@@ -530,11 +530,6 @@ public final class KeyboardShortcutListSearch {
                                 Pair.create(
                                         KeyEvent.KEYCODE_TAB,
                                         KeyEvent.META_SHIFT_ON | KeyEvent.META_ALT_ON))),
-                /* Hide and (re)show taskbar: Meta + T */
-                new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_hide_reshow_taskbar),
-                        Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_T, KeyEvent.META_META_ON))),
                 /* Access notification shade: Meta + N */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_access_notification_shade),

@@ -258,10 +258,10 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"הפעלה"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"הפעלה מחדש"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"חירום"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"דיווח על באג"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"דוח איתור באגים"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"סיום הפעלה"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"צילום מסך"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"דוח על באג"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"דיווח על באג"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"הפעולה הזו תאסוף מידע על מצב המכשיר הנוכחי שלך כדי לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת הדיווח על הבאג ועד לשליחת ההודעה בפועל. יש להמתין בסבלנות."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"דוח אינטראקטיבי"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"כדאי להשתמש באפשרות הזו ברוב המקרים. היא מאפשרת לך לעקוב אחר התקדמות הדוח, להזין פרטים נוספים על הבעיה ולצלם את המסך. היא עשויה להשמיט כמה קטעים שנמצאים פחות בשימוש ושיצירת הדיווח עליהם נמשכת זמן רב."</string>

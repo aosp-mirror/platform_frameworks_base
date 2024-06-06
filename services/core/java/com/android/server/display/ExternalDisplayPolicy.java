@@ -42,6 +42,9 @@ import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.display.utils.DebugUtils;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Listens for Skin thermal sensor events, disables external displays if thermal status becomes
  * equal or above {@link android.os.Temperature#THROTTLING_CRITICAL}, enables external displays if
@@ -106,6 +109,10 @@ class ExternalDisplayPolicy {
     private final ExternalDisplayStatsService mExternalDisplayStatsService;
     @ThrottlingStatus
     private volatile int mStatus = THROTTLING_NONE;
+    //@GuardedBy("mSyncRoot")
+    private boolean mIsBootCompleted;
+    //@GuardedBy("mSyncRoot")
+    private final Set<Integer> mDisplayIdsWaitingForBootCompletion = new HashSet<>();
 
     ExternalDisplayPolicy(@NonNull final Injector injector) {
         mInjector = injector;
@@ -121,6 +128,17 @@ class ExternalDisplayPolicy {
      * Starts listening for temperature changes.
      */
     void onBootCompleted() {
+        synchronized (mSyncRoot) {
+            mIsBootCompleted = true;
+            for (var displayId : mDisplayIdsWaitingForBootCompletion) {
+                var logicalDisplay = mLogicalDisplayMapper.getDisplayLocked(displayId);
+                if (logicalDisplay != null) {
+                    handleExternalDisplayConnectedLocked(logicalDisplay);
+                }
+            }
+            mDisplayIdsWaitingForBootCompletion.clear();
+        }
+
         if (!mFlags.isConnectedDisplayManagementEnabled()) {
             if (DEBUG) {
                 Slog.d(TAG, "External display management is not enabled on your device:"
@@ -189,6 +207,11 @@ class ExternalDisplayPolicy {
             return;
         }
 
+        if (!mIsBootCompleted) {
+            mDisplayIdsWaitingForBootCompletion.add(logicalDisplay.getDisplayIdLocked());
+            return;
+        }
+
         mExternalDisplayStatsService.onDisplayConnected(logicalDisplay);
 
         if ((Build.IS_ENG || Build.IS_USERDEBUG)
@@ -227,7 +250,12 @@ class ExternalDisplayPolicy {
             return;
         }
 
-        mExternalDisplayStatsService.onDisplayDisconnected(logicalDisplay.getDisplayIdLocked());
+        var displayId = logicalDisplay.getDisplayIdLocked();
+        if (mDisplayIdsWaitingForBootCompletion.remove(displayId)) {
+            return;
+        }
+
+        mExternalDisplayStatsService.onDisplayDisconnected(displayId);
     }
 
     /**

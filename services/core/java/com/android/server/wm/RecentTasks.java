@@ -1258,6 +1258,11 @@ class RecentTasks {
                 continue;
             }
 
+            if (otherTask.topRunningActivity() == null) {
+                // Skip if there's no running activity in the Task.
+                continue;
+            }
+
             // Stop searching if the task has higher z-ordering, or increase the index and
             // continue the search.
             if (task.compareTo(otherTask) > 0) {

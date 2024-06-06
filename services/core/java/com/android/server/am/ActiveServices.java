@@ -3696,7 +3696,9 @@ public final class ActiveServices {
             // is not "now". Compute the time from "now" when starting the anr timer.
             final long anrTime = sr.getEarliestStopTypeAndTime().second
                     + mAm.mConstants.mFgsAnrExtraWaitDuration - SystemClock.uptimeMillis();
-            mFGSAnrTimer.start(sr, anrTime);
+            if (android.app.Flags.introduceNewServiceOntimeoutCallback()) {
+                mFGSAnrTimer.start(sr, anrTime);
+            }
         }
     }
 

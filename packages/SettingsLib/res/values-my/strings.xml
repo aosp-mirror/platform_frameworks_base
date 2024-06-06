@@ -250,7 +250,7 @@
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"ချိတ်ဆက်ခြင်း မအောင်မြင်ပါ"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> သည် မှန်ကန်သည့် ကွန်ရက်သို့ ချိတ်ဆက်ထားခြင်းရှိမရှိ စစ်ဆေးပါ"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"စက်ပစ္စည်းနှင့် အတူတွဲပါ"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi အတူတွဲချိတ်ရန် ကုဒ်"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi တွဲချိတ်ကုဒ်"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"တွဲချိတ်ခြင်း မအောင်မြင်ပါ"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"စက်ပစ္စည်းသည် ကွန်ရက်တစ်ခုတည်းသို့ ချိတ်ဆက်ထားခြင်းရှိမရှိ စစ်ဆေးပါ။"</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR ကုဒ် စကင်ဖတ်ခြင်းဖြင့် Wi-Fi ပေါ်တွင် စက်ပစ္စည်းကို အတူတွဲပါ"</string>
@@ -389,7 +389,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"စတုဂံပုံမကျသော ဖြတ်ပိုင်း လုပ်ဆောင်ချက်များကို အမှားဖယ်ရှားရန်"</string>
     <string name="track_frame_time" msgid="522674651937771106">"HWUI ပရိုဖိုင် ဆောင်ရွက်ခြင်း"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU အမှားရှာအလွှာဖွင့်ရန်"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ထည့်သွင်းခွင့်ပြုပါ"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ဖွင့်ခွင့်ပြုသည်"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"အကျယ်ရှင်းလင်းချက်ပံ့ပိုးသူ မှတ်တမ်းဖွင့်ရန်"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ချွတ်ယွင်းမှု အစီရင်ခံချက်တွင် စက်ပစ္စည်းအလိုက် ထုတ်လုပ်သူမှတ်တမ်းများကို ထည့်သွင်းခြင်းဖြင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များ ပါဝင်ခြင်း၊ ဘက်ထရီပိုသုံးခြင်း နှင့်/သို့မဟုတ် သိုလှောင်ခန်းပိုသုံးခြင်းတို့ ဖြစ်စေနိုင်သည်။"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"လှုပ်ရှားသက်ဝင်ပုံစကေး"</string>
@@ -411,7 +411,7 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"ပုံစံမျိုးစုံ ဝင်းဒိုးများ ဖွင့်ရန်"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ပုံစံမျိုးစုံဝင်းဒိုးများ စမ်းသပ်ခြင်းအတွက် ပံ့ပိုးမှုကို ဖွင့်သည်"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ဒက်စ်တော့ အရန်စကားဝှက်"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ဒက်စ်တော့ အရန်သိမ်းဆည်းခြင်းအားလုံးကို လောလောဆယ် ကာကွယ်မထားပါ"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ဒက်စ်တော့ တစ်ခုလုံး အရန်သိမ်းဆည်းခြင်းကို လက်ရှိတွင် ကာကွယ်မထားပါ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ဒက်စ်တော့ အပြည့်အဝ အရန်သိမ်းခြင်းအတွက် စကားဝှက်ကို ပြောင်းရန် သို့မဟုတ် ဖယ်ရှားရန် တို့ပါ။"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"အရန်သိမ်းဆည်းခြင်းအတွက် စကားဝှက်အသစ်ကို သတ်မှတ်ပြီးပြီ။"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"စကားဝှက်အသစ်နှင့် အတည်ပြုချက် ကွဲလွဲနေသည်။"</string>
@@ -452,7 +452,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (အပြာ-အဝါ)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင်ပြင်ခြင်း"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင် အမှန်ပြင်ခြင်း"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"အရောင် အမှန်ပြင်ခြင်းသည် အောက်ပါတို့အတွက် အသုံးဝင်နိုင်သည်-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုမှန်ကန်စွာ ကြည့်ရှုခြင်း&lt;/li&gt; &lt;li&gt;&amp;nbsp;အာရုံစိုက်နိုင်ရန် အရောင်များ ဖယ်ရှားခြင်း&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -491,7 +491,7 @@
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"အားအပြည့်သွင်းထားသည်"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"အားသွင်းခြင်းကို ခဏရပ်ထားသည်"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"စီမံခန့်ခွဲသူမှ ထိန်းချုပ်ပါသည်"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"ကန့်သတ်ထားသော ဆက်တင်များဖြင့် ထိန်းချုပ်ထားသည်"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"ကန့်သတ်ဆက်တင်ဖြင့် ထိန်းချုပ်ထားသည်"</string>
     <string name="disabled" msgid="8017887509554714950">"ပိတ်ထားပြီး"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ခွင့်ပြုထားသည်"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"ခွင့်မပြုပါ"</string>
@@ -536,7 +536,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"နှိုးစက်နှင့် သတိပေးချက်များ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"နှိုးစက်နှင့် သတိပေးချက်များ သတ်မှတ်ခွင့်ပြုရန်"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"နှိုးစက်နှင့် သတိပေးချက်များ"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"နှိုးစက်သတ်မှတ်ရန်နှင့် အချိန်တိကျရန် လိုအပ်သည့် လုပ်ဆောင်ချက်များ အစီအစဉ်ဆွဲရန် ဤအက်ပ်ကို ခွင့်ပြုပါ။ ၎င်းက အက်ပ်ကို နောက်ခံတွင် လုပ်ဆောင်ခွင့်ပေးပြီး ဘက်ထရီပိုသုံးနိုင်သည်။\n\nဤခွင့်ပြုချက်ကို ပိတ်ထားပါက ဤအက်ပ်ဖြင့် အစီအစဉ်ဆွဲထားသော လက်ရှိနှိုးစက်နှင့် အချိန်သတ်မှတ်ထားသည့် အစီအစဉ်များ အလုပ်လုပ်တော့မည် မဟုတ်ပါ။"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"နှိုးစက်သတ်မှတ်ရန်နှင့် အချိန်တိကျရန် လိုအပ်သည့် လုပ်ဆောင်ချက်များအတွက် အစီအစဉ်ဆွဲရန် ဤအက်ပ်ကို ခွင့်ပြုသည်။ ၎င်းက အက်ပ်ကို နောက်ခံတွင် လုပ်ဆောင်ခွင့်ပေးပြီး ဘက်ထရီပိုသုံးနိုင်သည်။\n\nဤခွင့်ပြုချက်ကို ပိတ်ထားပါက ဤအက်ပ်ဖြင့် အစီအစဉ်ဆွဲထားသော လက်ရှိနှိုးစက်နှင့် အချိန်သတ်မှတ်ထားသည့် အစီအစဉ်များ အလုပ်လုပ်တော့မည် မဟုတ်ပါ။"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"အချိန်ဇယား၊ နှိုးစက်၊ သတိပေးချက်၊ နာရီ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ဖွင့်ရန်"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'မနှောင့်ယှက်ရ\' ဖွင့်ခြင်း"</string>
@@ -597,7 +597,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ကန့်သတ်ထားသော ကိုယ်ရေးအချက်အလက်များ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"အသုံးပြုသူအသစ် ထည့်မလား။"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"နောက်ထပ် အသုံးပြုသူများ ထည့်သွင်းခြင်းဖြင့် ဤစက်ပစ္စည်းကို အခြားသူများနှင့် မျှဝေအသုံးပြုနိုင်သည်။ အသုံးပြုသူတိုင်းသည် မိမိတို့ကိုယ်ပိုင်နေရာ ရရှိမည်ဖြစ်ပြီး အက်ပ်၊ နောက်ခံပုံနှင့် အခြားအရာတို့ဖြင့် စိတ်ကြိုက်ပြင်ဆင်နိုင်ပါမည်။ အားလုံးကို အကျိုးသက်ရောက်မှု ရှိစေနိုင်သည့် Wi-Fi ကဲ့သို့ ဆက်တင်များကိုလည်း ချိန်ညှိနိုင်ပါမည်။\n\nအသုံးပြုသူအသစ် ထည့်သည့်အခါ ထိုသူသည် မိမိ၏ကိုယ်ပိုင်နေရာကို သတ်မှတ်ရပါမည်။\n\nအသုံးပြုသူ မည်သူမဆို အခြားအသုံးပြုသူများအတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်နိုင်သည်။ အများသုံးစွဲနိုင်မှုဆက်တင်များနှင့် ဝန်ဆောင်မှုများကို အသုံးပြုသူအသစ်ထံသို့ လွှဲပြောင်းပေးမည် မဟုတ်ပါ။"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"သင်က အသုံးပြုသူအသစ် ထည့်လိုက်လျှင် ထိုသူသည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရပါမည်။\n\n အသုံးပြုသူတိုင်းက ကျန်အသုံးပြုသူ အားလုံးအတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်နိုင်သည်။"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"သင်ထည့်လိုက်သည့် အသုံးပြုသူအသစ်သည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရပါမည်။\n\n အသုံးပြုသူတိုင်းက ကျန်အသုံးပြုသူ အားလုံးအတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်နိုင်သည်။"</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"ဤအသုံးပြုသူကို စီမံခန့်ခွဲသူအဖြစ် သတ်မှတ်မလား။"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"စီမံခန့်ခွဲသူများ၌ အခြားအသုံးပြုသူများတွင်မရှိသော အထူးဆောင်ရွက်ခွင့်များရှိသည်။ စီမံခန့်ခွဲသူက အသုံးပြုသူအားလုံးကို စီမံခြင်း၊ ဤစက်ပစ္စည်းကို အပ်ဒိတ်လုပ်ခြင်း (သို့) ပြင်ဆင်သတ်မှတ်ခြင်း၊ ဆက်တင်များပြင်ဆင်ခြင်း၊ ထည့်သွင်းထားသောအက်ပ်အားလုံးကို ကြည့်ခြင်းနှင့် အခြားသူများအတွက် စီမံခန့်ခွဲသူ ဆောင်ရွက်ခွင့်များပေးခြင်း (သို့) ရုပ်သိမ်းခြင်းတို့ လုပ်နိုင်သည်။"</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"စီမံခန့်ခွဲသူအဖြစ် သတ်မှတ်ရန်"</string>

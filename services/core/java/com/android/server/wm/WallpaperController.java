@@ -157,13 +157,21 @@ class WallpaperController {
             mFindResults.setUseTopWallpaperAsTarget(true);
         }
 
-        if (mService.mPolicy.isKeyguardLocked() && w.canShowWhenLocked()) {
-            if (mService.mPolicy.isKeyguardOccluded() || (useShellTransition
-                    ? w.inTransition() : mService.mPolicy.isKeyguardUnoccluding())) {
-                // The lowest show when locked window decides whether we need to put the wallpaper
-                // behind.
-                mFindResults.mNeedsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
-                        || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+        if (mService.mPolicy.isKeyguardLocked()) {
+            if (w.canShowWhenLocked()) {
+                if (mService.mPolicy.isKeyguardOccluded() || (useShellTransition
+                        ? w.inTransition() : mService.mPolicy.isKeyguardUnoccluding())) {
+                    // The lowest show-when-locked window decides whether to show wallpaper.
+                    mFindResults.mNeedsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
+                            || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+                }
+            } else if (w.hasWallpaper() && mService.mPolicy.isKeyguardHostWindow(w.mAttrs)
+                    && w.mTransitionController.isTransitionOnDisplay(mDisplayContent)) {
+                // If we have no candidates at all, notification shade is allowed to be the target
+                // of last resort even if it has not been made visible yet.
+                if (DEBUG_WALLPAPER) Slog.v(TAG, "Found keyguard as wallpaper target: " + w);
+                mFindResults.setWallpaperTarget(w);
+                return false;
             }
         }
 
@@ -200,14 +208,7 @@ class WallpaperController {
 
     private boolean isRecentsTransitionTarget(WindowState w) {
         if (w.mTransitionController.isShellTransitionsEnabled()) {
-            // Because the recents activity is invisible in background while keyguard is occluded
-            // (the activity window is on screen while keyguard is locked) with recents animation,
-            // the task animating by recents needs to be wallpaper target to make wallpaper visible.
-            // While for unlocked case, because recents activity will be moved to top, it can be
-            // the wallpaper target naturally.
-            return w.mActivityRecord != null && w.mAttrs.type == TYPE_BASE_APPLICATION
-                    && mDisplayContent.isKeyguardLocked()
-                    && w.mTransitionController.isTransientHide(w.getTask());
+            return false;
         }
         // The window is either the recents activity or is in the task animating by the recents.
         final RecentsAnimationController controller = mService.getRecentsAnimationController();

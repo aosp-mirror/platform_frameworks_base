@@ -873,7 +873,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_NOTIFICATION_ROW_USER_CONTEXT)
     public void imageResolver_differentNotificationUser_createsUserContext() throws Exception {
         UserHandle user = new UserHandle(33);
         Context userContext = new SysuiTestableContext(mContext);

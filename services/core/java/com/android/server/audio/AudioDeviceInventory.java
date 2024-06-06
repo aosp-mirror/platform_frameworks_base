@@ -920,27 +920,25 @@ public class AudioDeviceInventory {
                         di.mDeviceCodecFormat = codec;
                         mConnectedDevices.replace(key, di);
                         codecChange = true;
-                        final int res = mAudioSystem.handleDeviceConfigChange(
-                                btInfo.mAudioSystemDevice, address,
-                                BtHelper.getName(btDevice), codec);
-                        if (res != AudioSystem.AUDIO_STATUS_OK) {
-                            AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
-                                    "APM handleDeviceConfigChange failed for A2DP device addr="
-                                            + address + " codec="
-                                            + AudioSystem.audioFormatToString(codec))
-                                    .printSlog(EventLogger.Event.ALOGE, TAG));
-
-                            // force A2DP device disconnection in case of error so that AudioService
-                            // state is consistent with audio policy manager state
-                            setBluetoothActiveDevice(new AudioDeviceBroker.BtDeviceInfo(btInfo,
-                                    BluetoothProfile.STATE_DISCONNECTED));
-                        } else {
-                            AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
-                                    "APM handleDeviceConfigChange success for A2DP device addr="
-                                            + address
-                                            + " codec=" + AudioSystem.audioFormatToString(codec))
-                                    .printSlog(EventLogger.Event.ALOGI, TAG));
-                        }
+                    }
+                    final int res = mAudioSystem.handleDeviceConfigChange(
+                            btInfo.mAudioSystemDevice, address, BtHelper.getName(btDevice), codec);
+                    if (res != AudioSystem.AUDIO_STATUS_OK) {
+                        AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                                "APM handleDeviceConfigChange failed for A2DP device addr="
+                                        + address + " codec="
+                                        + AudioSystem.audioFormatToString(codec))
+                                .printSlog(EventLogger.Event.ALOGE, TAG));
+                        // force A2DP device disconnection in case of error so that AudioService
+                        // state is consistent with audio policy manager state
+                        setBluetoothActiveDevice(new AudioDeviceBroker.BtDeviceInfo(btInfo,
+                                BluetoothProfile.STATE_DISCONNECTED));
+                    } else {
+                        AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                                "APM handleDeviceConfigChange success for A2DP device addr="
+                                        + address
+                                        + " codec=" + AudioSystem.audioFormatToString(codec))
+                                .printSlog(EventLogger.Event.ALOGI, TAG));
                     }
                 }
                 if (!codecChange) {

@@ -111,7 +111,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failu pārsūtīšana"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Ievades ierīce"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Piekļuve internetam"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Atļaujiet piekļuvi kontaktpersonām un vēsturei."</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Atļaut piekļuvi kontaktpersonām un vēsturei"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Informācija tiks izmantota paziņojumiem par zvaniem u.c."</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Interneta savienojuma koplietošana"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Īsziņas"</string>
@@ -457,8 +457,7 @@
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Jaunā preference: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> — <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> — uzlāde apturēta, lai aizsargātu akumulatoru"</string>
-    <!-- no translation found for power_incompatible_charging_settings_home_page (1322050766135126880) -->
-    <skip />
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> — pārbaudiet uzlādes piederumu"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Aptuvenais atlikušais laiks: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Aptuvenais atlikušais laiks: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Ņemot vērā lietojumu, atlikušais laiks: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -469,7 +468,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Ņemot vērā lietojumu, darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Iespējams, akumulators izlādēsies līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Atlicis: mazāk nekā <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Atlicis: mazāk nekā <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -523,7 +522,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS reģistrācijas statuss"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Reģistrēts"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Nav reģistrēts"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Nepieejams"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Nepieejama"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC ir atlasīts nejaušā secībā"</string>
     <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{Pievienota 1 ierīce.}zero{Pievienotas # ierīces.}one{Pievienota # ierīce.}other{Pievienotas # ierīces.}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Vairāk laika."</string>
@@ -631,7 +630,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Noņemt"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Notiek viesa sesijas atiestatīšana…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vai atiestatīt viesa sesiju?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tādējādi tiks sākta jauna viesa sesijas un visas pašreizējās sesijas lietotnes un dati tiks dzēsti"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tādējādi tiks sākta jauna viesa sesija un visas pašreizējās sesijas lietotnes un dati tiks dzēsti"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vai iziet no viesa režīma?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tādējādi tiks dzēstas pašreizējās viesa sesijas lietotnes un dati."</string>
     <string name="grant_admin" msgid="4323199171790522574">"Jā, iestatīt kā administratoru"</string>

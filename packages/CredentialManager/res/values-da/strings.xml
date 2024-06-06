@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Selvom vi nærmer os en fremtid, hvor adgangskoder er mindre fremtrædende, kan de stadig bruges i samspil med adgangsnøgler."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Vælg, hvor du vil gemme dine <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Vælg en adgangskodeadministrator for at gemme dine oplysninger, så du kan logge ind hurtigere næste gang"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Vil du oprette en adgangsnøgle for at logge ind på <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Vil du gemme adgangskoden for at logge ind på <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vil du gemme loginoplysningerne til <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"adgangsnøgle"</string>
     <string name="password" msgid="6738570945182936667">"adgangskode"</string>

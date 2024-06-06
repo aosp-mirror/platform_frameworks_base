@@ -63,7 +63,7 @@
     <string name="archive_application_text_all_users" msgid="3151229641681672580">"Бул колдонмо бардык колдонуучулар үчүн архивделсинби? Жеке маалыматыңыз сакталат"</string>
     <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Бул колдонмо жумуш профилиңизде архивделсинби? Жеке маалыматыңыз сакталат"</string>
     <string name="archive_application_text_user" msgid="2586558895535581451">"Бул колдонмо <xliff:g id="USERNAME">%1$s</xliff:g> үчүн архивделсинби? Жеке маалыматыңыз сакталат"</string>
-    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Бул колдонмо жеке чөйрөдөн архивделсинби? Жеке маалыматыңыз сакталат"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Бул колдонмо жеке мейкиндиктен архивделсинби? Жеке маалыматыңыз сакталат"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Бул колдонмо "<b>"бардык"</b>" колдонуучулардан алынып салынсынбы? Бул колдонмо жана анын дайындары бул түзмөктүн "<b>"бардык"</b>" колдонуучуларынан өчүрүлөт."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Бул колдонмону <xliff:g id="USERNAME">%1$s</xliff:g> үчүн чыгарып саласызбы?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Бул колдонмону жумуш профилиңизден чыгарып саласызбы?"</string>
@@ -72,7 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Колдонмонун <xliff:g id="SIZE">%1$s</xliff:g> дайындарын сактоо."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Бул колдонмону өчүрөсүзбү?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Бул колдонмону чыгарып саласызбы? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клону да өчүрүлөт."</string>
-    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Бул колдонмону жеке чөйрөдөн чыгарып саласызбы?"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Бул колдонмону жеке мейкиндиктен чыгарып саласызбы?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Чыгарылып салынууда"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Чыгарылып салынбай калгандар"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Чыгарылып салынууда…"</string>

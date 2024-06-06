@@ -492,8 +492,8 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"允許應用程式存取額外位置資訊提供者指令。這項設定可能會造成應用程式干擾 GPS 或其他位置資訊來源的運作。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"僅可在前景中取得精確位置"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"只有在你使用時，這個應用程式才能透過定位服務取得你的精確位置。你必須在裝置上開啟定位服務，這個應用程式才能取得位置資訊。這麼做可能會增加電池用量。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"僅可在前景中取得概略位置"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"只有在你使用時，這個應用程式才能透過定位服務取得你的概略位置。你必須在裝置上開啟定位服務，這個應用程式才能取得位置資訊。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"僅可在前景中取得大概位置"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"只有在你使用時，這個應用程式才能透過定位服務取得你的大概位置。你必須在裝置上開啟定位服務，這個應用程式才能取得位置資訊。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"在背景存取位置資訊"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"這個應用程式隨時都能取得位置資訊 (包括未使用應用程式時)。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"變更音訊設定"</string>
@@ -1586,7 +1586,7 @@
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"完成"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"模式變更"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Shift 鍵"</string>
-    <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter 鍵"</string>
+    <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"選擇應用程式"</string>
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"無法啟動 <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"分享對象："</string>
@@ -1723,7 +1723,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要將裝置的完整控制權授予「<xliff:g id="SERVICE">%1$s</xliff:g>」嗎？"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，建議可將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看及控制螢幕"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"可讀取螢幕上的所有內容及在其他應用程式上顯示內容。"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"可讀取螢幕上的所有內容，並在其他應用程式上顯示內容。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看及執行動作"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"可追蹤你與應用程式或硬體感應器的互動，並代表你與應用程式進行互動。"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"允許"</string>
@@ -1900,7 +1900,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"確定"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"省電模式會開啟深色主題，並限制或關閉背景活動、某些視覺效果、特定功能和部分網路連線。"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"省電模式會開啟深色主題，並限制或關閉背景活動、某些視覺效果、特定功能和部分網路連線。"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。目前使用中的單一應用程式仍可存取資料，但存取頻率可能會變低。舉例來說，圖片可能要等到你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{1 分鐘 (直到 {formattedTime})}other{# 分鐘 (直到 {formattedTime})}}"</string>
@@ -1971,7 +1971,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"新增受監管的使用者"</string>
     <string name="language_selection_title" msgid="52674936078683285">"新增語言"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"地區偏好設定"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言名稱"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建議語言"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"建議地區"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"建議語言"</string>

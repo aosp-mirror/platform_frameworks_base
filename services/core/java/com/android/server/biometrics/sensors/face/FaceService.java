@@ -119,7 +119,7 @@ public class FaceService extends SystemService {
      * Receives the incoming binder calls from FaceManager.
      */
     @VisibleForTesting final class FaceServiceWrapper extends IFaceService.Stub {
-        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
                 @NonNull String opPackageName) {
@@ -149,11 +149,7 @@ public class FaceService extends SystemService {
             return proto.getBytes();
         }
 
-        @android.annotation.EnforcePermission(
-                anyOf = {
-                        android.Manifest.permission.USE_BIOMETRIC_INTERNAL,
-                        android.Manifest.permission.USE_BACKGROUND_FACE_AUTHENTICATION
-                })
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(
                 String opPackageName) {
@@ -295,29 +291,6 @@ public class FaceService extends SystemService {
             return provider.second.scheduleAuthenticate(token, operationId,
                     0 /* cookie */, new ClientMonitorCallbackConverter(receiver), options,
                     restricted, statsClient, isKeyguard);
-        }
-
-        @android.annotation.EnforcePermission(
-                android.Manifest.permission.USE_BACKGROUND_FACE_AUTHENTICATION)
-        @Override // Binder call
-        public long authenticateInBackground(final IBinder token, final long operationId,
-                final IFaceServiceReceiver receiver, final FaceAuthenticateOptions options) {
-            // TODO(b/152413782): If the sensor supports face detect and the device is encrypted or
-            //  lockdown, something wrong happened. See similar path in FingerprintService.
-
-            super.authenticateInBackground_enforcePermission();
-
-            final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
-            if (provider == null) {
-                Slog.w(TAG, "Null provider for authenticate");
-                return -1;
-            }
-            options.setSensorId(provider.first);
-
-            return provider.second.scheduleAuthenticate(token, operationId,
-                    0 /* cookie */, new ClientMonitorCallbackConverter(receiver), options,
-                    false /* restricted */, BiometricsProtoEnums.CLIENT_UNKNOWN /* statsClient */,
-                    true /* allowBackgroundAuthentication */);
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
@@ -583,11 +556,7 @@ public class FaceService extends SystemService {
             return provider.getEnrolledFaces(sensorId, userId);
         }
 
-        @android.annotation.EnforcePermission(
-                anyOf = {
-                        android.Manifest.permission.USE_BIOMETRIC_INTERNAL,
-                        android.Manifest.permission.USE_BACKGROUND_FACE_AUTHENTICATION
-                })
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public boolean hasEnrolledFaces(int sensorId, int userId, String opPackageName) {
             super.hasEnrolledFaces_enforcePermission();

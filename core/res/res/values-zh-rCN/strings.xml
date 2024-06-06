@@ -256,11 +256,11 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"关机"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"电源"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"重启"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"紧急呼救"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"紧急呼叫"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"错误报告"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"结束会话"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"屏幕截图"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Bug 报告"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"错误报告"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"这会收集有关当前设备状态的信息，并以电子邮件的形式进行发送。从开始生成错误报告到准备好发送需要一点时间，请耐心等待。"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"互动式报告"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"在大多数情况下，建议您使用此选项，以便追踪报告的生成进度，输入与相应问题相关的更多详细信息，以及截取屏幕截图。系统可能会省略掉一些不常用的区段，从而缩短生成报告的时间。"</string>
@@ -844,7 +844,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"恢复出厂设置时，系统会在不发出警告的情况下清除平板电脑上的数据。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"不事先发出警告就以恢复出厂设置的方式清空 Android TV 设备中的数据。"</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"在不发出警告的情况下，通过恢复出厂设置来清除信息娱乐系统上的数据。"</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"恢复出厂设置时，系统会在不发出警告的情况下清除手机上的数据。"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"恢复出厂设置，不发出警告就直接清除手机上的数据。"</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"清除个人资料数据"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"清空用户数据"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"清空此用户在这台平板电脑上的数据，而不事先发出警告。"</string>
@@ -990,7 +990,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"按 Menu 解锁或进行紧急呼救。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"按 MENU 解锁。"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"绘制解锁图案"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"紧急呼救"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"紧急呼叫"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"返回通话"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"正确！"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"重试"</string>
@@ -1012,7 +1012,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"停止"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"快退"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"快进"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"只能拨打紧急呼救电话"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"只能拨打紧急呼叫电话"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"网络已锁定"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM 卡已用 PUK 码锁定。"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"请参阅《用户指南》或与客服人员联系。"</string>
@@ -1281,7 +1281,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"即将完成启动。"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"您已按电源按钮，这通常会关闭屏幕。\n\n请尝试在设置指纹时轻轻按一下。"</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"若要结束设置，请关闭屏幕"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"结束设置，请关闭屏幕"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"关闭"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"要继续验证您的指纹吗？"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"您已按电源按钮，这通常会关闭屏幕。\n\n请尝试轻轻按一下来验证您的指纹。"</string>
@@ -1417,7 +1417,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"拒绝"</string>
     <string name="select_input_method" msgid="3971267998568587025">"选择输入法"</string>
-    <string name="show_ime" msgid="6406112007347443383">"开启后，连接到实体键盘时，它会一直显示在屏幕上"</string>
+    <string name="show_ime" msgid="6406112007347443383">"连接到实体键盘时，在屏幕上显示一个虚拟键盘"</string>
     <string name="hardware" msgid="3611039921284836033">"使用屏幕键盘"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"配置“<xliff:g id="DEVICE_NAME">%s</xliff:g>”"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"配置物理键盘"</string>

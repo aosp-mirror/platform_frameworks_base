@@ -89,4 +89,8 @@ constructor(
     fun showPrimaryBouncer() {
         statusBarKeyguardViewManager.showPrimaryBouncer(/* scrimmed */ true)
     }
+
+    fun hideAlternateBouncer() {
+        statusBarKeyguardViewManager.hideAlternateBouncer(false)
+    }
 }

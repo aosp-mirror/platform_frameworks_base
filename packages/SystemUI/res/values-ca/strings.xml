@@ -360,9 +360,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vols desbloquejar el micròfon del dispositiu?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Vols desbloquejar la càmera del dispositiu?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Vols desbloquejar la càmera i el micròfon del dispositiu?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Aquesta opció desbloqueja l\'accés de tots els serveis i aplicacions que tenen permís per utilitzar el micròfon."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Aquesta opció desbloqueja l\'accés de tots els serveis i aplicacions que tenen permís per utilitzar la càmera."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Aquesta opció desbloqueja l\'accés de tots els serveis i aplicacions que tenen permís per utilitzar la càmera o el micròfon."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Si ho fas, tots els serveis i les aplicacions que tenen permís podran utilitzar el micròfon."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Si ho fas, tots els serveis i les aplicacions que tenen permís podran utilitzar la càmera."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Si ho fas, tots els serveis i les aplicacions que tenen permís podran utilitzar la càmera o el micròfon."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"El micròfon està bloquejat"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"La càmera està bloquejada"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"El micròfon i la càmera estan bloquejats"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Afegeix més widgets"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Mantén premut per personalitzar els widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalitza els widgets"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Icona de l\'aplicació per a widget desactivat"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Edita el widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Suprimeix"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Afegeix un widget"</string>
@@ -459,7 +458,7 @@
     <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Comparteix o grava una aplicació"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Vols començar a gravar o emetre contingut amb <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Quan comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Quan comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Quan comparteixes, graves o emets una aplicació, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es mostri o que es reprodueixi en aquella aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Inicia"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ha desactivat aquesta opció"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Vols iniciar una emissió?"</string>
@@ -468,7 +467,7 @@
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Inicia una emissió"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Vols començar a compartir?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Quan comparteixes, graves o emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Quan comparteixes, graves o emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Quan comparteixes, graves o emets una aplicació, Android té accés a qualsevol cosa que es mostri o que es reprodueixi en aquella aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Inicia"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"La compartició es posa en pausa quan canvies d\'aplicació"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Comparteix aquesta aplicació"</string>
@@ -565,7 +564,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"S\'ha deixat de fixar l\'aplicació"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Trucada"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"To de trucada"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"So"</string>
     <string name="stream_music" msgid="2188224742361847580">"Multimèdia"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarma"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notificació"</string>
@@ -719,7 +718,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"No s\'ha trobat cap drecera"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistema"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Entrada"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Obre aplicacions"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Aplicacions obertes"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Aplicació actual"</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"S\'estan mostrant els resultats de la cerca"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"S\'estan mostrant les dreceres del sistema"</string>
@@ -735,10 +734,9 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Desplaça\'t cap endavant per les aplicacions recents"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Desplaça\'t cap enrere per les aplicacions recents"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Obre la llista d\'aplicacions"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Mostra la barra de tasques"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Obre la configuració"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Obre l\'Assistent"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueig"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloqueja la pantalla"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Crea una nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasques del sistema"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Entra al mode de pantalla dividida amb l\'aplicació actual a la dreta"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menú d\'engegada"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pàgina <xliff:g id="ID_1">%1$d</xliff:g> (<xliff:g id="ID_2">%2$d</xliff:g> en total)"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantalla de bloqueig"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Pots localitzar aquest telèfon amb Troba el meu dispositiu fins i tot quan estigui apagat"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"S\'està apagant…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Mostra els passos de manteniment"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Mostra els passos de manteniment"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Desconnecta el dispositiu"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Per a una resolució més alta, gira el telèfon"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositiu plegable desplegant-se"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositiu plegable girant"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"plegat"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"desplegat"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de bateria"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connecta el llapis òptic a un carregador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria del llapis òptic baixa"</string>

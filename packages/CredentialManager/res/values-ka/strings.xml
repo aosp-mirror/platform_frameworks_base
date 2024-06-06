@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"უპაროლო მომავალში პაროლები კვლავ ხელმისაწვდომი იქნება, წვდომის გასაღებებთან ერთად."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"აირჩიეთ სად შეინახოთ თქვენი <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"აირჩიეთ პაროლების მმართველი თქვენი ინფორმაციის შესანახად, რომ მომავალში უფრო სწრაფად შეხვიდეთ."</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"შესასვლელად წვდომის გასაღების შექმნა: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"შესასვლელი პაროლის შენახვა: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"შეინახავთ <xliff:g id="APPNAME">%1$s</xliff:g> აპში შესვლის ინფორმაციას?"</string>
     <string name="passkey" msgid="632353688396759522">"წვდომის გასაღები"</string>
     <string name="password" msgid="6738570945182936667">"პაროლი"</string>

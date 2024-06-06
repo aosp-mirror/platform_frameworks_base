@@ -441,7 +441,7 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"¿Quieres retomar la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Volver a empezar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continuar"</string>
-    <string name="guest_notification_app_name" msgid="2110425506754205509">"Modo de Invitado"</string>
+    <string name="guest_notification_app_name" msgid="2110425506754205509">"Modo de invitado"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Estás en el modo de invitado"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Si agregas un usuario nuevo, se desactivará el modo de invitado y se borrarán todas las apps y los datos de la sesión de invitado actual."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Alcanzaste el límite de usuarios"</string>
@@ -461,10 +461,10 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Cuando compartas, grabes o transmitas una app, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> podrá acceder a todo el contenido que se muestre o que reproduzcas en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Iniciar"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> inhabilitó esta opción"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"¿Quieres comenzar a transmitir contenido?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"¿Empezar a transmitir contenido?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Cuando transmitas contenido, Android podrá acceder a todo lo que sea visible en la pantalla o que reproduzcas en el dispositivo. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Cuando transmitas una app, Android podrá acceder a todo el contenido que se muestre o que reproduzcas en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Comenzar a transmitir contenido"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Empezar"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"¿Quieres empezar a compartir?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Cuando compartas, grabes o transmitas contenido, Android podrá acceder a todo lo que sea visible en la pantalla o que reproduzcas en el dispositivo. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Cuando compartas, grabes o transmitas una app, Android podrá acceder a todo el contenido que se muestre o que reproduzcas en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
@@ -600,7 +600,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Billetera"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Prepárate para realizar compras rápidas y seguras con tu teléfono"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostrar todo"</string>
-    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Presiona para abrir"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Toca para abrir"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Actualizando"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ocurrió un problema al obtener las tarjetas; vuelve a intentarlo más tarde"</string>
@@ -636,7 +636,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminada"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sin sonido ni vibración"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"No suena ni vibra, y aparece en la parte inferior de la sección de conversaciones."</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"No suena ni vibra, y aparece en la parte inferior de la sección de conversaciones"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Puede sonar o vibrar según la configuración del dispositivo"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Puede sonar o vibrar según la configuración del dispositivo. Conversaciones de la burbuja de <xliff:g id="APP_NAME">%1$s</xliff:g> de forma predeterminada."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Dejar que el sistema determine si esta notificación debe emitir un sonido o una vibración"</string>
@@ -683,7 +683,7 @@
     <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Flecha hacia arriba"</string>
     <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Flecha hacia abajo"</string>
     <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Flecha a la izquierda"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Flecha hacia la derecha"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Flecha a la derecha"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Centro"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Espacio"</string>
@@ -711,10 +711,10 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notificaciones"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Ver combinaciones de teclas"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Cambiar diseño del teclado"</string>
-    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"o bien"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"o"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Borrar búsqueda"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Combinaciones de teclas"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Buscar comb. de teclas"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Buscar combinaciones de teclas"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"No hay comb. de teclas"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistema"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Entrada"</string>
@@ -727,21 +727,20 @@
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Mostrando combinaciones de teclas para la app actual"</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Ver notificaciones"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Tomar captura de pantalla"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Mostrar accesos directos"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Mostrar combinaciones de teclas"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Atrás"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Ir a la pantalla principal"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Ver apps recientes"</string>
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Desplazar por las apps recientes (adelante)"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Desplazar por las apps recientes (atrás)"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Abrir lista de apps"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Mostrar Barra de tareas"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Abrir configuración"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Abrir Asistente"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloquear la pantalla"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Crear una nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Tareas múltiples del sistema"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Activar pantalla dividida con la app actual en el lado derecho (RHS)"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Activar pantalla dividida con la app actual en el lado izquierdo (LHS)"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Activar pantalla dividida con la app actual en el lado derecho"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Activar pantalla dividida con la app actual en el lado izquierdo"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Cambiar de pantalla dividida a pantalla completa"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Durante pantalla dividida: Reemplaza una app con otra"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
@@ -796,8 +795,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Clave de código derecho"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ícono izquierdo"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícono derecho"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén presionado y arrastra para agregar tarjetas"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionado y arrastra para reorganizar las tarjetas"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén presionada la tarjeta y arrástrala para agregarla"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionada la tarjeta y arrástrala para reorganizarla"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastra aquí para quitar"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tarjetas"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>
@@ -1140,7 +1139,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Conexión establecida"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Conectado temporalmente"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Conexión deficiente"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"No se conectarán automáticamente los datos móviles"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Los datos móviles no se conectarán automáticamente"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sin conexión"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"No hay otras redes disponibles"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"No hay redes disponibles"</string>
@@ -1161,7 +1160,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# app está activa}many{# apps están activas}other{# apps están activas}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nueva información"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps activas"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Estas apps están activas y en ejecución, incluso mientras no las usas. Esto mejora su funcionalidad, pero también afecta la duración de batería."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Estas apps están activas y en ejecución, incluso mientras no las usas. Esto mejora su funcionalidad, pero también afecta la duración de la batería."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Detener"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Detenida"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Listo"</string>
@@ -1223,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Para obtener una resolución más alta, gira el teléfono"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo plegable siendo desplegado"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo plegable siendo girado"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"plegado"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"desplegado"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> de batería restante"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conecta tu pluma stylus a un cargador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"La pluma stylus tiene poca batería"</string>

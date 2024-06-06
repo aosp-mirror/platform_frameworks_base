@@ -21,7 +21,7 @@
     <string name="menu_show_system" msgid="906304605807554788">"Mostrar sistema"</string>
     <string name="menu_hide_system" msgid="374571689914923020">"Ocultar sistema"</string>
     <string name="app_permission_summary_allowed" msgid="6115213465364138103">"Permitido"</string>
-    <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"Não permitido"</string>
+    <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"Sem permissão"</string>
     <string name="version_text" msgid="4001669804596458577">"Versão <xliff:g id="VERSION_NUM">%1$s</xliff:g>"</string>
     <string name="cloned_app_info_label" msgid="1765651167024478391">"Clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
 </resources>

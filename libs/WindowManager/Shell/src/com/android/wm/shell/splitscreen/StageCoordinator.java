@@ -821,14 +821,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     void startIntents(PendingIntent pendingIntent1, Intent fillInIntent1,
             @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
-            PendingIntent pendingIntent2, Intent fillInIntent2,
+            @Nullable PendingIntent pendingIntent2, Intent fillInIntent2,
             @Nullable ShortcutInfo shortcutInfo2, @Nullable Bundle options2,
             @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN,
                 "startIntents: intent1=%s intent2=%s position=%d snapPosition=%d",
-                pendingIntent1.getIntent(), pendingIntent2.getIntent(), splitPosition,
-                snapPosition);
+                pendingIntent1.getIntent(),
+                (pendingIntent2 != null ? pendingIntent2.getIntent() : "null"),
+                splitPosition, snapPosition);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (pendingIntent2 == null) {
             options1 = options1 != null ? options1 : new Bundle();

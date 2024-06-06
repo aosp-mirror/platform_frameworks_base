@@ -112,7 +112,7 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Urządzenie wejściowe"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Dostęp do internetu"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Zezwól na dostęp do kontaktów i historii połączeń"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Informacje zostaną wykorzystane do powiadomień i nie tylko"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Informacje zostaną wykorzystane m.in. do powiadomień o połączeniach"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Udostępnianie połączenia internetowego"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS-y"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Dostęp do karty SIM"</string>
@@ -257,7 +257,7 @@
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Paruję urządzenie…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Nie udało się sparować z urządzeniem. Kod QR jest nieprawidłowy albo urządzenie nie jest podłączone do tej samej sieci."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adres IP i port"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skaner kodów QR"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Zeskanuj kod QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Sparuj urządzenia przez Wi-Fi, skanując kod QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Połącz się z siecią Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
@@ -314,7 +314,7 @@
     <string name="wifi_metered_label" msgid="8737187690304098638">"Użycie danych jest mierzone"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Użycie danych nie jest mierzone"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Rozmiary bufora rejestratora"</string>
-    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Wybierz rozmiary Rejestratora/bufor dziennika"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Wybierz rozmiary Rejestratora na bufor dziennika"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Wyczyścić pamięć trwałych dzienników?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Po zakończeniu monitorowania przy użyciu trwale zapisywanych dzienników musimy usunąć ich dane zapisane na urządzeniu."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Zapisuj trwale dane dzienników na urządzeniu"</string>
@@ -486,12 +486,12 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Ładowanie bezprzewodowe"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Ładowanie"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nie podłączony"</string>
-    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Podłączono, ale nie ładuje się"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Podłączono, brak ładowania"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Naładowana"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Bateria w pełni naładowana"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Ładowanie wstrzymane"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolowane przez administratora"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kontrolowane przez ograniczone ustawienia"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Obowiązują ustawienia z ograniczonym dostępem"</string>
     <string name="disabled" msgid="8017887509554714950">"Wyłączone"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dozwolone"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Niedozwolone"</string>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Użyj języków systemu"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Nie udało się otworzyć ustawień aplikacji <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Ta metoda wprowadzania tekstu może gromadzić cały wpisywany tekst, w tym dane osobowe takie jak hasła czy numery kart kredytowych. Pochodzi ona z aplikacji <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Użyć jej?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Uwaga: po restarcie ta aplikacja będzie mogła uruchomić się dopiero po odblokowaniu telefonu"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Uwaga: po restarcie ta aplikacja będzie mogła uruchomić się dopiero, gdy odblokujesz telefon."</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Stan rejestracji IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Zarejestrowane"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Niezarejestrowane"</string>

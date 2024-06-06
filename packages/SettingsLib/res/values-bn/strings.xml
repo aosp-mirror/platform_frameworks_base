@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"সিস্টেমের ভাষাগুলি ব্যবহার করুন"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> জন্য সেটিংস খুলতে ব্যর্থ হয়েছে"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"এই ইনপুট পদ্ধতিটি হয়ত পাসওয়ার্ড এবং ক্রেডিট কার্ড নম্বর সহ আপনার টাইপ করা সমস্ত টেক্সট সংগ্রহ করতে সক্ষম হতে পারে। এটি <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> অ্যাপ থেকে এসেছে। এই ইনপুট পদ্ধতিটি ব্যবহার করবেন?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"দ্রষ্টব্য: পুনরায় চালু করার পরে, আপনি আপনার ফোন আনলক না করা পর্যন্ত এই অ্যাপটিকে চালু করতে পারবেন না"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"দ্রষ্টব্য: রিবুট করার পরে, আপনি আপনার ফোন আনলক না করা পর্যন্ত এই অ্যাপটিকে চালু করতে পারবেন না"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS রেজিস্ট্রেশনের স্থিতি"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"রেজিস্টার করা"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"রেজিস্টার করা নয়"</string>
@@ -609,7 +609,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"যোগ করুন"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"নতুন ব্যবহারকারী"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"নতুন প্রোফাইল"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"ব্যবহারকারী তথ্য"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"ব্যবহারকারীর তথ্য"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"প্রোফাইল তথ্য"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"আপনি একটি সীমাবদ্ধযুক্ত প্রোফাইল তৈরি করার আগে, আপনাকে আপনার অ্যাপ্লিকেশন এবং ব্যক্তিগত ডেটা সুরক্ষিত করার জন্য একটি স্ক্রিন লক সেট-আপ করতে হবে।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"লক সেট করুন"</string>

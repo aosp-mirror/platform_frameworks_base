@@ -116,7 +116,7 @@
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"แสดงการแตะบนหน้าจอ"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"หยุด"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"แชร์"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"บันทึกการบันทึกหน้าจอแล้ว"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"จัดเก็บการบันทึกหน้าจอไว้แล้ว"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"แตะเพื่อดู"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"เกิดข้อผิดพลาดในการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"เกิดข้อผิดพลาดขณะเริ่มบันทึกหน้าจอ"</string>
@@ -142,7 +142,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"โทรศัพท์"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ตัวช่วยเสียง"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"เครื่องมือสแกนคิวอาร์โค้ด"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"แอปสแกนคิวอาร์โค้ด"</string>
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"ปลดล็อกแล้ว"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"อุปกรณ์ถูกล็อก"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"กำลังสแกนใบหน้า"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"เพิ่มวิดเจ็ตอีก"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"กดค้างเพื่อปรับแต่งวิดเจ็ต"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ปรับแต่งวิดเจ็ต"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"ไอคอนแอปสำหรับวิดเจ็ตที่ปิดใช้อยู่"</string>
     <string name="edit_widget" msgid="9030848101135393954">"แก้ไขวิดเจ็ต"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"นำออก"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"เพิ่มวิดเจ็ต"</string>
@@ -590,7 +589,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"ตัวควบคุมระดับเสียง %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"สายเรียกเข้าและการแจ้งเตือนจะส่งเสียง (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"กำลังเล่น <xliff:g id="LABEL">%s</xliff:g> ใน"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"เสียงจะเล่นต่อไป"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"เสียงจะเล่นต่อใน"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ตัวรับสัญญาณ UI ระบบ"</string>
     <string name="status_bar" msgid="4357390266055077437">"แถบสถานะ"</string>
     <string name="demo_mode" msgid="263484519766901593">"โหมดสาธิต UI ของระบบ"</string>
@@ -606,7 +605,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ปลดล็อกเพื่อใช้"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"เกิดปัญหาในการดึงข้อมูลบัตรของคุณ โปรดลองอีกครั้งในภายหลัง"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"การตั้งค่าหน้าจอล็อก"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"เครื่องมือสแกนคิวอาร์โค้ด"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"แอปสแกนคิวอาร์โค้ด"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"กำลังอัปเดต"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"โปรไฟล์งาน"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"โหมดบนเครื่องบิน"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"สลับระหว่างแอปล่าสุดแบบไปข้างหน้า"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"สลับระหว่างแอปล่าสุดแบบกลับหลัง"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"เปิดรายชื่อแอป"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"แสดงแถบงาน"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"เปิดการตั้งค่า"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"เปิด Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ล็อกหน้าจอ"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"เมนูเปิด/ปิด"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"หน้า <xliff:g id="ID_1">%1$d</xliff:g> จาก <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"หน้าจอล็อก"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"คุณจะหาตำแหน่งของโทรศัพท์นี้ได้ด้วยแอปหาอุปกรณ์ของฉันแม้จะปิดเครื่องอยู่ก็ตาม"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"กำลังปิด…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ดูขั้นตอนในการดูแลรักษา"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ดูขั้นตอนในการดูแลรักษา"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"ถอดปลั๊กอุปกรณ์"</string>
@@ -1164,7 +1160,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{ทำงานอยู่ # แอป}other{ทำงานอยู่ # แอป}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ข้อมูลใหม่"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"แอปที่ทำงานอยู่"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"แอปเหล่านี้กำลังทำงานแม้ว่าคุณจะไม่ได้ใช้งานอยู่ก็ตาม วิธีนี้ช่วยให้ฟังก์ชันการทำงานของแอปมีประสิทธิภาพมากขึ้น แต่ก็อาจส่งผลต่ออายุการใช้งานแบตเตอรี่ด้วย"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"แอปเหล่านี้กำลังทำงานแม้ว่าคุณจะไม่ได้ใช้งานอยู่ก็ตาม วิธีนี้ช่วยให้ฟังก์ชันการทำงานของแอปมีประสิทธิภาพมากขึ้น แต่ก็อาจส่งผลต่อระยะเวลาการใช้งานแบตเตอรี่ด้วย"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"หยุด"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"หยุดแล้ว"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"เสร็จ"</string>
@@ -1217,7 +1213,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• มีอุปกรณ์หรือแผงอุปกรณ์พร้อมใช้งานอย่างน้อย 1 รายการ"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"เลือกแอปโน้ตเริ่มต้นเพื่อใช้ทางลัดการจดบันทึก"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"เลือกแอป"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"แตะแป้นพิมพ์ลัดค้างไว้"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"แตะทางลัดค้างไว้"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ยกเลิก"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"สลับหน้าจอเลย"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"กางโทรศัพท์ออก"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"พลิกด้านโทรศัพท์เพื่อให้ได้ภาพที่มีความละเอียดมากขึ้น"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"อุปกรณ์ที่พับได้กำลังกางออก"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"อุปกรณ์ที่พับได้กำลังพลิกไปมา"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"พับ"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"กางออก"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"เหลือแบตเตอรี่ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"เชื่อมต่อสไตลัสกับที่ชาร์จ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"แบตเตอรี่สไตลัสเหลือน้อย"</string>

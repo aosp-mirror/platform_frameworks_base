@@ -323,13 +323,13 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Laneko aplikazioak"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Pausatuta"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Gaueko argia"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ilunabarrean"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ilunabarrean aktibatuta"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Ilunabarrera arte"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Aktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> arte"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Gai iluna"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Bateria-aurreztailea"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Ilunabarrean aktibatuko da"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Ilunabarrean aktibatuta"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Egunsentira arte"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Aktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Desaktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Gehitu widget gehiago"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Widgetak pertsonalizatzeko, sakatu luze"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Pertsonalizatu widgetak"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Desgaitutako widgetaren aplikazio-ikonoa"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Editatu widgeta"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Kendu"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Gehitu widget bat"</string>
@@ -582,7 +581,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Sakatu audioa desaktibatzeko. Baliteke erabilerraztasun-eginbideen audioa desaktibatzea."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Sakatu hau dardara ezartzeko."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Sakatu hau audioa desaktibatzeko."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Zarata-murrizketa"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Zarata-kontrola"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Sakatu tonu-jotzailearen modua aldatzeko"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"desaktibatu audioa"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"aktibatu audioa"</string>
@@ -590,7 +589,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s gailuaren bolumena kontrolatzeko aukerak"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Tonuak jo egingo du deiak eta jakinarazpenak jasotzean (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> hemen erreproduzitzen:"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audioa erreproduzitzen jarraituko du"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audioak abian jarraituko du hemen:"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sistemaren erabiltzaile-interfazearen konfiguratzailea"</string>
     <string name="status_bar" msgid="4357390266055077437">"Egoera-barra"</string>
     <string name="demo_mode" msgid="263484519766901593">"Sistemaren erabiltzaile-interfazearen demo modua"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Ikusi azken aplikazioak banan-banan (aurrerantz)"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Ikusi azken aplikazioak banan-banan (atzerantz)"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ireki aplikazioen zerrenda"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Erakutsi zereginen barra"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ireki ezarpenak"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Ireki Laguntzailea"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Blokeatu pantaila"</string>
@@ -758,8 +756,8 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMSak"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musika"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
-    <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Ireki Kalkulagailua"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Ireki Maps"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Kalkulagailua"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ez molestatzeko modua"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Bolumen-botoietarako lasterbidea"</string>
     <string name="battery" msgid="769686279459897127">"Bateria"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Itzaltzeko menua"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g> orria"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantaila blokeatua"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Itzalita badago ere aurki dezakezu telefonoa Bilatu nire gailua erabilita"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Itzaltzen…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ikusi zaintzeko urratsak"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ikusi zaintzeko urratsak"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Deskonektatu gailua"</string>
@@ -1095,7 +1091,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Elkarrizketa irekia"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Elkarrizketa-widgetak"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat orri nagusian gehitzeko"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Azken elkarrizketak agertuko dira hemen"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Azkenaldiko elkarrizketak agertuko dira hemen"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Lehentasunezko elkarrizketak"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Azken elkarrizketak"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"Duela <xliff:g id="DURATION">%1$s</xliff:g> egun"</string>
@@ -1121,7 +1117,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Laster agertuko da edukia"</string>
     <string name="missed_call" msgid="4228016077700161689">"Dei galdua"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Ikusi azken mezuak, dei galduak eta egoerari buruzko informazio eguneratua"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Ikusi azken mezuak, dei galduak eta egoerei buruzko informazio eguneratua"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Elkarrizketa"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Ez molestatzeko moduak pausatu du"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> erabiltzaileak mezu bat bidali du: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
@@ -1130,7 +1126,7 @@
     <string name="person_available" msgid="2318599327472755472">"Konektatuta"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Arazo bat izan da bateria-neurgailua irakurtzean"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Informazio gehiago lortzeko, sakatu hau"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ez da ezarri alarmarik"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Alarmarik ez"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"erabili pantailaren blokeoa"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Hatz-marken sentsorea"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentifikatu"</string>
@@ -1143,7 +1139,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Konektatuta"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Aldi baterako konektatuta"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Konexio ahula"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Ez da automatikoki aktibatuko datu-konexioa"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Datu-konexioa ez da automatikoki aktibatuko"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Konexiorik gabe"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Ez dago beste sare erabilgarririk"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Ez dago sare erabilgarririk"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Irauli telefonoa bereizmen handiago a lortzeko"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Gailu tolesgarria zabaltzen"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Gailu tolesgarria biratzen"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"tolestuta"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"tolestu gabe"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Bateriaren <xliff:g id="PERCENTAGE">%s</xliff:g> geratzen da"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Konektatu arkatza kargagailu batera"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Arkatzak bateria gutxi du"</string>

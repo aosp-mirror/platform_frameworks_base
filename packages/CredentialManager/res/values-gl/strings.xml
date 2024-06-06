@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Durante este percorrido cara a un futuro sen contrasinais, estes seguirán estando dispoñibles a canda as claves de acceso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolle onde queres gardar: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un xestor de contrasinais para gardar a túa información e iniciar sesión máis rápido a próxima vez"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Queres crear unha clave de acceso para iniciar sesión en <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Queres gardar o contrasinal para iniciar sesión en <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Queres gardar a información de inicio de sesión de <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"clave de acceso"</string>
     <string name="password" msgid="6738570945182936667">"contrasinal"</string>
@@ -76,7 +74,7 @@
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Queres desbloquear as opcións de inicio de sesión para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Escolle unha clave de acceso gardada para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Escolle un contrasinal gardado para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Escolle un método de inicio de sesión gardado para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Escolle un inicio de sesión gardado para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Escolle un inicio de sesión para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Queres escoller unha opción para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Queres usar esta información en <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

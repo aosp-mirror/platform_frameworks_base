@@ -323,7 +323,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Pracovné aplikácie"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Pozastavené"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nočný režim"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Zap. pri záp. slnka"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Pri západe slnka"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do východu slnka"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Od <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Pridať ďalšie miniaplikácie"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Miniaplikácie prispôsobíte dlhým stlačením"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Prispôsobiť miniaplikácie"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ikona deaktivovanej miniaplikácie"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Upraviť miniaplikáciu"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Odstrániť"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Pridať miniaplikáciu"</string>
@@ -590,7 +589,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"Ovládacie prvky hlasitosti %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Hovory a upozornenia spustia zvonenie (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> sa prehráva v:"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk sa prehrá v:"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk sa prehrá cez"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Tuner používateľského rozhrania systému"</string>
     <string name="status_bar" msgid="4357390266055077437">"Stavový riadok"</string>
     <string name="demo_mode" msgid="263484519766901593">"Ukážka používateľského rozhrania systému"</string>
@@ -649,7 +648,7 @@
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Zobrazuje sa ako bublina v hornej časti upozornení konverzácie a profilová fotka na uzamknutej obrazovke"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Zobrazuje sa v hornej časti upozornení konverzácie a ako profilová fotka na uzamknutej obrazovke, preruší režim bez vyrušení"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Zobrazuje sa ako bublina v hornej časti upozornení konverzácie a profilová fotka na uzamknutej obrazovke, preruší režim bez vyrušení"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritné"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> nepodporuje funkcie konverzácie"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tieto upozornenia sa nedajú upraviť."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Upozornenia na hovory sa nedajú upraviť."</string>
@@ -719,7 +718,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Nenašli sa žiadne skratky"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Systém"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Vstup"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Otvorenie apl."</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Otvorené aplikácie"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Aktuálna aplik."</string>
     <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"Zobrazujú sa výsledky vyhľadávania"</string>
     <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"Zobrazujú sa skratky systému"</string>
@@ -735,10 +734,9 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Cyklické prechádzanie dopredu po nedávnych aplikáciách"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Cyklické prechádzanie dozadu po nedávnych aplikáciách"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvorenie zoznamu aplikácií"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Zobrazenie panela aplikácií"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvorenie nastavení"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvorenie Asistenta"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Zamknúť obrazovku"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Uzamknutie obrazovky"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Napísanie poznámky"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasking systému"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Rozdelenie obrazovky s aktuálnou aplikáciou vpravo"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Ponuka vypínača"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Strana <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Uzamknutá obrazovka"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Pomocou funkcie Nájdi moje zariadenie môžete zistiť polohu tohto telefónu, aj keď je vypnutý"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Vypína sa…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Zobraziť opatrenia"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Zobraziť opatrenia"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Odpojte zariadenie"</string>
@@ -1143,7 +1139,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Pripojené"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Dočasne pripojené"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Slabé pripojenie"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Automatické pripojenie cez mobilné dáta nefunguje"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobilné dáta sa nepripájajú automaticky"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Bez pripojenia"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nie sú k dispozícii žiadne ďalšie siete"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Nie sú k dispozícii žiadne siete"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Ak chcete vyššie rozlíšenie, prevráťte telefón"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Rozloženie skladacieho zariadenia"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Prevrátenie skladacieho zariadenia"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"zložené"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"rozložené"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Zostáva <xliff:g id="PERCENTAGE">%s</xliff:g> batérie"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Pripojte dotykové pero k nabíjačke"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Stav batérie dotykového pera je nízky"</string>
@@ -1236,7 +1235,7 @@
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Inštalovať pracovnú telefónnu aplikáciu"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Zrušiť"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Prispôsobiť uzamknutú obrazovku"</string>
-    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Ak chcete prispôsobiť uzamknutú obrazovku, odomknite ju"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Uzamknutú obrazovku môžete prispôsobiť po odomknutí"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi‑Fi nie je k dispozícii"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera je blokovaná"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera a mikrofón sú blokované"</string>
@@ -1252,7 +1251,7 @@
     <string name="dismiss_dialog" msgid="2195508495854675882">"Zavrieť"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Obrazovka je pripojená"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofón a fotoaparát"</string>
-    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Nedávne využitie aplikácie"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Nedávne použitie aplikáciami"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Zobraziť nedávny prístup"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Hotovo"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Rozbaliť a zobraziť možnosti"</string>

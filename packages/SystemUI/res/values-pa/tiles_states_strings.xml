@@ -126,9 +126,11 @@
     <item msgid="8259411607272330225">"ਬੰਦ ਹੈ"</item>
     <item msgid="578444932039713369">"ਚਾਲੂ ਹੈ"</item>
   </string-array>
-    <!-- no translation found for tile_states_record_issue:0 (1727196795383575383) -->
-    <!-- no translation found for tile_states_record_issue:1 (9061144428113385092) -->
-    <!-- no translation found for tile_states_record_issue:2 (2984256114867200368) -->
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"ਉਪਲਬਧ ਨਹੀਂ"</item>
+    <item msgid="9061144428113385092">"ਬੰਦ"</item>
+    <item msgid="2984256114867200368">"ਚਾਲੂ"</item>
+  </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"ਅਣਉਪਲਬਧ ਹੈ"</item>
     <item msgid="8707481475312432575">"ਬੰਦ ਹੈ"</item>
@@ -150,7 +152,7 @@
     <item msgid="8998632451221157987">"ਚਾਲੂ ਹੈ"</item>
   </string-array>
   <string-array name="tile_states_controls">
-    <item msgid="8199009425335668294">"ਅਣਉਪਲਬਧ ਹੈ"</item>
+    <item msgid="8199009425335668294">"ਅਣਉਪਲਬਧ ਹਨ"</item>
     <item msgid="4544919905196727508">"ਬੰਦ ਹੈ"</item>
     <item msgid="3422023746567004609">"ਚਾਲੂ ਹੈ"</item>
   </string-array>

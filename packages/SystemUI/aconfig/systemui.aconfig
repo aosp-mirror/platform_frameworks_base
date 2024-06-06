@@ -344,6 +344,16 @@ flag {
 }
 
 flag {
+   name: "activity_transition_use_largest_window"
+   namespace: "systemui"
+   description: "Target largest opening window during activity transitions."
+   bug: "323294573"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
    name: "centralized_status_bar_height_fix"
    namespace: "systemui"
    description: "Refactors shade header and keyguard status bar to read status bar dimens from a"

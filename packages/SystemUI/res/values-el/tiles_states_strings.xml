@@ -126,9 +126,11 @@
     <item msgid="8259411607272330225">"Ανενεργό"</item>
     <item msgid="578444932039713369">"Ενεργό"</item>
   </string-array>
-    <!-- no translation found for tile_states_record_issue:0 (1727196795383575383) -->
-    <!-- no translation found for tile_states_record_issue:1 (9061144428113385092) -->
-    <!-- no translation found for tile_states_record_issue:2 (2984256114867200368) -->
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"Μη διαθέσιμη"</item>
+    <item msgid="9061144428113385092">"Ανενεργή"</item>
+    <item msgid="2984256114867200368">"Ενεργή"</item>
+  </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"Μη διαθέσιμο"</item>
     <item msgid="8707481475312432575">"Ανενεργό"</item>

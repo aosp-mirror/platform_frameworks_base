@@ -106,13 +106,13 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actif, gauche uniquement"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Actif, droit uniquement"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Actifs, gauche et droit"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Multimédia"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimédia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Appels téléphoniques"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfert de fichiers"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Périphérique d\'entrée"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Accès Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Autoriser l\'accès aux contacts et à l\'historique des appels"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Les infos seront utilisées pour les notifications d\'appels, entre autres"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Ces infos seront utilisées pour les notifications d\'appels, entre autres"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partage de connexion Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Accès à la SIM"</string>
@@ -317,7 +317,7 @@
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Tailles enreg. par tampon journal"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Effacer l\'espace de stockage persistant de l\'enregistreur ?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Lorsque nous n\'effectuons plus de suivi avec l\'enregistreur persistant, nous sommes tenus d\'effacer les données associées à ce dernier qui sont stockées sur votre appareil."</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"Stocker données enregistreur en permanence sur appareil"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Stocker données journaux sur appareil de manière persistante"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Sélectionner les mémoires tampon journal à stocker en permanence sur l\'appareil"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"Sélectionner une configuration USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Sélectionner une configuration USB"</string>
@@ -518,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Utiliser les langues du système"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Échec de l\'ouverture des paramètres de l\'application <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>."</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Ce mode de saisie est susceptible d\'enregistrer le texte que vous saisissez, y compris vos données personnelles, telles que les mots de passe et les numéros de carte de paiement. Il provient de l\'application <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Voulez-vous vraiment l\'activer ?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Remarque : Après un redémarrage, vous ne pouvez pas lancer cette application tant que vous n\'avez pas déverrouillé votre téléphone."</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Remarque : Après un redémarrage, cette application ne peut pas démarrer tant que vous n\'avez pas déverrouillé votre téléphone."</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"État de l\'enregistrement IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Enregistré"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Non enregistré"</string>
@@ -703,7 +703,7 @@
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activer les animations système pour la prévisualisation du Retour"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ce paramètre active les animations système pour la prévisualisation du geste de retour. Pour cela, enableOnBackInvokedCallback doit être défini sur \"True\" dans le fichier manifeste de chaque appli."</string>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
-    <string name="not_specified" msgid="5423502443185110328">"Non défini"</string>
+    <string name="not_specified" msgid="5423502443185110328">"Non personnalisé"</string>
     <string name="neuter" msgid="2075249330106127310">"Neutre"</string>
     <string name="feminine" msgid="1529155595310784757">"Féminin"</string>
     <string name="masculine" msgid="4653978041013996303">"Masculin"</string>

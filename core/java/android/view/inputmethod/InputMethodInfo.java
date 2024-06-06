@@ -499,6 +499,25 @@ public final class InputMethodInfo implements Parcelable {
     @TestApi
     public InputMethodInfo(@NonNull String packageName, @NonNull String className,
             @NonNull CharSequence label, @NonNull String settingsActivity,
+            boolean supportStylusHandwriting,
+            @NonNull String stylusHandwritingSettingsActivityAttr) {
+        this(buildFakeResolveInfo(packageName, className, label), false /* isAuxIme */,
+                settingsActivity, null /* languageSettingsActivity */,
+                null /* subtypes */, 0 /* isDefaultResId */,
+                false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
+                false /* inlineSuggestionsEnabled */, false /* isVrOnly */,
+                false /* isVirtualDeviceOnly */, 0 /* handledConfigChanges */,
+                supportStylusHandwriting, false /* supportConnectionlessStylusHandwriting */,
+                stylusHandwritingSettingsActivityAttr, false /* inlineSuggestionsEnabled */);
+    }
+
+    /**
+     * Test API for creating a built-in input method to verify stylus handwriting.
+     * @hide
+     */
+    @TestApi
+    public InputMethodInfo(@NonNull String packageName, @NonNull String className,
+            @NonNull CharSequence label, @NonNull String settingsActivity,
             @NonNull String languageSettingsActivity, boolean supportStylusHandwriting,
             @NonNull String stylusHandwritingSettingsActivityAttr) {
         this(buildFakeResolveInfo(packageName, className, label), false /* isAuxIme */,

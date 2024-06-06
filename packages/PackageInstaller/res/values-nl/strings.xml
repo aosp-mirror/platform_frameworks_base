@@ -83,8 +83,8 @@
     <string name="uninstall_failed" msgid="1847750968168364332">"Verwijdering mislukt."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> kan niet worden verwijderd."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon verwijderen…"</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan actieve apparaatbeheer-app niet verwijderen"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan actieve apparaatbeheer-app niet verwijderen voor <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan actieve app voor apparaatbeheer niet verwijderen"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan actieve app voor apparaatbeheer niet verwijderen voor <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Deze app is vereist voor sommige gebruikers of profielen en is verwijderd voor andere"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Deze app is vereist voor je profiel en kan niet worden verwijderd."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Deze app is vereist door je apparaatbeheerder en kan niet worden verwijderd."</string>
@@ -98,7 +98,7 @@
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Uit veiligheidsoverwegingen heeft je tv momenteel geen toestemming om onbekende apps van deze bron te installeren. Je kunt dit wijzigen via Instellingen."</string>
     <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Uit veiligheidsoverwegingen heeft je smartwatch momenteel geen toestemming om onbekende apps van deze bron te installeren. Je kunt dit wijzigen via Instellingen."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Uit veiligheidsoverwegingen heeft je telefoon momenteel geen toestemming om onbekende apps van deze bron te installeren. Je kunt dit wijzigen via Instellingen."</string>
-    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Je telefoon en persoonsgegevens zijn kwetsbaarder voor aanvallen door onbekende apps. Als je deze app installeert, ga je ermee akkoord dat je verantwoordelijk bent voor eventuele schade aan je telefoon of gegevensverlies als gevolg van het gebruik van de app."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Je telefoon en persoonsgegevens zijn kwetsbaarder voor aanvallen door onbekende apps. Door deze app te installeren, ga je ermee akkoord dat je verantwoordelijk bent voor eventuele schade aan je telefoon of gegevensverlies als gevolg van het gebruik van de app."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Je tablet en persoonsgegevens zijn kwetsbaarder voor aanvallen door onbekende apps. Als je deze app installeert, ga je ermee akkoord dat je verantwoordelijk bent voor eventuele schade aan je tablet of gegevensverlies als gevolg van het gebruik van de app."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Je tv en persoonsgegevens zijn kwetsbaarder voor aanvallen door onbekende apps. Als je deze app installeert, ga je ermee akkoord dat je verantwoordelijk bent voor eventuele schade aan je tv of gegevensverlies als gevolg van het gebruik van de app."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon"</string>

@@ -280,7 +280,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotazione automatica dello schermo"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Geolocalizzazione"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Salvaschermo"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accesso alla videocamera"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accesso alla fotocamera"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accesso al microfono"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponibile"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloccato"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Aggiungi altri widget"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Premi a lungo per personalizzare i widget"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalizza widget"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Icona dell\'app per widget disattivati"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Modifica widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Rimuovi"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Aggiungi widget"</string>
@@ -566,7 +565,7 @@
     <string name="stream_voice_call" msgid="7468348170702375660">"Chiamata"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Suoneria"</string>
-    <string name="stream_music" msgid="2188224742361847580">"Supporti multimediali"</string>
+    <string name="stream_music" msgid="2188224742361847580">"Contenuti multimediali"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Sveglia"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notifica"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Spostati avanti tra le app recenti"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Spostati indietro tra le app recenti"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Apri elenco di app"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Mostra barra delle app"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Apri impostazioni"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Apri l\'assistente"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Blocca lo schermo"</string>
@@ -746,7 +744,7 @@
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Passa da schermo diviso a schermo intero"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Con lo schermo diviso: sostituisci un\'app con un\'altra"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Inserimento"</string>
-    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Passa alla prossima lingua"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Passa alla lingua successiva"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Passa alla lingua precedente"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Accedi all\'emoji"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Accedi alla digitazione vocale"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu del tasto di accensione"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> di <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Schermata di blocco"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Puoi trovare questo smartphone tramite Trova il mio dispositivo anche quando è spento"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Arresto in corso…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Leggi le misure da adottare"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Leggi le misure da adottare"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Scollega il dispositivo"</string>
@@ -951,7 +947,7 @@
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Punto di manipolazione destro"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Punto di manipolazione inferiore"</string>
     <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Impostazioni di ingrandimento"</string>
-    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Dimensione dell\'ingrandimento"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Dimensione ingrandimento"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zoom"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Medio"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Piccolo"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Gira il telefono per una maggiore risoluzione"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo pieghevole che viene aperto"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo pieghevole che viene capovolto"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"Piegato"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"Non piegato"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> batteria rimanente"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connetti lo stilo a un caricabatterie"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Batteria stilo in esaurimento"</string>

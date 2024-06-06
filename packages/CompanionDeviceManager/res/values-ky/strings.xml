@@ -40,7 +40,7 @@
     <string name="summary_generic" msgid="1761976003668044801">"Бул колдонмо маалыматты шайкештире алат, мисалы, чалып жаткан кишинин атын телефон жана тандалган түзмөк менен шайкештирет"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Ооба"</string>
     <string name="consent_no" msgid="2640796915611404382">"Уруксат берилбесин"</string>
-    <string name="consent_cancel" msgid="5655005528379285841">"Жокко чыгаруу"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Жок"</string>
     <string name="consent_back" msgid="2560683030046918882">"Артка"</string>
     <string name="permission_expand" msgid="893185038020887411">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> жайып көрсөтүү"</string>
     <string name="permission_collapse" msgid="3320833884220844084">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> жыйыштыруу"</string>

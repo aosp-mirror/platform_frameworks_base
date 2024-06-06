@@ -111,7 +111,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenos súborov"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Vstupné zariadenie"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Prístup na internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Povoľte aj prístup ku kontaktom a histórii hovorov"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Povoliť prístup ku kontaktom a histórii hovorov"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Pomocou informácií sa budú oznamovať hovory a viac"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Zdieľanie pripojenia na Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Textové správy"</string>
@@ -140,7 +140,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Použiť pre vstup"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Používať pre načúvadlá"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Používať s profilom LE_AUDIO"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Párovať"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Spárovať"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"PÁROVAŤ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Zrušiť"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Párovaním udelíte zariadeniam po pripojení prístup k svojim kontaktom a histórii hovorov."</string>
@@ -483,7 +483,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nabíja sa"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Rýchle nabíjanie"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Pomalé nabíjanie"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Nabíja sa bezdrôtovo"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Bezdrôtové nabíjanie"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Nabíja sa"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nenabíja sa"</string>
     <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Pripojené, ale nenabíja sa"</string>

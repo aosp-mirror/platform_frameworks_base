@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Sandi akan tetap tersedia bersama kunci sandi seiring perjalanan menuju era di mana sandi tidak diperlukan lagi."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pilih tempat penyimpanan <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pilih pengelola sandi untuk menyimpan info Anda dan login lebih cepat lain kali"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Buat kunci sandi untuk login ke <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Simpan sandi untuk login ke <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Simpan info login untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"kunci sandi"</string>
     <string name="password" msgid="6738570945182936667">"sandi"</string>

@@ -102,9 +102,16 @@ object AlternateBouncerViewBinder {
 
                 launch {
                     viewModel.scrimAlpha.collect {
+                        val wasVisible = alternateBouncerViewContainer.visibility == View.VISIBLE
                         alternateBouncerViewContainer.visibility =
                             if (it < .1f) View.INVISIBLE else View.VISIBLE
                         scrim.viewAlpha = it
+                        if (
+                            wasVisible && alternateBouncerViewContainer.visibility == View.INVISIBLE
+                        ) {
+                            // view is no longer visible
+                            viewModel.hideAlternateBouncer()
+                        }
                     }
                 }
 

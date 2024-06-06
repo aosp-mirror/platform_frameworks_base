@@ -105,9 +105,9 @@
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Dok snimate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Dok snimate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Pokreni snimanje"</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimi zvučni zapis"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimanje zvuka"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk na uređaju"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, naprimjer muzika, pozivi i melodije zvona"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, npr. muzika, pozivi i melodije zvona"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk na uređaju i mikrofon"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Pokreni"</string>
@@ -260,7 +260,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ne ometaj"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Nema dostupnih uparenih uređaja"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Dodirnite da povežete uređaj ili prekinete njegovu povezanost"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Dodirnite da povežete ili prekinete povezanost uređaja"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Upari novi uređaj"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Prikaži sve"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Koristi Bluetooth"</string>
@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Dodajte još vidžeta"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Pritisnite i zadržite da prilagodite vidžete"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Prilagodite vidžete"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ikona aplikacije za onemogućeni vidžet"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Uredite vidžet"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Uklanjanje"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Dodajte vidžet"</string>
@@ -590,7 +589,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"Kontrole glasnoće za %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Pozivi i obavještenja će zvoniti jačinom (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Reproduciranje: <xliff:g id="LABEL">%s</xliff:g>"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk će se reprod. na:"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Reprodukcija zvuka na"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Podešavač za korisnički interfejs sistema"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusna traka"</string>
     <string name="demo_mode" msgid="263484519766901593">"Demo način rada Sistemskog UI-ja"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Kruženje kroz nedavne aplikacije unaprijed"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Kruženje kroz nedavne aplikacije unazad"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvaranje liste aplikacija"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Prikaz trake zadataka"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvaranje postavki"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvaranje Asistenta"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključavanje ekrana"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meni napajanja"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključani ekran"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Možete pronaći telefon putem usluge Pronađi moj uređaj čak i kada je isključen"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Isključivanje…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Pogledajte korake za zaštitu"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Pogledajte korake za zaštitu"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Iskopčajte uređaj"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Za višu rezoluciju obrnite telefon"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Sklopivi uređaj se rasklapa"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Sklopivi uređaj se obrće"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"sklopljeno"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"otklopljeno"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Preostalo baterije: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Priključite pisaljku na punjač"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Baterija pisaljke je slaba"</string>

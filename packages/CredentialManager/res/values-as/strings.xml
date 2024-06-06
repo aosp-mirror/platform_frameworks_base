@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"আমি পাছৱৰ্ডবিহীন ভৱিষ্যতৰ দিশে আগবঢ়াৰ লগে লগে পাছকীৰ লগতে পাছৱৰ্ডসমূহো উপলব্ধ হ’ব।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"আপোনাৰ <xliff:g id="CREATETYPES">%1$s</xliff:g> ক’ত ছেভ কৰিব লাগে সেয়া বাছনি কৰক"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"আপোনাৰ তথ্য ছেভ কৰি পৰৱৰ্তী সময়ত দ্ৰুতভাৱে ছাইন ইন কৰিবলৈ এটা পাছৱৰ্ড পৰিচালক বাছনি কৰক"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ পাছকী সৃষ্টি কৰিবনে?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ পাছৱৰ্ড ছেভ কৰিবনে?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g>ৰ বাবে ছাইন ইনৰ তথ্য ছেভ কৰিবনে?"</string>
     <string name="passkey" msgid="632353688396759522">"পাছকী"</string>
     <string name="password" msgid="6738570945182936667">"পাছৱৰ্ড"</string>

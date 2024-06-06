@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Сырсөзсүз келечекти көздөй баратсак да, аларды киргизүүчү ачкычтар менен бирге колдоно берүүгө болот."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> кайда сакталарын тандаңыз"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Маалыматыңызды сактоо жана кийинки жолу тезирээк кирүү үчүн сырсөздөрдү башкаргычты тандаңыз"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> колдонмосуна кирүү үчүн киргизүүчү ачкычты түзөсүзбү?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> колдонмосуна кирүү үчүн сырсөздү сактайсызбы?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> үчүн кирүү маалыматы сакталсынбы?"</string>
     <string name="passkey" msgid="632353688396759522">"киргизүүчү ачкыч"</string>
     <string name="password" msgid="6738570945182936667">"сырсөз"</string>

@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Pasahitzik gabeko etorkizun baterantz goazen arren, pasahitzek sarbide-gakoen bizikide izaten jarraituko dute."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Aukeratu non gorde <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Hautatu informazioa gordetzeko pasahitz-kudeatzaile bat eta hasi saioa bizkorrago hurrengoan"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioan saioa hasteko sarbide-gako bat sortu nahi duzu?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioan saioa hasteko pasahitza gorde nahi duzu?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioko saioa hasteko informazioa gorde nahi duzu?"</string>
     <string name="passkey" msgid="632353688396759522">"sarbide-gakoa"</string>
     <string name="password" msgid="6738570945182936667">"pasahitza"</string>

@@ -36,7 +36,7 @@
     <string name="wifi_security_none" msgid="7392696451280611452">"Ninguna"</string>
     <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
     <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
-    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2 Personal"</string>
+    <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
     <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
     <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
     <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
@@ -111,8 +111,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferencia de archivos"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispositivo de entrada"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Acceso a Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Permitir acc. a hist. de llam. y cont."</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Se usará la inf. para anuncios de llamadas y otras funciones"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Acceso a contactos e historial de llamadas"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Se usará la información para anuncios de llamadas y más"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Compartir conexión a Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mensajes de texto"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Acceso a SIM"</string>
@@ -169,7 +169,7 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Aplicaciones eliminadas"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Aplicaciones y usuarios eliminados"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Actualizaciones del sistema"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Conexión a red por USB"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"Conexión mediante USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Hotspot portátil"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Conexión Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Compartir conexión"</string>
@@ -264,7 +264,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"Acceso directo para informes de errores"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Muestra un botón en el menú de encendido para realizar un informe de errores"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Permanecer activo"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca quedará inactiva mientras el dispositivo se esté cargando."</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca quedará inactiva mientras el dispositivo se esté cargando"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Registro de Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar paquetes de Bluetooth (activa/desactiva el Bluetooth después de cambiar esta configuración)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueo de OEM"</string>
@@ -305,7 +305,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Desactivado"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automático"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nombre de host del proveedor de DNS privado"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Ingresa el host del proveedor de DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Ingresa el nombre de host del proveedor de DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"No se pudo establecer conexión"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Muestra opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta el nivel de registro Wi-Fi y se muestra por SSID RSSI en el selector de Wi-Fi"</string>
@@ -313,7 +313,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Si este modo está habilitado, es posible que la dirección MAC del dispositivo cambie cada vez que se conecte a una red que tenga habilitada la aleatorización de MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"De uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sin tarifa plana"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de búfer de Logger"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de los búferes de registro"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"¿Borrar el almacenamiento persistente del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Cuando ya no usamos el registrador persistente para monitorear, debemos borrar los datos que almacena el registrador en tu dispositivo."</string>
@@ -389,7 +389,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operaciones de recorte no rectangulares"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Perfil procesamiento HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Habilitar depuración GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite capas de GPU para apps de depuración"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite cargar capas de depuración de GPU para apps de depuración"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Habilitar registro detallado"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluye otros registros de proveedor específicos del dispositivo en los informes de errores, que podrían contener información privada, consumir más batería o usar más espacio de almacenamiento."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animación de ventana"</string>
@@ -411,7 +411,7 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"Habilitar ventanas de forma libre"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Permite la compatibilidad con ventanas de forma libre experimentales."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Contraseñas"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Tus copias de seguridad de escritorio no están protegidas por contraseña."</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Tus copias de seguridad de escritorio no están protegidas por contraseña"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Presiona para cambiar o quitar la contraseña de las copias de seguridad completas de tu escritorio."</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Nueva contraseña de copia de seguridad definida"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"La nueva contraseña y la de confirmación no coinciden."</string>
@@ -437,7 +437,7 @@
     <string name="transcode_default" msgid="3784803084573509491">"Suponer que las apps admiten formatos modernos"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostrar notificaciones de transcodificación"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Inhabilitar caché de transcodificación"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Parámetros de configuración de Widevine"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Configuración de Widevine"</string>
     <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forzar resguardo de nivel 3"</string>
     <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Seleccionar para forzar un resguardo de nivel 3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"En ejecución"</string>
@@ -452,7 +452,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteronomalía (rojo-verde)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalía (rojo-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalía (azul-amarillo)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corrección de color"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corrección de colores"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"La corrección de colores puede ser útil cuando quieres hacer lo siguiente:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Ver los colores con mayor precisión&lt;/li&gt; &lt;li&gt;&amp;nbsp;Quitar colores para concentrarte&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Reemplazado por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -491,7 +491,7 @@
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Carga completa"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Se detuvo la carga"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada por el administrador"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlada por la configuración restringida"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Función controlada por configuración restringida"</string>
     <string name="disabled" msgid="8017887509554714950">"Inhabilitada"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Con permiso"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"No permitida"</string>
@@ -555,7 +555,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Esta tablet"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Conector de la bocina"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Bocina de la estación de carga"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
@@ -629,7 +629,7 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Restablecer"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Quitar"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Restableciendo invitado…"</string>
-    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"¿Quieres restablecer la sesión de invitado?"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"¿Restablecer la sesión de invitado?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Esta acción comenzará una nueva sesión de invitado y borrará todas las apps y los datos de la sesión actual."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo de invitado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Esta acción borrará todas las apps y los datos de la sesión de invitado actual."</string>

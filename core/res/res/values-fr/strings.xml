@@ -261,7 +261,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Rapport de bug"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Fermer la session"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Capture d\'écran"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Rapport de bug"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Signaler un bug"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme d\'e-mail. Merci de patienter pendant la préparation du rapport de bug. Cette opération peut prendre quelques instants."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Rapport interactif"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilisez cette option dans la plupart des circonstances. Elle vous permet de suivre la progression du rapport, de saisir plus d\'informations sur le problème et d\'effectuer des captures d\'écran. Certaines sections moins utilisées et dont le remplissage demande beaucoup de temps peuvent être omises."</string>
@@ -330,7 +330,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder aux données d\'activité physique"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Caméra"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Appareils à proximité"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"détecter des appareils à proximité et s\'y connecter"</string>
@@ -828,7 +828,7 @@
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Autorise l\'appli à mettre à jour les états de validation des clés de contact E2EE possédées par d\'autres applis."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les codes d\'accès de verrouillage de l\'écran"</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Gérer les tentatives de déverrouillage de l\'écran"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Contrôler les tentatives de déverrouillage de l\'écran"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller la tablette ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Contrôle le nombre de fois qu\'un mot de passe incorrect est saisi lors du déverrouillage de l\'écran, et verrouille votre appareil Android TV ou en efface toutes les données si le nombre maximal de mots de passe incorrects autorisé est dépassé."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller le système d\'infoloisirs ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint."</string>
@@ -1059,7 +1059,7 @@
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Sélecteur d\'utilisateur"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"État"</string>
-    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Caméra"</string>
+    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Appareil photo"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Commandes multimédias"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Début de la réorganisation des widgets"</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Réorganisation des widgets terminée."</string>
@@ -1987,9 +1987,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Réactiver les applis pro ?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Réactiver"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgence"</string>
-    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Définir verrouillage écran"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Activer verrouillage écran"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Activer verrouillage écran"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Pour utiliser votre espace privé, définissez un verrouillage de l\'écran sur cet appareil"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Pour utiliser votre espace privé, activez le verrouillage de l\'écran sur cet appareil"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Application non disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas disponible pour le moment."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponible"</string>
@@ -2119,7 +2119,7 @@
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Fermer"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Système"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Paramètres"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Caméra"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Appareil photo"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micro"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"se superpose aux autres applications sur l\'écran"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Envoyer des commentaires"</string>

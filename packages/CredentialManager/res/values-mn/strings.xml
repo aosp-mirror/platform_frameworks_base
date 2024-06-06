@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Бид нууц үггүй ирээдүй рүү урагшлахын хэрээр нууц үг нь нэвтрэх түлхүүрийн хамтаар боломжтой хэвээр байх болно."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g>-г хаана хадгалахаа сонгоно уу"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Мэдээллээ хадгалж, дараагийн удаа илүү хурдан нэвтрэхийн тулд нууц үгний менежерийг сонгоно уу"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g>-д нэвтрэхийн тулд нэвтрэх түлхүүр үүсгэх үү?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g>-д нэвтрэхийн тулд нууц үгийг хадгалах уу?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g>-н нэвтрэх мэдээллийг хадгалах уу?"</string>
     <string name="passkey" msgid="632353688396759522">"passkey"</string>
     <string name="password" msgid="6738570945182936667">"нууц үг"</string>

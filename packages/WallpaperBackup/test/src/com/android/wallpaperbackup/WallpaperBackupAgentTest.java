@@ -59,6 +59,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
@@ -838,6 +839,26 @@ public class WallpaperBackupAgentTest {
                 WallpaperManager.SQUARE_PORTRAIT, new Rect(5, 6, 7, 8),
                 WallpaperManager.SQUARE_LANDSCAPE, new Rect(9, 10, 11, 12));
         testParseCropHints(testMap);
+    }
+
+    @Test
+    public void test_sourceDimensionsAreLargerThanTarget() {
+        // source device is larger than target, expecting to get false
+        Point sourceDimensions = new Point(2208, 1840);
+        Point targetDimensions = new Point(1080, 2092);
+        boolean isSourceSmaller = mWallpaperBackupAgent
+                .isSourceDeviceSignificantlySmallerThanTarget(sourceDimensions, targetDimensions);
+        assertThat(isSourceSmaller).isEqualTo(false);
+    }
+
+    @Test
+    public void test_sourceDimensionsMuchSmallerThanTarget() {
+        // source device is smaller than target, expecting to get true
+        Point sourceDimensions = new Point(1080, 2092);
+        Point targetDimensions = new Point(2208, 1840);
+        boolean isSourceSmaller = mWallpaperBackupAgent
+                .isSourceDeviceSignificantlySmallerThanTarget(sourceDimensions, targetDimensions);
+        assertThat(isSourceSmaller).isEqualTo(true);
     }
 
     private void testParseCropHints(Map<Integer, Rect> testMap) throws Exception {

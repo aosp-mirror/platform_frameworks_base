@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"पासवर्ड न वापरणाऱ्या भविष्यात पुढे जाताना, पासवर्ड तरीही पासकीच्या बरोबरीने उपलब्ध असतील."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"तुमची <xliff:g id="CREATETYPES">%1$s</xliff:g> कुठे सेव्ह करायची ते निवडा"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"तुमची माहिती सेव्ह करण्यासाठी आणि पुढच्या वेळी जलद साइन इन करण्याकरिता Password Manager निवडा"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> मध्ये साइन इन करण्यासाठी पासकी तयार करायची आहे का?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> मध्ये साइन इन करण्यासाठी पासवर्ड सेव्ह करायचा आहे का?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> साठी साइन-इन माहिती सेव्ह करायची का?"</string>
     <string name="passkey" msgid="632353688396759522">"पासकी"</string>
     <string name="password" msgid="6738570945182936667">"पासवर्ड"</string>
@@ -83,7 +81,7 @@
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"दुसऱ्या मार्गाने साइन इन करा"</string>
     <string name="snackbar_action" msgid="37373514216505085">"पर्याय पहा"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"पुढे सुरू ठेवा"</string>
-    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"साइन इन पर्याय"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"साइन-इन पर्याय"</string>
     <string name="button_label_view_more" msgid="3429098227286495651">"आणखी पहा"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> साठी"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"लॉक केलेले पासवर्ड व्यवस्थापक"</string>
@@ -94,6 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"दुसऱ्या डिव्हाइस वरून"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"वेगळे डिव्हाइस वापरा"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ने विनंती रद्द केली आहे"</string>
-    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"साइन इन करण्याचे पर्याय"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"साइन-इन पर्याय"</string>
     <string name="more_options_content_description" msgid="1323427365788198808">"आणखी"</string>
 </resources>

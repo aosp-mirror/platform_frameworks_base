@@ -1765,9 +1765,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         this(context, attrs, context);
-        if (com.android.systemui.Flags.notificationRowUserContext()) {
-            Log.wtf(TAG, "This constructor shouldn't be called");
-        }
+        Log.wtf(TAG, "This constructor shouldn't be called");
     }
 
     /**

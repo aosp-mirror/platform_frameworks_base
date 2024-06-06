@@ -291,6 +291,21 @@ class FullMobileConnectionRepository(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.dataEnabled.value)
 
+    override val inflateSignalStrength =
+        activeRepo
+            .flatMapLatest { it.inflateSignalStrength }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = "inflate",
+                initialValue = activeRepo.value.inflateSignalStrength.value,
+            )
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                activeRepo.value.inflateSignalStrength.value
+            )
+
     override val numberOfLevels =
         activeRepo
             .flatMapLatest { it.numberOfLevels }
@@ -301,7 +316,7 @@ class FullMobileConnectionRepository(
             .flatMapLatest { it.networkName }
             .logDiffsForTable(
                 tableLogBuffer,
-                columnPrefix = "",
+                columnPrefix = "intent",
                 initialValue = activeRepo.value.networkName.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.networkName.value)
@@ -311,7 +326,7 @@ class FullMobileConnectionRepository(
             .flatMapLatest { it.carrierName }
             .logDiffsForTable(
                 tableLogBuffer,
-                columnPrefix = "",
+                columnPrefix = "sub",
                 initialValue = activeRepo.value.carrierName.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.carrierName.value)

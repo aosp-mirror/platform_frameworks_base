@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Προσθήκη περισσότερων γραφικών στοιχείων"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Παρατεταμένο πάτημα για προσαρμογή γραφ. στοιχείων"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Προσαρμογή γραφικών στοιχείων"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Εικονίδιο εφαρμογής για απενεργοποιημένο γραφικό στοιχείο"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Επεξεργασία γραφικού στοιχείου"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Κατάργηση"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Προσθήκη γραφικού στοιχείου"</string>
@@ -565,7 +564,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Η εφαρμογή ξεκαρφιτσώθηκε."</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Κλήση"</string>
     <string name="stream_system" msgid="7663148785370565134">"Σύστημα"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Κλήση"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Ήχος κλήσης"</string>
     <string name="stream_music" msgid="2188224742361847580">"Μέσα"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Ξυπνητήρι"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Ειδοποίηση"</string>
@@ -735,7 +734,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Περιήγηση προς τα εμπρός σε πρόσφατες εφαρμογές"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Περιήγηση προς τα πίσω σε πρόσφατες εφαρμογές"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Άνοιγμα λίστας εφαρμογών"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Εμφάνιση γραμμής εργαλείων"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Άνοιγμα ρυθμίσεων"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Άνοιγμα Βοηθού"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Κλείδωμα οθόνης"</string>
@@ -837,10 +835,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Μενού λειτουργίας"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Σελίδα <xliff:g id="ID_1">%1$d</xliff:g> από <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Οθόνη κλειδώματος"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Μπορείτε να εντοπίσετε το συγκεκριμένο τηλέφωνο με την Εύρεση συσκευής ακόμα και όταν είναι απενεργοποιημένο"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Τερματισμός λειτουργίας…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Δείτε βήματα αντιμετώπισης."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Δείτε βήματα αντιμετώπισης."</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Αποσυνδέστε τη συσκευή"</string>
@@ -1155,7 +1151,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Δεν θα γίνεται προς το παρόν αυτόματη σύνδεση Wi-Fi."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Εμφάνιση όλων"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Για εναλλαγή δικτύων, αποσυνδέστε το ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Για βελτίωση της εμπειρίας στη συσκευή, οι εφαρμογές και οι υπηρεσίες μπορούν ακόμα να εκτελούν σάρωση για δίκτυα Wi‑Fi ανά πάσα στιγμή, ακόμα και όταν το Wi‑Fi είναι απενεργοποιημένο. Μπορείτε να αλλάξετε αυτήν τη ρύθμιση στις ρυθμίσεις της Σάρωσης Wi‑Fi. "<annotation id="link">"Αλλαγή"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Για βελτίωση της εμπειρίας στη συσκευή, οι εφαρμογές και οι υπηρεσίες μπορούν ακόμα να εκτελούν σάρωση για δίκτυα Wi‑Fi ανά πάσα στιγμή, ακόμα και όταν το Wi‑Fi είναι απενεργοποιημένο. Μπορείτε να αλλάξετε αυτή τη ρύθμιση στις ρυθμίσεις της Σάρωσης Wi‑Fi. "<annotation id="link">"Αλλαγή"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Απενεργοποίηση λειτουργίας πτήσης"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"Η εφαρμογή <xliff:g id="APPNAME">%1$s</xliff:g> θέλει να προσθέσει το παρακάτω πλακίδιο στις Γρήγορες ρυθμίσεις"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Προσθήκη πλακιδίου"</string>
@@ -1226,6 +1222,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Για υψηλότερη ανάλυση, αναστρέψτε το τηλέφωνο"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Αναδιπλούμενη συσκευή που ξεδιπλώνει"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Αναδιπλούμενη συσκευή που διπλώνει"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"διπλωμένη"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ξεδιπλωμένη"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Απομένει το <xliff:g id="PERCENTAGE">%s</xliff:g> της μπαταρίας"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Συνδέστε τη γραφίδα σε έναν φορτιστή"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Χαμηλή στάθμη μπαταρίας γραφίδας"</string>

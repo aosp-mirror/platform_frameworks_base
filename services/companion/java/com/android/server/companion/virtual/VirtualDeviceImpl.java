@@ -1213,7 +1213,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mContext.startActivityAsUser(
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
                 ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle(),
-                mContext.getUser());
+                UserHandle.SYSTEM);
     }
 
     private void onSecureWindowShown(int displayId, int uid) {

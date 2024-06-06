@@ -4834,6 +4834,16 @@ public abstract class PackageManager {
     public static final String FEATURE_ROTARY_ENCODER_LOW_RES =
             "android.hardware.rotaryencoder.lowres";
 
+  /**
+   * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+   * support for contextual search helper.
+   *
+   * @hide
+   */
+  @SdkConstant(SdkConstantType.FEATURE)
+  public static final String FEATURE_CONTEXTUAL_SEARCH_HELPER =
+      "android.software.contextualsearch";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 

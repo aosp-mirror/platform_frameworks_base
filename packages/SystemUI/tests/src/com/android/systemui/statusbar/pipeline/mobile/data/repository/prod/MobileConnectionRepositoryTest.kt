@@ -868,6 +868,24 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun networkName_usingEagerStrategy_retainsNameBetweenSubscribers() =
+        testScope.runTest {
+            // Use the [StateFlow.value] getter so we can prove that the collection happens
+            // even when there is no [Job]
+
+            // Starts out default
+            assertThat(underTest.networkName.value).isEqualTo(DEFAULT_NAME_MODEL)
+
+            val intent = spnIntent()
+            val captor = argumentCaptor<BroadcastReceiver>()
+            verify(context).registerReceiver(captor.capture(), any())
+            captor.value!!.onReceive(context, intent)
+
+            // The value is still there despite no active subscribers
+            assertThat(underTest.networkName.value).isEqualTo(intent.toNetworkNameModel(SEP))
+        }
+
+    @Test
     fun operatorAlphaShort_tracked() =
         testScope.runTest {
             var latest: String? = null
@@ -1009,6 +1027,26 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(DEFAULT_NUM_LEVELS)
 
             job.cancel()
+        }
+
+    @Test
+    fun inflateSignalStrength_usesCarrierConfig() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.inflateSignalStrength)
+
+            assertThat(latest).isEqualTo(false)
+
+            systemUiCarrierConfig.processNewCarrierConfig(
+                configWithOverride(KEY_INFLATE_SIGNAL_STRENGTH_BOOL, true)
+            )
+
+            assertThat(latest).isEqualTo(true)
+
+            systemUiCarrierConfig.processNewCarrierConfig(
+                configWithOverride(KEY_INFLATE_SIGNAL_STRENGTH_BOOL, false)
+            )
+
+            assertThat(latest).isEqualTo(false)
         }
 
     @Test
