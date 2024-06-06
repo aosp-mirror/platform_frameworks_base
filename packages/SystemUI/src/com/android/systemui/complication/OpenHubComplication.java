@@ -28,7 +28,6 @@ import android.widget.ImageView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.Flags;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.complication.dagger.OpenHubComplicationComponent;
@@ -111,11 +110,11 @@ public class OpenHubComplication implements Complication {
 
         private void updateOpenHubComplication() {
             // TODO(b/339667383): don't show the complication if glanceable hub is disabled
-            if (Flags.glanceableHubShortcutButton()) {
-                mDreamOverlayStateController.addComplication(mComplication);
-            } else {
-                mDreamOverlayStateController.removeComplication(mComplication);
-            }
+//            if (Flags.glanceableHubShortcutButton()) {
+//                mDreamOverlayStateController.addComplication(mComplication);
+//            } else {
+//                mDreamOverlayStateController.removeComplication(mComplication);
+//            }
         }
     }
 
