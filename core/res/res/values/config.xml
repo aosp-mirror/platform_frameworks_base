@@ -4840,7 +4840,7 @@
      See android.credentials.CredentialManager
     -->
     <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
-    
+
     <!-- The component name, flattened to a string, for the system's credential manager
       autofill service. This service allows interceding autofill requests and routing
       them to credential manager.
@@ -6502,9 +6502,6 @@
          code and resources provided by applications. This value will be set by the manufacturer  -->
     <string-array name="config_sharedLibrariesLoadedAfterApp" translatable="false">
     </string-array>
-
-    <!-- the number of the max cached processes in the system. -->
-    <integer name="config_customizedMaxCachedProcesses">32</integer>
 
     <!-- Whether this device should support taking app snapshots on closure -->
     <bool name="config_disableTaskSnapshots">false</bool>
