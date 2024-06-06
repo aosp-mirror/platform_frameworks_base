@@ -2847,14 +2847,22 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     // Caution! This method is called in this class. Handle multi-user carefully
     @GuardedBy("ImfLock.class")
     private void updateSystemUiLocked(int vis, int backDisposition) {
-        if (getCurTokenLocked() == null) {
+        updateSystemUiLocked(vis, backDisposition, mCurrentUserId);
+    }
+
+    @GuardedBy("ImfLock.class")
+    private void updateSystemUiLocked(int vis, int backDisposition, @UserIdInt int userId) {
+        final var bindingController = getInputMethodBindingController(userId);
+        final var curToken = bindingController.getCurToken();
+        if (curToken == null) {
             return;
         }
+        final int curTokenDisplayId = bindingController.getCurTokenDisplayId();
         if (DEBUG) {
             Slog.d(TAG, "IME window vis: " + vis
                     + " active: " + (vis & InputMethodService.IME_ACTIVE)
                     + " inv: " + (vis & InputMethodService.IME_INVISIBLE)
-                    + " displayId: " + getCurTokenDisplayIdLocked());
+                    + " displayId: " + curTokenDisplayId);
         }
         final IBinder focusedWindowToken = mImeBindingState != null
                 ? mImeBindingState.mFocusedWindow : null;
@@ -2873,17 +2881,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             } else {
                 vis &= ~InputMethodService.IME_VISIBLE_IMPERCEPTIBLE;
             }
-            final var curId = getInputMethodBindingController(mCurrentUserId).getCurId();
+            final var curId = bindingController.getCurId();
+            // TODO(b/305849394): Make mMenuController multi-user aware.
             if (mMenuController.getSwitchingDialogLocked() != null
-                    || !Objects.equals(curId, getSelectedMethodIdLocked())) {
+                    || !Objects.equals(curId, bindingController.getSelectedMethodId())) {
                 // When the IME switcher dialog is shown, or we are switching IMEs,
                 // the back button should be in the default state (as if the IME is not shown).
                 backDisposition = InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING;
             }
-            final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis, mCurrentUserId);
+            final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis, userId);
             if (mStatusBarManagerInternal != null) {
-                mStatusBarManagerInternal.setImeWindowStatus(getCurTokenDisplayIdLocked(),
-                        getCurTokenLocked(), vis, backDisposition, needsToShowImeSwitcher);
+                mStatusBarManagerInternal.setImeWindowStatus(curTokenDisplayId,
+                        curToken, vis, backDisposition, needsToShowImeSwitcher);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
