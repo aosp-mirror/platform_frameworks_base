@@ -452,10 +452,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             mHandler.post(() -> {
                 mTouchTracker.reset();
                 boolean isInProgress = mProgressAnimator.isBackAnimationInProgress();
-                mProgressAnimator.reset();
-                // TODO(b/333957271): Re-introduce auto fling progress generation.
                 final OnBackInvokedCallback callback = mCallback.get();
                 if (callback == null) {
+                    mProgressAnimator.reset();
                     Log.d(TAG, "Trying to call onBackInvoked() on a null callback reference.");
                     return;
                 }
@@ -463,7 +462,13 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                     Log.w(TAG, "ProgressAnimator was not in progress, skip onBackInvoked().");
                     return;
                 }
-                callback.onBackInvoked();
+                OnBackAnimationCallback animationCallback = getBackAnimationCallback();
+                if (animationCallback != null) {
+                    mProgressAnimator.onBackInvoked(callback::onBackInvoked);
+                } else {
+                    mProgressAnimator.reset();
+                    callback.onBackInvoked();
+                }
             });
         }
 
