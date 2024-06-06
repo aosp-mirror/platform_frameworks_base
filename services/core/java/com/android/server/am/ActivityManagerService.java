@@ -5846,19 +5846,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void setProcessLimit(int max) {
-        enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
-                "setProcessLimit()");
-        synchronized (this) {
-            mConstants.setOverrideMaxCachedProcesses(max);
-            trimApplicationsLocked(true, OOM_ADJ_REASON_PROCESS_END);
-        }
+        // Process limits are deprecated since b/253908413
     }
 
     @Override
     public int getProcessLimit() {
-        synchronized (this) {
-            return mConstants.getOverrideMaxCachedProcesses();
-        }
+        // Process limits are deprecated since b/253908413
+        return Integer.MAX_VALUE;
     }
 
     void importanceTokenDied(ImportanceToken token) {

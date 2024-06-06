@@ -494,26 +494,6 @@
         <item>show_deuteranomaly</item>
     </string-array>
 
-    <!-- Titles for app process limit preference. [CHAR LIMIT=35] -->
-    <string-array name="app_process_limit_entries">
-        <item>Standard limit</item>
-        <item>No background processes</item>
-        <item>At most 1 process</item>
-        <item>At most 2 processes</item>
-        <item>At most 3 processes</item>
-        <item>At most 4 processes</item>
-    </string-array>
-
-    <!-- Values for app process limit preference. -->
-    <string-array name="app_process_limit_values" translatable="false" >
-        <item>-1</item>
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-    </string-array>
-
     <!-- USB configuration names for Developer Settings.
          This can be overridden by devices with additional USB configurations. -->
     <string-array name="usb_configuration_titles">
