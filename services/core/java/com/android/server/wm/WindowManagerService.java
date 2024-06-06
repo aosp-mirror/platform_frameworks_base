@@ -2027,7 +2027,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // Otherwise, look at the package
             final ApplicationInfo appInfo = mPmInternal.getApplicationInfo(
                     packageName, 0 /* flags */, SYSTEM_UID, UserHandle.getUserId(callingUid));
-            if (appInfo == null || appInfo.uid != callingUid) {
+            if (appInfo == null
+                    || !mPmInternal.isSameApp(
+                            packageName, callingUid, UserHandle.getUserId(callingUid))) {
                 throw new SecurityException("Package " + packageName + " not in UID "
                         + callingUid);
             }
