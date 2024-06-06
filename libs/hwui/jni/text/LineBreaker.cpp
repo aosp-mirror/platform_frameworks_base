@@ -83,7 +83,7 @@ static jlong nGetReleaseFunc(CRITICAL_JNI_PARAMS) {
     return reinterpret_cast<jlong>(nFinish);
 }
 
-static void nFinishP(CRITICAL_JNI_PARAMS, jlong nativePtr) {
+static void nFinishP(CRITICAL_JNI_PARAMS_COMMA jlong nativePtr) {
     nFinish(nativePtr);
 }
 

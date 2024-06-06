@@ -402,7 +402,6 @@ cc_defaults {
     ],
 
     static_libs: [
-        "libnativehelper_lazy",
         "libziparchive_for_incfs",
     ],
 
@@ -431,6 +430,7 @@ cc_defaults {
             ],
             static_libs: [
                 "libgif",
+                "libnativehelper_lazy",
                 "libstatslog_hwui",
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
@@ -443,6 +443,7 @@ cc_defaults {
             ],
             static_libs: [
                 "libandroidfw",
+                "libnativehelper",
             ],
         },
     },
@@ -514,6 +515,7 @@ cc_defaults {
         "pipeline/skia/RenderNodeDrawable.cpp",
         "pipeline/skia/ReorderBarrierDrawables.cpp",
         "pipeline/skia/TransformCanvas.cpp",
+        "renderstate/RenderState.cpp",
         "renderthread/CanvasContext.cpp",
         "renderthread/DrawFrameTask.cpp",
         "renderthread/Frame.cpp",
@@ -579,7 +581,6 @@ cc_defaults {
                 "pipeline/skia/SkiaVulkanPipeline.cpp",
                 "pipeline/skia/VkFunctorDrawable.cpp",
                 "pipeline/skia/VkInteropFunctorDrawable.cpp",
-                "renderstate/RenderState.cpp",
                 "renderthread/CacheManager.cpp",
                 "renderthread/EglManager.cpp",
                 "renderthread/VulkanManager.cpp",
