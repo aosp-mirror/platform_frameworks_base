@@ -1457,8 +1457,9 @@ public class BubbleController implements ConfigurationChangeListener,
             SynchronousScreenCaptureListener screenCaptureListener) {
         try {
             ScreenCapture.CaptureArgs args = null;
-            if (mStackView != null) {
-                ViewRootImpl viewRoot = mStackView.getViewRootImpl();
+            View viewToUse = mStackView != null ? mStackView : mLayerView;
+            if (viewToUse != null) {
+                ViewRootImpl viewRoot = viewToUse.getViewRootImpl();
                 if (viewRoot != null) {
                     SurfaceControl bubbleLayer = viewRoot.getSurfaceControl();
                     if (bubbleLayer != null) {
