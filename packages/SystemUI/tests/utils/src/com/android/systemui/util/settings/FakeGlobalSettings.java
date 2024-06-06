@@ -22,8 +22,6 @@ import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 
-import kotlinx.coroutines.CoroutineDispatcher;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,13 +41,6 @@ public class FakeGlobalSettings implements GlobalSettings {
         throw new UnsupportedOperationException(
                 "GlobalSettings.getContentResolver is not implemented, but you may find "
                         + "GlobalSettings.registerContentObserver helpful instead.");
-    }
-
-    @Override
-    public CoroutineDispatcher getBackgroundDispatcher() {
-        throw new UnsupportedOperationException(
-                "GlobalSettings.getBackgroundDispatcher is not implemented, but you may find "
-                        + "GlobalSettings.getBackgroundDispatcher helpful instead.");
     }
 
     @Override
