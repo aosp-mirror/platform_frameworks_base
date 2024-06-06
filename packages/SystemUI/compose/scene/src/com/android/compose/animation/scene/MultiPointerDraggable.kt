@@ -19,8 +19,6 @@ package com.android.compose.animation.scene
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.awaitVerticalTouchSlopOrCancellation
-import androidx.compose.foundation.gestures.horizontalDrag
-import androidx.compose.foundation.gestures.verticalDrag
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -32,7 +30,9 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
 import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
+import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.util.fastAll
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.sign
@@ -297,18 +298,14 @@ internal class MultiPointerDraggableNode(
                 onDrag(controller, drag, overSlop)
 
                 successful =
-                    when (orientation) {
-                        Orientation.Horizontal ->
-                            horizontalDrag(drag.id) {
-                                onDrag(controller, it, it.positionChange().toFloat())
-                                it.consume()
-                            }
-                        Orientation.Vertical ->
-                            verticalDrag(drag.id) {
-                                onDrag(controller, it, it.positionChange().toFloat())
-                                it.consume()
-                            }
-                    }
+                    drag(
+                        initialPointerId = drag.id,
+                        hasDragged = { it.positionChangeIgnoreConsumed().toFloat() != 0f },
+                        onDrag = {
+                            onDrag(controller, it, it.positionChange().toFloat())
+                            it.consume()
+                        },
+                    )
             } catch (t: Throwable) {
                 onDragCancel(controller)
                 throw t
@@ -350,6 +347,77 @@ internal class MultiPointerDraggableNode(
         return when (orientation) {
             Orientation.Vertical -> y
             Orientation.Horizontal -> x
+        }
+    }
+
+    /**
+     * Continues to read drag events until all pointers are up or the drag event is canceled. The
+     * initial pointer to use for driving the drag is [initialPointerId]. [hasDragged] passes the
+     * result whether a change was detected from the drag function or not. [onDrag] is called
+     * whenever the pointer moves and [hasDragged] returns non-zero.
+     *
+     * @return true when gesture ended with all pointers up and false when the gesture was canceled.
+     *
+     * Note: Inspired by DragGestureDetector.kt
+     */
+    private suspend inline fun AwaitPointerEventScope.drag(
+        initialPointerId: PointerId,
+        hasDragged: (PointerInputChange) -> Boolean,
+        onDrag: (PointerInputChange) -> Unit,
+    ): Boolean {
+        val pointer = currentEvent.changes.fastFirstOrNull { it.id == initialPointerId }
+        val isPointerUp = pointer?.pressed != true
+        if (isPointerUp) {
+            return false // The pointer has already been lifted, so the gesture is canceled
+        }
+        var pointerId = initialPointerId
+        while (true) {
+            val change = awaitDragOrUp(pointerId, hasDragged) ?: return false
+
+            if (change.isConsumed) {
+                return false
+            }
+
+            if (change.changedToUpIgnoreConsumed()) {
+                return true
+            }
+
+            onDrag(change)
+            pointerId = change.id
+        }
+    }
+
+    /**
+     * Waits for a single drag in one axis, final pointer up, or all pointers are up. When
+     * [initialPointerId] has lifted, another pointer that is down is chosen to be the finger
+     * governing the drag. When the final pointer is lifted, that [PointerInputChange] is returned.
+     * When a drag is detected, that [PointerInputChange] is returned. A drag is only detected when
+     * [hasDragged] returns `true`.
+     *
+     * `null` is returned if there was an error in the pointer input stream and the pointer that was
+     * down was dropped before the 'up' was received.
+     *
+     * Note: Copied from DragGestureDetector.kt
+     */
+    private suspend inline fun AwaitPointerEventScope.awaitDragOrUp(
+        initialPointerId: PointerId,
+        hasDragged: (PointerInputChange) -> Boolean,
+    ): PointerInputChange? {
+        var pointerId = initialPointerId
+        while (true) {
+            val event = awaitPointerEvent()
+            val dragEvent = event.changes.fastFirstOrNull { it.id == pointerId } ?: return null
+            if (dragEvent.changedToUpIgnoreConsumed()) {
+                val otherDown = event.changes.fastFirstOrNull { it.pressed }
+                if (otherDown == null) {
+                    // This is the last "up"
+                    return dragEvent
+                } else {
+                    pointerId = otherDown.id
+                }
+            } else if (hasDragged(dragEvent)) {
+                return dragEvent
+            }
         }
     }
 }
