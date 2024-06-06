@@ -1267,7 +1267,7 @@
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"గేమ్‌ను ఎంచుకోండి"</string>
     <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"మెరుగైన పనితీరు పొందడానికి, ఈ గేమ్‌లలో ఒకసారికి ఒక్కటి మాత్రమే తెరవగలరు."</string>
     <string name="old_app_action" msgid="725331621042848590">"<xliff:g id="OLD_APP">%1$s</xliff:g>కి తిరిగి వెళ్లు"</string>
-    <string name="new_app_action" msgid="547772182913269801">"<xliff:g id="NEW_APP">%1$s</xliff:g>ని తెరువు"</string>
+    <string name="new_app_action" msgid="547772182913269801">"<xliff:g id="NEW_APP">%1$s</xliff:g>‌ను తెరవండి"</string>
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> సేవ్ చేయకుండానే మూసివేయబడుతుంది"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> మెమరీ పరిమితిని మించిపోయింది"</string>
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> హీప్ డంప్ సిద్ధంగా ఉంది"</string>
