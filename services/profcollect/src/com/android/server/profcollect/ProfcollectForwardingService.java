@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
@@ -258,6 +259,7 @@ public final class ProfcollectForwardingService extends SystemService {
         BackgroundThread.get().getThreadHandler().post(
                 () -> {
                     registerAppLaunchObserver();
+                    registerCameraOpenObserver();
                     registerDex2oatObserver();
                     registerOTAObserver();
                 });
@@ -370,5 +372,38 @@ public final class ProfcollectForwardingService extends SystemService {
                     .putExtra("filename", reportName);
             pfs.getContext().sendBroadcast(intent);
         });
+    }
+
+    private void registerCameraOpenObserver() {
+        CameraManager cm = getContext().getSystemService(CameraManager.class);
+        cm.registerAvailabilityCallback(new CameraManager.AvailabilityCallback() {
+            @Override
+            public void onCameraOpened(String cameraId, String packageId) {
+                Log.d(LOG_TAG, "Received camera open event from: " + packageId);
+                // Skip face auth and Android System Intelligence, since they trigger way too
+                // often.
+                if (packageId.startsWith("client.pid")
+                        || packageId.equals("com.google.android.as")) {
+                    return;
+                }
+                // Sample for a fraction of camera events.
+                final int traceFrequency =
+                        DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
+                        "camera_trace_freq", 10);
+                int randomNum = ThreadLocalRandom.current().nextInt(100);
+                if (randomNum >= traceFrequency) {
+                    return;
+                }
+                BackgroundThread.get().getThreadHandler().post(() -> {
+                    try {
+                        // Wait for a short time before starting tracing.
+                        Thread.sleep(1000);
+                        mIProfcollect.trace_once("camera");
+                    } catch (RemoteException | InterruptedException e) {
+                        Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
+                    }
+                });
+            }
+        }, null);
     }
 }
