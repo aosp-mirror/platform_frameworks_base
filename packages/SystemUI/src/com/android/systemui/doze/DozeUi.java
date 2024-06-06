@@ -18,6 +18,7 @@ package com.android.systemui.doze;
 
 import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
+import static com.android.systemui.Flags.dozeuiSchedulingAlarmsBackgroundExecution;
 
 import android.app.AlarmManager;
 import android.content.Context;
@@ -70,6 +71,7 @@ public class DozeUi implements DozeMachine.Part {
     @Inject
     public DozeUi(Context context, AlarmManager alarmManager,
             WakeLock wakeLock, DozeHost host, @Main Handler handler,
+            @Background Handler bgHandler,
             DozeParameters params,
             @Background DelayableExecutor bgExecutor,
             DozeLog dozeLog) {
@@ -80,7 +82,13 @@ public class DozeUi implements DozeMachine.Part {
         mBgExecutor = bgExecutor;
         mCanAnimateTransition = !params.getDisplayNeedsBlanking();
         mDozeParameters = params;
-        mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick", handler);
+        if (dozeuiSchedulingAlarmsBackgroundExecution()) {
+            mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick",
+                    bgHandler);
+        } else {
+            mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick",
+                    handler);
+        }
         mDozeLog = dozeLog;
     }
 
