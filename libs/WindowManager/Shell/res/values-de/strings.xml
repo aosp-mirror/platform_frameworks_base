@@ -48,8 +48,8 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"50 % oben"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"30 % oben"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Vollbild unten"</string>
-    <string name="accessibility_split_left" msgid="1713683765575562458">"Links teilen"</string>
-    <string name="accessibility_split_right" msgid="8441001008181296837">"Rechts teilen"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Links positionieren"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Rechts positionieren"</string>
     <string name="accessibility_split_top" msgid="2789329702027147146">"Oben teilen"</string>
     <string name="accessibility_split_bottom" msgid="8694551025220868191">"Unten teilen"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Einhandmodus wird verwendet"</string>
