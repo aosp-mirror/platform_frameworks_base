@@ -93,7 +93,7 @@ class TraceurMessageSender @Inject constructor(@Background private val backgroun
     }
 
     @WorkerThread
-    fun startTracing(traceType: PresetTraceType?) {
+    fun startTracing(traceType: PresetTraceType) {
         val data =
             Bundle().apply { putSerializable(MessageConstants.INTENT_EXTRA_TRACE_TYPE, traceType) }
         notifyTraceur(MessageConstants.START_WHAT, data)
