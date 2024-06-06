@@ -265,6 +265,8 @@ cc_defaults {
     cppflags: ["-Wno-conversion-null"],
 
     srcs: [
+        "apex/android_bitmap.cpp",
+        "apex/android_canvas.cpp",
         "apex/android_matrix.cpp",
         "apex/android_paint.cpp",
         "apex/android_region.cpp",
@@ -275,8 +277,6 @@ cc_defaults {
     target: {
         android: {
             srcs: [ // sources that depend on android only libraries
-                "apex/android_bitmap.cpp",
-                "apex/android_canvas.cpp",
                 "apex/jni_runtime.cpp",
                 "apex/renderthread.cpp",
             ],

@@ -96,7 +96,7 @@ CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
     }
     return nullptr;
 #else
-    return new CanvasContext(thread, translucent, rootRenderNode, nullptr,
+    return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
                              std::make_unique<skiapipeline::SkiaHostPipeline>(thread));
 #endif
 }
@@ -129,8 +129,8 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
         : mRenderThread(thread)
         , mGenerationID(0)
         , mOpaque(!translucent)
-#ifdef __ANDROID__  // Layoutlib does not support Animations, Profiling, DeviceInfo
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
+#ifdef __ANDROID__  // Layoutlib does not support Profiling, DeviceInfo
         , mJankTracker(&thread.globalProfileData())
         , mProfiler(mJankTracker.frames(), thread.timeLord().frameIntervalNanos())
 #endif
@@ -169,9 +169,7 @@ void CanvasContext::destroy() {
     setSurfaceControl(nullptr);
     freePrefetchedLayers();
     destroyHardwareResources();
-#ifdef __ANDROID__  // Layoutlib does not support Animations
     mAnimationContext->destroy();
-#endif
 }
 
 static void setBufferCount(ANativeWindow* window) {
@@ -215,6 +213,7 @@ void CanvasContext::setSurfaceControl(ASurfaceControl* surfaceControl) {
         setASurfaceTransactionCallback(nullptr);
         setPrepareSurfaceControlForWebviewCallback(nullptr);
     }
+
     if (mSurfaceControl != nullptr) {
         funcs.unregisterListenerFunc(this, &onSurfaceStatsAvailable);
         funcs.releaseFunc(mSurfaceControl);
@@ -388,9 +387,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
     info.damageGenerationId = mDamageId++;
     info.out.canDrawThisFrame = true;
 
-#ifdef __ANDROID__  // Layoutlib does not support Animation
     mAnimationContext->startFrame(info.mode);
-#endif
     for (const sp<RenderNode>& node : mRenderNodes) {
         // Only the primary target node will be drawn full - all other nodes would get drawn in
         // real time mode. In case of a window, the primary node is the window content and the other
@@ -401,8 +398,8 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
         GL_CHECKPOINT(MODERATE);
 #endif
     }
-#ifdef __ANDROID__  // Layoutlib does not support Animation, GPU
     mAnimationContext->runRemainingAnimations(info);
+#ifdef __ANDROID__  // Layoutlib does not support GPU
     GL_CHECKPOINT(MODERATE);
 
     freePrefetchedLayers();
@@ -440,7 +437,6 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
         info.out.canDrawThisFrame = false;
     }
 
-#ifdef __ANDROID__  // Layoutlib does not support Frame Callbacks
     if (info.out.canDrawThisFrame) {
         int err = mNativeSurface->reserveNext();
         if (err != OK) {
@@ -486,15 +482,12 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
             });
         }
     }
-#endif
 }
 
 void CanvasContext::stopDrawing() {
     cleanupResources();
     mRenderThread.removeFrameCallback(this);
-#ifdef __ANDROID__  // Layoutlib does not support Animation
     mAnimationContext->pauseAnimators();
-#endif
     mGenerationID++;
 }
 
@@ -695,9 +688,12 @@ void CanvasContext::cleanupResources() {
 
 void CanvasContext::reportMetricsWithPresentTime() {
 #ifdef __ANDROID__  // Layoutlib does not support FrameMetrics
-    if (mFrameMetricsReporter == nullptr) {
-        return;
-    }
+    {               // acquire lock
+        std::scoped_lock lock(mFrameMetricsReporterMutex);
+        if (mFrameMetricsReporter == nullptr) {
+            return;
+        }
+    }  // release lock
     if (mNativeSurface == nullptr) {
         return;
     }
@@ -723,8 +719,25 @@ void CanvasContext::reportMetricsWithPresentTime() {
             nullptr /*outReleaseTime*/);
 
     forthBehind->set(FrameInfoIndex::DisplayPresentTime) = presentTime;
-    mFrameMetricsReporter->reportFrameMetrics(forthBehind->data(), true /*hasPresentTime*/);
+    {  // acquire lock
+        std::scoped_lock lock(mFrameMetricsReporterMutex);
+        if (mFrameMetricsReporter != nullptr) {
+            mFrameMetricsReporter->reportFrameMetrics(forthBehind->data(), true /*hasPresentTime*/);
+        }
+    }  // release lock
 #endif
+}
+
+FrameInfo* CanvasContext::getFrameInfoFromLast4(uint64_t frameNumber) {
+#ifdef __ANDROID__  // Layoutlib does not support Profiling
+    std::scoped_lock lock(mLast4FrameInfosMutex);
+    for (size_t i = 0; i < mLast4FrameInfos.size(); i++) {
+        if (mLast4FrameInfos[i].second == frameNumber) {
+            return mLast4FrameInfos[i].first;
+        }
+    }
+#endif
+    return nullptr;
 }
 
 void CanvasContext::onSurfaceStatsAvailable(void* context, ASurfaceControl* control,

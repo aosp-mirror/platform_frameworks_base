@@ -283,7 +283,6 @@ enum class CopyResult {
 
 class RenderThread {
     PREVENT_COPY_AND_ASSIGN(RenderThread);
-
 public:
     static void setOnStartHook(JVMAttachHook onStartHook) {}
 
@@ -309,6 +308,11 @@ public:
     template <class F>
     void postAt(nsecs_t time, F&& func) {
         func();
+    }
+
+    template <class F>
+    void postDelayed(nsecs_t delay, F&& func) {
+        // We cannot do a delayed function call, let it be a noop as for now
     }
 
     template <class F>
