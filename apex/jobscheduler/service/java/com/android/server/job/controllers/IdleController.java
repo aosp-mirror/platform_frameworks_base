@@ -48,6 +48,7 @@ public final class IdleController extends RestrictingController implements Idlen
     private static final String TAG = "JobScheduler.IdleController";
     // Policy: we decide that we're "idle" if the device has been unused /
     // screen off or dreaming or wireless charging dock idle for at least this long
+    @GuardedBy("mLock")
     final ArraySet<JobStatus> mTrackedTasks = new ArraySet<>();
     IdlenessTracker mIdleTracker;
     private final FlexibilityController mFlexibilityController;
@@ -118,8 +119,10 @@ public final class IdleController extends RestrictingController implements Idlen
             for (int i = mTrackedTasks.size()-1; i >= 0; i--) {
                 mTrackedTasks.valueAt(i).setIdleConstraintSatisfied(nowElapsed, isIdle);
             }
+            if (!mTrackedTasks.isEmpty()) {
+                mStateChangedListener.onControllerStateChanged(mTrackedTasks);
+            }
         }
-        mStateChangedListener.onControllerStateChanged(mTrackedTasks);
     }
 
     /**

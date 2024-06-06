@@ -923,6 +923,8 @@ public class AccessibilityManagerServiceTest {
         ResolveInfo resolveInfo1 = installedService1.getResolveInfo();
         AccessibilityServiceInfo installedService2 =
                 mA11yms.getCurrentUserState().mInstalledServices.getLast();
+        // Invokes client change to trigger onUserStateChanged.
+        mA11yms.onClientChangeLocked(false);
 
         // Disables `installedService2`
         when(mMockPackageManager.queryIntentServicesAsUser(any(), anyInt(), anyInt()))

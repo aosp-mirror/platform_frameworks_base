@@ -2684,35 +2684,39 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>Flash strength level to be used when manual flash control is active.</p>
      * <p>Flash strength level to use in capture mode i.e. when the applications control
      * flash with either SINGLE or TORCH mode.</p>
-     * <p>Use android.flash.info.singleStrengthMaxLevel and
-     * android.flash.info.torchStrengthMaxLevel to check whether the device supports
+     * <p>Use {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} and
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} to check whether the device supports
      * flash strength control or not.
      * If the values of android.flash.info.singleStrengthMaxLevel and
-     * android.flash.info.torchStrengthMaxLevel are greater than 1,
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} are greater than 1,
      * then the device supports manual flash strength control.</p>
      * <p>If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> TORCH the value must be &gt;= 1
-     * and &lt;= android.flash.info.torchStrengthMaxLevel.
+     * and &lt;= {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel}.
      * If the application doesn't set the key and
-     * android.flash.info.torchStrengthMaxLevel &gt; 1,
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} &gt; 1,
      * then the flash will be fired at the default level set by HAL in
-     * android.flash.info.torchStrengthDefaultLevel.
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_DEFAULT_LEVEL android.flash.torchStrengthDefaultLevel}.
      * If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> SINGLE, then the value must be &gt;= 1
-     * and &lt;= android.flash.info.singleStrengthMaxLevel.
+     * and &lt;= {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel}.
      * If the application does not set this key and
-     * android.flash.info.singleStrengthMaxLevel &gt; 1,
+     * {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} &gt; 1,
      * then the flash will be fired at the default level set by HAL
-     * in android.flash.info.singleStrengthDefaultLevel.
+     * in {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_DEFAULT_LEVEL android.flash.singleStrengthDefaultLevel}.
      * If {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to any of ON_AUTO_FLASH, ON_ALWAYS_FLASH,
      * ON_AUTO_FLASH_REDEYE, ON_EXTERNAL_FLASH values, then the strengthLevel will be ignored.</p>
      * <p><b>Range of valid values:</b><br>
-     * <code>[1-android.flash.info.torchStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
+     * <code>[1-{@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel}]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
      * set to TORCH;
-     * <code>[1-android.flash.info.singleStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
+     * <code>[1-{@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel}]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
      * set to SINGLE</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#FLASH_MODE
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_DEFAULT_LEVEL
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_DEFAULT_LEVEL
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL
      */
     @PublicKey
     @NonNull

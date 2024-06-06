@@ -44,7 +44,7 @@ public class FakeGlobalSettings implements GlobalSettings {
     }
 
     @Override
-    public void registerContentObserver(Uri uri, boolean notifyDescendants,
+    public void registerContentObserverSync(Uri uri, boolean notifyDescendants,
             ContentObserver settingsObserver) {
         List<ContentObserver> observers;
         mContentObserversAllUsers.putIfAbsent(uri.toString(), new ArrayList<>());
@@ -53,7 +53,7 @@ public class FakeGlobalSettings implements GlobalSettings {
     }
 
     @Override
-    public void unregisterContentObserver(ContentObserver settingsObserver) {
+    public void unregisterContentObserverSync(ContentObserver settingsObserver) {
         for (Map.Entry<String, List<ContentObserver>> entry :
                 mContentObserversAllUsers.entrySet()) {
             entry.getValue().remove(settingsObserver);

@@ -20,6 +20,7 @@ import com.android.asllib.marshallable.AndroidSafetyLabelTest;
 import com.android.asllib.marshallable.AppInfoTest;
 import com.android.asllib.marshallable.DataCategoryTest;
 import com.android.asllib.marshallable.DataLabelsTest;
+import com.android.asllib.marshallable.DataTypeEqualityTest;
 import com.android.asllib.marshallable.DeveloperInfoTest;
 import com.android.asllib.marshallable.SafetyLabelsTest;
 import com.android.asllib.marshallable.SecurityLabelsTest;
@@ -37,6 +38,7 @@ import org.junit.runners.Suite;
     AppInfoTest.class,
     DataCategoryTest.class,
     DataLabelsTest.class,
+    DataTypeEqualityTest.class,
     DeveloperInfoTest.class,
     SafetyLabelsTest.class,
     SecurityLabelsTest.class,

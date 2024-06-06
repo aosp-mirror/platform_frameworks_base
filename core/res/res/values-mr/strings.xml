@@ -201,10 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"तुमचे कार्य प्रोफाइल आता या डिव्हाइसवर उपलब्‍ध नाही"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"बर्‍याचदा पासवर्ड टाकण्‍याचा प्रयत्‍न केला"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"वैयक्तिक वापरासाठी ॲडमिनने नियंत्रण सोडलेले डिव्हाइस"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"खाजगी स्पेस काढून टाकली आहे"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"तुमची संस्था या व्यवस्थापित केलेल्या डिव्हाइसवर खाजगी स्पेसना अनुमती देत नाही."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"डिव्हाइस व्यवस्थापित केले आहे"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"तुमची संस्था हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे निरीक्षण करू शकते. तपशीलांसाठी टॅप करा."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ॲप्स तुमचे स्थान अ‍ॅक्सेस करू शकतात"</string>
@@ -2198,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad डावीकडील"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad चे उजवीकडील"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad चे मधले"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> चा शीर्षक बार."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> हे प्रतिबंधित बादलीमध्ये ठेवण्यात आले आहे"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"इमेज पाठवली आहे"</string>

@@ -79,12 +79,12 @@ class VotesStorage {
     }
 
     /** updates vote storage for all displays */
-    void updateGlobalVote(int priority, @Nullable Vote vote) {
+    void updateGlobalVote(@Vote.Priority int priority, @Nullable Vote vote) {
         updateVote(GLOBAL_ID, priority, vote);
     }
 
     /** updates vote storage */
-    void updateVote(int displayId, int priority, @Nullable Vote vote) {
+    void updateVote(int displayId, @Vote.Priority int priority, @Nullable Vote vote) {
         if (mLoggingEnabled) {
             Slog.i(TAG, "updateVoteLocked(displayId=" + displayId
                     + ", priority=" + Vote.priorityToString(priority)
@@ -126,7 +126,7 @@ class VotesStorage {
     }
 
     /** removes all votes with certain priority from vote storage */
-    void removeAllVotesForPriority(int priority) {
+    void removeAllVotesForPriority(@Vote.Priority int priority) {
         if (mLoggingEnabled) {
             Slog.i(TAG, "removeAllVotesForPriority(priority="
                     + Vote.priorityToString(priority) + ")");

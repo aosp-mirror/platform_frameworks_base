@@ -295,7 +295,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             val targets = listOf(target1, target2, target3)
             smartspaceRepository.setCommunalSmartspaceTargets(targets)
 
-            val smartspaceContent by collectLastValue(underTest.ongoingContent)
+            val smartspaceContent by collectLastValue(underTest.getOngoingContent(true))
             assertThat(smartspaceContent?.size).isEqualTo(1)
             assertThat(smartspaceContent?.get(0)?.key)
                 .isEqualTo(CommunalContentModel.KEY.smartspace("target3"))
@@ -393,7 +393,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             smartspaceRepository.setCommunalSmartspaceTargets(targets)
 
-            val smartspaceContent by collectLastValue(underTest.ongoingContent)
+            val smartspaceContent by collectLastValue(underTest.getOngoingContent(true))
             assertThat(smartspaceContent?.size).isEqualTo(totalTargets)
             for (index in 0 until totalTargets) {
                 assertThat(smartspaceContent?.get(index)?.size).isEqualTo(expectedSizes[index])
@@ -409,11 +409,25 @@ class CommunalInteractorTest : SysuiTestCase() {
             // Media is playing.
             mediaRepository.mediaActive()
 
-            val umoContent by collectLastValue(underTest.ongoingContent)
+            val umoContent by collectLastValue(underTest.getOngoingContent(true))
 
             assertThat(umoContent?.size).isEqualTo(1)
             assertThat(umoContent?.get(0)).isInstanceOf(CommunalContentModel.Umo::class.java)
             assertThat(umoContent?.get(0)?.key).isEqualTo(CommunalContentModel.KEY.umo())
+        }
+
+    @Test
+    fun umo_mediaPlaying_doNotShowUmo() =
+        testScope.run {
+            // Tutorial completed.
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+
+            // Media is playing.
+            mediaRepository.mediaActive()
+
+            val umoContent by collectLastValue(underTest.getOngoingContent(false))
+
+            assertThat(umoContent?.size).isEqualTo(0)
         }
 
     @Test
@@ -439,7 +453,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             val timer3 = smartspaceTimer("timer3", timestamp = 4L)
             smartspaceRepository.setCommunalSmartspaceTargets(listOf(timer1, timer2, timer3))
 
-            val ongoingContent by collectLastValue(underTest.ongoingContent)
+            val ongoingContent by collectLastValue(underTest.getOngoingContent(true))
             assertThat(ongoingContent?.size).isEqualTo(4)
             assertThat(ongoingContent?.get(0)?.key)
                 .isEqualTo(CommunalContentModel.KEY.smartspace("timer3"))

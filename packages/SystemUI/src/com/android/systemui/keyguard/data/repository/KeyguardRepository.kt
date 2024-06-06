@@ -183,7 +183,7 @@ interface KeyguardRepository {
     val statusBarState: StateFlow<StatusBarState>
 
     /** Observable for biometric unlock state which includes the mode and unlock source */
-    val biometricUnlockState: Flow<BiometricUnlockModel>
+    val biometricUnlockState: StateFlow<BiometricUnlockModel>
 
     fun setBiometricUnlockState(
         unlockMode: BiometricUnlockMode,
@@ -307,17 +307,20 @@ constructor(
     private val _dismissAction: MutableStateFlow<DismissAction> =
         MutableStateFlow(DismissAction.None)
     override val dismissAction = _dismissAction.asStateFlow()
+
     override fun setDismissAction(dismissAction: DismissAction) {
         _dismissAction.value = dismissAction
     }
 
     private val _keyguardDone: MutableSharedFlow<KeyguardDone> = MutableSharedFlow()
     override val keyguardDone = _keyguardDone.asSharedFlow()
+
     override suspend fun setKeyguardDone(keyguardDoneType: KeyguardDone) {
         _keyguardDone.emit(keyguardDoneType)
     }
 
     override val keyguardDoneAnimationsFinished: MutableSharedFlow<Unit> = MutableSharedFlow()
+
     override fun keyguardDoneAnimationsFinished() {
         keyguardDoneAnimationsFinished.tryEmit(Unit)
     }
@@ -490,6 +493,7 @@ constructor(
                         override fun onStartDream() {
                             trySendWithFailureLogging(true, TAG, "updated isDreamingWithOverlay")
                         }
+
                         override fun onWakeUp() {
                             trySendWithFailureLogging(false, TAG, "updated isDreamingWithOverlay")
                         }
@@ -618,7 +622,8 @@ constructor(
 
     private val _biometricUnlockState: MutableStateFlow<BiometricUnlockModel> =
         MutableStateFlow(BiometricUnlockModel(BiometricUnlockMode.NONE, null))
-    override val biometricUnlockState = _biometricUnlockState.asStateFlow()
+    override val biometricUnlockState: StateFlow<BiometricUnlockModel> =
+        _biometricUnlockState.asStateFlow()
 
     override fun setBiometricUnlockState(
         unlockMode: BiometricUnlockMode,

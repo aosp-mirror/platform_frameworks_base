@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.mediaoutput.data.repository
 
 import com.android.settingslib.volume.data.repository.LocalMediaRepository
+import kotlinx.coroutines.CoroutineScope
 
 class FakeLocalMediaRepositoryFactory(private val defaultProvider: () -> LocalMediaRepository) :
     LocalMediaRepositoryFactory {
@@ -27,6 +28,8 @@ class FakeLocalMediaRepositoryFactory(private val defaultProvider: () -> LocalMe
         repositories[packageName] = localMediaRepository
     }
 
-    override fun create(packageName: String?): LocalMediaRepository =
-        repositories[packageName] ?: defaultProvider()
+    override fun create(
+        packageName: String?,
+        coroutineScope: CoroutineScope
+    ): LocalMediaRepository = repositories[packageName] ?: defaultProvider()
 }

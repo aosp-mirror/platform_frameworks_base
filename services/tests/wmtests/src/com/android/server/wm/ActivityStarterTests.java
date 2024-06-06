@@ -416,9 +416,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn("packageName").when(mMockPackageManager).getNameForUid(anyInt());
         doReturn(false).when(mMockPackageManager).isInstantAppInstallerComponent(any());
         doReturn(null).when(mMockPackageManager).resolveIntent(any(), any(), anyLong(), anyLong(),
-                anyInt(), anyBoolean(), anyInt());
-        doReturn(null).when(mMockPackageManager).resolveIntentExported(any(), any(),
-                anyLong(), anyLong(), anyInt(), anyBoolean(), anyInt(), anyInt());
+                anyInt(), anyBoolean(), anyInt(), anyInt());
         doReturn(new ComponentName("", "")).when(mMockPackageManager).getSystemUiServiceComponent();
 
         // Never review permissions

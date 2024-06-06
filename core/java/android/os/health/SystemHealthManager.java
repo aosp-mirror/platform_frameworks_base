@@ -33,13 +33,16 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.SynchronousResultReceiver;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.server.power.optimization.Flags;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -67,6 +70,14 @@ public class SystemHealthManager {
     private final IPowerStatsService mPowerStats;
     private List<PowerMonitor> mPowerMonitorsInfo;
     private final Object mPowerMonitorsLock = new Object();
+    private static final long TAKE_UID_SNAPSHOT_TIMEOUT_MILLIS = 10_000;
+
+    private static class PendingUidSnapshots {
+        public int[] uids;
+        public SynchronousResultReceiver resultReceiver;
+    }
+
+    private final PendingUidSnapshots mPendingUidSnapshots = new PendingUidSnapshots();
 
     /**
      * Construct a new SystemHealthManager object.
@@ -111,12 +122,19 @@ public class SystemHealthManager {
      * @see Process#myUid() Process.myUid()
      */
     public HealthStats takeUidSnapshot(int uid) {
-        try {
-            final HealthStatsParceler parceler = mBatteryStats.takeUidSnapshot(uid);
-            return parceler.getHealthStats();
-        } catch (RemoteException ex) {
-            throw new RuntimeException(ex);
+        if (!Flags.onewayBatteryStatsService()) {
+            try {
+                final HealthStatsParceler parceler = mBatteryStats.takeUidSnapshot(uid);
+                return parceler.getHealthStats();
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
+            }
         }
+        final HealthStats[] result = takeUidSnapshots(new int[]{uid});
+        if (result != null && result.length >= 1) {
+            return result[0];
+        }
+        return null;
     }
 
     /**
@@ -144,17 +162,61 @@ public class SystemHealthManager {
      * other than its own.
      */
     public HealthStats[] takeUidSnapshots(int[] uids) {
-        try {
-            final HealthStatsParceler[] parcelers = mBatteryStats.takeUidSnapshots(uids);
-            final HealthStats[] results = new HealthStats[uids.length];
-            final int N = uids.length;
-            for (int i = 0; i < N; i++) {
-                results[i] = parcelers[i].getHealthStats();
+        if (!Flags.onewayBatteryStatsService()) {
+            try {
+                final HealthStatsParceler[] parcelers = mBatteryStats.takeUidSnapshots(uids);
+                final int count = uids.length;
+                final HealthStats[] results = new HealthStats[count];
+                for (int i = 0; i < count; i++) {
+                    results[i] = parcelers[i].getHealthStats();
+                }
+                return results;
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
             }
-            return results;
-        } catch (RemoteException ex) {
-            throw new RuntimeException(ex);
         }
+
+        SynchronousResultReceiver resultReceiver;
+        synchronized (mPendingUidSnapshots) {
+            if (Arrays.equals(mPendingUidSnapshots.uids, uids)) {
+                resultReceiver = mPendingUidSnapshots.resultReceiver;
+            } else {
+                mPendingUidSnapshots.uids = Arrays.copyOf(uids, uids.length);
+                mPendingUidSnapshots.resultReceiver = resultReceiver =
+                        new SynchronousResultReceiver("takeUidSnapshots");
+                try {
+                    mBatteryStats.takeUidSnapshotsAsync(uids, resultReceiver);
+                } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
+                }
+            }
+        }
+
+        SynchronousResultReceiver.Result result;
+        try {
+            result = resultReceiver.awaitResult(TAKE_UID_SNAPSHOT_TIMEOUT_MILLIS);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        } finally {
+            synchronized (mPendingUidSnapshots) {
+                if (mPendingUidSnapshots.resultReceiver == resultReceiver) {
+                    mPendingUidSnapshots.uids = null;
+                    mPendingUidSnapshots.resultReceiver = null;
+                }
+            }
+        }
+
+        final HealthStats[] results = new HealthStats[uids.length];
+        if (result.bundle != null) {
+            HealthStatsParceler[] parcelers = result.bundle.getParcelableArray(
+                    IBatteryStats.KEY_UID_SNAPSHOTS, HealthStatsParceler.class);
+            if (parcelers != null && parcelers.length == uids.length) {
+                for (int i = 0; i < parcelers.length; i++) {
+                    results[i] = parcelers[i].getHealthStats();
+                }
+            }
+        }
+        return results;
     }
 
     /**

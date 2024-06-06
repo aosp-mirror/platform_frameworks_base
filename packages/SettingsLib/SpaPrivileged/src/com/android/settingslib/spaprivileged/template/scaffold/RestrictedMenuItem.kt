@@ -30,22 +30,24 @@ import com.android.settingslib.spaprivileged.model.enterprise.rememberRestricted
 @Composable
 fun MoreOptionsScope.RestrictedMenuItem(
     text: String,
+    enabled: Boolean = true,
     restrictions: Restrictions,
     onClick: () -> Unit,
 ) {
-    RestrictedMenuItemImpl(text, restrictions, onClick, ::RestrictionsProviderImpl)
+    RestrictedMenuItemImpl(text, enabled, restrictions, onClick, ::RestrictionsProviderImpl)
 }
 
 @VisibleForTesting
 @Composable
 internal fun MoreOptionsScope.RestrictedMenuItemImpl(
     text: String,
+    enabled: Boolean = true,
     restrictions: Restrictions,
     onClick: () -> Unit,
     restrictionsProviderFactory: RestrictionsProviderFactory,
 ) {
     val restrictedMode = restrictionsProviderFactory.rememberRestrictedMode(restrictions).value
-    MenuItem(text = text, enabled = restrictedMode !== BaseUserRestricted) {
+    MenuItem(text = text, enabled = enabled && restrictedMode !== BaseUserRestricted) {
         when (restrictedMode) {
             is BlockedByAdmin -> restrictedMode.sendShowAdminSupportDetailsIntent()
             is BlockedByEcm -> restrictedMode.showRestrictedSettingsDetails()

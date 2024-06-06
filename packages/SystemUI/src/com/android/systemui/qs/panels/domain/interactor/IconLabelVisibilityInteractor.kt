@@ -20,7 +20,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.qs.panels.data.repository.IconLabelVisibilityRepository
 import com.android.systemui.qs.panels.shared.model.IconLabelVisibilityLog
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -33,17 +32,17 @@ import kotlinx.coroutines.flow.stateIn
 class IconLabelVisibilityInteractor
 @Inject
 constructor(
-    private val repo: IconLabelVisibilityRepository,
+    private val preferencesInteractor: QSPreferencesInteractor,
     @IconLabelVisibilityLog private val logBuffer: LogBuffer,
     @Application scope: CoroutineScope,
 ) {
     val showLabels: StateFlow<Boolean> =
-        repo.showLabels
+        preferencesInteractor.showLabels
             .onEach { logChange(it) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), repo.showLabels.value)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     fun setShowLabels(showLabels: Boolean) {
-        repo.setShowLabels(showLabels)
+        preferencesInteractor.setShowLabels(showLabels)
     }
 
     private fun logChange(showLabels: Boolean) {

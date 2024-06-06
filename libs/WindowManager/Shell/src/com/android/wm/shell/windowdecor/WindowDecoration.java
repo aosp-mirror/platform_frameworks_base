@@ -22,6 +22,7 @@ import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -51,10 +52,12 @@ import android.window.TaskConstants;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams.OccludingCaptionElement;
+import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -401,7 +404,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mCaptionWindowManager.setConfiguration(taskConfig);
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(outResult.mCaptionWidth, outResult.mCaptionHeight,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
         lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
@@ -568,10 +571,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * @param yPos         y position of new window
      * @param width        width of new window
      * @param height       height of new window
-     * @return the {@link AdditionalWindow} that was added.
+     * @return the {@link AdditionalViewHostViewContainer} that was added.
      */
-    AdditionalWindow addWindow(int layoutId, String namePrefix, SurfaceControl.Transaction t,
-            SurfaceSyncGroup ssg, int xPos, int yPos, int width, int height) {
+    AdditionalViewHostViewContainer addWindow(int layoutId, String namePrefix,
+            SurfaceControl.Transaction t, SurfaceSyncGroup ssg, int xPos, int yPos,
+            int width, int height) {
         final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
         SurfaceControl windowSurfaceControl = builder
                 .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
@@ -585,9 +589,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .setWindowCrop(windowSurfaceControl, width, height)
                 .show(windowSurfaceControl);
         final WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(width, height,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
+                new WindowManager.LayoutParams(width, height, TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSPARENT);
         lp.setTitle("Additional window of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
         WindowlessWindowManager windowManager = new WindowlessWindowManager(mTaskInfo.configuration,
@@ -595,7 +599,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         SurfaceControlViewHost viewHost = mSurfaceControlViewHostFactory
                 .create(mDecorWindowContext, mDisplay, windowManager);
         ssg.add(viewHost.getSurfacePackage(), () -> viewHost.setView(v, lp));
-        return new AdditionalWindow(windowSurfaceControl, viewHost,
+        return new AdditionalViewHostViewContainer(windowSurfaceControl, viewHost,
                 mSurfaceControlTransactionSupplier);
     }
 
@@ -687,7 +691,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
     }
 
-    interface SurfaceControlViewHostFactory {
+    @VisibleForTesting
+    public interface SurfaceControlViewHostFactory {
         default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
             return new SurfaceControlViewHost(c, d, wmm, "WindowDecoration");
         }
@@ -735,43 +740,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         @Override
         public int hashCode() {
             return Objects.hash(mToken, mOwner, mFrame, Arrays.hashCode(mBoundingRects));
-        }
-    }
-
-    /**
-     * Subclass for additional windows associated with this WindowDecoration
-     */
-    static class AdditionalWindow {
-        SurfaceControl mWindowSurface;
-        SurfaceControlViewHost mWindowViewHost;
-        Supplier<SurfaceControl.Transaction> mTransactionSupplier;
-
-        AdditionalWindow(SurfaceControl surfaceControl,
-                SurfaceControlViewHost surfaceControlViewHost,
-                Supplier<SurfaceControl.Transaction> transactionSupplier) {
-            mWindowSurface = surfaceControl;
-            mWindowViewHost = surfaceControlViewHost;
-            mTransactionSupplier = transactionSupplier;
-        }
-
-        void releaseView() {
-            WindowlessWindowManager windowManager = mWindowViewHost.getWindowlessWM();
-
-            if (mWindowViewHost != null) {
-                mWindowViewHost.release();
-                mWindowViewHost = null;
-            }
-            windowManager = null;
-            final SurfaceControl.Transaction t = mTransactionSupplier.get();
-            boolean released = false;
-            if (mWindowSurface != null) {
-                t.remove(mWindowSurface);
-                mWindowSurface = null;
-                released = true;
-            }
-            if (released) {
-                t.apply();
-            }
         }
     }
 }

@@ -148,9 +148,9 @@ internal class DraggableHandlerImpl(
         val swipes = computeSwipes(fromScene, startedPosition, pointersDown)
         val result =
             swipes.findUserActionResult(fromScene, overSlop, true)
-            // As we were unable to locate a valid target scene, the initial SwipeTransition
-            // cannot be defined. Consequently, a simple NoOp Controller will be returned.
-            ?: return NoOpDragController
+                // As we were unable to locate a valid target scene, the initial SwipeTransition
+                // cannot be defined. Consequently, a simple NoOp Controller will be returned.
+                ?: return NoOpDragController
 
         return updateDragController(
             swipes = swipes,
@@ -521,6 +521,7 @@ private fun SwipeTransition(
         }
 
     return SwipeTransition(
+        layoutImpl = layoutImpl,
         layoutState = layoutState,
         coroutineScope = coroutineScope,
         key = result.transitionKey,
@@ -534,6 +535,7 @@ private fun SwipeTransition(
 
 private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
     return SwipeTransition(
+            layoutImpl = old.layoutImpl,
             layoutState = old.layoutState,
             coroutineScope = old.coroutineScope,
             key = old.key,
@@ -550,6 +552,7 @@ private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
 }
 
 private class SwipeTransition(
+    val layoutImpl: SceneTransitionLayoutImpl,
     val layoutState: BaseSceneTransitionLayoutState,
     val coroutineScope: CoroutineScope,
     val key: TransitionKey?,
@@ -607,6 +610,12 @@ private class SwipeTransition(
 
     override val overscrollScope: OverscrollScope =
         object : OverscrollScope {
+            override val density: Float
+                get() = layoutImpl.density.density
+
+            override val fontScale: Float
+                get() = layoutImpl.density.fontScale
+
             override val absoluteDistance: Float
                 get() = distance().absoluteValue
         }
