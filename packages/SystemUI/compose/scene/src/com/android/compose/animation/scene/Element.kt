@@ -39,6 +39,8 @@ import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.TraversableNode
+import androidx.compose.ui.node.traverseDescendants
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
@@ -165,7 +167,7 @@ internal class ElementNode(
     private var currentTransitions: List<TransitionState.Transition>,
     private var scene: Scene,
     private var key: ElementKey,
-) : Modifier.Node(), DrawModifierNode, ApproachLayoutModifierNode {
+) : Modifier.Node(), DrawModifierNode, ApproachLayoutModifierNode, TraversableNode {
     private var _element: Element? = null
     private val element: Element
         get() = _element!!
@@ -173,6 +175,8 @@ internal class ElementNode(
     private var _sceneState: Element.SceneState? = null
     private val sceneState: Element.SceneState
         get() = _sceneState!!
+
+    override val traverseKey: Any = ElementTraverseKey
 
     override fun onAttach() {
         super.onAttach()
@@ -289,9 +293,7 @@ internal class ElementNode(
         val isOtherSceneOverscrolling = overscrollScene != null && overscrollScene != scene.key
         val isNotPartOfAnyOngoingTransitions = transitions.isNotEmpty() && transition == null
         if (isNotPartOfAnyOngoingTransitions || isOtherSceneOverscrolling) {
-            sceneState.lastOffset = Offset.Unspecified
-            sceneState.lastScale = Scale.Unspecified
-            sceneState.lastAlpha = Element.AlphaUnspecified
+            recursivelyClearPlacementValues()
 
             val placeable = measurable.measure(constraints)
             sceneState.lastSize = placeable.size()
@@ -319,9 +321,7 @@ internal class ElementNode(
 
             // No need to place the element in this scene if we don't want to draw it anyways.
             if (!shouldPlaceElement(layoutImpl, scene.key, element, transition)) {
-                sceneState.lastOffset = Offset.Unspecified
-                sceneState.lastScale = Scale.Unspecified
-                sceneState.lastAlpha = Element.AlphaUnspecified
+                recursivelyClearPlacementValues()
                 return
             }
 
@@ -402,6 +402,25 @@ internal class ElementNode(
         }
     }
 
+    /**
+     * Recursively clear the last placement values on this node and all descendants ElementNodes.
+     * This should be called when this node is not placed anymore, so that we correctly clear values
+     * for the descendants for which approachMeasure() won't be called.
+     */
+    private fun recursivelyClearPlacementValues() {
+        fun Element.SceneState.clearLastPlacementValues() {
+            lastOffset = Offset.Unspecified
+            lastScale = Scale.Unspecified
+            lastAlpha = Element.AlphaUnspecified
+        }
+
+        sceneState.clearLastPlacementValues()
+        traverseDescendants(ElementTraverseKey) { node ->
+            (node as ElementNode).sceneState.clearLastPlacementValues()
+            TraversableNode.Companion.TraverseDescendantsAction.ContinueTraversal
+        }
+    }
+
     override fun ContentDrawScope.draw() {
         element.wasDrawnInAnyScene = true
 
@@ -421,6 +440,8 @@ internal class ElementNode(
     }
 
     companion object {
+        private val ElementTraverseKey = Any()
+
         private fun maybePruneMaps(
             layoutImpl: SceneTransitionLayoutImpl,
             element: Element,
