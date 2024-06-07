@@ -938,7 +938,7 @@
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Fechar definições de ampliação"</string>
     <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"Sair do modo de edição"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Arrastar o canto para redimensionar"</string>
-    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permitir deslocamento da página na diagonal"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permitir deslocamento diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Redimensionar"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Alterar tipo de ampliação"</string>
     <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Terminar redimensionamento"</string>

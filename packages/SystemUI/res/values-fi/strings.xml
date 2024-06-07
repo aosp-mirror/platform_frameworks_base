@@ -193,7 +193,7 @@
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Sormenjälkiavauksen määritys epäonnistui. Siirry asetuksiin ja yritä uudelleen."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Ota kasvojentunnistusavaus uudelleen käyttöön"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Kasvojentunnistusavaus"</string>
-    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Kasvojentunnistusavauksen käyttöönotto"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Kasvojen&amp;shy;tunnistus&amp;shy;avauksen käyttöönotto"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Jos haluat ottaa kasvojentunnistusavauksen uudelleen käyttöön, nykyinen kasvomalli poistetaan.\n\nJos haluat avata puhelimen lukituksen kasvoilla, sinun on otettava ominaisuus uudelleen käyttöön."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Kasvojentunnistusavauksen käyttöönotto epäonnistui. Siirry asetuksiin ja yritä uudelleen."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Kosketa sormenjälkitunnistinta"</string>

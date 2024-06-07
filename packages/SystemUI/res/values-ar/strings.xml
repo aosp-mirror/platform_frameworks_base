@@ -582,7 +582,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. انقر للتعيين على الاهتزاز."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. انقر لكتم الصوت."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"التحكُّم في مستوى الضجيج"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"التحكُّم في مستوى الضوضاء"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"انقر لتغيير وضع الرنين."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"كتم الصوت"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"إعادة الصوت"</string>
