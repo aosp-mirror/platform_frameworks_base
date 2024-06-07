@@ -129,10 +129,7 @@ import com.android.server.wm.utils.OptPropFactory.OptProp;
 import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /** Controls behaviour of the letterbox UI for {@link mActivityRecord}. */
 // TODO(b/185262487): Improve test coverage of this class. Parts of it are tested in
@@ -228,10 +225,6 @@ final class LetterboxUiController {
     @NonNull
     private final OptProp mFakeFocusOptProp;
 
-    // TODO(b/336807329) Eventually eemove this dependency when refactoring Reachability.
-    @NonNull
-    private final TransparentPolicy mTransparentPolicy;
-
     private boolean mIsRelaunchingAfterRequestedOrientationChanged;
 
     private boolean mLastShouldShowLetterboxUi;
@@ -245,24 +238,6 @@ final class LetterboxUiController {
         // to use it after since controller is only used in ActivityRecord.
         mActivityRecord = activityRecord;
 
-        mTransparentPolicy = new TransparentPolicy(activityRecord, mLetterboxConfiguration,
-                new Predicate<ActivityRecord>() {
-                    @Override
-                    public boolean test(ActivityRecord opaqueActivity) {
-                        if (opaqueActivity == null || opaqueActivity.isEmbedded()) {
-                            // We skip letterboxing if the translucent activity doesn't have any
-                            // opaque activities beneath or the activity below is embedded which
-                            // never has letterbox.
-                            mActivityRecord.recomputeConfiguration();
-                            return true;
-                        }
-                        if (mActivityRecord.getTask() == null || mActivityRecord.fillsParent()
-                                || mActivityRecord.hasCompatDisplayInsetsWithoutInheritance()) {
-                            return true;
-                        }
-                        return false;
-                    }
-                });
         PackageManager packageManager = wmService.mContext.getPackageManager();
 
         final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
@@ -340,18 +315,13 @@ final class LetterboxUiController {
             mLetterbox.destroy();
             mLetterbox = null;
         }
-        mTransparentPolicy.stop();
+        mActivityRecord.mTransparentPolicy.stop();
     }
 
     void onMovedToDisplay(int displayId) {
         if (mLetterbox != null) {
             mLetterbox.onMovedToDisplay(displayId);
         }
-    }
-
-    @NonNull
-    TransparentPolicy getTransparentPolicy() {
-        return mTransparentPolicy;
     }
 
     /**
@@ -854,7 +824,7 @@ final class LetterboxUiController {
             // For this reason we use ActivityRecord#getBounds() that the translucent activity
             // inherits from the first opaque activity beneath and also takes care of the scaling
             // in case of activities in size compat mode.
-            final Rect innerFrame = hasInheritedLetterboxBehavior()
+            final Rect innerFrame = mActivityRecord.mTransparentPolicy.isRunning()
                     ? mActivityRecord.getBounds() : w.getFrame();
             mLetterbox.layout(spaceToFill, innerFrame, mTmpPoint);
             if (mDoubleTapEvent) {
@@ -1320,10 +1290,9 @@ final class LetterboxUiController {
         }
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
-        final Rect opaqueActivityBounds = hasInheritedLetterboxBehavior()
-                ? getTransparentPolicy().getTransparentPolicyState()
-                    .mFirstOpaqueActivity.getScreenResolvedBounds()
-                : mActivityRecord.getScreenResolvedBounds();
+        final Rect opaqueActivityBounds = mActivityRecord.mTransparentPolicy
+                .getFirstOpaqueActivity().map(ActivityRecord::getScreenResolvedBounds)
+                .orElse(mActivityRecord.getScreenResolvedBounds());
         return mLetterboxConfiguration.getIsHorizontalReachabilityEnabled()
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
@@ -1358,11 +1327,10 @@ final class LetterboxUiController {
             return false;
         }
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
-        // as activity bounds can sometimes be empty
-        final Rect opaqueActivityBounds = hasInheritedLetterboxBehavior()
-                ? getTransparentPolicy().getTransparentPolicyState()
-                    .mFirstOpaqueActivity.getScreenResolvedBounds()
-                : mActivityRecord.getScreenResolvedBounds();
+        // as activity bounds can sometimes be empty.
+        final Rect opaqueActivityBounds = mActivityRecord.mTransparentPolicy
+                .getFirstOpaqueActivity().map(ActivityRecord::getScreenResolvedBounds)
+                .orElse(mActivityRecord.getScreenResolvedBounds());
         return mLetterboxConfiguration.getIsVerticalReachabilityEnabled()
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
@@ -1469,7 +1437,8 @@ final class LetterboxUiController {
         // corners because we assume the specific layout would. This is the case when the layout
         // of the translucent activity uses only a part of all the bounds because of the use of
         // LayoutParams.WRAP_CONTENT.
-        if (hasInheritedLetterboxBehavior() && (cropBounds.width() != mainWindow.mRequestedWidth
+        if (mActivityRecord.mTransparentPolicy.isRunning()
+                && (cropBounds.width() != mainWindow.mRequestedWidth
                 || cropBounds.height() != mainWindow.mRequestedHeight)) {
             return null;
         }
@@ -1771,72 +1740,6 @@ final class LetterboxUiController {
                 letterboxOuterBounds,
                 w.mAttrs.insetsFlags.appearance
         );
-    }
-
-    /**
-     * Handles translucent activities letterboxing inheriting constraints from the
-     * first opaque activity beneath.
-     */
-    void updateInheritedLetterbox() {
-        mTransparentPolicy.start();
-    }
-
-    /**
-     * @return {@code true} if the current activity is translucent with an opaque activity
-     * beneath. In this case it will inherit bounds, orientation and aspect ratios from
-     * the first opaque activity beneath.
-     */
-    boolean hasInheritedLetterboxBehavior() {
-        return mTransparentPolicy.hasInheritedLetterboxBehavior();
-    }
-
-    /**
-     * @return {@code true} if the current activity is translucent with an opaque activity
-     * beneath and needs to inherit its orientation.
-     */
-    boolean hasInheritedOrientation() {
-        return mTransparentPolicy.hasInheritedOrientation();
-    }
-
-    float getInheritedMinAspectRatio() {
-        return mTransparentPolicy.getInheritedMinAspectRatio();
-    }
-
-    float getInheritedMaxAspectRatio() {
-        return mTransparentPolicy.getInheritedMaxAspectRatio();
-    }
-
-    int getInheritedAppCompatState() {
-        return mTransparentPolicy.getInheritedAppCompatState();
-    }
-
-    @Configuration.Orientation
-    int getInheritedOrientation() {
-        return mTransparentPolicy.getInheritedOrientation();
-    }
-
-    ActivityRecord.CompatDisplayInsets getInheritedCompatDisplayInsets() {
-        return mTransparentPolicy.getInheritedCompatDisplayInsets();
-    }
-
-    void clearInheritedCompatDisplayInsets() {
-        mTransparentPolicy.clearInheritedCompatDisplayInsets();
-    }
-
-    /**
-     * In case of translucent activities, it consumes the {@link ActivityRecord} of the first opaque
-     * activity beneath using the given consumer and returns {@code true}.
-     */
-    boolean applyOnOpaqueActivityBelow(@NonNull Consumer<ActivityRecord> consumer) {
-        return mTransparentPolicy.applyOnOpaqueActivityBelow(consumer);
-    }
-
-    /**
-     * @return The first not finishing opaque activity beneath the current translucent activity
-     * if it exists and the strategy is enabled.
-     */
-    Optional<ActivityRecord> findOpaqueNotFinishingActivityBelow() {
-        return mTransparentPolicy.findOpaqueNotFinishingActivityBelow();
     }
 
     @NonNull

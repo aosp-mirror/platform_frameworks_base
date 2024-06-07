@@ -40,6 +40,11 @@ import java.util.function.Predicate;
 
 /**
  * Encapsulate logic about translucent activities.
+ * <p/>
+ * An activity is defined as translucent if {@link ActivityRecord#fillsParent()} returns
+ * {@code false}. When the policy is running for a letterboxed activity, a transparent activity
+ * will inherit constraints about bounds, aspect ratios and orientation from the first not finishing
+ * activity below.
  */
 class TransparentPolicy {
 
@@ -50,30 +55,28 @@ class TransparentPolicy {
     private static final Predicate<ActivityRecord> FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE =
             ActivityRecord::occludesParent;
 
-    // The predicate to check to skip the policy
-    @NonNull
-    private final Predicate<ActivityRecord> mSkipLetterboxPredicate;
-
     // The ActivityRecord this policy relates to.
+    @NonNull
     private final ActivityRecord mActivityRecord;
 
     // If transparent activity policy is enabled.
+    @NonNull
     private final BooleanSupplier mIsTranslucentLetterboxingEnabledSupplier;
 
     // The list of observers for the destroy event of candidate opaque activities
     // when dealing with translucent activities.
+    @NonNull
     private final List<TransparentPolicy> mDestroyListeners = new ArrayList<>();
 
-    // THe current state for the possible transparent activity
+    // The current state for the possible transparent activity
+    @NonNull
     private final TransparentPolicyState mTransparentPolicyState;
 
     TransparentPolicy(@NonNull ActivityRecord activityRecord,
-            @NonNull LetterboxConfiguration letterboxConfiguration,
-            @NonNull Predicate<ActivityRecord> skipLetterboxPredicate) {
+            @NonNull LetterboxConfiguration letterboxConfiguration) {
         mActivityRecord = activityRecord;
-        mIsTranslucentLetterboxingEnabledSupplier = () -> letterboxConfiguration
-                .isTranslucentLetterboxingEnabled();
-        mSkipLetterboxPredicate = skipLetterboxPredicate;
+        mIsTranslucentLetterboxingEnabledSupplier =
+                letterboxConfiguration::isTranslucentLetterboxingEnabled;
         mTransparentPolicyState = new TransparentPolicyState(activityRecord);
     }
 
@@ -98,7 +101,7 @@ class TransparentPolicy {
                 true /* traverseTopToBottom */);
         // We check if we need for some reason to skip the policy gievn the specific first
         // opaque activity
-        if (mSkipLetterboxPredicate.test(firstOpaqueActivity)) {
+        if (shouldSkipTransparentPolicy(firstOpaqueActivity)) {
             return;
         }
         mTransparentPolicyState.start(firstOpaqueActivity);
@@ -112,7 +115,12 @@ class TransparentPolicy {
         mTransparentPolicyState.reset();
     }
 
-    boolean hasInheritedLetterboxBehavior() {
+    /**
+     * @return {@code true} if the current activity is translucent with an opaque activity
+     * beneath and the related policy is running. In this case it will inherit bounds, orientation
+     * and aspect ratios from the first opaque activity beneath.
+     */
+    boolean isRunning() {
         return mTransparentPolicyState.isRunning();
     }
 
@@ -121,35 +129,33 @@ class TransparentPolicy {
      * beneath and needs to inherit its orientation.
      */
     boolean hasInheritedOrientation() {
-        // To force a different orientation, the transparent one needs to have an explicit one
-        // otherwise the existing one is fine and the actual orientation will depend on the
-        // bounds.
-        // To avoid wrong behaviour, we're not forcing orientation for activities with not
-        // fixed orientation (e.g. permission dialogs).
-        return hasInheritedLetterboxBehavior()
+        // To avoid wrong behaviour (e.g. permission dialogs not centered or with wrong size),
+        // transparent activities inherit orientation from the first opaque activity below only if
+        // they explicitly define an orientation different from SCREEN_ORIENTATION_UNSPECIFIED.
+        return isRunning()
                 && mActivityRecord.getOverrideOrientation()
                 != SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
     float getInheritedMinAspectRatio() {
-        return mTransparentPolicyState.getInheritedMinAspectRatio();
+        return mTransparentPolicyState.mInheritedMinAspectRatio;
     }
 
     float getInheritedMaxAspectRatio() {
-        return mTransparentPolicyState.getInheritedMaxAspectRatio();
+        return mTransparentPolicyState.mInheritedMaxAspectRatio;
     }
 
     int getInheritedAppCompatState() {
-        return mTransparentPolicyState.getInheritedAppCompatState();
+        return mTransparentPolicyState.mInheritedAppCompatState;
     }
 
     @Configuration.Orientation
     int getInheritedOrientation() {
-        return mTransparentPolicyState.getInheritedOrientation();
+        return mTransparentPolicyState.mInheritedOrientation;
     }
 
     ActivityRecord.CompatDisplayInsets getInheritedCompatDisplayInsets() {
-        return mTransparentPolicyState.getInheritedCompatDisplayInsets();
+        return mTransparentPolicyState.mInheritedCompatDisplayInsets;
     }
 
     void clearInheritedCompatDisplayInsets() {
@@ -168,12 +174,34 @@ class TransparentPolicy {
         return mTransparentPolicyState.applyOnOpaqueActivityBelow(consumer);
     }
 
+    @NonNull
+    Optional<ActivityRecord> getFirstOpaqueActivity() {
+        return isRunning() ? Optional.of(mTransparentPolicyState.mFirstOpaqueActivity)
+                : Optional.empty();
+    }
+
     /**
      * @return The first not finishing opaque activity beneath the current translucent activity
      * if it exists and the strategy is enabled.
      */
     Optional<ActivityRecord> findOpaqueNotFinishingActivityBelow() {
         return mTransparentPolicyState.findOpaqueNotFinishingActivityBelow();
+    }
+
+    // We evaluate the case when the policy should not be applied.
+    private boolean shouldSkipTransparentPolicy(@Nullable ActivityRecord opaqueActivity) {
+        if (opaqueActivity == null || opaqueActivity.isEmbedded()) {
+            // We skip letterboxing if the translucent activity doesn't have any
+            // opaque activities beneath or the activity below is embedded which
+            // never has letterbox.
+            mActivityRecord.recomputeConfiguration();
+            return true;
+        }
+        if (mActivityRecord.getTask() == null || mActivityRecord.fillsParent()
+                || mActivityRecord.hasCompatDisplayInsetsWithoutInheritance()) {
+            return true;
+        }
+        return false;
     }
 
     /** Resets the screen size related fields so they can be resolved by requested bounds later. */
@@ -212,10 +240,11 @@ class TransparentPolicy {
         private int mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
 
         // The CompatDisplayInsets of the opaque activity beneath the translucent one.
+        @Nullable
         private ActivityRecord.CompatDisplayInsets mInheritedCompatDisplayInsets;
 
         @Nullable
-        ActivityRecord mFirstOpaqueActivity;
+        private ActivityRecord mFirstOpaqueActivity;
 
         /*
          * WindowContainerListener responsible to make translucent activities inherit
@@ -231,9 +260,8 @@ class TransparentPolicy {
 
         private void start(@NonNull ActivityRecord firstOpaqueActivity) {
             mFirstOpaqueActivity = firstOpaqueActivity;
-            mFirstOpaqueActivity.mLetterboxUiController.getTransparentPolicy()
-                    .mDestroyListeners.add(mActivityRecord.mLetterboxUiController
-                            .getTransparentPolicy());
+            mFirstOpaqueActivity.mTransparentPolicy
+                    .mDestroyListeners.add(mActivityRecord.mTransparentPolicy);
             inheritFromOpaque(firstOpaqueActivity);
             final WindowContainer<?> parent = mActivityRecord.getParent();
             mLetterboxConfigListener = WindowContainer.overrideConfigurationPropagation(
@@ -284,35 +312,14 @@ class TransparentPolicy {
             mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
             mInheritedCompatDisplayInsets = null;
             if (mFirstOpaqueActivity != null) {
-                mFirstOpaqueActivity.mLetterboxUiController.getTransparentPolicy()
-                        .mDestroyListeners.remove(mActivityRecord.mLetterboxUiController
-                                .getTransparentPolicy());
+                mFirstOpaqueActivity.mTransparentPolicy
+                        .mDestroyListeners.remove(mActivityRecord.mTransparentPolicy);
             }
             mFirstOpaqueActivity = null;
         }
 
         private boolean isRunning() {
             return mLetterboxConfigListener != null;
-        }
-
-        private int getInheritedOrientation() {
-            return mInheritedOrientation;
-        }
-
-        private float getInheritedMinAspectRatio() {
-            return mInheritedMinAspectRatio;
-        }
-
-        private float getInheritedMaxAspectRatio() {
-            return mInheritedMaxAspectRatio;
-        }
-
-        private int getInheritedAppCompatState() {
-            return mInheritedAppCompatState;
-        }
-
-        private ActivityRecord.CompatDisplayInsets getInheritedCompatDisplayInsets() {
-            return mInheritedCompatDisplayInsets;
         }
 
         private void clearInheritedCompatDisplayInsets() {

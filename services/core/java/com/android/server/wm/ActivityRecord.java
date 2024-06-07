@@ -803,6 +803,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final LetterboxUiController mLetterboxUiController;
 
     /**
+     * The policy for transparent activities
+     */
+    final TransparentPolicy mTransparentPolicy;
+
+    /**
      * The scale to fit at least one side of the activity to its parent. If the activity uses
      * 1920x1080, and the actually size on the screen is 960x540, then the scale is 0.5.
      */
@@ -1698,7 +1703,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (isState(RESUMED)) {
                 newParent.setResumedActivity(this, "onParentChanged");
             }
-            mLetterboxUiController.updateInheritedLetterbox();
+            mTransparentPolicy.start();
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
@@ -2136,6 +2141,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Don't move below setOrientation(info.screenOrientation) since it triggers
         // getOverrideOrientation that requires having mLetterboxUiController
         // initialised.
+        mTransparentPolicy = new TransparentPolicy(this, mWmService.mLetterboxConfiguration);
         mLetterboxUiController = new LetterboxUiController(mWmService, this);
         mCameraCompatControlEnabled = mWmService.mContext.getResources()
                 .getBoolean(R.bool.config_isCameraCompatControlForStretchedIssuesEnabled);
@@ -8080,13 +8086,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Configuration.Orientation
     int getRequestedConfigurationOrientation(boolean forDisplay,
             @ActivityInfo.ScreenOrientation int requestedOrientation) {
-        if (mLetterboxUiController.hasInheritedOrientation()) {
+        if (mTransparentPolicy.hasInheritedOrientation()) {
             final RootDisplayArea root = getRootDisplayArea();
             if (forDisplay && root != null && root.isOrientationDifferentFromDisplay()) {
                 return reverseConfigurationOrientation(
-                        mLetterboxUiController.getInheritedOrientation());
+                        mTransparentPolicy.getInheritedOrientation());
             } else {
-                return mLetterboxUiController.getInheritedOrientation();
+                return mTransparentPolicy.getInheritedOrientation();
             }
         }
         if (task != null && requestedOrientation == SCREEN_ORIENTATION_BEHIND) {
@@ -8302,8 +8308,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Nullable
     CompatDisplayInsets getCompatDisplayInsets() {
-        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
-            return mLetterboxUiController.getInheritedCompatDisplayInsets();
+        if (mTransparentPolicy.isRunning()) {
+            return mTransparentPolicy.getInheritedCompatDisplayInsets();
         }
         return mCompatDisplayInsets;
     }
@@ -8466,7 +8472,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
-        mLetterboxUiController.clearInheritedCompatDisplayInsets();
+        mTransparentPolicy.clearInheritedCompatDisplayInsets();
     }
 
     @VisibleForTesting
@@ -8784,8 +8790,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
         }
         // TODO(b/256564921): Investigate if we need new metrics for translucent activities
-        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
-            return mLetterboxUiController.getInheritedAppCompatState();
+        if (mTransparentPolicy.isRunning()) {
+            return mTransparentPolicy.getInheritedAppCompatState();
         }
         if (mInSizeCompatModeForBounds) {
             return APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
@@ -8938,7 +8944,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // We check if the current activity is transparent. In that case we need to
         // recomputeConfiguration of the first opaque activity beneath, to allow a
         // proper computation of the new bounds.
-        if (!mLetterboxUiController.applyOnOpaqueActivityBelow(
+        if (!mTransparentPolicy.applyOnOpaqueActivityBelow(
                 ActivityRecord::recomputeConfiguration)) {
             onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
         }
@@ -9411,7 +9417,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void updateSizeCompatScale(Rect resolvedAppBounds, Rect containerAppBounds) {
         // Only allow to scale down.
-        mSizeCompatScale = mLetterboxUiController.findOpaqueNotFinishingActivityBelow()
+        mSizeCompatScale = mTransparentPolicy.findOpaqueNotFinishingActivityBelow()
                 .map(activityRecord -> activityRecord.mSizeCompatScale)
                 .orElseGet(() -> {
                     final int contentW = resolvedAppBounds.width();
@@ -9424,7 +9430,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     private boolean isInSizeCompatModeForBounds(final Rect appBounds, final Rect containerBounds) {
-        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
+        if (mTransparentPolicy.isRunning()) {
             // To avoid wrong app behaviour, we decided to disable SCM when a translucent activity
             // is letterboxed.
             return false;
@@ -9487,7 +9493,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     public Rect getBounds() {
         // TODO(b/268458693): Refactor configuration inheritance in case of translucent activities
         final Rect superBounds = super.getBounds();
-        return mLetterboxUiController.findOpaqueNotFinishingActivityBelow()
+        return mTransparentPolicy.findOpaqueNotFinishingActivityBelow()
                 .map(ActivityRecord::getBounds)
                 .orElseGet(() -> {
                     if (mSizeCompatBounds != null) {
@@ -9851,8 +9857,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Returns the min aspect ratio of this activity.
      */
     float getMinAspectRatio() {
-        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
-            return mLetterboxUiController.getInheritedMinAspectRatio();
+        if (mTransparentPolicy.isRunning()) {
+            return mTransparentPolicy.getInheritedMinAspectRatio();
         }
         if (info.applicationInfo == null) {
             return info.getMinAspectRatio();
@@ -9902,8 +9908,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     float getMaxAspectRatio() {
-        if (mLetterboxUiController.hasInheritedLetterboxBehavior()) {
-            return mLetterboxUiController.getInheritedMaxAspectRatio();
+        if (mTransparentPolicy.isRunning()) {
+            return mTransparentPolicy.getInheritedMaxAspectRatio();
         }
         return info.getMaxAspectRatio();
     }
