@@ -18,6 +18,7 @@
 package com.android.server.companion;
 
 import static android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES;
+import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED;
@@ -52,6 +53,9 @@ import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ecm.EnhancedConfirmationManager;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.IAssociationRequestCallback;
@@ -538,6 +542,31 @@ public class CompanionDeviceManagerService extends SystemService {
             stopObservingDevicePresence_enforcePermission();
 
             mDevicePresenceProcessor.stopObservingDevicePresence(request, packageName, userId);
+        }
+
+        @Override
+        @EnforcePermission(BLUETOOTH_CONNECT)
+        public boolean removeBond(int associationId, String packageName, int userId) {
+            removeBond_enforcePermission();
+
+            Slog.i(TAG, "removeBond() "
+                    + "associationId=" + associationId + ", "
+                    + "package=u" + userId + "/" + packageName);
+            enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
+                    "remove bonds");
+
+            AssociationInfo association = mAssociationStore
+                    .getAssociationWithCallerChecks(associationId);
+            MacAddress address = association.getDeviceMacAddress();
+            if (address == null) {
+                throw new IllegalArgumentException(
+                        "Association id=[" + associationId + "] doesn't have a device address.");
+            }
+
+            BluetoothAdapter btAdapter = getContext().getSystemService(BluetoothManager.class)
+                    .getAdapter();
+            BluetoothDevice btDevice = btAdapter.getRemoteDevice(address.toString().toUpperCase());
+            return btDevice.removeBond();
         }
 
         @Override
