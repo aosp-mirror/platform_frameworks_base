@@ -715,6 +715,12 @@ public class MediaSessionService extends SystemService implements Monitor {
             ForegroundServiceDelegationOptions foregroundServiceDelegationOptions) {
         final long token = Binder.clearCallingIdentity();
         try {
+            Log.i(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "startFgsDelegate: pkg=%s uid=%d",
+                            foregroundServiceDelegationOptions.mClientPackageName,
+                            foregroundServiceDelegationOptions.mClientUid));
             mActivityManagerInternal.startForegroundServiceDelegate(
                     foregroundServiceDelegationOptions, /* connection= */ null);
         } finally {
@@ -756,6 +762,12 @@ public class MediaSessionService extends SystemService implements Monitor {
             ForegroundServiceDelegationOptions foregroundServiceDelegationOptions) {
         final long token = Binder.clearCallingIdentity();
         try {
+            Log.i(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "stopFgsDelegate: pkg=%s uid=%d",
+                            foregroundServiceDelegationOptions.mClientPackageName,
+                            foregroundServiceDelegationOptions.mClientUid));
             mActivityManagerInternal.stopForegroundServiceDelegate(
                     foregroundServiceDelegationOptions);
         } finally {
@@ -2679,6 +2691,9 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         @Override
         public void expireTempEngagedSessions() {
+            if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+                return;
+            }
             synchronized (mLock) {
                 for (Set<MediaSessionRecordImpl> uidSessions :
                         mUserEngagedSessionsForFgs.values()) {
