@@ -16,6 +16,9 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.content.pm.ActivityInfo.CONFIG_DENSITY;
+import static android.content.pm.ActivityInfo.CONFIG_LAYOUT_DIRECTION;
+import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -40,7 +43,6 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -959,7 +961,7 @@ class DividerPresenter implements View.OnTouchListener {
     @VisibleForTesting
     static class Properties {
         private static final int CONFIGURATION_MASK_FOR_DIVIDER =
-                ActivityInfo.CONFIG_DENSITY | ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+                CONFIG_DENSITY | CONFIG_WINDOW_CONFIGURATION | CONFIG_LAYOUT_DIRECTION;
         @NonNull
         private final Configuration mConfiguration;
         @NonNull
@@ -1228,6 +1230,12 @@ class DividerPresenter implements View.OnTouchListener {
                             FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL | FLAG_SLIPPERY,
                             PixelFormat.TRANSLUCENT);
             lp.setTitle(WINDOW_NAME);
+
+            // Ensure that the divider layout is always LTR regardless of the locale, because we
+            // already considered the locale when determining the split layout direction and the
+            // computed divider line position always starts from the left. This only affects the
+            // horizontal layout and does not have any effect on the top-to-bottom layout.
+            mDividerLayout.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
             mViewHost.setView(mDividerLayout, lp);
             mViewHost.relayout(lp);
         }
