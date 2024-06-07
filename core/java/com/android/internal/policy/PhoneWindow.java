@@ -4054,10 +4054,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void setResizingCaptionDrawable(Drawable drawable) {
-        // TODO(b/333724879): Deprecate this public API. The new caption in WM shell allows the app
-        // content to draw behind it directly if requested.
-    }
+    public void setResizingCaptionDrawable(Drawable drawable) {}
 
     @Override
     public void setDecorCaptionShade(int decorCaptionShade) {
