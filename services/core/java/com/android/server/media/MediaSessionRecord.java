@@ -294,7 +294,6 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             Looper handlerLooper,
             int policies)
             throws RemoteException {
-        mUniqueId = sNextMediaSessionRecordId.getAndIncrement();
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
