@@ -1076,6 +1076,16 @@ flag {
 }
 
 flag {
+   name: "enable_efficient_display_repository"
+   namespace: "systemui"
+   description: "Decide whether to use the new implementation of DisplayRepository that minimizes binder calls and background lock contention."
+   bug: "345472038"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
   name: "notification_media_manager_background_execution"
   namespace: "systemui"
   description: "Decide whether to execute binder calls in background thread"
