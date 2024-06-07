@@ -38,6 +38,7 @@ constructor(
 ) : KeyguardQuickAffordanceConfig {
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.GLANCEABLE_HUB
+
     override fun pickerName(): String = "Glanceable hub"
 
     override val pickerIconResourceId = R.drawable.ic_widgets
@@ -50,6 +51,10 @@ constructor(
         } else {
             flowOf(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
         }
+    }
+
+    override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
+        return KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
     }
 
     override fun onTriggered(
