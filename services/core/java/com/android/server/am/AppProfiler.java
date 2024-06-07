@@ -507,7 +507,8 @@ public class AppProfiler {
                 final int lruSize = mService.mProcessList.getLruSizeLOSP();
                 if (mCachedAppFrozenDurations == null
                         || mCachedAppFrozenDurations.length < lruSize) {
-                    mCachedAppFrozenDurations = new long[lruSize];
+                    mCachedAppFrozenDurations = new long[Math.max(
+                            lruSize, mService.mConstants.CUR_MAX_CACHED_PROCESSES)];
                 }
                 mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
                     if (app.mOptRecord.isFrozen()) {
@@ -1369,13 +1370,18 @@ public class AppProfiler {
             // are managing to keep around is less than half the maximum we desire;
             // if we are keeping a good number around, we'll let them use whatever
             // memory they want.
-            final int numCachedAndEmpty = numCached + numEmpty;
-            if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
-                memFactor = ADJ_MEM_FACTOR_CRITICAL;
-            } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
-                memFactor = ADJ_MEM_FACTOR_LOW;
+            if (numCached <= mService.mConstants.CUR_TRIM_CACHED_PROCESSES
+                    && numEmpty <= mService.mConstants.CUR_TRIM_EMPTY_PROCESSES) {
+                final int numCachedAndEmpty = numCached + numEmpty;
+                if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
+                    memFactor = ADJ_MEM_FACTOR_CRITICAL;
+                } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
+                    memFactor = ADJ_MEM_FACTOR_LOW;
+                } else {
+                    memFactor = ADJ_MEM_FACTOR_MODERATE;
+                }
             } else {
-                memFactor = ADJ_MEM_FACTOR_MODERATE;
+                memFactor = ADJ_MEM_FACTOR_NORMAL;
             }
         }
         // We always allow the memory level to go up (better).  We only allow it to go
