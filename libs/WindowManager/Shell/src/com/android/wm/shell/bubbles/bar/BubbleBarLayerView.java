@@ -132,7 +132,7 @@ public class BubbleBarLayerView extends FrameLayout
                     }
                 });
 
-        setOnClickListener(view -> hideMenuOrImeOrCollapse());
+        setOnClickListener(view -> hideModalOrCollapse());
     }
 
     @Override
@@ -217,7 +217,7 @@ public class BubbleBarLayerView extends FrameLayout
 
                 @Override
                 public void onBackPressed() {
-                    hideMenuOrImeOrCollapse();
+                    hideModalOrCollapse();
                 }
             });
 
@@ -345,7 +345,7 @@ public class BubbleBarLayerView extends FrameLayout
     }
 
     /** Hides the current modal education/menu view, IME or collapses the expanded view */
-    private void hideMenuOrImeOrCollapse() {
+    private void hideModalOrCollapse() {
         if (mEducationViewController.isEducationVisible()) {
             mEducationViewController.hideEducation(/* animated = */ true);
             return;
