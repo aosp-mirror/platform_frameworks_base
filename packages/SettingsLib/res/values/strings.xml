@@ -975,6 +975,9 @@
     <string name="immediately_destroy_activities_summary">Destroy every activity as soon as
         the user leaves it</string>
 
+    <!-- UI debug setting: limit number of running background processes [CHAR LIMIT=25] -->
+    <string name="app_process_limit_title">Background process limit</string>
+
     <!-- UI debug setting: show all ANRs? [CHAR LIMIT=25] -->
     <string name="show_all_anrs">Show background ANRs</string>
     <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=100] -->

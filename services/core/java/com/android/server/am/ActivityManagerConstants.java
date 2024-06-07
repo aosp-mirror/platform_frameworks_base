@@ -169,6 +169,7 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     static final String KEY_ENABLE_NEW_OOMADJ = "enable_new_oom_adj";
 
+    private static final int DEFAULT_MAX_CACHED_PROCESSES = 1024;
     private static final boolean DEFAULT_PRIORITIZE_ALARM_BROADCASTS = true;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
@@ -293,7 +294,12 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_SERVICE_BACKGROUND_TIMEOUT = DEFAULT_SERVICE_TIMEOUT * 10;
 
     /**
-     * Maximum number of phantom processes.
+     * Maximum number of cached processes.
+     */
+    private static final String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
+
+    /**
+     * Maximum number of cached processes.
      */
     private static final String KEY_MAX_PHANTOM_PROCESSES = "max_phantom_processes";
 
@@ -439,6 +445,9 @@ final class ActivityManagerConstants extends ContentObserver {
     volatile boolean mEnableProcStateStacktrace = false;
     volatile int mProcStateDebugSetProcStateDelay = 0;
     volatile int mProcStateDebugSetUidStateDelay = 0;
+
+    // Maximum number of cached processes we will allow.
+    public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
 
     // This is the amount of time we allow an app to settle after it goes into the background,
     // before we start restricting what it can do.
@@ -848,6 +857,24 @@ final class ActivityManagerConstants extends ContentObserver {
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
+    private int mOverrideMaxCachedProcesses = -1;
+    private final int mCustomizedMaxCachedProcesses;
+
+    // The maximum number of cached processes we will keep around before killing them.
+    // NOTE: this constant is *only* a control to not let us go too crazy with
+    // keeping around processes on devices with large amounts of RAM.  For devices that
+    // are tighter on RAM, the out of memory killer is responsible for killing background
+    // processes as RAM is needed, and we should *never* be relying on this limit to
+    // kill them.  Also note that this limit only applies to cached background processes;
+    // we have no limit on the number of service, visible, foreground, or other such
+    // processes and the number of those processes does not count against the cached
+    // process limit. This will be initialized in the constructor.
+    public int CUR_MAX_CACHED_PROCESSES;
+
+    // The maximum number of empty app processes we will let sit around.  This will be
+    // initialized in the constructor.
+    public int CUR_MAX_EMPTY_PROCESSES;
+
     /** @see #mNoKillCachedProcessesUntilBootCompleted */
     private static final String KEY_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED =
             "no_kill_cached_processes_until_boot_completed";
@@ -878,6 +905,15 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile long mNoKillCachedProcessesPostBootCompletedDurationMillis =
             DEFAULT_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS;
+
+    // The number of empty apps at which we don't consider it necessary to do
+    // memory trimming.
+    public int CUR_TRIM_EMPTY_PROCESSES = computeEmptyProcessLimit(MAX_CACHED_PROCESSES) / 2;
+
+    // The number of cached at which we don't consider it necessary to do
+    // memory trimming.
+    public int CUR_TRIM_CACHED_PROCESSES =
+            (MAX_CACHED_PROCESSES - computeEmptyProcessLimit(MAX_CACHED_PROCESSES)) / 3;
 
     /** @see #mNoKillCachedProcessesUntilBootCompleted */
     private static final String KEY_MAX_EMPTY_TIME_MILLIS =
@@ -1129,6 +1165,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             return;
                         }
                         switch (name) {
+                            case KEY_MAX_CACHED_PROCESSES:
+                                updateMaxCachedProcesses();
+                                break;
                             case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
                                 updateBackgroundActivityStarts();
                                 break;
@@ -1378,7 +1417,16 @@ final class ActivityManagerConstants extends ContentObserver {
                 context.getResources().getStringArray(
                         com.android.internal.R.array.config_keep_warming_services))
                 .map(ComponentName::unflattenFromString).collect(Collectors.toSet()));
+        mCustomizedMaxCachedProcesses = context.getResources().getInteger(
+                com.android.internal.R.integer.config_customizedMaxCachedProcesses);
+        CUR_MAX_CACHED_PROCESSES = mCustomizedMaxCachedProcesses;
+        CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
 
+        final int rawMaxEmptyProcesses = computeEmptyProcessLimit(
+                Integer.min(CUR_MAX_CACHED_PROCESSES, MAX_CACHED_PROCESSES));
+        CUR_TRIM_EMPTY_PROCESSES = rawMaxEmptyProcesses / 2;
+        CUR_TRIM_CACHED_PROCESSES = (Integer.min(CUR_MAX_CACHED_PROCESSES, MAX_CACHED_PROCESSES)
+                    - rawMaxEmptyProcesses) / 3;
         loadNativeBootDeviceConfigConstants();
         mDefaultDisableAppProfilerPssProfiling = context.getResources().getBoolean(
                 R.bool.config_am_disablePssProfiling);
@@ -1431,6 +1479,19 @@ final class ActivityManagerConstants extends ContentObserver {
     private void loadNativeBootDeviceConfigConstants() {
         ENABLE_NEW_OOMADJ = getDeviceConfigBoolean(KEY_ENABLE_NEW_OOMADJ,
                 DEFAULT_ENABLE_NEW_OOM_ADJ);
+    }
+
+    public void setOverrideMaxCachedProcesses(int value) {
+        mOverrideMaxCachedProcesses = value;
+        updateMaxCachedProcesses();
+    }
+
+    public int getOverrideMaxCachedProcesses() {
+        return mOverrideMaxCachedProcesses;
+    }
+
+    public static int computeEmptyProcessLimit(int totalProcessLimit) {
+        return totalProcessLimit/2;
     }
 
     @Override
@@ -1933,6 +1994,29 @@ final class ActivityManagerConstants extends ContentObserver {
                 mSystemServerAutomaticHeapDumpPackageName);
     }
 
+    private void updateMaxCachedProcesses() {
+        String maxCachedProcessesFlag = DeviceConfig.getProperty(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_MAX_CACHED_PROCESSES);
+        try {
+            CUR_MAX_CACHED_PROCESSES = mOverrideMaxCachedProcesses < 0
+                    ? (TextUtils.isEmpty(maxCachedProcessesFlag)
+                    ? mCustomizedMaxCachedProcesses : Integer.parseInt(maxCachedProcessesFlag))
+                    : mOverrideMaxCachedProcesses;
+        } catch (NumberFormatException e) {
+            // Bad flag value from Phenotype, revert to default.
+            Slog.e(TAG,
+                    "Unable to parse flag for max_cached_processes: " + maxCachedProcessesFlag, e);
+            CUR_MAX_CACHED_PROCESSES = mCustomizedMaxCachedProcesses;
+        }
+        CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
+
+        final int rawMaxEmptyProcesses = computeEmptyProcessLimit(
+                Integer.min(CUR_MAX_CACHED_PROCESSES, MAX_CACHED_PROCESSES));
+        CUR_TRIM_EMPTY_PROCESSES = rawMaxEmptyProcesses / 2;
+        CUR_TRIM_CACHED_PROCESSES = (Integer.min(CUR_MAX_CACHED_PROCESSES, MAX_CACHED_PROCESSES)
+                    - rawMaxEmptyProcesses) / 3;
+    }
+
     private void updateProactiveKillsEnabled() {
         PROACTIVE_KILLS_ENABLED = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -2191,6 +2275,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println("ACTIVITY MANAGER SETTINGS (dumpsys activity settings) "
                 + Settings.Global.ACTIVITY_MANAGER_CONSTANTS + ":");
 
+        pw.print("  "); pw.print(KEY_MAX_CACHED_PROCESSES); pw.print("=");
+        pw.println(MAX_CACHED_PROCESSES);
         pw.print("  "); pw.print(KEY_BACKGROUND_SETTLE_TIME); pw.print("=");
         pw.println(BACKGROUND_SETTLE_TIME);
         pw.print("  "); pw.print(KEY_FGSERVICE_MIN_SHOWN_TIME); pw.print("=");
@@ -2391,6 +2477,14 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(MAX_PREVIOUS_TIME);
 
         pw.println();
+        if (mOverrideMaxCachedProcesses >= 0) {
+            pw.print("  mOverrideMaxCachedProcesses="); pw.println(mOverrideMaxCachedProcesses);
+        }
+        pw.print("  mCustomizedMaxCachedProcesses="); pw.println(mCustomizedMaxCachedProcesses);
+        pw.print("  CUR_MAX_CACHED_PROCESSES="); pw.println(CUR_MAX_CACHED_PROCESSES);
+        pw.print("  CUR_MAX_EMPTY_PROCESSES="); pw.println(CUR_MAX_EMPTY_PROCESSES);
+        pw.print("  CUR_TRIM_EMPTY_PROCESSES="); pw.println(CUR_TRIM_EMPTY_PROCESSES);
+        pw.print("  CUR_TRIM_CACHED_PROCESSES="); pw.println(CUR_TRIM_CACHED_PROCESSES);
         pw.print("  OOMADJ_UPDATE_QUICK="); pw.println(OOMADJ_UPDATE_QUICK);
         pw.print("  ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION=");
         pw.println(mEnableWaitForFinishAttachApplication);

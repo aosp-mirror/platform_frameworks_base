@@ -470,7 +470,7 @@ public class OomAdjuster {
             return true;
         });
         mTmpUidRecords = new ActiveUids(service, false);
-        mTmpQueue = new ArrayDeque<ProcessRecord>();
+        mTmpQueue = new ArrayDeque<ProcessRecord>(mConstants.CUR_MAX_CACHED_PROCESSES << 1);
         mNumSlots = ((CACHED_APP_MAX_ADJ - CACHED_APP_MIN_ADJ + 1) >> 1)
                 / CACHED_APP_IMPORTANCE_LEVELS;
     }
@@ -1079,11 +1079,23 @@ public class OomAdjuster {
             int curEmptyAdj = CACHED_APP_MIN_ADJ + CACHED_APP_IMPORTANCE_LEVELS;
             int nextEmptyAdj = curEmptyAdj + (CACHED_APP_IMPORTANCE_LEVELS * 2);
 
+            final int emptyProcessLimit = mConstants.CUR_MAX_EMPTY_PROCESSES;
+            final int cachedProcessLimit = mConstants.CUR_MAX_CACHED_PROCESSES
+                                           - emptyProcessLimit;
             // Let's determine how many processes we have running vs.
             // how many slots we have for background processes; we may want
             // to put multiple processes in a slot of there are enough of
             // them.
             int numEmptyProcs = numLru - mNumNonCachedProcs - mNumCachedHiddenProcs;
+            if (numEmptyProcs > cachedProcessLimit) {
+                // If there are more empty processes than our limit on cached
+                // processes, then use the cached process limit for the factor.
+                // This ensures that the really old empty processes get pushed
+                // down to the bottom, so if we are running low on memory we will
+                // have a better chance at keeping around more cached processes
+                // instead of a gazillion empty processes.
+                numEmptyProcs = cachedProcessLimit;
+            }
             int cachedFactor = (mNumCachedHiddenProcs > 0
                     ? (mNumCachedHiddenProcs + mNumSlots - 1) : 1)
                                / mNumSlots;
@@ -1205,6 +1217,17 @@ public class OomAdjuster {
         ArrayList<ProcessRecord> lruList = mProcessList.getLruProcessesLOSP();
         final int numLru = lruList.size();
 
+        final boolean doKillExcessiveProcesses = shouldKillExcessiveProcesses(now);
+        if (!doKillExcessiveProcesses) {
+            if (mNextNoKillDebugMessageTime < now) {
+                Slog.d(TAG, "Not killing cached processes"); // STOPSHIP Remove it b/222365734
+                mNextNoKillDebugMessageTime = now + 5000; // Every 5 seconds
+            }
+        }
+        final int emptyProcessLimit = doKillExcessiveProcesses
+                ? mConstants.CUR_MAX_EMPTY_PROCESSES : Integer.MAX_VALUE;
+        final int cachedProcessLimit = doKillExcessiveProcesses
+                ? (mConstants.CUR_MAX_CACHED_PROCESSES - emptyProcessLimit) : Integer.MAX_VALUE;
         int lastCachedGroup = 0;
         int lastCachedGroupUid = 0;
         int numCached = 0;
@@ -1256,14 +1279,36 @@ public class OomAdjuster {
                         } else {
                             lastCachedGroupUid = lastCachedGroup = 0;
                         }
-                        if (proactiveKillsEnabled) {
+                        if ((numCached - numCachedExtraGroup) > cachedProcessLimit) {
+                            app.killLocked("cached #" + numCached,
+                                    "too many cached",
+                                    ApplicationExitInfo.REASON_OTHER,
+                                    ApplicationExitInfo.SUBREASON_TOO_MANY_CACHED,
+                                    true);
+                        } else if (proactiveKillsEnabled) {
                             lruCachedApp = app;
                         }
                         break;
                     case PROCESS_STATE_CACHED_EMPTY:
-                        numEmpty++;
-                        if (proactiveKillsEnabled) {
-                            lruCachedApp = app;
+                        if (numEmpty > mConstants.CUR_TRIM_EMPTY_PROCESSES
+                                && app.getLastActivityTime() < oldTime) {
+                            app.killLocked("empty for " + ((now
+                                    - app.getLastActivityTime()) / 1000) + "s",
+                                    "empty for too long",
+                                    ApplicationExitInfo.REASON_OTHER,
+                                    ApplicationExitInfo.SUBREASON_TRIM_EMPTY,
+                                    true);
+                        } else {
+                            numEmpty++;
+                            if (numEmpty > emptyProcessLimit) {
+                                app.killLocked("empty #" + numEmpty,
+                                        "too many empty",
+                                        ApplicationExitInfo.REASON_OTHER,
+                                        ApplicationExitInfo.SUBREASON_TOO_MANY_EMPTY,
+                                        true);
+                            } else if (proactiveKillsEnabled) {
+                                lruCachedApp = app;
+                            }
                         }
                         break;
                     default:
@@ -1304,6 +1349,7 @@ public class OomAdjuster {
         }
 
         if (proactiveKillsEnabled                               // Proactive kills enabled?
+                && doKillExcessiveProcesses                     // Should kill excessive processes?
                 && freeSwapPercent < lowSwapThresholdPercent    // Swap below threshold?
                 && lruCachedApp != null                         // If no cached app, let LMKD decide
                 // If swap is non-decreasing, give reclaim a chance to catch up
@@ -1496,6 +1542,25 @@ public class OomAdjuster {
                 mService.mServices.stopInBackgroundLocked(becameIdle.get(i).getUid());
             }
         }
+    }
+
+    /**
+     * Return true if we should kill excessive cached/empty processes.
+     */
+    private boolean shouldKillExcessiveProcesses(long nowUptime) {
+        final long lastUserUnlockingUptime = mService.mUserController.getLastUserUnlockingUptime();
+
+        if (lastUserUnlockingUptime == 0) {
+            // No users have been unlocked.
+            return !mConstants.mNoKillCachedProcessesUntilBootCompleted;
+        }
+        final long noKillCachedProcessesPostBootCompletedDurationMillis =
+                mConstants.mNoKillCachedProcessesPostBootCompletedDurationMillis;
+        if ((lastUserUnlockingUptime + noKillCachedProcessesPostBootCompletedDurationMillis)
+                > nowUptime) {
+            return false;
+        }
+        return true;
     }
 
     protected final ComputeOomAdjWindowCallback mTmpComputeOomAdjWindowCallback =
