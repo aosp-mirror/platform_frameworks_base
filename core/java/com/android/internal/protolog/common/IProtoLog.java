@@ -27,11 +27,10 @@ public interface IProtoLog {
      * @param group The group this message belongs to.
      * @param messageHash The hash of the message.
      * @param paramsMask The parameters mask of the message.
-     * @param messageString The message string.
      * @param args The arguments of the message.
      */
     void log(LogLevel logLevel, IProtoLogGroup group, long messageHash, int paramsMask,
-             String messageString, Object[] args);
+            Object[] args);
 
     /**
      * Log a ProtoLog message

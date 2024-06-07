@@ -170,7 +170,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     @VisibleForTesting
     @Override
     public void log(LogLevel level, IProtoLogGroup group, long messageHash, int paramsMask,
-            @Nullable String messageString, Object[] args) {
+            Object[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "log");
 
         try {
@@ -180,7 +180,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                         logToProto(level, group, messageHash, paramsMask, args, tsNanos));
             }
             if (group.isLogToLogcat()) {
-                logToLogcat(group.getTag(), level, messageHash, messageString, args);
+                logToLogcat(group.getTag(), level, messageHash, args);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
@@ -199,7 +199,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                                 tsNanos));
             }
             if (group.isLogToLogcat()) {
-                logToLogcat(group.getTag(), logLevel, 0, messageString, args);
+                logToLogcat(group.getTag(), logLevel, 0, args);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
@@ -297,22 +297,18 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         os.end(outMessagesToken);
     }
 
-    private void logToLogcat(String tag, LogLevel level, long messageHash,
-            @Nullable String messageString, Object[] args) {
+    private void logToLogcat(String tag, LogLevel level, long messageHash, Object[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logToLogcat");
         try {
-            doLogToLogcat(tag, level, messageHash, messageString, args);
+            doLogToLogcat(tag, level, messageHash, args);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
-    private void doLogToLogcat(String tag, LogLevel level, long messageHash,
-            @androidx.annotation.Nullable String messageString, Object[] args) {
+    private void doLogToLogcat(String tag, LogLevel level, long messageHash, Object[] args) {
         String message = null;
-        if (messageString == null) {
-            messageString = mViewerConfigReader.getViewerString(messageHash);
-        }
+        String messageString = mViewerConfigReader.getViewerString(messageHash);
         if (messageString != null) {
             if (args != null) {
                 try {
