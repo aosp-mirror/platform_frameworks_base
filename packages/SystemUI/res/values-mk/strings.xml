@@ -854,7 +854,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Зголемувајте дел од екранот"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Отвори поставки за зголемување"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Повлечете на аголот за да ја промените големината"</string>
-    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Дозволете дијагонално лизгање"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Дозволи дијагонално лизгање"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Промени големина"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Променете го типот на зголемување"</string>
     <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Заврши ја промената на големина"</string>
@@ -863,7 +863,7 @@
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Десна рачка"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Долна рачка"</string>
     <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Поставки за зголемување"</string>
-    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Големина на лупа"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Големина на лупата"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Зум"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Средно"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Мало"</string>
