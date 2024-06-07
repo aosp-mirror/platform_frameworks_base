@@ -1404,7 +1404,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Omogućen je način testnog okvira"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Vratite na tvorničke postavke da biste onemogućili način testnog okvira."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serijska konzola omogućena"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Izvedba je otežana. Provjerite početni program za pokretanje da biste onemogućili konzolu."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Izvedba je otežana. Provjerite pokretač operativnog sustava da biste onemogućili konzolu."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Omogućen je eksperimentalni MTE"</string>
     <string name="mte_override_notification_message" msgid="2441170442725738942">"To može utjecati na izvedbu i stabilnost. Ponovno pokrenite da biste onemogućili. Ako je omogućeno pomoću arm64.memtag.bootctl, prethodno postavite na \"none\"."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Tekućina ili prljavština u USB priključku"</string>

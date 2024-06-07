@@ -300,7 +300,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Các ứng dụng tiêu thụ pin"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Phóng to"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Việc sử dụng tính năng hỗ trợ tiếp cận"</string>
-    <string name="notification_channel_display" msgid="6905032605735615090">"Màn hình"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Hiển thị"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang sử dụng pin"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ứng dụng đang sử dụng pin"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
@@ -1091,8 +1091,8 @@
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"Ở lại trang này"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nBạn có chắc chắn muốn điều hướng khỏi trang này không?"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"Tự động điền với <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
-    <string name="permlab_setAlarm" msgid="1158001610254173567">"đặt báo thức"</string>
-    <string name="permdesc_setAlarm" msgid="2185033720060109640">"Cho phép ứng dụng đặt báo thức trong ứng dụng đồng hồ báo thức được cài đặt. Một số ứng dụng đồng hồ báo thức có thể không thực thi tính  năng này."</string>
+    <string name="permlab_setAlarm" msgid="1158001610254173567">"đặt chuông báo"</string>
+    <string name="permdesc_setAlarm" msgid="2185033720060109640">"Cho phép ứng dụng đặt chuông báo trong ứng dụng đồng hồ được cài đặt. Một số ứng dụng đồng hồ có thể không có năng này."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"thêm thư thoại"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"Cho phép ứng dụng thêm thông báo vào hộp thư thoại đến của bạn."</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> đã dán dữ liệu từ bảng nhớ tạm của bạn"</string>
@@ -1320,7 +1320,7 @@
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Mặc định (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Không"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Nhạc chuông"</string>
-    <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Âm thanh báo thức"</string>
+    <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Âm thanh chuông báo"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Âm thanh thông báo"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Không xác định"</string>
     <string name="wifi_available_sign_in" msgid="381054692557675237">"Đăng nhập vào mạng Wi-Fi"</string>
