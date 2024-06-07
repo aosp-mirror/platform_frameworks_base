@@ -230,6 +230,16 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *              <nits>55.2</nits>
  *            </displayBrightnessPoint>
  *          </blockingZoneThreshold>
+ *          <supportedModes>
+ *            <point>
+ *              <first>60</first>   // refresh rate
+ *              <second>60</second> // vsync
+ *            </point>
+ *            <point>
+ *              <first>120</first>    // refresh rate
+ *              <second>120</second> // vsync
+ *            </point>
+ *          </supportedModes>
  *        </lowerBlockingZoneConfigs>
  *        <higherBlockingZoneConfigs>
  *          <defaultRefreshRate>90</defaultRefreshRate>
@@ -244,6 +254,16 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *            </displayBrightnessPoint>
  *          </blockingZoneThreshold>
  *        </higherBlockingZoneConfigs>
+ *        <lowPowerSupportedModes>
+ *          <point>
+ *            <first>60</first>   // refresh rate
+ *            <second>60</second> // vsync
+ *          </point>
+ *          <point>
+ *            <first>60</first>    // refresh rate
+ *            <second>240</second> // vsync
+ *          </point>
+ *        </lowPowerSupportedModes>
  *      </refreshRate>
  *
  *      <highBrightnessMode enabled="true">
