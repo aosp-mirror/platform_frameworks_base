@@ -68,35 +68,7 @@ public abstract class PaintContext {
 
     public abstract void drawTextOnPath(int textId, int pathId, float hOffset, float vOffset);
 
-    /**
-     * Return the dimensions (left, top, right, bottom).
-     * Relative to a drawTextRun x=0, y=0;
-     *
-     * @param textId
-     * @param start
-     * @param end    if end is -1 it means the whole string
-     * @param monospace measure with better support for monospace
-     * @param bounds the bounds (left, top, right, bottom)
-     */
-    public abstract void getTextBounds(int textId,
-                                       int start,
-                                       int end,
-                                       boolean monospace,
-                                       float[]bounds);
-
-    /**
-     * Draw a text starting ast x,y
-     *
-     * @param textId reference to the text
-     * @param start
-     * @param end
-     * @param contextStart
-     * @param contextEnd
-     * @param x
-     * @param y
-     * @param rtl
-     */
-    public abstract void drawTextRun(int textId,
+    public abstract void drawTextRun(int textID,
                                      int start,
                                      int end,
                                      int contextStart,
@@ -105,14 +77,6 @@ public abstract class PaintContext {
                                      float y,
                                      boolean rtl);
 
-    /**
-     * Draw an interpolation between two paths
-     * @param path1Id
-     * @param path2Id
-     * @param tween  0.0 = is path1 1.0 is path2
-     * @param start
-     * @param stop
-     */
     public abstract void drawTweenPath(int path1Id,
                                        int path2Id,
                                        float tween,
@@ -121,70 +85,21 @@ public abstract class PaintContext {
 
     public abstract void applyPaint(PaintBundle mPaintData);
 
-    /**
-     * Scale the rendering by scaleX and saleY (1.0 = no scale).
-     * Scaling is done about centerX,centerY.
-     *
-     * @param scaleX
-     * @param scaleY
-     * @param centerX
-     * @param centerY
-     */
-    public abstract void matrixScale(float scaleX, float scaleY, float centerX, float centerY);
+    public abstract void mtrixScale(float scaleX, float scaleY, float centerX, float centerY);
 
-    /**
-     * Translate the rendering
-     * @param translateX
-     * @param translateY
-     */
     public abstract void matrixTranslate(float translateX, float translateY);
 
-    /**
-     * Skew the rendering
-     * @param skewX
-     * @param skewY
-     */
     public abstract void matrixSkew(float skewX, float skewY);
 
-    /**
-     * Rotate the rendering.
-     * Note rotates are cumulative.
-     * @param rotate angle to rotate
-     * @param pivotX x-coordinate about which to rotate
-     * @param pivotY y-coordinate about which to rotate
-     */
     public abstract void matrixRotate(float rotate, float pivotX, float pivotY);
 
-    /**
-     * Save the current state of the transform
-     */
     public abstract void matrixSave();
 
-    /**
-     * Restore the previously saved state of the transform
-     */
     public abstract void matrixRestore();
 
-    /**
-     * Set the clip to a rectangle.
-     * Drawing outside the current clip region will have no effect
-     * @param left
-     * @param top
-     * @param right
-     * @param bottom
-     */
     public abstract void clipRect(float left, float top, float right, float bottom);
 
-    /**
-     * Clip based on a path.
-     * @param pathId
-     * @param regionOp
-     */
     public abstract void clipPath(int pathId, int regionOp);
 
-    /**
-     * Reset the paint
-     */
-    public abstract void reset();
 }
 

@@ -58,7 +58,7 @@ public class DrawTweenPath extends PaintOperation {
     public String toString() {
         return "DrawTweenPath " + mPath1Id + " " + mPath2Id
                 + " " + mTween + " " + mStart + " "
-                + "- " + mStop;
+                + "- " + mStop + ";";
     }
 
     public static class Companion implements CompanionOperation {

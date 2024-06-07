@@ -37,7 +37,7 @@ public class MatrixRestore extends PaintOperation {
 
     @Override
     public String toString() {
-        return "MatrixRestore";
+        return "MatrixRestore;";
     }
 
     public static class Companion implements CompanionOperation {
