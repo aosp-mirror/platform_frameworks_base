@@ -232,32 +232,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
 
         if (oldRootView != mResult.mRootView) {
-            if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) {
-                mWindowDecorViewHolder = new AppHandleViewHolder(
-                        mResult.mRootView,
-                        mOnCaptionTouchListener,
-                        mOnCaptionButtonClickListener
-                );
-            } else if (mRelayoutParams.mLayoutResId
-                    == R.layout.desktop_mode_app_header) {
-                loadAppInfoIfNeeded();
-                mWindowDecorViewHolder = new AppHeaderViewHolder(
-                        mResult.mRootView,
-                        mOnCaptionTouchListener,
-                        mOnCaptionButtonClickListener,
-                        mOnCaptionLongClickListener,
-                        mOnCaptionGenericMotionListener,
-                        mAppName,
-                        mAppIconBitmap,
-                        () -> {
-                            if (!isMaximizeMenuActive()) {
-                                createMaximizeMenu();
-                            }
-                            return Unit.INSTANCE;
-                        });
-            } else {
-                throw new IllegalArgumentException("Unexpected layout resource id");
-            }
+            mWindowDecorViewHolder = createViewHolder();
         }
         Trace.beginSection("DesktopModeWindowDecoration#relayout-binding");
         mWindowDecorViewHolder.bindData(mTaskInfo);
@@ -268,16 +243,18 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             closeMaximizeMenu();
         }
 
-        final boolean isFreeform =
-                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
-        final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
-        if (!isDragResizeable) {
+        updateDragResizeListener(oldDecorationSurface);
+        updateMaximizeMenu(startT);
+        Trace.endSection(); // DesktopModeWindowDecoration#relayout
+    }
+
+    private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {
+        if (!isDragResizable(mTaskInfo)) {
             if (!mTaskInfo.positionInParent.equals(mPositionInParent)) {
                 // We still want to track caption bar's exclusion region on a non-resizeable task.
                 updateExclusionRegion();
             }
             closeDragResizeListener();
-            Trace.endSection(); // DesktopModeWindowDecoration#relayout
             return;
         }
 
@@ -311,15 +288,51 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion();
         }
+    }
 
-        if (isMaximizeMenuActive()) {
-            if (!mTaskInfo.isVisible()) {
-                closeMaximizeMenu();
-            } else {
-                mMaximizeMenu.positionMenu(calculateMaximizeMenuPosition(), startT);
-            }
+    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
+        final boolean isFreeform =
+                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
+        return isFreeform && taskInfo.isResizeable;
+    }
+
+    private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
+        if (!isDragResizable(mTaskInfo) || !isMaximizeMenuActive()) {
+            return;
         }
-        Trace.endSection(); // DesktopModeWindowDecoration#relayout
+        if (!mTaskInfo.isVisible()) {
+            closeMaximizeMenu();
+        } else {
+            mMaximizeMenu.positionMenu(calculateMaximizeMenuPosition(), startT);
+        }
+    }
+
+    private WindowDecorationViewHolder createViewHolder() {
+        if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) {
+            return new AppHandleViewHolder(
+                    mResult.mRootView,
+                    mOnCaptionTouchListener,
+                    mOnCaptionButtonClickListener
+            );
+        } else if (mRelayoutParams.mLayoutResId
+                == R.layout.desktop_mode_app_header) {
+            loadAppInfoIfNeeded();
+            return new AppHeaderViewHolder(
+                    mResult.mRootView,
+                    mOnCaptionTouchListener,
+                    mOnCaptionButtonClickListener,
+                    mOnCaptionLongClickListener,
+                    mOnCaptionGenericMotionListener,
+                    mAppName,
+                    mAppIconBitmap,
+                    () -> {
+                        if (!isMaximizeMenuActive()) {
+                            createMaximizeMenu();
+                        }
+                        return Unit.INSTANCE;
+                    });
+        }
+        throw new IllegalArgumentException("Unexpected layout resource id");
     }
 
     @VisibleForTesting
