@@ -107,6 +107,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -371,6 +372,7 @@ class MediaDataProcessor(
             .onStart { emit(Unit) }
             .map { allowMediaRecommendations() }
             .distinctUntilChanged()
+            .flowOn(backgroundDispatcher)
             // only track the most recent emission
             .collectLatest {
                 allowMediaRecommendations = it
