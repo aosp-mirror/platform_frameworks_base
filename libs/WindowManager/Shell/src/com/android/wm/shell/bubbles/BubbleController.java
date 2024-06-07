@@ -1551,6 +1551,12 @@ public class BubbleController implements ConfigurationChangeListener,
                     Log.w(TAG, "Tried to add a bubble to the stack but the stack is null");
                 }
             };
+        } else if (mBubbleData.isExpanded() && mBubbleData.getSelectedBubble() != null) {
+            callback = b -> {
+                if (b.getKey().equals(mBubbleData.getSelectedBubbleKey())) {
+                    mLayerView.showExpandedView(b);
+                }
+            };
         }
         for (int i = mBubbleData.getBubbles().size() - 1; i >= 0; i--) {
             Bubble bubble = mBubbleData.getBubbles().get(i);
