@@ -1548,16 +1548,20 @@ public final class DisplayManagerService extends SystemService {
         int flags = virtualDisplayConfig.getFlags();
         if (virtualDevice != null) {
             final VirtualDeviceManager vdm = mContext.getSystemService(VirtualDeviceManager.class);
-            try {
-                if (!vdm.isValidVirtualDeviceId(virtualDevice.getDeviceId())) {
-                    throw new SecurityException("Invalid virtual device");
+            if (vdm != null) {
+                try {
+                    if (!vdm.isValidVirtualDeviceId(virtualDevice.getDeviceId())) {
+                        throw new SecurityException("Invalid virtual device");
+                    }
+                } catch (RemoteException ex) {
+                    throw new SecurityException("Unable to validate virtual device");
                 }
-            } catch (RemoteException ex) {
-                throw new SecurityException("Unable to validate virtual device");
+                final VirtualDeviceManagerInternal localVdm =
+                        getLocalService(VirtualDeviceManagerInternal.class);
+                if (localVdm != null) {
+                    flags |= localVdm.getBaseVirtualDisplayFlags(virtualDevice);
+                }
             }
-            final VirtualDeviceManagerInternal localVdm =
-                    getLocalService(VirtualDeviceManagerInternal.class);
-            flags |= localVdm.getBaseVirtualDisplayFlags(virtualDevice);
         }
 
         if (surface != null && surface.isSingleBuffered()) {

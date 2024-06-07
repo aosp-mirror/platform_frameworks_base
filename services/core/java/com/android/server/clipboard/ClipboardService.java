@@ -253,7 +253,7 @@ public class ClipboardService extends SystemService {
     }
 
     private void registerVirtualDeviceListener() {
-        if (mVirtualDeviceListener != null) {
+        if (mVdm == null || mVirtualDeviceListener != null) {
             return;
         }
         mVirtualDeviceListener = new VirtualDeviceManager.VirtualDeviceListener() {
@@ -893,7 +893,8 @@ public class ClipboardService extends SystemService {
                 Slog.e(TAG, "RemoteException calling UserManager: " + e);
                 return null;
             }
-            if (deviceId != DEVICE_ID_DEFAULT && !mVdm.isValidVirtualDeviceId(deviceId)) {
+            if (deviceId != DEVICE_ID_DEFAULT
+                    && mVdm != null && !mVdm.isValidVirtualDeviceId(deviceId)) {
                 Slog.w(TAG, "getClipboardLocked called with invalid (possibly released) deviceId "
                         + deviceId);
                 return null;
@@ -1476,8 +1477,8 @@ public class ClipboardService extends SystemService {
             return;
         }
         // Don't notify if this access is coming from the privileged app which owns the device.
-        if (clipboard.deviceId != DEVICE_ID_DEFAULT && mVdmInternal.getDeviceOwnerUid(
-                clipboard.deviceId) == uid) {
+        if (clipboard.deviceId != DEVICE_ID_DEFAULT && mVdmInternal != null
+                && mVdmInternal.getDeviceOwnerUid(clipboard.deviceId) == uid) {
             return;
         }
         // Don't notify if already notified for this uid and clip.
@@ -1528,7 +1529,7 @@ public class ClipboardService extends SystemService {
     private ArraySet<Context> getToastContexts(Clipboard clipboard) throws IllegalStateException {
         ArraySet<Context> contexts = new ArraySet<>();
 
-        if (clipboard.deviceId != DEVICE_ID_DEFAULT) {
+        if (mVdmInternal != null && clipboard.deviceId != DEVICE_ID_DEFAULT) {
             DisplayManager displayManager = getContext().getSystemService(DisplayManager.class);
 
             int topFocusedDisplayId = mWm.getTopFocusedDisplayId();
