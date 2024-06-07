@@ -917,7 +917,7 @@ public class ResolverActivity extends Activity implements
         mSystemWindowInsets = insets.getSystemWindowInsets();
 
         mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
-                mSystemWindowInsets.right, mSystemWindowInsets.bottom);
+                mSystemWindowInsets.right, 0);
 
         resetButtonBar();
 
@@ -946,7 +946,7 @@ public class ResolverActivity extends Activity implements
 
         if (mSystemWindowInsets != null) {
             mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
-                    mSystemWindowInsets.right, mSystemWindowInsets.bottom);
+                    mSystemWindowInsets.right, 0);
         }
     }
 
