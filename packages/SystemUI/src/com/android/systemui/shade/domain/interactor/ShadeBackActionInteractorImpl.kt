@@ -18,6 +18,7 @@ package com.android.systemui.shade.domain.interactor
 
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
@@ -36,11 +37,7 @@ constructor(
         if (shadeInteractor.isQsExpanded.value) {
             val key =
                 if (fullyCollapse || shadeInteractor.shadeMode.value is ShadeMode.Dual) {
-                    if (deviceEntryInteractor.isDeviceEntered.value) {
-                        Scenes.Gone
-                    } else {
-                        Scenes.Lockscreen
-                    }
+                    SceneFamilies.Home
                 } else {
                     Scenes.Shade
                 }
