@@ -981,6 +981,16 @@ flag {
 }
 
 flag {
+  name: "media_controls_lockscreen_shade_bug_fix"
+  namespace: "systemui"
+  description: "Use ShadeInteractor for media location changes"
+  bug: "319244625"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   namespace: "systemui"
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."
