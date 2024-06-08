@@ -316,6 +316,8 @@ public class FingerprintAuthenticationClient
 
                 if (getBiometricContext().isAwake()) {
                     mALSProbeCallback.getProbe().enable();
+                } else {
+                    mALSProbeCallback.getProbe().disable();
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
