@@ -361,13 +361,15 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Quali problemi ha l\'esperienza del dispositivo?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Seleziona il tipo di problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Regis. dello schermo"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"Prestazioni"</item>
-    <item msgid="1627504621139124393">"Interfaccia utente"</item>
-    <item msgid="8309220355268900335">"Batteria"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"Prestazioni"</string>
+    <string name="user_interface" msgid="3712869377953950887">"Interfaccia utente"</string>
+    <string name="thermal" msgid="6758074791325414831">"Termico"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modalità a una mano"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Apparecchi acustici"</string>
+    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
+    <skip />
+    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
+    <skip />
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Protesi uditive"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Accoppia nuovo dispositivo"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Fai clic per accoppiare un nuovo dispositivo"</string>
@@ -580,11 +582,11 @@
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Continua ad ascoltare"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Abbassa il volume"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"L\'app è bloccata sullo schermo"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Indietro e Panoramica."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Indietro e Home."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"La schermata rimane visibile finché non viene sbloccata. Per sbloccarla, tieni premuto Indietro e Panoramica."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La schermata rimane visibile finché non viene sbloccata. Per sbloccarla, tocca e tieni premuto Indietro e Home."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Rimarrà visibile finché non viene sbloccata. Scorri verso l\'alto e tieni premuto per sbloccarla."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Panoramica."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Home."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La schermata rimane visibile finché non viene sbloccata. Per sbloccarla, tieni premuto Panoramica."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La schermata rimane visibile finché non viene sbloccata. Per sbloccarla, tocca e tieni premuto Home."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"I dati personali potrebbero essere accessibili (ad esempio i contatti e i contenuti delle email)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"L\'app bloccata sullo schermo potrebbe aprire altre app."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Per sbloccare questa app, tocca e tieni premuti i pulsanti Indietro e Panoramica"</string>
@@ -727,11 +729,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Pulsante <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home page"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Indietro"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Freccia su"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Freccia giù"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Freccia sinistra"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Freccia destra"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Al centro"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Spazio"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Invio"</string>
@@ -1275,7 +1272,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"Piegato"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"Non piegato"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> batteria rimanente"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"Batteria dello stilo: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connetti lo stilo a un caricabatterie"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Batteria stilo in esaurimento"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videocamera"</string>
@@ -1318,23 +1315,16 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Recentemente in uso da <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"In uso da <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Recentemente in uso da <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
-    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"Sistema"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitasking"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Input"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Scorciatoie app"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibilità"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Scorciatoie da tastiera"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Scorciatoie per la ricerca"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icona Comprimi"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icona Espandi"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
     <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroilluminazione della tastiera"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Livello %1$d di %2$d"</string>

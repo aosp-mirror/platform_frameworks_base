@@ -550,6 +550,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void setImeOnBackInvokedDispatcher(
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         mImeDispatcher = imeDispatcher;
+        mImeDispatcher.setHandler(mHandler);
     }
 
     /** Returns true if a non-null {@link ImeOnBackInvokedDispatcher} has been set. **/

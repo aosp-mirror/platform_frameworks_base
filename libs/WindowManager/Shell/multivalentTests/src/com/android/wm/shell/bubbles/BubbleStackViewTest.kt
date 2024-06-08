@@ -456,5 +456,7 @@ class BubbleStackViewTest {
         override fun isStackExpanded(): Boolean = false
 
         override fun isShowingAsBubbleBar(): Boolean = false
+
+        override fun hideCurrentInputMethod() {}
     }
 }

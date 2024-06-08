@@ -361,13 +361,18 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"စက်အသုံးပြုမှု၏ မည်သည့်အပိုင်းကို သက်ရောက်သလဲ။"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ပြဿနာအမျိုးအစား ရွေးရန်"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ဖန်သားပြင်ရိုက်ကူးရန်"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"စွမ်းဆောင်ရည်"</item>
-    <item msgid="1627504621139124393">"သုံးသူအတွက် ကြားခံစနစ်"</item>
-    <item msgid="8309220355268900335">"ဘက်ထရီ"</item>
-  </string-array>
+    <!-- no translation found for performance (6552785217174378320) -->
+    <skip />
+    <!-- no translation found for user_interface (3712869377953950887) -->
+    <skip />
+    <!-- no translation found for thermal (6758074791325414831) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"လက်တစ်ဖက်သုံးမုဒ်"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"နားကြားကိရိယာ"</string>
+    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
+    <skip />
+    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
+    <skip />
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"နားကြားကိရိယာ"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"စက်အသစ်တွဲချိတ်ရန်"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"စက်အသစ် တွဲချိတ်ရန် နှိပ်ပါ"</string>
@@ -727,11 +732,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ခလုတ် <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"ပင်မ"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"နောက်သို့"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"အပေါ်ညွှန်မြား"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"အောက်ညွှန်မြား"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"ဘယ်ညွှန်မြား"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"ညာညွှန်မြား"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"ဌာန"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter ခလုတ်"</string>
@@ -1275,7 +1275,8 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ခေါက်ထားသည်"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ဖြန့်ထားသည်"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"ဘက်ထရီ <xliff:g id="PERCENTAGE">%s</xliff:g> ကျန်သေးသည်"</string>
+    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
+    <skip />
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"စတိုင်လပ်စ်ကို အားသွင်းကိရိယာနှင့် ချိတ်ဆက်ခြင်း"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"စတိုင်လပ်စ် ဘက်ထရီ အားနည်းနေသည်"</string>
     <string name="video_camera" msgid="7654002575156149298">"ဗီဒီယိုကင်မရာ"</string>
@@ -1327,6 +1328,8 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ရှာဖွေစာလုံး ဖြတ်လမ်း"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"လျှော့ပြရန် သင်္ကေတ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ပိုပြရန် သင်္ကေတ"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ကီးဘုတ်နောက်မီး"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"အဆင့် %2$d အနက် %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"အိမ်ထိန်းချုပ်မှုများ"</string>
