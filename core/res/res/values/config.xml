@@ -5668,6 +5668,9 @@
     <!-- The action name for the default profcollect report uploader app. -->
     <string name="config_defaultProfcollectReportUploaderAction" translatable="false"></string>
 
+    <!-- Names of packages excluded by Profcollect onCameraOpened observer. -->
+    <string-array name="config_profcollectOnCameraOpenedSkipPackages" translatable="false"></string-array>
+
     <!-- The default value used for RawContacts.ACCOUNT_NAME when contacts are inserted without this
          column set. These contacts are stored locally on the device and will not be removed even
          if no android.account.Account with this name exists. A null string will be used if the
