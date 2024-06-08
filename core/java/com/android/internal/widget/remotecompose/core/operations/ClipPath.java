@@ -24,11 +24,6 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 
 import java.util.List;
 
-/**
- * Defines a path that clips a the subsequent drawing commands
- * Use MatrixSave and MatrixRestore commands to remove clip
- * TODO allow id 0 to mean null?
- */
 public class ClipPath extends PaintOperation {
     public static final Companion COMPANION = new Companion();
     int mId;
@@ -99,3 +94,4 @@ public class ClipPath extends PaintOperation {
         context.clipPath(mId, mRegionOp);
     }
 }
+

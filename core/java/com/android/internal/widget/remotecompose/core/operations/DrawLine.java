@@ -15,28 +15,83 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.PaintOperation;
+import com.android.internal.widget.remotecompose.core.WireBuffer;
 
-public class DrawLine extends DrawBase4 {
-    public static final Companion COMPANION = new Companion(Operations.DRAW_LINE) {
-        @Override
-        public Operation construct(float x1,
-                                   float y1,
-                                   float x2,
-                                   float y2) {
-            return new DrawLine(x1, y1, x2, y2);
-        }
-    };
+import java.util.List;
+
+public class DrawLine extends PaintOperation {
+    public static final Companion COMPANION = new Companion();
+    float mX1;
+    float mY1;
+    float mX2;
+    float mY2;
 
     public DrawLine(
-            float left,
-            float top,
-            float right,
-            float bottom) {
-        super(left, top, right, bottom);
-        mName = "DrawLine";
+            float x1,
+            float y1,
+            float x2,
+            float y2) {
+        mX1 = x1;
+        mY1 = y1;
+        mX2 = x2;
+        mY2 = y2;
+    }
+
+    @Override
+    public void write(WireBuffer buffer) {
+        COMPANION.apply(buffer, mX1,
+                mY1,
+                mX2,
+                mY2);
+    }
+
+    @Override
+    public String toString() {
+        return "DrawArc " + mX1 + " " + mY1
+                + " " + mX2 + " " + mY2 + ";";
+    }
+
+    public static class Companion implements CompanionOperation {
+        private Companion() {
+        }
+
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            float x1 = buffer.readFloat();
+            float y1 = buffer.readFloat();
+            float x2 = buffer.readFloat();
+            float y2 = buffer.readFloat();
+
+            DrawLine op = new DrawLine(x1, y1, x2, y2);
+            operations.add(op);
+        }
+
+        @Override
+        public String name() {
+            return "DrawLine";
+        }
+
+        @Override
+        public int id() {
+            return Operations.DRAW_LINE;
+        }
+
+        public void apply(WireBuffer buffer,
+                          float x1,
+                          float y1,
+                          float x2,
+                          float y2) {
+            buffer.start(Operations.DRAW_LINE);
+            buffer.writeFloat(x1);
+            buffer.writeFloat(y1);
+            buffer.writeFloat(x2);
+            buffer.writeFloat(y2);
+        }
     }
 
     @Override

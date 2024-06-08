@@ -15,36 +15,88 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.PaintOperation;
+import com.android.internal.widget.remotecompose.core.WireBuffer;
 
-/**
- * Support clip with a rectangle
- */
-public class ClipRect extends DrawBase4 {
-    public static final Companion COMPANION =
-            new Companion(Operations.CLIP_RECT) {
-                @Override
-                public Operation construct(float x1,
-                                           float y1,
-                                           float x2,
-                                           float y2) {
-                    return new ClipRect(x1, y1, x2, y2);
-                }
-            };
+import java.util.List;
+
+public class ClipRect extends PaintOperation {
+    public static final Companion COMPANION = new Companion();
+    float mLeft;
+    float mTop;
+    float mRight;
+    float mBottom;
 
     public ClipRect(
             float left,
             float top,
             float right,
             float bottom) {
-        super(left, top, right, bottom);
-        mName = "ClipRect";
+        mLeft = left;
+        mTop = top;
+        mRight = right;
+        mBottom = bottom;
+
+    }
+
+    @Override
+    public void write(WireBuffer buffer) {
+        COMPANION.apply(buffer, mLeft, mTop, mRight, mBottom);
+    }
+
+    @Override
+    public String toString() {
+        return "ClipRect " + mLeft + " " + mTop
+                + " " + mRight + " " + mBottom + ";";
+    }
+
+    public static class Companion implements CompanionOperation {
+        private Companion() {
+        }
+
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            float sLeft = buffer.readFloat();
+            float srcTop = buffer.readFloat();
+            float srcRight = buffer.readFloat();
+            float srcBottom = buffer.readFloat();
+
+            ClipRect op = new ClipRect(sLeft, srcTop, srcRight, srcBottom);
+            operations.add(op);
+        }
+
+        @Override
+        public String name() {
+            return "ClipRect";
+        }
+
+        @Override
+        public int id() {
+            return Operations.CLIP_RECT;
+        }
+
+        public void apply(WireBuffer buffer,
+                          float left,
+                          float top,
+                          float right,
+                          float bottom) {
+            buffer.start(Operations.CLIP_RECT);
+            buffer.writeFloat(left);
+            buffer.writeFloat(top);
+            buffer.writeFloat(right);
+            buffer.writeFloat(bottom);
+        }
     }
 
     @Override
     public void paint(PaintContext context) {
-        context.clipRect(mX1, mY1, mX2, mY2);
+        context.clipRect(mLeft,
+                mTop,
+                mRight,
+                mBottom);
     }
 }

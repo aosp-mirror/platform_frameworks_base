@@ -85,7 +85,6 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         mDocument.initializeContext(mARContext);
         setContentDescription(mDocument.getDocument().getContentDescription());
         requestLayout();
-        invalidate();
     }
 
     AndroidRemoteContext mARContext = new AndroidRemoteContext();
@@ -120,7 +119,8 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         removeAllViews();
     }
 
-    public interface ClickCallbacks {
+
+    public  interface ClickCallbacks {
         void click(int id, String metadata);
     }
 
@@ -213,9 +213,6 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         setMeasuredDimension(w, h);
     }
 
-    private int mCount;
-    private long mTime = System.nanoTime();
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -227,17 +224,6 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         mARContext.mWidth = getWidth();
         mARContext.mHeight = getHeight();
         mDocument.paint(mARContext, mTheme);
-        if (mDebug) {
-            mCount++;
-            if (System.nanoTime() - mTime > 1000000000L) {
-                System.out.println(" count " + mCount + " fps");
-                mCount = 0;
-                mTime = System.nanoTime();
-            }
-        }
-        if (mDocument.needsRepaint() > 0) {
-            invalidate();
-        }
     }
 
 }
