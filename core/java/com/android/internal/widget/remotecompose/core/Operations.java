@@ -19,7 +19,6 @@ import com.android.internal.widget.remotecompose.core.operations.BitmapData;
 import com.android.internal.widget.remotecompose.core.operations.ClickArea;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
 import com.android.internal.widget.remotecompose.core.operations.ClipRect;
-import com.android.internal.widget.remotecompose.core.operations.ColorExpression;
 import com.android.internal.widget.remotecompose.core.operations.DrawArc;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmap;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmapInt;
@@ -29,12 +28,9 @@ import com.android.internal.widget.remotecompose.core.operations.DrawOval;
 import com.android.internal.widget.remotecompose.core.operations.DrawPath;
 import com.android.internal.widget.remotecompose.core.operations.DrawRect;
 import com.android.internal.widget.remotecompose.core.operations.DrawRoundRect;
-import com.android.internal.widget.remotecompose.core.operations.DrawText;
-import com.android.internal.widget.remotecompose.core.operations.DrawTextAnchored;
 import com.android.internal.widget.remotecompose.core.operations.DrawTextOnPath;
+import com.android.internal.widget.remotecompose.core.operations.DrawTextRun;
 import com.android.internal.widget.remotecompose.core.operations.DrawTweenPath;
-import com.android.internal.widget.remotecompose.core.operations.FloatConstant;
-import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.Header;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRotate;
@@ -46,10 +42,7 @@ import com.android.internal.widget.remotecompose.core.operations.PaintData;
 import com.android.internal.widget.remotecompose.core.operations.PathData;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.RootContentDescription;
-import com.android.internal.widget.remotecompose.core.operations.ShaderData;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
-import com.android.internal.widget.remotecompose.core.operations.TextFromFloat;
-import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntMap;
 
@@ -74,10 +67,9 @@ public class Operations {
     public static final int DRAW_BITMAP = 44;
     public static final int DRAW_BITMAP_INT = 66;
     public static final int DATA_BITMAP = 101;
-    public static final int DATA_SHADER = 45;
     public static final int DATA_TEXT = 102;
 
-    /////////////////////////////=====================
+/////////////////////////////=====================
     public static final int CLIP_PATH = 38;
     public static final int CLIP_RECT = 39;
     public static final int PAINT_VALUES = 40;
@@ -99,12 +91,6 @@ public class Operations {
     public static final int MATRIX_SAVE = 130;
     public static final int MATRIX_RESTORE = 131;
     public static final int MATRIX_SET = 132;
-    public static final int DATA_FLOAT = 80;
-    public static final int ANIMATED_FLOAT = 81;
-    public static final int DRAW_TEXT_ANCHOR = 133;
-    public static final int COLOR_EXPRESSIONS = 134;
-    public static final int TEXT_FROM_FLOAT = 135;
-    public static final int TEXT_MERGE = 136;
 
     /////////////////////////////////////////======================
     public static IntMap<CompanionOperation> map = new IntMap<>();
@@ -128,7 +114,7 @@ public class Operations {
         map.put(DRAW_RECT, DrawRect.COMPANION);
         map.put(DRAW_ROUND_RECT, DrawRoundRect.COMPANION);
         map.put(DRAW_TEXT_ON_PATH, DrawTextOnPath.COMPANION);
-        map.put(DRAW_TEXT_RUN, DrawText.COMPANION);
+        map.put(DRAW_TEXT_RUN, DrawTextRun.COMPANION);
         map.put(DRAW_TWEEN_PATH, DrawTweenPath.COMPANION);
         map.put(DATA_PATH, PathData.COMPANION);
         map.put(PAINT_VALUES, PaintData.COMPANION);
@@ -140,13 +126,6 @@ public class Operations {
         map.put(MATRIX_TRANSLATE, MatrixTranslate.COMPANION);
         map.put(CLIP_PATH, ClipPath.COMPANION);
         map.put(CLIP_RECT, ClipRect.COMPANION);
-        map.put(DATA_SHADER, ShaderData.COMPANION);
-        map.put(DATA_FLOAT, FloatConstant.COMPANION);
-        map.put(ANIMATED_FLOAT, FloatExpression.COMPANION);
-        map.put(DRAW_TEXT_ANCHOR, DrawTextAnchored.COMPANION);
-        map.put(COLOR_EXPRESSIONS, ColorExpression.COMPANION);
-        map.put(TEXT_FROM_FLOAT, TextFromFloat.COMPANION);
-        map.put(TEXT_MERGE, TextMerge.COMPANION);
 
     }
 

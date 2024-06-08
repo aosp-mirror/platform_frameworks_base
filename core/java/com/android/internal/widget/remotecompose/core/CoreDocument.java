@@ -30,7 +30,7 @@ public class CoreDocument {
 
     ArrayList<Operation> mOperations;
     RemoteComposeState mRemoteComposeState = new RemoteComposeState();
-    TimeVariables mTimeVariables = new TimeVariables();
+
     // Semantic version of the document
     Version mVersion = new Version(0, 1, 0);
 
@@ -70,7 +70,6 @@ public class CoreDocument {
 
     public void setWidth(int width) {
         this.mWidth = width;
-        mRemoteComposeState.setWindowWidth(width);
     }
 
     public int getHeight() {
@@ -79,8 +78,6 @@ public class CoreDocument {
 
     public void setHeight(int height) {
         this.mHeight = height;
-        mRemoteComposeState.setWindowHeight(height);
-
     }
 
     public RemoteComposeBuffer getBuffer() {
@@ -114,21 +111,21 @@ public class CoreDocument {
     /**
      * Sets the way the player handles the content
      *
-     * @param scroll    set the horizontal behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
+     * @param scroll set the horizontal behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
      * @param alignment set the alignment of the content (TOP|CENTER|BOTTOM|START|END)
-     * @param sizing    set the type of sizing for the content (NONE|SIZING_LAYOUT|SIZING_SCALE)
-     * @param mode      set the mode of sizing, either LAYOUT modes or SCALE modes
-     *                  the LAYOUT modes are:
-     *                  - LAYOUT_MATCH_PARENT
-     *                  - LAYOUT_WRAP_CONTENT
-     *                  or adding an horizontal mode and a vertical mode:
-     *                  - LAYOUT_HORIZONTAL_MATCH_PARENT
-     *                  - LAYOUT_HORIZONTAL_WRAP_CONTENT
-     *                  - LAYOUT_HORIZONTAL_FIXED
-     *                  - LAYOUT_VERTICAL_MATCH_PARENT
-     *                  - LAYOUT_VERTICAL_WRAP_CONTENT
-     *                  - LAYOUT_VERTICAL_FIXED
-     *                  The LAYOUT_*_FIXED modes will use the intrinsic document size
+     * @param sizing set the type of sizing for the content (NONE|SIZING_LAYOUT|SIZING_SCALE)
+     * @param mode set the mode of sizing, either LAYOUT modes or SCALE modes
+     *             the LAYOUT modes are:
+     *             - LAYOUT_MATCH_PARENT
+     *             - LAYOUT_WRAP_CONTENT
+     *             or adding an horizontal mode and a vertical mode:
+     *             - LAYOUT_HORIZONTAL_MATCH_PARENT
+     *             - LAYOUT_HORIZONTAL_WRAP_CONTENT
+     *             - LAYOUT_HORIZONTAL_FIXED
+     *             - LAYOUT_VERTICAL_MATCH_PARENT
+     *             - LAYOUT_VERTICAL_WRAP_CONTENT
+     *             - LAYOUT_VERTICAL_FIXED
+     *             The LAYOUT_*_FIXED modes will use the intrinsic document size
      */
     public void setRootContentBehavior(int scroll, int alignment, int sizing, int mode) {
         this.mContentScroll = scroll;
@@ -141,8 +138,8 @@ public class CoreDocument {
      * Given dimensions w x h of where to paint the content, returns the corresponding scale factor
      * according to the contentSizing information
      *
-     * @param w           horizontal dimension of the rendering area
-     * @param h           vertical dimension of the rendering area
+     * @param w horizontal dimension of the rendering area
+     * @param h vertical dimension of the rendering area
      * @param scaleOutput will contain the computed scale factor
      */
     public void computeScale(float w, float h, float[] scaleOutput) {
@@ -157,43 +154,37 @@ public class CoreDocument {
                     float scale = Math.min(1f, Math.min(scaleX, scaleY));
                     contentScaleX = scale;
                     contentScaleY = scale;
-                }
-                break;
+                } break;
                 case RootContentBehavior.SCALE_FIT: {
                     float scaleX = w / mWidth;
                     float scaleY = h / mHeight;
                     float scale = Math.min(scaleX, scaleY);
                     contentScaleX = scale;
                     contentScaleY = scale;
-                }
-                break;
+                } break;
                 case RootContentBehavior.SCALE_FILL_WIDTH: {
                     float scale = w / mWidth;
                     contentScaleX = scale;
                     contentScaleY = scale;
-                }
-                break;
+                } break;
                 case RootContentBehavior.SCALE_FILL_HEIGHT: {
                     float scale = h / mHeight;
                     contentScaleX = scale;
                     contentScaleY = scale;
-                }
-                break;
+                } break;
                 case RootContentBehavior.SCALE_CROP: {
                     float scaleX = w / mWidth;
                     float scaleY = h / mHeight;
                     float scale = Math.max(scaleX, scaleY);
                     contentScaleX = scale;
                     contentScaleY = scale;
-                }
-                break;
+                } break;
                 case RootContentBehavior.SCALE_FILL_BOUNDS: {
                     float scaleX = w / mWidth;
                     float scaleY = h / mHeight;
                     contentScaleX = scaleX;
                     contentScaleY = scaleY;
-                }
-                break;
+                } break;
                 default:
                     // nothing
             }
@@ -206,10 +197,10 @@ public class CoreDocument {
      * Given dimensions w x h of where to paint the content, returns the corresponding translation
      * according to the contentAlignment information
      *
-     * @param w               horizontal dimension of the rendering area
-     * @param h               vertical dimension of the rendering area
-     * @param contentScaleX   the horizontal scale we are going to use for the content
-     * @param contentScaleY   the vertical scale we are going to use for the content
+     * @param w horizontal dimension of the rendering area
+     * @param h vertical dimension of the rendering area
+     * @param contentScaleX the horizontal scale we are going to use for the content
+     * @param contentScaleY the vertical scale we are going to use for the content
      * @param translateOutput will contain the computed translation
      */
     private void computeTranslate(float w, float h, float contentScaleX, float contentScaleY,
@@ -224,32 +215,26 @@ public class CoreDocument {
         switch (horizontalContentAlignment) {
             case RootContentBehavior.ALIGNMENT_START: {
                 // nothing
-            }
-            break;
+            } break;
             case RootContentBehavior.ALIGNMENT_HORIZONTAL_CENTER: {
                 translateX = (w - contentWidth) / 2f;
-            }
-            break;
+            } break;
             case RootContentBehavior.ALIGNMENT_END: {
                 translateX = w - contentWidth;
-            }
-            break;
+            } break;
             default:
                 // nothing (same as alignment_start)
         }
         switch (verticalContentAlignment) {
             case RootContentBehavior.ALIGNMENT_TOP: {
                 // nothing
-            }
-            break;
+            } break;
             case RootContentBehavior.ALIGNMENT_VERTICAL_CENTER: {
                 translateY = (h - contentHeight) / 2f;
-            }
-            break;
+            } break;
             case RootContentBehavior.ALIGNMENT_BOTTOM: {
                 translateY = h - contentHeight;
-            }
-            break;
+            } break;
             default:
                 // nothing (same as alignment_top)
         }
@@ -306,13 +291,7 @@ public class CoreDocument {
             this.mMetadata = metadata;
         }
 
-        /**
-         * Returns true if x,y coordinate is within bounds
-         * @param x x-coordinate
-         * @param y y-coordinate
-         * @return x,y coordinate is within bounds
-         */
-        public boolean contains(float x, float y) {
+        public boolean contains(float x, float y)  {
             return x >= mLeft && x < mRight
                     && y >= mTop && y < mBottom;
         }
@@ -362,22 +341,16 @@ public class CoreDocument {
     public void initializeContext(RemoteContext context) {
         mRemoteComposeState.reset();
         mClickAreas.clear();
-        mRemoteComposeState.setNextId(RemoteComposeState.START_ID);
+
         context.mDocument = this;
         context.mRemoteComposeState = mRemoteComposeState;
+
         // mark context to be in DATA mode, which will skip the painting ops.
         context.mMode = RemoteContext.ContextMode.DATA;
-        mTimeVariables.updateTime(context);
-
-        for (Operation op : mOperations) {
-            if (op instanceof VariableSupport) {
-                ((VariableSupport) op).updateVariables(context);
-                ((VariableSupport) op).registerListening(context);
-            }
+        for (Operation op: mOperations) {
             op.apply(context);
         }
         context.mMode = RemoteContext.ContextMode.UNSET;
-
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -402,7 +375,7 @@ public class CoreDocument {
      * @param minorVersion minor version number, increased when adding new features
      * @param patch        patch level, increased upon bugfixes
      */
-    void setVersion(int majorVersion, int minorVersion, int patch) {
+    void  setVersion(int majorVersion, int minorVersion, int patch) {
         mVersion = new Version(majorVersion, minorVersion, patch);
     }
 
@@ -416,13 +389,13 @@ public class CoreDocument {
      * the click coordinates will be the one reported; the order of addition of those click areas
      * is therefore meaningful.
      *
-     * @param id                 the id of the area, which will be reported on click
+     * @param id       the id of the area, which will be reported on click
      * @param contentDescription the content description (used for accessibility)
-     * @param left               the left coordinate of the click area (in pixels)
-     * @param top                the top coordinate of the click area (in pixels)
-     * @param right              the right coordinate of the click area (in pixels)
-     * @param bottom             the bottom coordinate of the click area (in pixels)
-     * @param metadata           arbitrary metadata associated with the are, also reported on click
+     * @param left     the left coordinate of the click area (in pixels)
+     * @param top      the top coordinate of the click area (in pixels)
+     * @param right    the right coordinate of the click area (in pixels)
+     * @param bottom   the bottom coordinate of the click area (in pixels)
+     * @param metadata arbitrary metadata associated with the are, also reported on click
      */
     public void addClickArea(int id, String contentDescription,
                              float left, float top, float right, float bottom, String metadata) {
@@ -444,7 +417,7 @@ public class CoreDocument {
      * listeners.
      */
     public void onClick(float x, float y) {
-        for (ClickAreaRepresentation clickArea : mClickAreas) {
+        for (ClickAreaRepresentation clickArea: mClickAreas) {
             if (clickArea.contains(x, y)) {
                 warnClickListeners(clickArea);
             }
@@ -457,7 +430,7 @@ public class CoreDocument {
      * @param id the click area id
      */
     public void performClick(int id) {
-        for (ClickAreaRepresentation clickArea : mClickAreas) {
+        for (ClickAreaRepresentation clickArea: mClickAreas) {
             if (clickArea.mId == id) {
                 warnClickListeners(clickArea);
             }
@@ -468,36 +441,17 @@ public class CoreDocument {
      * Warn click listeners when a click area is activated
      */
     private void warnClickListeners(ClickAreaRepresentation clickArea) {
-        for (ClickCallbacks listener : mClickListeners) {
+        for (ClickCallbacks listener: mClickListeners) {
             listener.click(clickArea.mId, clickArea.mMetadata);
         }
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        for (Operation op : mOperations) {
-            builder.append(op.toString());
-            builder.append("\n");
-        }
-        return builder.toString();
-    }
-
-    //////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     // Painting
-    //////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     private final float[] mScaleOutput = new float[2];
     private final float[] mTranslateOutput = new float[2];
-    private int mRepaintNext = -1; // delay to next repaint -1 = don't 1 = asap
-
-    /**
-     * Returns > 0 if it needs to repaint
-     * @return
-     */
-    public int needsRepaint() {
-        return mRepaintNext;
-    }
 
     /**
      * Paint the document
@@ -521,11 +475,6 @@ public class CoreDocument {
             context.mPaintContext.translate(mTranslateOutput[0], mTranslateOutput[1]);
             context.mPaintContext.scale(mScaleOutput[0], mScaleOutput[1]);
         }
-        mTimeVariables.updateTime(context);
-        context.loadFloat(RemoteContext.ID_WINDOW_WIDTH, getWidth());
-        context.loadFloat(RemoteContext.ID_WINDOW_HEIGHT, getHeight());
-        mRepaintNext = context.updateOps();
-
         for (Operation op : mOperations) {
             // operations will only be executed if no theme is set (ie UNSPECIFIED)
             // or the theme is equal as the one passed in argument to paint.

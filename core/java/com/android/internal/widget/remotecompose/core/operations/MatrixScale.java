@@ -15,30 +15,74 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.PaintOperation;
+import com.android.internal.widget.remotecompose.core.WireBuffer;
 
-public class MatrixScale extends DrawBase4 {
-    public static final Companion COMPANION =
-            new Companion(Operations.MATRIX_SCALE) {
-                @Override
-                public Operation construct(float scaleX,
-                                           float scaleY,
-                                           float centerX,
-                                           float centerY
-                ) {
-                    return new MatrixScale(scaleX, scaleY, centerX, centerY);
-                }
-            };
+import java.util.List;
+
+public class MatrixScale extends PaintOperation {
+    public static final Companion COMPANION = new Companion();
+    float mScaleX, mScaleY;
+    float mCenterX, mCenterY;
 
     public MatrixScale(float scaleX, float scaleY, float centerX, float centerY) {
-        super(scaleX, scaleY, centerX, centerY);
-        mName = "MatrixScale";
+        mScaleX = scaleX;
+        mScaleY = scaleY;
+        mCenterX = centerX;
+        mCenterY = centerY;
+    }
+
+    @Override
+    public void write(WireBuffer buffer) {
+        COMPANION.apply(buffer, mScaleX, mScaleY, mCenterX, mCenterY);
+    }
+
+    @Override
+    public String toString() {
+        return "MatrixScale " + mScaleY + ", " + mScaleY + ";";
+    }
+
+    public static class Companion implements CompanionOperation {
+        private Companion() {
+        }
+
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            float scaleX = buffer.readFloat();
+            float scaleY = buffer.readFloat();
+            float centerX = buffer.readFloat();
+            float centerY = buffer.readFloat();
+            MatrixScale op = new MatrixScale(scaleX, scaleY, centerX, centerY);
+            operations.add(op);
+        }
+
+        @Override
+        public String name() {
+            return "Matrix";
+        }
+
+        @Override
+        public int id() {
+            return Operations.MATRIX_SCALE;
+        }
+
+        public void apply(WireBuffer buffer, float scaleX, float scaleY,
+                float centerX, float centerY) {
+            buffer.start(Operations.MATRIX_SCALE);
+            buffer.writeFloat(scaleX);
+            buffer.writeFloat(scaleY);
+            buffer.writeFloat(centerX);
+            buffer.writeFloat(centerY);
+
+        }
     }
 
     @Override
     public void paint(PaintContext context) {
-        context.matrixScale(mX1, mY1, mX2, mY2);
+        context.mtrixScale(mScaleX, mScaleY, mCenterX, mCenterY);
     }
 }

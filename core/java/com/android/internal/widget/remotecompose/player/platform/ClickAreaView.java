@@ -20,6 +20,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.view.View;
 
+
 /**
  * Implementation for the click handling
  */
@@ -38,6 +39,7 @@ class ClickAreaView extends View {
         this.mDebug = debug;
         setContentDescription(contentDescription);
     }
+
 
     public void setDebug(boolean value) {
         if (mDebug != value) {

@@ -44,13 +44,11 @@ public class TextData implements Operation {
 
     @Override
     public String toString() {
-        return "TextData[" + mTextId + "] = \""
-                + Utils.trimString(mText, 10) + "\"";
+        return "TEXT DATA " + mTextId + "\"" + mText + "\"";
     }
 
     public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
+        private Companion() {}
 
         @Override
         public String name() {
