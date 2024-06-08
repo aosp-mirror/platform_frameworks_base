@@ -803,6 +803,7 @@ public class AccessibilityManagerServiceTest {
                 ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
 
         mA11yms.performAccessibilityShortcut(
+                Display.DEFAULT_DISPLAY, HARDWARE,
                 ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
         mTestableLooper.processAllMessages();
 
@@ -821,6 +822,7 @@ public class AccessibilityManagerServiceTest {
                 ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
 
         mA11yms.performAccessibilityShortcut(
+                Display.DEFAULT_DISPLAY, HARDWARE,
                 ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
         mTestableLooper.processAllMessages();
 
