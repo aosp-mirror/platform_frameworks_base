@@ -44,6 +44,7 @@ import android.app.ondeviceintelligence.IProcessingSignal;
 import android.app.ondeviceintelligence.IResponseCallback;
 import android.app.ondeviceintelligence.IStreamingResponseCallback;
 import android.app.ondeviceintelligence.ITokenInfoCallback;
+import android.app.ondeviceintelligence.InferenceInfo;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -127,6 +128,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     private static final String NAMESPACE_ON_DEVICE_INTELLIGENCE = "ondeviceintelligence";
 
     private static final String SYSTEM_PACKAGE = "android";
+    private static final long MAX_AGE_MS = TimeUnit.HOURS.toMillis(3);
 
 
     private final Executor resourceClosingExecutor = Executors.newCachedThreadPool();
@@ -138,7 +140,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     private final Context mContext;
     protected final Object mLock = new Object();
 
-
+    private final InferenceInfoStore mInferenceInfoStore;
     private RemoteOnDeviceSandboxedInferenceService mRemoteInferenceService;
     private RemoteOnDeviceIntelligenceService mRemoteOnDeviceIntelligenceService;
     volatile boolean mIsServiceEnabled;
@@ -170,6 +172,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         super(context);
         mContext = context;
         mTemporaryServiceNames = new String[0];
+        mInferenceInfoStore = new InferenceInfoStore(MAX_AGE_MS);
     }
 
     @Override
@@ -220,6 +223,14 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             @Override
             public String getRemoteServicePackageName() {
                 return OnDeviceIntelligenceManagerService.this.getRemoteConfiguredPackageName();
+            }
+
+            @Override
+            public List<InferenceInfo> getLatestInferenceInfo(long startTimeEpochMillis) {
+                mContext.enforceCallingPermission(
+                        Manifest.permission.DUMP, TAG);
+                return OnDeviceIntelligenceManagerService.this.getLatestInferenceInfo(
+                        startTimeEpochMillis);
             }
 
             @Override
@@ -434,7 +445,8 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                                 service.requestTokenInfo(callerUid, feature,
                                         request,
                                         wrapCancellationFuture(cancellationSignalFuture),
-                                        wrapWithValidation(tokenInfoCallback, future));
+                                        wrapWithValidation(tokenInfoCallback, future,
+                                                mInferenceInfoStore));
                                 return future.orTimeout(getIdleTimeoutMs(), TimeUnit.MILLISECONDS);
                             });
                     result.whenCompleteAsync((c, e) -> BundleUtil.tryCloseResource(request),
@@ -480,7 +492,8 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                                         wrapCancellationFuture(cancellationSignalFuture),
                                         wrapProcessingFuture(processingSignalFuture),
                                         wrapWithValidation(responseCallback,
-                                                resourceClosingExecutor, future));
+                                                resourceClosingExecutor, future,
+                                                mInferenceInfoStore));
                                 return future.orTimeout(getIdleTimeoutMs(), TimeUnit.MILLISECONDS);
                             });
                     result.whenCompleteAsync((c, e) -> BundleUtil.tryCloseResource(request),
@@ -525,7 +538,8 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                                         wrapCancellationFuture(cancellationSignalFuture),
                                         wrapProcessingFuture(processingSignalFuture),
                                         wrapWithValidation(streamingCallback,
-                                                resourceClosingExecutor, future));
+                                                resourceClosingExecutor, future,
+                                                mInferenceInfoStore));
                                 return future.orTimeout(getIdleTimeoutMs(), TimeUnit.MILLISECONDS);
                             });
                     result.whenCompleteAsync((c, e) -> BundleUtil.tryCloseResource(request),
@@ -846,6 +860,10 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 && (serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) == 0;
     }
 
+    private List<InferenceInfo> getLatestInferenceInfo(long startTimeEpochMillis) {
+        return mInferenceInfoStore.getLatestInferenceInfo(startTimeEpochMillis);
+    }
+
     @Nullable
     public String getRemoteConfiguredPackageName() {
         try {
@@ -1066,7 +1084,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     }
 
     private void setRemoteInferenceServiceUid(int remoteInferenceServiceUid) {
-        synchronized (mLock){
+        synchronized (mLock) {
             this.remoteInferenceServiceUid = remoteInferenceServiceUid;
         }
     }

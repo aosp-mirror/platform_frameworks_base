@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.ondeviceintelligence;
+package android.app.ondeviceintelligence;
 
-public interface OnDeviceIntelligenceManagerInternal {
-    /**
-     * Gets the uid for the process that is currently hosting the
-     * {@link android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService} registered on
-     * the device.
-     */
-    int getInferenceServiceUid();
-}
+/**
+  * @hide
+  */
+parcelable InferenceInfo;
