@@ -687,7 +687,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         mSpManager = injector.getSyntheticPasswordManager(mStorage);
         mUnifiedProfilePasswordCache = injector.getUnifiedProfilePasswordCache(mKeyStore);
-        mBiometricDeferredQueue = new BiometricDeferredQueue(mSpManager, mHandler);
+        mBiometricDeferredQueue = new BiometricDeferredQueue(mSpManager);
 
         mRebootEscrowManager = injector.getRebootEscrowManager(new RebootEscrowCallbacks(),
                 mStorage);
