@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar.buttons;
+package com.android.systemui.navigationbar.views.buttons;
 
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
@@ -59,7 +59,6 @@ import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.navigationbar.NavBarButtonClickLogger;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.navigationbar.KeyButtonRipple;

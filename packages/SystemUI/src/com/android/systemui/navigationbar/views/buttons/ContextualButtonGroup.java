@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar.buttons;
+package com.android.systemui.navigationbar.views.buttons;
 
 import android.annotation.IdRes;
 import android.annotation.NonNull;

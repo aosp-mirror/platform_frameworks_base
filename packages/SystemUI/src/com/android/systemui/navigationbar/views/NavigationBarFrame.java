@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar;
+package com.android.systemui.navigationbar.views;
 
 import static android.view.MotionEvent.ACTION_OUTSIDE;
 
@@ -26,7 +26,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
-import com.android.systemui.navigationbar.buttons.DeadZone;
+import com.android.systemui.navigationbar.views.buttons.DeadZone;
 
 public class NavigationBarFrame extends FrameLayout {
 

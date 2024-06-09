@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar.buttons;
+package com.android.systemui.navigationbar.views.buttons;
 
 import static com.android.app.animation.Interpolators.LINEAR;
 
@@ -24,8 +24,6 @@ import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
 import android.view.ViewGroup;
-
-import com.android.systemui.navigationbar.NavBarButtonClickLogger;
 
 import java.util.ArrayList;
 

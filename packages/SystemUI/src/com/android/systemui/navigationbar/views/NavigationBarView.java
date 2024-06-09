@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar;
+package com.android.systemui.navigationbar.views;
 
 import static android.inputmethodservice.InputMethodService.canImeRenderGesturalNavButtons;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
@@ -66,12 +66,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
-import com.android.systemui.navigationbar.buttons.ContextualButton;
-import com.android.systemui.navigationbar.buttons.ContextualButtonGroup;
-import com.android.systemui.navigationbar.buttons.DeadZone;
-import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
-import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
+import com.android.systemui.navigationbar.ScreenPinningNotify;
+import com.android.systemui.navigationbar.views.buttons.ButtonDispatcher;
+import com.android.systemui.navigationbar.views.buttons.ContextualButton;
+import com.android.systemui.navigationbar.views.buttons.ContextualButtonGroup;
+import com.android.systemui.navigationbar.views.buttons.DeadZone;
+import com.android.systemui.navigationbar.views.buttons.KeyButtonDrawable;
+import com.android.systemui.navigationbar.views.buttons.NearestTouchFrame;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.res.R;

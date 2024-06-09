@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar;
+package com.android.systemui.navigationbar.views;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
@@ -117,11 +117,15 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.views.buttons.NavBarButtonClickLogger;
+import com.android.systemui.navigationbar.NavBarHelper;
 import com.android.systemui.navigationbar.NavigationBarComponent.NavigationBarScope;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener;
-import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
-import com.android.systemui.navigationbar.buttons.DeadZone;
-import com.android.systemui.navigationbar.buttons.KeyButtonView;
+import com.android.systemui.navigationbar.views.buttons.ButtonDispatcher;
+import com.android.systemui.navigationbar.views.buttons.DeadZone;
+import com.android.systemui.navigationbar.views.buttons.KeyButtonView;
+import com.android.systemui.navigationbar.views.buttons.NavbarOrientationTrackingLogger;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -1992,7 +1996,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         return mSamplingBounds;
     }
 
-    void setNavigationBarLumaSamplingEnabled(boolean enable) {
+    public void setNavigationBarLumaSamplingEnabled(boolean enable) {
         if (enable) {
             mRegionSamplingHelper.start(mSamplingBounds);
         } else {
