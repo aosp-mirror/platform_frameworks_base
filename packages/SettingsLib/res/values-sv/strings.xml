@@ -318,7 +318,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Tillåt skenplatser"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Aktivera inspektion av visningsattribut"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Håll alltid mobildata aktiverad, även när wifi är aktiverat (så att du snabbt kan byta mellan nätverk)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Använd maskinvaruacceleration för internetdelning om tillgängligt"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Använd hårdvaruacceleration för internetdelning om tillgängligt"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Ska USB-felsökning tillåtas?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-felsökning ska endast användas i utvecklingssyfte. Använd den för att kopiera data mellan datorn och enheten, installera appar på enheten utan meddelanden och läsa loggdata."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Vill du tillåta trådlös felsökning?"</string>
@@ -346,7 +346,7 @@
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Felsökaren måste ansluta till appen först"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Indata"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Ritning"</string>
-    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Maskinvaruaccelererad rendering"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Hårdvaruaccelererad rendering"</string>
     <string name="media_category" msgid="8122076702526144053">"Media"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Övervakning"</string>
     <string name="strict_mode" msgid="889864762140862437">"Strikt läge aktiverat"</string>
@@ -359,8 +359,8 @@
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Hela fönstret blinkar vid uppdatering"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Visa visningsuppdatering"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Visningar blinkar i fönster vid ritningar"</string>
-    <string name="show_hw_layers_updates" msgid="5268370750002509767">"Visa maskinvaruskiktuppdatering"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Låt maskinvaruskikt blinka grönt vid uppdateringar"</string>
+    <string name="show_hw_layers_updates" msgid="5268370750002509767">"Visa hårdvaruskiktuppdatering"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Låt hårdvaruskikt blinka grönt vid uppdateringar"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Felsök GPU-överritning"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Inaktivera HW-överlagringar"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Använd alltid GPU för skärmsammansättning"</string>

@@ -501,7 +501,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Қолданба босатылды."</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Қоңырау шалу"</string>
     <string name="stream_system" msgid="7663148785370565134">"Жүйе"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Шылдырлау"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Шылдыр"</string>
     <string name="stream_music" msgid="2188224742361847580">"Мультимедиа"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Дабыл"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Хабарландыру"</string>

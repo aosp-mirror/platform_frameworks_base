@@ -258,7 +258,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"బగ్ రిపోర్ట్‌ను తీసుకోవడానికి పవర్ మెనూలో బటన్‌ను చూపు"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"యాక్టివ్‌గా ఉంచు"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"ఛార్జ్ చేస్తున్నప్పుడు స్క్రీన్ ఎప్పటికీ నిద్రావస్థలోకి వెళ్లదు"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"బ్లూటూత్ HCI స్నూప్ లాగ్‌ను ఎనేబుల్ చేయి"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"బ్లూటూత్ HCI స్నూప్ లాగ్‌ను ఎనేబుల్ చేయండి"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"బ్లూటూత్‌ ప్యాకెట్‌లను క్యాప్చర్ చేయి. (ఈ సెట్టింగ్‌ని మార్చిన తర్వాత బ్లూటూత్‌ని టోగుల్ చేయండి)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM అన్‌లాకింగ్"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"బూట్‌లోడర్ అన్‌లాక్ కావడానికి అనుమతించండి"</string>
