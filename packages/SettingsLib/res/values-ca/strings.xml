@@ -260,9 +260,9 @@
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla no entra mai en mode de repòs si el dispositiu s\'està carregant"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Activa el registre de Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Captura els paquets de Bluetooth. Activa el Bluetooth un cop hagis canviat aquesta opció."</string>
-    <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueig d\'OEM"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueig OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Permet desbloquejar el bootloader"</string>
-    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permetre el desbloqueig d\'OEM?"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permetre el desbloqueig OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ADVERTIMENT: les funcions de protecció del dispositiu no funcionaran mentre aquesta opció estigui activada."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Selecciona una aplicació d\'ubicació simulada"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"No s\'ha definit cap aplicació d\'ubicació simulada"</string>

@@ -1872,7 +1872,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"確定"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"省電模式會開啟深色主題，並限制或關閉背景活動、某些視覺效果、特定功能和部分網路連線。"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"省電模式會開啟深色主題，並限制或關閉背景活動、某些視覺效果、特定功能和部分網路連線。"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。目前使用中的單一應用程式仍可存取資料，但存取頻率可能會變低。舉例來說，圖片可能要等到你輕觸後才會顯示。"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你使用中的一個應用程式仍可存取資料，但存取頻率可能會變低。舉例來說，圖片可能要等到你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{1 分鐘 (直到 {formattedTime})}other{# 分鐘 (直到 {formattedTime})}}"</string>
