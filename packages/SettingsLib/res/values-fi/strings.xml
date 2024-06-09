@@ -595,7 +595,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profiilin tiedot"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Ennen kuin voit luoda rajoitetun profiilin, määritä näytön lukitus, joka suojelee sovelluksiasi ja henkilökohtaisia tietojasi."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Aseta lukitus"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Vaihda tähän käyttäjään: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Vaihda käyttäjään: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Luodaan uutta käyttäjää…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Luodaan uutta vierasta…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Uuden käyttäjän luominen epäonnistui"</string>
@@ -674,8 +674,8 @@
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Valitse näppäimistöasettelu"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Oletus"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Näytön käynnistys"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Salli näytön käynnistäminen"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Salli sovelluksen käynnistää näyttö. Jos sovellus saa luvan, se voi käynnistää näytön itsenäisesti milloin tahansa."</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Salli näytön laittaminen päälle"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Salli sovelluksen laittaa näyttö päälle. Jos sovellus saa luvan, se voi laittaa näytön päälle itsenäisesti milloin tahansa."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Lopetetaanko <xliff:g id="APP_NAME">%1$s</xliff:g>-sovelluksen lähettäminen?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Jos lähetät <xliff:g id="SWITCHAPP">%1$s</xliff:g>-sovellusta tai muutat ulostuloa, nykyinen lähetyksesi loppuu"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Lähetä <xliff:g id="SWITCHAPP">%1$s</xliff:g>-sovellusta"</string>

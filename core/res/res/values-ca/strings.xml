@@ -2311,7 +2311,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No es pot accedir a la càmera del telèfon des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No es pot accedir a la càmera de la tauleta des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"No s\'hi pot accedir mentre s\'està reproduint en continu. Prova-ho al telèfon."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No es pot veure el mode d\'imatge sobre imatge durant la reproducció en línia"</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No es pot veure el mode d\'imatge sobre imatge durant l\'estríming"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Valor predeterminat del sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARGETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Permís del perfil del rellotge perquè l\'aplicació complementària gestioni els rellotges"</string>
