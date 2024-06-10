@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
@@ -62,7 +60,6 @@ import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANG
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
-import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -77,7 +74,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -196,26 +192,6 @@ public class SizeCompatTests extends WindowTestsBase {
     private void setUpDisplaySizeWithApp(int dw, int dh) {
         final TestDisplayContent.Builder builder = new TestDisplayContent.Builder(mAtm, dw, dh);
         setUpApp(builder.build());
-    }
-
-    @Test
-    public void testCleanLetterboxConfigListenerWhenTranslucentIsDestroyed() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2000, 1000);
-        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        // Translucent Activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
-                .build();
-        mTask.addChild(translucentActivity);
-
-        translucentActivity.setState(DESTROYED, "testing");
-        translucentActivity.removeImmediately();
-
-        assertFalse(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
     }
 
     @Test
@@ -363,42 +339,6 @@ public class SizeCompatTests extends WindowTestsBase {
         }
     }
 
-    @Test
-    public void testApplyStrategyAgainWhenOpaqueIsDestroyed() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2000, 1000);
-        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        // Launch another opaque activity
-        final ActivityRecord opaqueActivity = new ActivityBuilder(mAtm)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
-                .build();
-        mTask.addChild(opaqueActivity);
-        // Transparent activity strategy not applied
-        assertFalse(opaqueActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
-
-        // Launch translucent Activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
-                .build();
-        mTask.addChild(translucentActivity);
-        // Transparent strategy applied
-        assertTrue(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
-
-        spyOn(translucentActivity.mLetterboxUiController);
-        clearInvocations(translucentActivity.mLetterboxUiController);
-
-        // We destroy the first opaque activity
-        opaqueActivity.setState(DESTROYED, "testing");
-        opaqueActivity.removeImmediately();
-
-        // Check that updateInheritedLetterbox() is invoked again
-        verify(translucentActivity.mLetterboxUiController).updateInheritedLetterbox();
-    }
-
     // TODO(b/333663877): Enable test after fix
     @Test
     @RequiresFlagsDisabled({Flags.FLAG_INSETS_DECOUPLED_CONFIGURATION})
@@ -447,283 +387,6 @@ public class SizeCompatTests extends WindowTestsBase {
         doubleClick.accept(10);
         doubleClick.accept(10);
         assertEquals(cutoutHeight, innerBoundsOf.apply(mActivity).top);
-    }
-
-    @Test
-    public void testResetOpaqueReferenceWhenOpaqueIsDestroyed() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2000, 1000);
-        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-
-        // Launch translucent Activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
-                .build();
-        mTask.addChild(translucentActivity);
-        // Transparent strategy applied
-        assertTrue(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
-        assertNotNull(translucentActivity.mLetterboxUiController.mFirstOpaqueActivityBeneath);
-
-        spyOn(translucentActivity.mLetterboxUiController);
-        clearInvocations(translucentActivity.mLetterboxUiController);
-
-        // We destroy the first opaque activity
-        mActivity.removeImmediately();
-
-        // Check that updateInheritedLetterbox() is invoked again
-        verify(translucentActivity.mLetterboxUiController).updateInheritedLetterbox();
-        assertNull(translucentActivity.mLetterboxUiController.mFirstOpaqueActivityBeneath);
-    }
-
-    @Test
-    public void testNotApplyStrategyAgainWhenOpaqueIsNotDestroyed() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2000, 1000);
-        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        // Launch another opaque activity
-        final ActivityRecord opaqueActivity = new ActivityBuilder(mAtm)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
-                .build();
-        mTask.addChild(opaqueActivity);
-        // Transparent activity strategy not applied
-        assertFalse(opaqueActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
-
-        // Launch translucent Activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
-                .build();
-        mTask.addChild(translucentActivity);
-        // Transparent strategy applied
-        assertTrue(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
-
-        spyOn(translucentActivity.mLetterboxUiController);
-        clearInvocations(translucentActivity.mLetterboxUiController);
-
-        // Check that updateInheritedLetterbox() is invoked again
-        verify(translucentActivity.mLetterboxUiController, never()).updateInheritedLetterbox();
-    }
-
-    @Test
-    public void testApplyStrategyToTranslucentActivities() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2000, 1000);
-        prepareUnresizable(mActivity, 1.5f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.info.setMinAspectRatio(1.2f);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        // Translucent Activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
-                .setMinAspectRatio(1.1f)
-                .setMaxAspectRatio(3f)
-                .build();
-        mTask.addChild(translucentActivity);
-        // We check bounds
-        final Rect opaqueBounds = mActivity.getConfiguration().windowConfiguration.getBounds();
-        final Rect translucentRequestedBounds = translucentActivity.getRequestedOverrideBounds();
-        assertEquals(opaqueBounds, translucentRequestedBounds);
-        // We check orientation
-        final int translucentOrientation =
-                translucentActivity.getRequestedConfigurationOrientation();
-        assertEquals(ORIENTATION_PORTRAIT, translucentOrientation);
-        // We check aspect ratios
-        assertEquals(1.2f, translucentActivity.getMinAspectRatio(), 0.00001f);
-        assertEquals(1.5f, translucentActivity.getMaxAspectRatio(), 0.00001f);
-    }
-
-    @Test
-    public void testApplyStrategyToTranslucentActivitiesRetainsWindowConfigurationProperties() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2000, 1000);
-        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        // Translucent Activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .build();
-        final Configuration requestedConfig =
-                translucentActivity.getRequestedOverrideConfiguration();
-        final WindowConfiguration translucentWinConf = requestedConfig.windowConfiguration;
-        translucentWinConf.setActivityType(ACTIVITY_TYPE_STANDARD);
-        translucentWinConf.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        translucentWinConf.setAlwaysOnTop(true);
-        translucentActivity.onRequestedOverrideConfigurationChanged(requestedConfig);
-
-        mTask.addChild(translucentActivity);
-
-        // The original override of WindowConfiguration should keep.
-        assertEquals(ACTIVITY_TYPE_STANDARD, translucentActivity.getActivityType());
-        assertEquals(WINDOWING_MODE_MULTI_WINDOW, translucentWinConf.getWindowingMode());
-        assertTrue(translucentWinConf.isAlwaysOnTop());
-        // Unless display is going to be rotated, it should always inherit from parent.
-        assertEquals(ROTATION_UNDEFINED, translucentWinConf.getDisplayRotation());
-    }
-
-    @Test
-    public void testApplyStrategyToMultipleTranslucentActivities() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2000, 1000);
-        prepareUnresizable(mActivity, 1.5f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.info.setMinAspectRatio(1.2f);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        // Translucent Activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
-                .setMinAspectRatio(1.1f)
-                .setMaxAspectRatio(3f)
-                .build();
-        mTask.addChild(translucentActivity);
-        // We check bounds
-        final Rect opaqueBounds = mActivity.getConfiguration().windowConfiguration.getBounds();
-        final Rect translucentRequestedBounds = translucentActivity.getRequestedOverrideBounds();
-        assertEquals(opaqueBounds, translucentRequestedBounds);
-        // Launch another translucent activity
-        final ActivityRecord translucentActivity2 = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
-                .build();
-        mTask.addChild(translucentActivity2);
-        // We check bounds
-        final Rect translucent2RequestedBounds = translucentActivity2.getRequestedOverrideBounds();
-        assertEquals(opaqueBounds, translucent2RequestedBounds);
-    }
-
-    @Test
-    public void testNotApplyStrategyToTranslucentActivitiesOverEmbeddedActivities() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2000, 1000);
-        mActivity.info.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        // Mock the activity as embedded without additional TaskFragment layer in the task for
-        // simplicity.
-        doReturn(true).when(mActivity).isEmbedded();
-        // Translucent Activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent).build();
-        doReturn(false).when(translucentActivity).matchParentBounds();
-        mTask.addChild(translucentActivity);
-        // Check the strategy has not being applied
-        assertFalse(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
-    }
-
-    @Test
-    public void testTranslucentActivitiesDontGoInSizeCompatMode() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2800, 1400);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        prepareUnresizable(mActivity, -1f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
-        // Rotate to put activity in size compat mode.
-        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
-        assertTrue(mActivity.inSizeCompatMode());
-        // Rotate back
-        rotateDisplay(mActivity.mDisplayContent, ROTATION_0);
-        assertFalse(mActivity.inSizeCompatMode());
-        // We launch a transparent activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
-                .build();
-        mTask.addChild(translucentActivity);
-        // It should not be in SCM
-        assertFalse(translucentActivity.inSizeCompatMode());
-        // We rotate again
-        rotateDisplay(translucentActivity.mDisplayContent, ROTATION_90);
-        assertFalse(translucentActivity.inSizeCompatMode());
-    }
-
-    @Test
-    public void testCheckOpaqueIsLetterboxedWhenStrategyIsApplied() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2000, 1000);
-        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        // Translucent Activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .build();
-        assertFalse(translucentActivity.fillsParent());
-        assertTrue(mActivity.fillsParent());
-        mActivity.finishing = true;
-        assertFalse(mActivity.occludesParent());
-        mTask.addChild(translucentActivity);
-        // The translucent activity won't inherit letterbox behavior from a finishing activity.
-        assertFalse(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
-    }
-
-    @Test
-    public void testTranslucentActivitiesWhenUnfolding() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2800, 1400);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(
-                true /* ignoreOrientationRequest */);
-        mActivity.mWmService.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
-                1.0f /*letterboxVerticalPositionMultiplier*/);
-        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
-        // We launch a transparent activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
-                .build();
-        mTask.addChild(translucentActivity);
-        assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
-
-        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        spyOn(mActivity);
-
-        // Halffold
-        setFoldablePosture(translucentActivity, true /* isHalfFolded */,
-                false /* isTabletop */);
-        verify(mActivity).recomputeConfiguration();
-        assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
-        clearInvocations(mActivity);
-
-        // Unfold
-        setFoldablePosture(translucentActivity, false /* isHalfFolded */,
-                false /* isTabletop */);
-        verify(mActivity).recomputeConfiguration();
-        assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
-    }
-
-    @Test
-    public void testTranslucentActivity_clearSizeCompatMode_inheritedCompatDisplayInsetsCleared() {
-        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
-        setUpDisplaySizeWithApp(2800, 1400);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        prepareUnresizable(mActivity, -1f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
-        // Rotate to put activity in size compat mode.
-        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
-        assertTrue(mActivity.inSizeCompatMode());
-
-        // We launch a transparent activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
-                .setActivityTheme(android.R.style.Theme_Translucent)
-                .setLaunchedFromUid(mActivity.getUid())
-                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
-                .build();
-        mTask.addChild(translucentActivity);
-
-        // The transparent activity inherits the compat display insets of the opaque activity
-        // beneath it
-        assertNotNull(translucentActivity.getCompatDisplayInsets());
-
-        // Clearing SCM should also clear the inherited compat display insets
-        translucentActivity.clearSizeCompatMode();
-        assertNull(translucentActivity.getCompatDisplayInsets());
     }
 
     @Test

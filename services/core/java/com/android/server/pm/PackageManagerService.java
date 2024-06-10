@@ -485,9 +485,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      */
     static final long WATCHDOG_TIMEOUT = 1000*60*10;     // ten minutes
 
-    // How long to wait for Lock in async writeSettings and writePackageList.
-    private static final long WRITE_LOCK_TIMEOUT_MS = 1000 * 10;   // 10 seconds
-
     /**
      * Default IncFs timeouts. Maximum values in IncFs is 1hr.
      *
@@ -1576,7 +1573,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    void scheduleWritePackageList(int userId) {
+    void scheduleWritePackageListLocked(int userId) {
         invalidatePackageInfoCache();
         if (!mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
             Message msg = mHandler.obtainMessage(WRITE_PACKAGE_LIST);
@@ -1628,41 +1625,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mSettings.writePackageRestrictions(dirtyUsers);
     }
 
-    private boolean tryUnderLock(boolean sync, long timeoutMs, Runnable runnable) {
-        try {
-            if (sync) {
-                mLock.lock();
-            } else if (!mLock.tryLock(timeoutMs, TimeUnit.MILLISECONDS)) {
-                return false;
-            }
-            try {
-                runnable.run();
-                return true;
-            } finally {
-                mLock.unlock();
-            }
-        } catch (InterruptedException e) {
-            Slog.e(TAG, "Failed to obtain mLock", e);
-        }
-        return false;
-    }
-
-    boolean tryWriteSettings(boolean sync) {
-        return tryUnderLock(sync, WRITE_LOCK_TIMEOUT_MS, () -> {
+    void writeSettings(boolean sync) {
+        synchronized (mLock) {
             mHandler.removeMessages(WRITE_SETTINGS);
             mBackgroundHandler.removeMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS);
             writeSettingsLPrTEMP(sync);
             synchronized (mDirtyUsers) {
                 mDirtyUsers.clear();
             }
-        });
+        }
     }
 
-    boolean tryWritePackageList(int userId) {
-        return tryUnderLock(/*sync=*/false, WRITE_LOCK_TIMEOUT_MS, () -> {
+    void writePackageList(int userId) {
+        synchronized (mLock) {
             mHandler.removeMessages(WRITE_PACKAGE_LIST);
             mSettings.writePackageListLPr(userId);
-        });
+        }
     }
 
     private static final Handler.Callback BACKGROUND_HANDLER_CALLBACK = new Handler.Callback() {
@@ -1723,7 +1701,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new PackageDexOptimizer(i.getInstaller(), i.getInstallLock(),
                         i.getContext(), "*dexopt*"),
                 (i, pm) -> new DexManager(i.getContext(), i.getPackageDexOptimizer(),
-                        i.getInstaller(), i.getInstallLock(), i.getDynamicCodeLogger()),
+                        i.getDynamicCodeLogger()),
                 (i, pm) -> new DynamicCodeLogger(i.getInstaller()),
                 (i, pm) -> new ArtManagerService(i.getContext(), i.getInstaller(),
                         i.getInstallLock()),
@@ -2139,8 +2117,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mPreferredActivityHelper = new PreferredActivityHelper(this, mBroadcastHelper);
         mResolveIntentHelper = new ResolveIntentHelper(mContext, mPreferredActivityHelper,
                 injector.getCompatibility(), mUserManager, mDomainVerificationManager,
-                mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity,
-                injector.getBackgroundHandler());
+                mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity);
         mDexOptHelper = new DexOptHelper(this);
         mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mBroadcastHelper,
                 mProtectedPackages);
@@ -2161,7 +2138,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         Computer computer = mLiveComputer;
         // CHECKSTYLE:OFF IndentationCheck
-        synchronized (mInstallLock) {
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
         // writer
         synchronized (mLock) {
             mHandler = injector.getHandler();
@@ -2695,7 +2672,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         final ResolveInfo resolveInfo = mResolveIntentHelper.resolveIntentInternal(computer, intent,
                 null, MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                0 /*privateResolveFlags*/, UserHandle.USER_SYSTEM, false, Binder.getCallingUid());
+                0 /*privateResolveFlags*/, UserHandle.USER_SYSTEM, false,
+                Binder.getCallingUid(), Binder.getCallingPid());
         if (resolveInfo == null ||
                 mResolveActivity.name.equals(resolveInfo.getComponentInfo().name)) {
             throw new RuntimeException("There must be exactly one uninstaller; found "
@@ -2810,7 +2788,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
         final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE);
         List<ResolveInfo> resolvers = snapshot.queryIntentServicesInternal(resolverIntent, null,
-                resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
+                resolveFlags, UserHandle.USER_SYSTEM, callingUid, Process.INVALID_PID,
+                /*includeInstantApps*/ false, /*resolveForStart*/ false);
         final int N = resolvers.size();
         if (N == 0) {
             if (DEBUG_INSTANT) {
@@ -2924,17 +2903,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * Blocking call to clear all cached app data above quota.
      */
     public void freeAllAppCacheAboveQuota(String volumeUuid) throws IOException {
-        synchronized (mInstallLock) {
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
             // To avoid refactoring Installer.freeCache() and InstalldNativeService.freeCache(),
             // Long.MAX_VALUE is passed as an argument which is used in neither of two methods
             // when FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES is set
-            try {
-                mInstaller.freeCache(volumeUuid, Long.MAX_VALUE, Installer.FLAG_FREE_CACHE_V2
-                        | Installer.FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES);
-            } catch (InstallerException ignored) {
-            }
+            mInstaller.freeCache(volumeUuid, Long.MAX_VALUE, Installer.FLAG_FREE_CACHE_V2
+                    | Installer.FLAG_FREE_CACHE_DEFY_TARGET_FREE_BYTES);
+        } catch (InstallerException ignored) {
         }
-        return;
     }
 
     /**
@@ -3069,9 +3045,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (mHandler.hasMessages(WRITE_SETTINGS)
                     || mBackgroundHandler.hasMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS)
                     || mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
-                while (!tryWriteSettings(/*sync=*/true)) {
-                    Slog.wtf(TAG, "Failed to write settings on shutdown");
-                }
+                writeSettings(/*sync=*/true);
             }
         }
     }
@@ -3671,7 +3645,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                 UserHandle.USER_SYSTEM,
                 /* callingUid= */ Process.myUid(),
-                /* includeInstantApps= */ false);
+                Process.INVALID_PID,
+                /* includeInstantApps= */ false,
+                /* resolveForStart */ false);
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
@@ -4425,13 +4401,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      */
     void createNewUser(int userId, @Nullable Set<String> userTypeInstallablePackages,
             String[] disallowedPackages) {
-        synchronized (mInstallLock) {
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
             mSettings.createNewUserLI(this, mInstaller, userId,
                     userTypeInstallablePackages, disallowedPackages);
         }
         synchronized (mLock) {
             scheduleWritePackageRestrictions(userId);
-            scheduleWritePackageList(userId);
+            scheduleWritePackageListLocked(userId);
             mAppsFilter.onUserCreated(snapshotComputer(), userId);
         }
     }
@@ -4751,7 +4727,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             freezePackage(packageName, UserHandle.USER_ALL,
                                     "clearApplicationProfileData",
                                     ApplicationExitInfo.REASON_OTHER, null /* request */)) {
-                synchronized (mInstallLock) {
+                try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
                     mAppDataHelper.clearAppProfilesLIF(pkg);
                 }
             }
@@ -4797,7 +4773,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     try (PackageFreezer freezer = freezePackage(packageName, UserHandle.USER_ALL,
                             "clearApplicationUserData",
                             ApplicationExitInfo.REASON_USER_REQUESTED, null /* request */)) {
-                        synchronized (mInstallLock) {
+                        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
                             succeeded = clearApplicationUserDataLIF(snapshotComputer(), packageName,
                                     userId);
                         }
@@ -4940,7 +4916,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             || hasAccessInstantApps == PackageManager.PERMISSION_GRANTED;
                 }
                 if (doClearData) {
-                    synchronized (mInstallLock) {
+                    try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
                         final int flags = FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL;
                         // Snapshot again after mInstallLock?
                         final AndroidPackage pkg = snapshotComputer().getPackage(packageName);
@@ -8055,16 +8031,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public void reconcileSdkData(@Nullable String volumeUuid, @NonNull String packageName,
             @NonNull List<String> subDirNames, int userId, int appId, int previousAppId,
             @NonNull String seInfo, int flags) throws IOException {
-        synchronized (mInstallLock) {
-            ReconcileSdkDataArgs args = mInstaller.buildReconcileSdkDataArgs(volumeUuid,
-                    packageName, subDirNames, userId, appId, seInfo,
-                    flags);
-            args.previousAppId = previousAppId;
-            try {
-                mInstaller.reconcileSdkData(args);
-            } catch (InstallerException e) {
-                throw new IOException(e.getMessage());
-            }
+        ReconcileSdkDataArgs args = mInstaller.buildReconcileSdkDataArgs(volumeUuid,
+                packageName, subDirNames, userId, appId, seInfo,
+                flags);
+        args.previousAppId = previousAppId;
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
+            mInstaller.reconcileSdkData(args);
+        } catch (InstallerException e) {
+            throw new IOException(e.getMessage());
         }
     }
 

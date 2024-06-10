@@ -1277,10 +1277,11 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     permissionName
                 )
             else ->
-                permissionAllowlist.getProductSignatureAppAllowlistState(
-                    packageName,
-                    permissionName
-                )
+                permissionAllowlist.getApexSignatureAppAllowlistState(packageName, permissionName)
+                    ?: permissionAllowlist.getProductSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
                     ?: permissionAllowlist.getVendorSignatureAppAllowlistState(
                         packageName,
                         permissionName

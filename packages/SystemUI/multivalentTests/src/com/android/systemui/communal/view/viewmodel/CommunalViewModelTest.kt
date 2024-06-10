@@ -46,6 +46,7 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
 import com.android.systemui.communal.ui.viewmodel.PopupType
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -61,6 +62,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
@@ -142,11 +144,13 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             selectedUserIndex = 0,
         )
         whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
+        whenever(mediaHost.visible).thenReturn(true)
 
         kosmos.powerInteractor.setAwakeForTest()
 
         underTest =
             CommunalViewModel(
+                kosmos.testDispatcher,
                 testScope,
                 context.resources,
                 kosmos.keyguardTransitionInteractor,
@@ -232,6 +236,45 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(4))
                 .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
+        }
+
+    @Test
+    fun communalContent_mediaHostVisible_umoIncluded() =
+        testScope.runTest {
+            // Media playing.
+            mediaRepository.mediaActive()
+
+            val communalContent by collectLastValue(underTest.communalContent)
+            assertThat(communalContent?.size).isEqualTo(2)
+            assertThat(communalContent?.get(0)).isInstanceOf(CommunalContentModel.Umo::class.java)
+        }
+
+    @Test
+    fun communalContent_mediaHostVisible_umoExcluded() =
+        testScope.runTest {
+            whenever(mediaHost.visible).thenReturn(false)
+            mediaHost.updateViewVisibility()
+            // Media playing.
+            mediaRepository.mediaActive()
+
+            val communalContent by collectLastValue(underTest.communalContent)
+            assertThat(communalContent?.size).isEqualTo(1)
+            assertThat(communalContent?.get(0))
+                .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
+        }
+
+    @Test
+    fun communalContent_mediaHostVisible_umoToggle() =
+        testScope.runTest {
+            mediaHost.updateViewVisibility()
+            mediaRepository.mediaActive()
+
+            val communalContent by collectValues(underTest.communalContent)
+
+            whenever(mediaHost.visible).thenReturn(false)
+            mediaHost.updateViewVisibility()
+
+            assertThat(communalContent.size).isEqualTo(1)
         }
 
     @Test

@@ -455,7 +455,7 @@ public final class KeyboardShortcuts {
         if (mReceivedAppShortcutGroups == null || mReceivedImeShortcutGroups == null) {
             return;
         }
-        List<KeyboardShortcutGroup> shortcutGroups = mReceivedAppShortcutGroups;
+        List<KeyboardShortcutGroup> shortcutGroups = new ArrayList<>(mReceivedAppShortcutGroups);
         shortcutGroups.addAll(mReceivedImeShortcutGroups);
         mReceivedAppShortcutGroups = null;
         mReceivedImeShortcutGroups = null;

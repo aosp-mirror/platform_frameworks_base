@@ -345,7 +345,7 @@ public class AppDataHelper {
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final String volumeUuid = vol.getFsUuid();
-            synchronized (mPm.mInstallLock) {
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
                 reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppsData);
             }
         }
@@ -505,8 +505,8 @@ public class AppDataHelper {
             storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
         }
         final List<String> deferPackages;
-        synchronized (mPm.mInstallLock) {
-           deferPackages = reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL,
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+            deferPackages = reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL,
                     UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
                     true /* onlyCoreApps */);
         }
@@ -541,7 +541,7 @@ public class AppDataHelper {
                     count++;
                 }
             }
-            synchronized (mPm.mInstallLock) {
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
                 executeBatchLI(batch);
             }
             traceLog.traceEnd();

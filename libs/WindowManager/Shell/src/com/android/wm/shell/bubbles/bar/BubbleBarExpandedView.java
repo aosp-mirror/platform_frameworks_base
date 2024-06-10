@@ -82,6 +82,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private static final int INVALID_TASK_ID = -1;
 
     private BubbleExpandedViewManager mManager;
+    private BubblePositioner mPositioner;
     private boolean mIsOverflow;
     private BubbleTaskViewHelper mBubbleTaskViewHelper;
     private BubbleBarMenuViewController mMenuViewController;
@@ -160,6 +161,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             boolean isOverflow,
             @Nullable BubbleTaskView bubbleTaskView) {
         mManager = expandedViewManager;
+        mPositioner = positioner;
         mIsOverflow = isOverflow;
 
         if (mIsOverflow) {
@@ -290,15 +292,27 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     }
 
     /**
-     * Hides the current modal menu view or collapses the bubble stack.
-     * Called from {@link BubbleBarLayerView}
+     * Hides the current modal menu if it is visible
+     * @return {@code true} if menu was visible and is hidden
      */
-    public void hideMenuOrCollapse() {
+    public boolean hideMenuIfVisible() {
         if (mMenuViewController.isMenuVisible()) {
-            mMenuViewController.hideMenu(/* animated = */ true);
-        } else {
-            mManager.collapseStack();
+            mMenuViewController.hideMenu(true /* animated */);
+            return true;
         }
+        return false;
+    }
+
+    /**
+     * Hides the IME if it is visible
+     * @return {@code true} if IME was visible
+     */
+    public boolean hideImeIfVisible() {
+        if (mPositioner.isImeVisible()) {
+            mManager.hideCurrentInputMethod();
+            return true;
+        }
+        return false;
     }
 
     /** Updates the bubble shown in the expanded view. */

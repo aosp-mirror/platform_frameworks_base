@@ -1120,6 +1120,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             publishBinderService(Context.INPUT_METHOD_SERVICE,
                     IInputMethodManagerImpl.create(service), false /*allowIsolated*/,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
+            if (Flags.refactorInsetsController()) {
+                mService.registerImeRequestedChangedListener();
+            }
         }
 
         @Override
@@ -1161,7 +1164,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             synchronized (ImfLock.class) {
                 mService.mUserDataRepository.getOrCreate(userId);
                 if (mService.mExperimentalConcurrentMultiUserModeEnabled) {
-                    if (mService.mCurrentUserId != userId) {
+                    if (mService.mCurrentUserId != userId && mService.mSystemReady) {
                         mService.experimentalInitializeVisibleBackgroundUserLocked(userId);
                     }
                 }
@@ -1547,8 +1550,29 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 final var unused = SystemServerInitThreadPool.submit(
                         AdditionalSubtypeMapRepository::startWriterThread,
                         "Start AdditionalSubtypeMapRepository's writer thread");
+
+                if (mExperimentalConcurrentMultiUserModeEnabled) {
+                    for (int userId : mUserManagerInternal.getUserIds()) {
+                        if (userId != mCurrentUserId) {
+                            experimentalInitializeVisibleBackgroundUserLocked(userId);
+                        }
+                    }
+                }
             }
         }
+    }
+
+    void registerImeRequestedChangedListener() {
+        mWindowManagerInternal.setOnImeRequestedChangedListener(
+                (windowToken, imeVisible) -> {
+                    if (Flags.refactorInsetsController()) {
+                        if (imeVisible) {
+                            showSoftInputInternal(windowToken);
+                        } else {
+                            hideSoftInputInternal(windowToken);
+                        }
+                    }
+                });
     }
 
     /**
@@ -1907,6 +1931,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     /**
+     * TODO(b/338404383) Remove
      * Called when {@link #resetCurrentMethodAndClientLocked(int)} invoked for clean-up states
      * before unbinding the current method.
      */
@@ -2002,16 +2027,23 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         setEnabledSessionLocked(session);
         session.mMethod.startInput(startInputToken, mCurInputConnection, mCurEditorInfo, restarting,
                 navButtonFlags, mCurImeDispatcher);
-        if (isShowRequestedForCurrentWindow()) {
-            if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
-            // Re-use current statsToken, if it exists.
-            final var statsToken = mCurStatsToken != null ? mCurStatsToken
+        if (Flags.refactorInsetsController()) {
+            if (isShowRequestedForCurrentWindow() && mImeBindingState != null
+                    && mImeBindingState.mFocusedWindow != null) {
+                showSoftInputInternal(mImeBindingState.mFocusedWindow);
+            }
+        } else {
+            if (isShowRequestedForCurrentWindow()) {
+                if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
+                // Re-use current statsToken, if it exists.
+                final var statsToken = mCurStatsToken != null ? mCurStatsToken
                     : createStatsTokenForFocusedClient(true /* show */,
                             SoftInputShowHideReason.ATTACH_NEW_INPUT);
-            mCurStatsToken = null;
-            showCurrentInputLocked(mImeBindingState.mFocusedWindow, statsToken,
-                    mVisibilityStateComputer.getShowFlags(), MotionEvent.TOOL_TYPE_UNKNOWN,
-                    null /* resultReceiver */, SoftInputShowHideReason.ATTACH_NEW_INPUT);
+                mCurStatsToken = null;
+                showCurrentInputLocked(mImeBindingState.mFocusedWindow, statsToken,
+                        mVisibilityStateComputer.getShowFlags(), MotionEvent.TOOL_TYPE_UNKNOWN,
+                        null /* resultReceiver */, SoftInputShowHideReason.ATTACH_NEW_INPUT);
+            }
         }
 
         final var curId = bindingController.getCurId();
@@ -2295,10 +2327,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @NonNull InputMethodBindingController bindingController, @NonNull ClientState cs) {
         if (bindingController.hasMainConnection()) {
             if (getCurMethodLocked() != null) {
-                // Return to client, and we will get back with it when
-                // we have had a session made for it.
-                requestClientSessionLocked(cs);
-                requestClientSessionForAccessibilityLocked(cs);
+                if (!Flags.useZeroJankProxy()) {
+                    // Return to client, and we will get back with it when
+                    // we have had a session made for it.
+                    requestClientSessionLocked(cs);
+                    requestClientSessionForAccessibilityLocked(cs);
+                }
                 return new InputBindResult(
                         InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
                         null, null, null,
@@ -2661,25 +2695,27 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final boolean canImeDrawsImeNavBar =
                 mImeDrawsImeNavBarRes != null && mImeDrawsImeNavBarRes.get() && hasNavigationBar;
         final boolean shouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherLocked(
-                InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE);
+                InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE,
+                mCurrentUserId);
         return (canImeDrawsImeNavBar ? InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR : 0)
                 | (shouldShowImeSwitcherWhenImeIsShown
                 ? InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN : 0);
     }
 
     @GuardedBy("ImfLock.class")
-    private boolean shouldShowImeSwitcherLocked(int visibility) {
+    private boolean shouldShowImeSwitcherLocked(int visibility, @UserIdInt int userId) {
         if (!mShowOngoingImeSwitcherForPhones) return false;
         // When the IME switcher dialog is shown, the IME switcher button should be hidden.
+        // TODO(b/305849394): Make mMenuController multi-user aware.
         if (mMenuController.getSwitchingDialogLocked() != null) return false;
         // When we are switching IMEs, the IME switcher button should be hidden.
-        final var bindingController = getInputMethodBindingController(mCurrentUserId);
+        final var bindingController = getInputMethodBindingController(userId);
         if (!Objects.equals(bindingController.getCurId(),
                 bindingController.getSelectedMethodId())) {
             return false;
         }
         if (mWindowManagerInternal.isKeyguardShowingAndNotOccluded()
-                && mWindowManagerInternal.isKeyguardSecure(mCurrentUserId)) {
+                && mWindowManagerInternal.isKeyguardSecure(userId)) {
             return false;
         }
         if ((visibility & InputMethodService.IME_ACTIVE) == 0
@@ -2696,7 +2732,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return false;
         }
 
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         List<InputMethodInfo> imes = settings.getEnabledInputMethodListWithFilter(
                 InputMethodInfo::shouldShowInInputMethodPicker);
         final int numImes = imes.size();
@@ -2811,14 +2847,22 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     // Caution! This method is called in this class. Handle multi-user carefully
     @GuardedBy("ImfLock.class")
     private void updateSystemUiLocked(int vis, int backDisposition) {
-        if (getCurTokenLocked() == null) {
+        updateSystemUiLocked(vis, backDisposition, mCurrentUserId);
+    }
+
+    @GuardedBy("ImfLock.class")
+    private void updateSystemUiLocked(int vis, int backDisposition, @UserIdInt int userId) {
+        final var bindingController = getInputMethodBindingController(userId);
+        final var curToken = bindingController.getCurToken();
+        if (curToken == null) {
             return;
         }
+        final int curTokenDisplayId = bindingController.getCurTokenDisplayId();
         if (DEBUG) {
             Slog.d(TAG, "IME window vis: " + vis
                     + " active: " + (vis & InputMethodService.IME_ACTIVE)
                     + " inv: " + (vis & InputMethodService.IME_INVISIBLE)
-                    + " displayId: " + getCurTokenDisplayIdLocked());
+                    + " displayId: " + curTokenDisplayId);
         }
         final IBinder focusedWindowToken = mImeBindingState != null
                 ? mImeBindingState.mFocusedWindow : null;
@@ -2837,17 +2881,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             } else {
                 vis &= ~InputMethodService.IME_VISIBLE_IMPERCEPTIBLE;
             }
-            final var curId = getInputMethodBindingController(mCurrentUserId).getCurId();
+            final var curId = bindingController.getCurId();
+            // TODO(b/305849394): Make mMenuController multi-user aware.
             if (mMenuController.getSwitchingDialogLocked() != null
-                    || !Objects.equals(curId, getSelectedMethodIdLocked())) {
+                    || !Objects.equals(curId, bindingController.getSelectedMethodId())) {
                 // When the IME switcher dialog is shown, or we are switching IMEs,
                 // the back button should be in the default state (as if the IME is not shown).
                 backDisposition = InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING;
             }
-            final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
+            final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis, userId);
             if (mStatusBarManagerInternal != null) {
-                mStatusBarManagerInternal.setImeWindowStatus(getCurTokenDisplayIdLocked(),
-                        getCurTokenLocked(), vis, backDisposition, needsToShowImeSwitcher);
+                mStatusBarManagerInternal.setImeWindowStatus(curTokenDisplayId,
+                        curToken, vis, backDisposition, needsToShowImeSwitcher);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2884,10 +2929,22 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      */
     @GuardedBy("ImfLock.class")
     void experimentalInitializeVisibleBackgroundUserLocked(@UserIdInt int userId) {
-        if (!mUserManagerInternal.isUserVisible(userId)) {
-            return;
-        }
         final var settings = InputMethodSettingsRepository.get(userId);
+
+        // Until we figure out what makes most sense, we enable all the pre-installed IMEs in
+        // concurrent multi-user IME mode.
+        String enabledImeIdsStr = settings.getEnabledInputMethodsStr();
+        for (var imi : settings.getMethodList()) {
+            if (!imi.isSystem()) {
+                return;
+            }
+            enabledImeIdsStr = InputMethodUtils.concatEnabledImeIds(enabledImeIdsStr, imi.getId());
+        }
+        if (!TextUtils.equals(settings.getEnabledInputMethodsStr(), enabledImeIdsStr)) {
+            settings.putEnabledInputMethodsStr(enabledImeIdsStr);
+        }
+
+        // Also update the currently-selected IME.
         String id = settings.getSelectedInputMethod();
         if (TextUtils.isEmpty(id)) {
             final InputMethodInfo imi = InputMethodInfoUtils.getMostApplicableDefaultIME(
@@ -2898,8 +2955,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             id = imi.getId();
             settings.putSelectedInputMethod(id);
         }
-        final var bindingController = getInputMethodBindingController(userId);
-        bindingController.setSelectedMethodId(id);
     }
 
     @GuardedBy("ImfLock.class")
@@ -3107,8 +3162,58 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
-                return showCurrentInputLocked(windowToken, statsToken, flags, lastClickToolType,
-                        resultReceiver, reason);
+                if (Flags.refactorInsetsController()) {
+                    boolean wasVisible = isInputShownLocked();
+                    if (mImeBindingState != null && mImeBindingState.mFocusedWindowClient != null
+                            && mImeBindingState.mFocusedWindowClient.mClient != null) {
+                        mImeBindingState.mFocusedWindowClient.mClient.setImeVisibility(true);
+                        if (resultReceiver != null) {
+                            resultReceiver.send(
+                                    wasVisible ? InputMethodManager.RESULT_UNCHANGED_SHOWN
+                                            : InputMethodManager.RESULT_SHOWN, null);
+                        }
+                        return true;
+                    }
+                    return false;
+                } else {
+                    return showCurrentInputLocked(windowToken, statsToken, flags, lastClickToolType,
+                            resultReceiver, reason);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            }
+        }
+    }
+
+    boolean showSoftInputInternal(IBinder windowToken) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInputInternal");
+        ImeTracing.getInstance().triggerManagerServiceDump(
+                "InputMethodManagerService#showSoftInput", mDumper);
+        synchronized (ImfLock.class) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
+                return showCurrentInputLocked(windowToken, null /* statsToken */, 0 /* flags */,
+                        0 /* lastClickTooType */, null /* resultReceiver */,
+                        SoftInputShowHideReason.SHOW_SOFT_INPUT);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            }
+        }
+    }
+
+    boolean hideSoftInputInternal(IBinder windowToken) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInputInternal");
+        ImeTracing.getInstance().triggerManagerServiceDump(
+                "InputMethodManagerService#hideSoftInput", mDumper);
+        synchronized (ImfLock.class) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
+                return hideCurrentInputLocked(windowToken, null /* statsToken */, 0 /* flags */,
+                        null /* resultReceiver */, SoftInputShowHideReason.HIDE_SOFT_INPUT);
             } finally {
                 Binder.restoreCallingIdentity(ident);
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -3474,8 +3579,23 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             try {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideSoftInput");
                 if (DEBUG) Slog.v(TAG, "Client requesting input be hidden");
-                return InputMethodManagerService.this.hideCurrentInputLocked(windowToken,
-                        statsToken, flags, resultReceiver, reason);
+                if (Flags.refactorInsetsController()) {
+                    if (mImeBindingState != null && mImeBindingState.mFocusedWindowClient != null
+                            && mImeBindingState.mFocusedWindowClient.mClient != null) {
+                        boolean wasVisible = isInputShownLocked();
+                        // TODO add windowToken to interface
+                        mImeBindingState.mFocusedWindowClient.mClient.setImeVisibility(false);
+                        if (resultReceiver != null) {
+                            resultReceiver.send(wasVisible ? InputMethodManager.RESULT_HIDDEN
+                                    : InputMethodManager.RESULT_UNCHANGED_HIDDEN, null);
+                        }
+                        return true;
+                    }
+                    return false;
+                } else {
+                    return InputMethodManagerService.this.hideCurrentInputLocked(windowToken,
+                            statsToken, flags, resultReceiver, reason);
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -4622,8 +4742,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         ImeTracker.PHASE_SERVER_CURRENT_ACTIVE_IME);
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    hideCurrentInputLocked(mLastImeTargetWindow, statsToken, flags,
-                            null /* resultReceiver */, reason);
+                    if (Flags.refactorInsetsController()) {
+                        mCurClient.mClient.setImeVisibility(false);
+                        // TODO we will loose the flags here
+                        if (mImeBindingState != null
+                                && mImeBindingState.mFocusedWindowClient != null
+                                && mImeBindingState.mFocusedWindowClient.mClient != null) {
+                            mImeBindingState.mFocusedWindowClient.mClient.setImeVisibility(false);
+                        }
+                    } else {
+                        hideCurrentInputLocked(mLastImeTargetWindow, statsToken, flags,
+                                null /* resultReceiver */, reason);
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -4648,8 +4778,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         ImeTracker.PHASE_SERVER_CURRENT_ACTIVE_IME);
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    showCurrentInputLocked(mLastImeTargetWindow, statsToken, flags,
-                            MotionEvent.TOOL_TYPE_UNKNOWN, null /* resultReceiver */, reason);
+                    if (Flags.refactorInsetsController()) {
+                        mCurClient.mClient.setImeVisibility(false);
+                        // TODO we will loose the flags here
+                        if (mImeBindingState != null
+                                && mImeBindingState.mFocusedWindowClient != null
+                                && mImeBindingState.mFocusedWindowClient.mClient != null) {
+                            mImeBindingState.mFocusedWindowClient.mClient.setImeVisibility(true);
+                        }
+                    } else {
+                        showCurrentInputLocked(mLastImeTargetWindow, statsToken, flags,
+                                MotionEvent.TOOL_TYPE_UNKNOWN, null /* resultReceiver */, reason);
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -4780,8 +4920,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             case MSG_HIDE_ALL_INPUT_METHODS:
                 synchronized (ImfLock.class) {
-                    @SoftInputShowHideReason final int reason = (int) msg.obj;
-                    hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */, reason);
+                    if (Flags.refactorInsetsController()) {
+                        if (mImeBindingState != null
+                                && mImeBindingState.mFocusedWindowClient != null
+                                && mImeBindingState.mFocusedWindowClient.mClient != null) {
+                            mImeBindingState.mFocusedWindowClient.mClient.setImeVisibility(false);
+                        }
+                    } else {
+                        @SoftInputShowHideReason final int reason = (int) msg.obj;
+                        hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
+                                reason);
+                    }
                 }
                 return true;
             case MSG_REMOVE_IME_SURFACE: {
@@ -6446,8 +6595,19 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     final List<InputMethodInfo> nextEnabledImes;
                     final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
                     if (userId == mCurrentUserId) {
-                        hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
-                                SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND);
+                        if (Flags.refactorInsetsController()) {
+                            if (mImeBindingState != null
+                                    && mImeBindingState.mFocusedWindowClient != null
+                                    && mImeBindingState.mFocusedWindowClient.mClient != null) {
+                                mImeBindingState.mFocusedWindowClient.mClient.setImeVisibility(
+                                        false);
+                            } else {
+                                // TODO(b329229469): ImeTracker?
+                            }
+                        } else {
+                            hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
+                                    SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND);
+                        }
                         final var bindingController = getInputMethodBindingController(userId);
                         bindingController.unbindCurrentMethod();
 

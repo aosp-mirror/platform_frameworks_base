@@ -267,3 +267,13 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+  name: "use_private_space_icon_in_biometric_prompt"
+  namespace: "profile_experiences"
+  description: "Update the biometric prompt from generic Settings icon to private space icon"
+  bug: "333528540"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -98,8 +98,8 @@ constructor(
                                     trySend(Unit)
                                 }
                             }
-                        secureSettings.registerContentObserverForUser(SETTING, observer, userId)
-                        awaitClose { secureSettings.unregisterContentObserver(observer) }
+                        secureSettings.registerContentObserverForUserSync(SETTING, observer, userId)
+                        awaitClose { secureSettings.unregisterContentObserverSync(observer) }
                     }
                     .map { loadTilesFromSettings(userId) }
                     .flowOn(backgroundDispatcher)

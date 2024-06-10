@@ -126,7 +126,7 @@ public class ViewFrameRateTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
-    public void touchBoostDisable() throws Throwable {
+    public void frameBoostDisable() throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             long now = SystemClock.uptimeMillis();
             MotionEvent down = MotionEvent.obtain(
@@ -146,6 +146,7 @@ public class ViewFrameRateTest {
 
         mActivityRule.runOnUiThread(() -> {
             assertFalse(mViewRoot.getIsTouchBoosting());
+            assertFalse(mViewRoot.getIsFrameRateBoosting());
         });
     }
 
@@ -498,12 +499,9 @@ public class ViewFrameRateTest {
                         toolkitFrameRateDefaultNormalReadOnly() ? FRAME_RATE_CATEGORY_NORMAL
                                 : FRAME_RATE_CATEGORY_HIGH;
             } else {
-                // intermittent
-                // Even though this is not a small View, step 3 is triggered by this flag, which
-                // brings intermittent to LOW
-                expectedCategory = toolkitFrameRateBySizeReadOnly()
-                        ? FRAME_RATE_CATEGORY_LOW
-                        : FRAME_RATE_CATEGORY_NORMAL;
+                // intermittent.
+                // The expected category is normal.
+                expectedCategory = FRAME_RATE_CATEGORY_NORMAL;
             }
             mActivityRule.runOnUiThread(() -> {
                 mMovingView.invalidate();

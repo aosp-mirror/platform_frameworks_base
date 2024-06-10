@@ -515,7 +515,9 @@ public class AuthContainerView extends LinearLayout
         } else {
             throw new IllegalStateException("Unknown credential type: " + credentialType);
         }
-        mCredentialView = factory.inflate(layoutResourceId, null, false);
+        // TODO(b/288175645): Once AuthContainerView is removed, set 0dp in credential view xml
+        //  files with the corresponding left/right or top/bottom constraints being set to "parent".
+        mCredentialView = factory.inflate(layoutResourceId, mLayout, false);
 
         // The background is used for detecting taps / cancelling authentication. Since the
         // credential view is full-screen and should not be canceled from background taps,
@@ -552,8 +554,6 @@ public class AuthContainerView extends LinearLayout
         }
 
         mWakefulnessLifecycle.addObserver(this);
-        mPanelInteractionDetector.enable(
-                () -> animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED));
         if (constraintBp()) {
             // Do nothing on attachment with constraintLayout
         } else if (mPromptViewModel.getPromptKind().getValue().isBiometric()) {
@@ -566,6 +566,8 @@ public class AuthContainerView extends LinearLayout
         }
 
         if (!constraintBp()) {
+            mPanelInteractionDetector.enable(
+                    () -> animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED));
             updatePositionByCapability(false /* invalidate */);
         }
 
@@ -977,7 +979,7 @@ public class AuthContainerView extends LinearLayout
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;

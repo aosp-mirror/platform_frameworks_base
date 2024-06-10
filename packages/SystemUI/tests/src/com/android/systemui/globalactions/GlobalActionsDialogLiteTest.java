@@ -42,7 +42,6 @@ import android.os.Handler;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.GestureDetector;
 import android.view.IWindowManager;
@@ -52,6 +51,7 @@ import android.view.WindowManagerPolicyConstants;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
@@ -99,7 +99,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     private GlobalActionsDialogLite mGlobalActionsDialogLite;

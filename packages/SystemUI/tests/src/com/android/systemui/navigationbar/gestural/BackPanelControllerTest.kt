@@ -17,7 +17,6 @@
 package com.android.systemui.navigationbar.gestural
 
 import android.os.Handler
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -26,6 +25,7 @@ import android.view.MotionEvent.ACTION_MOVE
 import android.view.MotionEvent.ACTION_UP
 import android.view.ViewConfiguration
 import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.Cuj
 import com.android.internal.util.LatencyTracker
@@ -49,7 +49,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class BackPanelControllerTest : SysuiTestCase() {
     companion object {

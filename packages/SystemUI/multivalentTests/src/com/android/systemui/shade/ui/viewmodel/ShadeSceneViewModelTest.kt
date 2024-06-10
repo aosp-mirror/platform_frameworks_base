@@ -27,7 +27,6 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
@@ -40,7 +39,9 @@ import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.homeSceneFamilyResolver
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
@@ -75,7 +76,6 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
-    private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
     private val shadeRepository by lazy { kosmos.shadeRepository }
 
     private val qsSceneAdapter = FakeQSSceneAdapter({ mock() })
@@ -91,7 +91,6 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         underTest =
             ShadeSceneViewModel(
                 applicationScope = testScope.backgroundScope,
-                deviceEntryInteractor = deviceEntryInteractor,
                 shadeHeaderViewModel = kosmos.shadeHeaderViewModel,
                 qsSceneAdapter = qsSceneAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
@@ -109,18 +108,21 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_deviceLocked_lockScreen() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
-                .isEqualTo(Scenes.Lockscreen)
+                .isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
     fun upTransitionSceneKey_deviceUnlocked_gone() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
@@ -129,13 +131,15 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             )
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
-                .isEqualTo(Scenes.Gone)
+                .isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
@@ -143,13 +147,15 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
-                .isEqualTo(Scenes.Lockscreen)
+                .isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
@@ -158,7 +164,8 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             sceneInteractor.changeScene(Scenes.Gone, "reason")
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
-                .isEqualTo(Scenes.Gone)
+                .isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
     @Test

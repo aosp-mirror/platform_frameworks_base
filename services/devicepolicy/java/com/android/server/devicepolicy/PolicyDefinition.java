@@ -240,7 +240,7 @@ final class PolicyDefinition<V> {
                     POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE
                             | POLICY_FLAG_NON_COEXISTABLE_POLICY
                             | POLICY_FLAG_SKIP_ENFORCEMENT_IF_UNCHANGED,
-                    PolicyEnforcerCallbacks::noOp,
+                    PolicyEnforcerCallbacks::setApplicationRestrictions,
                     new BundlePolicySerializer());
 
     /**

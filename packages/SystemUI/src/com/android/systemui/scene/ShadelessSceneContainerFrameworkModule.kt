@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene
 
+import com.android.systemui.scene.domain.SceneDomainModule
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import dagger.Module
@@ -29,6 +30,7 @@ import dagger.Provides
             EmptySceneModule::class,
             GoneSceneModule::class,
             LockscreenSceneModule::class,
+            SceneDomainModule::class,
         ],
 )
 object ShadelessSceneContainerFrameworkModule {

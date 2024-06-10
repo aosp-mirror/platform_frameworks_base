@@ -518,7 +518,7 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     private ExternalInterfaceBinder createExternalInterface() {
-        return new BubbleController.IBubblesImpl(this);
+        return new IBubblesImpl(this);
     }
 
     @VisibleForTesting
@@ -592,11 +592,12 @@ public class BubbleController implements ConfigurationChangeListener,
      * Hides the current input method, wherever it may be focused, via InputMethodManagerInternal.
      */
     void hideCurrentInputMethod() {
+        mBubblePositioner.setImeVisible(false /* visible */, 0 /* height */);
         int displayId = mWindowManager.getDefaultDisplay().getDisplayId();
         try {
             mBarService.hideCurrentInputMethodForBubbles(displayId);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to hide IME", e);
         }
     }
 
@@ -1457,8 +1458,9 @@ public class BubbleController implements ConfigurationChangeListener,
             SynchronousScreenCaptureListener screenCaptureListener) {
         try {
             ScreenCapture.CaptureArgs args = null;
-            if (mStackView != null) {
-                ViewRootImpl viewRoot = mStackView.getViewRootImpl();
+            View viewToUse = mStackView != null ? mStackView : mLayerView;
+            if (viewToUse != null) {
+                ViewRootImpl viewRoot = viewToUse.getViewRootImpl();
                 if (viewRoot != null) {
                     SurfaceControl bubbleLayer = viewRoot.getSurfaceControl();
                     if (bubbleLayer != null) {
@@ -1548,6 +1550,12 @@ public class BubbleController implements ConfigurationChangeListener,
                     mStackView.setSelectedBubble(b);
                 } else {
                     Log.w(TAG, "Tried to add a bubble to the stack but the stack is null");
+                }
+            };
+        } else if (mBubbleData.isExpanded() && mBubbleData.getSelectedBubble() != null) {
+            callback = b -> {
+                if (b.getKey().equals(mBubbleData.getSelectedBubbleKey())) {
+                    mLayerView.showExpandedView(b);
                 }
             };
         }
@@ -2354,6 +2362,8 @@ public class BubbleController implements ConfigurationChangeListener,
         @Override
         public void invalidate() {
             mController = null;
+            // Unregister the listeners to ensure any binder death recipients are unlinked
+            mListener.unregister();
         }
 
         @Override
@@ -2530,17 +2540,6 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         private CachedState mCachedState = new CachedState();
-
-        private IBubblesImpl mIBubbles;
-
-        @Override
-        public IBubbles createExternalInterface() {
-            if (mIBubbles != null) {
-                mIBubbles.invalidate();
-            }
-            mIBubbles = new IBubblesImpl(BubbleController.this);
-            return mIBubbles;
-        }
 
         @Override
         public boolean isBubbleNotificationSuppressedFromShade(String key, String groupKey) {

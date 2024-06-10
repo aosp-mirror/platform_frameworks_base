@@ -167,6 +167,7 @@ constructor(
     private var targetBounds: Rect = Rect()
     private val mediaFrame
         get() = mediaCarouselController.mediaFrame
+
     private var statusbarState: Int = statusBarStateController.state
     private var animator =
         ValueAnimator.ofFloat(0.0f, 1.0f).apply {
@@ -600,7 +601,7 @@ constructor(
                     }
                 }
             }
-        secureSettings.registerContentObserverForUser(
+        secureSettings.registerContentObserverForUserSync(
             Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
             settingsObserver,
             UserHandle.USER_ALL

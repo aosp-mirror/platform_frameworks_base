@@ -284,7 +284,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         Box(
             Modifier.fillMaxWidth()
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    color = MaterialTheme.colorScheme.background,
                     alpha = { 1f },
                     shape = RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius))
                 )

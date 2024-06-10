@@ -26,7 +26,6 @@ import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.qs.qsTileFactory
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.TestScope
@@ -42,7 +41,6 @@ class QSLongPressEffectTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val vibratorHelper = kosmos.vibratorHelper
-    private val qsTile = kosmos.qsTileFactory.createTile("Test Tile")
 
     private val effectDuration = 400
     private val lowTickDuration = 12
@@ -63,7 +61,6 @@ class QSLongPressEffectTest : SysuiTestCase() {
                 vibratorHelper,
                 kosmos.keyguardInteractor,
             )
-        longPressEffect.qsTile = qsTile
     }
 
     @Test
@@ -94,10 +91,8 @@ class QSLongPressEffectTest : SysuiTestCase() {
         // GIVEN an action down event occurs
         longPressEffect.handleActionDown()
 
-        // THEN the effect moves to the TIMEOUT_WAIT state and starts the wait
-        val action by collectLastValue(longPressEffect.actionType)
+        // THEN the effect moves to the TIMEOUT_WAIT state
         assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.TIMEOUT_WAIT)
-        assertThat(action).isEqualTo(QSLongPressEffect.ActionType.WAIT_TAP_TIMEOUT)
     }
 
     @Test
@@ -108,6 +103,20 @@ class QSLongPressEffectTest : SysuiTestCase() {
 
             // THEN the effect goes back to idle and does not start
             assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.IDLE)
+            assertEffectDidNotStart()
+        }
+
+    @Test
+    fun onActionUp_whileWaiting_performsClick() =
+        testWhileInState(QSLongPressEffect.State.TIMEOUT_WAIT) {
+            // GIVEN an action is being collected
+            val action by collectLastValue(longPressEffect.actionType)
+
+            // GIVEN an action up occurs
+            longPressEffect.handleActionUp()
+
+            // THEN the action to invoke is the click action and the effect does not start
+            assertThat(action).isEqualTo(QSLongPressEffect.ActionType.CLICK)
             assertEffectDidNotStart()
         }
 
@@ -212,10 +221,8 @@ class QSLongPressEffectTest : SysuiTestCase() {
             // GIVEN that the animator was cancelled
             longPressEffect.handleAnimationCancel()
 
-            // THEN the state goes to the timeout wait and the wait is posted
-            val action by collectLastValue(longPressEffect.actionType)
+            // THEN the state goes to the timeout wait
             assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.TIMEOUT_WAIT)
-            assertThat(action).isEqualTo(QSLongPressEffect.ActionType.WAIT_TAP_TIMEOUT)
         }
 
     @Test
@@ -229,29 +236,6 @@ class QSLongPressEffectTest : SysuiTestCase() {
 
             // THEN the state goes to [QSLongPressEffect.State.IDLE]
             assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.IDLE)
-        }
-
-    @Test
-    fun onTileClick_whileWaiting_withQSTile_clicks() =
-        testWhileInState(QSLongPressEffect.State.TIMEOUT_WAIT) {
-            // GIVEN that a click was detected
-            val couldClick = longPressEffect.onTileClick()
-
-            // THEN the click is successful
-            assertThat(couldClick).isTrue()
-        }
-
-    @Test
-    fun onTileClick_whileWaiting_withoutQSTile_cannotClick() =
-        testWhileInState(QSLongPressEffect.State.TIMEOUT_WAIT) {
-            // GIVEN that no QSTile has been set
-            longPressEffect.qsTile = null
-
-            // GIVEN that a click was detected
-            val couldClick = longPressEffect.onTileClick()
-
-            // THEN the click is not successful
-            assertThat(couldClick).isFalse()
         }
 
     private fun testWithScope(initialize: Boolean = true, test: suspend TestScope.() -> Unit) =

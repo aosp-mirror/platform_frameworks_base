@@ -361,18 +361,19 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‏‎‏‏‎‎‎‎‎‎‎‏‎‏‏‏‎‏‏‏‎‎‎‏‎‎‎‎‏‏‎‎‎‏‎‏‏‏‎‎‎‎‏‏‏‎‎‎‏‏‎‎‏‎What part of your device experience was affected?‎‏‎‎‏‎"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‎‏‎‎‎‏‏‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‎‎‏‎‏‎‎‏‎‎‏‎‎‏‏‏‎‏‏‎‎‎‏‎‎‏‎‎‏‎‏‏‎Select issue type‎‏‎‎‏‎"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‎‏‏‏‎‏‎‏‎‎‏‎‎‏‏‎‎‏‎‎‎‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‎‎Screen record‎‏‎‎‏‎"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‏‎‏‎‎‏‎‏‎‏‏‎‏‏‏‎‎‏‎‏‎‎‎‏‏‎‎‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‎‏‏‎‏‎‏‎‎‏‏‎‎Performance‎‏‎‎‏‎"</item>
-    <item msgid="1627504621139124393">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎‎‎‎‏‏‏‎‏‏‎‏‎‏‎‎‎‏‏‏‏‏‎‏‎‏‎‎‏‏‎‏‏‏‏‎‎‎‎‎‏‎‏‎‏‎‎‏‎User Interface‎‏‎‎‏‎"</item>
-    <item msgid="8309220355268900335">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‎‎‎‎‏‎‎‎‏‏‏‏‏‏‎‎‎‏‏‏‎‎‏‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‏‏‎‏‏‏‏‎Battery‎‏‎‎‏‎"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‎‎‎‎‎‎‏‎‏‎‏‏‎‏‏‎‏‏‏‏‏‏‎‏‎‏‏‏‎‎‎‏‏‏‎‎‎‎‎‏‎‏‏‏‎‏‎‏‎‎‎‎‎Performance‎‏‎‎‏‎"</string>
+    <string name="user_interface" msgid="3712869377953950887">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‎‎‎‏‏‎‏‏‎‎‎‎‏‏‎‎‎‎‎‏‏‏‎‎‎‏‎‎‏‎‎‏‎‏‏‏‏‎‏‏‏‎‏‏‎‎‏‎‏‎‎‏‏‏‎User Interface‎‏‎‎‏‎"</string>
+    <string name="thermal" msgid="6758074791325414831">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‏‏‎‎‏‎‎‏‏‎‎‎‎‎‎‏‎‎‏‏‎‏‏‏‏‎‎‎‎‏‏‎‎‏‏‏‏‎‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‏‏‏‎Thermal‎‏‎‎‏‎"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‎‎‎‏‎‎‏‎‏‎‎‎‏‎‎‎‏‏‏‎‎‎‏‏‎‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎‎‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎One-handed mode‎‏‎‎‏‎"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‏‏‏‏‎‎‎‎‏‏‎‎‏‎‏‎‏‏‏‏‏‎‎‎‏‎‏‎‎‎‎‎‎‏‏‎‎‎‎‏‎Hearing devices‎‏‎‎‏‎"</string>
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‏‏‏‏‎‎‎‎‏‏‎‎‎‏‏‎‎‏‎‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‏‎‏‎‏‎‎‏‏‏‏‎‎‏‏‎‏‎‏‎‏‎Active‎‏‎‎‏‎"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‎‎‎‎‏‏‏‏‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‎‎‏‎‎‎‏‎‎‎‏‎‎‏‏‏‎‏‏‏‎‏‏‏‎‏‏‎Disconnected‎‏‎‎‏‎"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‏‎‏‏‎‎‎‏‎‎‏‎‎‎‎‏‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‎‎‏‏‏‎‏‎‏‎Hearing devices‎‏‎‎‏‎"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‏‎‏‏‎‎‏‏‏‏‎‎‎‎‏‎‏‏‏‏‎‏‎‎‏‎‎‏‎‎‎‎‎‎‎‎‎‏‏‏‏‎‎‎‏‎‎‎‏‏‎‏‎‎Pair new device‎‏‎‎‏‎"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‎‎‎‏‎‎‏‏‎‎‏‎‎‏‏‎‎‎‏‏‏‎‏‎‎‎‏‎‏‏‏‏‎‏‎‎‏‏‏‎‎‏‏‎‏‎‏‎‏‎‏‎‎Click to pair new device‎‏‎‎‏‎"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‏‏‎‏‏‏‎‎‏‎‏‏‏‏‎‏‎‏‏‎‎‎‎‎‏‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‎‎‎‏‎‏‏‎‎‎‎Couldn\'t update preset‎‏‎‎‏‎"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‎‏‎‏‎‏‎‎‏‏‏‎‏‎‎‏‏‏‎‏‏‎‏‏‎‎‏‎‏‏‎‏‎‏‎‎‎‏‏‎‏‏‎‏‎‏‎‎‏‎‎‏‏‎‎Preset‎‏‎‎‏‎"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‏‏‏‏‏‎‎‎‏‏‎‏‏‎‎‏‎‎‎‎‎‏‎‏‏‏‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‏‎‏‎‏‎‏‎‏‎Live Caption‎‏‎‎‏‎"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‎‎‎‏‎‎‎‎‏‎‎‎‏‏‏‎‎‏‏‎‎‏‏‎‏‏‎‎‏‎‏‏‎‏‏‎‏‎‏‏‏‎‎‎‎‎Unblock device microphone?‎‏‎‎‏‎"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‏‎‏‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‏‏‏‏‏‏‎‏‏‏‎‎‎‎‏‎‎‎‏‎‎‏‏‏‏‏‏‏‎‎‏‎‏‏‎Unblock device camera?‎‏‎‎‏‎"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‏‏‏‎‎‏‏‏‎‎‏‏‎‎‎‎‎‏‎‎‏‎‎‏‎‏‏‏‎‏‎‎‏‎‎‏‏‎‏‏‏‏‎‎‎‎‎‎‎‏‏‏‎‏‏‏‎Unblock device camera and microphone?‎‏‎‎‏‎"</string>
@@ -726,11 +727,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‏‎‎‏‏‏‎‏‏‏‎‏‏‎‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎‏‎‎‎‎‏‏‎‏‏‏‏‎‏‎‏‏‏‎‎‏‎‏‎Button ‎‏‎‎‏‏‎<xliff:g id="NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‏‎‏‎‎‏‏‎‏‎‎‎‎‎‏‏‎‎‏‎‏‎‏‎‎‏‏‏‎‎‎‎‏‎‎‎‎‎‏‎‏‏‏‏‎‎‏‎‎‏‏‎‎‎‏‎Home‎‏‎‎‏‎"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‎‎‏‎‏‎‏‏‎‎‏‏‎‎‏‏‎‏‏‏‏‎‎‏‏‏‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‎‎‏‎‎‎‎‎‎‏‏‏‏‎Back‎‏‎‎‏‎"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‎‎‏‎‎‎‎‏‏‎‏‏‏‏‏‏‎‏‏‏‎‏‏‏‏‎‎‎‎‎‏‎‏‎‎‏‎‏‎‎‎‎‏‎Up arrow‎‏‎‎‏‎"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‎‎‎‏‏‎‎‏‎‎‏‎‏‏‎‎‏‎‏‎‏‏‏‎‎‎‏‎‎‏‏‏‎‏‎‏‏‏‏‎‎‎‎‏‏‎‏‎‏‏‏‎‏‎‏‎Down arrow‎‏‎‎‏‎"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‎‎‎‎‎‎‎‎‎‎‏‏‎‏‏‏‏‎‏‎‎‏‎‎‏‎‎‏‎‎‎‏‎‎‏‏‏‎‏‎‎‏‎‏‎‎‏‎‎‏‏‏‏‏‎‏‎Left arrow‎‏‎‎‏‎"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‏‏‎‏‏‏‏‏‎‎‏‏‎‎‎‏‎‏‏‏‎‏‏‏‎‎‎‎‏‎‎‎‏‎‏‏‎‏‏‏‎‎‎‎‎‎‎‏‎‏‎Right arrow‎‏‎‎‏‎"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‏‏‎‎‏‏‏‏‏‏‎‎‎‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‎‎‎‎‎‏‏‎‎‏‎‏‏‏‎‎‏‏‏‏‏‎‎‏‎Center‎‏‎‎‏‎"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‎‏‏‏‎‎‎‎‏‏‏‏‎‏‎‎‏‏‏‏‎‎‎‎‎‎‏‎‎‎‏‏‏‎‏‏‎‏‏‎‏‏‎‏‎‎Tab‎‏‎‎‏‎"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‏‎‎‎‎‎‏‏‏‏‎‎‏‏‏‏‎‏‏‏‏‏‏‎‎‏‏‏‎‏‏‎‏‏‎‏‎‎‏‏‎‎‎‎‎‎‎‏‎‏‏‏‎‎‎Space‎‏‎‎‏‎"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‏‏‎‎‎‎‏‎‎‏‏‏‎‏‎‎‏‏‎‎‏‏‏‎‎‏‏‎‎‎‏‎‏‎‏‏‏‏‎‎Enter‎‏‎‎‏‎"</string>
@@ -1274,7 +1270,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‎‏‏‏‎‏‎‎‎‎‏‎‏‏‏‏‎‎‏‎‎‎‎‎‎‎‎‏‎‎‎‏‏‏‏‎‎‎‎‏‎‏‏‏‏‎‏‏‎‏‎‎‎‎‏‎folded‎‏‎‎‏‎"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‏‏‏‎‎‎‎‎‎‏‏‏‏‏‎‎‎‏‏‏‎‎‎‏‎‏‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‏‎‎‏‎‎‏‎‏‎‎unfolded‎‏‎‎‏‎"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‎‎‏‎‎‏‏‏‎‏‎‏‏‎‎‎‎‎‏‏‏‎‏‏‎‎‏‎‎‎‏‏‎‎‎‎‎‏‏‏‏‎‏‎‎‎‏‏‎‎‏‏‎‎%1$s / %2$s‎‏‎‎‏‎"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‏‏‎‏‏‏‎‏‎‎‎‏‏‎‏‎‏‏‏‎‏‎‏‎‏‏‏‎‎‏‎‎‏‎‎‎‏‎‏‎‏‏‏‎‎‎‏‏‏‎‏‏‎‎‎‏‎‎‏‏‎<xliff:g id="PERCENTAGE">%s</xliff:g>‎‏‎‎‏‏‏‎ battery remaining‎‏‎‎‏‎"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‏‎‎‏‎‏‏‎‎‎‎‎‎‏‎‏‏‎‏‏‎‏‏‏‏‎‎‏‎‏‏‎‎‏‏‎‏‎‎‎‎‎‎‎‎‏‎‎‏‏‏‏‏‎‏‎‎Stylus battery ‎‏‎‎‏‏‎<xliff:g id="PERCENTAGE">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‏‏‏‎‎‎‏‎‏‏‏‏‎‎‏‎‏‎‏‏‎‎‏‏‏‎‏‎‏‎‏‎‏‎‏‎‏‏‎‏‏‏‎‏‎‏‏‏‎‏‎‎‏‎Connect your stylus to a charger‎‏‎‎‏‎"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎‏‎‏‏‏‏‏‏‏‎‎‏‏‏‎‏‏‎‏‎‎‏‎‎‎‏‏‏‎‎‏‎‏‏‎‏‎‏‏‎‏‏‏‏‎‎‎‎Stylus battery low‎‏‎‎‏‎"</string>
     <string name="video_camera" msgid="7654002575156149298">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‏‎‎‎‎‏‏‏‏‎‏‎‏‏‎‎‏‎‏‎‎‎‎‏‏‎‏‎‎‎‎‏‏‎‏‏‎‏‏‏‏‏‎‎‎‎‏‏‎‎‏‎‎Video camera‎‏‎‎‏‎"</string>
@@ -1317,6 +1313,17 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‏‎‏‎‎‎‎‎‏‎‏‏‏‎‏‎‏‎‏‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‏‏‎‏‏‎‏‎‎‎‎‎‏‏‏‏‎‏‎Recently used by ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ (‎‏‎‎‏‏‎<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‏‏‎‏‎‎‎‏‎‎‏‏‏‎‏‎‎‏‎‎‏‎‎‏‏‎‎‎‎‏‎‎‎‎‏‎‎‏‏‏‎‎‏‏‎‏‎‏‏‎‎‏‏‏‎In use by ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ (‎‏‎‎‏‏‎<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>‎‏‎‎‏‏‏‎ • ‎‏‎‎‏‏‎<xliff:g id="PROXY_LABEL">%3$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‎‎‏‎‎‏‏‏‏‎‎‏‏‎‎‎‏‎‏‎‏‎‏‎‏‎‎‏‏‎‎‏‏‏‎‎‏‏‎‎‏‏‏‏‏‎‏‏‏‏‏‏‏‎Recently used by ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ (‎‏‎‎‏‏‎<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>‎‏‎‎‏‏‏‎ • ‎‏‎‎‏‏‎<xliff:g id="PROXY_LABEL">%3$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎"</string>
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‎‎‏‏‎‏‎‎‏‏‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎‎‏‏‏‏‏‏‎‎‎‎‎‏‏‏‏‎System‎‏‎‎‏‎"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‎‎‎‏‏‎‎‏‏‏‏‏‏‎‎‏‏‏‎‏‏‎‏‏‏‎‎‏‏‏‎‎‎‏‏‏‏‎‎‎‎‏‏‏‎‎‎‏‏‎‎‎‎Multitasking‎‏‎‎‏‎"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‎‎‎‏‎‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‎‎‏‏‏‎‎‎‏‏‏‎‎‏‎‎‎‏‎‎‏‎‏‎‎‎‏‏‏‎‎Input‎‏‎‎‏‎"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‏‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‏‏‎‎‏‎‎‎‎‏‎‎‎‎‏‎‎‎‎‏‎‏‎‏‎‎‏‏‎‏‏‎‏‎App shortcuts‎‏‎‎‏‎"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎‏‎‎‎‎‏‎‏‏‎‏‎‏‎‎‎‎‏‎‏‎‏‎‏‏‎‎‎‏‏‎‎‏‏‏‎‏‎‎‏‎‏‏‏‏‏‏‎‎‏‏‎‎‎‎Accessibility‎‏‎‎‏‎"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‎‎‏‏‏‎‎‎‎‎‏‎‏‏‎‏‎‎‏‏‏‎‏‏‏‎‏‏‎‎‏‏‎‎‏‎‎‎‎‎‏‎Keyboard shortcuts‎‏‎‎‏‎"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‎‏‎‏‎‏‏‎‎‏‏‏‏‎‎‏‏‏‎‎‏‎‏‎‏‎‎‎‏‎‎‎‎‏‎‏‎‏‎‎‎‏‎‎‏‏‎‏‏‎‎‏‎‏‏‎Search shortcuts‎‏‎‎‏‎"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‏‎‏‎‎‏‎‎‏‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‏‎‎‏‎‎‎‏‏‏‎‏‏‎‏‏‏‏‎‎‏‏‎‎‏‏‏‎‏‎‎Collapse icon‎‏‎‎‏‎"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎‎‎‏‏‎‎‏‎‏‏‎‎‎‎‏‎‎‎‎‏‎‏‏‎‎‎‏‎‎‎‏‎‏‏‏‎‎‏‎‎‎‏‎‏‏‏‎‏‏‎‏‏‏‎‎Expand icon‎‏‎‎‏‎"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‎‏‎‏‏‎‎‏‏‎‎‏‎‏‏‏‎‎‎‏‏‎‏‎‎‎Keyboard backlight‎‏‎‎‏‎"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‎‏‎‎‎‎‎‎‎‏‏‏‏‏‏‏‎‎‏‏‏‎‏‎‏‏‎‎‎‏‎‏‎‎‎‏‎‏‏‎‏‎‎‏‎‏‎‏‎‎‎‎‏‎‎Level %1$d of %2$d‎‏‎‎‏‎"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‎‎‎‏‏‎‎‎‎‏‎‏‏‏‏‎‏‎‏‏‏‎‏‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‏‏‎‏‎‎‎‎‏‎Home Controls‎‏‎‎‏‎"</string>

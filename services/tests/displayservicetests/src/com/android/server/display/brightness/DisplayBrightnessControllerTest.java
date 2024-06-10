@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -119,12 +120,19 @@ public final class DisplayBrightnessControllerTest {
         int targetDisplayState = Display.STATE_DOZE;
         when(mDisplayBrightnessStrategySelector.selectStrategy(
                 any(StrategySelectionRequest.class))).thenReturn(displayBrightnessStrategy);
-        mDisplayBrightnessController.updateBrightness(displayPowerRequest, targetDisplayState);
+        mDisplayBrightnessController.updateBrightness(displayPowerRequest, targetDisplayState, mock(
+                DisplayManagerInternal.DisplayOffloadSession.class));
         verify(displayBrightnessStrategy).updateBrightness(
                 eq(new StrategyExecutionRequest(displayPowerRequest, DEFAULT_BRIGHTNESS,
                         /* userSetBrightnessChanged= */ false)));
         assertEquals(mDisplayBrightnessController.getCurrentDisplayBrightnessStrategy(),
                 displayBrightnessStrategy);
+    }
+
+    @Test
+    public void isAllowAutoBrightnessWhileDozingDelegatesToDozeBrightnessStrategy() {
+        mDisplayBrightnessController.isAllowAutoBrightnessWhileDozing();
+        verify(mDisplayBrightnessStrategySelector).isAllowAutoBrightnessWhileDozing();
     }
 
     @Test

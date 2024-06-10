@@ -475,6 +475,15 @@
             android:exported="false"
             android:noHistory="true" />
 
+        <activity android:name=".touchpad.tutorial.ui.view.TouchpadTutorialActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+            <intent-filter>
+                <action android:name="com.android.systemui.action.TOUCHPAD_TUTORIAL"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
         <service android:name=".screenshot.appclips.AppClipsScreenshotHelperService"
             android:exported="false"
             android:singleUser="true"

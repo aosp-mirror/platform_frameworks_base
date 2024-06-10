@@ -28,23 +28,28 @@ import android.os.Handler;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
+import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.accessibility.hearingaid.HearingDevicesChecker;
 import com.android.systemui.accessibility.hearingaid.HearingDevicesDialogManager;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.res.R;
+import com.android.systemui.statusbar.policy.BluetoothController;
 
 import org.junit.After;
 import org.junit.Before;
@@ -57,7 +62,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 /** Tests for {@link HearingDevicesTile}. */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class HearingDevicesTileTest extends SysuiTestCase {
@@ -78,7 +83,11 @@ public class HearingDevicesTileTest extends SysuiTestCase {
     @Mock
     private QSLogger mQSLogger;
     @Mock
+    private HearingDevicesChecker mDevicesChecker;
+    @Mock
     HearingDevicesDialogManager mHearingDevicesDialogManager;
+    @Mock
+    BluetoothController mBluetoothController;
 
     private TestableLooper mTestableLooper;
     private HearingDevicesTile mTile;
@@ -98,7 +107,9 @@ public class HearingDevicesTileTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mActivityStarter,
                 mQSLogger,
-                mHearingDevicesDialogManager);
+                mHearingDevicesDialogManager,
+                mDevicesChecker,
+                mBluetoothController);
 
         mTile.initialize();
         mTestableLooper.processAllMessages();
@@ -141,5 +152,42 @@ public class HearingDevicesTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mHearingDevicesDialogManager).showDialog(expandable);
+    }
+
+    @Test
+    public void handleUpdateState_activeHearingDevice_stateActiveConnectedLabel() {
+        when(mDevicesChecker.isAnyActiveHearingDevice()).thenReturn(true);
+        when(mDevicesChecker.isAnyPairedHearingDevice()).thenReturn(true);
+
+        BooleanState activeState = new BooleanState();
+        mTile.handleUpdateState(activeState, null);
+
+        assertThat(activeState.state).isEqualTo(Tile.STATE_ACTIVE);
+        assertThat(activeState.secondaryLabel.toString()).isEqualTo(
+                mContext.getString(R.string.quick_settings_hearing_devices_connected));
+    }
+
+    @Test
+    public void handleUpdateState_bondedInactiveHearingDevice_stateInactiveDisconnectedLabel() {
+        when(mDevicesChecker.isAnyActiveHearingDevice()).thenReturn(false);
+        when(mDevicesChecker.isAnyPairedHearingDevice()).thenReturn(true);
+
+        BooleanState disconnectedState = new BooleanState();
+        mTile.handleUpdateState(disconnectedState, null);
+
+        assertThat(disconnectedState.state).isEqualTo(Tile.STATE_INACTIVE);
+        assertThat(disconnectedState.secondaryLabel.toString()).isEqualTo(
+                mContext.getString(R.string.quick_settings_hearing_devices_disconnected));
+    }
+
+    @Test
+    public void handleUpdateState_noHearingDevice_stateInactive() {
+        when(mDevicesChecker.isAnyActiveHearingDevice()).thenReturn(false);
+        when(mDevicesChecker.isAnyPairedHearingDevice()).thenReturn(false);
+
+        BooleanState inactiveState = new BooleanState();
+        mTile.handleUpdateState(inactiveState, null);
+
+        assertThat(inactiveState.state).isEqualTo(Tile.STATE_INACTIVE);
     }
 }

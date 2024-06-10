@@ -28,4 +28,10 @@
         <!-- Take screenshot upon test failure -->
         <option name="screenshot-on-failure" value="true" />
      </object>
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="pull-pattern-keys" value="input_.*" />
+        <!-- Pull files created by tests, like the output of screenshot tests -->
+        <option name="directory-keys" value="/storage/emulated/0/InputTests" />
+        <option name="collect-on-run-ended-only" value="false" />
+    </metrics_collector>
 </configuration>

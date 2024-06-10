@@ -31,6 +31,7 @@ import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.model.SceneContainerConfig
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -38,6 +39,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -151,6 +153,18 @@ class SceneInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun changeScene_toHomeSceneFamily() =
+        testScope.runTest {
+            underTest = kosmos.sceneInteractor
+            val currentScene by collectLastValue(underTest.currentScene)
+
+            underTest.changeScene(SceneFamilies.Home, "reason")
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(kosmos.homeSceneFamilyResolver.resolvedScene.value)
+        }
+
+    @Test
     fun snapToScene_toUnknownScene_doesNothing() =
         testScope.runTest {
             val sceneKeys =
@@ -213,6 +227,18 @@ class SceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest = kosmos.sceneInteractor
             underTest.snapToScene(Scenes.Gone, "reason")
+        }
+
+    @Test
+    fun snapToScene_toHomeSceneFamily() =
+        testScope.runTest {
+            underTest = kosmos.sceneInteractor
+            val currentScene by collectLastValue(underTest.currentScene)
+
+            underTest.snapToScene(SceneFamilies.Home, "reason")
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(kosmos.homeSceneFamilyResolver.resolvedScene.value)
         }
 
     @Test
@@ -427,5 +453,21 @@ class SceneInteractorTest : SysuiTestCase() {
             underTest.onUserInteractionFinished()
 
             assertThat(isVisible).isFalse()
+        }
+
+    @Test
+    fun resolveSceneFamily_home() =
+        testScope.runTest {
+            underTest = kosmos.sceneInteractor
+            assertThat(underTest.resolveSceneFamily(SceneFamilies.Home))
+                .isEqualTo(kosmos.homeSceneFamilyResolver.resolvedScene)
+        }
+
+    @Test
+    fun resolveSceneFamily_nonFamily() =
+        testScope.runTest {
+            underTest = kosmos.sceneInteractor
+            val resolved = underTest.resolveSceneFamily(Scenes.Gone).toList()
+            assertThat(resolved).containsExactly(Scenes.Gone).inOrder()
         }
 }

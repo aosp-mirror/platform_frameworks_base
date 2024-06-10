@@ -103,6 +103,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
@@ -543,7 +544,13 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         mTransactionPool, mMainExecutor, animRelOffset, cornerRadius,
                         clipRect);
 
-                if (info.getAnimationOptions() != null) {
+                final TransitionInfo.AnimationOptions options;
+                if (Flags.moveAnimationOptionsToChange()) {
+                    options = info.getAnimationOptions();
+                } else {
+                    options = change.getAnimationOptions();
+                }
+                if (options != null) {
                     attachThumbnail(animations, onAnimFinish, change, info.getAnimationOptions(),
                             cornerRadius);
                 }
@@ -725,7 +732,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final boolean isOpeningType = TransitionUtil.isOpeningType(type);
         final boolean enter = TransitionUtil.isOpeningType(changeMode);
         final boolean isTask = change.getTaskInfo() != null;
-        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
+        final TransitionInfo.AnimationOptions options;
+        if (Flags.moveAnimationOptionsToChange()) {
+            options = change.getAnimationOptions();
+        } else {
+            options = info.getAnimationOptions();
+        }
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
         final Rect endBounds = TransitionUtil.isClosingType(changeMode)
                 ? mRotator.getEndBoundsInStartRotation(change)

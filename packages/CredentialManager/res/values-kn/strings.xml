@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"ರುಜುವಾತು ನಿರ್ವಾಹಕ"</string>
     <string name="string_cancel" msgid="6369133483981306063">"ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="string_continue" msgid="1346732695941131882">"ಮುಂದುವರಿಸಿ"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"ಬೇರೆ ವಿಧಾನದಲ್ಲಿ ಉಳಿಸಿ"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"ಬೇರೆ ವಿಧಾನದಲ್ಲಿ ಸೇವ್ ಮಾಡಿ"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"ಪಾಸ್‌ವರ್ಡ್ ತೋರಿಸಿ"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಮರೆಮಾಡಿ"</string>
@@ -48,7 +48,7 @@
     <string name="passwords" msgid="5419394230391253816">"ಪಾಸ್‌ವರ್ಡ್‌ಗಳು"</string>
     <string name="sign_ins" msgid="4710739369149469208">"ಸೈನ್-ಇನ್‌ಗಳು"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"ಸೈನ್-ಇನ್ ಮಾಹಿತಿ"</string>
-    <string name="save_credential_to_title" msgid="3172811692275634301">"ಇಲ್ಲಿಗೆ <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ಅನ್ನು ಉಳಿಸಿ"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"ಇಲ್ಲಿಗೆ <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ಅನ್ನು ಸೇವ್ ಮಾಡಿ"</string>
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"ಇನ್ನೊಂದು ಸಾಧನದಲ್ಲಿ ಪಾಸ್‌ಕೀ ಅನ್ನು ರಚಿಸಬೇಕೆ?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"ಇನ್ನೊಂದು ಸಾಧನದಲ್ಲಿ ಪಾಸ್‌ವರ್ಡ್ ಉಳಿಸಬೇಕೆ?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"ಮತ್ತೊಂದು ಸಾಧನದಲ್ಲಿ ಸೈನ್-ಇನ್ ಅನ್ನು ಉಳಿಸಬೇಕೆ?"</string>
