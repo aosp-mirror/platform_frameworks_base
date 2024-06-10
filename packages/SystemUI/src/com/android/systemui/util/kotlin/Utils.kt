@@ -19,6 +19,8 @@ package com.android.systemui.util.kotlin
 import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 class Utils {
     companion object {
@@ -48,6 +50,14 @@ class Utils {
                 bcdefg.fifth,
                 bcdefg.sixth
             )
+
+        /**
+         * Samples the provided flow, performs a filter on the sampled value, then returns the
+         * original value.
+         */
+        fun <A, B> Flow<A>.sampleFilter(b: Flow<B>, predicate: (B) -> Boolean): Flow<A> {
+            return this.sample(b, ::Pair).filter { (_, b) -> predicate(b) }.map { (a, _) -> a }
+        }
 
         /**
          * Samples the provided flows, emitting a tuple of the original flow's value as well as each

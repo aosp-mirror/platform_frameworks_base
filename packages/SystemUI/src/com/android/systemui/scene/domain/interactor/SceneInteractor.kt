@@ -156,6 +156,28 @@ constructor(
             )
 
     /**
+     * The amount of transition into or out of the given [scene].
+     *
+     * The value will be `0` if not in this scene or `1` when fully in the given scene.
+     */
+    fun transitionProgress(scene: SceneKey): Flow<Float> {
+        return transitionState.flatMapLatest { transition ->
+            when (transition) {
+                is ObservableTransitionState.Idle -> {
+                    flowOf(if (transition.currentScene == scene) 1f else 0f)
+                }
+                is ObservableTransitionState.Transition -> {
+                    when {
+                        transition.toScene == scene -> transition.progress
+                        transition.fromScene == scene -> transition.progress.map { 1f - it }
+                        else -> flowOf(0f)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Returns the keys of all scenes in the container.
      *
      * The scenes will be sorted in z-order such that the last one is the one that should be
