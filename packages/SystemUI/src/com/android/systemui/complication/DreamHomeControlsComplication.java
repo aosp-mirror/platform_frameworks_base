@@ -36,7 +36,6 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.Utils;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.Flags;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.complication.dagger.DreamHomeControlsComplicationComponent;
 import com.android.systemui.controls.ControlsServiceInfo;
@@ -137,9 +136,7 @@ public class DreamHomeControlsComplication implements Complication {
 
         private void updateHomeControlsComplication() {
             mControlsComponent.getControlsListingController().ifPresent(c -> {
-                final boolean replacedWithOpenHub =
-                        Flags.glanceableHubShortcutButton() && mReplacedByOpenHub;
-                if (isHomeControlsAvailable(c.getCurrentServices()) && !replacedWithOpenHub) {
+                if (isHomeControlsAvailable(c.getCurrentServices())) {
                     mDreamOverlayStateController.addComplication(mComplication);
                 } else {
                     mDreamOverlayStateController.removeComplication(mComplication);

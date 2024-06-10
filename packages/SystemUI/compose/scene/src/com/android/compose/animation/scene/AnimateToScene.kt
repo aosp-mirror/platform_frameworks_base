@@ -109,8 +109,7 @@ internal fun CoroutineScope.animateToScene(
                     layoutState.transitions.interruptionHandler.onInterruption(
                         transitionState,
                         target,
-                    )
-                        ?: DefaultInterruptionHandler.onInterruption(transitionState, target)
+                    ) ?: DefaultInterruptionHandler.onInterruption(transitionState, target)
 
                 val animateFrom = interruptionResult.animateFrom
                 if (
@@ -159,6 +158,7 @@ private fun CoroutineScope.animate(
     val transition =
         if (reversed) {
             OneOffTransition(
+                key = transitionKey,
                 fromScene = targetScene,
                 toScene = fromScene,
                 currentScene = targetScene,
@@ -167,6 +167,7 @@ private fun CoroutineScope.animate(
             )
         } else {
             OneOffTransition(
+                key = transitionKey,
                 fromScene = fromScene,
                 toScene = targetScene,
                 currentScene = targetScene,
@@ -178,7 +179,7 @@ private fun CoroutineScope.animate(
     // Change the current layout state to start this new transition. This will compute the
     // TransformationSpec associated to this transition, which we need to initialize the Animatable
     // that will actually animate it.
-    layoutState.startTransition(transition, transitionKey, chain)
+    layoutState.startTransition(transition, chain)
 
     // The transition now contains the transformation spec that we should use to instantiate the
     // Animatable.
@@ -207,6 +208,7 @@ private fun CoroutineScope.animate(
 }
 
 private class OneOffTransition(
+    override val key: TransitionKey?,
     fromScene: SceneKey,
     toScene: SceneKey,
     override val currentScene: SceneKey,

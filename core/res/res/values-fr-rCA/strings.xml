@@ -717,7 +717,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Déplacez le téléphone vers la gauche"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Déplacez le téléphone vers la droite"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Veuillez regarder plus directement votre appareil."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Visage non détecté. Tenez votre téléphone à hauteur des yeux."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Visage non détecté. Tenez le téléphone au niveau des yeux."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Trop de mouvement. Tenez le téléphone immobile."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Veuillez inscrire votre visage à nouveau."</string>
     <string name="face_acquired_too_different" msgid="4505278456634706967">"Visage non reconnu. Réessayez."</string>
@@ -2408,6 +2408,8 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espace privé"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clone"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Commun"</string>
+    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
+    <skip />
     <string name="redacted_notification_message" msgid="1520587845842228816">"Le contenu confidentiel de la notification est masqué"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Le contenu de l\'application est masqué du Partage d\'écran par mesure de sécurité"</string>

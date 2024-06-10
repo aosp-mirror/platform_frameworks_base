@@ -29,6 +29,7 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.homeSceneFamilyResolver
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.recents.utilities.Utilities
@@ -36,6 +37,7 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -77,6 +79,8 @@ class ShadeBackActionInteractorImplTest : SysuiTestCase() {
     @Test
     fun animateCollapseQs_fullyCollapse_entered() =
         testScope.runTest {
+            // Ensure that HomeSceneFamilyResolver is running
+            kosmos.homeSceneFamilyResolver.resolvedScene.launchIn(backgroundScope)
             val actual by collectLastValue(sceneInteractor.currentScene)
             enterDevice()
             setScene(Scenes.QuickSettings)

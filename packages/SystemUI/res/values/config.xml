@@ -37,6 +37,9 @@
         <item>400</item>
     </integer-array>
 
+    <!-- Whether to use deadzone with nav bar -->
+    <bool name="config_useDeadZone">true</bool>
+
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>
     <integer name="navigation_bar_deadzone_decay">333</integer>

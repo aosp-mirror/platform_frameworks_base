@@ -6490,12 +6490,14 @@ public class BatteryStatsImpl extends BatteryStats {
         uid = mapUid(uid);
         if (mAudioOnNesting == 0) {
             mHistory.recordStateStartEvent(elapsedRealtimeMs, uptimeMs,
-                    HistoryItem.STATE_AUDIO_ON_FLAG);
+                    HistoryItem.STATE_AUDIO_ON_FLAG, uid, "audio");
             mAudioOnTimer.startRunningLocked(elapsedRealtimeMs);
         }
         mAudioOnNesting++;
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
-                .noteAudioTurnedOnLocked(elapsedRealtimeMs);
+        if (!mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_AUDIO)) {
+            getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+                    .noteAudioTurnedOnLocked(elapsedRealtimeMs);
+        }
     }
 
     @GuardedBy("this")
@@ -6506,11 +6508,13 @@ public class BatteryStatsImpl extends BatteryStats {
         uid = mapUid(uid);
         if (--mAudioOnNesting == 0) {
             mHistory.recordStateStopEvent(elapsedRealtimeMs, uptimeMs,
-                    HistoryItem.STATE_AUDIO_ON_FLAG);
+                    HistoryItem.STATE_AUDIO_ON_FLAG, uid, "audio");
             mAudioOnTimer.stopRunningLocked(elapsedRealtimeMs);
         }
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
-                .noteAudioTurnedOffLocked(elapsedRealtimeMs);
+        if (!mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_AUDIO)) {
+            getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+                    .noteAudioTurnedOffLocked(elapsedRealtimeMs);
+        }
     }
 
     @GuardedBy("this")
@@ -6518,12 +6522,14 @@ public class BatteryStatsImpl extends BatteryStats {
         uid = mapUid(uid);
         if (mVideoOnNesting == 0) {
             mHistory.recordState2StartEvent(elapsedRealtimeMs, uptimeMs,
-                    HistoryItem.STATE2_VIDEO_ON_FLAG);
+                    HistoryItem.STATE2_VIDEO_ON_FLAG, uid, "video");
             mVideoOnTimer.startRunningLocked(elapsedRealtimeMs);
         }
         mVideoOnNesting++;
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
-                .noteVideoTurnedOnLocked(elapsedRealtimeMs);
+        if (!mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_VIDEO)) {
+            getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+                    .noteVideoTurnedOnLocked(elapsedRealtimeMs);
+        }
     }
 
     @GuardedBy("this")
@@ -6534,11 +6540,13 @@ public class BatteryStatsImpl extends BatteryStats {
         uid = mapUid(uid);
         if (--mVideoOnNesting == 0) {
             mHistory.recordState2StopEvent(elapsedRealtimeMs, uptimeMs,
-                    HistoryItem.STATE2_VIDEO_ON_FLAG);
+                    HistoryItem.STATE2_VIDEO_ON_FLAG, uid, "video");
             mVideoOnTimer.stopRunningLocked(elapsedRealtimeMs);
         }
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
-                .noteVideoTurnedOffLocked(elapsedRealtimeMs);
+        if (!mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_VIDEO)) {
+            getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+                    .noteVideoTurnedOffLocked(elapsedRealtimeMs);
+        }
     }
 
     @GuardedBy("this")
@@ -6613,11 +6621,13 @@ public class BatteryStatsImpl extends BatteryStats {
         uid = mapUid(uid);
         if (mFlashlightOnNesting++ == 0) {
             mHistory.recordState2StartEvent(elapsedRealtimeMs, uptimeMs,
-                    HistoryItem.STATE2_FLASHLIGHT_FLAG);
+                    HistoryItem.STATE2_FLASHLIGHT_FLAG, uid, "flashlight");
             mFlashlightOnTimer.startRunningLocked(elapsedRealtimeMs);
         }
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
-                .noteFlashlightTurnedOnLocked(elapsedRealtimeMs);
+        if (!mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT)) {
+            getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+                    .noteFlashlightTurnedOnLocked(elapsedRealtimeMs);
+        }
     }
 
     @GuardedBy("this")
@@ -6628,11 +6638,13 @@ public class BatteryStatsImpl extends BatteryStats {
         uid = mapUid(uid);
         if (--mFlashlightOnNesting == 0) {
             mHistory.recordState2StopEvent(elapsedRealtimeMs, uptimeMs,
-                    HistoryItem.STATE2_FLASHLIGHT_FLAG);
+                    HistoryItem.STATE2_FLASHLIGHT_FLAG, uid, "flashlight");
             mFlashlightOnTimer.stopRunningLocked(elapsedRealtimeMs);
         }
-        getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
-                .noteFlashlightTurnedOffLocked(elapsedRealtimeMs);
+        if (!mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT)) {
+            getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+                    .noteFlashlightTurnedOffLocked(elapsedRealtimeMs);
+        }
     }
 
     @GuardedBy("this")

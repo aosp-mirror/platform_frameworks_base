@@ -16,18 +16,15 @@
 
 package com.android.systemui.recordissue
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Gravity
 import android.view.WindowManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 
-const val HAS_APPROVED_SCREEN_RECORDING = "HasApprovedScreenRecord"
-
 class ScreenCapturePermissionDialogDelegate(
     private val dialogFactory: SystemUIDialog.Factory,
-    private val sharedPreferences: SharedPreferences,
+    private val state: IssueRecordingState,
 ) : SystemUIDialog.Delegate {
 
     override fun beforeCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
@@ -37,7 +34,7 @@ class ScreenCapturePermissionDialogDelegate(
             setMessage(R.string.screenrecord_permission_dialog_warning_entire_screen)
             setNegativeButton(R.string.slice_permission_deny) { _, _ -> cancel() }
             setPositiveButton(R.string.slice_permission_allow) { _, _ ->
-                sharedPreferences.edit().putBoolean(HAS_APPROVED_SCREEN_RECORDING, true).apply()
+                state.markUserApprovalForScreenRecording()
                 dismiss()
             }
             window?.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
