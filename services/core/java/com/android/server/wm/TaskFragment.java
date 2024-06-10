@@ -40,6 +40,8 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
@@ -87,6 +89,7 @@ import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -2225,7 +2228,43 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     static class ConfigOverrideHint {
         @Nullable DisplayInfo mTmpOverrideDisplayInfo;
         @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
+        @Nullable Rect mTmpParentAppBoundsOverride;
+        int mTmpOverrideConfigOrientation;
         boolean mUseOverrideInsetsForConfig;
+
+        void resolveTmpOverrides(DisplayContent dc, Configuration parentConfig,
+                boolean isFixedRotationTransforming) {
+            mTmpParentAppBoundsOverride = new Rect(parentConfig.windowConfiguration.getAppBounds());
+            final Insets insets;
+            if (mUseOverrideInsetsForConfig && dc != null) {
+                // Insets are decoupled from configuration by default from V+, use legacy
+                // compatibility behaviour for apps targeting SDK earlier than 35
+                // (see applySizeOverrideIfNeeded).
+                int rotation = parentConfig.windowConfiguration.getRotation();
+                if (rotation == ROTATION_UNDEFINED && !isFixedRotationTransforming) {
+                    rotation = dc.getRotation();
+                }
+                final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+                final int dw = rotated ? dc.mBaseDisplayHeight : dc.mBaseDisplayWidth;
+                final int dh = rotated ? dc.mBaseDisplayWidth : dc.mBaseDisplayHeight;
+                DisplayPolicy.DecorInsets.Info decorInsets = dc.getDisplayPolicy()
+                        .getDecorInsetsInfo(rotation, dw, dh);
+                final Rect stableBounds = decorInsets.mOverrideConfigFrame;
+                mTmpOverrideConfigOrientation = stableBounds.width() > stableBounds.height()
+                                ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+                insets = Insets.of(decorInsets.mOverrideNonDecorInsets);
+            } else {
+                insets = Insets.NONE;
+            }
+            mTmpParentAppBoundsOverride.inset(insets);
+        }
+
+        void resetTmpOverrides() {
+            mTmpOverrideDisplayInfo = null;
+            mTmpCompatInsets = null;
+            mTmpParentAppBoundsOverride = null;
+            mTmpOverrideConfigOrientation = ORIENTATION_UNDEFINED;
+        }
     }
 
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
@@ -2311,7 +2350,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             if (!customContainerPolicy && windowingMode != WINDOWING_MODE_FREEFORM) {
                 final Rect containingAppBounds;
                 if (insideParentBounds) {
-                    containingAppBounds = parentConfig.windowConfiguration.getAppBounds();
+                    containingAppBounds = useOverrideInsetsForConfig
+                            ? overrideHint.mTmpParentAppBoundsOverride
+                            : parentConfig.windowConfiguration.getAppBounds();
                 } else {
                     // Restrict appBounds to display non-decor rather than parent because the
                     // override bounds are beyond the parent. Otherwise, it won't match the

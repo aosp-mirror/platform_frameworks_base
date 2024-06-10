@@ -1288,6 +1288,9 @@ final class LetterboxUiController {
         if (!allowHorizontalReachabilityForThinLetterbox()) {
             return false;
         }
+        final Rect parentAppBoundsOverride = mActivityRecord.getParentAppBoundsOverride();
+        final Rect parentAppBounds = parentAppBoundsOverride != null
+                ? parentAppBoundsOverride : parentConfiguration.windowConfiguration.getAppBounds();
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
         final Rect opaqueActivityBounds = mActivityRecord.mTransparentPolicy
@@ -1297,10 +1300,8 @@ final class LetterboxUiController {
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
                 // Check whether the activity fills the parent vertically.
-                && parentConfiguration.windowConfiguration.getAppBounds().height()
-                        <= opaqueActivityBounds.height()
-                && parentConfiguration.windowConfiguration.getAppBounds().width()
-                        > opaqueActivityBounds.width();
+                && parentAppBounds.height() <= opaqueActivityBounds.height()
+                && parentAppBounds.width() > opaqueActivityBounds.width();
     }
 
     @VisibleForTesting
@@ -1326,6 +1327,9 @@ final class LetterboxUiController {
         if (!allowVerticalReachabilityForThinLetterbox()) {
             return false;
         }
+        final Rect parentAppBoundsOverride = mActivityRecord.getParentAppBoundsOverride();
+        final Rect parentAppBounds = parentAppBoundsOverride != null
+                ? parentAppBoundsOverride : parentConfiguration.windowConfiguration.getAppBounds();
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty.
         final Rect opaqueActivityBounds = mActivityRecord.mTransparentPolicy
@@ -1335,10 +1339,8 @@ final class LetterboxUiController {
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
                 // Check whether the activity fills the parent horizontally.
-                && parentConfiguration.windowConfiguration.getAppBounds().width()
-                        <= opaqueActivityBounds.width()
-                && parentConfiguration.windowConfiguration.getAppBounds().height()
-                        > opaqueActivityBounds.height();
+                && parentAppBounds.width() <= opaqueActivityBounds.width()
+                && parentAppBounds.height() > opaqueActivityBounds.height();
     }
 
     @VisibleForTesting
