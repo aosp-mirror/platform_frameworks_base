@@ -25,10 +25,12 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
@@ -81,7 +83,10 @@ constructor(
     val surfaceBehindVisibility: Flow<Boolean?> =
         combine(
                 transitionInteractor.startedKeyguardTransitionStep,
-                transitionInteractor.transitionStepsFromState(KeyguardState.PRIMARY_BOUNCER)
+                transitionInteractor.transition(
+                    edge = Edge.create(from = Scenes.Bouncer),
+                    edgeWithoutSceneContainer = Edge.create(from = KeyguardState.PRIMARY_BOUNCER)
+                )
             ) { startedStep, fromBouncerStep ->
                 if (startedStep.to != KeyguardState.GONE) {
                     return@combine null

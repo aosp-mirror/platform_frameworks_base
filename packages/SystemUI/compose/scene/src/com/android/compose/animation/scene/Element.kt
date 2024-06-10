@@ -280,7 +280,7 @@ internal class ElementNode(
         constraints: Constraints,
     ): MeasureResult {
         val transitions = currentTransitions
-        val transition = elementTransition(element, transitions)
+        val transition = elementTransition(layoutImpl, element, transitions)
 
         // If this element is not supposed to be laid out now, either because it is not part of any
         // ongoing transition or the other scene of its transition is overscrolling, then lay out
@@ -318,13 +318,10 @@ internal class ElementNode(
             val targetOffsetInScene = lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
 
             // No need to place the element in this scene if we don't want to draw it anyways.
-            if (!shouldPlaceElement(layoutImpl, scene, element, transition)) {
+            if (!shouldPlaceElement(layoutImpl, scene.key, element, transition)) {
                 sceneState.lastOffset = Offset.Unspecified
                 sceneState.lastScale = Scale.Unspecified
                 sceneState.lastAlpha = Element.AlphaUnspecified
-
-                sceneState.clearValuesBeforeInterruption()
-                sceneState.clearInterruptionDeltas()
                 return
             }
 
@@ -353,7 +350,17 @@ internal class ElementNode(
                     getValueBeforeInterruption = { sceneState.offsetBeforeInterruption },
                     setValueBeforeInterruption = { sceneState.offsetBeforeInterruption = it },
                     getInterruptionDelta = { sceneState.offsetInterruptionDelta },
-                    setInterruptionDelta = { sceneState.offsetInterruptionDelta = it },
+                    setInterruptionDelta = { delta ->
+                        setPlacementInterruptionDelta(
+                            element = element,
+                            sceneState = sceneState,
+                            transition = transition,
+                            delta = delta,
+                            setter = { sceneState, delta ->
+                                sceneState.offsetInterruptionDelta = delta
+                            },
+                        )
+                    },
                     diff = { a, b -> a - b },
                     add = { a, b, bProgress -> a + b * bProgress },
                 )
@@ -363,7 +370,7 @@ internal class ElementNode(
             val offset = (interruptedOffset - currentOffset).round()
             if (
                 isElementOpaque(scene, element, transition) &&
-                    interruptedAlpha(layoutImpl, transition, sceneState, alpha = 1f) == 1f
+                    interruptedAlpha(layoutImpl, element, transition, sceneState, alpha = 1f) == 1f
             ) {
                 sceneState.lastAlpha = 1f
 
@@ -374,13 +381,17 @@ internal class ElementNode(
             } else {
                 placeable.placeWithLayer(offset) {
                     // This layer might still run on its own (outside of the placement phase) even
-                    // if this element is not placed anymore, so we need to double check again here
-                    // before calling [elementAlpha] (which will update [SceneState.lastAlpha]). We
-                    // also need to recompute the current transition to make sure that we are using
-                    // the current transition and not a reference to an old one. See b/343138966 for
-                    // details.
-                    val transition = elementTransition(element, currentTransitions)
-                    if (!shouldPlaceElement(layoutImpl, scene, element, transition)) {
+                    // if this element is not placed or composed anymore, so we need to double check
+                    // again here before calling [elementAlpha] (which will update
+                    // [SceneState.lastAlpha]). We also need to recompute the current transition to
+                    // make sure that we are using the current transition and not a reference to an
+                    // old one. See b/343138966 for details.
+                    if (_element == null) {
+                        return@placeWithLayer
+                    }
+
+                    val transition = elementTransition(layoutImpl, element, currentTransitions)
+                    if (!shouldPlaceElement(layoutImpl, scene.key, element, transition)) {
                         return@placeWithLayer
                     }
 
@@ -394,7 +405,7 @@ internal class ElementNode(
     override fun ContentDrawScope.draw() {
         element.wasDrawnInAnyScene = true
 
-        val transition = elementTransition(element, currentTransitions)
+        val transition = elementTransition(layoutImpl, element, currentTransitions)
         val drawScale = getDrawScale(layoutImpl, scene, element, transition, sceneState)
         if (drawScale == Scale.Default) {
             drawContent()
@@ -435,6 +446,7 @@ internal class ElementNode(
  * its scenes contains the element.
  */
 private fun elementTransition(
+    layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
     transitions: List<TransitionState.Transition>,
 ): TransitionState.Transition? {
@@ -448,7 +460,7 @@ private fun elementTransition(
 
     if (transition != previousTransition && transition != null && previousTransition != null) {
         // The previous transition was interrupted by another transition.
-        prepareInterruption(element, transition, previousTransition)
+        prepareInterruption(layoutImpl, element, transition, previousTransition)
     } else if (transition == null && previousTransition != null) {
         // The transition was just finished.
         element.sceneStates.values.forEach {
@@ -461,18 +473,43 @@ private fun elementTransition(
 }
 
 private fun prepareInterruption(
+    layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
     transition: TransitionState.Transition,
     previousTransition: TransitionState.Transition,
 ) {
     val sceneStates = element.sceneStates
-    sceneStates[previousTransition.fromScene]?.selfUpdateValuesBeforeInterruption()
-    sceneStates[previousTransition.toScene]?.selfUpdateValuesBeforeInterruption()
-    sceneStates[transition.fromScene]?.selfUpdateValuesBeforeInterruption()
-    sceneStates[transition.toScene]?.selfUpdateValuesBeforeInterruption()
+    fun updatedSceneState(key: SceneKey): Element.SceneState? {
+        return sceneStates[key]?.also { it.selfUpdateValuesBeforeInterruption() }
+    }
+
+    val previousFromState = updatedSceneState(previousTransition.fromScene)
+    val previousToState = updatedSceneState(previousTransition.toScene)
+    val fromState = updatedSceneState(transition.fromScene)
+    val toState = updatedSceneState(transition.toScene)
 
     reconcileStates(element, previousTransition)
     reconcileStates(element, transition)
+
+    // Remove the interruption values to all scenes but the scene(s) where the element will be
+    // placed, to make sure that interruption deltas are computed only right after this interruption
+    // is prepared.
+    fun maybeCleanPlacementValuesBeforeInterruption(sceneState: Element.SceneState) {
+        if (!shouldPlaceElement(layoutImpl, sceneState.scene, element, transition)) {
+            sceneState.offsetBeforeInterruption = Offset.Unspecified
+            sceneState.alphaBeforeInterruption = Element.AlphaUnspecified
+            sceneState.scaleBeforeInterruption = Scale.Unspecified
+
+            sceneState.offsetInterruptionDelta = Offset.Zero
+            sceneState.alphaInterruptionDelta = 0f
+            sceneState.scaleInterruptionDelta = Scale.Zero
+        }
+    }
+
+    previousFromState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
+    previousToState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
+    fromState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
+    toState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
 }
 
 /**
@@ -579,9 +616,38 @@ private inline fun <T> computeInterruptedValue(
     }
 }
 
+/**
+ * Set the interruption delta of a *placement/drawing*-related value (offset, alpha, scale). This
+ * ensures that the delta is also set on the other scene in the transition for shared elements, so
+ * that there is no jump cut if the scene where the element is placed has changed.
+ */
+private inline fun <T> setPlacementInterruptionDelta(
+    element: Element,
+    sceneState: Element.SceneState,
+    transition: TransitionState.Transition?,
+    delta: T,
+    setter: (Element.SceneState, T) -> Unit,
+) {
+    // Set the interruption delta on the current scene.
+    setter(sceneState, delta)
+
+    if (transition == null) {
+        return
+    }
+
+    // If the element is shared, also set the delta on the other scene so that it is used by that
+    // scene if we start overscrolling it and change the scene where the element is placed.
+    val otherScene =
+        if (sceneState.scene == transition.fromScene) transition.toScene else transition.fromScene
+    val otherSceneState = element.sceneStates[otherScene] ?: return
+    if (isSharedElementEnabled(element.key, transition)) {
+        setter(otherSceneState, delta)
+    }
+}
+
 private fun shouldPlaceElement(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
+    scene: SceneKey,
     element: Element,
     transition: TransitionState.Transition?,
 ): Boolean {
@@ -592,7 +658,7 @@ private fun shouldPlaceElement(
 
     // Don't place the element in this scene if this scene is not part of the current element
     // transition.
-    if (scene.key != transition.fromScene && scene.key != transition.toScene) {
+    if (scene != transition.fromScene && scene != transition.toScene) {
         return false
     }
 
@@ -610,7 +676,7 @@ private fun shouldPlaceElement(
 
     return shouldPlaceOrComposeSharedElement(
         layoutImpl,
-        scene.key,
+        scene,
         element.key,
         transition,
     )
@@ -740,13 +806,14 @@ private fun elementAlpha(
         element.sceneStates.forEach { it.value.alphaBeforeInterruption = 0f }
     }
 
-    val interruptedAlpha = interruptedAlpha(layoutImpl, transition, sceneState, alpha)
+    val interruptedAlpha = interruptedAlpha(layoutImpl, element, transition, sceneState, alpha)
     sceneState.lastAlpha = interruptedAlpha
     return interruptedAlpha
 }
 
 private fun interruptedAlpha(
     layoutImpl: SceneTransitionLayoutImpl,
+    element: Element,
     transition: TransitionState.Transition?,
     sceneState: Element.SceneState,
     alpha: Float,
@@ -760,7 +827,15 @@ private fun interruptedAlpha(
         getValueBeforeInterruption = { sceneState.alphaBeforeInterruption },
         setValueBeforeInterruption = { sceneState.alphaBeforeInterruption = it },
         getInterruptionDelta = { sceneState.alphaInterruptionDelta },
-        setInterruptionDelta = { sceneState.alphaInterruptionDelta = it },
+        setInterruptionDelta = { delta ->
+            setPlacementInterruptionDelta(
+                element = element,
+                sceneState = sceneState,
+                transition = transition,
+                delta = delta,
+                setter = { sceneState, delta -> sceneState.alphaInterruptionDelta = delta },
+            )
+        },
         diff = { a, b -> a - b },
         add = { a, b, bProgress -> a + b * bProgress },
     )
@@ -867,7 +942,15 @@ private fun ContentDrawScope.getDrawScale(
             getValueBeforeInterruption = { sceneState.scaleBeforeInterruption },
             setValueBeforeInterruption = { sceneState.scaleBeforeInterruption = it },
             getInterruptionDelta = { sceneState.scaleInterruptionDelta },
-            setInterruptionDelta = { sceneState.scaleInterruptionDelta = it },
+            setInterruptionDelta = { delta ->
+                setPlacementInterruptionDelta(
+                    element = element,
+                    sceneState = sceneState,
+                    transition = transition,
+                    delta = delta,
+                    setter = { sceneState, delta -> sceneState.scaleInterruptionDelta = delta },
+                )
+            },
             diff = { a, b ->
                 Scale(
                     scaleX = a.scaleX - b.scaleX,

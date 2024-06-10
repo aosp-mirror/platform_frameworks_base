@@ -227,7 +227,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         bouncerViewBinder.bind(mView.findViewById(R.id.keyguard_bouncer_container));
 
         collectFlow(mView, keyguardTransitionInteractor.transition(
-                Edge.Companion.create(LOCKSCREEN, DREAMING)),
+                Edge.create(LOCKSCREEN, DREAMING)),
                 mLockscreenToDreamingTransition);
         collectFlow(
                 mView,

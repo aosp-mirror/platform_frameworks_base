@@ -1681,7 +1681,7 @@ public class VibrationThreadTest {
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .compose();
         VibrationEffect effect4 = VibrationEffect.createOneShot(8000, 100);
-        VibrationEffect effect5 = VibrationEffect.createOneShot(20, 222);
+        VibrationEffect effect5 = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
 
         long vibrationId1 = startThreadAndDispatcher(effect1);
         waitForCompletion();
@@ -1745,13 +1745,12 @@ public class VibrationThreadTest {
         verifyCallbacksTriggered(vibrationId4, Vibration.Status.CANCELLED_BY_SCREEN_OFF);
         assertTrue("Tested duration=" + duration4, duration4 < 2000);
 
-        // Effect5: normal oneshot. Don't worry about amplitude, as effect4 may or may not have
-        // started.
+        // Effect5: played normally after effect4, which may or may not have played.
 
         verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId5));
         verifyCallbacksTriggered(vibrationId5, Vibration.Status.FINISHED);
 
-        assertEquals(Arrays.asList(expectedOneShot(20)),
+        assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
                 fakeVibrator.getEffectSegments(vibrationId5));
     }
 

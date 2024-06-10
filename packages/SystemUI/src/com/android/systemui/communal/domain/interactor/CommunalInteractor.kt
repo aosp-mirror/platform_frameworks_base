@@ -46,6 +46,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -164,7 +165,7 @@ constructor(
     /** Whether to start dreaming when returning from occluded */
     val dreamFromOccluded: Flow<Boolean> =
         keyguardTransitionInteractor
-            .transitionStepsToState(KeyguardState.OCCLUDED)
+            .transition(Edge.create(to = KeyguardState.OCCLUDED))
             .map { it.from == KeyguardState.DREAMING }
             .stateIn(scope = applicationScope, SharingStarted.Eagerly, false)
 

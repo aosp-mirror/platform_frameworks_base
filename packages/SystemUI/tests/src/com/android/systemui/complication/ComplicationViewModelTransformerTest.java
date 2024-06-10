@@ -21,9 +21,9 @@ import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.testing.AndroidTestingRunner;
 
 import androidx.lifecycle.ViewModel;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -38,7 +38,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ComplicationViewModelTransformerTest extends SysuiTestCase {
     @Mock
     ComplicationViewModelComponent.Factory mFactory;
