@@ -7961,6 +7961,10 @@ public class NotificationManagerService extends SystemService {
                 notification.setTimeoutAfter(NOTIFICATION_TTL);
             }
         }
+
+        if (notificationForceGrouping()) {
+            notification.fixSilentGroup();
+        }
     }
 
     /**
