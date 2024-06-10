@@ -1871,8 +1871,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         // Put BAL flags to avoid activity start aborted. Otherwise, flows like shortcut to split
         // will be canceled.
+        ActivityOptions options = ActivityOptions.fromBundle(opts);
         opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
         opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
+
+        // TODO (b/336477473): Disallow enter PiP when launching a task in split by default;
+        //                     this might have to be changed as more split-to-pip cujs are defined.
+        options.setDisallowEnterPictureInPictureWhileLaunching(true);
+        opts.putAll(options.toBundle());
     }
 
     void updateActivityOptions(Bundle opts, @SplitPosition int position) {
