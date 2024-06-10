@@ -1524,6 +1524,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 prepareExitSplitScreen(mTopStageAfterFoldDismiss, wct);
                 mSplitTransitions.startDismissTransition(wct, this,
                         mTopStageAfterFoldDismiss, EXIT_REASON_DEVICE_FOLDED);
+                setSplitsVisible(false);
             } else {
                 exitSplitScreen(
                         mTopStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage,
