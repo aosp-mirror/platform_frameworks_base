@@ -73,6 +73,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInte
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.keyguard.shared.model.DismissAction;
+import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.KeyguardDone;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -112,6 +113,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi;
 import kotlinx.coroutines.Job;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
@@ -507,8 +509,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mListenForCanShowAlternateBouncer = null;
         if (!DeviceEntryUdfpsRefactor.isEnabled()) {
             mListenForAlternateBouncerTransitionSteps = mJavaAdapter.alwaysCollectFlow(
-                    mKeyguardTransitionInteractor.transitionStepsFromState(
-                            KeyguardState.ALTERNATE_BOUNCER),
+                    mKeyguardTransitionInteractor
+                            .transition(Edge.create(KeyguardState.ALTERNATE_BOUNCER)),
                     this::consumeFromAlternateBouncerTransitionSteps
             );
 
@@ -899,6 +901,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } finally {
                 Trace.endSection();
             }
+        } else {
+            Log.w(TAG, "Ignoring request to dismiss, dumping state: ");
+            StringWriter sw = new StringWriter();
+            mKeyguardStateController.dump(new PrintWriter(sw), null);
+            Log.w(TAG, sw.toString());
         }
         updateStates();
     }

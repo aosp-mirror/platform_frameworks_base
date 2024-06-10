@@ -43,6 +43,7 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.qs.tiles.di.NewQSTileFactory
 import com.android.systemui.qs.toProto
+import com.android.systemui.retail.data.repository.RetailModeRepository
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
@@ -137,6 +138,7 @@ constructor(
     private val installedTilesComponentRepository: InstalledTilesComponentRepository,
     private val userRepository: UserRepository,
     private val minimumTilesRepository: MinimumTilesRepository,
+    private val retailModeRepository: RetailModeRepository,
     private val customTileStatePersister: CustomTileStatePersister,
     private val newQSTileFactory: Lazy<NewQSTileFactory>,
     private val tileFactory: QSFactory,
@@ -177,6 +179,14 @@ constructor(
         currentUser.flatMapLatest {
             installedTilesComponentRepository.getInstalledTilesComponents(it)
         }
+
+    private val minTiles: Int
+        get() =
+            if (retailModeRepository.inRetailMode) {
+                1
+            } else {
+                minimumTilesRepository.minNumberOfTiles
+            }
 
     init {
         if (featureFlags.pipelineEnabled) {
@@ -273,7 +283,7 @@ constructor(
                             newTileMap.filter { it.value is TileOrNotInstalled.NotInstalled }.keys,
                             newUser
                         )
-                        if (newResolvedTiles.size < minimumTilesRepository.minNumberOfTiles) {
+                        if (newResolvedTiles.size < minTiles) {
                             // We ended up with not enough tiles (some may be not installed).
                             // Prepend the default set of tiles
                             launch { tileSpecRepository.prependDefault(currentUser.value) }

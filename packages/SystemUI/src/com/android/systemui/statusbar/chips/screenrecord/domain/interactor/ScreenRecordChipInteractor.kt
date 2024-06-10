@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.stateIn
 
 /** Interactor for the screen recording chip shown in the status bar. */
 @SysUISingleton
-open class ScreenRecordChipInteractor
+class ScreenRecordChipInteractor
 @Inject
 constructor(
     @Application scope: CoroutineScope,

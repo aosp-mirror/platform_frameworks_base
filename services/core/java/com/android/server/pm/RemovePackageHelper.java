@@ -83,7 +83,7 @@ final class RemovePackageHelper {
     }
 
     public void removeCodePath(File codePath) {
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             removeCodePathLI(codePath);
         }
     }
@@ -133,7 +133,7 @@ final class RemovePackageHelper {
 
     // Used for system apps only
     public void removePackage(AndroidPackage pkg, boolean chatty) {
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             removePackageLI(pkg, chatty);
         }
     }
@@ -356,7 +356,7 @@ final class RemovePackageHelper {
 
     // Called to clean up disabled system packages
     public void removePackageData(final PackageSetting deletedPs, @NonNull int[] allUserHandles) {
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             removePackageDataLIF(deletedPs, UserHandle.USER_ALL, allUserHandles,
                     new PackageRemovedInfo(), /* flags= */ 0, /* writeSettings= */ false);
         }
@@ -488,7 +488,7 @@ final class RemovePackageHelper {
 
     void cleanUpResources(@Nullable String packageName, @Nullable File codeFile,
                           @Nullable String[] instructionSets) {
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             cleanUpResourcesLI(codeFile, instructionSets);
         }
         if (packageName == null) {
@@ -528,7 +528,7 @@ final class RemovePackageHelper {
         final File codeFile = new File(Environment.getDataAppDirectory(volumeUuid), toPathName);
         Slog.d(TAG, "Cleaning up " + packageName + " on " + volumeUuid);
         final int[] userIds = mPm.mUserManager.getUserIds();
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             // Clean up both app data and code
             // All package moves are frozen until finished
 

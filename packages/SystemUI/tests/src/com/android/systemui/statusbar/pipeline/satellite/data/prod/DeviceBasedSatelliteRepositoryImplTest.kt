@@ -371,6 +371,22 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun satelliteSupportedStateChangedCallbackThrows_doesNotCrash() =
+        testScope.runTest {
+            // GIVEN, satellite manager throws when registering for supported state changes
+            whenever(satelliteManager.registerForSupportedStateChanged(any(), any()))
+                .thenThrow(IllegalStateException())
+
+            // GIVEN a supported satellite manager.
+            setupDefaultRepo()
+            runCurrent()
+
+            // THEN a listener for satellite supported changed can attempt to register,
+            // with no crash
+            verify(satelliteManager).registerForSupportedStateChanged(any(), any())
+        }
+
+    @Test
     fun satelliteSupported_supportIsLost_unregistersListeners() =
         testScope.runTest {
             // GIVEN a supported satellite manager.

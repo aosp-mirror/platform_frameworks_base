@@ -403,4 +403,16 @@
     <integer name="config_wait_for_datagram_sending_response_for_last_message_timeout_millis">60000</integer>
     <java-symbol type="integer" name="config_wait_for_datagram_sending_response_for_last_message_timeout_millis" />
 
+    <!-- Boolean indicating whether Telephony should force PhoneGlobals creation
+         regardless of FEATURE_TELEPHONY presence.
+         -->
+    <bool name="config_force_phone_globals_creation">false</bool>
+    <java-symbol type="bool" name="config_force_phone_globals_creation" />
+
+    <!-- Boolean indicating whether to enable persistent logging via DropBoxManager.
+     Used in persisting SOS/emergency related log messages.
+     -->
+    <bool name="config_dropboxmanager_persistent_logging_enabled">false</bool>
+    <java-symbol type="bool" name="config_dropboxmanager_persistent_logging_enabled" />
+
 </resources>

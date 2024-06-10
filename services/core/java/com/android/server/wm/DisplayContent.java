@@ -4160,6 +4160,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mImeLayeringTarget != null
                 && mImeLayeringTarget.mActivityRecord != null
                 && mImeLayeringTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && mImeLayeringTarget.getBounds().equals(mImeWindowsContainer.getBounds())
                 // IME is attached to app windows that fill display area. This excludes
                 // letterboxed windows.
                 && mImeLayeringTarget.matchesDisplayAreaBounds();
@@ -4191,7 +4192,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && target.getDisplayContent().getImePolicy() == DISPLAY_IME_POLICY_LOCAL) {
             return target;
         }
-        return getImeFallback();
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            final DisplayContent defaultDc = mWmService.getDefaultDisplayContentLocked();
+            return defaultDc.mRemoteInsetsControlTarget;
+        } else {
+            return getImeFallback();
+        }
     }
 
     InsetsControlTarget getImeFallback() {
@@ -4624,6 +4630,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     && !mInputMethodSurfaceParent.isSameSurface(
                             mImeWindowsContainer.getParent().mSurfaceControl));
             updateImeControlTarget(forceUpdateImeParent);
+
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                mInsetsStateController.getImeSourceProvider().onInputTargetChanged(target);
+            }
         }
     }
 
@@ -4727,6 +4737,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // in case seeing unexpected IME surface visibility change when delivering the IME leash
             // to the remote insets target during the IME restarting, but the focus window is not in
             // multi-windowing mode, return null target until the next input target updated.
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                // The control target could be the RemoteInsetsControlTarget (if the focussed
+                // view is on a virtual display that can not show the IME (and therefore it will
+                // be shown on the default display)
+                if (isDefaultDisplay && mRemoteInsetsControlTarget != null) {
+                    return mRemoteInsetsControlTarget;
+                }
+            }
             return null;
         }
 
@@ -7062,14 +7080,30 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         @Override
         public boolean isRequestedVisible(@InsetsType int types) {
-            return ((types & ime()) != 0
-                            && getInsetsStateController().getImeSourceProvider().isImeShowing())
-                    || (mRequestedVisibleTypes & types) != 0;
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                return (mRequestedVisibleTypes & types) != 0;
+            } else {
+                return ((types & ime()) != 0
+                        && getInsetsStateController().getImeSourceProvider().isImeShowing())
+                        || (mRequestedVisibleTypes & types) != 0;
+            }
         }
 
         @Override
         public @InsetsType int getRequestedVisibleTypes() {
             return mRequestedVisibleTypes;
+        }
+
+        @Override
+        public void setImeInputTargetRequestedVisibility(boolean visible) {
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                try {
+                    // TODO stats token
+                    mRemoteInsetsController.setImeInputTargetRequestedVisibility(visible);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to deliver setImeInputTargetRequestedVisibility", e);
+                }
+            }
         }
 
         /**

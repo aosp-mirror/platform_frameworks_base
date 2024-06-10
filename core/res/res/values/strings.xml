@@ -5991,8 +5991,6 @@
     <string name="accessibility_system_action_dpad_right_label">Dpad Right</string>
     <!-- Label for Dpad center action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dpad_center_label">Dpad Center</string>
-    <!-- Accessibility description of caption view -->
-    <string name="accessibility_freeform_caption">Caption bar of <xliff:g id="app_name">%1$s</xliff:g>.</string>
 
     <!-- Text to tell the user that a package has been forced by themselves in the RESTRICTED bucket. [CHAR LIMIT=NONE] -->
     <string name="as_app_forced_to_restricted_bucket">
@@ -6474,6 +6472,9 @@ ul.</string>
     <string name="accessibility_label_clone_profile">Clone</string>
     <!-- Accessibility label for clone profile user type [CHAR LIMIT=30] -->
     <string name="accessibility_label_communal_profile">Communal</string>
+
+    <!-- Label for private space biometric prompt logo description [CHAR LIMIT=30] -->
+    <string name="private_space_biometric_prompt_title">Private space</string>
 
     <!-- Notification message used when a notification's normal message contains sensitive information [CHAR_LIMIT=NOTIF_BODY] -->
     <string name="redacted_notification_message">Sensitive notification content hidden</string>

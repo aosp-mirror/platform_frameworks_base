@@ -19,6 +19,7 @@ import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
 import android.provider.Settings.SettingNotFoundException
+import com.android.app.tracing.TraceUtils.trace
 
 /**
  * Used to interact with mainly with Settings.Global, but can also be used for Settings.System and
@@ -52,35 +53,43 @@ interface SettingsProxy {
      *
      * Implicitly calls [getUriFor] on the passed in name.
      */
-    fun registerContentObserver(name: String, settingsObserver: ContentObserver) {
-        registerContentObserver(getUriFor(name), settingsObserver)
+    fun registerContentObserverSync(name: String, settingsObserver: ContentObserver) {
+        registerContentObserverSync(getUriFor(name), settingsObserver)
     }
 
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
-    fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) =
-        registerContentObserver(uri, false, settingsObserver)
+    fun registerContentObserverSync(uri: Uri, settingsObserver: ContentObserver) =
+        registerContentObserverSync(uri, false, settingsObserver)
 
     /**
      * Convenience wrapper around [ContentResolver.registerContentObserver].'
      *
      * Implicitly calls [getUriFor] on the passed in name.
      */
-    fun registerContentObserver(
+    fun registerContentObserverSync(
         name: String,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver
-    ) = registerContentObserver(getUriFor(name), notifyForDescendants, settingsObserver)
+    ) = registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
 
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
-    fun registerContentObserver(
+    fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver
-    ) = getContentResolver().registerContentObserver(uri, notifyForDescendants, settingsObserver)
+    ) {
+        trace({ "SP#registerObserver#[$uri]" }) {
+            getContentResolver()
+                .registerContentObserver(uri, notifyForDescendants, settingsObserver)
+        }
+    }
 
     /** See [ContentResolver.unregisterContentObserver]. */
-    fun unregisterContentObserver(settingsObserver: ContentObserver) =
-        getContentResolver().unregisterContentObserver(settingsObserver)
+    fun unregisterContentObserverSync(settingsObserver: ContentObserver) {
+        trace({ "SP#unregisterObserver" }) {
+            getContentResolver().unregisterContentObserver(settingsObserver)
+        }
+    }
 
     /**
      * Look up a name in the database.

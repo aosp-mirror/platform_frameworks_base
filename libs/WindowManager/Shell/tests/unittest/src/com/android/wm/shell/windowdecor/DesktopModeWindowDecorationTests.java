@@ -22,6 +22,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.any;
@@ -54,6 +56,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.R;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
@@ -62,14 +65,17 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 
 import java.util.function.Supplier;
 
@@ -118,6 +124,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     private final Configuration mConfiguration = new Configuration();
 
+    private StaticMockitoSession mMockitoSession;
     private TestableContext mTestableContext;
 
     /** Set up run before test class. */
@@ -131,11 +138,21 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     @Before
     public void setUp() {
+        mMockitoSession = mockitoSession()
+                .strictness(Strictness.LENIENT)
+                .spyStatic(DesktopModeStatus.class)
+                .startMocking();
+        when(DesktopModeStatus.useDesktopOverrideDensity()).thenReturn(false);
         doReturn(mMockSurfaceControlViewHost).when(mMockSurfaceControlViewHostFactory).create(
                 any(), any(), any());
         doReturn(mMockTransaction).when(mMockTransactionSupplier).get();
         mTestableContext = new TestableContext(mContext);
         mTestableContext.ensureTestableResources();
+    }
+
+    @After
+    public void tearDown() {
+        mMockitoSession.finishMocking();
     }
 
     @Test
@@ -206,6 +223,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Test
     @DisableFlags(Flags.FLAG_ENABLE_APP_HEADER_WITH_TASK_DENSITY)
     public void updateRelayoutParams_appHeader_usesSystemDensity() {
+        when(DesktopModeStatus.useDesktopOverrideDensity()).thenReturn(true);
         final int systemDensity = mTestableContext.getOrCreateTestableResources().getResources()
                 .getConfiguration().densityDpi;
         final int customTaskDensity = systemDensity + 300;
@@ -228,7 +246,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void updateRelayoutParams_freeformAndTransparentAppearance_allowsInputFallthrough() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        taskInfo.taskDescription.setSystemBarsAppearance(
+        taskInfo.taskDescription.setTopOpaqueSystemBarsAppearance(
                 APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND);
         final RelayoutParams relayoutParams = new RelayoutParams();
 
@@ -246,7 +264,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void updateRelayoutParams_freeformButOpaqueAppearance_disallowsInputFallthrough() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        taskInfo.taskDescription.setSystemBarsAppearance(0);
+        taskInfo.taskDescription.setTopOpaqueSystemBarsAppearance(0);
         final RelayoutParams relayoutParams = new RelayoutParams();
 
         DesktopModeWindowDecoration.updateRelayoutParams(

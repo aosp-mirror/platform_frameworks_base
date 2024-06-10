@@ -22,6 +22,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -34,7 +36,6 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.GestureDetector;
 import android.view.IWindowManager;
@@ -45,8 +46,10 @@ import android.view.WindowMetrics;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -67,6 +70,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -75,7 +79,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class TouchMonitorTest extends SysuiTestCase {
     private KosmosJavaAdapter mKosmos;
@@ -119,6 +123,8 @@ public class TouchMonitorTest extends SysuiTestCase {
 
         private final KosmosJavaAdapter mKosmos;
 
+        private ArrayList<LifecycleObserver> mLifecycleObservers = new ArrayList<>();
+
 
         Environment(Set<TouchHandler> handlers, KosmosJavaAdapter kosmos) {
             mLifecycleOwner = new SimpleLifecycleOwner();
@@ -147,7 +153,13 @@ public class TouchMonitorTest extends SysuiTestCase {
             mMonitor = new TouchMonitor(mExecutor, mBackgroundExecutor, mLifecycleRegistry,
                     mInputFactory, mDisplayHelper, mKosmos.getConfigurationInteractor(),
                     handlers, mIWindowManager,  0);
+            clearInvocations(mLifecycleRegistry);
             mMonitor.init();
+
+            ArgumentCaptor<LifecycleObserver> observerCaptor =
+                    ArgumentCaptor.forClass(LifecycleObserver.class);
+            verify(mLifecycleRegistry, atLeast(1)).addObserver(observerCaptor.capture());
+            mLifecycleObservers.addAll(observerCaptor.getAllValues());
 
             updateLifecycle(Lifecycle.State.RESUMED);
 
@@ -186,6 +198,16 @@ public class TouchMonitorTest extends SysuiTestCase {
         void verifyInputSessionDispose() {
             verify(mInputSession).dispose();
             Mockito.clearInvocations(mInputSession);
+        }
+
+        void destroyMonitor() {
+            mMonitor.destroy();
+        }
+
+        void verifyLifecycleObserversUnregistered() {
+            for (LifecycleObserver observer : mLifecycleObservers) {
+                verify(mLifecycleRegistry).removeObserver(observer);
+            }
         }
     }
 
@@ -640,6 +662,16 @@ public class TouchMonitorTest extends SysuiTestCase {
         environment.executeAll();
 
         verify(callback).onRemoved();
+    }
+
+    @Test
+    public void testDestroy_cleansUpLifecycleObserver() {
+        final TouchHandler touchHandler = createTouchHandler();
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
+        environment.destroyMonitor();
+        environment.verifyLifecycleObserversUnregistered();
     }
 
     private GestureDetector.OnGestureListener registerGestureListener(TouchHandler handler) {

@@ -21,26 +21,33 @@ import androidx.test.filters.MediumTest
 
 import android.app.ActivityManager
 import android.app.ApplicationExitInfo
+import android.content.Context
 import android.graphics.Rect
+import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.IInputConstants.UNMULTIPLIED_DEFAULT_DISPATCHING_TIMEOUT_MILLIS
 import android.os.SystemClock
 import android.provider.Settings
 import android.provider.Settings.Global.HIDE_ERROR_DIALOGS
+import android.server.wm.CtsWindowInfoUtils.waitForStableWindowGeometry
 import android.testing.PollingCheck
-import android.view.InputDevice
-import android.view.MotionEvent
 
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 
+import com.android.cts.input.DebugInputRule
+import com.android.cts.input.UinputTouchScreen
+
+import java.util.concurrent.TimeUnit
+
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -69,6 +76,9 @@ class AnrTest {
     private val DISPATCHING_TIMEOUT = (UNMULTIPLIED_DEFAULT_DISPATCHING_TIMEOUT_MILLIS *
             Build.HW_TIMEOUT_MULTIPLIER)
 
+    @get:Rule
+    val debugInputRule = DebugInputRule()
+
     @Before
     fun setUp() {
         val contentResolver = instrumentation.targetContext.contentResolver
@@ -84,12 +94,14 @@ class AnrTest {
     }
 
     @Test
+    @DebugInputRule.DebugInput(bug = 339924248)
     fun testGestureMonitorAnr_Close() {
         triggerAnr()
         clickCloseAppOnAnrDialog()
     }
 
     @Test
+    @DebugInputRule.DebugInput(bug = 339924248)
     fun testGestureMonitorAnr_Wait() {
         triggerAnr()
         clickWaitOnAnrDialog()
@@ -105,7 +117,7 @@ class AnrTest {
         val closeAppButton: UiObject2? =
                 uiDevice.wait(Until.findObject(By.res("android:id/aerr_close")), 20000)
         if (closeAppButton == null) {
-            fail("Could not find anr dialog")
+            fail("Could not find anr dialog/close button")
             return
         }
         closeAppButton.click()
@@ -150,6 +162,18 @@ class AnrTest {
         assertEquals(ApplicationExitInfo.REASON_ANR, reasons[0].reason)
     }
 
+    private fun clickOnObject(obj: UiObject2) {
+        val displayManager =
+            instrumentation.context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+        val display = displayManager.getDisplay(obj.getDisplayId())
+        val touchScreen = UinputTouchScreen(instrumentation, display)
+
+        val rect: Rect = obj.visibleBounds
+        val pointer = touchScreen.touchDown(rect.centerX(), rect.centerY())
+        pointer.lift()
+        touchScreen.close()
+    }
+
     private fun triggerAnr() {
         startUnresponsiveActivity()
         val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
@@ -160,13 +184,7 @@ class AnrTest {
             return
         }
 
-        val rect: Rect = obj.visibleBounds
-        val downTime = SystemClock.uptimeMillis()
-        val downEvent = MotionEvent.obtain(downTime, downTime,
-                MotionEvent.ACTION_DOWN, rect.left.toFloat(), rect.top.toFloat(), 0 /* metaState */)
-        downEvent.source = InputDevice.SOURCE_TOUCHSCREEN
-
-        instrumentation.uiAutomation.injectInputEvent(downEvent, false /* sync*/)
+        clickOnObject(obj)
 
         SystemClock.sleep(DISPATCHING_TIMEOUT.toLong()) // default ANR timeout for gesture monitors
     }
@@ -175,5 +193,6 @@ class AnrTest {
         val flags = " -W -n "
         val startCmd = "am start $flags $PACKAGE_NAME/.UnresponsiveGestureMonitorActivity"
         instrumentation.uiAutomation.executeShellCommand(startCmd)
+        waitForStableWindowGeometry(5L, TimeUnit.SECONDS)
     }
 }

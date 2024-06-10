@@ -66,7 +66,8 @@ public:
     void clearSpots() override;
     void updatePointerIcon(PointerIconStyle iconId) override;
     void setCustomPointerIcon(const SpriteIcon& icon) override;
-    void setSkipScreenshot(ui::LogicalDisplayId displayId, bool skip) override;
+    void setSkipScreenshotFlagForDisplay(ui::LogicalDisplayId displayId) override;
+    void clearSkipScreenshotFlags() override;
 
     virtual void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();

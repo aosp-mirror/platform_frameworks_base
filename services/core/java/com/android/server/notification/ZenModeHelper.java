@@ -149,6 +149,8 @@ public class ZenModeHelper {
 
     private static final String IMPLICIT_RULE_ID_PREFIX = "implicit_"; // + pkg_name
 
+    private static final int MAX_ICON_RESOURCE_NAME_LENGTH = 1000;
+
     /**
      * Send new activation AutomaticZenRule statuses to apps with a min target SDK version
      */
@@ -2645,7 +2647,13 @@ public class ZenModeHelper {
         requireNonNull(packageName);
         try {
             final Resources res = mPm.getResourcesForApplication(packageName);
-            return res.getResourceName(resId);
+            String resourceName = res.getResourceName(resId);
+            if (resourceName != null && resourceName.length() > MAX_ICON_RESOURCE_NAME_LENGTH) {
+                Slog.e(TAG, "Resource name for ID=" + resId + " in package " + packageName
+                        + " is too long (" + resourceName.length() + "); ignoring it");
+                return null;
+            }
+            return resourceName;
         } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
             Slog.e(TAG, "Resource name for ID=" + resId + " not found in package " + packageName
                     + ". Resource IDs may change when the application is upgraded, and the system"

@@ -1203,6 +1203,25 @@ public class BubbleDataTest extends ShellTestCase {
         assertThat(update.currentBubbleList.get(0).getKey()).isEqualTo(mEntryA2.getKey());
         assertThat(update.currentBubbleList.get(1).getKey()).isEqualTo(mEntryA1.getKey());
         assertThat(update.bubbleBarLocation).isEqualTo(BubbleBarLocation.LEFT);
+        assertThat(update.expandedChanged).isFalse();
+        assertThat(update.selectedBubbleKey).isEqualTo(mEntryA2.getKey());
+    }
+
+    @Test
+    public void test_getInitialStateForBubbleBar_includesExpandedState() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mPositioner.setBubbleBarLocation(BubbleBarLocation.LEFT);
+        mBubbleData.setExpanded(true);
+
+        BubbleBarUpdate update = mBubbleData.getInitialStateForBubbleBar();
+        assertThat(update.currentBubbleList).hasSize(2);
+        assertThat(update.currentBubbleList.get(0).getKey()).isEqualTo(mEntryA2.getKey());
+        assertThat(update.currentBubbleList.get(1).getKey()).isEqualTo(mEntryA1.getKey());
+        assertThat(update.bubbleBarLocation).isEqualTo(BubbleBarLocation.LEFT);
+        assertThat(update.expandedChanged).isTrue();
+        assertThat(update.expanded).isTrue();
+        assertThat(update.selectedBubbleKey).isEqualTo(mEntryA2.getKey());
     }
 
     @Test

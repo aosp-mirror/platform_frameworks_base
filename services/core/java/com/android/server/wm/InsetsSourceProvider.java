@@ -69,12 +69,12 @@ class InsetsSourceProvider {
     protected final @NonNull InsetsStateController mStateController;
     protected @Nullable WindowContainer mWindowContainer;
     protected @Nullable InsetsSourceControl mControl;
+    protected @Nullable InsetsControlTarget mControlTarget;
     protected boolean mIsLeashReadyForDispatching;
 
     private final Rect mTmpRect = new Rect();
     private final InsetsSourceControl mFakeControl;
     private final Consumer<Transaction> mSetLeashPositionConsumer;
-    private @Nullable InsetsControlTarget mControlTarget;
     private @Nullable InsetsControlTarget mPendingControlTarget;
     private @Nullable InsetsControlTarget mFakeControlTarget;
 
@@ -350,11 +350,27 @@ class InsetsSourceProvider {
         boolean isServerVisible = windowState != null
                 ? windowState.wouldBeVisibleIfPolicyIgnored() && windowState.isVisibleByPolicy()
                 : mWindowContainer.isVisibleRequested();
+
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            if (mControl != null && mControl.getType() == WindowInsets.Type.ime() && !mServerVisible
+                    && isServerVisible && windowState != null) {
+                // in case the IME becomes visible, we need to check if it is already drawn and
+                // does not have given insets pending. If it's not yet drawn, we do not set
+                // server visibility
+                isServerVisible = windowState.isDrawn() && !windowState.mGivenInsetsPending;
+            }
+        }
+        final boolean serverVisibleChanged = mServerVisible != isServerVisible;
         setServerVisible(isServerVisible);
-        updateInsetsControlPosition(windowState);
+        updateInsetsControlPosition(windowState, serverVisibleChanged);
     }
 
     void updateInsetsControlPosition(WindowState windowState) {
+        updateInsetsControlPosition(windowState, false);
+    }
+
+    private void updateInsetsControlPosition(WindowState windowState,
+            boolean serverVisibleChanged) {
         if (mControl == null) {
             return;
         }
@@ -388,6 +404,9 @@ class InsetsSourceProvider {
         final Insets insetsHint = getInsetsHint();
         if (!mControl.getInsetsHint().equals(insetsHint)) {
             mControl.setInsetsHint(insetsHint);
+            changed = true;
+        }
+        if (android.view.inputmethod.Flags.refactorInsetsController() && serverVisibleChanged) {
             changed = true;
         }
         if (changed) {
@@ -590,6 +609,10 @@ class InsetsSourceProvider {
                 mServerVisible, mClientVisible);
     }
 
+    protected boolean isLeashReadyForDispatching() {
+        return mIsLeashReadyForDispatching;
+    }
+
     /**
      * Gets the source control for the given control target. If this is the provider's control
      * target, but the leash is not ready for dispatching, a new source control object with the
@@ -600,7 +623,7 @@ class InsetsSourceProvider {
     @Nullable
     InsetsSourceControl getControl(InsetsControlTarget target) {
         if (target == mControlTarget) {
-            if (!mIsLeashReadyForDispatching && mControl != null) {
+            if (!isLeashReadyForDispatching() && mControl != null) {
                 // The surface transaction of preparing leash is not applied yet. We don't send it
                 // to the client in case that the client applies its transaction sooner than ours
                 // that we could unexpectedly overwrite the surface state.
@@ -750,9 +773,11 @@ class InsetsSourceProvider {
                 @AnimationType int type, @NonNull OnAnimationFinishedCallback finishCallback) {
             // TODO(b/166736352): Check if we still need to control the IME visibility here.
             if (mSource.getType() == WindowInsets.Type.ime()) {
-                // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
-                t.setAlpha(animationLeash, 1 /* alpha */);
-                t.hide(animationLeash);
+                if (!android.view.inputmethod.Flags.refactorInsetsController() || !mClientVisible) {
+                    // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
+                    t.setAlpha(animationLeash, 1 /* alpha */);
+                    t.hide(animationLeash);
+                }
             }
             ProtoLog.i(WM_DEBUG_WINDOW_INSETS,
                     "ControlAdapter startAnimation mSource: %s controlTarget: %s", mSource,

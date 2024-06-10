@@ -2431,6 +2431,7 @@ public class PackageInstaller {
                     statusReceiver, new UserHandle(mUserId));
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2467,6 +2468,7 @@ public class PackageInstaller {
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2499,6 +2501,7 @@ public class PackageInstaller {
                     userActionIntent, new UserHandle(mUserId));
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3465,8 +3468,12 @@ public class PackageInstaller {
          *              Android S  ({@link android.os.Build.VERSION_CODES#S API 31})</li>
          *              <li>{@link android.os.Build.VERSION_CODES#R API 30} or higher on
          *              Android T ({@link android.os.Build.VERSION_CODES#TIRAMISU API 33})</li>
-         *              <li>{@link android.os.Build.VERSION_CODES#S API 31} or higher <b>after</b>
-         *              Android T ({@link android.os.Build.VERSION_CODES#TIRAMISU API 33})</li>
+         *              <li>{@link android.os.Build.VERSION_CODES#S API 31} or higher on
+         *              Android U ({@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE API 34})
+         *              </li>
+         *              <li>{@link android.os.Build.VERSION_CODES#TIRAMISU API 33} or higher on
+         *              Android V ({@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM API 35})
+         *              </li>
          *          </ul>
          *     </li>
          *     <li>The installer is:

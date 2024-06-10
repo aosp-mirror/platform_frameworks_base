@@ -18,8 +18,8 @@ package com.android.systemui.media.controls.domain.pipeline
 
 import android.app.smartspace.SmartspaceAction
 import android.os.Bundle
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
@@ -76,7 +76,7 @@ private val SMARTSPACE_INSTANCE_ID = InstanceId.fakeInstanceId(456)!!
 
 @ExperimentalCoroutinesApi
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class MediaDataFilterImplTest : SysuiTestCase() {
     val kosmos = testKosmos()

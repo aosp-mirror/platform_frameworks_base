@@ -61,7 +61,6 @@ import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
 import android.view.View;
@@ -72,6 +71,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.accessibility.common.ShortcutConstants;
@@ -101,7 +101,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Tests for {@link MenuViewLayer}. */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class MenuViewLayerTest extends SysuiTestCase {

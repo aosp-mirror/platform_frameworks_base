@@ -86,10 +86,12 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameter
+import platform.test.runner.parameterized.Parameters
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
@@ -105,7 +107,7 @@ private const val OP_PACKAGE_NAME_CAN_NOT_BE_FOUND = "can.not.be.found"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCase() {
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
@@ -1407,7 +1409,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         runningTaskInfo.topActivity = topActivity
         whenever(activityTaskManager.getTasks(1)).thenReturn(listOf(runningTaskInfo))
         selector =
-            PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
+            PromptSelectorInteractorImpl(
+                fingerprintRepository,
+                displayStateInteractor,
+                promptRepository,
+                lockPatternUtils
+            )
         selector.resetPrompt(REQUEST_ID)
 
         viewModel =
@@ -1471,7 +1478,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     companion object {
         @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         fun data(): Collection<TestCase> = singleModalityTestCases + coexTestCases
 
         private val singleModalityTestCases =
@@ -1643,7 +1650,8 @@ private fun PromptSelectorInteractor.initializePrompt(
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
         CHALLENGE,
         packageName,
-        false /*onUseDeviceCredential*/
+        onSwitchToCredential = false,
+        isLandscape = false,
     )
 }
 

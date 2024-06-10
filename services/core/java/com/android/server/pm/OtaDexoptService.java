@@ -506,8 +506,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
     private static class OTADexoptPackageDexOptimizer extends
             PackageDexOptimizer.ForcedUpdatePackageDexOptimizer {
-        public OTADexoptPackageDexOptimizer(Installer installer, Object installLock,
-                Context context) {
+        OTADexoptPackageDexOptimizer(Installer installer,
+                PackageManagerTracedLock installLock, Context context) {
             super(installer, installLock, context, "*otadexopt*");
         }
     }

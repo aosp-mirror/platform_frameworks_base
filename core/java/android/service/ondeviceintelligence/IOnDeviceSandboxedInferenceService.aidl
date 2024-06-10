@@ -21,6 +21,7 @@ import android.app.ondeviceintelligence.IResponseCallback;
 import android.app.ondeviceintelligence.ITokenInfoCallback;
 import android.app.ondeviceintelligence.IProcessingSignal;
 import android.app.ondeviceintelligence.Feature;
+import android.os.IRemoteCallback;
 import android.os.ICancellationSignal;
 import android.os.PersistableBundle;
 import android.os.Bundle;
@@ -34,18 +35,19 @@ import android.service.ondeviceintelligence.IProcessingUpdateStatusCallback;
  * @hide
  */
 oneway interface IOnDeviceSandboxedInferenceService {
-    void registerRemoteStorageService(in IRemoteStorageService storageService);
+    void registerRemoteStorageService(in IRemoteStorageService storageService,
+                                        in IRemoteCallback remoteCallback) = 0;
     void requestTokenInfo(int callerUid, in Feature feature, in Bundle request,
                             in AndroidFuture cancellationSignal,
-                            in ITokenInfoCallback tokenInfoCallback);
+                            in ITokenInfoCallback tokenInfoCallback) = 1;
     void processRequest(int callerUid, in Feature feature, in Bundle request, in int requestType,
                         in AndroidFuture cancellationSignal,
                         in AndroidFuture processingSignal,
-                        in IResponseCallback callback);
+                        in IResponseCallback callback) = 2;
     void processRequestStreaming(int callerUid, in Feature feature, in Bundle request, in int requestType,
                                 in AndroidFuture cancellationSignal,
                                 in AndroidFuture processingSignal,
-                                in IStreamingResponseCallback callback);
+                                in IStreamingResponseCallback callback) = 3;
     void updateProcessingState(in Bundle processingState,
-                                     in IProcessingUpdateStatusCallback callback);
+                                     in IProcessingUpdateStatusCallback callback) = 4;
 }
