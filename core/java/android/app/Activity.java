@@ -1150,6 +1150,11 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>To keep the Intent instance for future use, call {@link #setIntent(Intent)}, and use
      * this method to retrieve it.
+     *
+     * <p>Note that in {@link #onNewIntent}, this method will return the original Intent. You can
+     * use {@link #setIntent(Intent)} to update it to the new Intent.
+     *
+     * @return {@link Intent} instance that started this activity, or that was kept for future use
      */
     public Intent getIntent() {
         return mIntent;
@@ -1170,9 +1175,14 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Returns the ComponentCaller instance of the app that launched this activity with the intent
-     * from {@link #getIntent()}. To keep the value of the ComponentCaller instance for new intents,
-     * call {@link #setIntent(Intent, ComponentCaller)} instead of {@link #setIntent(Intent)}.
+     * Returns the ComponentCaller instance of the app that started this activity.
+     *
+     * <p>To keep the ComponentCaller instance for future use, call
+     * {@link #setIntent(Intent, ComponentCaller)}, and use this method to retrieve it.
+     *
+     * <p>Note that in {@link #onNewIntent}, this method will return the original ComponentCaller.
+     * You can use {@link #setIntent(Intent, ComponentCaller)} to update it to the new
+     * ComponentCaller.
      *
      * @return {@link ComponentCaller} instance corresponding to the intent from
      *         {@link #getIntent()}, or {@code null} if the activity was not launched with that
@@ -7156,8 +7166,8 @@ public class Activity extends ContextThemeWrapper
     /**
      * Returns the ComponentCaller instance of the app that initially launched this activity.
      *
-     * <p>Note that calls to {@link #onNewIntent} have no effect on the returned value of this
-     * method.
+     * <p>Note that calls to {@link #onNewIntent} and {@link #setIntent} have no effect on the
+     * returned value of this method.
      *
      * @return {@link ComponentCaller} instance
      * @see ComponentCaller
