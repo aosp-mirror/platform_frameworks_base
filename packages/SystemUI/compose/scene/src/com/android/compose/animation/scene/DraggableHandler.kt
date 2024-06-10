@@ -257,7 +257,7 @@ private class DragControllerImpl(
 
     fun updateTransition(newTransition: SwipeTransition, force: Boolean = false) {
         if (isDrivingTransition || force) {
-            layoutState.startTransition(newTransition, newTransition.key)
+            layoutState.startTransition(newTransition)
         }
 
         swipeTransition = newTransition
@@ -555,7 +555,7 @@ private class SwipeTransition(
     val layoutImpl: SceneTransitionLayoutImpl,
     val layoutState: BaseSceneTransitionLayoutState,
     val coroutineScope: CoroutineScope,
-    val key: TransitionKey?,
+    override val key: TransitionKey?,
     val _fromScene: Scene,
     val _toScene: Scene,
     val userActionDistanceScope: UserActionDistanceScope,

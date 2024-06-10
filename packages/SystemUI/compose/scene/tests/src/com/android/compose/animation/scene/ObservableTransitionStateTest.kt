@@ -135,7 +135,7 @@ class ObservableTransitionStateTest {
         var transitionCurrentScene by mutableStateOf(SceneA)
         val transition =
             transition(from = SceneA, to = SceneB, current = { transitionCurrentScene })
-        state.startTransition(transition, transitionKey = null)
+        state.startTransition(transition)
         assertThat(currentScene.value).isEqualTo(SceneA)
 
         // Change the transition current scene.
