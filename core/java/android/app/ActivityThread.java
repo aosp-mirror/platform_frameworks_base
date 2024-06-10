@@ -7500,7 +7500,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     + data.instrumentationName + ": " + e.toString(), e);
             }
             try {
-                timestampApplicationOnCreateNs = SystemClock.elapsedRealtimeNanos();
+                timestampApplicationOnCreateNs = SystemClock.uptimeNanos();
                 mInstrumentation.callApplicationOnCreate(app);
             } catch (Exception e) {
                 timestampApplicationOnCreateNs = 0;

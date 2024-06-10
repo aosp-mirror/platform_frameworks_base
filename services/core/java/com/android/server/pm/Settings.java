@@ -934,6 +934,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             ret.setTargetSdkVersion(p.getTargetSdkVersion());
             ret.setRestrictUpdateHash(p.getRestrictUpdateHash());
             ret.setScannedAsStoppedSystemApp(p.isScannedAsStoppedSystemApp());
+            ret.setInstallSource(p.getInstallSource());
         }
         mDisabledSysPackages.remove(name);
         return ret;

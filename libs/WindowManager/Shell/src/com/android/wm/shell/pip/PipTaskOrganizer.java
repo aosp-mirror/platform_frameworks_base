@@ -603,6 +603,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // the end of the enter animation and reschedule exitPip to run after enter-PiP
             // has finished its transition and allowed the client to draw in PiP mode.
             mPipTransitionController.end(() -> {
+                // TODO(341627042): force set to entered state to avoid potential stack overflow.
+                mPipTransitionState.setTransitionState(PipTransitionState.ENTERED_PIP);
                 exitPip(animationDurationMs, requestEnterSplit);
             });
             return;

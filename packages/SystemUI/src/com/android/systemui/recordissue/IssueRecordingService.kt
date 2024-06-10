@@ -35,8 +35,6 @@ import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.screenrecord.RecordingServiceStrings
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
-import com.android.traceur.MessageConstants.INTENT_EXTRA_TRACE_TYPE
-import com.android.traceur.TraceUtils.PresetTraceType
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -76,15 +74,10 @@ constructor(
         when (intent?.action) {
             ACTION_START -> {
                 bgExecutor.execute {
-                    traceurMessageSender.startTracing(
-                        intent.getSerializableExtra(
-                            INTENT_EXTRA_TRACE_TYPE,
-                            PresetTraceType::class.java
-                        )
-                    )
+                    traceurMessageSender.startTracing(issueRecordingState.traceType)
                 }
                 issueRecordingState.isRecording = true
-                if (!intent.getBooleanExtra(EXTRA_SCREEN_RECORD, false)) {
+                if (!issueRecordingState.recordScreen) {
                     // If we don't want to record the screen, the ACTION_SHOW_START_NOTIF action
                     // will circumvent the RecordingService's screen recording start code.
                     return super.onStartCommand(Intent(ACTION_SHOW_START_NOTIF), flags, startId)
@@ -107,7 +100,7 @@ constructor(
                     )
 
                     val screenRecording = intent.getParcelableExtra(EXTRA_PATH, Uri::class.java)
-                    if (issueRecordingState.takeBugReport) {
+                    if (issueRecordingState.takeBugreport) {
                         iActivityManager.requestBugReportWithExtraAttachment(screenRecording)
                     } else {
                         traceurMessageSender.shareTraces(applicationContext, screenRecording)
@@ -130,7 +123,6 @@ constructor(
     companion object {
         private const val TAG = "IssueRecordingService"
         private const val CHANNEL_ID = "issue_record"
-        private const val EXTRA_SCREEN_RECORD = "extra_screenRecord"
 
         /**
          * Get an intent to stop the issue recording service.
@@ -148,35 +140,36 @@ constructor(
          *
          * @param context Context from the requesting activity
          */
-        fun getStartIntent(
-            context: Context,
-            screenRecord: Boolean,
-            traceType: PresetTraceType,
-        ): Intent =
-            Intent(context, IssueRecordingService::class.java)
-                .setAction(ACTION_START)
-                .putExtra(EXTRA_SCREEN_RECORD, screenRecord)
-                .putExtra(INTENT_EXTRA_TRACE_TYPE, traceType)
+        fun getStartIntent(context: Context): Intent =
+            Intent(context, IssueRecordingService::class.java).setAction(ACTION_START)
     }
 }
 
 private class IrsStrings(private val res: Resources) : RecordingServiceStrings(res) {
     override val title
         get() = res.getString(R.string.issuerecord_title)
+
     override val notificationChannelDescription
         get() = res.getString(R.string.issuerecord_channel_description)
+
     override val startErrorResId
         get() = R.string.issuerecord_start_error
+
     override val startError
         get() = res.getString(R.string.issuerecord_start_error)
+
     override val saveErrorResId
         get() = R.string.issuerecord_save_error
+
     override val saveError
         get() = res.getString(R.string.issuerecord_save_error)
+
     override val ongoingRecording
         get() = res.getString(R.string.issuerecord_ongoing_screen_only)
+
     override val backgroundProcessingLabel
         get() = res.getString(R.string.issuerecord_background_processing_label)
+
     override val saveTitle
         get() = res.getString(R.string.issuerecord_save_title)
 }

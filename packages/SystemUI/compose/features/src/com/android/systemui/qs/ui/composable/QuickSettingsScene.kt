@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -56,6 +57,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
@@ -63,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
@@ -79,6 +83,8 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
+import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
+import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.InQS
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
@@ -258,6 +264,14 @@ private fun SceneScope.QuickSettingsScene(
             }
         }
 
+        // ############# Media ###############
+        val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
+        val mediaInRow =
+            isMediaVisible &&
+                LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
+        val mediaOffset by
+            animateSceneDpAsState(value = InQS, key = MediaLandscapeTopOffset, canOverflow = false)
+
         // This is the background for the whole scene, as the elements don't necessarily provide
         // a background that extends to the edges.
         Spacer(
@@ -337,21 +351,37 @@ private fun SceneScope.QuickSettingsScene(
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     // This view has its own horizontal padding
-                    QuickSettings(
-                        viewModel.qsSceneAdapter,
-                        { viewModel.qsSceneAdapter.qsHeight },
-                        isSplitShade = false,
-                        modifier = Modifier
-                    )
+                    val content: @Composable () -> Unit = {
+                        QuickSettings(
+                            viewModel.qsSceneAdapter,
+                            { viewModel.qsSceneAdapter.qsHeight },
+                            isSplitShade = false,
+                            modifier = Modifier.layoutId(QSMediaMeasurePolicy.LayoutId.QS)
+                        )
 
-                    val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
-
-                    MediaCarousel(
-                        isVisible = isMediaVisible,
-                        mediaHost = mediaHost,
-                        modifier = Modifier.fillMaxWidth(),
-                        carouselController = mediaCarouselController,
-                    )
+                        MediaCarousel(
+                            isVisible = isMediaVisible,
+                            mediaHost = mediaHost,
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .layoutId(QSMediaMeasurePolicy.LayoutId.Media),
+                            carouselController = mediaCarouselController,
+                        )
+                    }
+                    val landscapeQsMediaMeasurePolicy = remember {
+                        QSMediaMeasurePolicy(
+                            { viewModel.qsSceneAdapter.qsHeight },
+                            { mediaOffset.roundToPx() },
+                        )
+                    }
+                    if (mediaInRow) {
+                        Layout(
+                            content = content,
+                            measurePolicy = landscapeQsMediaMeasurePolicy,
+                        )
+                    } else {
+                        content()
+                    }
                 }
             }
 

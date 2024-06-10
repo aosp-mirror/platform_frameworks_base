@@ -1149,6 +1149,32 @@ public final class CompanionDeviceManager {
         }
     }
 
+    /**
+     * Remove bonding between this device and an associated companion device.
+     *
+     * <p>This is an asynchronous call, it will return immediately. Register for {@link
+     * BluetoothDevice#ACTION_BOND_STATE_CHANGED} intents to be notified when the bond removal
+     * process completes, and its result.
+     *
+     * @param associationId an already-associated companion device to remove bond from
+     * @return false on immediate error, true if bond removal process will begin
+     */
+    @FlaggedApi(Flags.FLAG_UNPAIR_ASSOCIATED_DEVICE)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    public boolean removeBond(int associationId) {
+        if (mService == null) {
+            Log.w(TAG, "CompanionDeviceManager service is not available.");
+            return false;
+        }
+
+        try {
+            return mService.removeBond(associationId, mContext.getOpPackageName(),
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Register to receive callbacks whenever the associated device comes in and out of range.

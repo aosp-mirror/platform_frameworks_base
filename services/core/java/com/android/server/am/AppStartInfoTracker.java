@@ -1128,21 +1128,8 @@ public final class AppStartInfoTracker {
 
             // Records are sorted newest to oldest, grab record at index 0.
             ApplicationStartInfo startInfo = mInfos.get(0);
-            int startupState = startInfo.getStartupState();
 
-            // If startup state is error then don't accept any further timestamps.
-            if (startupState == ApplicationStartInfo.STARTUP_STATE_ERROR) {
-                if (DEBUG) Slog.d(TAG, "Startup state is error, not accepting new timestamps.");
-                return;
-            }
-
-            // If startup state is first frame drawn then only accept fully drawn timestamp.
-            if (startupState == ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN
-                    && key != ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Startup state is first frame drawn and timestamp is not fully "
-                            + "drawn, not accepting new timestamps.");
-                }
+            if (!isAddTimestampAllowed(startInfo, key, timestampNs)) {
                 return;
             }
 
@@ -1153,6 +1140,55 @@ public final class AppStartInfoTracker {
                 startInfo.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
                 checkCompletenessAndCallback(startInfo);
             }
+        }
+
+        private boolean isAddTimestampAllowed(ApplicationStartInfo startInfo, int key,
+                long timestampNs) {
+            int startupState = startInfo.getStartupState();
+
+            // If startup state is error then don't accept any further timestamps.
+            if (startupState == ApplicationStartInfo.STARTUP_STATE_ERROR) {
+                if (DEBUG) Slog.d(TAG, "Startup state is error, not accepting new timestamps.");
+                return false;
+            }
+
+            Map<Integer, Long> timestamps = startInfo.getStartupTimestamps();
+
+            if (startupState == ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN) {
+                switch (key) {
+                    case ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN:
+                        // Allowed, continue to confirm it's not already added.
+                        break;
+                    case ApplicationStartInfo.START_TIMESTAMP_INITIAL_RENDERTHREAD_FRAME:
+                        Long firstFrameTimeNs = timestamps
+                                .get(ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME);
+                        if (firstFrameTimeNs == null) {
+                            // This should never happen. State can't be first frame drawn if first
+                            // frame timestamp was not provided.
+                            return false;
+                        }
+
+                        if (timestampNs > firstFrameTimeNs) {
+                            // Initial renderthread frame has to occur before first frame.
+                            return false;
+                        }
+
+                        // Allowed, continue to confirm it's not already added.
+                        break;
+                    case ApplicationStartInfo.START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE:
+                        // Allowed, continue to confirm it's not already added.
+                        break;
+                    default:
+                        return false;
+                }
+            }
+
+            if (timestamps.get(key) != null) {
+                // Timestamp should not occur more than once for a given start.
+                return false;
+            }
+
+            return true;
         }
 
         @GuardedBy("mLock")

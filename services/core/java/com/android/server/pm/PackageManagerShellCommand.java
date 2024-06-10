@@ -2946,6 +2946,9 @@ class PackageManagerShellCommand extends ShellCommand {
             case "system-ext":
                 allowlist = permissionAllowlist.getSystemExtSignatureAppAllowlist();
                 break;
+            case "apex":
+                allowlist = permissionAllowlist.getApexSignatureAppAllowlist();
+                break;
             default:
                 getErrPrintWriter().println("Error: unknown partition: " + partition);
                 return 1;
@@ -4923,7 +4926,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  get-signature-permission-allowlist PARTITION");
         pw.println("    Prints the signature permission allowlist for a partition.");
-        pw.println("    PARTITION is one of system, vendor, product and system-ext");
+        pw.println("    PARTITION is one of system, vendor, product, system-ext and apex");
         pw.println("");
         pw.println("  get-shared-uid-allowlist");
         pw.println("    Prints the shared UID allowlist.");

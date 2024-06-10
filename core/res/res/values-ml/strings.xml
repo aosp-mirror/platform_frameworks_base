@@ -2407,6 +2407,8 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"സ്വകാര്യ സ്പേസ്"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ക്ലോൺ ചെയ്യുക"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"കമ്മ്യൂണൽ"</string>
+    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
+    <skip />
     <string name="redacted_notification_message" msgid="1520587845842228816">"സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട അറിയിപ്പ് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ആപ്പ് ഉള്ളടക്കം, അതിന്റെ സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് മറച്ചിരിക്കുന്നു"</string>

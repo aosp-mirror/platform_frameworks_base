@@ -16,13 +16,17 @@
 
 package com.android.server.input;
 
+import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_BLACK;
+
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.PointerIcon;
@@ -56,6 +60,9 @@ final class PointerIconCache {
     private final SparseArray<Context> mDisplayContexts = new SparseArray<>();
     @GuardedBy("mLoadedPointerIconsByDisplayAndType")
     private final SparseIntArray mDisplayDensities = new SparseIntArray();
+    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
+    private @PointerIcon.PointerIconVectorStyleFill int mPointerIconFillStyle =
+            POINTER_ICON_VECTOR_STYLE_FILL_BLACK;
 
     private final DisplayManager.DisplayListener mDisplayListener =
             new DisplayManager.DisplayListener() {
@@ -105,6 +112,11 @@ final class PointerIconCache {
         mUiThreadHandler.post(() -> handleSetUseLargePointerIcons(useLargeIcons));
     }
 
+    /** Set the fill style for vector pointer icons. */
+    public void setPointerFillStyle(@PointerIcon.PointerIconVectorStyleFill int fillStyle) {
+        mUiThreadHandler.post(() -> handleSetPointerFillStyle(fillStyle));
+    }
+
     /**
      * Get a loaded system pointer icon. This will fetch the icon from the cache, or load it if
      * it isn't already cached.
@@ -119,8 +131,13 @@ final class PointerIconCache {
             }
             PointerIcon icon = iconsByType.get(type);
             if (icon == null) {
-                icon = PointerIcon.getLoadedSystemIcon(getContextForDisplayLocked(displayId), type,
-                        mUseLargePointerIcons);
+                Context context = getContextForDisplayLocked(displayId);
+                Resources.Theme theme = context.getResources().newTheme();
+                theme.setTo(context.getTheme());
+                theme.applyStyle(PointerIcon.vectorFillStyleToResource(mPointerIconFillStyle),
+                        /* force= */ true);
+                icon = PointerIcon.getLoadedSystemIcon(new ContextThemeWrapper(context, theme),
+                        type, mUseLargePointerIcons);
                 iconsByType.put(type, icon);
             }
             return Objects.requireNonNull(icon);
@@ -179,6 +196,19 @@ final class PointerIconCache {
                 return;
             }
             mUseLargePointerIcons = useLargeIcons;
+            // Clear all cached icons on all displays.
+            mLoadedPointerIconsByDisplayAndType.clear();
+        }
+        mNative.reloadPointerIcons();
+    }
+
+    @android.annotation.UiThread
+    private void handleSetPointerFillStyle(@PointerIcon.PointerIconVectorStyleFill int fillStyle) {
+        synchronized (mLoadedPointerIconsByDisplayAndType) {
+            if (mPointerIconFillStyle == fillStyle) {
+                return;
+            }
+            mPointerIconFillStyle = fillStyle;
             // Clear all cached icons on all displays.
             mLoadedPointerIconsByDisplayAndType.clear();
         }
