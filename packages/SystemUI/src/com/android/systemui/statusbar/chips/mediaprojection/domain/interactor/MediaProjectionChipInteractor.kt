@@ -30,8 +30,8 @@ import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChi
 import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndCastToOtherDeviceDialogDelegate
+import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndShareToAppDialogDelegate
-import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.Utils
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -60,8 +60,8 @@ constructor(
     private val mediaProjectionRepository: MediaProjectionRepository,
     private val packageManager: PackageManager,
     private val systemClock: SystemClock,
-    private val dialogFactory: SystemUIDialog.Factory,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
+    private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
 ) : OngoingActivityChipInteractor {
     override val chip: StateFlow<OngoingActivityChipModel> =
         mediaProjectionRepository.mediaProjectionState
@@ -70,9 +70,9 @@ constructor(
                     is MediaProjectionState.NotProjecting -> OngoingActivityChipModel.Hidden
                     is MediaProjectionState.Projecting -> {
                         if (isProjectionToOtherDevice(state.hostPackage)) {
-                            createCastToOtherDeviceChip()
+                            createCastToOtherDeviceChip(state)
                         } else {
-                            createShareToAppChip()
+                            createShareToAppChip(state)
                         }
                     }
                 }
@@ -97,7 +97,9 @@ constructor(
         return Utils.isHeadlessRemoteDisplayProvider(packageManager, packageName)
     }
 
-    private fun createCastToOtherDeviceChip(): OngoingActivityChipModel.Shown {
+    private fun createCastToOtherDeviceChip(
+        state: MediaProjectionState.Projecting,
+    ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown(
             icon =
                 Icon.Resource(
@@ -107,32 +109,39 @@ constructor(
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
             createDialogLaunchOnClickListener(
-                castToOtherDeviceDialogDelegate,
+                createCastToOtherDeviceDialogDelegate(state),
                 dialogTransitionAnimator,
             ),
         )
     }
 
-    private val castToOtherDeviceDialogDelegate =
+    private fun createCastToOtherDeviceDialogDelegate(state: MediaProjectionState.Projecting) =
         EndCastToOtherDeviceDialogDelegate(
-            dialogFactory,
+            endMediaProjectionDialogHelper,
             this@MediaProjectionChipInteractor,
+            state,
         )
 
-    private fun createShareToAppChip(): OngoingActivityChipModel.Shown {
+    private fun createShareToAppChip(
+        state: MediaProjectionState.Projecting,
+    ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown(
             // TODO(b/332662551): Use the right content description.
             icon = Icon.Resource(SHARE_TO_APP_ICON, contentDescription = null),
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
-            createDialogLaunchOnClickListener(shareToAppDialogDelegate, dialogTransitionAnimator),
+            createDialogLaunchOnClickListener(
+                createShareToAppDialogDelegate(state),
+                dialogTransitionAnimator
+            ),
         )
     }
 
-    private val shareToAppDialogDelegate =
+    private fun createShareToAppDialogDelegate(state: MediaProjectionState.Projecting) =
         EndShareToAppDialogDelegate(
-            dialogFactory,
+            endMediaProjectionDialogHelper,
             this@MediaProjectionChipInteractor,
+            state,
         )
 
     companion object {

@@ -28,6 +28,7 @@ import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
@@ -55,7 +56,7 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 class MediaProjectionChipInteractorTest : SysuiTestCase() {
-    private val kosmos = Kosmos()
+    private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
     private val mediaProjectionRepo = kosmos.fakeMediaProjectionRepository
     private val systemClock = kosmos.fakeSystemClock
@@ -178,7 +179,7 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_castToOtherDevice_clickListenerShowsCastDialog() =
+    fun chip_castToOtherDevice_entireScreen_clickListenerShowsCastDialog() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
             mediaProjectionRepo.mediaProjectionState.value =
@@ -200,11 +201,59 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_shareToApp_clickListenerShowsShareDialog() =
+    fun chip_castToOtherDevice_singleTask_clickListenerShowsCastDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.SingleTask(
+                    CAST_TO_OTHER_DEVICES_PACKAGE,
+                    createTask(taskId = 1)
+                )
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+
+            // Dialogs must be created on the main thread
+            context.mainExecutor.execute {
+                clickListener.onClick(chipView)
+                verify(kosmos.mockDialogTransitionAnimator)
+                    .showFromView(
+                        eq(mockCastDialog),
+                        eq(chipBackgroundView),
+                        eq(null),
+                        anyBoolean(),
+                    )
+            }
+        }
+
+    @Test
+    fun chip_shareToApp_entireScreen_clickListenerShowsShareDialog() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+
+            // Dialogs must be created on the main thread
+            context.mainExecutor.execute {
+                clickListener.onClick(chipView)
+                verify(kosmos.mockDialogTransitionAnimator)
+                    .showFromView(
+                        eq(mockShareDialog),
+                        eq(chipBackgroundView),
+                        eq(null),
+                        anyBoolean(),
+                    )
+            }
+        }
+
+    @Test
+    fun chip_shareToApp_singleTask_clickListenerShowsShareDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.SingleTask(NORMAL_PACKAGE, createTask(taskId = 1))
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
 

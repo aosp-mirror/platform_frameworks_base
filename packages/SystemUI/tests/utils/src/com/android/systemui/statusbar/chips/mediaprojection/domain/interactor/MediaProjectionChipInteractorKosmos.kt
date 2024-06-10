@@ -21,7 +21,7 @@ import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
-import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
+import com.android.systemui.statusbar.chips.mediaprojection.ui.view.endMediaProjectionDialogHelper
 import com.android.systemui.util.time.fakeSystemClock
 
 val Kosmos.mediaProjectionChipInteractor: MediaProjectionChipInteractor by
@@ -31,7 +31,7 @@ val Kosmos.mediaProjectionChipInteractor: MediaProjectionChipInteractor by
             mediaProjectionRepository = fakeMediaProjectionRepository,
             packageManager = packageManager,
             systemClock = fakeSystemClock,
-            dialogFactory = mockSystemUIDialogFactory,
+            endMediaProjectionDialogHelper = endMediaProjectionDialogHelper,
             dialogTransitionAnimator = mockDialogTransitionAnimator,
         )
     }
