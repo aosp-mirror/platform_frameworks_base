@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -155,6 +156,11 @@ fun SceneScope.ConstrainedNotificationStack(
             viewModel = viewModel,
             modifier = Modifier.align(Alignment.TopCenter),
         )
+        NotificationStackCutoffGuideline(
+            stackScrollView = stackScrollView,
+            viewModel = viewModel,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }
 
@@ -187,8 +193,12 @@ fun SceneScope.NotificationScrollingStack(
         viewModel.isCurrentGestureOverscroll.collectAsStateWithLifecycle(false)
     val expansionFraction by viewModel.expandFraction.collectAsStateWithLifecycle(0f)
 
-    val navBarHeight =
-        with(density) { WindowInsets.systemBars.asPaddingValues().calculateBottomPadding().toPx() }
+    val navBarHeightPx =
+        with(density) {
+            WindowInsets.systemBars.asPaddingValues().calculateBottomPadding().toPx().toInt()
+        }
+    val bottomPaddingPx = if (shouldReserveSpaceForNavBar) navBarHeightPx else 0
+
     val screenHeight = LocalRawScreenHeight.current
 
     /**
@@ -352,10 +362,7 @@ fun SceneScope.NotificationScrollingStack(
                         }
                         .verticalScroll(scrollState)
                         .fillMaxWidth()
-                        .notificationStackHeight(
-                            view = stackScrollView,
-                            padding = if (shouldReserveSpaceForNavBar) navBarHeight.toInt() else 0
-                        )
+                        .notificationStackHeight(view = stackScrollView, padding = bottomPaddingPx)
                         .onSizeChanged { size -> stackHeight.intValue = size.height },
             )
         }
@@ -395,6 +402,29 @@ fun SceneScope.NotificationShelfSpace(
     )
 }
 
+/**
+ * A 0 height horizontal spacer to be placed at the bottom-most position in the current scene, where
+ * the notification contents (stack, footer, shelf) should be drawn.
+ */
+@Composable
+fun NotificationStackCutoffGuideline(
+    stackScrollView: NotificationScrollView,
+    viewModel: NotificationsPlaceholderViewModel,
+    modifier: Modifier = Modifier,
+) {
+    Spacer(
+        modifier =
+            modifier
+                    .fillMaxWidth()
+                    .height(0.dp)
+                    .onGloballyPositioned { coordinates ->
+                val positionY = coordinates.positionInWindow().y
+                debugLog(viewModel) { "STACK cutoff onGloballyPositioned: y=$positionY" }
+                stackScrollView.setStackCutoff(positionY)
+            }
+    )
+}
+
 @Composable
 private fun SceneScope.NotificationPlaceholder(
     stackScrollView: NotificationScrollView,
@@ -417,7 +447,6 @@ private fun SceneScope.NotificationPlaceholder(
                     }
                     // NOTE: positionInWindow.y scrolls off screen, but boundsInWindow.top will not
                     stackScrollView.setStackTop(positionInWindow.y)
-                    stackScrollView.setStackBottom(positionInWindow.y + coordinates.size.height)
                 }
     )
 }
