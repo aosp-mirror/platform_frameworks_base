@@ -513,22 +513,23 @@ private fun prepareInterruption(
     // Remove the interruption values to all scenes but the scene(s) where the element will be
     // placed, to make sure that interruption deltas are computed only right after this interruption
     // is prepared.
-    fun maybeCleanPlacementValuesBeforeInterruption(sceneState: Element.SceneState) {
+    fun cleanInterruptionValues(sceneState: Element.SceneState) {
+        sceneState.sizeInterruptionDelta = IntSize.Zero
+        sceneState.offsetInterruptionDelta = Offset.Zero
+        sceneState.alphaInterruptionDelta = 0f
+        sceneState.scaleInterruptionDelta = Scale.Zero
+
         if (!shouldPlaceElement(layoutImpl, sceneState.scene, element, transition)) {
             sceneState.offsetBeforeInterruption = Offset.Unspecified
             sceneState.alphaBeforeInterruption = Element.AlphaUnspecified
             sceneState.scaleBeforeInterruption = Scale.Unspecified
-
-            sceneState.offsetInterruptionDelta = Offset.Zero
-            sceneState.alphaInterruptionDelta = 0f
-            sceneState.scaleInterruptionDelta = Scale.Zero
         }
     }
 
-    previousFromState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
-    previousToState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
-    fromState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
-    toState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
+    previousFromState?.let { cleanInterruptionValues(it) }
+    previousToState?.let { cleanInterruptionValues(it) }
+    fromState?.let { cleanInterruptionValues(it) }
+    toState?.let { cleanInterruptionValues(it) }
 }
 
 /**

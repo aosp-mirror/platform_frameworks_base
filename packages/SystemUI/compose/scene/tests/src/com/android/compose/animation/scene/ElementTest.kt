@@ -1838,4 +1838,66 @@ class ElementTest {
         rule.onNode(hasTestTag("fooParentInSceneA")).assertSizeIsEqualTo(40.dp, 60.dp)
         rule.onNode(hasTestTag("fooParentInSceneC")).assertSizeIsEqualTo(40.dp, 60.dp)
     }
+
+    @Test
+    fun interruptionDeltasAreProperlyCleaned() = runTest {
+        val state = rule.runOnIdle { MutableSceneTransitionLayoutStateImpl(SceneA) }
+
+        @Composable
+        fun SceneScope.Foo(offset: Dp) {
+            Box(Modifier.fillMaxSize()) {
+                Box(Modifier.offset(offset, offset).element(TestElements.Foo).size(20.dp))
+            }
+        }
+
+        rule.setContent {
+            SceneTransitionLayout(state, Modifier.size(200.dp)) {
+                scene(SceneA) { Foo(offset = 0.dp) }
+                scene(SceneB) { Foo(offset = 20.dp) }
+                scene(SceneC) { Foo(offset = 40.dp) }
+            }
+        }
+
+        // Start A => B at 50%.
+        val aToB =
+            transition(from = SceneA, to = SceneB, progress = { 0.5f }, onFinish = neverFinish())
+        rule.runOnUiThread { state.startTransition(aToB) }
+        rule.onNode(isElement(TestElements.Foo, SceneB)).assertPositionInRootIsEqualTo(10.dp, 10.dp)
+
+        // Start B => C at 0%. This will compute an interruption delta of (-10dp, -10dp) so that the
+        // position of Foo is unchanged and converges to (20dp, 20dp).
+        var interruptionProgress by mutableStateOf(1f)
+        val bToC =
+            transition(
+                from = SceneB,
+                to = SceneC,
+                progress = { 0f },
+                interruptionProgress = { interruptionProgress },
+                onFinish = neverFinish(),
+            )
+        rule.runOnUiThread { state.startTransition(bToC) }
+        rule.onNode(isElement(TestElements.Foo, SceneC)).assertPositionInRootIsEqualTo(10.dp, 10.dp)
+
+        // Finish the interruption and leave the transition progress at 0f. We should be at the same
+        // state as in B.
+        interruptionProgress = 0f
+        rule.onNode(isElement(TestElements.Foo, SceneC)).assertPositionInRootIsEqualTo(20.dp, 20.dp)
+
+        // Finish both transitions but directly start a new one B => A with interruption progress
+        // 100%. We should be at (20dp, 20dp), unless the interruption deltas have not been
+        // correctly cleaned.
+        rule.runOnUiThread {
+            state.finishTransition(aToB, idleScene = SceneB)
+            state.finishTransition(bToC, idleScene = SceneB)
+            state.startTransition(
+                transition(
+                    from = SceneB,
+                    to = SceneA,
+                    progress = { 0f },
+                    interruptionProgress = { 1f },
+                )
+            )
+        }
+        rule.onNode(isElement(TestElements.Foo, SceneB)).assertPositionInRootIsEqualTo(20.dp, 20.dp)
+    }
 }
