@@ -14,23 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.ambient.dagger
+package com.android.systemui.statusbar.pipeline.wifi.data.repository
 
-import com.android.systemui.ambient.statusbar.dagger.AmbientStatusBarComponent
-import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
-import com.android.systemui.ambient.touch.dagger.InputSessionComponent
-import dagger.Module
+import com.android.systemui.kosmos.Kosmos
 
-@Module(
-    subcomponents =
-        [
-            AmbientStatusBarComponent::class,
-            AmbientTouchComponent::class,
-            InputSessionComponent::class,
-        ]
-)
-interface AmbientModule {
-    companion object {
-        const val TOUCH_HANDLERS = "touch_handlers"
-    }
-}
+val Kosmos.fakeWifiRepository: FakeWifiRepository by Kosmos.Fixture { FakeWifiRepository() }
+val Kosmos.wifiRepository: WifiRepository by Kosmos.Fixture { fakeWifiRepository }
