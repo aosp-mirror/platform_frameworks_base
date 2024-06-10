@@ -229,14 +229,11 @@ constructor(
     val aodVisibility: Flow<Boolean> =
         combine(
                 keyguardInteractor.isDozing,
-                keyguardInteractor.isAodAvailable,
                 keyguardInteractor.biometricUnlockState,
-            ) { isDozing, isAodAvailable, biometricUnlockState ->
+            ) { isDozing, biometricUnlockState ->
                 // AOD is visible if we're dozing, unless we are wake and unlocking (where we go
                 // directly from AOD to unlocked while dozing).
-                isDozing &&
-                    isAodAvailable &&
-                    !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
+                isDozing && !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
             }
             .distinctUntilChanged()
 
