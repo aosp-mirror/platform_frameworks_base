@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.satellite.data
 
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Device-based satellite refers to the capability of a device to connect directly to a satellite
@@ -25,6 +26,9 @@ import kotlinx.coroutines.flow.Flow
  * given mobile data subscription.
  */
 interface DeviceBasedSatelliteRepository {
+    /** The current status of satellite provisioning. If not false, we don't want to show an icon */
+    val isSatelliteProvisioned: StateFlow<Boolean>
+
     /** See [SatelliteConnectionState] for available states */
     val connectionState: Flow<SatelliteConnectionState>
 
