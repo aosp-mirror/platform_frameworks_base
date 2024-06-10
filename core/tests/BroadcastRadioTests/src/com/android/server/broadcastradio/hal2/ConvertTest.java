@@ -173,6 +173,12 @@ public final class ConvertTest {
                 .that(ANNOUNCEMENT.getVendorInfo()).isEmpty();
     }
 
+    @Test
+    public void getBands_withInvalidFrequency() {
+        expect.withMessage("Band for invalid frequency")
+                .that(Utils.getBand(/* freq= */ 110000)).isEqualTo(FrequencyBand.UNKNOWN);
+    }
+
     private static RadioManager.ModuleProperties convertToModuleProperties() {
         AmFmRegionConfig amFmConfig = createAmFmRegionConfig();
         List<DabTableEntry> dabTableEntries = Arrays.asList(

@@ -622,6 +622,12 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
                 .isEqualTo(TEST_ALBUM_ART);
     }
 
+    @Test
+    public void getBands_withInvalidFrequency() {
+        expect.withMessage("Band for invalid frequency")
+                .that(Utils.getBand(/* freq= */ 110000)).isEqualTo(Utils.FrequencyBand.UNKNOWN);
+    }
+
     private static RadioManager.ModuleProperties convertToModuleProperties() {
         AmFmRegionConfig amFmConfig = createAmFmRegionConfig();
         DabTableEntry[] dabTableEntries = new DabTableEntry[]{
