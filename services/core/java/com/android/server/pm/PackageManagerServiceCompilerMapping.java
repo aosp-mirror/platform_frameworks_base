@@ -18,7 +18,7 @@ package com.android.server.pm;
 
 import android.os.SystemProperties;
 
-import com.android.server.pm.dex.DexoptOptions;
+import com.android.server.art.model.DexoptParams;
 
 import dalvik.system.DexFile;
 
@@ -71,7 +71,7 @@ public class PackageManagerServiceCompilerMapping {
     private static String getAndCheckValidity(int reason) {
         String sysPropValue = SystemProperties.get(getSystemPropertyName(reason));
         if (sysPropValue == null || sysPropValue.isEmpty()
-                || !(sysPropValue.equals(DexoptOptions.COMPILER_FILTER_NOOP)
+                || !(sysPropValue.equals(DexoptParams.COMPILER_FILTER_NOOP)
                         || DexFile.isValidCompilerFilter(sysPropValue))) {
             throw new IllegalStateException("Value \"" + sysPropValue +"\" not valid "
                     + "(reason " + REASON_STRINGS[reason] + ")");
