@@ -1299,9 +1299,11 @@ class ActivityClientController extends IActivityClientController.Stub {
             // The restore windowing mode must be set after the windowing mode is set since
             // Task#setWindowingMode resets the restore windowing mode to WINDOWING_MODE_INVALID.
             requester.mMultiWindowRestoreWindowingMode = restoreWindowingMode;
+            requester.mMultiWindowRestoreParent =
+                    requester.getParent().mRemoteToken.toWindowContainerToken();
         } else {
             targetWindowingMode = requester.mMultiWindowRestoreWindowingMode;
-            requester.setWindowingMode(targetWindowingMode);
+            requester.restoreWindowingMode();
         }
         if (targetWindowingMode == WINDOWING_MODE_FULLSCREEN) {
             requester.setBounds(null);
