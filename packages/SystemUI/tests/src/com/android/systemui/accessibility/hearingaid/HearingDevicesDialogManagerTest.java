@@ -21,20 +21,17 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.bluetooth.BluetoothDevice;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.settingslib.bluetooth.CachedBluetoothDevice;
-import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
-import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
-import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -43,9 +40,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /** Tests for {@link HearingDevicesDialogManager}. */
 @RunWith(AndroidTestingRunner.class)
@@ -56,7 +50,8 @@ public class HearingDevicesDialogManagerTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
-    private final List<CachedBluetoothDevice> mCachedDevices = new ArrayList<>();
+    private final FakeExecutor mMainExecutor = new FakeExecutor(new FakeSystemClock());
+    private final FakeExecutor mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
     @Mock
     private Expandable mExpandable;
     @Mock
@@ -68,13 +63,7 @@ public class HearingDevicesDialogManagerTest extends SysuiTestCase {
     @Mock
     private SystemUIDialog mDialog;
     @Mock
-    private LocalBluetoothManager mLocalBluetoothManager;
-    @Mock
-    private LocalBluetoothAdapter mLocalBluetoothAdapter;
-    @Mock
-    private CachedBluetoothDeviceManager mCachedBluetoothDeviceManager;
-    @Mock
-    private CachedBluetoothDevice mCachedDevice;
+    private HearingDevicesChecker mDevicesChecker;
 
     private HearingDevicesDialogManager mManager;
 
@@ -82,36 +71,35 @@ public class HearingDevicesDialogManagerTest extends SysuiTestCase {
     public void setUp() {
         when(mDialogFactory.create(anyBoolean())).thenReturn(mDialogDelegate);
         when(mDialogDelegate.createDialog()).thenReturn(mDialog);
-        when(mLocalBluetoothManager.getBluetoothAdapter()).thenReturn(mLocalBluetoothAdapter);
-        when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(
-                mCachedBluetoothDeviceManager);
-        when(mCachedBluetoothDeviceManager.getCachedDevicesCopy()).thenReturn(mCachedDevices);
 
         mManager = new HearingDevicesDialogManager(
                 mDialogTransitionAnimator,
                 mDialogFactory,
-                mLocalBluetoothManager
+                mDevicesChecker,
+                mBackgroundExecutor,
+                mMainExecutor
         );
     }
 
     @Test
-    public void showDialog_bluetoothDisable_showPairNewDeviceTrue() {
-        when(mLocalBluetoothAdapter.isEnabled()).thenReturn(false);
+    public void showDialog_existHearingDevice_showPairNewDeviceFalse() {
+        when(mDevicesChecker.isAnyPairedHearingDevice()).thenReturn(true);
 
         mManager.showDialog(mExpandable);
+        mBackgroundExecutor.runAllReady();
+        mMainExecutor.runAllReady();
 
-        verify(mDialogFactory).create(eq(true));
+        verify(mDialogFactory).create(eq(/* showPairNewDevice= */ false));
     }
 
     @Test
-    public void showDialog_containsHearingAid_showPairNewDeviceFalse() {
-        when(mLocalBluetoothAdapter.isEnabled()).thenReturn(true);
-        when(mCachedDevice.isHearingAidDevice()).thenReturn(true);
-        when(mCachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        mCachedDevices.add(mCachedDevice);
+    public void showDialog_noHearingDevice_showPairNewDeviceTrue() {
+        when(mDevicesChecker.isAnyPairedHearingDevice()).thenReturn(false);
 
         mManager.showDialog(mExpandable);
+        mBackgroundExecutor.runAllReady();
+        mMainExecutor.runAllReady();
 
-        verify(mDialogFactory).create(eq(false));
+        verify(mDialogFactory).create(eq(/* showPairNewDevice= */ true));
     }
 }

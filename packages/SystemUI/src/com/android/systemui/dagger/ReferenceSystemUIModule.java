@@ -31,6 +31,7 @@ import com.android.systemui.display.ui.viewmodel.ConnectingDisplayViewModel;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.doze.DozeHost;
+import com.android.systemui.keyboard.shortcut.ShortcutHelperModule;
 import com.android.systemui.keyguard.ui.composable.blueprint.DefaultBlueprintModule;
 import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule;
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule;
@@ -137,7 +138,8 @@ import javax.inject.Named;
         UnfoldTransitionModule.Startables.class,
         ToastModule.class,
         VolumeModule.class,
-        WallpaperModule.class
+        WallpaperModule.class,
+        ShortcutHelperModule.class,
 })
 public abstract class ReferenceSystemUIModule {
 

@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
@@ -161,6 +162,7 @@ class AudioRepositoryImpl(
                 },
                 volumeSettingChanges(audioStream),
             )
+            .conflate()
             .map { getCurrentAudioStream(audioStream) }
             .onStart { emit(getCurrentAudioStream(audioStream)) }
             .flowOn(backgroundCoroutineContext)
@@ -184,10 +186,11 @@ class AudioRepositoryImpl(
         }
     }
 
-    override suspend fun setVolume(audioStream: AudioStream, volume: Int) =
+    override suspend fun setVolume(audioStream: AudioStream, volume: Int) {
         withContext(backgroundCoroutineContext) {
             audioManager.setStreamVolume(audioStream.value, volume, 0)
         }
+    }
 
     override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean {
         return withContext(backgroundCoroutineContext) {

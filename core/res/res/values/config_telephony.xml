@@ -409,4 +409,10 @@
     <bool name="config_force_phone_globals_creation">false</bool>
     <java-symbol type="bool" name="config_force_phone_globals_creation" />
 
+    <!-- Boolean indicating whether to enable persistent logging via DropBoxManager.
+     Used in persisting SOS/emergency related log messages.
+     -->
+    <bool name="config_dropboxmanager_persistent_logging_enabled">false</bool>
+    <java-symbol type="bool" name="config_dropboxmanager_persistent_logging_enabled" />
+
 </resources>

@@ -147,11 +147,6 @@ public interface NotificationRowContentBinder {
          * Use increased height when binding heads up views.
          */
         public boolean usesIncreasedHeadsUpHeight;
-
-        /**
-         * Is group summary notification
-         */
-        public boolean mIsGroupSummary;
     }
 
     /**

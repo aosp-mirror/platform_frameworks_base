@@ -427,19 +427,6 @@ public class BackgroundActivityStartController {
             return name + "[debugOnly]";
         }
 
-        /** @return valid targetSdk or <code>-1</code> */
-        private int getTargetSdk(String packageName) {
-            if (packageName == null) {
-                return -1;
-            }
-            try {
-                PackageManager pm = mService.mContext.getPackageManager();
-                return pm.getTargetSdkVersion(packageName);
-            } catch (Exception e) {
-                return -1;
-            }
-        }
-
         private boolean hasRealCaller() {
             return mRealCallingUid != NO_PROCESS_UID;
         }
@@ -1730,7 +1717,9 @@ public class BackgroundActivityStartController {
                 state.mResultForRealCaller == null ? BAL_BLOCK
                         : state.mResultForRealCaller.getRawCode(),
                 state.mBalAllowedByPiSender.allowsBackgroundActivityStarts(),
-                state.realCallerExplicitOptInOrOut()
+                state.realCallerExplicitOptInOrOut(),
+                getTargetSdk(state.mCallingPackage),
+                getTargetSdk(state.mRealCallingPackage)
         );
     }
 
@@ -1809,6 +1798,19 @@ public class BackgroundActivityStartController {
                 + ", lastLaunchTime=" + ar.lastLaunchTime
                 + ", lastVisibleTime=" + ar.lastVisibleTime
                 + ", taskFragment=" + ar.getTaskFragment();
+    }
+
+    /** @return valid targetSdk or <code>-1</code> */
+    private int getTargetSdk(String packageName) {
+        if (packageName == null) {
+            return -1;
+        }
+        try {
+            PackageManager pm = mService.mContext.getPackageManager();
+            return pm.getTargetSdkVersion(packageName);
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     private class FinishedActivityEntry {

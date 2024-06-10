@@ -16,6 +16,9 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.content.pm.ActivityInfo.CONFIG_DENSITY;
+import static android.content.pm.ActivityInfo.CONFIG_LAYOUT_DIRECTION;
+import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -40,7 +43,6 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -683,46 +685,53 @@ class DividerPresenter implements View.OnTouchListener {
                 ? taskBounds.width() - mProperties.mDividerWidthPx
                 : taskBounds.height() - mProperties.mDividerWidthPx;
 
-        if (isDraggingToFullscreenAllowed(mProperties.mDividerAttributes)) {
-            final float displayDensity = getDisplayDensity();
-            return dividerPositionWithDraggingToFullscreenAllowed(
-                    dividerPosition,
-                    minPosition,
-                    maxPosition,
-                    fullyExpandedPosition,
-                    velocity,
-                    displayDensity);
-        }
-        return Math.clamp(dividerPosition, minPosition, maxPosition);
+        final float displayDensity = getDisplayDensity();
+        final boolean isDraggingToFullscreenAllowed =
+                isDraggingToFullscreenAllowed(mProperties.mDividerAttributes);
+        return dividerPositionWithPositionOptions(
+                dividerPosition,
+                minPosition,
+                maxPosition,
+                fullyExpandedPosition,
+                velocity,
+                displayDensity,
+                isDraggingToFullscreenAllowed);
     }
 
     /**
-     * Returns the divider position given a set of position options. A snap algorithm is used to
-     * adjust the ending position to either fully expand one container or move the divider back to
-     * the specified min/max ratio depending on the dragging velocity.
+     * Returns the divider position given a set of position options. A snap algorithm can adjust
+     * the ending position to either fully expand one container or move the divider back to
+     * the specified min/max ratio depending on the dragging velocity and if dragging to fullscreen
+     * is allowed.
      */
     @VisibleForTesting
-    static int dividerPositionWithDraggingToFullscreenAllowed(int dividerPosition, int minPosition,
-            int maxPosition, int fullyExpandedPosition, float velocity, float displayDensity) {
-        final float minDismissVelocityPxPerSecond =
-                MIN_DISMISS_VELOCITY_DP_PER_SECOND * displayDensity;
+    static int dividerPositionWithPositionOptions(int dividerPosition, int minPosition,
+            int maxPosition, int fullyExpandedPosition, float velocity, float displayDensity,
+            boolean isDraggingToFullscreenAllowed) {
+        if (isDraggingToFullscreenAllowed) {
+            final float minDismissVelocityPxPerSecond =
+                    MIN_DISMISS_VELOCITY_DP_PER_SECOND * displayDensity;
+            if (dividerPosition < minPosition && velocity < -minDismissVelocityPxPerSecond) {
+                return 0;
+            }
+            if (dividerPosition > maxPosition && velocity > minDismissVelocityPxPerSecond) {
+                return fullyExpandedPosition;
+            }
+        }
         final float minFlingVelocityPxPerSecond =
                 MIN_FLING_VELOCITY_DP_PER_SECOND * displayDensity;
-        if (dividerPosition < minPosition && velocity < -minDismissVelocityPxPerSecond) {
-            return 0;
+        if (Math.abs(velocity) >= minFlingVelocityPxPerSecond) {
+            return dividerPositionForFling(
+                    dividerPosition, minPosition, maxPosition, velocity);
         }
-        if (dividerPosition > maxPosition && velocity > minDismissVelocityPxPerSecond) {
-            return fullyExpandedPosition;
+        if (dividerPosition >= minPosition && dividerPosition <= maxPosition) {
+            return dividerPosition;
         }
-        if (Math.abs(velocity) < minFlingVelocityPxPerSecond) {
-            if (dividerPosition >= minPosition && dividerPosition <= maxPosition) {
-                return dividerPosition;
-            }
-            final int[] snapPositions = {0, minPosition, maxPosition, fullyExpandedPosition};
-            return snap(dividerPosition, snapPositions);
-        }
-        return dividerPositionForFling(
-                dividerPosition, minPosition, maxPosition, velocity);
+        return snap(
+                dividerPosition,
+                isDraggingToFullscreenAllowed
+                        ? new int[] {0, minPosition, maxPosition, fullyExpandedPosition}
+                        : new int[] {minPosition, maxPosition});
     }
 
     /**
@@ -959,7 +968,7 @@ class DividerPresenter implements View.OnTouchListener {
     @VisibleForTesting
     static class Properties {
         private static final int CONFIGURATION_MASK_FOR_DIVIDER =
-                ActivityInfo.CONFIG_DENSITY | ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+                CONFIG_DENSITY | CONFIG_WINDOW_CONFIGURATION | CONFIG_LAYOUT_DIRECTION;
         @NonNull
         private final Configuration mConfiguration;
         @NonNull
@@ -1228,6 +1237,12 @@ class DividerPresenter implements View.OnTouchListener {
                             FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL | FLAG_SLIPPERY,
                             PixelFormat.TRANSLUCENT);
             lp.setTitle(WINDOW_NAME);
+
+            // Ensure that the divider layout is always LTR regardless of the locale, because we
+            // already considered the locale when determining the split layout direction and the
+            // computed divider line position always starts from the left. This only affects the
+            // horizontal layout and does not have any effect on the top-to-bottom layout.
+            mDividerLayout.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
             mViewHost.setView(mDividerLayout, lp);
             mViewHost.relayout(lp);
         }

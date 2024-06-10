@@ -1510,7 +1510,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         a.persistableMode = ActivityInfo.PERSIST_NEVER;
         a.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         a.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
-        a.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
+        a.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS | ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
         a.configChanges = 0xffffffff;
 
         if (homePanelDream()) {

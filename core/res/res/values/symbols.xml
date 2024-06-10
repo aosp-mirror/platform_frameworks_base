@@ -1695,6 +1695,12 @@
   <java-symbol type="style" name="Pointer" />
   <java-symbol type="style" name="LargePointer" />
   <java-symbol type="style" name="VectorPointer" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillBlack" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillGreen" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillYellow" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillPink" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillBlue" />
+  <java-symbol type="attr" name="pointerIconVectorFill" />
   <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Title" />
   <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Info" />
 

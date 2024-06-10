@@ -256,11 +256,15 @@ public class BubbleData {
     }
 
     /**
-     * Returns a bubble bar update populated with the current list of active bubbles.
+     * Returns a bubble bar update populated with the current list of active bubbles, expanded,
+     * and selected state.
      */
     public BubbleBarUpdate getInitialStateForBubbleBar() {
         BubbleBarUpdate initialState = mStateChange.getInitialState();
         initialState.bubbleBarLocation = mPositioner.getBubbleBarLocation();
+        initialState.expanded = mExpanded;
+        initialState.expandedChanged = mExpanded; // only matters if we're expanded
+        initialState.selectedBubbleKey = getSelectedBubbleKey();
         return initialState;
     }
 

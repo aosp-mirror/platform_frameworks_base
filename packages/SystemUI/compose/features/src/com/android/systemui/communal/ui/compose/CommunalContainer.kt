@@ -1,6 +1,6 @@
 package com.android.systemui.communal.ui.compose
 
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -20,20 +20,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.CommunalSwipeDetector
@@ -217,6 +215,7 @@ private fun SceneScope.CommunalScene(
             CommunalBackgroundType.DEFAULT -> DefaultBackground(colors = colors)
             CommunalBackgroundType.STATIC_GRADIENT -> StaticLinearGradient()
             CommunalBackgroundType.ANIMATED -> AnimatedLinearGradient()
+            CommunalBackgroundType.NONE -> BackgroundTopScrim()
         }
     }
     with(content) { Content(modifier = modifier) }
@@ -252,7 +251,8 @@ private fun BoxScope.AnimatedLinearGradient() {
     val colors = LocalAndroidColorScheme.current
     Box(
         Modifier.matchParentSize()
-            .animatedGradientBackground(colors = listOf(colors.primary, colors.primaryContainer))
+            .background(colors.primary)
+            .animatedRadialGradientBackground(colors.primary, colors.primaryContainer)
     )
     BackgroundTopScrim()
 }
@@ -265,29 +265,76 @@ private fun BoxScope.BackgroundTopScrim() {
     Box(Modifier.matchParentSize().alpha(0.34f).background(scrimOnTopColor))
 }
 
-/** Modifier which sets the background of a composable to an animated gradient */
+/** The duration to use for the gradient background animation. */
+private const val ANIMATION_DURATION_MS = 10_000
+
+/** The offset to use in order to place the center of each gradient offscreen. */
+private val ANIMATION_OFFSCREEN_OFFSET = 128.dp
+
+/** Modifier which creates two radial gradients that animate up and down. */
 @Composable
-private fun Modifier.animatedGradientBackground(colors: List<Color>): Modifier = composed {
-    var size by remember { mutableStateOf(IntSize.Zero) }
-    val transition = rememberInfiniteTransition(label = "scrim background")
-    val startOffsetX by
-        transition.animateFloat(
-            initialValue = -size.width.toFloat(),
-            targetValue = size.width.toFloat(),
+fun Modifier.animatedRadialGradientBackground(toColor: Color, fromColor: Color): Modifier {
+    val density = LocalDensity.current
+    val infiniteTransition = rememberInfiniteTransition(label = "radial gradient transition")
+    val centerFraction by
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
             animationSpec =
                 infiniteRepeatable(
-                    animation = tween(durationMillis = 5_000, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse,
+                    animation =
+                        tween(
+                            durationMillis = ANIMATION_DURATION_MS,
+                            easing = CubicBezierEasing(0.33f, 0f, 0.67f, 1f),
+                        ),
+                    repeatMode = RepeatMode.Reverse
                 ),
-            label = "scrim start offset"
+            label = "radial gradient center fraction"
         )
-    background(
+
+    // Offset to place the center of the gradients offscreen. This is applied to both the
+    // x and y coordinates.
+    val offsetPx = remember(density) { with(density) { ANIMATION_OFFSCREEN_OFFSET.toPx() } }
+
+    return drawBehind {
+        val gradientRadius = (size.width / 2) + offsetPx
+        val totalHeight = size.height + 2 * offsetPx
+
+        val leftCenter =
+            Offset(
+                x = -offsetPx,
+                y = totalHeight * centerFraction - offsetPx,
+            )
+        val rightCenter =
+            Offset(
+                x = offsetPx + size.width,
+                y = totalHeight * (1f - centerFraction) - offsetPx,
+            )
+
+        // Right gradient
+        drawCircle(
             brush =
-                Brush.linearGradient(
-                    colors = colors,
-                    start = Offset(startOffsetX, 0f),
-                    end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat()),
-                )
+                Brush.radialGradient(
+                    colors = listOf(fromColor, toColor),
+                    center = rightCenter,
+                    radius = gradientRadius
+                ),
+            center = rightCenter,
+            radius = gradientRadius,
+            blendMode = BlendMode.SrcAtop,
         )
-        .onGloballyPositioned { size = it.size }
+
+        // Left gradient
+        drawCircle(
+            brush =
+                Brush.radialGradient(
+                    colors = listOf(fromColor, toColor),
+                    center = leftCenter,
+                    radius = gradientRadius
+                ),
+            center = leftCenter,
+            radius = gradientRadius,
+            blendMode = BlendMode.SrcAtop,
+        )
+    }
 }

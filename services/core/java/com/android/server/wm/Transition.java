@@ -1374,12 +1374,21 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // processed all the participants first (in particular, we want to trigger pip-enter first)
         for (int i = 0; i < mParticipants.size(); ++i) {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
+            if (ar == null) continue;
+
             // If the activity was just inserted to an invisible task, it will keep INITIALIZING
             // state. Then no need to notify the callback to avoid clearing some states
             // unexpectedly, e.g. launch-task-behind.
-            if (ar != null && (ar.isVisibleRequested()
-                    || !ar.isState(ActivityRecord.State.INITIALIZING))) {
+            if (ar.isVisibleRequested() || !ar.isState(ActivityRecord.State.INITIALIZING)) {
                 mController.dispatchLegacyAppTransitionFinished(ar);
+            }
+
+            // Reset the ActivityRecord#mCurrentLaunchCanTurnScreenOn state if it is not the top
+            // running activity. Doing so in case the state is not yet consumed during rapid
+            // activity launch.
+            if (ar.currentLaunchCanTurnScreenOn() && ar.getDisplayContent() != null
+                    && ar.getDisplayContent().topRunningActivity() != ar) {
+                ar.setCurrentLaunchCanTurnScreenOn(false);
             }
         }
 
