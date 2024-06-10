@@ -142,15 +142,17 @@ constructor(
         nonApps: Array<RemoteAnimationTarget>,
         finishedCallback: IRemoteAnimationFinishedCallback
     ) {
-        if (apps.isNotEmpty()) {
-            // Ensure that we've started a dismiss keyguard transition. WindowManager can start the
-            // going away animation on its own, if an activity launches and then requests dismissing
-            // the keyguard. In this case, this is the first and only signal we'll receive to start
-            // a transition to GONE.
-            keyguardTransitionInteractor.startDismissKeyguardTransition(
-                reason = "Going away remote animation started"
-            )
+        // Ensure that we've started a dismiss keyguard transition. WindowManager can start the
+        // going away animation on its own, if an activity launches and then requests dismissing the
+        // keyguard. In this case, this is the first and only signal we'll receive to start
+        // a transition to GONE. This transition needs to start even if we're not provided an app
+        // animation target - it's possible the app is destroyed on creation, etc. but we'll still
+        // be unlocking.
+        keyguardTransitionInteractor.startDismissKeyguardTransition(
+            reason = "Going away remote animation started"
+        )
 
+        if (apps.isNotEmpty()) {
             goingAwayRemoteAnimationFinishedCallback = finishedCallback
             keyguardSurfaceBehindAnimator.applyParamsToSurface(apps[0])
         } else {
