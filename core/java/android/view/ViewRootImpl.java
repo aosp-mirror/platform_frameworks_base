@@ -203,6 +203,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.sysprop.DisplayProperties;
+import android.sysprop.ViewProperties;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
@@ -1209,6 +1210,7 @@ public final class ViewRootImpl implements ViewParent,
             Flags.enableInvalidateCheckThread();
     private static boolean sSurfaceFlingerBugfixFlagValue =
             com.android.graphics.surfaceflinger.flags.Flags.vrrBugfix24q4();
+    private static final boolean sEnableVrr = ViewProperties.vrr_enabled().orElse(true);
 
     static {
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
@@ -12924,13 +12926,13 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldSetFrameRateCategory() {
         // use toolkitSetFrameRate flag to gate the change
-        return  mSurface.isValid() && shouldEnableDvrr();
+        return shouldEnableDvrr() && mSurface.isValid() && shouldEnableDvrr();
     }
 
     private boolean shouldSetFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
-        return mSurface.isValid() && mPreferredFrameRate >= 0
-                && shouldEnableDvrr() && !mIsFrameRateConflicted;
+        return shouldEnableDvrr() && mSurface.isValid() && mPreferredFrameRate >= 0
+                && !mIsFrameRateConflicted;
     }
 
     private boolean shouldTouchBoost(int motionEventAction, int windowType) {
@@ -12965,7 +12967,7 @@ public final class ViewRootImpl implements ViewParent,
      * @param view The View with the ThreadedRenderer animation that started.
      */
     public void addThreadedRendererView(View view) {
-        if (!mThreadedRendererViews.contains(view)) {
+        if (shouldEnableDvrr() && !mThreadedRendererViews.contains(view)) {
             mThreadedRendererViews.add(view);
         }
     }
@@ -12977,7 +12979,8 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void removeThreadedRendererView(View view) {
         mThreadedRendererViews.remove(view);
-        if (!mInvalidationIdleMessagePosted && sSurfaceFlingerBugfixFlagValue) {
+        if (shouldEnableDvrr()
+                && !mInvalidationIdleMessagePosted && sSurfaceFlingerBugfixFlagValue) {
             mInvalidationIdleMessagePosted = true;
             mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE, IDLE_TIME_MILLIS);
         }
@@ -13198,7 +13201,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldEnableDvrr() {
         // uncomment this when we are ready for enabling dVRR
-        if (sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+        if (sEnableVrr && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
             return sToolkitSetFrameRateReadOnlyFlagValue && isFrameRatePowerSavingsBalanced();
         }
         return false;
