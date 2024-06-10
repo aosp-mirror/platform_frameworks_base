@@ -33,6 +33,7 @@ import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.QSContainerImpl
 import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSSceneComponent
+import com.android.systemui.qs.tiles.viewmodel.StubQSTileViewModel.state
 import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -267,6 +268,7 @@ constructor(
 
     override val qqsHeight: Int
         get() = qsImpl.value?.qqsHeight ?: 0
+
     override val qsHeight: Int
         get() = qsImpl.value?.qsHeight ?: 0
 
@@ -375,8 +377,10 @@ constructor(
             qs.view.setPadding(0, 0, 0, 0)
             qs.setContainerController(this@QSSceneAdapterImpl)
             qs.applyState(state.value)
+            applyLatestExpansionAndSquishiness()
         }
     }
+
     override fun setState(state: QSSceneAdapter.State) {
         this.state.value = state
     }

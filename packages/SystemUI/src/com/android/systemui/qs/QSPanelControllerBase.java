@@ -456,7 +456,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     boolean switchTileLayout(boolean force) {
         /* Whether or not the panel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
-        if (horizontal != mUsingHorizontalLayout || force) {
+        if ((!SceneContainerFlag.isEnabled() && horizontal != mUsingHorizontalLayout) || force) {
             mQSLogger.logSwitchTileLayout(horizontal, mUsingHorizontalLayout, force,
                     mView.getDumpableTag());
             mUsingHorizontalLayout = horizontal;
@@ -470,7 +470,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         return false;
     }
 
-    void setLayoutForMediaInScene() {
+    private void setLayoutForMediaInScene() {
         boolean withMedia = shouldUseHorizontalInScene();
         mView.setColumnRowLayout(withMedia);
     }

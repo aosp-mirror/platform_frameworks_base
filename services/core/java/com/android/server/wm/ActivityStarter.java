@@ -1365,18 +1365,6 @@ class ActivityStarter {
             request.outActivity[0] = mLastStartActivityRecord;
         }
 
-        // Reset the ActivityRecord#mCurrentLaunchCanTurnScreenOn state of activity started
-        // before this one if it is no longer the top-most focusable activity.
-        // Doing so in case the state is not yet consumed during rapid activity launch.
-        if (previousStart != null && !previousStart.finishing && previousStart.isAttached()
-                && previousStart.currentLaunchCanTurnScreenOn()) {
-            final ActivityRecord topFocusable = previousStart.getDisplayContent().getActivity(
-                    ar -> ar.isFocusable() && !ar.finishing);
-            if (previousStart != topFocusable) {
-                previousStart.setCurrentLaunchCanTurnScreenOn(false);
-            }
-        }
-
         return mLastStartActivityResult;
     }
 

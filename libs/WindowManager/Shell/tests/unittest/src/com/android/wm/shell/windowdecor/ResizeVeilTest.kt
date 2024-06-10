@@ -150,7 +150,7 @@ class ResizeVeilTest : ShellTestCase() {
     fun showVeil() {
         val veil = createResizeVeil()
 
-        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
+        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), taskInfo, false /* fadeIn */)
 
         verify(mockTransaction).show(mockResizeVeilSurface)
         verify(mockTransaction).show(mockBackgroundSurface)
@@ -162,7 +162,7 @@ class ResizeVeilTest : ShellTestCase() {
     fun showVeil_displayUnavailable_doesNotShow() {
         val veil = createResizeVeil(withDisplayAvailable = false)
 
-        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
+        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), taskInfo, false /* fadeIn */)
 
         verify(mockTransaction, never()).show(mockResizeVeilSurface)
         verify(mockTransaction, never()).show(mockBackgroundSurface)
@@ -174,8 +174,8 @@ class ResizeVeilTest : ShellTestCase() {
     fun showVeil_alreadyVisible_doesNotShowAgain() {
         val veil = createResizeVeil()
 
-        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
-        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
+        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), taskInfo, false /* fadeIn */)
+        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), taskInfo, false /* fadeIn */)
 
         verify(mockTransaction, times(1)).show(mockResizeVeilSurface)
         verify(mockTransaction, times(1)).show(mockBackgroundSurface)
@@ -188,7 +188,13 @@ class ResizeVeilTest : ShellTestCase() {
         val veil = createResizeVeil(parent = mock())
 
         val newParent = mock<SurfaceControl>()
-        veil.showVeil(mockTransaction, newParent, Rect(0, 0, 100, 100), false /* fadeIn */)
+        veil.showVeil(
+            mockTransaction,
+            newParent,
+            Rect(0, 0, 100, 100),
+            taskInfo,
+            false /* fadeIn */
+        )
 
         verify(mockTransaction).reparent(mockResizeVeilSurface, newParent)
     }
@@ -212,11 +218,11 @@ class ResizeVeilTest : ShellTestCase() {
             context,
             mockDisplayController,
             mockAppIcon,
-            taskInfo,
             parent,
             { mockTransaction },
             mockSurfaceControlBuilderFactory,
-            mockSurfaceControlViewHostFactory
+            mockSurfaceControlViewHostFactory,
+            taskInfo
         )
     }
 }

@@ -9702,6 +9702,12 @@
         <attr name="hotSpotY" format="dimension" />
     </declare-styleable>
 
+    <!-- @hide -->
+    <declare-styleable name="PointerIconVectorTheme">
+        <attr name="pointerIconVectorFill" format="color" />
+        <attr name="pointerIconVectorFillInverse" format="color" />
+    </declare-styleable>
+
     <declare-styleable name="Storage">
         <!-- path to mount point for the storage. -->
         <attr name="mountPoint" format="string" />

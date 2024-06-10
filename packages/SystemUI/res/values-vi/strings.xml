@@ -247,7 +247,7 @@
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Không làm phiền."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth bật."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Báo thức được đặt cho <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Chuông báo được đặt cho <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Nhiều thời gian hơn."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Ít thời gian hơn."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Đã ngừng truyền màn hình."</string>
@@ -361,13 +361,18 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Bạn gặp loại vấn đề gì khi dùng thiết bị?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Chọn loại vấn đề"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Ghi màn hình"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"Hiệu suất"</item>
-    <item msgid="1627504621139124393">"Giao diện người dùng"</item>
-    <item msgid="8309220355268900335">"Pin"</item>
-  </string-array>
+    <!-- no translation found for performance (6552785217174378320) -->
+    <skip />
+    <!-- no translation found for user_interface (3712869377953950887) -->
+    <skip />
+    <!-- no translation found for thermal (6758074791325414831) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Chế độ một tay"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Thiết bị trợ thính"</string>
+    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
+    <skip />
+    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
+    <skip />
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Thiết bị trợ thính"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Ghép nối thiết bị mới"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Nhấp để ghép nối thiết bị mới"</string>
@@ -594,11 +599,11 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Không, cảm ơn"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Đã ghim ứng dụng"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Đã bỏ ghim ứng dụng"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Gọi"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Cuộc gọi"</string>
     <string name="stream_system" msgid="7663148785370565134">"Hệ thống"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Chuông"</string>
     <string name="stream_music" msgid="2188224742361847580">"Nội dung nghe nhìn"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"Báo thức"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"Chuông báo"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Thông báo"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Tần số đa chuông kép"</string>
@@ -642,7 +647,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"Bật chế độ trình diễn"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Hiển thị chế độ trình diễn"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Báo thức"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Chuông báo"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Ví"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Thiết lập để mua hàng nhanh hơn và an toàn hơn bằng điện thoại"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hiện tất cả"</string>
@@ -655,7 +660,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Đang cập nhật"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Hồ sơ công việc"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ trên máy bay"</string>
-    <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy báo thức tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
+    <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy chuông báo tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
     <string name="alarm_template" msgid="2234991538018805736">"lúc <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"vào <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Điểm phát sóng"</string>
@@ -727,11 +732,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Nút <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Quay lại"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Mũi tên lên"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Mũi tên xuống"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Mũi tên trái"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Mũi tên phải"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Giữa"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Dấu cách"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
@@ -1275,7 +1275,8 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"gập"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"mở"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Còn <xliff:g id="PERCENTAGE">%s</xliff:g> pin"</string>
+    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
+    <skip />
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Hãy kết nối bút cảm ứng với bộ sạc"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bút cảm ứng bị yếu pin"</string>
     <string name="video_camera" msgid="7654002575156149298">"Máy quay video"</string>
@@ -1318,23 +1319,16 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) đã dùng gần đây"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) đang dùng"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) đã dùng gần đây"</string>
-    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"Hệ thống"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Đa nhiệm"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Phương thức nhập"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Lối tắt ứng dụng"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Hỗ trợ tiếp cận"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Phím tắt"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Lối tắt tìm kiếm"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Biểu tượng Thu gọn"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Biểu tượng Mở rộng"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
     <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Đèn nền bàn phím"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Độ sáng %1$d/%2$d"</string>

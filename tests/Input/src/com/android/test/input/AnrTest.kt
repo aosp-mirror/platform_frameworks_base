@@ -37,6 +37,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 
+import com.android.cts.input.DebugInputRule
 import com.android.cts.input.UinputTouchScreen
 
 import java.util.concurrent.TimeUnit
@@ -46,6 +47,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -74,6 +76,9 @@ class AnrTest {
     private val DISPATCHING_TIMEOUT = (UNMULTIPLIED_DEFAULT_DISPATCHING_TIMEOUT_MILLIS *
             Build.HW_TIMEOUT_MULTIPLIER)
 
+    @get:Rule
+    val debugInputRule = DebugInputRule()
+
     @Before
     fun setUp() {
         val contentResolver = instrumentation.targetContext.contentResolver
@@ -89,12 +94,14 @@ class AnrTest {
     }
 
     @Test
+    @DebugInputRule.DebugInput(bug = 339924248)
     fun testGestureMonitorAnr_Close() {
         triggerAnr()
         clickCloseAppOnAnrDialog()
     }
 
     @Test
+    @DebugInputRule.DebugInput(bug = 339924248)
     fun testGestureMonitorAnr_Wait() {
         triggerAnr()
         clickWaitOnAnrDialog()
@@ -110,7 +117,7 @@ class AnrTest {
         val closeAppButton: UiObject2? =
                 uiDevice.wait(Until.findObject(By.res("android:id/aerr_close")), 20000)
         if (closeAppButton == null) {
-            fail("Could not find anr dialog")
+            fail("Could not find anr dialog/close button")
             return
         }
         closeAppButton.click()
