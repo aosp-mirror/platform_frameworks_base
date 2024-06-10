@@ -16,10 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
-import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CANCELED;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
@@ -44,7 +42,6 @@ import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBE
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvocations;
@@ -52,7 +49,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -79,15 +75,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 
 import android.app.ActivityOptions;
-import android.app.ActivityOptions.BackgroundActivityStartMode;
 import android.app.AppOpsManager;
-import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.content.ComponentName;
@@ -101,10 +94,8 @@ import android.content.pm.SigningDetails;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.provider.DeviceConfig;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Pair;
@@ -116,8 +107,6 @@ import android.window.TaskFragmentOrganizerToken;
 import androidx.test.filters.SmallTest;
 
 import com.android.compatibility.common.util.DeviceConfigStateHelper;
-import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.PackageArchiver;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
@@ -126,11 +115,8 @@ import com.android.server.wm.utils.MockTracker;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoSession;
-import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -726,497 +712,68 @@ public class ActivityStarterTests extends WindowTestsBase {
                 eq(FAKE_REAL_CALLING_UID), anyInt(), anyBoolean(), eq(false));
     }
 
-    /**
-     * This test ensures that unsupported usecases aren't aborted when background starts are
-     * allowed.
-     */
-    @Test
-    public void testBackgroundActivityStartsAllowed_noStartsAborted() {
-        doReturn(true).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest("allowed_noStartsAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, false, false);
-    }
 
     /**
      * This test ensures that unsupported usecases are aborted when background starts are
      * disallowed.
      */
     @Test
-    public void testBackgroundActivityStartsDisallowed_unsupportedUsecaseAborted() {
+    public void testPinnedSingleInstanceAborted() {
         doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_unsupportedUsecase_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that unsupported usecases are aborted when background starts are
-     * disallowed.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_callingUidProcessStateTopAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callingUidProcessStateTop_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that unsupported usecases are aborted when background starts are
-     * disallowed.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_realCallingUidProcessStateTopAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_realCallingUidProcessStateTop_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP,
-                false, false, false, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that unsupported usecases are aborted when background starts are
-     * disallowed.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_hasForegroundActivitiesAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_hasForegroundActivities_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                true, false, false, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that unsupported usecases are aborted when background starts are
-     * disallowed.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_pinnedSingleInstanceAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_pinned_singleinstance_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, true, false);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the calling process runs as ROOT_UID.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_rootUidNotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest("disallowed_rootUid_notAborted", false,
-                Process.ROOT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the calling process is running as SYSTEM_UID.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_systemUidNotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest("disallowed_systemUid_notAborted", false,
-                Process.SYSTEM_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the calling process is running as NFC_UID.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_nfcUidNotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest("disallowed_nfcUid_notAborted", false,
-                Process.NFC_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the calling process has a visible window.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_callingUidHasVisibleWindowNotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callingUidHasVisibleWindow_notAborted", false,
-                UNIMPORTANT_UID, true, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, false, false);
-    }
-
-    /**
-     * The sending app has a visible window, but does not (by default) allow the pending intent to
-     * start the background activity.
-     */
-    @Test
-    @Ignore("b/266015587")
-    public void testBackgroundActivityStartsDisallowed_realCallingUidHasVisibleWindowAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_realCallingUidHasVisibleWindow_abortedInU", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, true, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the caller is in the recent activity list.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_callerIsRecentsNotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callerIsRecents_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, true, false, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the caller is temporarily (10s) allowed to start.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_callerIsAllowedNotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callerIsAllowed_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, true, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the caller explicitly has background activity start privilege.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_callerIsInstrumentingWithBASPnotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callerIsInstrumentingWithBackgroundActivityStartPrivileges_notAborted",
-                false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, true, false, false, false, false);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the caller is a device owner.
-     */
-    @Test
-    public void
-            testBackgroundActivityStartsDisallowed_callingPackageNameIsDeviceOwnerNotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callingPackageNameIsDeviceOwner_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, true, false, false, false);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the caller is a affiliated profile owner.
-     */
-    @Test
-    public void
-            testBackgroundActivityStartsDisallowed_isAffiliatedProfileOwnerNotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callingUidIsAffiliatedProfileOwner_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, true, false, false);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the caller has the OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_callerHasSystemExemptAppOpNotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callerHasSystemExemptAppOpNotAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, false, true);
-    }
-
-    /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the caller is an IME.
-     */
-    @Test
-    public void testBackgroundActivityStartsDisallowed_callingPackageNameIsImeNotAborted() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        setupImeWindow();
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_callingPackageNameIsIme_notAborted", false,
-                CURRENT_IME_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, false, false, false, false, false, false, false);
-    }
-
-    /**
-     * This test ensures proper logging for BAL_ALLOW_PERMISSION.
-     */
-    @Test
-    public void testBackgroundActivityStartsAllowed_logging() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        MockitoSession mockingSession = mockitoSession()
-                .mockStatic(ActivityTaskManagerService.class)
-                .mockStatic(FrameworkStatsLog.class)
-                .strictness(Strictness.LENIENT)
-                .startMocking();
-        try {
-            doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
-                    eq(START_ACTIVITIES_FROM_BACKGROUND),
-                    anyInt(), anyInt()));
-            runAndVerifyBackgroundActivityStartsSubtest(
-                    "allowed_notAborted", false,
-                    UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                    UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                    false, true, false, false, false, false, false, false);
-            verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
-                    "",  // activity name
-                    BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
-                    UNIMPORTANT_UID,
-                    UNIMPORTANT_UID2,
-                    BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
-                    true, // opt in
-                    false, // but no explicit opt in
-                    BackgroundActivityStartController.BAL_BLOCK,
-                    true, // opt in
-                    false // but no explicit opt in
-            ));
-        } finally {
-            mockingSession.finishMocking();
-        }
-    }
-
-    /**
-     * This test ensures proper logging for BAL_ALLOW_PENDING_INTENT, when the PendingIntent sender
-     * is the only reason BAL is allowed.
-     */
-    @Test
-    @RequiresFlagsDisabled(com.android.window.flags.Flags.FLAG_BAL_IMPROVED_METRICS)
-    public void testBackgroundActivityStartsAllowed_loggingOnlyPendingIntentAllowed() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        MockitoSession mockingSession = mockitoSession()
-                .mockStatic(ActivityTaskManagerService.class)
-                .mockStatic(FrameworkStatsLog.class)
-                .mockStatic(PendingIntentRecord.class)
-                .strictness(Strictness.LENIENT)
-                .startMocking();
-        try {
-            doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
-                    eq(START_ACTIVITIES_FROM_BACKGROUND),
-                    anyInt(), anyInt()));
-            doReturn(BackgroundStartPrivileges.allowBackgroundActivityStarts(null)).when(
-                    () -> PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
-                            anyObject(), anyInt(), anyObject()));
-            runAndVerifyBackgroundActivityStartsSubtest(
-                    "allowed_notAborted", false,
-                    UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                    Process.SYSTEM_UID, true, PROCESS_STATE_BOUND_TOP,
-                    false, true, false, false, false, false, false, false,
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
-            verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
-                    DEFAULT_COMPONENT_PACKAGE_NAME + "/" + DEFAULT_COMPONENT_PACKAGE_NAME,
-                    BackgroundActivityStartController.BAL_ALLOW_PENDING_INTENT,
-                    UNIMPORTANT_UID,
-                    Process.SYSTEM_UID,
-                    BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
-                    false, // opt in
-                    true, // explicit opt out
-                    BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW,
-                    true, // opt in
-                    false // but no explicit opt in
-            ));
-        } finally {
-            mockingSession.finishMocking();
-        }
-    }
-
-    /**
-     * This test ensures proper logging for BAL_ALLOW_PENDING_INTENT, when the PendingIntent sender
-     * is not the primary reason to allow BAL (but the creator).
-     */
-    @Test
-    @RequiresFlagsDisabled(com.android.window.flags.Flags.FLAG_BAL_IMPROVED_METRICS)
-    public void testBackgroundActivityStartsAllowed_loggingPendingIntentAllowed() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        MockitoSession mockingSession = mockitoSession()
-                .mockStatic(ActivityTaskManagerService.class)
-                .mockStatic(FrameworkStatsLog.class)
-                .mockStatic(PendingIntentRecord.class)
-                .strictness(Strictness.LENIENT)
-                .startMocking();
-        try {
-            doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
-                    eq(START_ACTIVITIES_FROM_BACKGROUND),
-                    anyInt(), anyInt()));
-            doReturn(BackgroundStartPrivileges.allowBackgroundActivityStarts(null)).when(
-                    () -> PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
-                            anyObject(), anyInt(), anyObject()));
-            runAndVerifyBackgroundActivityStartsSubtest(
-                    "allowed_notAborted", false,
-                    UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                    Process.SYSTEM_UID, true, PROCESS_STATE_BOUND_TOP,
-                    false, true, false, false, false, false, false, false,
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-            verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
-                    "",
-                    BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
-                    UNIMPORTANT_UID,
-                    Process.SYSTEM_UID,
-                    BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
-                    true, // opt in
-                    true, // explicit opt in
-                    BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW,
-                    true, // opt in
-                    false // but no explicit opt in
-            ));
-        } finally {
-            mockingSession.finishMocking();
-        }
-    }
-
-    private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
-            int callingUid, boolean callingUidHasVisibleWindow, int callingUidProcState,
-            int realCallingUid, boolean realCallingUidHasVisibleWindow, int realCallingUidProcState,
-            boolean hasForegroundActivities, boolean callerIsRecents,
-            boolean callerIsTempAllowed,
-            boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
-            boolean isCallingUidDeviceOwner,
-            boolean isCallingUidAffiliatedProfileOwner,
-            boolean isPinnedSingleInstance,
-            boolean hasSystemExemptAppOp) {
-        runAndVerifyBackgroundActivityStartsSubtest(name, shouldHaveAborted, callingUid,
-                callingUidHasVisibleWindow, callingUidProcState, realCallingUid,
-                realCallingUidHasVisibleWindow,  realCallingUidProcState, hasForegroundActivities,
-                callerIsRecents, callerIsTempAllowed,
-                callerIsInstrumentingWithBackgroundActivityStartPrivileges,
-                isCallingUidDeviceOwner, isCallingUidAffiliatedProfileOwner, isPinnedSingleInstance,
-                hasSystemExemptAppOp,
-                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
-    }
-
-    private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
-            int callingUid, boolean callingUidHasVisibleWindow, int callingUidProcState,
-            int realCallingUid, boolean realCallingUidHasVisibleWindow, int realCallingUidProcState,
-            boolean hasForegroundActivities, boolean callerIsRecents,
-            boolean callerIsTempAllowed,
-            boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
-            boolean isCallingUidDeviceOwner,
-            boolean isCallingUidAffiliatedProfileOwner,
-            boolean isPinnedSingleInstance,
-            boolean hasSystemExemptAppOp,
-            @BackgroundActivityStartMode int pendingIntentCreatorBackgroundActivityStartMode) {
         // window visibility
-        doReturn(callingUidHasVisibleWindow).when(mAtm).hasActiveVisibleWindow(callingUid);
-        doReturn(realCallingUidHasVisibleWindow).when(mAtm).hasActiveVisibleWindow(realCallingUid);
+        doReturn(false).when(mAtm).hasActiveVisibleWindow(UNIMPORTANT_UID);
+        doReturn(false).when(mAtm).hasActiveVisibleWindow(UNIMPORTANT_UID2);
         // process importance
-        mAtm.mActiveUids.onUidActive(callingUid, callingUidProcState);
-        mAtm.mActiveUids.onUidActive(realCallingUid, realCallingUidProcState);
+        mAtm.mActiveUids.onUidActive(UNIMPORTANT_UID, PROCESS_STATE_BOUND_TOP);
+        mAtm.mActiveUids.onUidActive(UNIMPORTANT_UID2, PROCESS_STATE_BOUND_TOP);
         // foreground activities
         final IApplicationThread caller = mock(IApplicationThread.class);
         final WindowProcessListener listener = mock(WindowProcessListener.class);
         final ApplicationInfo ai = new ApplicationInfo();
-        ai.uid = callingUid;
+        ai.uid = UNIMPORTANT_UID;
         ai.packageName = "com.android.test.package";
-        final WindowProcessController callerApp =
-                spy(new WindowProcessController(mAtm, ai, null, callingUid, -1, null, listener));
-        doReturn(hasForegroundActivities).when(callerApp).hasForegroundActivities();
+        final WindowProcessController callerApp = spy(new WindowProcessController(
+                mAtm, ai, null, UNIMPORTANT_UID, -1, null, listener));
+        doReturn(false).when(callerApp).hasForegroundActivities();
         doReturn(callerApp).when(mAtm).getProcessController(caller);
         // caller is recents
         RecentTasks recentTasks = mock(RecentTasks.class);
         mAtm.mTaskSupervisor.setRecentTasks(recentTasks);
-        doReturn(callerIsRecents).when(recentTasks).isCallerRecents(callingUid);
+        doReturn(false).when(recentTasks).isCallerRecents(UNIMPORTANT_UID);
         // caller is temp allowed
-        if (callerIsTempAllowed) {
-            callerApp.addOrUpdateBackgroundStartPrivileges(new Binder(),
-                    BackgroundStartPrivileges.ALLOW_BAL);
-        }
         // caller is instrumenting with background activity starts privileges
-        callerApp.setInstrumenting(callerIsInstrumentingWithBackgroundActivityStartPrivileges,
-                callerIsInstrumentingWithBackgroundActivityStartPrivileges ? Process.SHELL_UID : -1,
-                callerIsInstrumentingWithBackgroundActivityStartPrivileges);
+        callerApp.setInstrumenting(false, -1, false);
         // callingUid is the device owner
-        doReturn(isCallingUidDeviceOwner).when(mAtm).isDeviceOwner(callingUid);
+        doReturn(false).when(mAtm).isDeviceOwner(UNIMPORTANT_UID);
         // callingUid is the affiliated profile owner
-        doReturn(isCallingUidAffiliatedProfileOwner).when(mAtm)
-            .isAffiliatedProfileOwner(callingUid);
+        doReturn(false).when(mAtm).isAffiliatedProfileOwner(UNIMPORTANT_UID);
 
         // caller has OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop
-        doReturn(hasSystemExemptAppOp ? AppOpsManager.MODE_ALLOWED
-                : AppOpsManager.MODE_DEFAULT).when(mAppOpsManager).checkOpNoThrow(
+        doReturn(AppOpsManager.MODE_DEFAULT).when(mAppOpsManager).checkOpNoThrow(
                 eq(AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION),
                 anyInt(), any());
 
-        int launchMode = LAUNCH_MULTIPLE;
-        if (isPinnedSingleInstance) {
-            final ActivityRecord baseActivity =
-                    new ActivityBuilder(mAtm).setCreateTask(true).build();
-            baseActivity.getRootTask()
-                    .setWindowingMode(WINDOWING_MODE_PINNED);
-            doReturn(baseActivity).when(mRootWindowContainer).findTask(any(), any());
-            launchMode = LAUNCH_SINGLE_INSTANCE;
-        }
+        final ActivityRecord baseActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        baseActivity.getRootTask().setWindowingMode(WINDOWING_MODE_PINNED);
+        doReturn(baseActivity).when(mRootWindowContainer).findTask(any(), any());
 
         ActivityOptions rawOptions = ActivityOptions.makeBasic()
                 .setPendingIntentCreatorBackgroundActivityStartMode(
-                        pendingIntentCreatorBackgroundActivityStartMode);
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
         final ActivityOptions options = spy(rawOptions);
         ActivityRecord[] outActivity = new ActivityRecord[1];
         ActivityStarter starter = prepareStarter(
-                FLAG_ACTIVITY_NEW_TASK, true, launchMode)
+                FLAG_ACTIVITY_NEW_TASK, true, LAUNCH_SINGLE_INSTANCE)
                 .setCallingPackage("com.whatever.dude")
                 .setCaller(caller)
-                .setCallingUid(callingUid)
-                .setRealCallingUid(realCallingUid)
+                .setCallingUid(UNIMPORTANT_UID)
+                .setRealCallingUid(UNIMPORTANT_UID2)
                 .setActivityOptions(new SafeActivityOptions(options))
                 .setOutActivity(outActivity);
 
-        final int result = starter.setReason("testBackgroundActivityStarts_" + name).execute();
-
-        assertEquals(ActivityStarter.getExternalResult(
-                shouldHaveAborted ? START_ABORTED : START_SUCCESS), result);
-        verify(options, times(shouldHaveAborted ? 1 : 0)).abort();
+        final int result = starter.setReason("testPinnedSingleInstanceAborted").execute();
+        assertEquals(ActivityStarter.getExternalResult(START_ABORTED), result);
+        verify(options, times(1)).abort();
 
         final ActivityRecord startedActivity = outActivity[0];
         if (startedActivity != null && startedActivity.getTask() != null) {

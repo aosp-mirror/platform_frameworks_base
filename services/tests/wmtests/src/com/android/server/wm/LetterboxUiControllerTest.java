@@ -77,6 +77,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.compat.testing.PlatformCompatChangeRule;
@@ -110,7 +111,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 /**
- * Test class for {@link LetterboxUiControllerTest}.
+ * Test class for {@link LetterboxUiController}.
  *
  * Build/Install/Run:
  * atest WmTests:LetterboxUiControllerTest
@@ -521,8 +522,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         final Rect opaqueBounds = new Rect(0, 0, 500, 300);
         doReturn(opaqueBounds).when(mActivity).getBounds();
         // Activity is translucent
-        spyOn(mActivity.mLetterboxUiController);
-        doReturn(true).when(mActivity.mLetterboxUiController).hasInheritedLetterboxBehavior();
+        spyOn(mActivity.mTransparentPolicy);
+        when(mActivity.mTransparentPolicy.isRunning()).thenReturn(true);
 
         // Makes requested sizes different
         mainWindow.mRequestedWidth = opaqueBounds.width() - 1;

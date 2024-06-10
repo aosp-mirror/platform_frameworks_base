@@ -361,21 +361,24 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Cila pjesë e përvojës me pajisjen është prekur?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Zgjidh llojin e problemit"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Regjistrim i ekranit"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"Performanca"</item>
-    <item msgid="1627504621139124393">"Ndërfaqja e përdoruesit"</item>
-    <item msgid="8309220355268900335">"Bateria"</item>
-  </string-array>
+    <!-- no translation found for performance (6552785217174378320) -->
+    <skip />
+    <!-- no translation found for user_interface (3712869377953950887) -->
+    <skip />
+    <!-- no translation found for thermal (6758074791325414831) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modaliteti i përdorimit me një dorë"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Pajisje ndihmëse për dëgjimin"</string>
+    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
+    <skip />
+    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
+    <skip />
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Pajisjet e dëgjimit"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Çifto pajisje të re"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliko për të çiftuar një pajisje të re"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Paravendosja nuk mund të përditësohej"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
-    <!-- no translation found for live_caption_title (8916875614623730005) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Paravendosja"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"Titra në çast"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Të zhbllokohet mikrofoni i pajisjes?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Të zhbllokohet kamera e pajisjes?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Të zhbllokohen kamera dhe mikrofoni i pajisjes?"</string>
@@ -596,9 +599,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Jo, faleminderit!"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacioni u gozhdua"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacioni u zhgozhdua"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Telefono"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Telefonata"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistemi"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Bjeri ziles"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Zilja"</string>
     <string name="stream_music" msgid="2188224742361847580">"Media"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarmi"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Njoftimi"</string>
@@ -729,11 +732,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Butoni <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Kreu"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Prapa"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Shigjeta lart"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Shigjeta poshtë"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Shigjeta majtas"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Shigjeta djathtas"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Qendror"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Hapësirë"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
@@ -1277,7 +1275,8 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"palosur"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"shpalosur"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Përqindja e mbetur e baterisë: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
+    <skip />
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Lidhe stilolapsin me një karikues"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria e stilolapsit në nivel të ulët"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokamera"</string>
@@ -1320,23 +1319,16 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Përdorur së fundi nga <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Në përdorim nga <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Përdorur së fundi nga <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
-    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"Sistemi"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Kryerja e shumë detyrave"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Hyrja"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Shkurtoret e aplikacionit"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Qasshmëria"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Shkurtoret e tastierës"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Kërko për shkurtoret"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona e palosjes"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona e zgjerimit"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
     <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Drita e sfondit e tastierës"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveli: %1$d nga %2$d"</string>

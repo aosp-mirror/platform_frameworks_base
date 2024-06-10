@@ -1424,6 +1424,10 @@ public class RemoteViews implements Parcelable, Filter {
                                 context.unbindService(this);
                             }
 
+                            if (items == null) {
+                                items = new RemoteCollectionItems.Builder().build();
+                            }
+
                             result.complete(items);
                         }
 

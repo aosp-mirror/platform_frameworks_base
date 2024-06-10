@@ -1077,9 +1077,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (dc != null && dc != this) {
             dc.getPendingTransaction().merge(mPendingTransaction);
         }
-        if (dc != this && mLocalInsetsSources != null) {
-            mLocalInsetsSources.clear();
-        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
             child.onDisplayChanged(dc);
