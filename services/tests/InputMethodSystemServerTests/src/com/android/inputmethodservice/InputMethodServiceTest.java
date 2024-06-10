@@ -48,6 +48,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.apps.inputmethod.simpleime.ims.InputMethodServiceWrapper;
 import com.android.apps.inputmethod.simpleime.testing.TestActivity;
+import com.android.compatibility.common.util.SystemUtil;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 
 import org.junit.After;
@@ -834,8 +835,7 @@ public class InputMethodServiceTest {
 
     private String executeShellCommand(String cmd) throws IOException {
         Log.i(TAG, "Run command: " + cmd);
-        return UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-                .executeShellCommand(cmd);
+        return SystemUtil.runShellCommandOrThrow(cmd);
     }
 
     private void clickOnEditorText() {
