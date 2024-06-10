@@ -28,7 +28,6 @@ import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSI
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
 
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -430,20 +429,20 @@ public class AccessibilityUserStateTest {
     }
 
     @Test
-    public void updateShortcutTargetsLocked_quickSettings_valueUpdated() {
+    public void updateA11yQsTargetLocked_valueUpdated() {
         Set<String> newTargets = Set.of(
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString(),
                 AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString()
         );
 
-        mUserState.updateShortcutTargetsLocked(newTargets, QUICK_SETTINGS);
+        mUserState.updateA11yQsTargetLocked(newTargets);
 
         assertThat(mUserState.getA11yQsTargets()).isEqualTo(newTargets);
     }
 
     @Test
     public void getA11yQsTargets_returnsCopiedData() {
-        updateShortcutTargetsLocked_quickSettings_valueUpdated();
+        updateA11yQsTargetLocked_valueUpdated();
 
         Set<String> targets = mUserState.getA11yQsTargets();
         targets.clear();
