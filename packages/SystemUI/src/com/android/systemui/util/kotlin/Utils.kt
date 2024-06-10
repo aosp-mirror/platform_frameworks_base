@@ -25,15 +25,18 @@ import kotlinx.coroutines.flow.map
 class Utils {
     companion object {
         fun <A, B, C> toTriple(a: A, bc: Pair<B, C>) = Triple(a, bc.first, bc.second)
+
         fun <A, B, C> toTriple(ab: Pair<A, B>, c: C) = Triple(ab.first, ab.second, c)
 
         fun <A, B, C, D> toQuad(a: A, b: B, c: C, d: D) = Quad(a, b, c, d)
+
         fun <A, B, C, D> toQuad(a: A, bcd: Triple<B, C, D>) =
             Quad(a, bcd.first, bcd.second, bcd.third)
         fun <A, B, C, D> toQuad(abc: Triple<A, B, C>, d: D) =
             Quad(abc.first, abc.second, abc.third, d)
 
         fun <A, B, C, D, E> toQuint(a: A, b: B, c: C, d: D, e: E) = Quint(a, b, c, d, e)
+
         fun <A, B, C, D, E> toQuint(a: A, bcde: Quad<B, C, D, E>) =
             Quint(a, bcde.first, bcde.second, bcde.third, bcde.fourth)
 
