@@ -94,7 +94,7 @@ class MediaMuteAwaitConnectionManager constructor(
     }
 
     private fun AudioDeviceAttributes.getIcon(): Drawable {
-        return deviceIconUtil.getIconFromAudioDeviceType(this.type, context)
+        return deviceIconUtil.getIconFromAudioDeviceType(this.type)
     }
 
     private fun IntArray.hasMedia() = USAGE_MEDIA in this

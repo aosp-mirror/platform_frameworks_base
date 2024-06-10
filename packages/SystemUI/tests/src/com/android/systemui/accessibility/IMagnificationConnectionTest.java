@@ -37,7 +37,6 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
@@ -45,6 +44,7 @@ import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -67,7 +67,7 @@ import org.mockito.MockitoAnnotations;
  * {@link Magnification}
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class IMagnificationConnectionTest extends SysuiTestCase {
 

@@ -20,13 +20,13 @@ import android.content.Context
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.service.quicksettings.Tile
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.text.TextUtils
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -41,7 +41,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class QSTileViewImplTest : SysuiTestCase() {

@@ -45,7 +45,6 @@ import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.TypedValue
 import android.view.View
@@ -60,6 +59,7 @@ import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.media.utils.MediaConstants
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.widget.CachingIconView
@@ -137,7 +137,7 @@ private const val REC_APP_NAME = "REC APP NAME"
 private const val APP_NAME = "APP_NAME"
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MediaControlPanelTest : SysuiTestCase() {
     @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()

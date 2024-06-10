@@ -29,6 +29,7 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOAR
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 import static android.companion.virtualdevice.flags.Flags.virtualCameraServiceDiscovery;
+import static android.companion.virtualdevice.flags.Flags.intentInterceptionActionMatchingFix;
 
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -1054,7 +1055,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public int getVirtualCameraId(@NonNull VirtualCameraConfig cameraConfig)
+    public String getVirtualCameraId(@NonNull VirtualCameraConfig cameraConfig)
             throws RemoteException {
         super.getVirtualCameraId_enforcePermission();
         Objects.requireNonNull(cameraConfig);
@@ -1478,7 +1479,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         synchronized (mVirtualDeviceLock) {
             boolean hasInterceptedIntent = false;
             for (Map.Entry<IBinder, IntentFilter> interceptor : mIntentInterceptors.entrySet()) {
-                if (interceptor.getValue().match(
+                IntentFilter intentFilter = interceptor.getValue();
+                // Explicitly match the actions because the intent filter will match any intent
+                // without an explicit action. If the intent has no action, then require that there
+                // are no actions specified in the filter either.
+                boolean explicitActionMatch = !intentInterceptionActionMatchingFix()
+                        || intent.getAction() != null || intentFilter.countActions() == 0;
+                if (explicitActionMatch && intentFilter.match(
                         intent.getAction(), intent.getType(), intent.getScheme(), intent.getData(),
                         intent.getCategories(), TAG) >= 0) {
                     try {

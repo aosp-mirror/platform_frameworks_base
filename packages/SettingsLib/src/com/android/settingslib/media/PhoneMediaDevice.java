@@ -29,6 +29,8 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -40,7 +42,6 @@ import android.media.RouteListingPreference;
 import android.os.SystemProperties;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
@@ -100,17 +101,6 @@ public class PhoneMediaDevice extends MediaDevice {
                         R.string.media_transfer_external_device_name);
                 break;
             case TYPE_HDMI_ARC:
-                if (isTv) {
-                    String deviceName = getHdmiOutDeviceName(context);
-                    if (deviceName != null) {
-                        name = deviceName;
-                    } else {
-                        name = context.getString(R.string.tv_media_transfer_arc_fallback_title);
-                    }
-                } else {
-                    name = context.getString(R.string.media_transfer_external_device_name);
-                }
-                break;
             case TYPE_HDMI_EARC:
                 if (isTv) {
                     String deviceName = getHdmiOutDeviceName(context);
@@ -130,14 +120,10 @@ public class PhoneMediaDevice extends MediaDevice {
         return name.toString();
     }
 
-    PhoneMediaDevice(Context context, MediaRoute2Info info) {
-        this(context, info, null);
-    }
-
     PhoneMediaDevice(
-            Context context,
-            MediaRoute2Info info,
-            RouteListingPreference.Item item) {
+            @NonNull Context context,
+            @NonNull MediaRoute2Info info,
+            @Nullable RouteListingPreference.Item item) {
         super(context, info, item);
         mDeviceIconUtil = new DeviceIconUtil(mContext);
         initDeviceRecord();

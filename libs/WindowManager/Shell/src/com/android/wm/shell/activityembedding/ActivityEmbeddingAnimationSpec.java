@@ -38,6 +38,7 @@ import android.view.animation.TranslateAnimation;
 import android.window.TransitionInfo;
 
 import com.android.internal.policy.TransitionAnimation;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.shared.TransitionUtil;
 
 /** Animation spec for ActivityEmbedding transition. */
@@ -202,7 +203,7 @@ class ActivityEmbeddingAnimationSpec {
     Animation loadOpenAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = TransitionUtil.isOpeningType(change.getMode());
-        final Animation customAnimation = loadCustomAnimation(info, isEnter);
+        final Animation customAnimation = loadCustomAnimation(info, change, isEnter);
         final Animation animation;
         if (customAnimation != null) {
             animation = customAnimation;
@@ -229,7 +230,7 @@ class ActivityEmbeddingAnimationSpec {
     Animation loadCloseAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = TransitionUtil.isOpeningType(change.getMode());
-        final Animation customAnimation = loadCustomAnimation(info, isEnter);
+        final Animation customAnimation = loadCustomAnimation(info, change, isEnter);
         final Animation animation;
         if (customAnimation != null) {
             animation = customAnimation;
@@ -261,8 +262,14 @@ class ActivityEmbeddingAnimationSpec {
     }
 
     @Nullable
-    private Animation loadCustomAnimation(@NonNull TransitionInfo info, boolean isEnter) {
-        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
+    private Animation loadCustomAnimation(@NonNull TransitionInfo info,
+            @NonNull TransitionInfo.Change change, boolean isEnter) {
+        final TransitionInfo.AnimationOptions options;
+        if (Flags.moveAnimationOptionsToChange()) {
+            options = change.getAnimationOptions();
+        } else {
+            options = info.getAnimationOptions();
+        }
         if (options == null || options.getType() != ANIM_CUSTOM) {
             return null;
         }

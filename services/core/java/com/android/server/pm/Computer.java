@@ -108,16 +108,20 @@ public interface Computer extends PackageDataSnapshot {
     default int getUsed() {
         return 0;
     }
-    @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
+    @NonNull List<ResolveInfo> queryIntentActivitiesInternal(
+            Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags,
-            int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits);
+            int filterCallingUid, int callingPid, int userId,
+            boolean resolveForStart, boolean allowDynamicSplits);
     @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
             long flags, int filterCallingUid, int userId);
     @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
             long flags, int userId);
-    @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent, String resolvedType,
-            long flags, int userId, int callingUid, boolean includeInstantApps);
+    @NonNull List<ResolveInfo> queryIntentServicesInternal(
+            Intent intent, String resolvedType, long flags,
+            int userId, int callingUid, int callingPid,
+            boolean includeInstantApps, boolean resolveForStart);
     @NonNull QueryIntentActivitiesResult queryIntentActivitiesInternalBody(Intent intent,
             String resolvedType, long flags, int filterCallingUid, int userId,
             boolean resolveForStart, boolean allowDynamicSplits, String pkgName,

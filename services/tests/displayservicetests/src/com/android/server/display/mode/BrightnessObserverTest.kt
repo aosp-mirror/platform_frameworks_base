@@ -19,11 +19,12 @@ package com.android.server.display.mode
 import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.display.BrightnessInfo
-import android.util.SparseArray
 import android.view.Display
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.SmallTest
 import com.android.server.display.DisplayDeviceConfig
+import com.android.server.display.config.RefreshRateData
+import com.android.server.display.config.SupportedModeData
 import com.android.server.display.feature.DisplayManagerFlags
 import com.android.server.display.mode.DisplayModeDirector.DisplayDeviceConfigProvider
 import com.android.server.testutils.TestHandler
@@ -38,6 +39,13 @@ import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+
+private val LOW_LIGHT_REFRESH_RATE_DATA = createRefreshRateData(
+    lowLightBlockingZoneSupportedModes = listOf(
+        SupportedModeData(60f, 60f), SupportedModeData(240f, 240f)))
+private val EXPECTED_SUPPORTED_MODES_VOTE = SupportedRefreshRatesVote(
+    listOf(SupportedRefreshRatesVote.RefreshRates(60f, 60f),
+        SupportedRefreshRatesVote.RefreshRates(240f, 240f)))
 
 @SmallTest
 @RunWith(TestParameterInjector::class)
@@ -65,21 +73,25 @@ class BrightnessObserverTest {
         whenever(mockFlags.isVsyncLowLightVoteEnabled).thenReturn(testCase.vsyncLowLightVoteEnabled)
         val displayModeDirector = DisplayModeDirector(
                 spyContext, testHandler, mockInjector, mockFlags, mockDisplayDeviceConfigProvider)
-        val ddcByDisplay = SparseArray<DisplayDeviceConfig>()
         whenever(mockDeviceConfig.isVrrSupportEnabled).thenReturn(testCase.vrrSupported)
-        ddcByDisplay.put(Display.DEFAULT_DISPLAY, mockDeviceConfig)
-        displayModeDirector.injectDisplayDeviceConfigByDisplay(ddcByDisplay)
+        whenever(mockDeviceConfig.refreshRateData).thenReturn(testCase.refreshRateData)
+        whenever(mockDeviceConfig.defaultLowBlockingZoneRefreshRate).thenReturn(-1)
+
+        displayModeDirector.defaultDisplayDeviceUpdated(mockDeviceConfig)
+
         val brightnessObserver = displayModeDirector.BrightnessObserver(
                 spyContext, testHandler, mockInjector, mockFlags)
-
+        // set mRefreshRateChangeable to true
         brightnessObserver.onRefreshRateSettingChangedLocked(0.0f, 120.0f)
         brightnessObserver.updateBlockingZoneThresholds(mockDeviceConfig, false)
-        brightnessObserver.onDeviceConfigRefreshRateInLowZoneChanged(60)
+        brightnessObserver.onDeviceConfigRefreshRateInLowZoneChanged(testCase.refreshRateInLowZone)
 
         brightnessObserver.onDisplayChanged(Display.DEFAULT_DISPLAY)
 
         assertThat(displayModeDirector.getVote(VotesStorage.GLOBAL_ID,
-                Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH)).isEqualTo(testCase.expectedVote)
+            Vote.PRIORITY_FLICKER_REFRESH_RATE)).isEqualTo(testCase.expectedRefreshRateVote)
+        assertThat(displayModeDirector.getVote(VotesStorage.GLOBAL_ID,
+                Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH)).isEqualTo(testCase.expectedSwitchVote)
     }
 
     private fun setUpLowBrightnessZone() {
@@ -98,14 +110,20 @@ class BrightnessObserverTest {
     enum class LowLightTestCase(
             val vrrSupported: Boolean,
             val vsyncLowLightVoteEnabled: Boolean,
-            internal val expectedVote: Vote
+            val refreshRateData: RefreshRateData,
+            val refreshRateInLowZone: Int,
+            internal val expectedRefreshRateVote: Vote,
+            internal val expectedSwitchVote: Vote?,
     ) {
-        ALL_ENABLED(true, true, CombinedVote(
-                listOf(DisableRefreshRateSwitchingVote(true),
-                        SupportedRefreshRatesVote(
-                                listOf(SupportedRefreshRatesVote.RefreshRates(60f, 60f),
-                                        SupportedRefreshRatesVote.RefreshRates(120f, 120f)))))),
-        VRR_NOT_SUPPORTED(false, true, DisableRefreshRateSwitchingVote(true)),
-        VSYNC_VOTE_DISABLED(true, false, DisableRefreshRateSwitchingVote(true))
+        ALL_ENABLED(true, true, LOW_LIGHT_REFRESH_RATE_DATA, 60,
+            EXPECTED_SUPPORTED_MODES_VOTE, null),
+        ALL_ENABLED_NO_RR_IN_LOW_ZONE(true, true, LOW_LIGHT_REFRESH_RATE_DATA, 0,
+            EXPECTED_SUPPORTED_MODES_VOTE, null),
+        VRR_NOT_SUPPORTED(false, true, LOW_LIGHT_REFRESH_RATE_DATA, 60,
+            Vote.forPhysicalRefreshRates(60f, 60f), DisableRefreshRateSwitchingVote(true)),
+        VSYNC_VOTE_DISABLED(true, false, LOW_LIGHT_REFRESH_RATE_DATA, 50,
+            Vote.forPhysicalRefreshRates(50f, 50f), DisableRefreshRateSwitchingVote(true)),
+        NO_LOW_LIGHT_CONFIG(true, true, createRefreshRateData(), 40,
+            Vote.forPhysicalRefreshRates(40f, 40f), DisableRefreshRateSwitchingVote(true)),
     }
 }

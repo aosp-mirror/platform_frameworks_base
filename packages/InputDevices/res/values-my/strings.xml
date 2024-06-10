@@ -52,8 +52,6 @@
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"ဂျော်ဂျီယာ"</string>
     <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"ထိုင်း (ကတ်မနီး)"</string>
     <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"ထိုင်း (ပတ်တာချုတ်)"</string>
-    <!-- no translation found for keyboard_layout_serbian_latin (3128791759390046571) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_montenegrin_latin (1467832503378949945) -->
-    <skip />
+    <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"ဆားဘီးယား (လက်တင်)"</string>
+    <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"မွန်တီနီဂရင်း (လက်တင်)"</string>
 </resources>

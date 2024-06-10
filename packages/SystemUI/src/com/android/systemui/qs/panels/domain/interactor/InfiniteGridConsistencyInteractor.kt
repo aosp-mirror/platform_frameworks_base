@@ -38,14 +38,13 @@ constructor(
     override fun reconcileTiles(tiles: List<TileSpec>): List<TileSpec> {
         val newTiles: MutableList<TileSpec> = mutableListOf()
         val row = TileRow<TileSpec>(columns = gridSizeInteractor.columns.value)
-        val iconTilesSet = iconTilesInteractor.iconTilesSpecs.value
         val tilesQueue =
             ArrayDeque(
                 tiles.map {
                     SizedTile(
                         it,
                         width =
-                            if (iconTilesSet.contains(it)) {
+                            if (iconTilesInteractor.isIconTile(it)) {
                                 1
                             } else {
                                 2

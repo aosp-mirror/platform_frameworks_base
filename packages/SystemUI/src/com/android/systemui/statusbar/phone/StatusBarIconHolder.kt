@@ -155,6 +155,7 @@ open class StatusBarIconHolder private constructor() {
                     0,
                     0,
                     contentDescription,
+                    StatusBarIcon.Type.SystemIcon,
                 )
             holder.tag = state.subId
             return holder

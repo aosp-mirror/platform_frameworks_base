@@ -34,11 +34,11 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.compose.ui.platform.ComposeView;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -48,15 +48,12 @@ import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSComponent;
-import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
@@ -117,11 +114,9 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     private final MediaHost mQqsMediaHost;
     private final QSDisableFlagsLogger mQsDisableFlagsLogger;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
-    private final FeatureFlags mFeatureFlags;
     private final QSLogger mLogger;
     private final FooterActionsController mFooterActionsController;
     private final FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
-    private final FooterActionsViewBinder mFooterActionsViewBinder;
     private final ListeningAndVisibilityLifecycleOwner mListeningAndVisibilityLifecycleOwner;
     private boolean mShowCollapsedOnKeyguard;
     private boolean mLastKeyguardAndExpanded;
@@ -168,11 +163,14 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     private boolean mIsSmallScreen;
 
+    /** Should the squishiness fraction be updated on the media host. */
+    private boolean mShouldUpdateMediaSquishiness;
+
     private CommandQueue mCommandQueue;
 
     private View mRootView;
     @Nullable
-    private View mFooterActionsView;
+    private ComposeView mFooterActionsView;
 
     @Inject
     public QSImpl(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -184,23 +182,19 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
             DumpManager dumpManager, QSLogger qsLogger,
             FooterActionsController footerActionsController,
             FooterActionsViewModel.Factory footerActionsViewModelFactory,
-            FooterActionsViewBinder footerActionsViewBinder,
-            LargeScreenShadeInterpolator largeScreenShadeInterpolator,
-            FeatureFlags featureFlags) {
+            LargeScreenShadeInterpolator largeScreenShadeInterpolator) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mQsMediaHost = qsMediaHost;
         mQqsMediaHost = qqsMediaHost;
         mQsDisableFlagsLogger = qsDisableFlagsLogger;
         mLogger = qsLogger;
         mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
-        mFeatureFlags = featureFlags;
         mCommandQueue = commandQueue;
         mBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
         mDumpManager = dumpManager;
         mFooterActionsController = footerActionsController;
         mFooterActionsViewModelFactory = footerActionsViewModelFactory;
-        mFooterActionsViewBinder = footerActionsViewBinder;
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
         if (SceneContainerFlag.isEnabled()) {
             mStatusBarState = StatusBarState.SHADE;
@@ -294,43 +288,9 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     }
 
     private void bindFooterActionsView(View root) {
-        LinearLayout footerActionsView = root.findViewById(R.id.qs_footer_actions);
-
-        if (!mFeatureFlags.isEnabled(Flags.COMPOSE_QS_FOOTER_ACTIONS)) {
-            Log.d(TAG, "Binding the View implementation of the QS footer actions");
-            mFooterActionsView = footerActionsView;
-            mFooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
-                    mListeningAndVisibilityLifecycleOwner);
-            return;
-        }
-
-        // Compose is available, so let's use the Compose implementation of the footer actions.
-        Log.d(TAG, "Binding the Compose implementation of the QS footer actions");
-        View composeView = QSUtils.createFooterActionsView(root.getContext(),
+        mFooterActionsView = root.findViewById(R.id.qs_footer_actions);
+        QSUtils.setFooterActionsViewContent(mFooterActionsView,
                 mQSFooterActionsViewModel, mListeningAndVisibilityLifecycleOwner);
-        mFooterActionsView = composeView;
-
-        // The id R.id.qs_footer_actions is used by QSContainerImpl to set the horizontal margin
-        // to all views except for qs_footer_actions, so we set it to the Compose view.
-        composeView.setId(R.id.qs_footer_actions);
-
-        // Set this tag so that QSContainerImpl does not add horizontal paddings to this Compose
-        // implementation of the footer actions. They will be set in Compose instead so that the
-        // background fills the full screen width.
-        composeView.setTag(R.id.tag_compose_qs_footer_actions, true);
-
-        // Set the same elevation as the View implementation, otherwise the footer actions will be
-        // drawn below the scroll view with QS grid and clicks won't get through on small devices
-        // where there isn't enough vertical space to show all the tiles and the footer actions.
-        composeView.setElevation(
-                composeView.getContext().getResources().getDimension(R.dimen.qs_panel_elevation));
-
-        // Replace the View by the Compose provided one.
-        ViewGroup parent = (ViewGroup) footerActionsView.getParent();
-        ViewGroup.LayoutParams layoutParams = footerActionsView.getLayoutParams();
-        int index = parent.indexOfChild(footerActionsView);
-        parent.removeViewAt(index);
-        parent.addView(composeView, index, layoutParams);
     }
 
     @Override
@@ -662,6 +622,12 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     }
 
     @Override
+    public void setShouldUpdateSquishinessOnMedia(boolean shouldUpdate) {
+        if (DEBUG) Log.d(TAG, "setShouldUpdateSquishinessOnMedia " + shouldUpdate);
+        mShouldUpdateMediaSquishiness = shouldUpdate;
+    }
+
+    @Override
     public void setQsExpansion(float expansion, float panelExpansionFraction,
             float proposedTranslation, float squishinessFraction) {
         float headerTranslation = mTransitioningToFullShade ? 0 : proposedTranslation;
@@ -740,9 +706,11 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         if (mQSAnimator != null) {
             mQSAnimator.setPosition(expansion);
         }
-        if (!mInSplitShade
+        if (!mShouldUpdateMediaSquishiness
+                && (!mInSplitShade
                 || mStatusBarStateController.getState() == KEYGUARD
-                || mStatusBarStateController.getState() == SHADE_LOCKED) {
+                || mStatusBarStateController.getState() == SHADE_LOCKED)
+        ) {
             // At beginning, state is 0 and will apply wrong squishiness to MediaHost in lockscreen
             // and media player expect no change by squishiness in lock screen shade. Don't bother
             // squishing mQsMediaHost when not in split shade to prevent problems with stale state.
@@ -1038,6 +1006,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         indentingPw.println("mTransitioningToFullShade: " + mTransitioningToFullShade);
         indentingPw.println("mLockscreenToShadeProgress: " + mLockscreenToShadeProgress);
         indentingPw.println("mOverScrolling: " + mOverScrolling);
+        indentingPw.println("mShouldUpdateMediaSquishiness: " + mShouldUpdateMediaSquishiness);
         indentingPw.println("isCustomizing: " + mQSCustomizerController.isCustomizing());
         View view = getView();
         if (view != null) {

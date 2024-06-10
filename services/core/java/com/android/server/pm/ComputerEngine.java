@@ -500,10 +500,10 @@ public class ComputerEngine implements Computer {
         return mUsed;
     }
 
-    public final @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
+    public final @NonNull List<ResolveInfo> queryIntentActivitiesInternal(
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags,
-            int filterCallingUid, int userId, boolean resolveForStart,
+            int filterCallingUid, int callingPid, int userId, boolean resolveForStart,
             boolean allowDynamicSplits) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
 
@@ -529,6 +529,11 @@ public class ComputerEngine implements Computer {
                 comp != null || pkgName != null /*onlyExposedExplicitly*/,
                 isImplicitImageCaptureIntentAndNotSetByDpc(intent, userId, resolvedType,
                         flags));
+
+        var args = new SaferIntentUtils.IntentArgs(intent, resolvedType,
+                false /* isReceiver */, resolveForStart, filterCallingUid, callingPid);
+        args.platformCompat = mInjector.getCompatibility();
+        args.snapshot = this;
 
         List<ResolveInfo> list = Collections.emptyList();
         boolean skipPostResolution = false;
@@ -583,9 +588,7 @@ public class ComputerEngine implements Computer {
                     ri.userHandle = UserHandle.of(userId);
                     list = new ArrayList<>(1);
                     list.add(ri);
-                    PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            mInjector.getCompatibility(), this, list, false, intent,
-                            resolvedType, filterCallingUid);
+                    SaferIntentUtils.enforceIntentFilterMatching(args, list);
                 }
             }
         } else {
@@ -609,15 +612,13 @@ public class ComputerEngine implements Computer {
                 }
                 list = lockedResult.result;
             }
-            PackageManagerServiceUtils.applyNullActionBlocking(
-                    mInjector.getCompatibility(), this, list, false, intent, filterCallingUid);
+            SaferIntentUtils.blockNullAction(args, list);
         }
 
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
-            PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    mInjector.getCompatibility(), this, list, false, originalIntent,
-                    resolvedType, filterCallingUid);
+            args.intent = originalIntent;
+            SaferIntentUtils.enforceIntentFilterMatching(args, list);
         }
 
         return skipPostResolution ? list : applyPostResolutionFilter(
@@ -631,19 +632,22 @@ public class ComputerEngine implements Computer {
             @PackageManager.ResolveInfoFlagsBits long flags, int filterCallingUid, int userId) {
         return queryIntentActivitiesInternal(
                 intent, resolvedType, flags, 0 /*privateResolveFlags*/, filterCallingUid,
-                userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
+                Process.INVALID_PID, userId,
+                /*resolveForStart*/ false, /*allowDynamicSplits*/ true);
     }
 
     public final @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         return queryIntentActivitiesInternal(
-                intent, resolvedType, flags, 0 /*privateResolveFlags*/, Binder.getCallingUid(),
-                userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
+                intent, resolvedType, flags, 0 /*privateResolveFlags*/,
+                Binder.getCallingUid(), Process.INVALID_PID, userId,
+                /*resolveForStart*/ false, /*allowDynamicSplits*/ true);
     }
 
-    public final @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId,
-            int callingUid, boolean includeInstantApps) {
+    public final @NonNull List<ResolveInfo> queryIntentServicesInternal(
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
+            int userId, int callingUid, int callingPid,
+            boolean includeInstantApps, boolean resolveForStart) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         enforceCrossUserOrProfilePermission(callingUid,
                 userId,
@@ -653,6 +657,11 @@ public class ComputerEngine implements Computer {
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, callingUid, includeInstantApps,
                 false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
+
+        var args = new SaferIntentUtils.IntentArgs(intent, resolvedType,
+                false /* isReceiver */, resolveForStart, callingUid, callingPid);
+        args.platformCompat = mInjector.getCompatibility();
+        args.snapshot = this;
 
         Intent originalIntent = null;
         ComponentName comp = intent.getComponent();
@@ -699,23 +708,19 @@ public class ComputerEngine implements Computer {
                     ri.serviceInfo = si;
                     list = new ArrayList<>(1);
                     list.add(ri);
-                    PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            mInjector.getCompatibility(), this, list, false, intent,
-                            resolvedType, callingUid);
+                    SaferIntentUtils.enforceIntentFilterMatching(args, list);
                 }
             }
         } else {
             list = queryIntentServicesInternalBody(intent, resolvedType, flags,
                     userId, callingUid, instantAppPkgName);
-            PackageManagerServiceUtils.applyNullActionBlocking(
-                    mInjector.getCompatibility(), this, list, false, intent, callingUid);
+            SaferIntentUtils.blockNullAction(args, list);
         }
 
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
-            PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    mInjector.getCompatibility(), this, list, false, originalIntent,
-                    resolvedType, callingUid);
+            args.intent = originalIntent;
+            SaferIntentUtils.enforceIntentFilterMatching(args, list);
         }
 
         return list;
@@ -847,8 +852,8 @@ public class ComputerEngine implements Computer {
         // IMPORTANT: disallow dynamic splits to avoid an infinite loop
         final List<ResolveInfo> result = queryIntentActivitiesInternal(
                 failureActivityIntent, null /*resolvedType*/, 0 /*flags*/,
-                0 /*privateResolveFlags*/, filterCallingUid, userId, false /*resolveForStart*/,
-                false /*allowDynamicSplits*/);
+                0 /*privateResolveFlags*/, filterCallingUid, Process.INVALID_PID, userId,
+                /*resolveForStart*/ false, /*allowDynamicSplits*/ false);
         final int numResults = result.size();
         if (numResults > 0) {
             for (int i = 0; i < numResults; i++) {
@@ -4359,7 +4364,7 @@ public class ComputerEngine implements Computer {
             uid = getBaseSdkSandboxUid();
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
-        if (isKnownIsolatedComputeApp(uid, callingUserId)) {
+        if (isKnownIsolatedComputeApp(uid)) {
             try {
                 uid = getIsolatedOwner(uid);
             } catch (IllegalStateException e) {
@@ -4402,7 +4407,7 @@ public class ComputerEngine implements Computer {
             if (Process.isSdkSandboxUid(uid)) {
                 uid = getBaseSdkSandboxUid();
             }
-            if (isKnownIsolatedComputeApp(uid, callingUserId)) {
+            if (isKnownIsolatedComputeApp(uid)) {
                 try {
                     uid = getIsolatedOwner(uid);
                 } catch (IllegalStateException e) {
@@ -5804,7 +5809,7 @@ public class ComputerEngine implements Computer {
     }
 
 
-    private boolean isKnownIsolatedComputeApp(int uid, int callingUserId) {
+    private boolean isKnownIsolatedComputeApp(int uid) {
         if (!Process.isIsolatedUid(uid)) {
             return false;
         }
@@ -5817,27 +5822,8 @@ public class ComputerEngine implements Computer {
         }
         OnDeviceIntelligenceManagerInternal onDeviceIntelligenceManagerInternal =
                 mInjector.getLocalService(OnDeviceIntelligenceManagerInternal.class);
-        if (onDeviceIntelligenceManagerInternal == null) {
-            return false;
-        }
-
-        String onDeviceIntelligencePackage =
-                onDeviceIntelligenceManagerInternal.getRemoteServicePackageName();
-        if (onDeviceIntelligencePackage == null) {
-            return false;
-        }
-
-        try {
-            if (getIsolatedOwner(uid) == getPackageUid(onDeviceIntelligencePackage, 0,
-                    callingUserId)) {
-                return true;
-            }
-        } catch (IllegalStateException e) {
-            // If the owner uid doesn't exist, just use the current uid
-            Slog.wtf(TAG, "Expected isolated uid " + uid + " to have an owner", e);
-        }
-
-        return false;
+        return onDeviceIntelligenceManagerInternal != null
+                && uid == onDeviceIntelligenceManagerInternal.getInferenceServiceUid();
     }
 
     @Nullable

@@ -2729,8 +2729,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         try {
             List<WallpaperData> pendingColorExtraction = new ArrayList<>();
             synchronized (mLock) {
-                WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
-                WallpaperData lockWallpaper = mLockWallpaperMap.get(mCurrentUserId);
+                // If called in boot before mCurrentUserId is set, sets the dim for USER_SYSTEM.
+                int userId = mCurrentUserId != UserHandle.USER_NULL
+                        ? mCurrentUserId : UserHandle.USER_SYSTEM;
+                WallpaperData wallpaper = mWallpaperMap.get(userId);
+                WallpaperData lockWallpaper = mLockWallpaperMap.get(userId);
 
                 if (dimAmount == 0.0f) {
                     wallpaper.mUidToDimAmount.remove(uid);

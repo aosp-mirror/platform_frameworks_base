@@ -2324,7 +2324,6 @@ public class BubbleStackView extends FrameLayout
      * not.
      */
     void hideCurrentInputMethod() {
-        mPositioner.setImeVisible(false, 0);
         mManager.hideCurrentInputMethod();
     }
 

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptVerticalListContentView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
@@ -15,14 +16,13 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 private const val USER_ID = 2
 private const val OPERATION_ID = 8L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class BiometricPromptRequestTest : SysuiTestCase() {
 
     @Test

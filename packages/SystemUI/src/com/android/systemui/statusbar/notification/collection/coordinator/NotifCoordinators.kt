@@ -116,11 +116,14 @@ constructor(
         }
 
         // Manually add Ordered Sections
-        mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
-        mOrderedSections.add(colorizedFgsCoordinator.sectioner) // ForegroundService
         if (NotificationMinimalismPrototype.V2.isEnabled) {
-            mOrderedSections.add(keyguardCoordinator.unseenNotifSectioner) // Unseen (FGS)
+            mOrderedSections.add(keyguardCoordinator.topOngoingSectioner) // Top Ongoing
         }
+        mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
+        if (NotificationMinimalismPrototype.V2.isEnabled) {
+            mOrderedSections.add(keyguardCoordinator.topUnseenSectioner) // Top Unseen
+        }
+        mOrderedSections.add(colorizedFgsCoordinator.sectioner) // ForegroundService
         if (PriorityPeopleSection.isEnabled) {
             mOrderedSections.add(conversationCoordinator.priorityPeopleSectioner) // Priority People
         }

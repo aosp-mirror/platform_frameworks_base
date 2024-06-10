@@ -7,9 +7,9 @@ import android.graphics.ColorSpace
 import android.graphics.Point
 import android.graphics.Rect
 import android.hardware.HardwareBuffer
-import android.testing.AndroidTestingRunner
 import android.view.Surface
 import android.window.TaskSnapshot
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.recents.model.ThumbnailData
@@ -24,7 +24,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 class ActivityTaskManagerThumbnailLoaderTest : SysuiTestCase() {

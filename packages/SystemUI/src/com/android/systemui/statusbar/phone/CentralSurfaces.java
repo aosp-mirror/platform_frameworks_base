@@ -288,11 +288,12 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
     void awakenDreams();
 
     /**
-     * Handle a touch event while dreaming when the touch was initiated within a prescribed
-     * swipeable area. This method is provided for cases where swiping in certain areas of a dream
-     * should be handled by CentralSurfaces instead (e.g. swiping communal hub open).
+     * Handle a touch event while dreaming or on the glanceable hub when the touch was initiated
+     * within a prescribed swipeable area. This method is provided for cases where swiping in
+     * certain areas should be handled by CentralSurfaces instead (e.g. swiping hub open, opening
+     * the notification shade over dream or hub).
      */
-    void handleDreamTouch(MotionEvent event);
+    void handleExternalShadeWindowTouch(MotionEvent event);
 
     boolean isBouncerShowing();
 
@@ -326,6 +327,11 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
     /** @deprecated Use {@link DisplayMetricsRepository} instead. */
     @Deprecated
     float getDisplayDensity();
+
+    /**
+     * Forwards touch events to communal hub
+     */
+    void handleCommunalHubTouch(MotionEvent event);
 
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;

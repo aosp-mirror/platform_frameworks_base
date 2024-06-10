@@ -22,10 +22,10 @@ import android.content.res.Configuration
 import android.database.ContentObserver
 import android.os.LocaleList
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.MathUtils.abs
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -107,7 +107,7 @@ private const val PLAYING_LOCAL = "playing local"
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class MediaCarouselControllerTest : SysuiTestCase() {
     val kosmos = testKosmos()
 
@@ -194,7 +194,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         MediaPlayerData.clear()
         verify(globalSettings)
-            .registerContentObserver(
+            .registerContentObserverSync(
                 eq(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE)),
                 capture(settingsObserverCaptor)
             )

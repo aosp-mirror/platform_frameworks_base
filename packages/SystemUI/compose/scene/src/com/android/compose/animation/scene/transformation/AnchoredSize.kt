@@ -41,15 +41,20 @@ internal class AnchoredSize(
         value: IntSize,
     ): IntSize {
         fun anchorSizeIn(scene: SceneKey): IntSize {
-            val size = layoutImpl.elements[anchor]?.sceneStates?.get(scene)?.targetSize
-            return if (size != null && size != Element.SizeUnspecified) {
-                IntSize(
-                    width = if (anchorWidth) size.width else value.width,
-                    height = if (anchorHeight) size.height else value.height,
-                )
-            } else {
-                value
-            }
+            val size =
+                layoutImpl.elements[anchor]?.sceneStates?.get(scene)?.targetSize?.takeIf {
+                    it != Element.SizeUnspecified
+                }
+                    ?: throwMissingAnchorException(
+                        transformation = "AnchoredSize",
+                        anchor = anchor,
+                        scene = scene,
+                    )
+
+            return IntSize(
+                width = if (anchorWidth) size.width else value.width,
+                height = if (anchorHeight) size.height else value.height,
+            )
         }
 
         // This simple implementation assumes that the size of [element] is the same as the size of

@@ -63,4 +63,5 @@
     <color name="settingslib_color_cyan400">#4ecde6</color>
     <color name="settingslib_color_cyan300">#78d9ec</color>
     <color name="settingslib_color_cyan100">#cbf0f8</color>
+    <color name="settingslib_color_charcoal">#171717</color>
 </resources>

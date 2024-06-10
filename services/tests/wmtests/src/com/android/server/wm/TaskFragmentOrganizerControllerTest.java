@@ -1902,7 +1902,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         assertApplyTransactionAllowed(mTransaction);
 
-        verify(task).moveOrCreateDecorSurfaceFor(tf);
+        verify(task).moveOrCreateDecorSurfaceFor(tf, true /* visible */);
     }
 
     @Test

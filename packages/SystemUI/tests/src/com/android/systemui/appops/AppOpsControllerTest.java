@@ -49,9 +49,9 @@ import android.media.AudioManager;
 import android.media.AudioRecordingConfiguration;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
@@ -75,7 +75,7 @@ import java.util.List;
 import java.util.Map;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class AppOpsControllerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";

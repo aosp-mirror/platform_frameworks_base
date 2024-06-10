@@ -708,7 +708,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"實體鍵盤"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"選擇鍵盤配置"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"預設"</string>
-    <string name="turn_screen_on_title" msgid="2662312432042116026">"螢幕開啟控制選項"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"螢幕開啟設定"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"允許開啟螢幕"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"允許應用程式開啟螢幕。如果授予這項權限，即使你未明確指示，應用程式也隨時可能會開啟螢幕。"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"要停止播送「<xliff:g id="APP_NAME">%1$s</xliff:g>」的內容嗎？"</string>

@@ -17,41 +17,38 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import com.android.compose.animation.scene.Back
-import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Models UI state and handles user input for the Quick Settings Shade scene. */
 @SysUISingleton
 class QuickSettingsShadeSceneViewModel
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
-    overlayShadeViewModel: OverlayShadeViewModel,
+    val overlayShadeViewModel: OverlayShadeViewModel,
+    val brightnessSliderViewModel: BrightnessSliderViewModel,
+    val tileGridViewModel: TileGridViewModel,
+    val editModeViewModel: EditModeViewModel,
+    val qsSceneAdapter: QSSceneAdapter,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        overlayShadeViewModel.backgroundScene
-            .map(::destinationScenes)
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = destinationScenes(overlayShadeViewModel.backgroundScene.value),
+        MutableStateFlow(
+                mapOf(
+                    Swipe.Up to SceneFamilies.Home,
+                    Back to SceneFamilies.Home,
+                )
             )
-
-    private fun destinationScenes(backgroundScene: SceneKey): Map<UserAction, UserActionResult> {
-        return mapOf(
-            Swipe.Up to backgroundScene,
-            Back to backgroundScene,
-        )
-    }
+            .asStateFlow()
 }

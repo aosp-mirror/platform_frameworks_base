@@ -53,8 +53,13 @@ constructor(
         withContext(coroutineDispatcher) {
             val groupedTasks: List<GroupedRecentTaskInfo> = recents?.getTasks() ?: emptyList()
             // Note: the returned task list is from the most-recent to least-recent order.
-            // The last foreground task is at index 1, because at index 0 will be our app selector.
-            val foregroundGroup = groupedTasks.elementAtOrNull(1)
+            // When opening the app selector in full screen, index 0 will be just the app selector
+            // activity and a null second task, so the foreground task will be index 1, but when
+            // opening the app selector in split screen mode, the foreground task will be the second
+            // task in index 0.
+            val foregroundGroup =
+                if (groupedTasks.first().splitBounds != null) groupedTasks.first()
+                else groupedTasks.elementAtOrNull(1)
             val foregroundTaskId1 = foregroundGroup?.taskInfo1?.taskId
             val foregroundTaskId2 = foregroundGroup?.taskInfo2?.taskId
             val foregroundTaskIds = listOfNotNull(foregroundTaskId1, foregroundTaskId2)

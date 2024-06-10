@@ -370,18 +370,16 @@ class InstallingSession {
             Slog.d(TAG, "Moving " + mMoveInfo.mPackageName + " from "
                     + mMoveInfo.mFromUuid + " to " + mMoveInfo.mToUuid);
         }
-        synchronized (mPm.mInstallLock) {
-            try {
-                mPm.mInstaller.moveCompleteApp(mMoveInfo.mFromUuid, mMoveInfo.mToUuid,
-                        mMoveInfo.mPackageName, mMoveInfo.mAppId, mMoveInfo.mSeInfo,
-                        mMoveInfo.mTargetSdkVersion, mMoveInfo.mFromCodePath);
-            } catch (Installer.InstallerException e) {
-                final String errorMessage = "Failed to move app";
-                request.setError(PackageManagerException.ofInternalError(errorMessage,
-                        PackageManagerException.INTERNAL_ERROR_MOVE));
-                Slog.w(TAG, errorMessage, e);
-                return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-            }
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+            mPm.mInstaller.moveCompleteApp(mMoveInfo.mFromUuid, mMoveInfo.mToUuid,
+                    mMoveInfo.mPackageName, mMoveInfo.mAppId, mMoveInfo.mSeInfo,
+                    mMoveInfo.mTargetSdkVersion, mMoveInfo.mFromCodePath);
+        } catch (Installer.InstallerException e) {
+            final String errorMessage = "Failed to move app";
+            request.setError(PackageManagerException.ofInternalError(errorMessage,
+                    PackageManagerException.INTERNAL_ERROR_MOVE));
+            Slog.w(TAG, errorMessage, e);
+            return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
         }
 
         final String toPathName = new File(mMoveInfo.mFromCodePath).getName();

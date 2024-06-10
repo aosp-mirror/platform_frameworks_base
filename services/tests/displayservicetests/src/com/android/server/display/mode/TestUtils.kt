@@ -34,9 +34,10 @@ fun createRefreshRateData(
         defaultPeakRefreshRate: Int = 60,
         defaultRefreshRateInHbmHdr: Int = 60,
         defaultRefreshRateInHbmSunlight: Int = 60,
-        lowPowerSupportedModes: List<SupportedModeData> = emptyList()
+        lowPowerSupportedModes: List<SupportedModeData> = emptyList(),
+        lowLightBlockingZoneSupportedModes: List<SupportedModeData> = emptyList()
 ): RefreshRateData {
         return RefreshRateData(defaultRefreshRate, defaultPeakRefreshRate,
                 defaultRefreshRateInHbmHdr, defaultRefreshRateInHbmSunlight,
-                lowPowerSupportedModes)
+                lowPowerSupportedModes, lowLightBlockingZoneSupportedModes)
 }

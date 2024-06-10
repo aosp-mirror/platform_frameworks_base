@@ -33,6 +33,7 @@ import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.rememberContext
+import com.android.settingslib.spa.framework.util.filterItem
 import com.android.settingslib.spa.framework.util.getStringArg
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
@@ -143,7 +144,7 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
         listModel.transform(userIdFlow, appListFlow)
 
     override fun filter(userIdFlow: Flow<Int>, option: Int, recordListFlow: Flow<List<T>>) =
-        listModel.filter(userIdFlow, recordListFlow)
+        listModel.filter(userIdFlow, recordListFlow.filterItem { !it.isSystemOrRootUid() })
 
     @Composable
     override fun getSummary(option: Int, record: T) = getSummary(record)

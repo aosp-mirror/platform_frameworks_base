@@ -77,7 +77,7 @@ class KeyedObserverTest {
         var observer: KeyedObserver<Any?>? = KeyedObserver { _, _ -> counter.incrementAndGet() }
         keyedObservable.addObserver(observer!!, executor1)
 
-        keyedObservable.notifyChange(ChangeReason.UPDATE)
+        keyedObservable.notifyChange(DataChangeReason.UPDATE)
         assertThat(counter.get()).isEqualTo(1)
 
         // trigger GC, the observer callback should not be invoked
@@ -85,7 +85,7 @@ class KeyedObserverTest {
         System.gc()
         System.runFinalization()
 
-        keyedObservable.notifyChange(ChangeReason.UPDATE)
+        keyedObservable.notifyChange(DataChangeReason.UPDATE)
         assertThat(counter.get()).isEqualTo(1)
     }
 
@@ -95,7 +95,7 @@ class KeyedObserverTest {
         var keyObserver: KeyedObserver<Any>? = KeyedObserver { _, _ -> counter.incrementAndGet() }
         keyedObservable.addObserver(key1, keyObserver!!, executor1)
 
-        keyedObservable.notifyChange(key1, ChangeReason.UPDATE)
+        keyedObservable.notifyChange(key1, DataChangeReason.UPDATE)
         assertThat(counter.get()).isEqualTo(1)
 
         // trigger GC, the observer callback should not be invoked
@@ -103,7 +103,7 @@ class KeyedObserverTest {
         System.gc()
         System.runFinalization()
 
-        keyedObservable.notifyChange(key1, ChangeReason.UPDATE)
+        keyedObservable.notifyChange(key1, DataChangeReason.UPDATE)
         assertThat(counter.get()).isEqualTo(1)
     }
 
@@ -112,16 +112,16 @@ class KeyedObserverTest {
         keyedObservable.addObserver(observer1, executor1)
         keyedObservable.addObserver(observer2, executor2)
 
-        keyedObservable.notifyChange(ChangeReason.UPDATE)
-        verify(observer1).onKeyChanged(null, ChangeReason.UPDATE)
-        verify(observer2).onKeyChanged(null, ChangeReason.UPDATE)
+        keyedObservable.notifyChange(DataChangeReason.UPDATE)
+        verify(observer1).onKeyChanged(null, DataChangeReason.UPDATE)
+        verify(observer2).onKeyChanged(null, DataChangeReason.UPDATE)
 
         reset(observer1, observer2)
         keyedObservable.removeObserver(observer2)
 
-        keyedObservable.notifyChange(ChangeReason.DELETE)
-        verify(observer1).onKeyChanged(null, ChangeReason.DELETE)
-        verify(observer2, never()).onKeyChanged(null, ChangeReason.DELETE)
+        keyedObservable.notifyChange(DataChangeReason.DELETE)
+        verify(observer1).onKeyChanged(null, DataChangeReason.DELETE)
+        verify(observer2, never()).onKeyChanged(null, DataChangeReason.DELETE)
     }
 
     @Test
@@ -129,16 +129,16 @@ class KeyedObserverTest {
         keyedObservable.addObserver(key1, keyedObserver1, executor1)
         keyedObservable.addObserver(key2, keyedObserver2, executor2)
 
-        keyedObservable.notifyChange(key1, ChangeReason.UPDATE)
-        verify(keyedObserver1).onKeyChanged(key1, ChangeReason.UPDATE)
-        verify(keyedObserver2, never()).onKeyChanged(key2, ChangeReason.UPDATE)
+        keyedObservable.notifyChange(key1, DataChangeReason.UPDATE)
+        verify(keyedObserver1).onKeyChanged(key1, DataChangeReason.UPDATE)
+        verify(keyedObserver2, never()).onKeyChanged(key2, DataChangeReason.UPDATE)
 
         reset(keyedObserver1, keyedObserver2)
         keyedObservable.removeObserver(key1, keyedObserver1)
 
-        keyedObservable.notifyChange(key1, ChangeReason.DELETE)
-        verify(keyedObserver1, never()).onKeyChanged(key1, ChangeReason.DELETE)
-        verify(keyedObserver2, never()).onKeyChanged(key2, ChangeReason.DELETE)
+        keyedObservable.notifyChange(key1, DataChangeReason.DELETE)
+        verify(keyedObserver1, never()).onKeyChanged(key1, DataChangeReason.DELETE)
+        verify(keyedObserver2, never()).onKeyChanged(key2, DataChangeReason.DELETE)
     }
 
     @Test
@@ -147,24 +147,24 @@ class KeyedObserverTest {
         keyedObservable.addObserver(key1, keyedObserver1, executor1)
         keyedObservable.addObserver(key2, keyedObserver2, executor1)
 
-        keyedObservable.notifyChange(ChangeReason.UPDATE)
-        verify(observer1).onKeyChanged(null, ChangeReason.UPDATE)
-        verify(keyedObserver1).onKeyChanged(key1, ChangeReason.UPDATE)
-        verify(keyedObserver2).onKeyChanged(key2, ChangeReason.UPDATE)
+        keyedObservable.notifyChange(DataChangeReason.UPDATE)
+        verify(observer1).onKeyChanged(null, DataChangeReason.UPDATE)
+        verify(keyedObserver1).onKeyChanged(key1, DataChangeReason.UPDATE)
+        verify(keyedObserver2).onKeyChanged(key2, DataChangeReason.UPDATE)
 
         reset(observer1, keyedObserver1, keyedObserver2)
-        keyedObservable.notifyChange(key1, ChangeReason.UPDATE)
+        keyedObservable.notifyChange(key1, DataChangeReason.UPDATE)
 
-        verify(observer1).onKeyChanged(key1, ChangeReason.UPDATE)
-        verify(keyedObserver1).onKeyChanged(key1, ChangeReason.UPDATE)
-        verify(keyedObserver2, never()).onKeyChanged(key1, ChangeReason.UPDATE)
+        verify(observer1).onKeyChanged(key1, DataChangeReason.UPDATE)
+        verify(keyedObserver1).onKeyChanged(key1, DataChangeReason.UPDATE)
+        verify(keyedObserver2, never()).onKeyChanged(key1, DataChangeReason.UPDATE)
 
         reset(observer1, keyedObserver1, keyedObserver2)
-        keyedObservable.notifyChange(key2, ChangeReason.UPDATE)
+        keyedObservable.notifyChange(key2, DataChangeReason.UPDATE)
 
-        verify(observer1).onKeyChanged(key2, ChangeReason.UPDATE)
-        verify(keyedObserver1, never()).onKeyChanged(key2, ChangeReason.UPDATE)
-        verify(keyedObserver2).onKeyChanged(key2, ChangeReason.UPDATE)
+        verify(observer1).onKeyChanged(key2, DataChangeReason.UPDATE)
+        verify(keyedObserver1, never()).onKeyChanged(key2, DataChangeReason.UPDATE)
+        verify(keyedObserver2).onKeyChanged(key2, DataChangeReason.UPDATE)
     }
 
     @Test
@@ -176,7 +176,7 @@ class KeyedObserverTest {
 
         keyedObservable.addObserver(observer, executor1)
 
-        keyedObservable.notifyChange(ChangeReason.UPDATE)
+        keyedObservable.notifyChange(DataChangeReason.UPDATE)
         keyedObservable.removeObserver(observer)
     }
 
@@ -189,7 +189,7 @@ class KeyedObserverTest {
 
         keyedObservable.addObserver(key1, keyObserver, executor1)
 
-        keyedObservable.notifyChange(key1, ChangeReason.UPDATE)
+        keyedObservable.notifyChange(key1, DataChangeReason.UPDATE)
         keyedObservable.removeObserver(key1, keyObserver)
     }
 }

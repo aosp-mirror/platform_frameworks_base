@@ -91,6 +91,12 @@ abstract class BaseCommunalViewModel(
     /** A list of all the communal content to be displayed in the communal hub. */
     abstract val communalContent: Flow<List<CommunalContentModel>>
 
+    /**
+     * Whether to freeze the emission of the communalContent flow to prevent recomposition. Defaults
+     * to false, indicating that the flow will emit new update.
+     */
+    open val isCommunalContentFlowFrozen: Flow<Boolean> = flowOf(false)
+
     /** Whether in edit mode for the communal hub. */
     open val isEditMode = false
 

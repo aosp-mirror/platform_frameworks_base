@@ -220,3 +220,13 @@ flag {
     description: "Feature allows users to change color correction saturation for daltonizer."
     bug: "322829049"
 }
+
+flag {
+    name: "skip_package_change_before_user_switch"
+    namespace: "accessibility"
+    description: "Skip onSomePackageChanged callback if the SwitchUser signal is not received yet."
+    bug: "340927041"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

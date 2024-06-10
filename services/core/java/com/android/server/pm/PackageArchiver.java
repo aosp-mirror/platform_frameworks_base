@@ -704,7 +704,8 @@ public class PackageArchiver {
             return false;
         }
 
-        if (isAppOptedOutOfArchiving(packageName, ps.getAppId())) {
+        if (isAppOptedOutOfArchiving(packageName,
+                    UserHandle.getUid(userId, ps.getAppId()))) {
             return false;
         }
 

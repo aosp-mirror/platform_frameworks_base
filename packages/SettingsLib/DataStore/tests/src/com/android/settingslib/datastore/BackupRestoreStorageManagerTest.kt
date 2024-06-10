@@ -157,9 +157,9 @@ class BackupRestoreStorageManagerTest {
 
         manager.onRestoreFinished()
 
-        verify(keyedObserver).onKeyChanged("key", ChangeReason.RESTORE)
-        verify(anyKeyObserver).onKeyChanged(null, ChangeReason.RESTORE)
-        verify(observer).onChanged(ChangeReason.RESTORE)
+        verify(keyedObserver).onKeyChanged("key", DataChangeReason.RESTORE)
+        verify(anyKeyObserver).onKeyChanged(null, DataChangeReason.RESTORE)
+        verify(observer).onChanged(DataChangeReason.RESTORE)
         if (isRobolectric()) {
             Shadows.shadowOf(BackupManager(application)).apply {
                 assertThat(isDataChanged).isFalse()
@@ -186,8 +186,8 @@ class BackupRestoreStorageManagerTest {
             assertThat(dataChangedCount).isEqualTo(0)
         }
 
-        fileStorage.notifyChange(ChangeReason.UPDATE)
-        verify(observer).onChanged(ChangeReason.UPDATE)
+        fileStorage.notifyChange(DataChangeReason.UPDATE)
+        verify(observer).onChanged(DataChangeReason.UPDATE)
         verify(keyedObserver, never()).onKeyChanged(any(), any())
         verify(anyKeyObserver, never()).onKeyChanged(any(), any())
         reset(observer)
@@ -196,10 +196,10 @@ class BackupRestoreStorageManagerTest {
             assertThat(dataChangedCount).isEqualTo(1)
         }
 
-        keyedStorage.notifyChange("key", ChangeReason.DELETE)
+        keyedStorage.notifyChange("key", DataChangeReason.DELETE)
         verify(observer, never()).onChanged(any())
-        verify(keyedObserver).onKeyChanged("key", ChangeReason.DELETE)
-        verify(anyKeyObserver).onKeyChanged("key", ChangeReason.DELETE)
+        verify(keyedObserver).onKeyChanged("key", DataChangeReason.DELETE)
+        verify(anyKeyObserver).onKeyChanged("key", DataChangeReason.DELETE)
         backupManager?.apply {
             assertThat(isDataChanged).isTrue()
             assertThat(dataChangedCount).isEqualTo(2)
@@ -207,11 +207,11 @@ class BackupRestoreStorageManagerTest {
         reset(keyedObserver)
 
         // backup manager is not notified for restore event
-        fileStorage.notifyChange(ChangeReason.RESTORE)
-        keyedStorage.notifyChange("key", ChangeReason.RESTORE)
-        verify(observer).onChanged(ChangeReason.RESTORE)
-        verify(keyedObserver).onKeyChanged("key", ChangeReason.RESTORE)
-        verify(anyKeyObserver).onKeyChanged("key", ChangeReason.RESTORE)
+        fileStorage.notifyChange(DataChangeReason.RESTORE)
+        keyedStorage.notifyChange("key", DataChangeReason.RESTORE)
+        verify(observer).onChanged(DataChangeReason.RESTORE)
+        verify(keyedObserver).onKeyChanged("key", DataChangeReason.RESTORE)
+        verify(anyKeyObserver).onKeyChanged("key", DataChangeReason.RESTORE)
         backupManager?.apply {
             assertThat(isDataChanged).isTrue()
             assertThat(dataChangedCount).isEqualTo(2)

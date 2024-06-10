@@ -134,19 +134,4 @@ to pre-existing users, but cannot uninstall pre-existing system packages from pr
     <install-in-user-type package="com.android.avatarpicker">
         <install-in user-type="FULL" />
     </install-in-user-type>
-
-    <!-- AiLabs Warp app pre-installed in hardware/google/pixel/common/pixel-common-device.mk -->
-    <install-in-user-type package="com.google.android.apps.warp">
-        <install-in user-type="FULL" />
-        <install-in user-type="PROFILE" />
-        <do-not-install-in user-type="android.os.usertype.profile.PRIVATE" />
-    </install-in-user-type>
-
-    <!-- Google Home app pre-installed on tangor devices in vendor/google/products/tangor_common.mk
-     -->
-    <install-in-user-type package="com.google.android.apps.chromecast.app">
-        <install-in user-type="FULL" />
-        <install-in user-type="PROFILE" />
-        <do-not-install-in user-type="android.os.usertype.profile.PRIVATE" />
-    </install-in-user-type>
 </config>

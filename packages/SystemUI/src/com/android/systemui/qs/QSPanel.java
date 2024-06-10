@@ -113,6 +113,9 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     private boolean mSceneContainerEnabled;
 
+    @Nullable
+    private View mMediaViewPlaceHolderForScene;
+
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
         mUsingMediaPlayer = useQsMediaPlayer(context);
@@ -125,7 +128,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         setOrientation(VERTICAL);
 
         mMovableContentStartIndex = getChildCount();
-
     }
 
     void initialize(QSLogger qsLogger, boolean usingMediaPlayer) {
@@ -133,7 +135,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         mUsingMediaPlayer = usingMediaPlayer;
         mTileLayout = getOrCreateTileLayout();
 
-        if (mUsingMediaPlayer) {
+        if (mUsingMediaPlayer || SceneContainerFlag.isEnabled()) {
             mHorizontalLinearLayout = new RemeasuringLinearLayout(mContext);
             mHorizontalLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
             mHorizontalLinearLayout.setVisibility(
@@ -151,6 +153,13 @@ public class QSPanel extends LinearLayout implements Tunable {
             lp.setMarginEnd(marginSize);
             lp.gravity = Gravity.CENTER_VERTICAL;
             mHorizontalLinearLayout.addView(mHorizontalContentContainer, lp);
+            if (SceneContainerFlag.isEnabled()) {
+                int mediaHeight = mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.qs_media_session_height_expanded);
+                lp = new LayoutParams(0, mediaHeight, 1);
+                mMediaViewPlaceHolderForScene = new View(mContext);
+                mHorizontalLinearLayout.addView(mMediaViewPlaceHolderForScene, lp);
+            }
 
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1);
             addView(mHorizontalLinearLayout, lp);
@@ -383,6 +392,13 @@ public class QSPanel extends LinearLayout implements Tunable {
         if (mTileLayout != null) {
             mTileLayout.updateResources();
         }
+
+        if (mMediaViewPlaceHolderForScene != null) {
+            ViewGroup.LayoutParams lp = mMediaViewPlaceHolderForScene.getLayoutParams();
+            lp.height = mContext.getResources()
+                    .getDimensionPixelSize(R.dimen.qs_media_session_height_expanded);
+            mMediaViewPlaceHolderForScene.setLayoutParams(lp);
+        }
     }
 
     protected void updatePadding() {
@@ -417,7 +433,8 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     private void updateHorizontalLinearLayoutMargins() {
-        if (mUsingMediaPlayer && mHorizontalLinearLayout != null && !displayMediaMarginsOnMedia()) {
+        if ((mUsingMediaPlayer || SceneContainerFlag.isEnabled()) && mHorizontalLinearLayout != null
+                && !displayMediaMarginsOnMedia()) {
             LayoutParams lp = (LayoutParams) mHorizontalLinearLayout.getLayoutParams();
             lp.bottomMargin = Math.max(mMediaTotalBottomMargin - getPaddingBottom(), 0);
             mHorizontalLinearLayout.setLayoutParams(lp);
@@ -632,6 +649,7 @@ public class QSPanel extends LinearLayout implements Tunable {
             // using media, the parent should always be this.
             ViewGroup newParent =
                     horizontal && mUsingMediaPlayer ? mHorizontalContentContainer : this;
+            if (SceneContainerFlag.isEnabled()) return;
             switchAllContentToParent(newParent, mTileLayout);
             reAttachMediaHost(mediaHostView, horizontal);
             if (needsDynamicRowsAndColumns()) {
@@ -647,6 +665,19 @@ public class QSPanel extends LinearLayout implements Tunable {
     void setColumnRowLayout(boolean withMedia) {
         mTileLayout.setMinRows(withMedia ? 2 : 1);
         mTileLayout.setMaxColumns(withMedia ? 2 : 4);
+        placeTileLayoutForScene(withMedia);
+    }
+
+    protected void placeTileLayoutForScene(boolean withMedia) {
+        // The tile layout should be reparented if horizontal and we are using media. If not
+        // using media, the parent should always be this.
+        ViewGroup newParent = withMedia ? mHorizontalContentContainer : this;
+        if (mTileLayout != null && ((View) mTileLayout).getParent() != newParent) {
+            switchAllContentToParent(newParent, mTileLayout);
+        }
+        if (mHorizontalLinearLayout != null) {
+            mHorizontalLinearLayout.setVisibility(withMedia ? View.VISIBLE : View.GONE);
+        }
     }
 
     private void updateMargins(ViewGroup mediaHostView) {
@@ -697,6 +728,12 @@ public class QSPanel extends LinearLayout implements Tunable {
      */
     public void setCanCollapse(boolean canCollapse) {
         mCanCollapse = canCollapse;
+    }
+
+    @Nullable
+    @VisibleForTesting
+    View getMediaPlaceholder() {
+        return mMediaViewPlaceHolderForScene;
     }
 
     public interface QSTileLayout {
