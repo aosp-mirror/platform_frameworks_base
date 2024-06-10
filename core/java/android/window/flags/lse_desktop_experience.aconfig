@@ -106,3 +106,10 @@ flag {
     description: "Whether to apply Camera Compat treatment to fixed-orientation apps in desktop windowing mode"
     bug: "314952133"
 }
+
+flag {
+    name: "enable_task_stack_observer_in_shell"
+    namespace: "lse_desktop_experience"
+    description: "Introduces a new observer in shell to track the task stack."
+    bug: "341932484"
+}
