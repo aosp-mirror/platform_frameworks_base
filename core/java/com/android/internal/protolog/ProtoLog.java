@@ -169,4 +169,16 @@ public class ProtoLog {
             sProtoLogInstance.log(logLevel, group, stringMessage, args);
         }
     }
+
+    static {
+        if (android.tracing.Flags.perfettoProtologTracing()) {
+            sProtoLogInstance = new PerfettoProtoLogImpl();
+        } else {
+            if (REQUIRE_PROTOLOGTOOL) {
+                throw new RuntimeException("REQUIRE_PROTOLOGTOOL not set to false.");
+            } else {
+                sProtoLogInstance = new LogcatOnlyProtoLogImpl();
+            }
+        }
+    }
 }
