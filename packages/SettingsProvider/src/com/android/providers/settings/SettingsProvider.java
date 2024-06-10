@@ -1972,7 +1972,7 @@ public class SettingsProvider extends ContentProvider {
 
         File cacheFile = getCacheFile(name, callingUserId);
         if (cacheFile != null) {
-            if (!isValidAudioUri(name, value)) {
+            if (!isValidMediaUri(name, value)) {
                 return false;
             }
             // Invalidate any relevant cache files
@@ -2031,7 +2031,7 @@ public class SettingsProvider extends ContentProvider {
         return true;
     }
 
-    private boolean isValidAudioUri(String name, String uri) {
+    private boolean isValidMediaUri(String name, String uri) {
         if (uri != null) {
             Uri audioUri = Uri.parse(uri);
             if (Settings.AUTHORITY.equals(
@@ -2049,10 +2049,13 @@ public class SettingsProvider extends ContentProvider {
                 return false;
             }
             if (!(mimeType.startsWith("audio/") || mimeType.equals("application/ogg")
-                    || mimeType.equals("application/x-flac"))) {
+                    || mimeType.equals("application/x-flac")
+                    // also check for video ringtones
+                    || mimeType.startsWith("video/") || mimeType.equals("application/mp4"))) {
                 Slog.e(LOG_TAG,
                         "mutateSystemSetting for setting: " + name + " URI: " + audioUri
-                        + " ignored: associated mimeType: " + mimeType + " is not an audio type");
+                        + " ignored: associated MIME type:" + mimeType
+                        + " is not a recognized audio or video type");
                 return false;
             }
         }

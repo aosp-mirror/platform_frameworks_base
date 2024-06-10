@@ -707,6 +707,7 @@ public final class InputMethodManager {
     private static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
     private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
     private static final int MSG_SET_INTERACTIVE = 13;
+    private static final int MSG_SET_VISIBILITY = 14;
     private static final int MSG_ON_SHOW_REQUESTED = 31;
     private static final int MSG_START_INPUT_RESULT = 40;
 
@@ -903,6 +904,21 @@ public final class InputMethodManager {
             synchronized (mH) {
                 if (mCurRootView == viewRootImpl) {
                     mCurRootViewWindowFocused = false;
+
+                    if (Flags.refactorInsetsController() && mCurRootView != null) {
+                        final int softInputMode = mCurRootView.mWindowAttributes.softInputMode;
+                        final int state =
+                                softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
+                        if (state == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
+                            // when losing focus (e.g., by going to another window), we reset the
+                            // requestedVisibleTypes of WindowInsetsController by hiding the IME
+                            if (DEBUG) {
+                                Log.d(TAG, "onWindowLostFocus, hiding IME because "
+                                        + "of STATE_ALWAYS_HIDDEN");
+                            }
+                            mCurRootView.getInsetsController().hide(WindowInsets.Type.ime());
+                        }
+                    }
 
                     clearCurRootViewIfNeeded();
                 }
@@ -1332,6 +1348,19 @@ public final class InputMethodManager {
                     }
                     return;
                 }
+                case MSG_SET_VISIBILITY:
+                    final boolean visible = msg.arg1 != 0;
+                    synchronized (mH) {
+                        if (visible) {
+                            showSoftInput(mServedView, /* flags */ 0);
+                        } else {
+                            if (mCurRootView != null
+                                    && mCurRootView.getInsetsController() != null) {
+                                mCurRootView.getInsetsController().hide(WindowInsets.Type.ime());
+                            }
+                        }
+                    }
+                    break;
                 case MSG_SEND_INPUT_EVENT: {
                     sendInputEventAndReportResultOnMainLooper((PendingEvent)msg.obj);
                     return;
@@ -1426,6 +1455,11 @@ public final class InputMethodManager {
         public void setInteractive(boolean interactive, boolean fullscreen) {
             mH.obtainMessage(MSG_SET_INTERACTIVE, interactive ? 1 : 0, fullscreen ? 1 : 0)
                     .sendToTarget();
+        }
+
+        @Override
+        public void setImeVisibility(boolean visible) {
+            mH.obtainMessage(MSG_SET_VISIBILITY, visible ? 1 : 0, 0).sendToTarget();
         }
 
         @Override
@@ -2298,19 +2332,32 @@ public final class InputMethodManager {
 
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
-            // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
-            // TODO(b/229426865): call WindowInsetsController#show instead.
-            mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
-            Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags + " reason="
-                    + InputMethodDebug.softInputDisplayReasonToString(reason));
-            return IInputMethodManagerGlobalInvoker.showSoftInput(
-                    mClient,
-                    view.getWindowToken(),
-                    statsToken,
-                    flags,
-                    mCurRootView.getLastClickToolType(),
-                    resultReceiver,
-                    reason);
+            if (Flags.refactorInsetsController()) {
+                // In case of a running show IME animation, it should not be requested visible,
+                // otherwise the animation would jump and not be controlled by the user anymore
+                if ((mCurRootView.getInsetsController().computeUserAnimatingTypes()
+                        & WindowInsets.Type.ime()) == 0) {
+                    // TODO(b/322992891) handle case of SHOW_IMPLICIT
+                    view.getWindowInsetsController().show(WindowInsets.Type.ime());
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
+                // TODO(b/229426865): call WindowInsetsController#show instead.
+                mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
+                Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags + " reason="
+                        + InputMethodDebug.softInputDisplayReasonToString(reason));
+                return IInputMethodManagerGlobalInvoker.showSoftInput(
+                        mClient,
+                        view.getWindowToken(),
+                        statsToken,
+                        flags,
+                        mCurRootView.getLastClickToolType(),
+                        resultReceiver,
+                        reason);
+            }
         }
     }
 
@@ -2447,8 +2494,14 @@ public final class InputMethodManager {
 
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
-            return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
-                    flags, resultReceiver, reason);
+            if (Flags.refactorInsetsController()) {
+                // TODO(b/322992891) handle case of HIDE_IMPLICIT_ONLY
+                servedView.getWindowInsetsController().hide(WindowInsets.Type.ime());
+                return true;
+            } else {
+                return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken,
+                        statsToken, flags, resultReceiver, reason);
+            }
         }
     }
 

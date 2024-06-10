@@ -398,7 +398,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mSystemIconsContainer.setOnHoverListener(hoverListener);
         mView.setOnApplyWindowInsetsListener(
                 (view, windowInsets) -> mView.updateWindowInsets(windowInsets, mInsetsProvider));
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON,
                 false,
                 mVolumeSettingObserver,
@@ -416,7 +416,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mDisableStateTracker.stopTracking(mCommandQueue);
-        mSecureSettings.unregisterContentObserver(mVolumeSettingObserver);
+        mSecureSettings.unregisterContentObserverSync(mVolumeSettingObserver);
         if (mTintedIconManager != null) {
             mStatusBarIconController.removeIconGroup(mTintedIconManager);
         }

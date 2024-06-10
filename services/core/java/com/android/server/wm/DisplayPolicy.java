@@ -2011,9 +2011,14 @@ public class DisplayPolicy {
             public String toString() {
                 final StringBuilder tmpSb = new StringBuilder(32);
                 return "{nonDecorInsets=" + mNonDecorInsets.toShortString(tmpSb)
+                        + ", overrideNonDecorInsets=" + mOverrideNonDecorInsets.toShortString(tmpSb)
                         + ", configInsets=" + mConfigInsets.toShortString(tmpSb)
+                        + ", overrideConfigInsets=" + mOverrideConfigInsets.toShortString(tmpSb)
                         + ", nonDecorFrame=" + mNonDecorFrame.toShortString(tmpSb)
-                        + ", configFrame=" + mConfigFrame.toShortString(tmpSb) + '}';
+                        + ", overrideNonDecorFrame=" + mOverrideNonDecorFrame.toShortString(tmpSb)
+                        + ", configFrame=" + mConfigFrame.toShortString(tmpSb)
+                        + ", overrideConfigFrame=" + mOverrideConfigFrame.toShortString(tmpSb)
+                        + '}';
             }
         }
 

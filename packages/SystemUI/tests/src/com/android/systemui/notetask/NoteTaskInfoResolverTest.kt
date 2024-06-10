@@ -19,8 +19,8 @@ package com.android.systemui.notetask
 import android.app.role.RoleManager
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever

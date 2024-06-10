@@ -135,7 +135,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 new DataSourceParams.Builder()
                         .setBufferExhaustedPolicy(
                                 DataSourceParams
-                                        .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT)
+                                        .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
                         .build();
         mDataSource.register(params);
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;

@@ -16,7 +16,6 @@
 
 package android.nfc.cardemulation;
 
-import android.annotation.DurationMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -33,13 +32,13 @@ import java.util.List;
 
 /**
  * Polling Frames represent data about individual frames of an NFC polling loop. These frames will
- * be deliverd to subclasses of {@link HostApduService} that have registered filters with
- * {@link CardEmulation#registerPollingLoopFilterForService(ComponentName, String)} that match a
- * given frame in a loop and will be delivered through calls to
+ * be delivered to subclasses of {@link HostApduService} that have registered filters with
+ * {@link CardEmulation#registerPollingLoopFilterForService(ComponentName, String, boolean)} that
+ * match a given frame in a loop and will be delivered through calls to
  * {@link HostApduService#processPollingFrames(List)}.
  */
 @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-public final class PollingFrame implements Parcelable{
+public final class PollingFrame implements Parcelable {
 
     /**
      * @hide
@@ -146,7 +145,6 @@ public final class PollingFrame implements Parcelable{
     private final int mType;
     private final byte[] mData;
     private final int mGain;
-    @DurationMillisLong
     private final long mTimestamp;
     private boolean mTriggeredAutoTransact;
 
@@ -179,18 +177,18 @@ public final class PollingFrame implements Parcelable{
      * @param type the type of the frame
      * @param data a byte array of the data contained in the frame
      * @param gain the vendor-specific gain of the field
-     * @param timestampMillis the timestamp in millisecones
+     * @param timestampMicros the timestamp in microseconds
      * @param triggeredAutoTransact whether or not this frame triggered the device to start a
      * transaction automatically
      *
      * @hide
      */
     public PollingFrame(@PollingFrameType int type, @Nullable byte[] data,
-            int gain, @DurationMillisLong long timestampMillis, boolean triggeredAutoTransact) {
+            int gain, long timestampMicros, boolean triggeredAutoTransact) {
         mType = type;
         mData = data == null ? new byte[0] : data;
         mGain = gain;
-        mTimestamp = timestampMillis;
+        mTimestamp = timestampMicros;
         mTriggeredAutoTransact = triggeredAutoTransact;
     }
 
@@ -198,11 +196,11 @@ public final class PollingFrame implements Parcelable{
      * Returns the type of frame for this polling loop frame.
      * The possible return values are:
      * <ul>
-     *   <li>{@link POLLING_LOOP_TYPE_ON}</li>
-     *   <li>{@link POLLING_LOOP_TYPE_OFF}</li>
-     *   <li>{@link POLLING_LOOP_TYPE_A}</li>
-     *   <li>{@link POLLING_LOOP_TYPE_B}</li>
-     *   <li>{@link POLLING_LOOP_TYPE_F}</li>
+     *   <li>{@link #POLLING_LOOP_TYPE_ON}</li>
+     *   <li>{@link #POLLING_LOOP_TYPE_OFF}</li>
+     *   <li>{@link #POLLING_LOOP_TYPE_A}</li>
+     *   <li>{@link #POLLING_LOOP_TYPE_B}</li>
+     *   <li>{@link #POLLING_LOOP_TYPE_F}</li>
      * </ul>
      */
     public @PollingFrameType int getType() {
@@ -226,12 +224,12 @@ public final class PollingFrame implements Parcelable{
     }
 
     /**
-     * Returns the timestamp of when the polling loop frame was observed in milliseconds. These
-     * timestamps are relative and not absolute and should only be used for comparing the timing of
-     * frames relative to each other.
-     * @return the timestamp in milliseconds
+     * Returns the timestamp of when the polling loop frame was observed, in microseconds. These
+     * timestamps are relative and should only be used for comparing the timing of frames relative
+     * to each other.
+     * @return the timestamp in microseconds
      */
-    public @DurationMillisLong long getTimestamp() {
+    public long getTimestamp() {
         return mTimestamp;
     }
 

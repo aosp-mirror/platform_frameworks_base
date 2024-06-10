@@ -20,6 +20,7 @@ import static android.Manifest.permission.ACCESS_CONTEXTUAL_SEARCH;
 import static android.app.AppOpsManager.OP_ASSIST_SCREENSHOT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.content.Context.CONTEXTUAL_SEARCH_SERVICE;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
@@ -245,7 +246,7 @@ public class ContextualSearchManagerService extends SystemService {
 
         if (DEBUG_USER) Log.d(TAG, "Launch component: " + launchIntent.getComponent());
         launchIntent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION
-                | FLAG_ACTIVITY_NO_USER_ACTION);
+                | FLAG_ACTIVITY_NO_USER_ACTION | FLAG_ACTIVITY_CLEAR_TASK);
         launchIntent.putExtra(
                 ContextualSearchManager.EXTRA_INVOCATION_TIME_MS,
                 SystemClock.uptimeMillis());

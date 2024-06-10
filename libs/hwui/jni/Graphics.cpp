@@ -583,6 +583,16 @@ jobject GraphicsJNI::getColorSpace(JNIEnv* env, SkColorSpace* decodeColorSpace,
                             transferParams.a, transferParams.b, transferParams.c, transferParams.d,
                             transferParams.e, transferParams.f, transferParams.g);
 
+    // Some transfer functions that are considered valid by Skia are not
+    // accepted by android.graphics.
+    if (hasException(env)) {
+        // Callers (e.g. Bitmap#getColorSpace) are not expected to throw an
+        // Exception, so clear it and return null, which is a documented
+        // possibility.
+        env->ExceptionClear();
+        return nullptr;
+    }
+
     jfloatArray xyzArray = env->NewFloatArray(9);
     jfloat xyz[9] = {
             xyzMatrix.vals[0][0],

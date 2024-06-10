@@ -17,6 +17,8 @@ package com.android.systemui.statusbar.policy
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.internal.logging.UiEvent
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
@@ -33,9 +35,7 @@ import javax.inject.Inject
 @SysUISingleton
 class AvalancheController
 @Inject
-constructor(
-    dumpManager: DumpManager,
-) : Dumpable {
+constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) : Dumpable {
 
     private val tag = "AvalancheController"
     private val debug = Compile.IS_DEBUG && Log.isLoggable(tag, Log.DEBUG)
@@ -65,6 +65,18 @@ constructor(
     // For debugging only
     @VisibleForTesting var debugDropSet: MutableSet<HeadsUpEntry> = HashSet()
 
+    enum class ThrottleEvent(private val id: Int) : UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "HUN was shown.") AVALANCHE_THROTTLING_HUN_SHOWN(1821),
+        @UiEvent(doc = "HUN was dropped to show higher priority HUNs.")
+        AVALANCHE_THROTTLING_HUN_DROPPED(1822),
+        @UiEvent(doc = "HUN was removed while waiting to show.")
+        AVALANCHE_THROTTLING_HUN_REMOVED(1823);
+
+        override fun getId(): Int {
+            return id
+        }
+    }
+
     init {
         dumpManager.registerNormalDumpable(tag, /* module */ this)
     }
@@ -79,7 +91,7 @@ constructor(
             runnable.run()
             return
         }
-        log { "\n "}
+        log { "\n " }
         val fn = "$label => AvalancheController.update ${getKey(entry)}"
         if (entry == null) {
             log { "Entry is NULL, stop update." }
@@ -111,9 +123,10 @@ constructor(
                 // HeadsUpEntry.updateEntry recursively calls AvalancheController#update
                 // and goes to the isShowing case above
                 headsUpEntryShowing!!.updateEntry(
-                        /* updatePostTime= */ false,
-                        /* updateEarliestRemovalTime= */ false,
-                        /* reason= */ "avalanche duration update")
+                    /* updatePostTime= */ false,
+                    /* updateEarliestRemovalTime= */ false,
+                    /* reason= */ "avalanche duration update"
+                )
             }
         }
         logState("after $fn")
@@ -134,7 +147,7 @@ constructor(
             runnable.run()
             return
         }
-        log { "\n "}
+        log { "\n " }
         val fn = "$label => AvalancheController.delete " + getKey(entry)
         if (entry == null) {
             log { "$fn => entry NULL, running runnable" }
@@ -145,6 +158,7 @@ constructor(
             log { "$fn => remove from next" }
             if (entry in nextMap) nextMap.remove(entry)
             if (entry in nextList) nextList.remove(entry)
+            uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_REMOVED)
         } else if (entry in debugDropSet) {
             log { "$fn => remove from dropset" }
             debugDropSet.remove(entry)
@@ -254,6 +268,13 @@ constructor(
         return null
     }
 
+    fun getWaitingEntryList(): List<HeadsUpEntry> {
+        if (!NotificationThrottleHun.isEnabled) {
+            return mutableListOf()
+        }
+        return nextMap.keys.toList()
+    }
+
     private fun isShowing(entry: HeadsUpEntry): Boolean {
         return headsUpEntryShowing != null && entry.mEntry?.key == headsUpEntryShowing?.mEntry?.key
     }
@@ -261,6 +282,7 @@ constructor(
     private fun showNow(entry: HeadsUpEntry, runnableList: MutableList<Runnable>) {
         log { "SHOW: " + getKey(entry) }
 
+        uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_SHOWN)
         headsUpEntryShowing = entry
 
         runnableList.forEach {
@@ -288,6 +310,12 @@ constructor(
 
         // Remove runnable labels for dropped huns
         val listToDrop = nextList.subList(1, nextList.size)
+
+        // Log dropped HUNs
+        for (e in listToDrop) {
+            uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_DROPPED)
+        }
+
         if (debug) {
             // Clear runnable labels
             for (e in listToDrop) {

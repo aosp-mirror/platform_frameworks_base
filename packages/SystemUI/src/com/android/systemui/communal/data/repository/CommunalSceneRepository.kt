@@ -22,11 +22,13 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.communal.dagger.Communal
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.shared.model.SceneDataSource
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,6 +36,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Encapsulates the state of communal mode. */
 interface CommunalSceneRepository {
@@ -49,7 +52,7 @@ interface CommunalSceneRepository {
     fun changeScene(toScene: SceneKey, transitionKey: TransitionKey? = null)
 
     /** Immediately snaps to the desired scene. */
-    fun snapToScene(toScene: SceneKey)
+    fun snapToScene(toScene: SceneKey, delayMillis: Long = 0)
 
     /**
      * Updates the transition state of the hub [SceneTransitionLayout].
@@ -64,6 +67,7 @@ interface CommunalSceneRepository {
 class CommunalSceneRepositoryImpl
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     @Background backgroundScope: CoroutineScope,
     @Communal private val sceneDataSource: SceneDataSource,
 ) : CommunalSceneRepository {
@@ -82,11 +86,20 @@ constructor(
             )
 
     override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) {
-        sceneDataSource.changeScene(toScene, transitionKey)
+        applicationScope.launch {
+            // SceneTransitionLayout state updates must be triggered on the thread the STL was
+            // created on.
+            sceneDataSource.changeScene(toScene, transitionKey)
+        }
     }
 
-    override fun snapToScene(toScene: SceneKey) {
-        sceneDataSource.snapToScene(toScene)
+    override fun snapToScene(toScene: SceneKey, delayMillis: Long) {
+        applicationScope.launch {
+            // SceneTransitionLayout state updates must be triggered on the thread the STL was
+            // created on.
+            delay(delayMillis)
+            sceneDataSource.snapToScene(toScene)
+        }
     }
 
     /**

@@ -118,8 +118,6 @@ import javax.inject.Inject;
 public class InternetDialogController implements AccessPointController.AccessPointCallback {
 
     private static final String TAG = "InternetDialogController";
-    private static final String ACTION_NETWORK_PROVIDER_SETTINGS =
-            "android.settings.NETWORK_PROVIDER_SETTINGS";
     private static final String ACTION_WIFI_SCANNING_SETTINGS =
             "android.settings.WIFI_SCANNING_SETTINGS";
     /**
@@ -363,7 +361,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
 
     @VisibleForTesting
     protected Intent getSettingsIntent() {
-        return new Intent(ACTION_NETWORK_PROVIDER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return new Intent(Settings.ACTION_NETWORK_PROVIDER_SETTINGS).addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
     @Nullable
@@ -935,6 +934,10 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         if (ddsSubInfo == null) {
             mHasActiveSubIdOnDds = false;
             Log.e(TAG, "Can't get DDS subscriptionInfo");
+            return;
+        } else if (ddsSubInfo.isOnlyNonTerrestrialNetwork()) {
+            mHasActiveSubIdOnDds = false;
+            Log.d(TAG, "This is NTN, so do not show mobile data");
             return;
         }
 

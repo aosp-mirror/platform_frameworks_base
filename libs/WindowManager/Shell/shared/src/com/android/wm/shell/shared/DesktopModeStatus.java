@@ -67,6 +67,10 @@ public class DesktopModeStatus {
     private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
             "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
 
+    /** Whether the desktop density override is enabled. */
+    public static final boolean DESKTOP_DENSITY_OVERRIDE_ENABLED =
+            SystemProperties.getBoolean("persist.wm.debug.desktop_mode_density_enabled", false);
+
     /** Override density for tasks when they're inside the desktop. */
     public static final int DESKTOP_DENSITY_OVERRIDE =
             SystemProperties.getInt("persist.wm.debug.desktop_mode_density", 284);
@@ -157,9 +161,23 @@ public class DesktopModeStatus {
     }
 
     /**
-     * Return {@code true} if the override desktop density is set.
+     * Return {@code true} if the override desktop density is enabled and valid.
      */
-    public static boolean isDesktopDensityOverrideSet() {
+    public static boolean useDesktopOverrideDensity() {
+        return isDesktopDensityOverrideEnabled() && isValidDesktopDensityOverrideSet();
+    }
+
+    /**
+     * Return {@code true} if the override desktop density is enabled.
+     */
+    private static boolean isDesktopDensityOverrideEnabled() {
+        return DESKTOP_DENSITY_OVERRIDE_ENABLED;
+    }
+
+    /**
+     * Return {@code true} if the override desktop density is set and within a valid range.
+     */
+    private static boolean isValidDesktopDensityOverrideSet() {
         return DESKTOP_DENSITY_OVERRIDE >= DESKTOP_DENSITY_MIN
                 && DESKTOP_DENSITY_OVERRIDE <= DESKTOP_DENSITY_MAX;
     }

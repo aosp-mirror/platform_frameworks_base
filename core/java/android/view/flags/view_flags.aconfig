@@ -28,6 +28,14 @@ flag {
 }
 
 flag {
+    name: "enable_vector_cursor_a11y_settings"
+    namespace: "systemui"
+    description: "Feature flag to enable accessibility settings for vector cursors."
+    bug: "302275042"
+    is_fixed_read_only: true
+}
+
+flag {
   name: "sensitive_content_app_protection_api"
   is_exported: true
   namespace: "permissions"

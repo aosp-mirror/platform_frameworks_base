@@ -720,6 +720,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
         onComputeInsets(mTmpInsets);
+        mNavigationBarController.updateInsets(mTmpInsets);
         if (!mViewsCreated) {
             // The IME views are not ready, keep visible insets untouched.
             mTmpInsets.visibleTopInsets = 0;

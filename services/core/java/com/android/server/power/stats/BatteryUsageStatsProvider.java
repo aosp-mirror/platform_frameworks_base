@@ -97,9 +97,15 @@ public class BatteryUsageStatsProvider {
                         mContext.getSystemService(SensorManager.class)));
                 mPowerCalculators.add(new GnssPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new CameraPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new FlashlightPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new AudioPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new VideoPowerCalculator(mPowerProfile));
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT)) {
+                    mPowerCalculators.add(new FlashlightPowerCalculator(mPowerProfile));
+                }
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_AUDIO)) {
+                    mPowerCalculators.add(new AudioPowerCalculator(mPowerProfile));
+                }
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_VIDEO)) {
+                    mPowerCalculators.add(new VideoPowerCalculator(mPowerProfile));
+                }
                 mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));

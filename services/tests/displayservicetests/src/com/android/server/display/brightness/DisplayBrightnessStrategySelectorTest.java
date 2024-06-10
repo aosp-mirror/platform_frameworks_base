@@ -16,13 +16,15 @@
 
 package com.android.server.display.brightness;
 
+import static junit.framework.Assert.assertFalse;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
@@ -96,6 +98,9 @@ public final class DisplayBrightnessStrategySelectorTest {
     private Resources mResources;
     @Mock
     private DisplayManagerFlags mDisplayManagerFlags;
+
+    @Mock
+    private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
 
     private DisplayBrightnessStrategySelector mDisplayBrightnessStrategySelector;
     private Context mContext;
@@ -191,7 +196,7 @@ public final class DisplayBrightnessStrategySelectorTest {
                 DISALLOW_AUTO_BRIGHTNESS_WHILE_DOZING);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_DOZE,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mDozeBrightnessModeStrategy);
     }
 
@@ -205,7 +210,30 @@ public final class DisplayBrightnessStrategySelectorTest {
                 DISALLOW_AUTO_BRIGHTNESS_WHILE_DOZING);
         assertNotEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_DOZE,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
+                mDozeBrightnessModeStrategy);
+    }
+
+    @Test
+    public void selectStrategyDoesNotSelectDozeStrategyWhenOffloadSessionAutoBrightnessIsEnabled() {
+        when(mDisplayManagerFlags.offloadControlsDozeAutoBrightness()).thenReturn(true);
+        when(mDisplayManagerFlags.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayOffloadSession.allowAutoBrightnessInDoze()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
+                true);
+        when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
+                true);
+
+        mDisplayBrightnessStrategySelector = new DisplayBrightnessStrategySelector(mContext,
+                mInjector, DISPLAY_ID, mDisplayManagerFlags);
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
+                DisplayManagerInternal.DisplayPowerRequest.class);
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+        displayPowerRequest.dozeScreenBrightness = 0.2f;
+
+        assertNotEquals(mDisplayBrightnessStrategySelector.selectStrategy(
+                        new StrategySelectionRequest(displayPowerRequest, Display.STATE_DOZE,
+                                0.1f, false, mDisplayOffloadSession)),
                 mDozeBrightnessModeStrategy);
     }
 
@@ -215,7 +243,7 @@ public final class DisplayBrightnessStrategySelectorTest {
                 DisplayManagerInternal.DisplayPowerRequest.class);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_OFF,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mScreenOffBrightnessModeStrategy);
     }
 
@@ -227,7 +255,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(Float.NaN);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mOverrideBrightnessStrategy);
     }
 
@@ -240,7 +268,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mTemporaryBrightnessStrategy.getTemporaryScreenBrightness()).thenReturn(0.3f);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mTemporaryBrightnessStrategy);
     }
 
@@ -254,7 +282,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mTemporaryBrightnessStrategy.getTemporaryScreenBrightness()).thenReturn(Float.NaN);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mBoostBrightnessStrategy);
     }
 
@@ -268,7 +296,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mOffloadBrightnessStrategy.getOffloadScreenBrightness()).thenReturn(Float.NaN);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mInvalidBrightnessStrategy);
     }
 
@@ -279,7 +307,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(0.3f);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mFollowerBrightnessStrategy);
     }
 
@@ -297,13 +325,18 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mOffloadBrightnessStrategy.getOffloadScreenBrightness()).thenReturn(0.3f);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mOffloadBrightnessStrategy);
     }
 
     @Test
     public void selectStrategy_selectsAutomaticStrategyWhenValid() {
         when(mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.offloadControlsDozeAutoBrightness()).thenReturn(true);
+        when(mDisplayManagerFlags.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayOffloadSession.allowAutoBrightnessInDoze()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
+                true);
         mDisplayBrightnessStrategySelector = new DisplayBrightnessStrategySelector(mContext,
                 mInjector, DISPLAY_ID, mDisplayManagerFlags);
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
@@ -316,13 +349,11 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mAutomaticBrightnessStrategy.isAutoBrightnessValid()).thenReturn(true);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mAutomaticBrightnessStrategy);
-        verifyZeroInteractions(mOffloadBrightnessStrategy);
         verify(mAutomaticBrightnessStrategy).setAutoBrightnessState(Display.STATE_ON,
-                false, BrightnessReason.REASON_UNKNOWN,
+                true, BrightnessReason.REASON_UNKNOWN,
                 DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT, 0.1f, false);
-
     }
 
     @Test
@@ -341,7 +372,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mAutoBrightnessFallbackStrategy.isValid()).thenReturn(true);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mAutoBrightnessFallbackStrategy);
     }
 
@@ -359,7 +390,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         assertNotEquals(mOffloadBrightnessStrategy,
                 mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                                0.1f, false)));
+                                0.1f, false, mDisplayOffloadSession)));
     }
 
     @Test
@@ -377,7 +408,7 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mAutomaticBrightnessStrategy.isAutoBrightnessValid()).thenReturn(false);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                                0.1f, false)),
+                                0.1f, false, mDisplayOffloadSession)),
                 mFallbackBrightnessStrategy);
     }
 
@@ -392,7 +423,7 @@ public final class DisplayBrightnessStrategySelectorTest {
 
         mDisplayBrightnessStrategySelector.selectStrategy(
                 new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
-                        0.1f, false));
+                        0.1f, false, mDisplayOffloadSession));
 
         StrategySelectionNotifyRequest strategySelectionNotifyRequest =
                 new StrategySelectionNotifyRequest(displayPowerRequest, Display.STATE_ON,
@@ -421,5 +452,79 @@ public final class DisplayBrightnessStrategySelectorTest {
                 mInjector, DISPLAY_ID, mDisplayManagerFlags);
         assertEquals(mAutomaticBrightnessStrategy,
                 mDisplayBrightnessStrategySelector.getAutomaticBrightnessStrategy());
+    }
+
+    @Test
+    public void setAllowAutoBrightnessWhileDozing_enabledWhenConfigAndOffloadSessionAreEnabled() {
+        when(mDisplayManagerFlags.offloadControlsDozeAutoBrightness()).thenReturn(true);
+        when(mDisplayManagerFlags.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayOffloadSession.allowAutoBrightnessInDoze()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
+                true);
+        mDisplayBrightnessStrategySelector = new DisplayBrightnessStrategySelector(mContext,
+                mInjector, DISPLAY_ID, mDisplayManagerFlags);
+        mDisplayBrightnessStrategySelector
+                .setAllowAutoBrightnessWhileDozing(mDisplayOffloadSession);
+        assertTrue(mDisplayBrightnessStrategySelector.isAllowAutoBrightnessWhileDozing());
+    }
+
+    @Test
+    public void setAllowAutoBrightnessWhileDozing_disabledWhenOffloadSessionFlagIsDisabled() {
+        when(mDisplayManagerFlags.offloadControlsDozeAutoBrightness()).thenReturn(true);
+        when(mDisplayManagerFlags.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayOffloadSession.allowAutoBrightnessInDoze()).thenReturn(false);
+        when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
+                true);
+        mDisplayBrightnessStrategySelector = new DisplayBrightnessStrategySelector(mContext,
+                mInjector, DISPLAY_ID, mDisplayManagerFlags);
+        mDisplayBrightnessStrategySelector
+                .setAllowAutoBrightnessWhileDozing(mDisplayOffloadSession);
+        assertFalse(mDisplayBrightnessStrategySelector.isAllowAutoBrightnessWhileDozing());
+    }
+
+    @Test
+    public void setAllowAutoBrightnessWhileDozing_disabledWhenABWhileDozingConfigIsDisabled() {
+        when(mDisplayManagerFlags.offloadControlsDozeAutoBrightness()).thenReturn(true);
+        when(mDisplayManagerFlags.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayOffloadSession.allowAutoBrightnessInDoze()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
+                false);
+        mDisplayBrightnessStrategySelector = new DisplayBrightnessStrategySelector(mContext,
+                mInjector, DISPLAY_ID, mDisplayManagerFlags);
+        mDisplayBrightnessStrategySelector
+                .setAllowAutoBrightnessWhileDozing(mDisplayOffloadSession);
+        assertFalse(mDisplayBrightnessStrategySelector.isAllowAutoBrightnessWhileDozing());
+    }
+
+    @Test
+    public void setAllowAutoBrightnessWhileDozing_EnabledWhenOffloadSessionIsNotSet() {
+        when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
+                true);
+        mDisplayBrightnessStrategySelector = new DisplayBrightnessStrategySelector(mContext,
+                mInjector, DISPLAY_ID, mDisplayManagerFlags);
+        mDisplayBrightnessStrategySelector.setAllowAutoBrightnessWhileDozing(null);
+        assertTrue(mDisplayBrightnessStrategySelector.isAllowAutoBrightnessWhileDozing());
+    }
+
+    @Test
+    public void setAllowAutoBrightnessWhileDozing_EnabledWhenFlagsAreDisabled() {
+        when(mDisplayManagerFlags.offloadControlsDozeAutoBrightness()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
+                true);
+        mDisplayBrightnessStrategySelector = new DisplayBrightnessStrategySelector(mContext,
+                mInjector, DISPLAY_ID, mDisplayManagerFlags);
+
+        // Same as the config_allowAutoBrightnessWhileDozing when either of the concerned flags
+        // are disabled
+        when(mDisplayManagerFlags.isDisplayOffloadEnabled()).thenReturn(false);
+        mDisplayBrightnessStrategySelector
+                .setAllowAutoBrightnessWhileDozing(mDisplayOffloadSession);
+        assertTrue(mDisplayBrightnessStrategySelector.isAllowAutoBrightnessWhileDozing());
+
+        when(mDisplayManagerFlags.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.offloadControlsDozeAutoBrightness()).thenReturn(false);
+        mDisplayBrightnessStrategySelector
+                .setAllowAutoBrightnessWhileDozing(mDisplayOffloadSession);
+        assertTrue(mDisplayBrightnessStrategySelector.isAllowAutoBrightnessWhileDozing());
     }
 }

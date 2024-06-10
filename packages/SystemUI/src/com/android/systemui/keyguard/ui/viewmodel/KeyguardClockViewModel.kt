@@ -65,7 +65,7 @@ constructor(
             }
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
+                started = SharingStarted.Eagerly,
                 initialValue = ClockSize.LARGE,
             )
 
@@ -74,7 +74,7 @@ constructor(
             .map { it == ClockSize.LARGE }
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
+                started = SharingStarted.Eagerly,
                 initialValue = true,
             )
 

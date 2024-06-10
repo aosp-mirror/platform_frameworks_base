@@ -88,7 +88,7 @@ class MaximizeButtonView(
     }
 
     fun cancelHoverAnimation() {
-        hoverProgressAnimatorSet.removeAllListeners()
+        hoverProgressAnimatorSet.childAnimations.forEach { it.removeAllListeners() }
         hoverProgressAnimatorSet.cancel()
         progressBar.visibility = View.INVISIBLE
     }

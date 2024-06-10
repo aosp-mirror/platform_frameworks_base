@@ -53,6 +53,7 @@ sealed class TransitionInteractor(
     val bgDispatcher: CoroutineDispatcher,
     val powerInteractor: PowerInteractor,
     val keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
+    val keyguardInteractor: KeyguardInteractor,
 ) {
     val name = this::class.simpleName ?: "UnknownTransitionInteractor"
     abstract val transitionRepository: KeyguardTransitionRepository
@@ -164,14 +165,10 @@ sealed class TransitionInteractor(
     @Deprecated("Will be merged into maybeStartTransitionToOccludedOrInsecureCamera")
     suspend fun maybeHandleInsecurePowerGesture(): Boolean {
         if (keyguardOcclusionInteractor.shouldTransitionFromPowerButtonGesture()) {
-            if (transitionInteractor.getCurrentState() == KeyguardState.GONE) {
-                // If the current state is GONE when the launch gesture is triggered, it means we
-                // were in transition from GONE -> DOZING/AOD due to the first power button tap. The
-                // second tap indicates that the user's intent was actually to launch the unlocked
-                // (insecure) camera, so we should transition back to GONE.
+            if (keyguardInteractor.isKeyguardDismissible.value) {
                 startTransitionTo(
                     KeyguardState.GONE,
-                    ownerReason = "Power button gesture while GONE"
+                    ownerReason = "Power button gesture while keyguard is dismissible"
                 )
 
                 return true

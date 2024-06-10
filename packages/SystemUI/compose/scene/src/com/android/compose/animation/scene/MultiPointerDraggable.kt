@@ -72,6 +72,7 @@ internal fun Modifier.multiPointerDraggable(
     enabled: () -> Boolean,
     startDragImmediately: (startedPosition: Offset) -> Boolean,
     onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
 ): Modifier =
     this.then(
         MultiPointerDraggableElement(
@@ -79,6 +80,7 @@ internal fun Modifier.multiPointerDraggable(
             enabled,
             startDragImmediately,
             onDragStarted,
+            swipeDetector,
         )
     )
 
@@ -88,6 +90,7 @@ private data class MultiPointerDraggableElement(
     private val startDragImmediately: (startedPosition: Offset) -> Boolean,
     private val onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    private val swipeDetector: SwipeDetector,
 ) : ModifierNodeElement<MultiPointerDraggableNode>() {
     override fun create(): MultiPointerDraggableNode =
         MultiPointerDraggableNode(
@@ -95,6 +98,7 @@ private data class MultiPointerDraggableElement(
             enabled = enabled,
             startDragImmediately = startDragImmediately,
             onDragStarted = onDragStarted,
+            swipeDetector = swipeDetector,
         )
 
     override fun update(node: MultiPointerDraggableNode) {
@@ -102,6 +106,7 @@ private data class MultiPointerDraggableElement(
         node.enabled = enabled
         node.startDragImmediately = startDragImmediately
         node.onDragStarted = onDragStarted
+        node.swipeDetector = swipeDetector
     }
 }
 
@@ -111,6 +116,7 @@ internal class MultiPointerDraggableNode(
     var startDragImmediately: (startedPosition: Offset) -> Boolean,
     var onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    var swipeDetector: SwipeDetector = DefaultSwipeDetector,
 ) :
     PointerInputModifierNode,
     DelegatingNode(),
@@ -199,6 +205,7 @@ internal class MultiPointerDraggableNode(
                             onDragCancel = { controller ->
                                 controller.onStop(velocity = 0f, canChangeScene = true)
                             },
+                            swipeDetector = swipeDetector
                         )
                     } catch (exception: CancellationException) {
                         // If the coroutine scope is active, we can just restart the drag cycle.
@@ -226,7 +233,8 @@ internal class MultiPointerDraggableNode(
             (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
         onDrag: (controller: DragController, change: PointerInputChange, dragAmount: Float) -> Unit,
         onDragEnd: (controller: DragController) -> Unit,
-        onDragCancel: (controller: DragController) -> Unit
+        onDragCancel: (controller: DragController) -> Unit,
+        swipeDetector: SwipeDetector,
     ) {
         // Wait for a consumable event in [PointerEventPass.Main] pass
         val consumablePointer = awaitConsumableEvent().changes.first()
@@ -238,8 +246,10 @@ internal class MultiPointerDraggableNode(
                 consumablePointer
             } else {
                 val onSlopReached = { change: PointerInputChange, over: Float ->
-                    change.consume()
-                    overSlop = over
+                    if (swipeDetector.detectSwipe(change)) {
+                        change.consume()
+                        overSlop = over
+                    }
                 }
 
                 // TODO(b/291055080): Replace by await[Orientation]PointerSlopOrCancellation once it

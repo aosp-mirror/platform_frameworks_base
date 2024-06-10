@@ -710,7 +710,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"За умовчанням"</string>
     <string name="turn_screen_on_title" msgid="2662312432042116026">"Керування ввімкненням екрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволити ввімкнення екрана"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозвольте додатку вмикати екран. Якщо ви надасте цей дозвіл, додаток зможе будь-коли вмикати екран пристрою навіть без вашого явного наміру."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Додатку буде дозволено вмикати екран. З таким дозволом додаток зможе будь-коли вмикати екран пристрою навіть без вашого явного наміру."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Зупинити трансляцію з додатка <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Якщо ви зміните додаток (<xliff:g id="SWITCHAPP">%1$s</xliff:g>) або аудіовихід, поточну трансляцію буде припинено"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Змінити додаток для трансляції на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

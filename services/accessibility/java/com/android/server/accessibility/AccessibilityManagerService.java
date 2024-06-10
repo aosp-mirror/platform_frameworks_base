@@ -588,6 +588,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return Thread.holdsLock(mLock);
     }
 
+    /**
+     * Returns if the service is initialized.
+     *
+     * The service is considered initialized when the user switch happened.
+     */
+    private boolean isServiceInitializedLocked() {
+        return mInitialized;
+    }
+
     @Override
     public int getCurrentUserIdLocked() {
         return mCurrentUserId;
@@ -5244,13 +5253,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
                 //Clip to the window bounds.
                 Rect windowBounds = mTempRect1;
-                if (Flags.focusClickPointWindowBoundsFromA11yWindowInfo()) {
-                    AccessibilityWindowInfo window = focus.getWindow();
-                    if (window != null) {
-                        window.getBoundsInScreen(windowBounds);
-                    }
-                } else {
-                    getWindowBounds(focus.getWindowId(), windowBounds);
+                AccessibilityWindowInfo window = focus.getWindow();
+                if (window != null) {
+                    window.getBoundsInScreen(windowBounds);
                 }
                 if (!boundsInScreenBeforeMagnification.intersect(windowBounds)) {
                     return false;
@@ -6232,6 +6237,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 // Only the profile parent can install accessibility services.
                 // Therefore we ignore packages from linked profiles.
                 if (userId != mManagerService.getCurrentUserIdLocked()) {
+                    return;
+                }
+
+                // Only continue setting up the packages if the service has been initialized.
+                // See: b/340927041
+                if (Flags.skipPackageChangeBeforeUserSwitch()
+                        && !mManagerService.isServiceInitializedLocked()) {
+                    Slog.w(LOG_TAG,
+                            "onSomePackagesChanged: service not initialized, skip the callback.");
                     return;
                 }
                 mManagerService.onSomePackagesChangedLocked(parsedAccessibilityServiceInfos,
