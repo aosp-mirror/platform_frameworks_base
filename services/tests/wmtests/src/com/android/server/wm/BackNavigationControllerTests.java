@@ -550,7 +550,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         }).when(appWindow.mSession).setOnBackInvokedCallbackInfo(eq(appWindow.mClient), any());
 
         addToWindowMap(appWindow, true);
-        dispatcher.attachToWindow(appWindow.mSession, appWindow.mClient, null, null);
+        dispatcher.attachToWindow(appWindow.mSession, appWindow.mClient, null);
 
 
         OnBackInvokedCallback appCallback = createBackCallback(appLatch);
