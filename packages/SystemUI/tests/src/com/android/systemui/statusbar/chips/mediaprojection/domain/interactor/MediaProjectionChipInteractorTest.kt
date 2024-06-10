@@ -21,8 +21,10 @@ import android.content.Intent
 import android.content.packageManager
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
@@ -32,16 +34,23 @@ import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionR
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.ui.viewmodel.mediaProjectionChipInteractor
+import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndCastToOtherDeviceDialogDelegate
+import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndShareToAppDialogDelegate
+import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.doAnswer
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
@@ -51,9 +60,28 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
     private val mediaProjectionRepo = kosmos.fakeMediaProjectionRepository
     private val systemClock = kosmos.fakeSystemClock
 
+    private val mockCastDialog = mock<SystemUIDialog>()
+    private val mockShareDialog = mock<SystemUIDialog>()
+
+    private val chipBackgroundView = mock<ChipBackgroundContainer>()
+    private val chipView =
+        mock<View>().apply {
+            whenever(
+                    this.requireViewById<ChipBackgroundContainer>(
+                        R.id.ongoing_activity_chip_background
+                    )
+                )
+                .thenReturn(chipBackgroundView)
+        }
+
     @Before
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
+
+        whenever(kosmos.mockSystemUIDialogFactory.create(any<EndCastToOtherDeviceDialogDelegate>()))
+            .thenReturn(mockCastDialog)
+        whenever(kosmos.mockSystemUIDialogFactory.create(any<EndShareToAppDialogDelegate>()))
+            .thenReturn(mockShareDialog)
     }
 
     private val underTest = kosmos.mediaProjectionChipInteractor
@@ -147,6 +175,50 @@ class MediaProjectionChipInteractorTest : SysuiTestCase() {
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             assertThat((latest as OngoingActivityChipModel.Shown).startTimeMs).isEqualTo(5678)
+        }
+
+    @Test
+    fun chip_castToOtherDevice_clickListenerShowsCastDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+
+            // Dialogs must be created on the main thread
+            context.mainExecutor.execute {
+                clickListener.onClick(chipView)
+                verify(kosmos.mockDialogTransitionAnimator)
+                    .showFromView(
+                        eq(mockCastDialog),
+                        eq(chipBackgroundView),
+                        eq(null),
+                        anyBoolean(),
+                    )
+            }
+        }
+
+    @Test
+    fun chip_shareToApp_clickListenerShowsShareDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+
+            // Dialogs must be created on the main thread
+            context.mainExecutor.execute {
+                clickListener.onClick(chipView)
+                verify(kosmos.mockDialogTransitionAnimator)
+                    .showFromView(
+                        eq(mockShareDialog),
+                        eq(chipBackgroundView),
+                        eq(null),
+                        anyBoolean(),
+                    )
+            }
         }
 
     companion object {

@@ -64,6 +64,10 @@ constructor(
         }
     }
 
+    override suspend fun stopProjecting() {
+        withContext(backgroundDispatcher) { mediaProjectionManager.stopActiveProjection() }
+    }
+
     override val mediaProjectionState: Flow<MediaProjectionState> =
         conflatedCallbackFlow {
                 val callback =

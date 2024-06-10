@@ -36,6 +36,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -175,5 +176,13 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
 
             assertThat((state as MediaProjectionState.Projecting.SingleTask).hostPackage)
                 .isEqualTo("com.media.projection.repository.test")
+        }
+
+    @Test
+    fun stopProjecting_invokesManager() =
+        testScope.runTest {
+            repo.stopProjecting()
+
+            verify(fakeMediaProjectionManager.mediaProjectionManager).stopActiveProjection()
         }
 }

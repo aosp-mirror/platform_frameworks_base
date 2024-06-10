@@ -326,6 +326,20 @@
     <!-- Button to stop a screen recording [CHAR LIMIT=35] -->
     <string name="screenrecord_stop_dialog_button">Stop recording</string>
 
+    <!-- Title for a dialog shown to the user that will let them stop sharing their screen to another app on the device [CHAR LIMIT=50] -->
+    <string name="share_to_app_stop_dialog_title">Stop sharing screen?</string>
+    <!-- Text telling a user that they will stop sharing their screen if they click the "Stop sharing" button [CHAR LIMIT=100] -->
+    <string name="share_to_app_stop_dialog_message">You will stop sharing your screen</string>
+    <!-- Button to stop screen sharing [CHAR LIMIT=35] -->
+    <string name="share_to_app_stop_dialog_button">Stop sharing</string>
+
+    <!-- Title for a dialog shown to the user that will let them stop casting their screen to a different device [CHAR LIMIT=50] -->
+    <string name="cast_to_other_device_stop_dialog_title">Stop casting screen?</string>
+    <!-- Text telling a user that they will stop casting their screen to a different device if they click the "Stop casting" button [CHAR LIMIT=100] -->
+    <string name="cast_to_other_device_stop_dialog_message">You will stop casting your screen</string>
+    <!-- Button to stop screen casting to a different device [CHAR LIMIT=35] -->
+    <string name="cast_to_other_device_stop_dialog_button">Stop casting</string>
+
     <!-- Button to close a dialog without doing any action [CHAR LIMIT=20] -->
     <string name="close_dialog_button">Close</string>
 
