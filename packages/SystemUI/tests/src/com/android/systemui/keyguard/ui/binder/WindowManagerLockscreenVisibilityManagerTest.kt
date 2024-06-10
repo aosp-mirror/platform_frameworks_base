@@ -100,11 +100,9 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAodVisible_noLockscreenShownCallYet_doesNotShowLockscreenUntilLater() {
+    fun testAodVisible_noLockscreenShownCallYet_defaultsToShowLockscreen() {
         underTest.setAodVisible(false)
-        verifyNoMoreInteractions(activityTaskManagerService)
 
-        underTest.setLockscreenShown(true)
         verify(activityTaskManagerService).setLockScreenShown(true, false)
         verifyNoMoreInteractions(activityTaskManagerService)
     }
