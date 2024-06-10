@@ -364,7 +364,7 @@ object BiometricViewSizeBinder {
                             if (midGuideline != null) {
                                 val left =
                                     if (bounds.left >= 0) {
-                                        bounds.left
+                                        abs(bounds.left)
                                     } else {
                                         view.width - abs(bounds.left)
                                     }
@@ -372,7 +372,7 @@ object BiometricViewSizeBinder {
                                     if (bounds.right >= 0) {
                                         view.width - abs(bounds.right)
                                     } else {
-                                        bounds.right
+                                        abs(bounds.right)
                                     }
                                 val mid = (left + right) / 2
                                 mediumConstraintSet.setGuidelineBegin(midGuideline.id, mid)
