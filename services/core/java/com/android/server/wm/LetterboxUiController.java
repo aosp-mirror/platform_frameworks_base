@@ -18,18 +18,7 @@ package com.android.server.wm;
 
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
-import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
-import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
-import static android.content.pm.ActivityInfo.isFixedOrientation;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
-import static android.content.pm.ActivityInfo.screenOrientationToString;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_16_9;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_3_2;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_4_3;
@@ -117,14 +106,6 @@ final class LetterboxUiController {
 
     // TODO(b/265576778): Cache other overrides as well.
 
-    // Corresponds to OVERRIDE_ANY_ORIENTATION
-    private final boolean mIsOverrideAnyOrientationEnabled;
-    // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT
-    private final boolean mIsOverrideToPortraitOrientationEnabled;
-    // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR
-    private final boolean mIsOverrideToNosensorOrientationEnabled;
-    // Corresponds to OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE
-    private final boolean mIsOverrideToReverseLandscapeOrientationEnabled;
 
     private boolean mShowWallpaperForLetterboxBackground;
 
@@ -144,6 +125,9 @@ final class LetterboxUiController {
     @NonNull
     private final AppCompatCapability mAppCompatCapability;
 
+    @NonNull
+    private final AppCompatOrientationPolicy mAppCompatOrientationPolicy;
+
     private boolean mLastShouldShowLetterboxUi;
 
     private boolean mDoubleTapEvent;
@@ -160,14 +144,10 @@ final class LetterboxUiController {
 
         mAppCompatCapability = new AppCompatCapability(wmService, mActivityRecord,
                 mLetterboxConfiguration);
-
-        mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
-        mIsOverrideToPortraitOrientationEnabled =
-                isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT);
-        mIsOverrideToReverseLandscapeOrientationEnabled =
-                isCompatChangeEnabled(OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE);
-        mIsOverrideToNosensorOrientationEnabled =
-                isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR);
+        mAppCompatOrientationPolicy = new AppCompatOrientationPolicy(mActivityRecord,
+                mAppCompatCapability, () -> shouldApplyUserFullscreenOverride(),
+                () -> shouldApplyUserMinAspectRatioOverride(),
+                () -> isSystemOverrideToFullscreenEnabled());
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -233,12 +213,14 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldIgnoreOrientationRequestLoop() {
-        return mAppCompatCapability.shouldIgnoreOrientationRequestLoop();
+        return mAppCompatCapability.getAppCompatOrientationCapability()
+                .shouldIgnoreOrientationRequestLoop();
     }
 
     @VisibleForTesting
     int getSetOrientationRequestCounter() {
-        return mAppCompatCapability.getSetOrientationRequestCounter();
+        return mAppCompatCapability.getAppCompatOrientationCapability()
+                .getSetOrientationRequestCounter();
     }
 
     /**
@@ -325,7 +307,8 @@ final class LetterboxUiController {
      * android.app.Activity#setRequestedOrientation}.
      */
     void setRelaunchingAfterRequestedOrientationChanged(boolean isRelaunching) {
-        mAppCompatCapability.setRelaunchingAfterRequestedOrientationChanged(isRelaunching);
+        mAppCompatCapability.getAppCompatOrientationCapability()
+                .setRelaunchingAfterRequestedOrientationChanged(isRelaunching);
     }
 
     /**
@@ -362,91 +345,7 @@ final class LetterboxUiController {
 
     @ScreenOrientation
     int overrideOrientationIfNeeded(@ScreenOrientation int candidate) {
-        final DisplayContent displayContent = mActivityRecord.mDisplayContent;
-        final boolean isIgnoreOrientationRequestEnabled = displayContent != null
-                && displayContent.getIgnoreOrientationRequest();
-        if (shouldApplyUserFullscreenOverride() && isIgnoreOrientationRequestEnabled
-                // Do not override orientation to fullscreen for camera activities.
-                // Fixed-orientation activities are rarely tested in other orientations, and it
-                // often results in sideways or stretched previews. As the camera compat treatment
-                // targets fixed-orientation activities, overriding the orientation disables the
-                // treatment.
-                && !mActivityRecord.isCameraActive()) {
-            Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_USER)
-                    + " by user aspect ratio settings.");
-            return SCREEN_ORIENTATION_USER;
-        }
-
-        // In some cases (e.g. Kids app) we need to map the candidate orientation to some other
-        // orientation.
-        candidate = mActivityRecord.mWmService.mapOrientationRequest(candidate);
-
-        if (shouldApplyUserMinAspectRatioOverride() && (!isFixedOrientation(candidate)
-                || candidate == SCREEN_ORIENTATION_LOCKED)) {
-            Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_PORTRAIT)
-                    + " by user aspect ratio settings.");
-            return SCREEN_ORIENTATION_PORTRAIT;
-        }
-
-        if (mAppCompatCapability.isAllowOrientationOverrideOptOut()) {
-            return candidate;
-        }
-
-        if (displayContent != null && mAppCompatCapability
-                    .isOverrideOrientationOnlyForCameraEnabled()
-                && (displayContent.mDisplayRotationCompatPolicy == null
-                        || !displayContent.mDisplayRotationCompatPolicy
-                                .isActivityEligibleForOrientationOverride(mActivityRecord))) {
-            return candidate;
-        }
-
-        // mUserAspectRatio is always initialized first in shouldApplyUserFullscreenOverride(),
-        // which will always come first before this check as user override > device
-        // manufacturer override.
-        if (isSystemOverrideToFullscreenEnabled() && isIgnoreOrientationRequestEnabled
-                // Do not override orientation to fullscreen for camera activities.
-                // Fixed-orientation activities are rarely tested in other orientations, and it
-                // often results in sideways or stretched previews. As the camera compat treatment
-                // targets fixed-orientation activities, overriding the orientation disables the
-                // treatment.
-                && !mActivityRecord.isCameraActive()) {
-            Slog.v(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_USER));
-            return SCREEN_ORIENTATION_USER;
-        }
-
-        if (mIsOverrideToReverseLandscapeOrientationEnabled
-                && (isFixedOrientationLandscape(candidate) || mIsOverrideAnyOrientationEnabled)) {
-            Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_REVERSE_LANDSCAPE));
-            return SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-        }
-
-        if (!mIsOverrideAnyOrientationEnabled && isFixedOrientation(candidate)) {
-            return candidate;
-        }
-
-        if (mIsOverrideToPortraitOrientationEnabled) {
-            Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_PORTRAIT));
-            return SCREEN_ORIENTATION_PORTRAIT;
-        }
-
-        if (mIsOverrideToNosensorOrientationEnabled) {
-            Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
-                    + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_NOSENSOR));
-            return SCREEN_ORIENTATION_NOSENSOR;
-        }
-
-        return candidate;
+        return mAppCompatOrientationPolicy.overrideOrientationIfNeeded(candidate);
     }
 
     boolean isOverrideOrientationOnlyForCameraEnabled() {
@@ -1147,7 +1046,8 @@ final class LetterboxUiController {
 
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        if (mAppCompatCapability.getIsRelaunchingAfterRequestedOrientationChanged()) {
+        if (mAppCompatCapability.getAppCompatOrientationCapability()
+                .getIsRelaunchingAfterRequestedOrientationChanged()) {
             return mLastShouldShowLetterboxUi;
         }
 
@@ -1307,7 +1207,8 @@ final class LetterboxUiController {
     }
 
     boolean getIsRelaunchingAfterRequestedOrientationChanged() {
-        return mAppCompatCapability.getIsRelaunchingAfterRequestedOrientationChanged();
+        return mAppCompatCapability.getAppCompatOrientationCapability()
+                .getIsRelaunchingAfterRequestedOrientationChanged();
     }
 
     private void adjustBoundsForTaskbar(final WindowState mainWindow, final Rect bounds) {
