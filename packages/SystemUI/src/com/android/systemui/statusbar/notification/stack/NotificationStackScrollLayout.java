@@ -833,6 +833,23 @@ public class NotificationStackScrollLayout
         int y = 0;
         drawDebugInfo(canvas, y, Color.RED, /* label= */ "y = " + y);
 
+        if (SceneContainerFlag.isEnabled()) {
+            y = (int) mScrollViewFields.getStackTop();
+            drawDebugInfo(canvas, y, Color.RED, /* label= */ "getStackTop() = " + y);
+
+            y = (int) mScrollViewFields.getStackBottom();
+            drawDebugInfo(canvas, y, Color.MAGENTA, /* label= */ "getStackBottom() = " + y);
+
+            y = (int) mScrollViewFields.getHeadsUpTop();
+            drawDebugInfo(canvas, y, Color.GREEN, /* label= */ "getHeadsUpTop() = " + y);
+
+            y += getTopHeadsUpHeight();
+            drawDebugInfo(canvas, y, Color.BLUE,
+                    /* label= */ "getHeadsUpTop() + getTopHeadsUpHeight() = " + y);
+
+            return; // the rest of the fields are not important in Flexiglass
+        }
+
         y = getTopPadding();
         drawDebugInfo(canvas, y, Color.RED, /* label= */ "getTopPadding() = " + y);
 
