@@ -3471,6 +3471,7 @@ public class NotificationStackScrollLayout
             }
 
             if (isUpOrCancel) {
+                mScrollViewFields.sendCurrentGestureOverscroll(false);
                 setIsBeingDragged(false);
             }
             return false;
@@ -3606,7 +3607,6 @@ public class NotificationStackScrollLayout
                 if (mIsBeingDragged) {
                     // Defer actual scrolling to the scene framework if enabled
                     if (SceneContainerFlag.isEnabled()) {
-                        setIsBeingDragged(false);
                         return false;
                     }
                     // Scroll to follow the motion event
