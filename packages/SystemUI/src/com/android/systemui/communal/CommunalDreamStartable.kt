@@ -62,10 +62,10 @@ constructor(
         if (restartDreamOnUnocclude()) {
             keyguardTransitionInteractor.startedKeyguardTransitionStep
                 .sample(keyguardInteractor.isDreaming, ::Pair)
-                .filter {
-                    it.first.from == KeyguardState.OCCLUDED &&
-                        it.first.to == KeyguardState.DREAMING &&
-                        !it.second
+                .filter { (step, isDreaming) ->
+                    step.from == KeyguardState.OCCLUDED &&
+                        step.to == KeyguardState.DREAMING &&
+                        !isDreaming
                 }
                 .onEach { dreamManager.startDream() }
                 .launchIn(bgScope)
