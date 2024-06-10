@@ -24,6 +24,7 @@ import static com.android.systemui.Flags.edgebackGestureHandlerGetRunningTasksBa
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED;
 
 import static java.util.stream.Collectors.joining;
 
@@ -1021,8 +1022,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             if (mIsTrackpadThreeFingerSwipe) {
                 // Trackpad back gestures don't have zones, so we don't need to check if the down
                 // event is within insets.
-                mAllowGesture = isBackAllowedCommon && isValidTrackpadBackGesture(
-                        true /* isTrackpadEvent */);
+                boolean trackpadGesturesEnabled =
+                        (mSysUiFlags & SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED) == 0;
+                mAllowGesture = isBackAllowedCommon && trackpadGesturesEnabled
+                        && isValidTrackpadBackGesture(true /* isTrackpadEvent */);
             } else {
                 mAllowGesture = isBackAllowedCommon && !mUsingThreeButtonNav && isWithinInsets
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY())
