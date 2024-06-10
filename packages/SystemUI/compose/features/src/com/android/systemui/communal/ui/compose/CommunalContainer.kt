@@ -68,6 +68,7 @@ object Communal {
         val Grid = ElementKey("CommunalContent")
         val LockIcon = ElementKey("CommunalLockIcon")
         val IndicationArea = ElementKey("CommunalIndicationArea")
+        val StatusBar = ElementKey("StatusBar")
     }
 }
 
@@ -92,6 +93,7 @@ val sceneTransitions = transitions {
             fade(Communal.Elements.Grid)
             fade(Communal.Elements.IndicationArea)
             fade(Communal.Elements.LockIcon)
+            fade(Communal.Elements.StatusBar)
         }
         timestampRange(startMillis = 167, endMillis = 334) { fade(Communal.Elements.Scrim) }
     }

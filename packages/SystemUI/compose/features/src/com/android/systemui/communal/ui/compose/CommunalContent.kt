@@ -16,13 +16,16 @@
 
 package com.android.systemui.communal.ui.compose
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntRect
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.theme.LocalAndroidColorScheme
+import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
@@ -38,19 +41,24 @@ constructor(
     private val interactionHandler: WidgetInteractionHandler,
     private val dialogFactory: SystemUIDialogFactory,
     private val lockSection: LockSection,
+    private val ambientStatusBarSection: AmbientStatusBarSection,
 ) {
-
     @Composable
     fun SceneScope.Content(modifier: Modifier = Modifier) {
         Layout(
             modifier = modifier.fillMaxSize(),
             content = {
-                CommunalHub(
-                    viewModel = viewModel,
-                    interactionHandler = interactionHandler,
-                    dialogFactory = dialogFactory,
-                    modifier = Modifier.element(Communal.Elements.Grid)
-                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    with(ambientStatusBarSection) {
+                        AmbientStatusBar(modifier = Modifier.fillMaxWidth())
+                    }
+                    CommunalHub(
+                        viewModel = viewModel,
+                        interactionHandler = interactionHandler,
+                        dialogFactory = dialogFactory,
+                        modifier = Modifier.element(Communal.Elements.Grid)
+                    )
+                }
                 with(lockSection) {
                     LockIcon(
                         overrideColor = LocalAndroidColorScheme.current.onPrimaryContainer,
