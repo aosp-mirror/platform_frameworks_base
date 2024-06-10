@@ -47,7 +47,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.NonNull;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 
 import com.android.server.wm.utils.OptPropFactory;
@@ -157,38 +156,6 @@ public class AppCompatCapability {
                 isCompatChangeEnabled(OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
         mIsOverrideOrientationOnlyForCameraEnabled =
                 isCompatChangeEnabled(OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
-    }
-
-    /**
-     * Whether should ignore app requested orientation in response to an app
-     * calling {@link android.app.Activity#setRequestedOrientation}.
-     *
-     * <p>This is needed to avoid getting into {@link android.app.Activity#setRequestedOrientation}
-     * loop when {@link DisplayContent#getIgnoreOrientationRequest} is enabled or device has
-     * landscape natural orientation which app developers don't expect. For example, the loop can
-     * look like this:
-     * <ol>
-     *     <li>App sets default orientation to "unspecified" at runtime
-     *     <li>App requests to "portrait" after checking some condition (e.g. display rotation).
-     *     <li>(2) leads to fullscreen -> letterboxed bounds change and activity relaunch because
-     *     app can't handle the corresponding config changes.
-     *     <li>Loop goes back to (1)
-     * </ol>
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the treatment is enabled
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Opt-in component property or per-app override are enabled
-     *     <li>Activity is relaunched after {@link android.app.Activity#setRequestedOrientation}
-     *     call from an app or camera compat force rotation treatment is active for the activity.
-     *     <li>Orientation request loop detected and is not letterboxed for fixed orientation
-     * </ul>
-     */
-    boolean shouldIgnoreRequestedOrientation(
-            @ActivityInfo.ScreenOrientation int requestedOrientation) {
-        return mAppCompatOrientationCapability
-                .shouldIgnoreRequestedOrientation(requestedOrientation);
     }
 
     /**
