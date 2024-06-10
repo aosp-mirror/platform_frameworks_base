@@ -64,6 +64,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -85,13 +86,13 @@ import java.util.concurrent.CountDownLatch;
 // FOR ACONFIGD TEST MISSION AND ROLLOUT
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import android.net.LocalSocketAddress;
-import android.net.LocalSocket;
 import android.util.proto.ProtoInputStream;
 import android.aconfigd.Aconfigd.StorageRequestMessage;
 import android.aconfigd.Aconfigd.StorageRequestMessages;
 import android.aconfigd.Aconfigd.StorageReturnMessage;
 import android.aconfigd.Aconfigd.StorageReturnMessages;
+import android.aconfigd.AconfigdClientSocket;
+import android.aconfigd.AconfigdFlagInfo;
 import android.aconfigd.AconfigdJavaUtils;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 /**
@@ -265,6 +266,10 @@ final class SettingsState {
     @NonNull
     private Map<String, Map<String, String>> mNamespaceDefaults;
 
+    // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
+    @NonNull
+    private Map<String, AconfigdFlagInfo> mAconfigDefaultFlags;
+
     public static final int SETTINGS_TYPE_GLOBAL = 0;
     public static final int SETTINGS_TYPE_SYSTEM = 1;
     public static final int SETTINGS_TYPE_SECURE = 2;
@@ -334,8 +339,13 @@ final class SettingsState {
                 + settingTypeToString(getTypeFromKey(key)) + "]";
     }
 
-    public SettingsState(Context context, Object lock, File file, int key,
-            int maxBytesPerAppPackage, Looper looper) {
+    public SettingsState(
+            Context context,
+            Object lock,
+            File file,
+            int key,
+            int maxBytesPerAppPackage,
+            Looper looper) {
         // It is important that we use the same lock as the settings provider
         // to ensure multiple mutations on this state are atomically persisted
         // as the async persistence should be blocked while we make changes.
@@ -353,12 +363,15 @@ final class SettingsState {
             mPackageToMemoryUsage = null;
         }
 
-        mHistoricalOperations = Build.IS_DEBUGGABLE
-                ? new ArrayList<>(HISTORICAL_OPERATION_COUNT) : null;
+        mHistoricalOperations =
+                Build.IS_DEBUGGABLE ? new ArrayList<>(HISTORICAL_OPERATION_COUNT) : null;
 
         mNamespaceDefaults = new HashMap<>();
+        mAconfigDefaultFlags = new HashMap<>();
 
         ProtoOutputStream requests = null;
+        Map<String, AconfigdFlagInfo> aconfigFlagMap = new HashMap<>();
+
         synchronized (mLock) {
             readStateSyncLocked();
 
@@ -375,39 +388,114 @@ final class SettingsState {
                 }
             }
 
+            if (enableAconfigStorageDaemon()) {
+                if (isConfigSettingsKey(mKey)) {
+                    aconfigFlagMap = getAllAconfigFlagsFromSettings();
+                }
+            }
+
             if (isConfigSettingsKey(mKey)) {
-                requests = handleBulkSyncToNewStorage();
+                requests = handleBulkSyncToNewStorage(aconfigFlagMap);
             }
         }
 
-        if (requests != null) {
-            LocalSocket client = new LocalSocket();
-            try{
-                client.connect(new LocalSocketAddress(
-                    "aconfigd", LocalSocketAddress.Namespace.RESERVED));
-                Slog.d(LOG_TAG, "connected to aconfigd socket");
-            } catch (IOException ioe) {
-                Slog.e(LOG_TAG, "failed to connect to aconfigd socket", ioe);
-                return;
+        if (enableAconfigStorageDaemon()) {
+            if (isConfigSettingsKey(mKey)){
+                AconfigdClientSocket localSocket = AconfigdJavaUtils.getAconfigdClientSocket();
+                if (requests != null) {
+                    InputStream res = localSocket.send(requests.getBytes());
+                    if (res == null) {
+                        Slog.w(LOG_TAG, "Bulk sync request to acongid failed.");
+                    }
+                }
+                // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
+                if (mSettings.get("aconfigd_marker/bulk_synced").value.equals("true")
+                        && requests == null) {
+                    Map<String, AconfigdFlagInfo> aconfigdFlagMap =
+                            AconfigdJavaUtils.listFlagsValueInNewStorage(localSocket);
+                    compareFlagValueInNewStorage(
+                            aconfigFlagMap,
+                            mAconfigDefaultFlags,
+                            aconfigdFlagMap);
+                }
             }
-            AconfigdJavaUtils.sendAconfigdRequests(client, requests);
         }
     }
 
-    // TODO(b/341764371): migrate aconfig flag push to GMS core
-    public static class FlagOverrideToSync {
-        public String packageName;
-        public String flagName;
-        public String flagValue;
-        public boolean isLocal;
+    // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
+    public int compareFlagValueInNewStorage(
+            Map<String, AconfigdFlagInfo> settingFlagMap,
+            Map<String, AconfigdFlagInfo> defaultFlagMap,
+            Map<String, AconfigdFlagInfo> aconfigdFlagMap) {
+
+        // Get all defaults from the default map. The mSettings may not contain
+        // all flags, since it only contains updated flags.
+        int diffNum = 0;
+        for (Map.Entry<String, AconfigdFlagInfo> entry : defaultFlagMap.entrySet()) {
+            String key = entry.getKey();
+            AconfigdFlagInfo flag = entry.getValue();
+            if (settingFlagMap.containsKey(key)) {
+                flag.merge(settingFlagMap.get(key));
+            }
+
+            AconfigdFlagInfo aconfigdFlag = aconfigdFlagMap.get(key);
+            if (aconfigdFlag == null) {
+                Slog.w(LOG_TAG, String.format("Flag %s is missing from aconfigd", key));
+                diffNum++;
+                continue;
+            }
+            String diff = flag.dumpDiff(aconfigdFlag);
+            if (!diff.isEmpty()) {
+                Slog.w(
+                        LOG_TAG,
+                        String.format(
+                                "Flag %s is different in Settings and aconfig: %s", key, diff));
+                diffNum++;
+            }
+        }
+
+        for (String key : aconfigdFlagMap.keySet()) {
+            if (defaultFlagMap.containsKey(key)) continue;
+            Slog.w(LOG_TAG, String.format("Flag %s is missing from Settings", key));
+            diffNum++;
+        }
+
+        if (diffNum == 0) {
+            Slog.i(LOG_TAG, "Settings and new storage have same flags.");
+        }
+        return diffNum;
+    }
+
+    @GuardedBy("mLock")
+    public Map<String, AconfigdFlagInfo> getAllAconfigFlagsFromSettings() {
+        Map<String, AconfigdFlagInfo> ret = new HashMap<>();
+        int numSettings = mSettings.size();
+        int num_requests = 0;
+        for (int i = 0; i < numSettings; i++) {
+            String name = mSettings.keyAt(i);
+            Setting setting = mSettings.valueAt(i);
+            AconfigdFlagInfo flag =
+                    getFlagOverrideToSync(name, setting.getValue());
+            if (flag == null) {
+                continue;
+            }
+            String fullFlagName = flag.getFullFlagName();
+            AconfigdFlagInfo prev = ret.putIfAbsent(fullFlagName,flag);
+            if (prev != null) {
+                prev.merge(flag);
+            }
+            ++num_requests;
+        }
+        Slog.i(LOG_TAG, num_requests + " flag override requests created");
+        return ret;
     }
 
     // TODO(b/341764371): migrate aconfig flag push to GMS core
     @VisibleForTesting
     @GuardedBy("mLock")
-    public FlagOverrideToSync getFlagOverrideToSync(String name, String value) {
+    public AconfigdFlagInfo getFlagOverrideToSync(String name, String value) {
         int slashIdx = name.indexOf("/");
-        if (slashIdx <= 0 || slashIdx >= name.length()-1) {
+        if (slashIdx <= 0 || slashIdx >= name.length() - 1) {
             Slog.e(LOG_TAG, "invalid flag name " + name);
             return null;
         }
@@ -430,8 +518,9 @@ final class SettingsState {
         }
 
         String aconfigName = namespace + "/" + fullFlagName;
-        boolean isAconfig = mNamespaceDefaults.containsKey(namespace)
-                            && mNamespaceDefaults.get(namespace).containsKey(aconfigName);
+        boolean isAconfig =
+                mNamespaceDefaults.containsKey(namespace)
+                        && mNamespaceDefaults.get(namespace).containsKey(aconfigName);
         if (!isAconfig) {
             return null;
         }
@@ -443,25 +532,30 @@ final class SettingsState {
             return null;
         }
 
-        FlagOverrideToSync flag = new FlagOverrideToSync();
-        flag.packageName = fullFlagName.substring(0, dotIdx);
-        flag.flagName = fullFlagName.substring(dotIdx + 1);
-        flag.isLocal = isLocal;
-        flag.flagValue = value;
-        return flag;
+        AconfigdFlagInfo.Builder builder = AconfigdFlagInfo.newBuilder()
+                        .setPackageName(fullFlagName.substring(0, dotIdx))
+                        .setFlagName(fullFlagName.substring(dotIdx + 1))
+                        .setDefaultFlagValue(mNamespaceDefaults.get(namespace).get(aconfigName));
+
+        if (isLocal) {
+            builder.setHasLocalOverride(isLocal).setBootFlagValue(value).setLocalFlagValue(value);
+        } else {
+            builder.setHasServerOverride(true).setServerFlagValue(value).setBootFlagValue(value);
+        }
+        return builder.build();
     }
 
 
     // TODO(b/341764371): migrate aconfig flag push to GMS core
     @VisibleForTesting
     @GuardedBy("mLock")
-    public ProtoOutputStream handleBulkSyncToNewStorage() {
+    public ProtoOutputStream handleBulkSyncToNewStorage(
+            Map<String, AconfigdFlagInfo> aconfigFlagMap) {
         // get marker or add marker if it does not exist
         final String bulkSyncMarkerName = new String("aconfigd_marker/bulk_synced");
         Setting markerSetting = mSettings.get(bulkSyncMarkerName);
         if (markerSetting == null) {
-            markerSetting = new Setting(
-                bulkSyncMarkerName, "false", false, "aconfig", "aconfig");
+            markerSetting = new Setting(bulkSyncMarkerName, "false", false, "aconfig", "aconfig");
             mSettings.put(bulkSyncMarkerName, markerSetting);
         }
 
@@ -479,23 +573,18 @@ final class SettingsState {
                 AconfigdJavaUtils.writeResetStorageRequest(requests);
 
                 // loop over all settings and add flag override requests
-                final int numSettings = mSettings.size();
-                int num_requests = 0;
-                for (int i = 0; i < numSettings; i++) {
-                    String name = mSettings.keyAt(i);
-                    Setting setting = mSettings.valueAt(i);
-                    FlagOverrideToSync flag =
-                            getFlagOverrideToSync(name, setting.getValue());
-                    if (flag == null) {
-                        continue;
-                    }
-                    ++num_requests;
+                for (AconfigdFlagInfo flag : aconfigFlagMap.values()) {
+                    String value =
+                            flag.getHasLocalOverride()
+                                    ? flag.getLocalFlagValue()
+                                    : flag.getServerFlagValue();
                     AconfigdJavaUtils.writeFlagOverrideRequest(
-                        requests, flag.packageName, flag.flagName, flag.flagValue,
-                        flag.isLocal);
+                            requests,
+                            flag.getPackageName(),
+                            flag.getFlagName(),
+                            value,
+                            flag.getHasLocalOverride());
                 }
-
-                Slog.i(LOG_TAG, num_requests + " flag override requests created");
 
                 // mark sync has been done
                 markerSetting.value = "true";
@@ -513,14 +602,14 @@ final class SettingsState {
                 return null;
             }
         }
-
     }
 
     @GuardedBy("mLock")
     private void loadAconfigDefaultValuesLocked(List<String> filePaths) {
         for (String fileName : filePaths) {
             try (FileInputStream inputStream = new FileInputStream(fileName)) {
-                loadAconfigDefaultValues(inputStream.readAllBytes(), mNamespaceDefaults);
+                loadAconfigDefaultValues(
+                        inputStream.readAllBytes(), mNamespaceDefaults, mAconfigDefaultFlags);
             } catch (IOException e) {
                 Slog.e(LOG_TAG, "failed to read protobuf", e);
             }
@@ -566,21 +655,30 @@ final class SettingsState {
 
     @VisibleForTesting
     @GuardedBy("mLock")
-    public static void loadAconfigDefaultValues(byte[] fileContents,
-            @NonNull Map<String, Map<String, String>> defaultMap) {
+    public static void loadAconfigDefaultValues(
+            byte[] fileContents,
+            @NonNull Map<String, Map<String, String>> defaultMap,
+            @NonNull Map<String, AconfigdFlagInfo> flagInfoDefault) {
         try {
-            parsed_flags parsedFlags =
-                    parsed_flags.parseFrom(fileContents);
+            parsed_flags parsedFlags = parsed_flags.parseFrom(fileContents);
             for (parsed_flag flag : parsedFlags.getParsedFlagList()) {
                 if (!defaultMap.containsKey(flag.getNamespace())) {
                     Map<String, String> defaults = new HashMap<>();
                     defaultMap.put(flag.getNamespace(), defaults);
                 }
-                String flagName = flag.getNamespace()
-                        + "/" + flag.getPackage() + "." + flag.getName();
-                String flagValue = flag.getState() == flag_state.ENABLED
-                        ? "true" : "false";
+                String fullFlagName = flag.getPackage() + "." + flag.getName();
+                String flagName = flag.getNamespace() + "/" + fullFlagName;
+                String flagValue = flag.getState() == flag_state.ENABLED ? "true" : "false";
                 defaultMap.get(flag.getNamespace()).put(flagName, flagValue);
+                if (!flagInfoDefault.containsKey(fullFlagName)) {
+                    flagInfoDefault.put(
+                            fullFlagName,
+                            AconfigdFlagInfo.newBuilder()
+                                    .setPackageName(flag.getPackage())
+                                    .setFlagName(flag.getName())
+                                    .setDefaultFlagValue(flagValue)
+                                    .build());
+                }
             }
         } catch (IOException e) {
             Slog.e(LOG_TAG, "failed to parse protobuf", e);
@@ -1646,7 +1744,6 @@ final class SettingsState {
                         }
                     }
                 }
-
                 mSettings.put(name, new Setting(name, value, defaultValue, packageName, tag,
                         fromSystem, id, isPreservedInRestore));
 

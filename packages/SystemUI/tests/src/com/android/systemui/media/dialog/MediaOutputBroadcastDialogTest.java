@@ -33,13 +33,13 @@ import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.media.AudioManager;
 import android.media.session.MediaSessionManager;
 import android.os.PowerExemptionManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -72,7 +72,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
 

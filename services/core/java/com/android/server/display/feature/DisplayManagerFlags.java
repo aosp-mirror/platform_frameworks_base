@@ -174,6 +174,11 @@ public class DisplayManagerFlags {
             Flags::enableSynthetic60hzModes
     );
 
+    private final FlagState mOffloadDozeOverrideHoldsWakelock = new FlagState(
+            Flags.FLAG_OFFLOAD_DOZE_OVERRIDE_HOLDS_WAKELOCK,
+            Flags::offloadDozeOverrideHoldsWakelock
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -343,8 +348,12 @@ public class DisplayManagerFlags {
         return mPeakRefreshRatePhysicalLimit.isEnabled();
     }
 
+    public boolean isOffloadDozeOverrideHoldsWakelockEnabled() {
+        return mOffloadDozeOverrideHoldsWakelock.isEnabled();
+    }
+
     /**
-     * @return Whether to ignore preferredRefreshRate app request or not
+     * @return Whether to ignore preferredRefreshRate app request conversion to display mode or not
      */
     public boolean ignoreAppPreferredRefreshRateRequest() {
         return mIgnoreAppPreferredRefreshRate.isEnabled();
@@ -389,6 +398,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mPeakRefreshRatePhysicalLimit);
         pw.println(" " + mIgnoreAppPreferredRefreshRate);
         pw.println(" " + mSynthetic60hzModes);
+        pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
     }
 
     private static class FlagState {

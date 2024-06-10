@@ -281,5 +281,5 @@ interface IVirtualDevice {
      * Returns the id of the virtual camera with given config.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    int getVirtualCameraId(in VirtualCameraConfig camera);
+    String getVirtualCameraId(in VirtualCameraConfig camera);
 }

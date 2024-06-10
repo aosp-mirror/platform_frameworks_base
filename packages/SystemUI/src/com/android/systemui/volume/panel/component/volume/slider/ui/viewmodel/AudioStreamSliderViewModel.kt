@@ -32,9 +32,13 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -49,6 +53,7 @@ constructor(
     private val uiEventLogger: UiEventLogger,
 ) : SliderViewModel {
 
+    private val volumeChanges = MutableStateFlow<Int?>(null)
     private val streamsAffectedByRing =
         setOf(
             AudioManager.STREAM_RING,
@@ -104,12 +109,17 @@ constructor(
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
 
+    init {
+        volumeChanges
+            .filterNotNull()
+            .onEach { audioVolumeInteractor.setVolume(audioStream, it) }
+            .launchIn(coroutineScope)
+    }
+
     override fun onValueChanged(state: SliderState, newValue: Float) {
         val audioViewModel = state as? State
         audioViewModel ?: return
-        coroutineScope.launch {
-            audioVolumeInteractor.setVolume(audioStream, newValue.roundToInt())
-        }
+        volumeChanges.tryEmit(newValue.roundToInt())
     }
 
     override fun onValueChangeFinished() {
@@ -146,14 +156,18 @@ constructor(
             isEnabled = isEnabled,
             a11yStep = volumeRange.step,
             a11yClickDescription =
-                context.getString(
-                    if (isMuted) {
-                        R.string.volume_panel_hint_unmute
-                    } else {
-                        R.string.volume_panel_hint_mute
-                    },
-                    label,
-                ),
+                if (isAffectedByMute) {
+                    context.getString(
+                        if (isMuted) {
+                            R.string.volume_panel_hint_unmute
+                        } else {
+                            R.string.volume_panel_hint_mute
+                        },
+                        label,
+                    )
+                } else {
+                    null
+                },
             a11yStateDescription =
                 if (volume == volumeRange.first) {
                     context.getString(

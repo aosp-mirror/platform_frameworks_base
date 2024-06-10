@@ -3980,7 +3980,7 @@ class StorageManagerService extends IStorageManager.Stub
                     if (resUuids.contains(rec.fsUuid)) continue;
 
                     // Treat as recent if mounted within the last week
-                    if (rec.lastSeenMillis > 0 && rec.lastSeenMillis < lastWeek) {
+                    if (rec.lastSeenMillis > 0 && rec.lastSeenMillis >= lastWeek) {
                         final StorageVolume userVol = rec.buildStorageVolume(mContext);
                         res.add(userVol);
                         resUuids.add(userVol.getUuid());

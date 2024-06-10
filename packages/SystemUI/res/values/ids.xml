@@ -259,9 +259,6 @@
     <!-- ID of the Scene Container root Composable view -->
     <item type='id' name="scene_container_root_composable" />
 
-    <!-- Tag set on the Compose implementation of the QS footer actions. -->
-    <item type="id" name="tag_compose_qs_footer_actions" />
-
     <!--
     Ids for the device entry icon.
         device_entry_icon_view: parent view of both device_entry_icon and device_entry_icon_bg

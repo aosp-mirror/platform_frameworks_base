@@ -26,6 +26,8 @@ import static android.provider.settings.validators.SettingsValidators.NON_NEGATI
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.URI_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.VIBRATION_INTENSITY_VALIDATOR;
+import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_BEGIN;
+import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_END;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -206,6 +208,9 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.SIP_ADDRESS_ONLY, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.SIP_ASK_ME_EACH_TIME, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.POINTER_SPEED, new InclusiveFloatRangeValidator(-7, 7));
+        VALIDATORS.put(System.POINTER_FILL_STYLE,
+                new InclusiveIntegerRangeValidator(POINTER_ICON_VECTOR_STYLE_FILL_BEGIN,
+                        POINTER_ICON_VECTOR_STYLE_FILL_END));
         VALIDATORS.put(System.TOUCHPAD_POINTER_SPEED, new InclusiveIntegerRangeValidator(-7, 7));
         VALIDATORS.put(System.TOUCHPAD_NATURAL_SCROLLING, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.TOUCHPAD_TAP_TO_CLICK, BOOLEAN_VALIDATOR);

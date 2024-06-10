@@ -19,16 +19,13 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.perftests.utils.ShellHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 
 // Based on //platform/frameworks/base/apct-tests/perftests/utils/BenchmarkState.java
 public class BenchmarkRunner {
-    private static final String TAG = BenchmarkRunner.class.getSimpleName();
+
     private static final long COOL_OFF_PERIOD_MS = 1000;
-    private static final int CPU_IDLE_TIMEOUT_MS = 60 * 1000;
-    private static final int CPU_IDLE_THRESHOLD_PERCENTAGE = 90;
 
     private static final int NUM_ITERATIONS = 4;
 
@@ -83,7 +80,7 @@ public class BenchmarkRunner {
 
     private void prepareForNextRun() {
         SystemClock.sleep(COOL_OFF_PERIOD_MS);
-        waitCoolDownPeriod();
+        ShellHelper.runShellCommand("am wait-for-broadcast-idle --flush-broadcast-loopers");
         mStartTimeNs = System.nanoTime();
         mPausedDurationNs = 0;
     }
@@ -105,7 +102,7 @@ public class BenchmarkRunner {
      * to avoid unnecessary waiting.
      */
     public void resumeTiming() {
-        waitCoolDownPeriod();
+        ShellHelper.runShellCommand("am wait-for-broadcast-idle --flush-broadcast-loopers");
         resumeTimer();
     }
 
@@ -164,57 +161,5 @@ public class BenchmarkRunner {
             return new AssertionError("BenchmarkRunner state is not FINISHED.");
         }
         return null;
-    }
-
-    /** Waits for the broadcast queue and the CPU cores to be idle. */
-    public void waitCoolDownPeriod() {
-        waitForBroadcastIdle();
-        waitForCpuIdle();
-    }
-
-    private void waitForBroadcastIdle() {
-        Log.d(TAG, "starting to waitForBroadcastIdle");
-        final long startedAt = System.currentTimeMillis();
-        ShellHelper.runShellCommand("am wait-for-broadcast-idle --flush-broadcast-loopers");
-        final long elapsed = System.currentTimeMillis() - startedAt;
-        Log.d(TAG, "waitForBroadcastIdle is complete in " + elapsed + " ms");
-    }
-    private void waitForCpuIdle() {
-        Log.d(TAG, "starting to waitForCpuIdle");
-        final long startedAt = System.currentTimeMillis();
-        while (true) {
-            final int idleCpuPercentage = getIdleCpuPercentage();
-            final long elapsed = System.currentTimeMillis() - startedAt;
-            Log.d(TAG, "waitForCpuIdle " + idleCpuPercentage + "% (" + elapsed + "ms elapsed)");
-            if (idleCpuPercentage >= CPU_IDLE_THRESHOLD_PERCENTAGE) {
-                Log.d(TAG, "waitForCpuIdle is complete in " + elapsed + " ms");
-                return;
-            }
-            if (elapsed >= CPU_IDLE_TIMEOUT_MS) {
-                Log.e(TAG, "Ending waitForCpuIdle because it didn't finish in "
-                        + CPU_IDLE_TIMEOUT_MS + " ms");
-                return;
-            }
-            SystemClock.sleep(1000);
-        }
-    }
-
-    private int getIdleCpuPercentage() {
-        String output = ShellHelper.runShellCommand("top -m 1 -n 1");
-        String[] tokens = output.split("\\s+");
-        float totalCpu = -1;
-        float idleCpu = -1;
-        for (String token : tokens) {
-            if (token.contains("%cpu")) {
-                totalCpu = Float.parseFloat(token.split("%")[0]);
-            } else if (token.contains("%idle")) {
-                idleCpu = Float.parseFloat(token.split("%")[0]);
-            }
-        }
-        if (totalCpu < 0 || idleCpu < 0) {
-            Log.e(TAG, "Could not get idle cpu percentage, output=" + output);
-            return -1;
-        }
-        return (int) (100 * idleCpu / totalCpu);
     }
 }

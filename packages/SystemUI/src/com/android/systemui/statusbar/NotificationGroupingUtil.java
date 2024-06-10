@@ -362,18 +362,32 @@ public class NotificationGroupingUtil {
         }
 
         protected boolean hasSameIcon(Object parentData, Object childData) {
-            Icon parentIcon = ((Notification) parentData).getSmallIcon();
-            Icon childIcon = ((Notification) childData).getSmallIcon();
+            Icon parentIcon = getIcon((Notification) parentData);
+            Icon childIcon = getIcon((Notification) childData);
             return parentIcon.sameAs(childIcon);
+        }
+
+        private static Icon getIcon(Notification notification) {
+            if (notification.shouldUseAppIcon()) {
+                return notification.getAppIcon();
+            }
+            return notification.getSmallIcon();
         }
 
         /**
          * @return whether two ImageViews have the same colorFilterSet or none at all
          */
         protected boolean hasSameColor(Object parentData, Object childData) {
-            int parentColor = ((Notification) parentData).color;
-            int childColor = ((Notification) childData).color;
+            int parentColor = getColor((Notification) parentData);
+            int childColor = getColor((Notification) childData);
             return parentColor == childColor;
+        }
+
+        private static int getColor(Notification notification) {
+            if (notification.shouldUseAppIcon()) {
+                return 0;  // the color filter isn't applied if using the app icon
+            }
+            return notification.color;
         }
 
         @Override

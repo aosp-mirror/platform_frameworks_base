@@ -28,8 +28,10 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
@@ -104,6 +106,9 @@ class KeyguardIndicationAreaViewModelTest : SysuiTestCase() {
                 burnInInteractor = burnInInteractor,
                 shortcutsCombinedViewModel = shortcutsCombinedViewModel,
                 configurationInteractor = ConfigurationInteractor(FakeConfigurationRepository()),
+                keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
+                backgroundCoroutineContext = kosmos.testDispatcher,
+                mainDispatcher = kosmos.testDispatcher
             )
     }
 

@@ -1626,8 +1626,8 @@ abstract public class ManagedServices {
 
         ApplicationInfo appInfo = null;
         try {
-            appInfo = mContext.getPackageManager().getApplicationInfo(
-                name.getPackageName(), 0);
+            appInfo = mContext.getPackageManager().getApplicationInfoAsUser(
+                name.getPackageName(), 0, userid);
         } catch (NameNotFoundException e) {
             // Ignore if the package doesn't exist we won't be able to bind to the service.
         }

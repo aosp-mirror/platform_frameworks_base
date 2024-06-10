@@ -1287,6 +1287,31 @@ public class ViewRootImplTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY)
+    public void votePreferredFrameRate_velocityVotedAfterOnDraw() throws Throwable {
+        mView = new View(sContext);
+        double delta = 0.1;
+        float pixelsPerSecond = 1000_000;
+        float expectedFrameRate = 120;
+        attachViewToWindow(mView);
+        sInstrumentation.waitForIdleSync();
+        ViewRootImpl viewRoot = mView.getViewRootImpl();
+        waitForFrameRateCategoryToSettle(mView);
+
+        sInstrumentation.runOnMainSync(() -> {
+            mView.setFrameContentVelocity(pixelsPerSecond);
+            mView.invalidate();
+            assertEquals(0, viewRoot.getPreferredFrameRate(), delta);
+            assertEquals(0, viewRoot.getLastPreferredFrameRate(), delta);
+            runAfterDraw(() -> {
+                assertEquals(expectedFrameRate, viewRoot.getPreferredFrameRate(), delta);
+                assertEquals(expectedFrameRate, viewRoot.getLastPreferredFrameRate(), delta);
+            });
+        });
+        waitForAfterDraw();
+    }
+
+    @Test
     public void forceInvertOffDarkThemeOff_forceDarkModeDisabled() {
         mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);
         ShellIdentityUtils.invokeWithShellPermissions(() -> {

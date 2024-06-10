@@ -32,6 +32,7 @@ import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
@@ -52,6 +53,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Point;
@@ -80,6 +84,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -668,30 +674,58 @@ public class InsetsControllerTest {
     }
 
     @Test
-    public void testResizeAnimation_withFlagAnimateResizing() {
+    public void testResizeAnimation_withFlagAnimateResizing() throws InterruptedException {
+        final int id = ID_NAVIGATION_BAR;
+        final @InsetsType int type = navigationBars();
+        final int fromInsetsHeight = 50;
+        final int toInsetsHeight = 60;
+        final ArrayList<WindowInsets> progressList = new ArrayList<>();
+        final CountDownLatch animationEndLatch = new CountDownLatch(1);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            final int id = ID_NAVIGATION_BAR;
-            final @InsetsType int type = navigationBars();
             final InsetsState state1 = new InsetsState();
             state1.getOrCreateSource(id, type)
                     .setVisible(true)
-                    .setFrame(0, 0, 500, 50)
+                    .setFrame(0, 0, 500, fromInsetsHeight)
                     .setFlags(FLAG_ANIMATE_RESIZING, FLAG_ANIMATE_RESIZING);
             final InsetsState state2 = new InsetsState(state1, true /* copySources */);
-            state2.peekSource(id).setFrame(0, 0, 500, 60);
+            state2.peekSource(id).setFrame(0, 0, 500, toInsetsHeight);
 
             // New insets source won't cause the resize animation.
             mController.onStateChanged(state1);
             assertEquals("There must not be resize animation.", ANIMATION_TYPE_NONE,
                     mController.getAnimationType(type));
 
+            mViewRoot.getView().setWindowInsetsAnimationCallback(
+                    new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
+                        @Override
+                        public WindowInsets onProgress(
+                                @NonNull WindowInsets insets,
+                                @NonNull List<WindowInsetsAnimation> runningAnimations) {
+                            progressList.add(insets);
+                            return insets;
+                        }
+
+                        @Override
+                        public void onEnd(@NonNull WindowInsetsAnimation animation) {
+                            animationEndLatch.countDown();
+                        }
+                    });
+
             // Changing frame of the source with FLAG_ANIMATE_RESIZING will cause the resize
             // animation.
             mController.onStateChanged(state2);
             assertEquals("There must be resize animation.", ANIMATION_TYPE_RESIZE,
                     mController.getAnimationType(type));
+
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        assertTrue("Animation must be ended.", animationEndLatch.await(3, SECONDS));
+        assertEquals("The first insets height must be the same as `fromInsetsHeight`",
+                fromInsetsHeight, progressList.get(0).getInsets(type).top);
+        assertEquals("The last insets height must be the same as `toInsetsHeight`",
+                toInsetsHeight, progressList.get(progressList.size() - 1).getInsets(type).top);
     }
 
     @Test

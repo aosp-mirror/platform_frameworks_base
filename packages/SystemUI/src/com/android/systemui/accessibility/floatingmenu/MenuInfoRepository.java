@@ -240,26 +240,26 @@ class MenuInfoRepository {
     }
 
     void registerObserversAndCallbacks() {
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
                 /* notifyForDescendants */ false, mMenuTargetFeaturesContentObserver,
                 UserHandle.USER_CURRENT);
         if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     mSecureSettings.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
                     /* notifyForDescendants */ false,
                     mMenuTargetFeaturesContentObserver,
                     UserHandle.USER_CURRENT);
         }
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE),
                 /* notifyForDescendants */ false, mMenuSizeContentObserver,
                 UserHandle.USER_CURRENT);
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 mSecureSettings.getUriFor(ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED),
                 /* notifyForDescendants */ false, mMenuFadeOutContentObserver,
                 UserHandle.USER_CURRENT);
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 mSecureSettings.getUriFor(ACCESSIBILITY_FLOATING_MENU_OPACITY),
                 /* notifyForDescendants */ false, mMenuFadeOutContentObserver,
                 UserHandle.USER_CURRENT);

@@ -16,14 +16,20 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import com.android.systemui.brightness.ui.viewmodel.brightnessSliderViewModel
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.tileGridViewModel
+import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneViewModel
 
 val Kosmos.quickSettingsShadeSceneViewModel: QuickSettingsShadeSceneViewModel by
     Kosmos.Fixture {
         QuickSettingsShadeSceneViewModel(
-            applicationScope = applicationCoroutineScope,
             overlayShadeViewModel = overlayShadeViewModel,
+            brightnessSliderViewModel = brightnessSliderViewModel,
+            tileGridViewModel = tileGridViewModel,
+            editModeViewModel = editModeViewModel,
+            qsSceneAdapter = qsSceneAdapter,
         )
     }

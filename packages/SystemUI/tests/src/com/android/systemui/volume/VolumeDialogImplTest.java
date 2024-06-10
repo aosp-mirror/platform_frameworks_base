@@ -52,7 +52,6 @@ import android.os.SystemClock;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Log;
 import android.view.Gravity;
@@ -65,6 +64,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 
 import androidx.test.core.view.MotionEventBuilder;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -87,6 +87,7 @@ import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
+import com.android.systemui.volume.ui.binder.VolumeDialogMenuIconBinder;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import dagger.Lazy;
@@ -107,7 +108,7 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class VolumeDialogImplTest extends SysuiTestCase {
     VolumeDialogImpl mDialog;
@@ -148,6 +149,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     private VolumePanelNavigationInteractor mVolumePanelNavigationInteractor;
     @Mock
     private VolumeNavigator mVolumeNavigator;
+    @Mock
+    private VolumeDialogMenuIconBinder mVolumeDialogMenuIconBinder;
 
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
             new CsdWarningDialog.Factory() {
@@ -211,6 +214,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mDumpManager,
                 mLazySecureSettings,
                 mVibratorHelper,
+                mVolumeDialogMenuIconBinder,
                 new FakeSystemClock());
         mDialog.init(0, null);
         State state = createShellState();

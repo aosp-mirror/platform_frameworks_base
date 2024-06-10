@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -27,8 +28,10 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,6 +63,21 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
 
             underTest.snapToScene(CommunalScenes.Communal)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun snapToSceneWithDelay() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+            underTest.snapToScene(
+                CommunalScenes.Communal,
+                ActivityTransitionAnimator.TIMINGS.totalDuration
+            )
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+            advanceTimeBy(ActivityTransitionAnimator.TIMINGS.totalDuration)
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
         }
 

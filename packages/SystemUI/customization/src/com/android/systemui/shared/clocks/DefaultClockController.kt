@@ -239,6 +239,8 @@ class DefaultClockController(
     }
 
     inner class DefaultClockEvents : ClockEvents {
+        override var isReactiveTouchInteractionEnabled: Boolean = false
+
         override fun onTimeFormatChanged(is24Hr: Boolean) =
             clocks.forEach { it.refreshFormat(is24Hr) }
 

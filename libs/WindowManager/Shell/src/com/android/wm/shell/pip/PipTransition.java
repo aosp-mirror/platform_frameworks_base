@@ -200,9 +200,6 @@ public class PipTransition extends PipTransitionController {
             animator.cancel();
         }
         mExitTransition = mTransitions.startTransition(type, out, this);
-        if (mPipOrganizer.getOutPipWindowingMode() == WINDOWING_MODE_UNDEFINED) {
-            mHomeTransitionObserver.notifyHomeVisibilityChanged(false /* isVisible */);
-        }
     }
 
     @Override
@@ -489,6 +486,14 @@ public class PipTransition extends PipTransitionController {
                     // activity windowing mode, and set the task bounds to the final bounds
                     wct.setActivityWindowingMode(taskInfo.token, WINDOWING_MODE_UNDEFINED);
                     wct.setBounds(taskInfo.token, destinationBounds);
+                    // If the animation is only used to apply destination bounds immediately and
+                    // invisibly, then reshow it until the pip is drawn with the bounds.
+                    final PipAnimationController.PipTransitionAnimator<?> animator =
+                            mPipAnimationController.getCurrentAnimator();
+                    if (animator != null && animator.getEndValue().equals(0f)) {
+                        tx.addTransactionCommittedListener(mTransitions.getMainExecutor(),
+                                () -> fadeExistingPip(true /* show */));
+                    }
                 } else {
                     wct.setBounds(taskInfo.token, null /* bounds */);
                 }
@@ -650,6 +655,9 @@ public class PipTransition extends PipTransitionController {
         if (mPipOrganizer.mPipOverlay != null) {
             startTransaction.remove(mPipOrganizer.mPipOverlay);
             mPipOrganizer.clearContentOverlay();
+        }
+        if (mPipOrganizer.getOutPipWindowingMode() == WINDOWING_MODE_UNDEFINED) {
+            mHomeTransitionObserver.notifyHomeVisibilityChanged(false /* isVisible */);
         }
         if (pipChange == null) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -1026,6 +1034,7 @@ public class PipTransition extends PipTransitionController {
         }
         startTransaction.apply();
 
+        int animationDuration = mEnterExitAnimationDuration;
         PipAnimationController.PipTransitionAnimator animator;
         if (enterAnimationType == ANIM_TYPE_BOUNDS) {
             animator = mPipAnimationController.getAnimator(taskInfo, leash, currentBounds,
@@ -1057,8 +1066,17 @@ public class PipTransition extends PipTransitionController {
                 }
             }
         } else if (enterAnimationType == ANIM_TYPE_ALPHA) {
+            // In case augmentRequest() is unable to apply the entering bounds (e.g. the request
+            // info only contains display change), keep the animation invisible (alpha 0) and
+            // duration 0 to apply the destination bounds. The actual fade-in animation will be
+            // done in onFinishResize() after the bounds are applied.
+            final boolean fadeInAfterOnFinishResize = rotationDelta != Surface.ROTATION_0
+                    && mFixedRotationState == FIXED_ROTATION_CALLBACK;
             animator = mPipAnimationController.getAnimator(taskInfo, leash, destinationBounds,
-                    0f, 1f);
+                    0f, fadeInAfterOnFinishResize ? 0f : 1f);
+            if (fadeInAfterOnFinishResize) {
+                animationDuration = 0;
+            }
             mSurfaceTransactionHelper
                     .crop(finishTransaction, leash, destinationBounds)
                     .round(finishTransaction, leash, true /* applyCornerRadius */);
@@ -1068,7 +1086,7 @@ public class PipTransition extends PipTransitionController {
         mPipOrganizer.setContentOverlay(animator.getContentOverlayLeash(), currentBounds);
         animator.setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
                 .setPipAnimationCallback(mPipAnimationCallback)
-                .setDuration(mEnterExitAnimationDuration);
+                .setDuration(animationDuration);
         if (rotationDelta != Surface.ROTATION_0
                 && mFixedRotationState == FIXED_ROTATION_TRANSITION) {
             // For fixed rotation, the animation destination bounds is in old rotation coordinates.

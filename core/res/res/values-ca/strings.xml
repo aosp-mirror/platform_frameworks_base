@@ -202,10 +202,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"El teu perfil de treball ja no està disponible en aquest dispositiu"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Has intentat introduir la contrasenya massa vegades"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"L\'administrador ha cedit el dispositiu per a ús personal"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"S\'ha suprimit l\'espai privat"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"La teva organització no permet espais privats en aquest dispositiu gestionat."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"El dispositiu està gestionat"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"La teva organització gestiona aquest dispositiu i és possible que supervisi el trànsit de xarxa. Toca per obtenir més informació."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Les aplicacions poden accedir a la teva ubicació"</string>
@@ -2018,9 +2016,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"En aquests moments, No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al dispositiu Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"En aquests moments, No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho a la tauleta."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al telèfon."</string>
-    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió de reproducció en línia. Primer concedeix el permís al teu dispositiu Android TV."</string>
-    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió de reproducció en línia. Primer concedeix el permís a la teva tauleta."</string>
-    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió de reproducció en línia. Primer concedeix el permís al teu telèfon."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió d\'estríming. Primer concedeix el permís al teu dispositiu Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió d\'estríming. Primer concedeix el permís a la teva tauleta."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió d\'estríming. Primer concedeix el permís al teu telèfon."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho al dispositiu Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho a la tauleta."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho al telèfon."</string>
@@ -2199,7 +2197,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Creu direccional: esquerra"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Creu direccional: dreta"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Creu direccional: centre"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de títol de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> s\'ha transferit al segment RESTRINGIT"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ha enviat una imatge"</string>
@@ -2368,7 +2365,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No es pot accedir a la càmera del telèfon des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No es pot accedir a la càmera de la tauleta des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"No s\'hi pot accedir mentre s\'està reproduint en continu. Prova-ho al telèfon."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No es pot veure el mode d\'imatge sobre imatge durant la reproducció en línia"</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No es pot veure el mode d\'imatge sobre imatge durant l\'estríming"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Valor predeterminat del sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARGETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Permís del perfil del rellotge perquè l\'aplicació complementària gestioni els rellotges"</string>
@@ -2411,6 +2408,8 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espai privat"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Comunitari"</string>
+    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
+    <skip />
     <string name="redacted_notification_message" msgid="1520587845842228816">"S\'ha amagat contingut sensible de les notificacions"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per motius de seguretat"</string>
