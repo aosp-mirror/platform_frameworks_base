@@ -5430,6 +5430,10 @@
     <string name="call_notification_screening_text">Screening an incoming call</string>
 
     <string name="default_notification_channel_label">Uncategorized</string>
+    <string name="promotional_notification_channel_label">Promotions</string>
+    <string name="social_notification_channel_label">Social</string>
+    <string name="news_notification_channel_label">News</string>
+    <string name="recs_notification_channel_label">Recommendations</string>
 
     <string name="importance_from_user">You set the importance of these notifications.</string>
     <string name="importance_from_person">This is important because of the people involved.</string>
