@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.ambient.dagger
+package com.android.systemui.statusbar.pipeline.wifi.domain.interactor
 
-import com.android.systemui.ambient.statusbar.dagger.AmbientStatusBarComponent
-import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
-import com.android.systemui.ambient.touch.dagger.InputSessionComponent
-import dagger.Module
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.statusbar.pipeline.shared.data.repository.connectivityRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.wifiRepository
 
-@Module(
-    subcomponents =
-        [
-            AmbientStatusBarComponent::class,
-            AmbientTouchComponent::class,
-            InputSessionComponent::class,
-        ]
-)
-interface AmbientModule {
-    companion object {
-        const val TOUCH_HANDLERS = "touch_handlers"
+val Kosmos.wifiInteractor: WifiInteractor by
+    Kosmos.Fixture {
+        WifiInteractorImpl(
+            connectivityRepository,
+            wifiRepository,
+            applicationCoroutineScope,
+        )
     }
-}

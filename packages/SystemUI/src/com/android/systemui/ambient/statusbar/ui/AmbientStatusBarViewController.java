@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams;
+package com.android.systemui.ambient.statusbar.ui;
 
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
@@ -31,20 +31,22 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.DreamLogger;
+import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
+import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider;
 import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider.StatusBarItem;
-import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.dagger.DreamLog;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CrossFadeHelper;
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository;
+import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor;
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
-import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.time.DateFormatUtil;
 
@@ -59,13 +61,11 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 /**
- * View controller for {@link DreamOverlayStatusBarView}.
+ * View controller for {@link AmbientStatusBarView}.
  */
-@DreamOverlayComponent.DreamOverlayScope
-public class DreamOverlayStatusBarViewController extends ViewController<DreamOverlayStatusBarView> {
+public class AmbientStatusBarViewController extends ViewController<AmbientStatusBarView> {
     private static final String TAG = "DreamStatusBarCtrl";
 
-    private final TouchInsetManager.TouchInsetSession mTouchInsetSession;
     private final NextAlarmController mNextAlarmController;
     private final AlarmManager mAlarmManager;
     private final Resources mResources;
@@ -76,7 +76,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     private final ZenModeController mZenModeController;
     private final DreamOverlayStateController mDreamOverlayStateController;
     private final UserTracker mUserTracker;
-    private final WifiRepository mWifiRepository;
+    private final WifiInteractor mWifiInteractor;
     private final StatusBarWindowStateController mStatusBarWindowStateController;
     private final DreamOverlayStatusBarItemsProvider mStatusBarItemsProvider;
     private final Executor mMainExecutor;
@@ -115,7 +115,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
 
     private final DreamOverlayNotificationCountProvider.Callback mNotificationCountCallback =
             notificationCount -> showIcon(
-                    DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS,
+                    AmbientStatusBarView.STATUS_ICON_NOTIFICATIONS,
                     notificationCount > 0,
                     notificationCount > 0
                             ? buildNotificationsContentDescription(notificationCount)
@@ -125,11 +125,10 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             this::onStatusBarItemsChanged;
 
     @Inject
-    public DreamOverlayStatusBarViewController(
-            DreamOverlayStatusBarView view,
+    public AmbientStatusBarViewController(
+            AmbientStatusBarView view,
             @Main Resources resources,
             @Main Executor mainExecutor,
-            TouchInsetManager.TouchInsetSession touchInsetSession,
             AlarmManager alarmManager,
             NextAlarmController nextAlarmController,
             DateFormatUtil dateFormatUtil,
@@ -140,12 +139,11 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             DreamOverlayStatusBarItemsProvider statusBarItemsProvider,
             DreamOverlayStateController dreamOverlayStateController,
             UserTracker userTracker,
-            WifiRepository wifiRepository,
+            WifiInteractor wifiInteractor,
             @DreamLog LogBuffer logBuffer) {
         super(view);
         mResources = resources;
         mMainExecutor = mainExecutor;
-        mTouchInsetSession = touchInsetSession;
         mAlarmManager = alarmManager;
         mNextAlarmController = nextAlarmController;
         mDateFormatUtil = dateFormatUtil;
@@ -156,7 +154,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mZenModeController = zenModeController;
         mDreamOverlayStateController = dreamOverlayStateController;
         mUserTracker = userTracker;
-        mWifiRepository = wifiRepository;
+        mWifiInteractor = wifiInteractor;
         mLogger = new DreamLogger(logBuffer, TAG);
 
         // Register to receive show/hide updates for the system status bar. Our custom status bar
@@ -170,7 +168,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
 
         collectFlow(
                 mView,
-                mWifiRepository.getWifiNetwork(),
+                mWifiInteractor.getWifiNetwork(),
                 network -> updateWifiUnavailableStatusIcon(
                         network instanceof WifiNetworkModel.Active));
 
@@ -202,7 +200,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mView.removeAllExtraStatusBarItemViews();
         mDreamOverlayStateController.setDreamOverlayStatusBarVisible(false);
         mDreamOverlayStateController.removeCallback(mDreamOverlayStateCallback);
-        mTouchInsetSession.clear();
 
         mIsAttached = false;
     }
@@ -212,7 +209,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
      *
      * No-op if the dream overlay status bar should not be shown.
      */
-    protected void setFadeAmount(float fadeAmount, boolean fadingOut) {
+    public void setFadeAmount(float fadeAmount, boolean fadingOut) {
         updateVisibility();
 
         if (mView.getVisibility() != View.VISIBLE) {
@@ -240,7 +237,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
 
     @VisibleForTesting
     void updateWifiUnavailableStatusIcon(boolean available) {
-        showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, !available,
+        showIcon(AmbientStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, !available,
                 R.string.wifi_unavailable_dream_overlay_content_description);
     }
 
@@ -249,13 +246,13 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                 mAlarmManager.getNextAlarmClock(mUserTracker.getUserId());
         final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
         showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_ALARM_SET,
+                AmbientStatusBarView.STATUS_ICON_ALARM_SET,
                 hasAlarm,
                 hasAlarm ? buildAlarmContentDescription(alarm) : null);
     }
 
     private void updateAssistantAttentionIcon() {
-        showIcon(DreamOverlayStatusBarView.STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE,
+        showIcon(AmbientStatusBarView.STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE,
                 mDreamOverlayStateController.hasAssistantAttention(),
                 R.string.assistant_attention_content_description);
     }
@@ -284,17 +281,17 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                 .isSensorBlocked(SensorPrivacyManager.Sensors.MICROPHONE);
         final boolean cameraBlocked = mSensorPrivacyController
                 .isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA);
-        @DreamOverlayStatusBarView.StatusIconType int iconType = Resources.ID_NULL;
+        @AmbientStatusBarView.StatusIconType int iconType = Resources.ID_NULL;
         showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_CAMERA_DISABLED,
+                AmbientStatusBarView.STATUS_ICON_CAMERA_DISABLED,
                 !micBlocked && cameraBlocked,
                 R.string.camera_blocked_dream_overlay_content_description);
         showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_MIC_DISABLED,
+                AmbientStatusBarView.STATUS_ICON_MIC_DISABLED,
                 micBlocked && !cameraBlocked,
                 R.string.microphone_blocked_dream_overlay_content_description);
         showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED,
+                AmbientStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED,
                 micBlocked && cameraBlocked,
                 R.string.camera_and_microphone_blocked_dream_overlay_content_description);
     }
@@ -308,24 +305,24 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
 
     private void updatePriorityModeStatusIcon() {
         showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON,
+                AmbientStatusBarView.STATUS_ICON_PRIORITY_MODE_ON,
                 mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF,
                 R.string.priority_mode_dream_overlay_content_description);
     }
 
-    private void showIcon(@DreamOverlayStatusBarView.StatusIconType int iconType, boolean show,
+    private void showIcon(@AmbientStatusBarView.StatusIconType int iconType, boolean show,
             int contentDescriptionResId) {
         showIcon(iconType, show, mResources.getString(contentDescriptionResId));
     }
 
     private void showIcon(
-            @DreamOverlayStatusBarView.StatusIconType int iconType,
+            @AmbientStatusBarView.StatusIconType int iconType,
             boolean show,
             @Nullable String contentDescription) {
         mMainExecutor.execute(() -> {
             if (mIsAttached) {
                 mLogger.logShowOrHideStatusBarItem(
-                        show, DreamOverlayStatusBarView.getLoggableStatusIconType(iconType));
+                        show, AmbientStatusBarView.getLoggableStatusIconType(iconType));
                 mView.showIcon(iconType, show, contentDescription);
             }
         });

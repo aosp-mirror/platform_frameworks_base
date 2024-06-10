@@ -47,6 +47,7 @@ import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController;
 import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
@@ -55,6 +56,7 @@ import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.touch.TouchInsetManager;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
@@ -80,7 +82,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     ViewTreeObserver mViewTreeObserver;
 
     @Mock
-    DreamOverlayStatusBarViewController mDreamOverlayStatusBarViewController;
+    AmbientStatusBarViewController mAmbientStatusBarViewController;
 
     @Mock
     LowLightTransitionCoordinator mLowLightTransitionCoordinator;
@@ -131,6 +133,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     CommunalInteractor mCommunalInteractor;
     @Mock
     private DreamManager mDreamManager;
+    @Mock
+    private TouchInsetManager.TouchInsetSession mTouchInsetSession;
 
     DreamOverlayContainerViewController mController;
 
@@ -150,8 +154,9 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mComplicationHostViewController,
                 mDreamOverlayContentView,
                 mHubGestureIndicatorView,
-                mDreamOverlayStatusBarViewController,
+                mAmbientStatusBarViewController,
                 mLowLightTransitionCoordinator,
+                mTouchInsetSession,
                 mBlurUtils,
                 mHandler,
                 mDispatcher,
@@ -190,7 +195,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     @Test
     public void testDreamOverlayStatusBarViewControllerInitialized() {
         mController.init();
-        verify(mDreamOverlayStatusBarViewController).init();
+        verify(mAmbientStatusBarViewController).init();
     }
 
     @Test
