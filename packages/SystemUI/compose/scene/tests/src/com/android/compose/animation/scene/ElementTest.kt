@@ -47,10 +47,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertTopPositionInRootIsEqualTo
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -1790,5 +1792,50 @@ class ElementTest {
         assertThat(barInB.lastOffset).isNotEqualTo(Offset.Unspecified)
         assertThat(barInB.lastAlpha).isNotEqualTo(Element.AlphaUnspecified)
         assertThat(barInB.lastScale).isNotEqualTo(Scale.Unspecified)
+    }
+
+    @Test
+    fun currentTransitionSceneIsUsedToComputeElementValues() = runTest {
+        val state =
+            rule.runOnIdle {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions {
+                        from(SceneB, to = SceneC) {
+                            scaleSize(TestElements.Foo, width = 2f, height = 3f)
+                        }
+                    }
+                )
+            }
+
+        @Composable
+        fun SceneScope.Foo() {
+            Box(Modifier.testTag("fooParentIn${sceneKey.debugName}")) {
+                Box(Modifier.element(TestElements.Foo).size(20.dp))
+            }
+        }
+
+        rule.setContent {
+            SceneTransitionLayout(state, Modifier.size(200.dp)) {
+                scene(SceneA) { Foo() }
+                scene(SceneB) {}
+                scene(SceneC) { Foo() }
+            }
+        }
+
+        // We have 2 transitions:
+        //  - A => B at 100%
+        //  - B => C at 0%
+        // So Foo should have a size of (40dp, 60dp) in both A and C given that it is scaling its
+        // size in B => C.
+        rule.runOnUiThread {
+            state.startTransition(
+                transition(from = SceneA, to = SceneB, progress = { 1f }, onFinish = neverFinish())
+            )
+            state.startTransition(transition(from = SceneB, to = SceneC, progress = { 0f }))
+        }
+
+        rule.onNode(hasTestTag("fooParentInSceneA")).assertSizeIsEqualTo(40.dp, 60.dp)
+        rule.onNode(hasTestTag("fooParentInSceneC")).assertSizeIsEqualTo(40.dp, 60.dp)
     }
 }
