@@ -6110,11 +6110,17 @@ public class Intent implements Parcelable, Cloneable {
      * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}
      * method will contains the original intent Chooser has been launched with under the
      * {@link #EXTRA_INTENT} key as a context for the current sharing session. The returned
-     * {@link android.database.Cursor} should contain
-     * {@link android.service.chooser.AdditionalContentContract.Columns#URI} column for the item URI
-     * and, optionally, {@link AdditionalContentContract.CursorExtraKeys#POSITION} extra that
+     * {@link android.database.Cursor} should contain:
+     * <ul>
+     * <li>{@link android.service.chooser.AdditionalContentContract.Columns#URI} column for the item
+     * URI.</li>
+     * <li>Optional columns {@link MediaStore.MediaColumns#WIDTH} and
+     * {@link MediaStore.MediaColumns#HEIGHT} for the dimensions of the preview image.
+     * These columns can also be returned for each {@link #EXTRA_STREAM} item metadata
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)} call.</li>
+     * <li>Optional {@link AdditionalContentContract.CursorExtraKeys#POSITION} extra that
      * specifies the cursor starting position; the item at this position is expected to match the
-     * item specified by {@link #EXTRA_CHOOSER_FOCUSED_ITEM_POSITION}.</p>
+     * item specified by {@link #EXTRA_CHOOSER_FOCUSED_ITEM_POSITION}.</li></ul></p>
      *
      * <p>When the user makes a selection change,
      * {@link ContentProvider#call(String, String, Bundle)} method will be invoked with the "method"
