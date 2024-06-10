@@ -17,6 +17,7 @@
 package com.android.systemui.dreams;
 
 import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -144,6 +145,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         when(mDreamOverlayContainerView.getRootSurfaceControl())
                 .thenReturn(mAttachedSurfaceControl);
         when(mKeyguardTransitionInteractor.isFinishedInStateWhere(any())).thenReturn(emptyFlow());
+        when(mShadeInteractor.isAnyExpanded()).thenReturn(MutableStateFlow(false));
+        when(mCommunalInteractor.isCommunalShowing()).thenReturn(MutableStateFlow(false));
 
         mController = new DreamOverlayContainerViewController(
                 mDreamOverlayContainerView,
@@ -324,5 +327,13 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     public void onViewDetached_removesScrimExpansionCallback() {
         mController.onViewDetached();
         verify(mBouncerlessScrimController).removeCallback(any());
+    }
+
+    @EnableFlags(android.service.dreams.Flags.FLAG_DREAM_HANDLES_BEING_OBSCURED)
+    @Test
+    public void testOnViewAttachedSucceedsWhenDreamHandlesBeingObscuredFlagEnabled() {
+        // This test will catch failures in presubmit when the dream_handles_being_obscured flag is
+        // enabled.
+        mController.onViewAttached();
     }
 }
