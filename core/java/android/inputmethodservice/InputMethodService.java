@@ -401,10 +401,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private long mStylusHwSessionsTimeout = STYLUS_HANDWRITING_IDLE_TIMEOUT_MS;
     private Runnable mStylusWindowIdleTimeoutRunnable;
     private long mStylusWindowIdleTimeoutForTest;
-    /**
-     * Tracks last {@link MotionEvent#getToolType(int)} used for {@link MotionEvent#ACTION_DOWN}.
-     **/
-    private int mLastUsedToolType;
+
     /**
      * Tracks the ctrl+shift shortcut
      **/
@@ -1367,7 +1364,6 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private void updateEditorToolTypeInternal(int toolType) {
         if (Flags.useHandwritingListenerForTooltype()) {
-            mLastUsedToolType = toolType;
             if (mInputEditorInfo != null) {
                 mInputEditorInfo.setInitialToolType(toolType);
             }
@@ -3384,9 +3380,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 null /* icProto */);
         mInputStarted = true;
         mStartedInputConnection = ic;
-        if (Flags.useHandwritingListenerForTooltype()) {
-            editorInfo.setInitialToolType(mLastUsedToolType);
-        }
         mInputEditorInfo = editorInfo;
         initialize();
         mInlineSuggestionSessionController.notifyOnStartInput(
