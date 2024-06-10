@@ -386,7 +386,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             // Should match the density of the task. The task may have had its density overridden
             // to be different that SysUI's.
             windowDecorConfig.setTo(taskInfo.configuration);
-        } else if (DesktopModeStatus.isDesktopDensityOverrideSet()) {
+        } else if (DesktopModeStatus.useDesktopOverrideDensity()) {
             // The task has had its density overridden, but keep using the system's density to
             // layout the header.
             windowDecorConfig.setTo(context.getResources().getConfiguration());
@@ -516,8 +516,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private void createResizeVeilIfNeeded() {
         if (mResizeVeil != null) return;
         loadAppInfoIfNeeded();
-        mResizeVeil = new ResizeVeil(mContext, mDisplayController, mResizeVeilBitmap, mTaskInfo,
-                mTaskSurface, mSurfaceControlTransactionSupplier);
+        mResizeVeil = new ResizeVeil(mContext, mDisplayController, mResizeVeilBitmap,
+                mTaskSurface, mSurfaceControlTransactionSupplier, mTaskInfo);
     }
 
     /**
@@ -525,7 +525,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     public void showResizeVeil(Rect taskBounds) {
         createResizeVeilIfNeeded();
-        mResizeVeil.showVeil(mTaskSurface, taskBounds);
+        mResizeVeil.showVeil(mTaskSurface, taskBounds, mTaskInfo);
     }
 
     /**
@@ -533,7 +533,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     public void showResizeVeil(SurfaceControl.Transaction tx, Rect taskBounds) {
         createResizeVeilIfNeeded();
-        mResizeVeil.showVeil(tx, mTaskSurface, taskBounds, false /* fadeIn */);
+        mResizeVeil.showVeil(tx, mTaskSurface, taskBounds, mTaskInfo, false /* fadeIn */);
     }
 
     /**

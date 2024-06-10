@@ -227,8 +227,8 @@ public class StatusBarIconControllerImpl implements Tunable,
         StatusBarIconHolder holder = mStatusBarIconList.getIconHolder(slot, 0);
         if (holder == null) {
             StatusBarIcon icon = new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
-                    Icon.createWithResource(
-                            mContext, resourceId), 0, 0, contentDescription);
+                    Icon.createWithResource(mContext, resourceId), 0, 0,
+                    contentDescription, StatusBarIcon.Type.SystemIcon);
             holder = StatusBarIconHolder.fromIcon(icon);
             setIcon(slot, holder);
         } else {
@@ -295,7 +295,7 @@ public class StatusBarIconControllerImpl implements Tunable,
                 } else {
                     holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
                             Icon.createWithResource(mContext, state.callStrengthResId), 0, 0,
-                            state.callStrengthDescription));
+                            state.callStrengthDescription, StatusBarIcon.Type.SystemIcon));
                 }
                 setIcon(slot, holder);
             }
@@ -320,7 +320,7 @@ public class StatusBarIconControllerImpl implements Tunable,
                 } else {
                     holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
                             Icon.createWithResource(mContext, state.noCallingResId), 0, 0,
-                            state.noCallingDescription));
+                            state.noCallingDescription, StatusBarIcon.Type.SystemIcon));
                 }
                 setIcon(slot, holder);
             }

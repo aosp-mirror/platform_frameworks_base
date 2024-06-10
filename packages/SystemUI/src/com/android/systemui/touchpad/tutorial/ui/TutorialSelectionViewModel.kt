@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recordissue
+package com.android.systemui.touchpad.tutorial.ui
 
-import com.android.traceur.TraceUtils.PresetTraceType
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
-data class IssueRecordingConfig(val screenRecord: Boolean, val traceType: PresetTraceType)
+class TutorialSelectionViewModel : ViewModel()
+
+class TutorialSelectionViewModelFactory : ViewModelProvider.Factory {
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return TutorialSelectionViewModel() as T
+    }
+}

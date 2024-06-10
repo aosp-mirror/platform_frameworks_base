@@ -830,7 +830,8 @@ public final class ActiveServices {
             for (int i = 0; i < smap.mServicesByInstanceName.size(); i++) {
                 final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
                 if (sr.appInfo.packageName.equals(pkg) && sr.isForeground) {
-                    if (Objects.equals(sr.foregroundNoti.getChannelId(), channelId)) {
+                    if (sr.foregroundNoti != null
+                            && Objects.equals(sr.foregroundNoti.getChannelId(), channelId)) {
                         if (DEBUG_FOREGROUND_SERVICE) {
                             Slog.d(TAG_SERVICE, "Channel u" + userId + "/pkg=" + pkg
                                     + "/channelId=" + channelId

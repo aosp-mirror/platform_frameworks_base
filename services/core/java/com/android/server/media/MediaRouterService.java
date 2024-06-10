@@ -16,7 +16,6 @@
 
 package com.android.server.media;
 
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -75,7 +74,6 @@ import com.android.media.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -266,32 +264,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public boolean showMediaOutputSwitcher(String packageName) {
-        int uid = Binder.getCallingUid();
-        if (!validatePackageName(uid, packageName)) {
-            throw new SecurityException("packageName must match the calling identity");
-        }
-        UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
-        final long token = Binder.clearCallingIdentity();
-        try {
-            if (mContext.getSystemService(ActivityManager.class).getPackageImportance(packageName)
-                    > IMPORTANCE_FOREGROUND) {
-                Slog.w(TAG, "showMediaOutputSwitcher only works when called from foreground");
-                return false;
-            }
-            synchronized (mLock) {
-                StatusBarManagerInternal statusBar =
-                        LocalServices.getService(StatusBarManagerInternal.class);
-                statusBar.showMediaOutputSwitcher(packageName, userHandle);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-        return true;
-    }
-
-    // Binder call
-    @Override
     public MediaRouterClientState getState(IMediaRouterClient client) {
         final long token = Binder.clearCallingIdentity();
         try {
@@ -440,6 +412,17 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 /* callerPackageName */ null,
                 /* targetPackageName */ null, /* setDeviceRouteSelected */
                 false);
+    }
+
+    // Binder call
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @Override
+    public boolean showMediaOutputSwitcherWithRouter2(@NonNull String packageName) {
+        int uid = Binder.getCallingUid();
+        if (!validatePackageName(uid, packageName)) {
+            throw new SecurityException("packageName must match the calling identity");
+        }
+        return mService2.showMediaOutputSwitcherWithRouter2(packageName);
     }
 
     // Binder call
@@ -674,6 +657,13 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     public void releaseSessionWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId) {
         mService2.releaseSessionWithManager(manager, requestId, sessionId);
+    }
+
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @Override
+    public boolean showMediaOutputSwitcherWithProxyRouter(
+            @NonNull IMediaRouter2Manager proxyRouter) {
+        return mService2.showMediaOutputSwitcherWithProxyRouter(proxyRouter);
     }
 
     void restoreBluetoothA2dp() {

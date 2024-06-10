@@ -2409,6 +2409,8 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Прыватная прастора"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Клон"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Супольны"</string>
+    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
+    <skip />
     <string name="redacted_notification_message" msgid="1520587845842228816">"Канфідэнцыяльнае змесціва ў апавяшчэннях схавана"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Змесціва праграмы выключана з абагульвання экрана ў мэтах бяспекі"</string>

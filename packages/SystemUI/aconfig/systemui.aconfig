@@ -1064,3 +1064,23 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "dozeui_scheduling_alarms_background_execution"
+  namespace: "systemui"
+  description: "Decide whether to execute binder calls to schedule alarms in background thread"
+  bug: "330492575"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "notification_pulsing_fix"
+  namespace: "systemui"
+  description: "Allow showing new pulsing notifications when the device is already pulsing."
+  bug: "335560575"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

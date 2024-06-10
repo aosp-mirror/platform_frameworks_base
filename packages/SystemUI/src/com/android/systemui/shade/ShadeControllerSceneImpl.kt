@@ -17,16 +17,14 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
-import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.ShadeTouchLog
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
@@ -61,8 +59,6 @@ constructor(
     @Background private val scope: CoroutineScope,
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
-    private val deviceEntryInteractor: DeviceEntryInteractor,
-    private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val notificationStackScrollLayout: NotificationStackScrollLayout,
     @ShadeTouchLog private val touchLog: LogBuffer,
     private val vibratorHelper: VibratorHelper,
@@ -100,7 +96,7 @@ constructor(
 
     override fun instantCollapseShade() {
         sceneInteractor.snapToScene(
-            getCollapseDestinationScene(),
+            SceneFamilies.Home,
             "hide shade",
         )
     }
@@ -140,22 +136,10 @@ constructor(
 
     private fun animateCollapseShadeInternal() {
         sceneInteractor.changeScene(
-            getCollapseDestinationScene(), // TODO(b/336581871): add sceneState?
+            SceneFamilies.Home, // TODO(b/336581871): add sceneState?
             "ShadeController.animateCollapseShade",
             SlightlyFasterShadeCollapse,
         )
-    }
-
-    private fun getCollapseDestinationScene(): SceneKey {
-        // Always check whether device is unlocked before transitioning to gone scene.
-        return if (
-            deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked &&
-                deviceEntryInteractor.isDeviceEntered.value
-        ) {
-            Scenes.Gone
-        } else {
-            Scenes.Lockscreen
-        }
     }
 
     override fun cancelExpansionAndCollapseShade() {

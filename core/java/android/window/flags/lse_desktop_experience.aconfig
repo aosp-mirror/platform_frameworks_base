@@ -52,6 +52,13 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_windowing_scvh_cache"
+    namespace: "lse_desktop_experience"
+    description: "Enables a SurfaceControlViewHost cache for window decorations"
+    bug: "345146928"
+}
+
+flag {
     name: "enable_desktop_windowing_wallpaper_activity"
     namespace: "lse_desktop_experience"
     description: "Enables desktop wallpaper activity to show wallpaper in the desktop mode"

@@ -281,6 +281,10 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String RESTRICTIONS_FILE_PREFIX = "res_";
     private static final String XML_SUFFIX = ".xml";
 
+    private static final String CUSTOM_BIOMETRIC_PROMPT_LOGO_RES_ID_KEY = "custom_logo_res_id";
+    private static final String CUSTOM_BIOMETRIC_PROMPT_LOGO_DESCRIPTION_KEY =
+            "custom_logo_description";
+
     private static final int ALLOWED_FLAGS_FOR_CREATE_USERS_PERMISSION =
             UserInfo.FLAG_MANAGED_PROFILE
             | UserInfo.FLAG_PROFILE
@@ -1970,6 +1974,14 @@ public class UserManagerService extends IUserManager.Stub {
         // intentSender
         unlockIntent.putExtra(Intent.EXTRA_INTENT, pendingIntent.getIntentSender());
         unlockIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+
+        if (Flags.enablePrivateSpaceFeatures() && Flags.usePrivateSpaceIconInBiometricPrompt()
+                && getUserInfo(userId).isPrivateProfile()) {
+            unlockIntent.putExtra(CUSTOM_BIOMETRIC_PROMPT_LOGO_RES_ID_KEY,
+                    com.android.internal.R.drawable.stat_sys_private_profile_status);
+            unlockIntent.putExtra(CUSTOM_BIOMETRIC_PROMPT_LOGO_DESCRIPTION_KEY,
+                    mContext.getString(R.string.private_space_biometric_prompt_title));
+        }
         mContext.startActivityAsUser(
                 unlockIntent, UserHandle.of(getProfileParentIdUnchecked(userId)));
     }

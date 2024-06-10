@@ -19,8 +19,6 @@ package com.android.systemui.qs.tileimpl
 import android.content.Context
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.service.quicksettings.Tile
 import android.testing.TestableLooper
 import android.text.TextUtils
@@ -30,13 +28,11 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.haptics.qs.QSLongPressEffect
 import com.android.systemui.haptics.qs.qsLongPressEffect
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.qs.qsTileFactory
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -540,41 +536,16 @@ class QSTileViewImplTest : SysuiTestCase() {
         assertThat(tileView.haveLongPressPropertiesBeenReset).isTrue()
     }
 
-    @Test
-    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
-    fun onInit_withLongPressEffect_longPressEffectHasTileAndExpandable() {
-        val tile = kosmos.qsTileFactory.createTile("Test Tile")
-        tileView.init(tile)
-
-        assertThat(tileView.isTileAddedToLongPress).isTrue()
-        assertThat(tileView.isExpandableAddedToLongPress).isTrue()
-    }
-
-    @Test
-    @DisableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
-    fun onInit_withoutLongPressEffect_longPressEffectDoesNotHaveTileAndExpandable() {
-        val tile = kosmos.qsTileFactory.createTile("Test Tile")
-        tileView.init(tile)
-
-        assertThat(tileView.isTileAddedToLongPress).isFalse()
-        assertThat(tileView.isExpandableAddedToLongPress).isFalse()
-    }
-
     class FakeTileView(
         context: Context,
         collapsed: Boolean,
-        private val longPressEffect: QSLongPressEffect?,
+        longPressEffect: QSLongPressEffect?,
     ) : QSTileViewImpl(
             ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings),
             collapsed,
             longPressEffect,
     ) {
         var constantLongPressEffectDuration = 500
-
-        val isTileAddedToLongPress: Boolean
-            get() = longPressEffect?.qsTile != null
-        val isExpandableAddedToLongPress: Boolean
-            get() = longPressEffect?.expandable != null
 
         override fun getLongPressEffectDuration(): Int = constantLongPressEffectDuration
         fun changeState(state: QSTile.State) {

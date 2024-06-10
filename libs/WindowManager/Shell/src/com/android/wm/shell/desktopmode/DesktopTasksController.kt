@@ -54,7 +54,6 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
-import com.android.wm.shell.common.ExecutorUtils
 import com.android.wm.shell.common.ExternalInterfaceBinder
 import com.android.wm.shell.common.LaunchAdjacentController
 import com.android.wm.shell.common.MultiInstanceHelper
@@ -76,7 +75,7 @@ import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.shared.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
-import com.android.wm.shell.shared.DesktopModeStatus.isDesktopDensityOverrideSet
+import com.android.wm.shell.shared.DesktopModeStatus.useDesktopOverrideDensity
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -961,8 +960,8 @@ class DesktopTasksController(
             }
         }
         val wct = WindowContainerTransaction()
-        if (isDesktopDensityOverrideSet()) {
-            // TODO(344599474) reintroduce density changes behind a disabled flag
+        if (useDesktopOverrideDensity()) {
+            wct.setDensityDpi(task.token, DESKTOP_DENSITY_OVERRIDE)
         }
         // Desktop Mode is showing and we're launching a new Task - we might need to minimize
         // a Task.
@@ -1036,7 +1035,7 @@ class DesktopTasksController(
         }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.reorder(taskInfo.token, true /* onTop */)
-        if (isDesktopDensityOverrideSet()) {
+        if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, DESKTOP_DENSITY_OVERRIDE)
         }
     }
@@ -1056,7 +1055,7 @@ class DesktopTasksController(
             }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
         wct.setBounds(taskInfo.token, Rect())
-        if (isDesktopDensityOverrideSet()) {
+        if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
     }
@@ -1471,13 +1470,13 @@ class DesktopTasksController(
         }
 
         override fun showDesktopApps(displayId: Int, remoteTransition: RemoteTransition?) {
-            ExecutorUtils.executeRemoteCallWithTaskPermission(controller, "showDesktopApps") { c ->
+            executeRemoteCallWithTaskPermission(controller, "showDesktopApps") { c ->
                 c.showDesktopApps(displayId, remoteTransition)
             }
         }
 
         override fun showDesktopApp(taskId: Int) {
-            ExecutorUtils.executeRemoteCallWithTaskPermission(controller, "showDesktopApp") { c ->
+            executeRemoteCallWithTaskPermission(controller, "showDesktopApp") { c ->
                 c.moveTaskToFront(taskId)
             }
         }
@@ -1495,7 +1494,7 @@ class DesktopTasksController(
 
         override fun getVisibleTaskCount(displayId: Int): Int {
             val result = IntArray(1)
-            ExecutorUtils.executeRemoteCallWithTaskPermission(
+            executeRemoteCallWithTaskPermission(
                 controller,
                 "getVisibleTaskCount",
                 { controller -> result[0] = controller.getVisibleTaskCount(displayId) },
@@ -1505,7 +1504,7 @@ class DesktopTasksController(
         }
 
         override fun onDesktopSplitSelectAnimComplete(taskInfo: RunningTaskInfo) {
-            ExecutorUtils.executeRemoteCallWithTaskPermission(
+            executeRemoteCallWithTaskPermission(
                 controller,
                 "onDesktopSplitSelectAnimComplete"
             ) { c ->
@@ -1519,13 +1518,13 @@ class DesktopTasksController(
                 "IDesktopModeImpl: set task listener=%s",
                 listener ?: "null"
             )
-            ExecutorUtils.executeRemoteCallWithTaskPermission(controller, "setTaskListener") { _ ->
+            executeRemoteCallWithTaskPermission(controller, "setTaskListener") { _ ->
                 listener?.let { remoteListener.register(it) } ?: remoteListener.unregister()
             }
         }
 
         override fun moveToDesktop(taskId: Int, transitionSource: DesktopModeTransitionSource) {
-            ExecutorUtils.executeRemoteCallWithTaskPermission(controller, "moveToDesktop") { c ->
+            executeRemoteCallWithTaskPermission(controller, "moveToDesktop") { c ->
                 c.moveToDesktop(taskId, transitionSource = transitionSource)
             }
         }

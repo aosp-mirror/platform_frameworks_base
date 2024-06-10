@@ -164,25 +164,16 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
 
             with(qsImpl!!) {
                 verify(this).setQsVisible(false)
-                verify(this, never())
+                verify(this)
                     .setQsExpansion(
-                        /* expansion= */ anyFloat(),
-                        /* panelExpansionFraction= */ anyFloat(),
-                        /* proposedTranslation= */ anyFloat(),
-                        /* squishinessFraction= */ anyFloat(),
+                        /* expansion= */ 0f,
+                        /* panelExpansionFraction= */ 1f,
+                        /* proposedTranslation= */ 0f,
+                        /* squishinessFraction= */ 1f,
                     )
                 verify(this).setListening(false)
                 verify(this).setExpanded(false)
             }
-
-            underTest.applyLatestExpansionAndSquishiness()
-            verify(qsImpl!!)
-                .setQsExpansion(
-                    /* expansion= */ 0f,
-                    /* panelExpansionFraction= */ 1f,
-                    /* proposedTranslation= */ 0f,
-                    /* squishinessFraction= */ 1f,
-                )
         }
 
     @Test

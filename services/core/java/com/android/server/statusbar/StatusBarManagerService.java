@@ -1296,7 +1296,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         synchronized (mIcons) {
             StatusBarIcon icon = new StatusBarIcon(iconPackage, UserHandle.SYSTEM, iconId,
-                    iconLevel, 0, contentDescription);
+                    iconLevel, 0, contentDescription, StatusBarIcon.Type.SystemIcon);
             //Slog.d(TAG, "setIcon slot=" + slot + " index=" + index + " icon=" + icon);
             mIcons.put(slot, icon);
 

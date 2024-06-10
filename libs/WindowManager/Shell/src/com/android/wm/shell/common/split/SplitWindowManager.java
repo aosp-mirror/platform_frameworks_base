@@ -143,6 +143,8 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     /**
      * Releases the surface control of the current {@link DividerView} and tear down the view
      * hierarchy.
+     * @param t If supplied, the surface removal will be bundled with this Transaction. If
+     *          called with null, removes the surface immediately.
      */
     void release(@Nullable SurfaceControl.Transaction t) {
         if (mDividerView != null) {

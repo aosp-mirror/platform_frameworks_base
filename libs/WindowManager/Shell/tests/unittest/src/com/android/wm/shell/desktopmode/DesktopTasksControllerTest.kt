@@ -1113,10 +1113,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   fun handleRequest_freeformTask_alreadyInDesktop_noOverrideDensity_noConfigDensityChange() {
-    // TODO(344599474) enable the test once the density change is behind a flag
-    assumeTrue(false)
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
-    whenever(DesktopModeStatus.isDesktopDensityOverrideSet()).thenReturn(false)
+    whenever(DesktopModeStatus.useDesktopOverrideDensity()).thenReturn(false)
 
     val freeformTask1 = setUpFreeformTask()
     markTaskVisible(freeformTask1)
@@ -1129,10 +1127,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   fun handleRequest_freeformTask_alreadyInDesktop_overrideDensity_hasConfigDensityChange() {
-    // TODO(344599474) enable the test once the density change is behind a flag
-    assumeTrue(false)
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
-    whenever(DesktopModeStatus.isDesktopDensityOverrideSet()).thenReturn(true)
+    whenever(DesktopModeStatus.useDesktopOverrideDensity()).thenReturn(true)
 
     val freeformTask1 = setUpFreeformTask()
     markTaskVisible(freeformTask1)

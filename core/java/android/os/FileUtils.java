@@ -580,6 +580,8 @@ public final class FileUtils {
                            ", copied:" + progress +
                            ", read:" + (count - countToRead) +
                            ", in pipe: " + countInPipe);
+                    Os.close(pipes[0]);
+                    Os.close(pipes[1]);
                     throw new ErrnoException("splice, pipe --> fdOut", EIO);
                 } else {
                     progress += t;
@@ -607,6 +609,8 @@ public final class FileUtils {
                 listener.onProgress(progressSnapshot);
             });
         }
+        Os.close(pipes[0]);
+        Os.close(pipes[1]);
         return progress;
     }
 
