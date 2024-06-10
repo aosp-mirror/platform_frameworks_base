@@ -1893,6 +1893,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // will be canceled.
         options.setPendingIntentBackgroundActivityStartMode(MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
         options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+
+        // TODO (b/336477473): Disallow enter PiP when launching a task in split by default;
+        //                     this might have to be changed as more split-to-pip cujs are defined.
+        options.setDisallowEnterPictureInPictureWhileLaunching(true);
         opts.putAll(options.toBundle());
     }
 
