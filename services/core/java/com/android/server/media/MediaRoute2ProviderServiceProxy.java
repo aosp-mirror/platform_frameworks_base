@@ -539,17 +539,29 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            onServiceConnectedInternal(service);
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(() -> onServiceConnectedInternal(service));
+            } else {
+                onServiceConnectedInternal(service);
+            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            onServiceDisconnectedInternal();
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(() -> onServiceDisconnectedInternal());
+            } else {
+                onServiceDisconnectedInternal();
+            }
         }
 
         @Override
         public void onBindingDied(ComponentName name) {
-            onBindingDiedInternal(name);
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(() -> onBindingDiedInternal(name));
+            } else {
+                onBindingDiedInternal(name);
+            }
         }
     }
 
