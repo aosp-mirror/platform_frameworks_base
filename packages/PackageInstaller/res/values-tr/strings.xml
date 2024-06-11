@@ -55,7 +55,7 @@
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"Geçerli kullanıcının bu yüklemeyi kaldırma izni yok."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Hata"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Uygulamanın yüklemesi kaldırılamadı."</string>
-    <string name="uninstall_application_title" msgid="4045420072401428123">"Uygulamanın yüklemesini kaldır"</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"Uygulamayı kaldır"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Güncelleme kaldırılsın mı?"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g>, şu uygulamanın bir parçasıdır:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Bu uygulamanın yüklemesini kaldırmak istiyor musunuz?"</string>
