@@ -30,6 +30,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -47,6 +48,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
+import android.view.WindowManager;
 import android.window.BackAnimationAdapter;
 import android.window.BackEvent;
 import android.window.BackMotionEvent;
@@ -119,6 +121,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mShellExecutor;
     private final Handler mBgHandler;
+    private final WindowManager mWindowManager;
+    @VisibleForTesting
+    final Rect mTouchableArea = new Rect();
 
     /**
      * Tracks the current user back gesture.
@@ -222,6 +227,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellBackAnimationRegistry = shellBackAnimationRegistry;
         mLatencyTracker = LatencyTracker.getInstance(mContext);
         mShellCommandHandler = shellCommandHandler;
+        mWindowManager = context.getSystemService(WindowManager.class);
+        updateTouchableArea();
     }
 
     private void onInit() {
@@ -283,6 +290,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         mShellBackAnimationRegistry.onConfigurationChanged(newConfig);
+        updateTouchableArea();
+    }
+
+    private void updateTouchableArea() {
+        mTouchableArea.set(mWindowManager.getCurrentWindowMetrics().getBounds());
     }
 
     @Override
@@ -416,9 +428,16 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (!shouldDispatchToAnimator && mActiveCallback != null) {
             mCurrentTracker.updateStartLocation();
             tryDispatchOnBackStarted(mActiveCallback, mCurrentTracker.createStartEvent(null));
+            if (mBackNavigationInfo != null && !isAppProgressGenerationAllowed()) {
+                tryPilferPointers();
+            }
         } else if (shouldDispatchToAnimator) {
             tryPilferPointers();
         }
+    }
+
+    private boolean isAppProgressGenerationAllowed() {
+        return mBackNavigationInfo.getTouchableRegion().equals(mTouchableArea);
     }
 
     /**
@@ -536,6 +555,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             // App is handling back animation. Cancel system animation latency tracking.
             cancelLatencyTracking();
             tryDispatchOnBackStarted(mActiveCallback, touchTracker.createStartEvent(null));
+            if (!isAppProgressGenerationAllowed()) {
+                tryPilferPointers();
+            }
         }
     }
 
@@ -642,7 +664,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     private void dispatchOnBackProgressed(IOnBackInvokedCallback callback,
             BackMotionEvent backEvent) {
-        if (callback == null || !shouldDispatchToAnimator()) {
+        if (callback == null || (!shouldDispatchToAnimator() && mBackNavigationInfo != null
+                && isAppProgressGenerationAllowed())) {
             return;
         }
         try {
