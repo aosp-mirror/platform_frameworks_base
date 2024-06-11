@@ -216,7 +216,7 @@ constructor(
     private var carouselLocale: Locale? = null
 
     private val animationScaleObserver: ContentObserver =
-        object : ContentObserver(null) {
+        object : ContentObserver(executor, 0) {
             override fun onChange(selfChange: Boolean) {
                 if (!mediaFlags.isSceneContainerEnabled()) {
                     MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
@@ -396,10 +396,12 @@ constructor(
         }
 
         // Notifies all active players about animation scale changes.
-        globalSettings.registerContentObserverSync(
-            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-            animationScaleObserver
-        )
+        bgExecutor.execute {
+            globalSettings.registerContentObserverSync(
+                    Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+                    animationScaleObserver
+            )
+        }
     }
 
     private fun setUpListeners() {
