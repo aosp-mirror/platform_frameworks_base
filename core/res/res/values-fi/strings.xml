@@ -153,7 +153,7 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunnin päästä"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ei siirretty"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ei siirretty"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Mobiiliverkon tietoturva"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Puhelinverkon turvallisuus"</string>
     <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Tarkista asetukset"</string>
     <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Laitteen tunnistinta käytettiin"</string>
     <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Yhteys verkossa (<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>) tallensi laitteesi yksilöllisen tunnisteen (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> kertaa <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> – <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> välillä."</string>
