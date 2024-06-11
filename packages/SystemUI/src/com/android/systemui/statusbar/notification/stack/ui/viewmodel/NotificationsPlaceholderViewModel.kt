@@ -29,7 +29,6 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrim
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -61,10 +60,6 @@ constructor(
         interactor.setConstrainedAvailableSpace(height)
     }
 
-    fun onHeadsUpTopChanged(headsUpTop: Float) {
-        interactor.setHeadsUpTop(headsUpTop)
-    }
-
     /** Sets the content alpha for the current state of the brightness mirror */
     fun setAlphaForBrightnessMirror(alpha: Float) {
         interactor.setAlphaForBrightnessMirror(alpha)
@@ -73,9 +68,6 @@ constructor(
     /** Corner rounding of the stack */
     val shadeScrimRounding: Flow<ShadeScrimRounding> =
         interactor.shadeScrimRounding.dumpWhileCollecting("shadeScrimRounding")
-
-    /** The height in px of the contents of the HUN. */
-    val headsUpHeight: StateFlow<Float> = interactor.headsUpHeight.dumpValue("headsUpHeight")
 
     /**
      * The amount [0-1] that the shade or quick settings has been opened. At 0, the shade is closed;

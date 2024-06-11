@@ -40,7 +40,7 @@ class InterruptionHandlerTest {
         val state =
             MutableSceneTransitionLayoutState(
                 SceneA,
-                transitions { /* default interruption handler */},
+                transitions { /* default interruption handler */ },
             )
 
         state.setTargetScene(SceneB, coroutineScope = this)
@@ -160,7 +160,7 @@ class InterruptionHandlerTest {
                 progressVelocity = { progressVelocity },
                 onFinish = { launch {} },
             )
-        state.startTransition(aToB, transitionKey = null)
+        state.startTransition(aToB)
 
         // Animate back to A. The previous transition is reversed, i.e. it has the same (from, to)
         // pair, and its velocity is used when animating the progress back to 0.
@@ -186,7 +186,7 @@ class InterruptionHandlerTest {
                 progressVelocity = { progressVelocity },
                 onFinish = { launch {} },
             )
-        state.startTransition(aToB, transitionKey = null)
+        state.startTransition(aToB)
 
         // Animate to B. The previous transition is reversed, i.e. it has the same (from, to) pair,
         // and its velocity is used when animating the progress to 1.

@@ -53,8 +53,8 @@ constructor(
     }
 
     /** Immediately snaps to the new scene. */
-    fun snapToScene(newScene: SceneKey) {
-        communalSceneRepository.snapToScene(newScene)
+    fun snapToScene(newScene: SceneKey, delayMillis: Long = 0) {
+        communalSceneRepository.snapToScene(newScene, delayMillis)
     }
 
     /**

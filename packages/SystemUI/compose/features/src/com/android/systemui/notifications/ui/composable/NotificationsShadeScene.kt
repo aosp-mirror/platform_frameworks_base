@@ -16,11 +16,11 @@
 
 package com.android.systemui.notifications.ui.composable
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
@@ -75,7 +75,7 @@ constructor(
         OverlayShade(
             modifier = modifier,
             viewModel = overlayShadeViewModel,
-            horizontalArrangement = Arrangement.Start,
+            panelAlignment = Alignment.TopEnd,
             lockscreenContent = lockscreenContent,
         ) {
             Column {
@@ -94,8 +94,9 @@ constructor(
                     maxScrimTop = { 0f },
                     shouldPunchHoleBehindScrim = false,
                     shouldFillMaxSize = false,
+                    shouldReserveSpaceForNavBar = false,
                     shadeMode = ShadeMode.Dual,
-                    modifier = Modifier.width(416.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }

@@ -856,11 +856,12 @@ public class SoundDoseHelper {
         pw.println();
     }
 
-    /*package*/void  reset() {
+    /*package*/void reset(boolean resetISoundDose) {
         Log.d(TAG, "Reset the sound dose helper");
 
-        mSoundDose.compareAndExchange(/*expectedValue=*/null,
-                AudioSystem.getSoundDoseInterface(mSoundDoseCallback));
+        if (resetISoundDose) {
+            mSoundDose.set(AudioSystem.getSoundDoseInterface(mSoundDoseCallback));
+        }
 
         synchronized (mCsdStateLock) {
             try {
@@ -972,7 +973,7 @@ public class SoundDoseHelper {
             }
         }
 
-        reset();
+        reset(/*resetISoundDose=*/false);
     }
 
     private void onConfigureSafeMedia(boolean force, String caller) {

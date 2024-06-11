@@ -403,7 +403,9 @@ public class UsageStatsService extends SystemService implements
 
         mAppStandby.addListener(mStandbyChangeListener);
 
-        mPackageMonitor.register(getContext(), null, UserHandle.ALL, true);
+        mPackageMonitor.register(getContext(),
+                /* thread= */ USE_DEDICATED_HANDLER_THREAD ? mHandler.getLooper() : null,
+                UserHandle.ALL, true);
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);

@@ -548,7 +548,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * and ensuring that the view is freed when it is safe to remove.
      *
      * @param inflationFlag flag corresponding to the content view to be freed
-     * @deprecated By default, {@link NotificationContentInflater#unbindContent} will tell the
+     * @deprecated By default, {@link NotificationRowContentBinder#unbindContent} will tell the
      * view hierarchy to only free when the view is safe to remove so this method is no longer
      * needed. Will remove when all uses are gone.
      */
@@ -2843,12 +2843,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mIsSystemChildExpanded = expanded;
     }
 
-    public void setLayoutListener(LayoutListener listener) {
+    public void setLayoutListener(@Nullable LayoutListener listener) {
         mLayoutListener = listener;
-    }
-
-    public void removeListener() {
-        mLayoutListener = null;
     }
 
     @Override

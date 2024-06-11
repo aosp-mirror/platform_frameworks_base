@@ -37,7 +37,7 @@ fun interface KeyedObserver<in K> {
      * @param reason the reason of change
      * @see KeyedObservable.addObserver
      */
-    fun onKeyChanged(key: K, @ChangeReason reason: Int)
+    fun onKeyChanged(key: K, reason: Int)
 }
 
 /**
@@ -89,7 +89,7 @@ interface KeyedObservable<K> {
      *
      * @param reason reason of the change
      */
-    fun notifyChange(@ChangeReason reason: Int)
+    fun notifyChange(reason: Int)
 
     /**
      * Notifies observers that a change occurs on given key.
@@ -99,7 +99,7 @@ interface KeyedObservable<K> {
      * @param key key of the change
      * @param reason reason of the change
      */
-    fun notifyChange(key: K, @ChangeReason reason: Int)
+    fun notifyChange(key: K, reason: Int)
 }
 
 /** A thread safe implementation of [KeyedObservable]. */
@@ -141,7 +141,7 @@ class KeyedDataObservable<K> : KeyedObservable<K> {
         }
     }
 
-    override fun notifyChange(@ChangeReason reason: Int) {
+    override fun notifyChange(reason: Int) {
         // make a copy to avoid potential ConcurrentModificationException
         val observers = synchronized(observers) { observers.entries.toTypedArray() }
         val keyedObservers = synchronized(keyedObservers) { keyedObservers.copy() }
@@ -165,7 +165,7 @@ class KeyedDataObservable<K> : KeyedObservable<K> {
         return result
     }
 
-    override fun notifyChange(key: K, @ChangeReason reason: Int) {
+    override fun notifyChange(key: K, reason: Int) {
         // make a copy to avoid potential ConcurrentModificationException
         val observers = synchronized(observers) { observers.entries.toTypedArray() }
         val keyedObservers =

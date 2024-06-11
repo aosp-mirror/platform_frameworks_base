@@ -17,8 +17,8 @@
 package com.android.systemui.qs
 
 import android.os.Handler
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.settings.FakeSettings
@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
 private typealias Callback = (Int, Boolean) -> Unit
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class UserSettingObserverTest : SysuiTestCase() {
 

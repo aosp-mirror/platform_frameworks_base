@@ -19,8 +19,8 @@ package com.android.systemui.privacy
 import android.app.AppOpsManager
 import android.content.pm.UserInfo
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpItem
@@ -52,7 +52,7 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @RunWithLooper
 class AppOpsPrivacyItemMonitorTest : SysuiTestCase() {

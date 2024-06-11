@@ -432,7 +432,6 @@ public class AccessibilityServiceConnectionTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_RESETTABLE_DYNAMIC_PROPERTIES)
     public void binderDied_resetA11yServiceInfo() {
         final int flag = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
         setServiceBinding(COMPONENT_NAME);

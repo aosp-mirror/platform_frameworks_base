@@ -320,7 +320,7 @@ public class FingerprintAuthenticationClientTest {
     }
 
     @Test
-    public void luxProbeNotEnabledOnStartWhenNotWake() throws RemoteException {
+    public void luxProbeDisabledOnStartWhenNotWake() throws RemoteException {
         luxProbeEnabledOnStart(false /* isAwake */);
     }
 
@@ -337,6 +337,7 @@ public class FingerprintAuthenticationClientTest {
                 .getValue().toAidlContext());
 
         verify(mLuxProbe, isAwake ? times(1) : never()).enable();
+        verify(mLuxProbe, isAwake ? never() : times(1)).disable();
     }
 
     @Test

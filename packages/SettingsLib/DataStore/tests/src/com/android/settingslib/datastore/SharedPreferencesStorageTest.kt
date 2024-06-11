@@ -80,13 +80,13 @@ class SharedPreferencesStorageTest {
         storage.addObserver("key", keyedObserver, executor)
 
         storage.sharedPreferences.edit().putString("key", "string").applySync()
-        verify(observer).onKeyChanged("key", ChangeReason.UPDATE)
-        verify(keyedObserver).onKeyChanged("key", ChangeReason.UPDATE)
+        verify(observer).onKeyChanged("key", DataChangeReason.UPDATE)
+        verify(keyedObserver).onKeyChanged("key", DataChangeReason.UPDATE)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             storage.sharedPreferences.edit().clear().applySync()
-            verify(observer).onKeyChanged(null, ChangeReason.DELETE)
-            verify(keyedObserver).onKeyChanged("key", ChangeReason.DELETE)
+            verify(observer).onKeyChanged(null, DataChangeReason.DELETE)
+            verify(keyedObserver).onKeyChanged("key", DataChangeReason.DELETE)
         }
     }
 

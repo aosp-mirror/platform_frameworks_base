@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/biometric_prompt_constraint_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="@string/biometric_dialog_empty_space_description"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/panel"
+        style="@style/AuthCredentialPanelStyle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/rightGuideline"
+        app:layout_constraintStart_toStartOf="@id/leftGuideline"
+        app:layout_constraintTop_toTopOf="@id/topBarrier"
+        app:layout_constraintWidth_max="@dimen/biometric_prompt_panel_max_width" />
+
+    <include
+        android:id="@+id/button_bar"
+        layout="@layout/biometric_prompt_button_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@id/bottomGuideline"
+        app:layout_constraintEnd_toEndOf="@id/panel"
+        app:layout_constraintStart_toStartOf="@id/panel" />
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:fadeScrollbars="false"
+        android:paddingBottom="@dimen/biometric_prompt_top_scroll_view_bottom_padding"
+        android:paddingHorizontal="@dimen/biometric_prompt_top_scroll_view_horizontal_padding"
+        android:paddingTop="24dp"
+        app:layout_constrainedHeight="true"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toTopOf="@+id/scrollBarrier"
+        app:layout_constraintEnd_toEndOf="@id/panel"
+        app:layout_constraintStart_toStartOf="@id/panel"
+        app:layout_constraintTop_toTopOf="@+id/topGuideline"
+        app:layout_constraintVertical_bias="1.0">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/innerConstraint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/logo"
+                android:contentDescription="@string/biometric_dialog_logo"
+                android:layout_width="@dimen/biometric_prompt_logo_size"
+                android:layout_height="@dimen/biometric_prompt_logo_size"
+                android:layout_gravity="center"
+                android:scaleType="fitXY"
+                android:importantForAccessibility="no"
+                app:layout_constraintBottom_toTopOf="@+id/logo_description"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/logo_description"
+                style="@style/TextAppearance.AuthCredential.LogoDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/biometric_prompt_logo_description_top_padding"
+                app:layout_constraintBottom_toTopOf="@+id/title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/logo" />
+
+            <TextView
+                android:id="@+id/title"
+                style="@style/TextAppearance.AuthCredential.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="@integer/biometric_dialog_text_gravity"
+                android:paddingTop="16dp"
+                app:layout_constraintBottom_toTopOf="@+id/subtitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/logo_description" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                style="@style/TextAppearance.AuthCredential.Subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="@integer/biometric_dialog_text_gravity"
+                android:paddingTop="16dp"
+                app:layout_constraintBottom_toTopOf="@+id/contentBarrier"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title" />
+
+            <LinearLayout
+                android:id="@+id/customized_view_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingTop="24dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/subtitle" />
+
+            <TextView
+                android:id="@+id/description"
+                style="@style/TextAppearance.AuthCredential.Description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="@integer/biometric_dialog_text_gravity"
+                android:textAlignment="viewStart"
+                android:paddingTop="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/subtitle" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/contentBarrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierAllowsGoneWidgets="false"
+                app:barrierDirection="top"
+                app:constraint_referenced_ids="description, customized_view_container" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/indicator"
+        style="@style/TextAppearance.AuthCredential.Indicator"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="24dp"
+        android:accessibilityLiveRegion="assertive"
+        android:fadingEdge="horizontal"
+        android:gravity="center_horizontal"
+        android:scrollHorizontally="true"
+        app:layout_constraintBottom_toTopOf="@+id/button_bar"
+        app:layout_constraintEnd_toEndOf="@+id/panel"
+        app:layout_constraintStart_toStartOf="@+id/panel"
+        app:layout_constraintTop_toBottomOf="@+id/biometric_icon"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/topBarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="false"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="scrollView" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/scrollBarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="false"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="biometric_icon, button_bar" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/leftGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="@dimen/biometric_prompt_one_pane_medium_horizontal_guideline_padding" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/rightGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="@dimen/biometric_prompt_one_pane_medium_horizontal_guideline_padding" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bottomGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_end="40dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/topGuideline"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="@dimen/biometric_prompt_one_pane_medium_top_guideline_padding" />
+
+    <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
+        android:id="@+id/biometric_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
+        android:id="@+id/biometric_icon_overlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="@+id/biometric_icon"
+        app:layout_constraintEnd_toEndOf="@+id/biometric_icon"
+        app:layout_constraintStart_toStartOf="@+id/biometric_icon"
+        app:layout_constraintTop_toTopOf="@+id/biometric_icon" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -319,7 +319,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         }
 
         // Unregister observer before removing view
-        mSecureSettings.unregisterContentObserver(mMagnificationCapabilityObserver);
+        mSecureSettings.unregisterContentObserverSync(mMagnificationCapabilityObserver);
         mWindowManager.removeView(mSettingView);
         mIsVisible = false;
         if (resetPosition) {
@@ -380,7 +380,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
             mWindowManager.addView(mSettingView, mParams);
 
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
                     mMagnificationCapabilityObserver,
                     UserHandle.USER_CURRENT);

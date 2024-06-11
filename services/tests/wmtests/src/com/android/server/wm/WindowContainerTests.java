@@ -960,10 +960,20 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(child.handlesOrientationChangeFromDescendant(orientation));
     }
 
+    private static void addLocalInsets(WindowContainer wc) {
+        final Binder owner = new Binder();
+        Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
+        final InsetsFrameProvider provider1 =
+                new InsetsFrameProvider(owner, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect1);
+        wc.addLocalInsetsFrameProvider(provider1, owner);
+    }
+
     @Test
     public void testOnDisplayChanged() {
         final Task rootTask = createTask(mDisplayContent);
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        addLocalInsets(task);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
         final DisplayContent newDc = createNewDisplay();
@@ -972,6 +982,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
         verify(rootTask).onDisplayChanged(newDc);
         verify(task).onDisplayChanged(newDc);
+        assertTrue(task.mLocalInsetsSources.size() == 1);
         verify(activity).onDisplayChanged(newDc);
         assertEquals(newDc, rootTask.mDisplayContent);
         assertEquals(newDc, task.mDisplayContent);
@@ -981,6 +992,7 @@ public class WindowContainerTests extends WindowTestsBase {
     @Test
     public void testOnDisplayChanged_cleanupChanging() {
         final Task task = createTask(mDisplayContent);
+        addLocalInsets(task);
         spyOn(task.mSurfaceFreezer);
         mDisplayContent.mChangingContainers.add(task);
 
@@ -988,6 +1000,7 @@ public class WindowContainerTests extends WindowTestsBase {
         // This happens on display info changed.
         task.onDisplayChanged(mDisplayContent);
 
+        assertTrue(task.mLocalInsetsSources.size() == 1);
         assertTrue(mDisplayContent.mChangingContainers.contains(task));
         verify(task.mSurfaceFreezer, never()).unfreeze(any());
 

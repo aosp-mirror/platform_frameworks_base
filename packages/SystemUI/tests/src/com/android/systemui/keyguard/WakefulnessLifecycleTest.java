@@ -24,8 +24,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.app.IWallpaperManager;
 import android.os.PowerManager;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -39,7 +39,7 @@ import org.junit.runner.RunWith;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class WakefulnessLifecycleTest extends SysuiTestCase {
 

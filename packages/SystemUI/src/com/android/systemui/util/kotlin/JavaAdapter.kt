@@ -88,8 +88,8 @@ fun <T> collectFlow(
     flow: Flow<T>,
     consumer: Consumer<T>,
     state: Lifecycle.State = Lifecycle.State.CREATED,
-) {
-    lifecycle.coroutineScope.launch {
+): Job {
+    return lifecycle.coroutineScope.launch {
         lifecycle.repeatOnLifecycle(state) { flow.collect { consumer.accept(it) } }
     }
 }

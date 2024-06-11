@@ -34,6 +34,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state for the scene container. */
@@ -61,7 +63,9 @@ constructor(
     val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
 
     private val destinationScenesBySceneKey =
-        scenes.associate { scene -> scene.key to scene.destinationScenes }
+        scenes.associate { scene ->
+            scene.key to scene.destinationScenes.flatMapLatestConflated { replaceSceneFamilies(it) }
+        }
 
     fun currentDestinationScenes(
         scope: CoroutineScope,
@@ -140,7 +144,24 @@ constructor(
             val fromLockscreenScene = currentScene.value == Scenes.Lockscreen
 
             !fromLockscreenScene || !isFalseTouch
-        }
-            ?: true
+        } ?: true
+    }
+
+    private fun replaceSceneFamilies(
+        destinationScenes: Map<UserAction, UserActionResult>,
+    ): Flow<Map<UserAction, UserActionResult>> {
+        return destinationScenes
+            .mapValues { (_, actionResult) ->
+                sceneInteractor.resolveSceneFamily(actionResult.toScene).map { scene ->
+                    actionResult.copy(toScene = scene)
+                }
+            }
+            .combineValueFlows()
     }
 }
+
+private fun <K, V> Map<K, Flow<V>>.combineValueFlows(): Flow<Map<K, V>> =
+    combine(
+        asIterable().map { (k, fv) -> fv.map { k to it } },
+        transform = Array<Pair<K, V>>::toMap,
+    )

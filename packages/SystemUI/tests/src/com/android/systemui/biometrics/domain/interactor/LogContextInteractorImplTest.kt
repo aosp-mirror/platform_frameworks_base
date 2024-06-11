@@ -19,6 +19,7 @@ package com.android.systemui.biometrics.domain.interactor
 import android.hardware.biometrics.AuthenticateOptions
 import android.hardware.biometrics.IBiometricContextListener
 import android.hardware.biometrics.IBiometricContextListener.FoldState
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -40,12 +41,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.junit.MockitoJUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class LogContextInteractorImplTest : SysuiTestCase() {
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 

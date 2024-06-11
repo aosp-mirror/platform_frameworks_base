@@ -38,6 +38,12 @@ import com.android.internal.logging.InstanceIdSequence
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_HANDLE_MENU_BUTTON
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.shared.TransitionUtil
@@ -304,11 +310,13 @@ class DesktopModeLoggerTransitionObserver(
 
     /** Get [EnterReason] for this session enter */
     private fun getEnterReason(transitionInfo: TransitionInfo): EnterReason {
-        // TODO(b/326231756) - Add support for missing enter reasons
         return when (transitionInfo.type) {
             WindowManager.TRANSIT_WAKE -> EnterReason.SCREEN_ON
             Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP -> EnterReason.APP_HANDLE_DRAG
-            Transitions.TRANSIT_MOVE_TO_DESKTOP -> EnterReason.APP_HANDLE_MENU_BUTTON
+            TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON -> EnterReason.APP_HANDLE_MENU_BUTTON
+            // TODO(b/344822506): Create and update EnterReason to APP_FROM_OVERVIEW
+            TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW -> EnterReason.UNKNOWN_ENTER
+            TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT -> EnterReason.KEYBOARD_SHORTCUT_ENTER
             WindowManager.TRANSIT_OPEN -> EnterReason.APP_FREEFORM_INTENT
             else -> EnterReason.UNKNOWN_ENTER
         }
@@ -316,11 +324,14 @@ class DesktopModeLoggerTransitionObserver(
 
     /** Get [ExitReason] for this session exit */
     private fun getExitReason(transitionInfo: TransitionInfo): ExitReason {
-        // TODO(b/326231756) - Add support for missing exit reasons
         return when {
             transitionInfo.type == WindowManager.TRANSIT_SLEEP -> ExitReason.SCREEN_OFF
             transitionInfo.type == WindowManager.TRANSIT_CLOSE -> ExitReason.TASK_FINISHED
-            transitionInfo.type == Transitions.TRANSIT_EXIT_DESKTOP_MODE -> ExitReason.DRAG_TO_EXIT
+            transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG -> ExitReason.DRAG_TO_EXIT
+            transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_HANDLE_MENU_BUTTON ->
+                ExitReason.APP_HANDLE_MENU_BUTTON_EXIT
+            transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT ->
+                ExitReason.KEYBOARD_SHORTCUT_EXIT
             transitionInfo.isRecentsTransition() -> ExitReason.RETURN_HOME_OR_OVERVIEW
             else -> ExitReason.UNKNOWN_EXIT
         }

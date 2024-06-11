@@ -47,3 +47,10 @@ flag {
     description: "Enable ongoing perm sync"
     bug: "338469649"
 }
+
+flag {
+    name: "unpair_associated_device"
+    namespace: "companion"
+    description: "Unpair with an associated bluetooth device"
+    bug: "322237619"
+}

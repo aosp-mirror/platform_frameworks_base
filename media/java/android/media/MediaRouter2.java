@@ -681,8 +681,19 @@ public final class MediaRouter2 {
     /**
      * Registers a callback to discover routes and to receive events when they change.
      *
+     * <p>Clients can register multiple callbacks, as long as the {@link RouteCallback} instances
+     * are different. Each callback can provide a unique {@link RouteDiscoveryPreference preference}
+     * and will only receive updates related to that set preference.
+     *
      * <p>If the specified callback is already registered, its registration will be updated for the
      * given {@link Executor executor} and {@link RouteDiscoveryPreference discovery preference}.
+     *
+     * <p>{@link #getInstance(Context) Local routers} must register a route callback to register in
+     * the system and start receiving updates. Otherwise, all operations will be no-ops.
+     *
+     * <p>Any discovery preference passed by a {@link #getInstance(Context, String) proxy router}
+     * will be ignored and will receive route updates based on the preference set by its matching
+     * local router.
      */
     public void registerRouteCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -2655,8 +2666,11 @@ public final class MediaRouter2 {
 
         @Override
         public boolean showSystemOutputSwitcher() {
-            throw new UnsupportedOperationException(
-                    "Cannot show system output switcher from a privileged router.");
+            try {
+                return mMediaRouterService.showMediaOutputSwitcherWithProxyRouter(mClient);
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
+            }
         }
 
         /** Gets the list of all discovered routes. */
@@ -3528,7 +3542,7 @@ public final class MediaRouter2 {
         public boolean showSystemOutputSwitcher() {
             synchronized (mLock) {
                 try {
-                    return mMediaRouterService.showMediaOutputSwitcher(mImpl.getPackageName());
+                    return mMediaRouterService.showMediaOutputSwitcherWithRouter2(mPackageName);
                 } catch (RemoteException ex) {
                     ex.rethrowFromSystemServer();
                 }

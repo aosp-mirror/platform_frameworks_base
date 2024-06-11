@@ -32,6 +32,7 @@ import android.os.Handler
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.provider.Settings
+import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
@@ -84,6 +85,7 @@ import java.util.Optional
 import java.util.concurrent.Executor
 
 @SmallTest
+@RunWithLooper(setAsMainLooper = true)
 class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     companion object {
         const val SMARTSPACE_TIME_TOO_EARLY = 1000L
@@ -760,6 +762,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         // THEN the existing session is reused and views are registered
         verify(smartspaceManager, never()).createSmartspaceSession(any())
         verify(smartspaceView2).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(smartspaceView2).setTimeChangedDelegate(any())
         verify(smartspaceView2).registerDataProvider(plugin)
         verify(smartspaceView2).registerConfigProvider(configPlugin)
     }
@@ -778,6 +781,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @RunWithLooper(setAsMainLooper = false)
     fun testConnectAttemptBeforeInitializationShouldNotCreateSession() {
         // GIVEN an uninitalized smartspaceView
         // WHEN the device is provisioned
@@ -833,6 +837,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         verify(dateSmartspaceView).setUiSurface(
                 BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(dateSmartspaceView).setTimeChangedDelegate(any())
         verify(dateSmartspaceView).registerDataProvider(datePlugin)
 
         verify(dateSmartspaceView).setPrimaryTextColor(anyInt())
@@ -845,6 +850,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         verify(weatherSmartspaceView).setUiSurface(
                 BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(weatherSmartspaceView).setTimeChangedDelegate(any())
         verify(weatherSmartspaceView).registerDataProvider(weatherPlugin)
 
         verify(weatherSmartspaceView).setPrimaryTextColor(anyInt())
@@ -856,6 +862,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         controller.stateChangeListener.onViewAttachedToWindow(view)
 
         verify(smartspaceView).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(smartspaceView).setTimeChangedDelegate(any())
         verify(smartspaceView).registerDataProvider(plugin)
         verify(smartspaceView).registerConfigProvider(configPlugin)
         verify(smartspaceSession)
@@ -981,6 +988,10 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun setUiSurface(uiSurface: String) {
             }
 
+            override fun setTimeChangedDelegate(
+                delegate: BcSmartspaceDataPlugin.TimeChangedDelegate?
+            ) {}
+
             override fun setDozeAmount(amount: Float) {
             }
 
@@ -1009,6 +1020,10 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun setUiSurface(uiSurface: String) {
             }
 
+            override fun setTimeChangedDelegate(
+                delegate: BcSmartspaceDataPlugin.TimeChangedDelegate?
+            ) {}
+
             override fun setDozeAmount(amount: Float) {
             }
 
@@ -1032,6 +1047,10 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
             override fun setUiSurface(uiSurface: String) {
             }
+
+            override fun setTimeChangedDelegate(
+                delegate: BcSmartspaceDataPlugin.TimeChangedDelegate?
+            ) {}
 
             override fun setDozeAmount(amount: Float) {
             }

@@ -248,6 +248,17 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
                     unverifiedTargetSdkVersion,
                     userId, imeDispatcher);
             sendOnStartInputResult(client, result, startInputSeq);
+            // For first-time client bind, MSG_BIND should arrive after MSG_START_INPUT_RESULT.
+            if (result.result == InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION) {
+                InputMethodManagerService imms = ((InputMethodManagerService) mInner);
+                synchronized (ImfLock.class) {
+                    ClientState cs = imms.getClientStateLocked(client);
+                    if (cs != null) {
+                        imms.requestClientSessionLocked(cs);
+                        imms.requestClientSessionForAccessibilityLocked(cs);
+                    }
+                }
+            }
         });
     }
 
