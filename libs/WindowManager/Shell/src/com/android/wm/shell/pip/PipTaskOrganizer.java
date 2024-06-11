@@ -980,7 +980,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private void onEndOfSwipePipToHomeTransition() {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mPipTransitionController.setEnterAnimationType(ANIM_TYPE_BOUNDS);
             return;
         }
 
