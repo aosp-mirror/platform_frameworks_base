@@ -1224,11 +1224,8 @@ public class ViewRootImplTest {
         // Infrequent update
         Thread.sleep(delay);
 
-        // Even though this is not a small View, step 3 is triggered by this flag, which
-        // brings intermittent to LOW
-        int intermittentExpected = toolkitFrameRateBySizeReadOnly()
-                ? FRAME_RATE_CATEGORY_LOW
-                : FRAME_RATE_CATEGORY_NORMAL;
+        // The expected category is normal for intermittent.
+        int intermittentExpected = FRAME_RATE_CATEGORY_NORMAL;
 
         sInstrumentation.runOnMainSync(() -> {
             mView.invalidate();
