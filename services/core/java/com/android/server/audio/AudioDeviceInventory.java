@@ -444,7 +444,7 @@ public class AudioDeviceInventory {
         @Override
         public DeviceInfo put(String key, DeviceInfo value) {
             final DeviceInfo result = super.put(key, value);
-            record("put", true /* connected */, key, value);
+            record("put", true /* connected */, value);
             return result;
         }
 
@@ -452,7 +452,7 @@ public class AudioDeviceInventory {
         public DeviceInfo putIfAbsent(String key, DeviceInfo value) {
             final DeviceInfo result = super.putIfAbsent(key, value);
             if (result == null) {
-                record("putIfAbsent", true /* connected */, key, value);
+                record("putIfAbsent", true /* connected */, value);
             }
             return result;
         }
@@ -461,7 +461,7 @@ public class AudioDeviceInventory {
         public DeviceInfo remove(Object key) {
             final DeviceInfo result = super.remove(key);
             if (result != null) {
-                record("remove", false /* connected */, (String) key, result);
+                record("remove", false /* connected */, result);
             }
             return result;
         }
@@ -470,7 +470,7 @@ public class AudioDeviceInventory {
         public boolean remove(Object key, Object value) {
             final boolean result = super.remove(key, value);
             if (result) {
-                record("remove", false /* connected */, (String) key, (DeviceInfo) value);
+                record("remove", false /* connected */, (DeviceInfo) value);
             }
             return result;
         }
@@ -484,7 +484,7 @@ public class AudioDeviceInventory {
         // putAll
         // replace
         // replaceAll
-        private void record(String event, boolean connected, String key, DeviceInfo value) {
+        private void record(String event, boolean connected, DeviceInfo value) {
             // DeviceInfo - int mDeviceType;
             // DeviceInfo - int mDeviceCodecFormat;
             new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE
@@ -657,7 +657,7 @@ public class AudioDeviceInventory {
     /**
      * A class just for packaging up a set of connection parameters.
      */
-    /*package*/ class WiredDeviceConnectionState {
+    /*package*/ static class WiredDeviceConnectionState {
         public final AudioDeviceAttributes mAttributes;
         public final @AudioService.ConnectionState int mState;
         public final String mCaller;
@@ -1021,7 +1021,9 @@ public class AudioDeviceInventory {
                 IAudioRoutesObserver obs = mRoutesObservers.getBroadcastItem(n);
                 try {
                     obs.dispatchAudioRoutesChanged(routes);
-                } catch (RemoteException e) { }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "onReportNewRoutes", e);
+                }
             }
         }
         mRoutesObservers.finishBroadcast();
@@ -1802,7 +1804,8 @@ public class AudioDeviceInventory {
                     .set(MediaMetrics.Property.EVENT, "disconnectHearingAid")
                     .record();
             if (toRemove.size() > 0) {
-                final int delay = checkSendBecomingNoisyIntentInt(DEVICE_OUT_HEARING_AID,
+                /*final int delay = */
+                checkSendBecomingNoisyIntentInt(DEVICE_OUT_HEARING_AID,
                         AudioService.CONNECTION_STATE_DISCONNECTED, AudioSystem.DEVICE_NONE);
                 toRemove.stream().forEach(deviceAddress ->
                         // TODO delay not used?
@@ -2664,10 +2667,6 @@ public class AudioDeviceInventory {
     private static final String CONNECT_INTENT_KEY_PORT_NAME = "portName";
     private static final String CONNECT_INTENT_KEY_STATE = "state";
     private static final String CONNECT_INTENT_KEY_ADDRESS = "address";
-    private static final String CONNECT_INTENT_KEY_HAS_PLAYBACK = "hasPlayback";
-    private static final String CONNECT_INTENT_KEY_HAS_CAPTURE = "hasCapture";
-    private static final String CONNECT_INTENT_KEY_HAS_MIDI = "hasMIDI";
-    private static final String CONNECT_INTENT_KEY_DEVICE_CLASS = "class";
 
     private void sendDeviceConnectionIntent(int device, int state, String address,
                                             String deviceName) {
@@ -2830,6 +2829,7 @@ public class AudioDeviceInventory {
                 mPrefDevDispatchers.getBroadcastItem(i).dispatchPrefDevicesChanged(
                         strategy, devices);
             } catch (RemoteException e) {
+                Log.e(TAG, "dispatchPreferredDevice ", e);
             }
         }
         mPrefDevDispatchers.finishBroadcast();
@@ -2846,6 +2846,7 @@ public class AudioDeviceInventory {
                 mNonDefDevDispatchers.getBroadcastItem(i).dispatchNonDefDevicesChanged(
                         strategy, devices);
             } catch (RemoteException e) {
+                Log.e(TAG, "dispatchNonDefaultDevice ", e);
             }
         }
         mNonDefDevDispatchers.finishBroadcast();
@@ -2862,6 +2863,7 @@ public class AudioDeviceInventory {
                 mDevRoleCapturePresetDispatchers.getBroadcastItem(i).dispatchDevicesRoleChanged(
                         capturePreset, role, devices);
             } catch (RemoteException e) {
+                Log.e(TAG, "dispatchDevicesRoleForCapturePreset ", e);
             }
         }
         mDevRoleCapturePresetDispatchers.finishBroadcast();
@@ -2927,7 +2929,7 @@ public class AudioDeviceInventory {
 
     /**
      * Check if device is in the list of connected devices
-     * @param device
+     * @param device the device to query
      * @return true if connected
      */
     @VisibleForTesting
