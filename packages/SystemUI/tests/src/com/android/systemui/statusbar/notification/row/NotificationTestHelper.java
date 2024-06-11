@@ -84,6 +84,7 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -192,16 +193,27 @@ public class NotificationTestHelper {
                 mBgCoroutineContext,
                 mMainCoroutineContext);
 
-        NotificationContentInflater contentBinder = new NotificationContentInflater(
-                mock(NotifRemoteViewCache.class),
-                mock(NotificationRemoteInputManager.class),
-                mock(ConversationNotificationProcessor.class),
-                mock(MediaFeatureFlag.class),
-                mock(Executor.class),
-                new MockSmartReplyInflater(),
-                mock(NotifLayoutInflaterFactory.Provider.class),
-                mock(HeadsUpStyleProvider.class),
-                mock(NotificationContentInflaterLogger.class));
+        NotificationRowContentBinder contentBinder =
+                NotificationRowContentBinderRefactor.isEnabled()
+                        ? new NotificationRowContentBinderImpl(
+                                mock(NotifRemoteViewCache.class),
+                                mock(NotificationRemoteInputManager.class),
+                                mock(ConversationNotificationProcessor.class),
+                                mock(Executor.class),
+                                new MockSmartReplyInflater(),
+                                mock(NotifLayoutInflaterFactory.Provider.class),
+                                mock(HeadsUpStyleProvider.class),
+                                mock(NotificationRowContentBinderLogger.class))
+                        : new NotificationContentInflater(
+                                mock(NotifRemoteViewCache.class),
+                                mock(NotificationRemoteInputManager.class),
+                                mock(ConversationNotificationProcessor.class),
+                                mock(MediaFeatureFlag.class),
+                                mock(Executor.class),
+                                new MockSmartReplyInflater(),
+                                mock(NotifLayoutInflaterFactory.Provider.class),
+                                mock(HeadsUpStyleProvider.class),
+                                mock(NotificationRowContentBinderLogger.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
                 mock(NotifInflationErrorManager.class),

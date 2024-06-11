@@ -308,6 +308,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 new JavaAdapter(mTestScope.getBackgroundScope()),
                 mCastController,
                 splitShadeStateController,
+                () -> mKosmos.getCommunalTransitionViewModel(),
                 () -> mLargeScreenHeaderHelper
         );
         mQsController.init();

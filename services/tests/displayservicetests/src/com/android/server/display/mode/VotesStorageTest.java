@@ -38,10 +38,10 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class VotesStorageTest {
     private static final int DISPLAY_ID = 100;
-    private static final int PRIORITY = Vote.PRIORITY_APP_REQUEST_SIZE;
+    private static final @Vote.Priority int PRIORITY = Vote.PRIORITY_APP_REQUEST_SIZE;
     private static final Vote VOTE = Vote.forDisableRefreshRateSwitching();
     private static final int DISPLAY_ID_OTHER = 101;
-    private static final int PRIORITY_OTHER = Vote.PRIORITY_FLICKER_REFRESH_RATE;
+    private static final @Vote.Priority int PRIORITY_OTHER = Vote.PRIORITY_FLICKER_REFRESH_RATE;
     private static final Vote VOTE_OTHER = Vote.forBaseModeRefreshRate(10f);
 
     @Mock

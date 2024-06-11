@@ -165,6 +165,15 @@ void MouseCursorController::setStylusHoverMode(bool stylusHoverMode) {
     }
 }
 
+void MouseCursorController::setSkipScreenshot(bool skip) {
+    std::scoped_lock lock(mLock);
+    if (mLocked.skipScreenshot == skip) {
+        return;
+    }
+    mLocked.skipScreenshot = skip;
+    updatePointerLocked();
+}
+
 void MouseCursorController::reloadPointerResources(bool getAdditionalMouseResources) {
     std::scoped_lock lock(mLock);
 
@@ -352,6 +361,7 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
     mLocked.pointerSprite->setLayer(Sprite::BASE_LAYER_POINTER);
     mLocked.pointerSprite->setPosition(mLocked.pointerX, mLocked.pointerY);
     mLocked.pointerSprite->setDisplayId(mLocked.viewport.displayId);
+    mLocked.pointerSprite->setSkipScreenshot(mLocked.skipScreenshot);
 
     if (mLocked.pointerAlpha > 0) {
         mLocked.pointerSprite->setAlpha(mLocked.pointerAlpha);

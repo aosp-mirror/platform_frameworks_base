@@ -76,8 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"נשלחה תמונה"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"המערכת שומרת את צילום המסך..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"צילום המסך נשמר בפרופיל העבודה…"</string>
-    <!-- no translation found for screenshot_saving_private_profile (8934706048497093297) -->
-    <skip />
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"צילום המסך נשמר בפרופיל האישי"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"צילום המסך נשמר"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"לא ניתן היה לשמור את צילום המסך"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"תצוגה במסך חיצוני"</string>
@@ -362,19 +361,21 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"איזה חלק בחוויית השימוש שלך במכשיר הושפע?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"בחירה בסוג הבעיה"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"הקלטת המסך"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"ביצועים"</item>
-    <item msgid="1627504621139124393">"ממשק משתמש"</item>
-    <item msgid="8309220355268900335">"סוללה"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"ביצועים"</string>
+    <string name="user_interface" msgid="3712869377953950887">"ממשק משתמש"</string>
+    <string name="thermal" msgid="6758074791325414831">"תרמי"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"מצב שימוש ביד אחת"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"מכשירי שמיעה"</string>
+    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
+    <skip />
+    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
+    <skip />
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"מכשירי שמיעה"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"התאמה של מכשיר חדש"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"צריך ללחוץ כדי להתאים מכשיר חדש"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"לא ניתן לעדכן את ההגדרה הקבועה מראש"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"הגדרה קבועה מראש"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"כתוביות מיידיות"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"לבטל את חסימת המיקרופון של המכשיר?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"לבטל את חסימת המצלמה של המכשיר?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"לבטל את חסימת המצלמה והמיקרופון של המכשיר?"</string>
@@ -728,11 +729,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"לחצן <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"דף הבית"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"הקודם"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"חץ למעלה"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"חץ למטה"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"חץ שמאלה"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"חץ ימינה"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"מרכז"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"רווח"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
@@ -1276,7 +1272,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"מצב מקופל"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"מצב לא מקופל"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"‏%1$s‏ / %2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"רמת הטעינה שנותרה בסוללה: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"רמת הטעינה בסוללה של הסטיילוס: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"כדאי לחבר את הסטיילוס למטען"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"הסוללה של הסטיילוס חלשה"</string>
     <string name="video_camera" msgid="7654002575156149298">"מצלמת וידאו"</string>
@@ -1319,6 +1315,17 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"נעשה שימוש לאחרונה על ידי <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"בשימוש על ידי <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"נעשה שימוש לאחרונה על ידי <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"מערכת"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ריבוי משימות"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"קלט"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"קיצורי דרך של אפליקציות"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"נגישות"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"מקשי קיצור"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"קיצורי דרך לחיפוש"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"סמל הכיווץ"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"סמל ההרחבה"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"התאורה האחורית במקלדת"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏רמה %1$d מתוך %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"שליטה במכשירים"</string>

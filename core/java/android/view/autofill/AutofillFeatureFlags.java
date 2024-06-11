@@ -548,7 +548,7 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_FILL_FIELDS_FROM_CURRENT_SESSION_ONLY,
-                false);
+                true);
     }
 
     /**

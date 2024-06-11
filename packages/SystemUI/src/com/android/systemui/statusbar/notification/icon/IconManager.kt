@@ -165,7 +165,7 @@ constructor(
                 Log.wtf(
                     TAG,
                     "Updating using the cache is not supported when the " +
-                        "notifications_background_conversation_icons flag is off"
+                        "notifications_background_icons flag is off"
                 )
             }
             if (!usingCache || !Flags.notificationsBackgroundIcons()) {
@@ -216,39 +216,74 @@ constructor(
 
     @Throws(InflationException::class)
     private fun getIconDescriptor(entry: NotificationEntry, redact: Boolean): StatusBarIcon {
-        val n = entry.sbn.notification
         val showPeopleAvatar = !redact && isImportantConversation(entry)
 
+        // If the descriptor is already cached, return it
+        getCachedIconDescriptor(entry, showPeopleAvatar)?.also {
+            return it
+        }
+
+        val n = entry.sbn.notification
+        val (icon: Icon?, type: StatusBarIcon.Type) =
+            if (showPeopleAvatar) {
+                createPeopleAvatar(entry) to StatusBarIcon.Type.PeopleAvatar
+            } else if (
+                android.app.Flags.notificationsUseMonochromeAppIcon() && n.shouldUseAppIcon()
+            ) {
+                n.smallIcon to StatusBarIcon.Type.MaybeMonochromeAppIcon
+            } else {
+                n.smallIcon to StatusBarIcon.Type.NotifSmallIcon
+            }
+        if (icon == null) {
+            throw InflationException("No icon in notification from ${entry.sbn.packageName}")
+        }
+
+        val sbi = icon.toStatusBarIcon(entry, type)
+        cacheIconDescriptor(entry, sbi)
+        return sbi
+    }
+
+    private fun getCachedIconDescriptor(
+        entry: NotificationEntry,
+        showPeopleAvatar: Boolean
+    ): StatusBarIcon? {
         val peopleAvatarDescriptor = entry.icons.peopleAvatarDescriptor
+        val appIconDescriptor = entry.icons.appIconDescriptor
         val smallIconDescriptor = entry.icons.smallIconDescriptor
 
         // If cached, return corresponding cached values
-        if (showPeopleAvatar && peopleAvatarDescriptor != null) {
-            return peopleAvatarDescriptor
-        } else if (!showPeopleAvatar && smallIconDescriptor != null) {
-            return smallIconDescriptor
+        return when {
+            showPeopleAvatar && peopleAvatarDescriptor != null -> peopleAvatarDescriptor
+            android.app.Flags.notificationsUseMonochromeAppIcon() && appIconDescriptor != null ->
+                appIconDescriptor
+            smallIconDescriptor != null -> smallIconDescriptor
+            else -> null
         }
+    }
 
-        val icon =
-            (if (showPeopleAvatar) {
-                createPeopleAvatar(entry)
+    private fun cacheIconDescriptor(entry: NotificationEntry, descriptor: StatusBarIcon) {
+        if (
+            android.app.Flags.notificationsUseAppIcon() ||
+                android.app.Flags.notificationsUseMonochromeAppIcon()
+        ) {
+            // If either of the new icon flags is enabled, we cache the icon all the time.
+            when (descriptor.type) {
+                StatusBarIcon.Type.PeopleAvatar -> entry.icons.peopleAvatarDescriptor = descriptor
+                // When notificationsUseMonochromeAppIcon is enabled, we use the appIconDescriptor.
+                StatusBarIcon.Type.MaybeMonochromeAppIcon ->
+                    entry.icons.appIconDescriptor = descriptor
+                // When notificationsUseAppIcon is enabled, the app icon overrides the small icon.
+                // But either way, it's a good idea to cache the descriptor.
+                else -> entry.icons.smallIconDescriptor = descriptor
+            }
+        } else if (isImportantConversation(entry)) {
+            // Old approach: cache only if important conversation.
+            if (descriptor.type == StatusBarIcon.Type.PeopleAvatar) {
+                entry.icons.peopleAvatarDescriptor = descriptor
             } else {
-                n.smallIcon
-            })
-                ?: throw InflationException("No icon in notification from " + entry.sbn.packageName)
-
-        val sbi = icon.toStatusBarIcon(entry)
-
-        // Cache if important conversation or app icon.
-        if (isImportantConversation(entry) || android.app.Flags.notificationsUseAppIcon()) {
-            if (showPeopleAvatar) {
-                entry.icons.peopleAvatarDescriptor = sbi
-            } else {
-                entry.icons.smallIconDescriptor = sbi
+                entry.icons.smallIconDescriptor = descriptor
             }
         }
-
-        return sbi
     }
 
     @Throws(InflationException::class)
@@ -264,7 +299,10 @@ constructor(
         }
     }
 
-    private fun Icon.toStatusBarIcon(entry: NotificationEntry): StatusBarIcon {
+    private fun Icon.toStatusBarIcon(
+        entry: NotificationEntry,
+        type: StatusBarIcon.Type
+    ): StatusBarIcon {
         val n = entry.sbn.notification
         return StatusBarIcon(
             entry.sbn.user,
@@ -272,7 +310,8 @@ constructor(
             /* icon = */ this,
             n.iconLevel,
             n.number,
-            iconBuilder.getIconContentDescription(n)
+            iconBuilder.getIconContentDescription(n),
+            type
         )
     }
 
@@ -294,7 +333,8 @@ constructor(
             // Once we have the icon, updating it should happen on the main thread.
             if (icon != null) {
                 withContext(mainCoroutineContext) {
-                    val iconDescriptor = icon.toStatusBarIcon(entry)
+                    val iconDescriptor =
+                        icon.toStatusBarIcon(entry, StatusBarIcon.Type.PeopleAvatar)
 
                     // Cache the value
                     entry.icons.peopleAvatarDescriptor = iconDescriptor

@@ -17,5 +17,5 @@
 package com.android.server.ondeviceintelligence;
 
 public interface OnDeviceIntelligenceManagerInternal {
-    String getRemoteServicePackageName();
+    int getInferenceServiceUid();
 }

@@ -20,6 +20,7 @@ import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.is;
@@ -69,6 +70,7 @@ public class ActionBarOverlayLayoutTest {
 
     private ViewGroup mContent;
     private ViewGroup mActionBarTop;
+    private ViewGroup mActionBarView;
     private Toolbar mToolbar;
     private FakeOnApplyWindowListener mContentInsetsListener;
 
@@ -86,15 +88,22 @@ public class ActionBarOverlayLayoutTest {
         mContentInsetsListener = new FakeOnApplyWindowListener();
         mContent.setOnApplyWindowInsetsListener(mContentInsetsListener);
 
-        mActionBarTop = new ActionBarContainer(mContext);
-        mActionBarTop.setId(com.android.internal.R.id.action_bar_container);
-        mActionBarTop.setLayoutParams(new ViewGroup.LayoutParams(MATCH_PARENT, 20));
-        mLayout.addView(mActionBarTop);
-        mLayout.setActionBarHeight(20);
+        // mActionBarView and mToolbar are supposed to be the same view. Here makes mToolbar a child
+        // of mActionBarView is to control the height of mActionBarView. In this way, the child
+        // views of mToolbar won't affect the measurement of mActionBarView or mActionBarTop.
+        mActionBarView = new FrameLayout(mContext);
+        mActionBarView.setLayoutParams(new ViewGroup.LayoutParams(MATCH_PARENT, 20));
 
         mToolbar = new Toolbar(mContext);
         mToolbar.setId(com.android.internal.R.id.action_bar);
-        mActionBarTop.addView(mToolbar);
+        mActionBarView.addView(mToolbar);
+
+        mActionBarTop = new ActionBarContainer(mContext);
+        mActionBarTop.setId(com.android.internal.R.id.action_bar_container);
+        mActionBarTop.setLayoutParams(new ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+        mActionBarTop.addView(mActionBarView);
+        mLayout.addView(mActionBarTop);
+        mLayout.setActionBarHeight(20);
     }
 
     @Test

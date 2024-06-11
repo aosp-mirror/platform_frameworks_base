@@ -22,6 +22,8 @@ import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_COMPAT;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+import static android.os.Process.ROOT_UID;
+import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -422,6 +424,10 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             })
     public static BackgroundStartPrivileges getDefaultBackgroundStartPrivileges(
             int callingUid, @Nullable String callingPackage) {
+        if (callingUid == ROOT_UID || callingUid == SYSTEM_UID) {
+            // root and system must always opt in explicitly
+            return BackgroundStartPrivileges.ALLOW_FGS;
+        }
         boolean isChangeEnabledForApp = callingPackage != null ? CompatChanges.isChangeEnabled(
                 DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER, callingPackage,
                 UserHandle.getUserHandleForUid(callingUid)) : CompatChanges.isChangeEnabled(

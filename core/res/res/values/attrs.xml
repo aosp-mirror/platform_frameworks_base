@@ -606,11 +606,9 @@
         <!-- ============ -->
        <eat-comment />
        <attr name="floatingToolbarCloseDrawable" format="reference" />
-       <attr name="floatingToolbarForegroundColor" format="reference|color" />
        <attr name="floatingToolbarItemBackgroundBorderlessDrawable" format="reference" />
        <attr name="floatingToolbarItemBackgroundDrawable" format="reference" />
        <attr name="floatingToolbarOpenDrawable" format="reference" />
-       <attr name="floatingToolbarPopupBackgroundDrawable" format="reference" />
        <attr name="floatingToolbarDividerColor" format="reference" />
 
         <!-- ============ -->
@@ -9700,6 +9698,12 @@
         <attr name="hotSpotX" format="dimension" />
         <!-- Y coordinate of the icon hot spot. -->
         <attr name="hotSpotY" format="dimension" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="PointerIconVectorTheme">
+        <attr name="pointerIconVectorFill" format="color" />
+        <attr name="pointerIconVectorFillInverse" format="color" />
     </declare-styleable>
 
     <declare-styleable name="Storage">

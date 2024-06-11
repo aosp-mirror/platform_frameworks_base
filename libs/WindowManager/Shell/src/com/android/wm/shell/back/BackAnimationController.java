@@ -18,7 +18,6 @@ package com.android.wm.shell.back;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_HOME;
 import static com.android.window.flags.Flags.predictiveBackSystemAnims;
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
 
@@ -31,6 +30,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,7 +41,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.IRemoteAnimationRunner;
 import android.view.InputDevice;
@@ -49,6 +48,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
+import android.view.WindowManager;
 import android.window.BackAnimationAdapter;
 import android.window.BackEvent;
 import android.window.BackMotionEvent;
@@ -63,7 +63,6 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.wm.shell.R;
-import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
@@ -88,15 +87,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     public static final boolean IS_ENABLED =
             SystemProperties.getInt("persist.wm.debug.predictive_back",
                     SETTING_VALUE_ON) == SETTING_VALUE_ON;
-    public static final float FLING_MAX_LENGTH_SECONDS = 0.1f;     // 100ms
-    public static final float FLING_SPEED_UP_FACTOR = 0.6f;
-
-    /**
-     * The maximum additional progress in case of fling gesture.
-     * The end animation starts after the user lifts the finger from the screen, we continue to
-     * fire {@link BackEvent}s until the velocity reaches 0.
-     */
-    private static final float MAX_FLING_PROGRESS = 0.3f; /* 30% of the screen */
 
     /** Predictive back animation developer option */
     private final AtomicBoolean mEnableAnimations = new AtomicBoolean(false);
@@ -119,8 +109,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private boolean mPointersPilfered = false;
     private final boolean mRequirePointerPilfer;
 
-    private final FlingAnimationUtils mFlingAnimationUtils;
-
     /** Registry for the back animations */
     private final ShellBackAnimationRegistry mShellBackAnimationRegistry;
 
@@ -133,6 +121,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mShellExecutor;
     private final Handler mBgHandler;
+    private final WindowManager mWindowManager;
+    @VisibleForTesting
+    final Rect mTouchableArea = new Rect();
 
     /**
      * Tracks the current user back gesture.
@@ -233,14 +224,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mBgHandler = bgHandler;
         shellInit.addInitCallback(this::onInit, this);
         mAnimationBackground = backAnimationBackground;
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        mFlingAnimationUtils = new FlingAnimationUtils.Builder(displayMetrics)
-                .setMaxLengthSeconds(FLING_MAX_LENGTH_SECONDS)
-                .setSpeedUpFactor(FLING_SPEED_UP_FACTOR)
-                .build();
         mShellBackAnimationRegistry = shellBackAnimationRegistry;
         mLatencyTracker = LatencyTracker.getInstance(mContext);
         mShellCommandHandler = shellCommandHandler;
+        mWindowManager = context.getSystemService(WindowManager.class);
+        updateTouchableArea();
     }
 
     private void onInit() {
@@ -302,6 +290,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         mShellBackAnimationRegistry.onConfigurationChanged(newConfig);
+        updateTouchableArea();
+    }
+
+    private void updateTouchableArea() {
+        mTouchableArea.set(mWindowManager.getCurrentWindowMetrics().getBounds());
     }
 
     @Override
@@ -435,9 +428,16 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (!shouldDispatchToAnimator && mActiveCallback != null) {
             mCurrentTracker.updateStartLocation();
             tryDispatchOnBackStarted(mActiveCallback, mCurrentTracker.createStartEvent(null));
+            if (mBackNavigationInfo != null && !isAppProgressGenerationAllowed()) {
+                tryPilferPointers();
+            }
         } else if (shouldDispatchToAnimator) {
             tryPilferPointers();
         }
+    }
+
+    private boolean isAppProgressGenerationAllowed() {
+        return mBackNavigationInfo.getTouchableRegion().equals(mTouchableArea);
     }
 
     /**
@@ -555,6 +555,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             // App is handling back animation. Cancel system animation latency tracking.
             cancelLatencyTracking();
             tryDispatchOnBackStarted(mActiveCallback, touchTracker.createStartEvent(null));
+            if (!isAppProgressGenerationAllowed()) {
+                tryPilferPointers();
+            }
         }
     }
 
@@ -661,7 +664,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     private void dispatchOnBackProgressed(IOnBackInvokedCallback callback,
             BackMotionEvent backEvent) {
-        if (callback == null || !shouldDispatchToAnimator()) {
+        if (callback == null || (!shouldDispatchToAnimator() && mBackNavigationInfo != null
+                && isAppProgressGenerationAllowed())) {
             return;
         }
         try {

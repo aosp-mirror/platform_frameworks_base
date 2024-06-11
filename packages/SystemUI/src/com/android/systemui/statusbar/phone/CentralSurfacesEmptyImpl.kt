@@ -80,7 +80,8 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun updateScrimController() {}
     override fun shouldIgnoreTouch() = false
     override fun isDeviceInteractive() = false
-    override fun handleDreamTouch(event: MotionEvent?) {}
+    override fun handleExternalShadeWindowTouch(event: MotionEvent?) {}
+    override fun handleCommunalHubTouch(event: MotionEvent?) {}
     override fun awakenDreams() {}
     override fun isBouncerShowing() = false
     override fun isBouncerShowingScrimmed() = false

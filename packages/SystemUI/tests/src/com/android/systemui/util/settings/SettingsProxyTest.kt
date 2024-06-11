@@ -52,14 +52,14 @@ class SettingsProxyTest : SysuiTestCase() {
 
     @Test
     fun registerContentObserver_inputString_success() {
-        mSettings.registerContentObserver(TEST_SETTING, mContentObserver)
+        mSettings.registerContentObserverSync(TEST_SETTING, mContentObserver)
         verify(mSettings.getContentResolver())
             .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
     }
 
     @Test
     fun registerContentObserver_inputString_notifyForDescendants_true() {
-        mSettings.registerContentObserver(
+        mSettings.registerContentObserverSync(
             TEST_SETTING,
             notifyForDescendants = true,
             mContentObserver
@@ -70,14 +70,14 @@ class SettingsProxyTest : SysuiTestCase() {
 
     @Test
     fun registerContentObserver_inputUri_success() {
-        mSettings.registerContentObserver(TEST_SETTING_URI, mContentObserver)
+        mSettings.registerContentObserverSync(TEST_SETTING_URI, mContentObserver)
         verify(mSettings.getContentResolver())
             .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver))
     }
 
     @Test
     fun registerContentObserver_inputUri_notifyForDescendants_true() {
-        mSettings.registerContentObserver(
+        mSettings.registerContentObserverSync(
             TEST_SETTING_URI,
             notifyForDescendants = true,
             mContentObserver
@@ -88,7 +88,7 @@ class SettingsProxyTest : SysuiTestCase() {
 
     @Test
     fun unregisterContentObserver() {
-        mSettings.unregisterContentObserver(mContentObserver)
+        mSettings.unregisterContentObserverSync(mContentObserver)
         verify(mSettings.getContentResolver()).unregisterContentObserver(eq(mContentObserver))
     }
 

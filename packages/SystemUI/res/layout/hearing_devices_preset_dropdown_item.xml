@@ -22,4 +22,5 @@
     android:minHeight="@dimen/hearing_devices_preset_spinner_height"
     android:paddingStart="@dimen/hearing_devices_preset_spinner_text_padding_start"
     android:gravity="center_vertical"
+    android:textDirection="locale"
     android:ellipsize="end" />

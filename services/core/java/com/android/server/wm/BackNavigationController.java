@@ -200,6 +200,7 @@ class BackNavigationController {
             }
             infoBuilder.setOnBackInvokedCallback(callbackInfo.getCallback());
             infoBuilder.setAnimationCallback(callbackInfo.isAnimationCallback());
+            infoBuilder.setTouchableRegion(window.getFrame());
             mNavigationMonitor.startMonitor(window, navigationObserver);
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
@@ -1099,10 +1100,6 @@ class BackNavigationController {
         }
 
         void finishPresentAnimations() {
-            if (!mComposed) {
-                return;
-            }
-
             if (mCloseAdaptor != null) {
                 mCloseAdaptor.mTarget.cancelAnimation();
                 mCloseAdaptor = null;
@@ -1131,8 +1128,10 @@ class BackNavigationController {
         }
 
         void clearBackAnimateTarget() {
-            finishPresentAnimations();
-            mComposed = false;
+            if (mComposed) {
+                mComposed = false;
+                finishPresentAnimations();
+            }
             mWaitTransition = false;
             mStartingSurfaceTargetMatch = false;
             mSwitchType = UNKNOWN;

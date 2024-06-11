@@ -56,10 +56,17 @@ final class VibratorController {
     private volatile boolean mIsUnderExternalControl;
     private volatile float mCurrentAmplitude;
 
-    /** Listener for vibration completion callbacks from native. */
+    /**
+     * Listener for vibration completion callbacks from native.
+     *
+     * <p>Only the latest active native call to {@link VibratorController#on} will ever trigger this
+     * completion callback, to avoid race conditions during a vibration playback. If a new call to
+     * {@link #on} or {@link #off} happens before a previous callback was triggered then the
+     * previous callback will be disabled, even if the new command fails.
+     */
     public interface OnVibrationCompleteListener {
 
-        /** Callback triggered when vibration is complete. */
+        /** Callback triggered when an active vibration command is complete. */
         void onComplete(int vibratorId, long vibrationId);
     }
 
@@ -235,7 +242,7 @@ final class VibratorController {
     }
 
     /**
-     * Turn on the vibrator for {@code milliseconds} time, using {@code vibrationId} or completion
+     * Turn on the vibrator for {@code milliseconds} time, using {@code vibrationId} for completion
      * callback to {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
@@ -255,7 +262,7 @@ final class VibratorController {
     }
 
     /**
-     * Plays predefined vibration effect, using {@code vibrationId} or completion callback to
+     * Plays predefined vibration effect, using {@code vibrationId} for completion callback to
      * {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
@@ -276,8 +283,8 @@ final class VibratorController {
     }
 
     /**
-     * Plays a composition of vibration primitives, using {@code vibrationId} or completion callback
-     * to {@link OnVibrationCompleteListener}.
+     * Plays a composition of vibration primitives, using {@code vibrationId} for completion
+     * callback to {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
      *
@@ -299,7 +306,7 @@ final class VibratorController {
     }
 
     /**
-     * Plays a composition of pwle primitives, using {@code vibrationId} or completion callback
+     * Plays a composition of pwle primitives, using {@code vibrationId} for completion callback
      * to {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
@@ -321,7 +328,11 @@ final class VibratorController {
         }
     }
 
-    /** Turns off the vibrator. This will affect the state of {@link #isVibrating()}. */
+    /**
+     * Turns off the vibrator and disables completion callback to any pending vibration.
+     *
+     * <p>This will affect the state of {@link #isVibrating()}.
+     */
     public void off() {
         synchronized (mLock) {
             mNativeWrapper.off();

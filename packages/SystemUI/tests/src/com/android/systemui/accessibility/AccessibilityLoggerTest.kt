@@ -16,7 +16,7 @@
 
 package com.android.systemui.accessibility
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
@@ -34,7 +34,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class AccessibilityLoggerTest : SysuiTestCase() {
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 

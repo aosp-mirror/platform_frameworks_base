@@ -9842,6 +9842,43 @@ public class CarrierConfigManager {
     public static final String KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL =
             "remove_satellite_plmn_in_manual_network_scan_bool";
 
+
+    /** @hide */
+    @IntDef({
+            SATELLITE_DATA_SUPPORT_ONLY_RESTRICTED,
+            SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED,
+            SATELLITE_DATA_SUPPORT_ALL,
+    })
+    public @interface SATELLITE_DATA_SUPPORT_MODE {}
+
+    /**
+     * Doesn't support unrestricted traffic on satellite network.
+     * @hide
+     */
+    public static final int SATELLITE_DATA_SUPPORT_ONLY_RESTRICTED = 0;
+    /**
+     * Support unrestricted but bandwidth_constrained traffic on satellite network.
+     * @hide
+     */
+    public static final int SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED = 1;
+    /**
+     * Support unrestricted satellite network that serves all traffic.
+     * @hide
+     */
+    public static final int SATELLITE_DATA_SUPPORT_ALL = 2;
+    /**
+     * Indicates what kind of traffic an {@link NetworkCapabilities#NET_CAPABILITY_NOT_RESTRICTED}
+     * satellite network can possibly support. The network may subject to further
+     * restrictions such as entitlement etc.
+     * If no data is allowed on satellite network, exclude
+     * {@link ApnSetting#INFRASTRUCTURE_SATELLITE} from APN infrastructure_bitmask, and this
+     * configuration is ignored.
+     * By default it only supports restricted data.
+     * @hide
+     */
+    public static final String KEY_SATELLITE_DATA_SUPPORT_MODE_INT =
+            "satellite_data_support_mode_int";
+
     /**
      * Determine whether to override roaming Wi-Fi Calling preference when device is connected to
      * non-terrestrial network.
@@ -11084,6 +11121,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
         sDefaults.putBoolean(KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL, true);
+        sDefaults.putInt(KEY_SATELLITE_DATA_SUPPORT_MODE_INT,
+                CarrierConfigManager.SATELLITE_DATA_SUPPORT_ONLY_RESTRICTED);
         sDefaults.putBoolean(KEY_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN_BOOL, true);
         sDefaults.putInt(KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT, 7);
         sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
