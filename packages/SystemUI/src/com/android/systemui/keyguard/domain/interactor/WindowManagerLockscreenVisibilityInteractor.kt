@@ -105,7 +105,17 @@ constructor(
                         is ObservableTransitionState.Transition ->
                             when {
                                 transitionState.fromScene == Scenes.Lockscreen &&
-                                    transitionState.toScene == Scenes.Gone -> flowOf(true)
+                                    transitionState.toScene == Scenes.Gone ->
+                                    sceneInteractor
+                                        .get()
+                                        .isTransitionUserInputOngoing
+                                        .flatMapLatestConflated { isUserInputOngoing ->
+                                            if (isUserInputOngoing) {
+                                                isDeviceEntered
+                                            } else {
+                                                flowOf(true)
+                                            }
+                                        }
                                 transitionState.fromScene == Scenes.Bouncer &&
                                     transitionState.toScene == Scenes.Gone ->
                                     transitionState.progress.map { progress ->
