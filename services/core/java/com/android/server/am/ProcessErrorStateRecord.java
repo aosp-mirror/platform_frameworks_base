@@ -60,7 +60,6 @@ import com.android.server.ResourcePressureUtil;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.wm.WindowProcessController;
-import com.android.server.utils.AnrTimer;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -69,6 +68,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -429,7 +429,7 @@ class ProcessErrorStateRecord {
             }
         }
         // Build memory headers for the ANRing process.
-        String memoryHeaders = buildMemoryHeadersFor(pid);
+        LinkedHashMap<String, String> memoryHeaders = buildMemoryHeadersFor(pid);
 
         // Get critical event log before logging the ANR so that it doesn't occur in the log.
         latencyTracker.criticalEventLogStarted();
@@ -753,7 +753,7 @@ class ProcessErrorStateRecord {
             resolver.getUserId()) != 0;
     }
 
-    private @Nullable String buildMemoryHeadersFor(int pid) {
+    private @Nullable LinkedHashMap<String, String> buildMemoryHeadersFor(int pid) {
         if (pid <= 0) {
             Slog.i(TAG, "Memory header requested with invalid pid: " + pid);
             return null;
@@ -764,15 +764,13 @@ class ProcessErrorStateRecord {
             return null;
         }
 
-        StringBuilder memoryHeaders = new StringBuilder();
-        memoryHeaders.append("RssHwmKb: ")
-            .append(snapshot.rssHighWaterMarkInKilobytes)
-            .append("\n");
-        memoryHeaders.append("RssKb: ").append(snapshot.rssInKilobytes).append("\n");
-        memoryHeaders.append("RssAnonKb: ").append(snapshot.anonRssInKilobytes).append("\n");
-        memoryHeaders.append("RssShmemKb: ").append(snapshot.rssShmemKilobytes).append("\n");
-        memoryHeaders.append("VmSwapKb: ").append(snapshot.swapInKilobytes).append("\n");
-        return memoryHeaders.toString();
+        LinkedHashMap<String, String> memoryHeaders = new LinkedHashMap<>();
+        memoryHeaders.put("RssHwmKb", Integer.toString(snapshot.rssHighWaterMarkInKilobytes));
+        memoryHeaders.put("RssKb", Integer.toString(snapshot.rssInKilobytes));
+        memoryHeaders.put("RssAnonKb", Integer.toString(snapshot.anonRssInKilobytes));
+        memoryHeaders.put("RssShmemKb", Integer.toString(snapshot.rssShmemKilobytes));
+        memoryHeaders.put("VmSwapKb", Integer.toString(snapshot.swapInKilobytes));
+        return memoryHeaders;
     }
     /**
      * Unless configured otherwise, swallow ANRs in background processes & kill the process.
