@@ -360,6 +360,10 @@ static jlong android_view_MotionEvent_nativeInitialize(
             return 0;
         }
         pointerCoordsToNative(env, pointerCoordsObj, xOffset, yOffset, &rawPointerCoords[i]);
+        if (rawPointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION) != 0.f) {
+            flags |= AMOTION_EVENT_PRIVATE_FLAG_SUPPORTS_ORIENTATION |
+                    AMOTION_EVENT_PRIVATE_FLAG_SUPPORTS_DIRECTIONAL_ORIENTATION;
+        }
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
@@ -685,13 +689,15 @@ static jboolean android_view_MotionEvent_nativeIsTouchEvent(
 
 static jint android_view_MotionEvent_nativeGetFlags(CRITICAL_JNI_PARAMS_COMMA jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getFlags();
+    // Prevent private flags from being used in Java.
+    return event->getFlags() & ~AMOTION_EVENT_PRIVATE_FLAG_MASK;
 }
 
 static void android_view_MotionEvent_nativeSetFlags(CRITICAL_JNI_PARAMS_COMMA jlong nativePtr,
                                                     jint flags) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->setFlags(flags);
+    // Prevent private flags from being used from Java.
+    event->setFlags(flags & ~AMOTION_EVENT_PRIVATE_FLAG_MASK);
 }
 
 static jint android_view_MotionEvent_nativeGetEdgeFlags(CRITICAL_JNI_PARAMS_COMMA jlong nativePtr) {
