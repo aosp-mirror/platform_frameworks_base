@@ -227,6 +227,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     /**
+     * Indicates that the annotated field is shared by all the users.
+     *
+     * <p>See b/305849394 for details.</p>
+     */
+    @Retention(SOURCE)
+    @Target({ElementType.FIELD})
+    private @interface SharedByAllUsersField {
+    }
+
+    /**
      * Indicates that the annotated field is not yet ready for concurrent multi-user support.
      *
      * <p>See b/305849394 for details.</p>
@@ -272,6 +282,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * {@link LayoutParams#SOFT_INPUT_STATE_ALWAYS_VISIBLE SOFT_INPUT_STATE_ALWAYS_VISIBLE}
      * starting from {@link android.os.Build.VERSION_CODES#P}.
      */
+    @SharedByAllUsersField
     private final boolean mPreventImeStartupUnlessTextEditor;
 
     /**
@@ -279,6 +290,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * from the IME startup avoidance behavior that is enabled by
      * {@link #mPreventImeStartupUnlessTextEditor}.
      */
+    @SharedByAllUsersField
     @NonNull
     private final String[] mNonPreemptibleInputMethods;
 
@@ -286,6 +298,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * See {@link #shouldEnableExperimentalConcurrentMultiUserMode(Context)} about when set to be
      * {@code true}.
      */
+    @SharedByAllUsersField
     private final boolean mExperimentalConcurrentMultiUserModeEnabled;
 
     /**
@@ -327,6 +340,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
     final ImePlatformCompatUtils mImePlatformCompatUtils;
+    @SharedByAllUsersField
     final InputMethodDeviceConfigs mInputMethodDeviceConfigs;
 
     private final UserManagerInternal mUserManagerInternal;
@@ -339,6 +353,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private final ImeVisibilityStateComputer mVisibilityStateComputer;
 
     @GuardedBy("ImfLock.class")
+    @SharedByAllUsersField
     @NonNull
     private final DefaultImeVisibilityApplier mVisibilityApplier;
 
@@ -355,7 +370,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     // Mapping from deviceId to the device-specific imeId for that device.
     @GuardedBy("ImfLock.class")
-    @MultiUserUnawareField
+    @SharedByAllUsersField
     private final SparseArray<String> mVirtualDeviceMethodMap = new SparseArray<>();
 
     // TODO: Instantiate mSwitchingController for each user.
@@ -379,12 +394,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @Nullable
     private StatusBarManagerInternal mStatusBarManagerInternal;
+    @SharedByAllUsersField
     private boolean mShowOngoingImeSwitcherForPhones;
     @GuardedBy("ImfLock.class")
     @MultiUserUnawareField
     private final HandwritingModeController mHwController;
     @GuardedBy("ImfLock.class")
-    @MultiUserUnawareField
+    @SharedByAllUsersField
     private IntArray mStylusIds;
 
     @GuardedBy("ImfLock.class")
@@ -463,6 +479,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Manages the IME clients.
      */
+    @SharedByAllUsersField
     private final ClientController mClientController;
 
     /**
@@ -474,6 +491,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * Set once the system is ready to run third party code.
      */
+    @SharedByAllUsersField
     boolean mSystemReady;
 
     @GuardedBy("ImfLock.class")
@@ -510,6 +528,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     /**
      * The client that is currently bound to an input method.
      */
+    @MultiUserUnawareField
     @Nullable
     private ClientState mCurClient;
 
@@ -561,6 +580,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * {@link android.view.InsetsController} for the given window.
      */
     @GuardedBy("ImfLock.class")
+    @SharedByAllUsersField
     private final WeakHashMap<IBinder, Boolean> mFocusedWindowPerceptible = new WeakHashMap<>();
 
     /**
@@ -665,28 +685,36 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @MultiUserUnawareField
     int mImeWindowVis;
 
+    @SharedByAllUsersField
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
+
+    @SharedByAllUsersField
     private final String mSlotIme;
 
     /**
      * Registered {@link InputMethodListListener}.
      * This variable can be accessed from both of MainThread and BinderThread.
      */
+    @SharedByAllUsersField
     private final CopyOnWriteArrayList<InputMethodListListener> mInputMethodListListeners =
             new CopyOnWriteArrayList<>();
 
     @GuardedBy("ImfLock.class")
+    @SharedByAllUsersField
     private final WeakHashMap<IBinder, IBinder> mImeTargetWindowMap = new WeakHashMap<>();
 
     @GuardedBy("ImfLock.class")
+    @SharedByAllUsersField
     @NonNull
     private final StartInputHistory mStartInputHistory = new StartInputHistory();
 
     @GuardedBy("ImfLock.class")
+    @SharedByAllUsersField
     @NonNull
     private final SoftInputShowHideHistory mSoftInputShowHideHistory =
             new SoftInputShowHideHistory();
 
+    @SharedByAllUsersField
     @NonNull
     private final ImeTrackerService mImeTrackerService;
 
