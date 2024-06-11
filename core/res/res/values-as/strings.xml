@@ -1829,7 +1829,7 @@
     <string name="mediasize_japanese_you4" msgid="5552111912684384833">"You4"</string>
     <string name="mediasize_japanese_l" msgid="1326765321473431817">"L"</string>
     <string name="mediasize_unknown_portrait" msgid="3817016220446495613">"অজ্ঞাত প\'ৰ্ট্ৰেইট"</string>
-    <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"অজ্ঞাত লেণ্ডস্কেইপ"</string>
+    <string name="mediasize_unknown_landscape" msgid="1584741567225095325">"অজ্ঞাত লেণ্ডস্কে’প"</string>
     <string name="write_fail_reason_cancelled" msgid="2344081488493969190">"বাতিল কৰা হ’ল"</string>
     <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"সমল লিখাত আসোঁৱাহ"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"অজ্ঞাত"</string>
