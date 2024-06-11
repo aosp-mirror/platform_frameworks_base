@@ -2409,8 +2409,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privati erdvė"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klonuoti"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Bendruomenės"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privati erdvė"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Neskelbtinos informacijos pranešimo turinys paslėptas"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Programos turinys paslėptas bendrinant ekraną saugumo sumetimais"</string>

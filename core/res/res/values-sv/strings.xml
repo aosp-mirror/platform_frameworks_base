@@ -2038,7 +2038,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Fäst <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Lossa"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Lossa <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Info om appen"</string>
+    <string name="app_info" msgid="6113278084877079851">"Appinformation"</string>
     <string name="negative_duration" msgid="1938335096972945232">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Demo startas …"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Enheten återställs …"</string>
@@ -2407,8 +2407,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privat område"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klona"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Allmän"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privat område"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Känsligt aviseringsinnehåll dolt"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Av säkerhetsskäl döljs appinnehållet vid skärmdelning"</string>
