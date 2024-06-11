@@ -3079,7 +3079,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     void setInputMethodLocked(String id, int subtypeId, int deviceId) {
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+        final int userId = mCurrentUserId;
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         InputMethodInfo info = settings.getMethodMap().get(id);
         if (info == null) {
             throw getExceptionForUnknownImeId(id);
@@ -3087,7 +3088,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         // See if we need to notify a subtype change within the same IME.
         if (id.equals(getSelectedMethodIdLocked())) {
-            final int userId = settings.getUserId();
             final int subtypeCount = info.getSubtypeCount();
             if (subtypeCount <= 0) {
                 notifyInputMethodSubtypeChangedLocked(userId, info, null);
@@ -3143,7 +3143,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // mCurMethodId should be updated after setSelectedInputMethodAndSubtypeLocked()
             // because mCurMethodId is stored as a history in
             // setSelectedInputMethodAndSubtypeLocked().
-            getInputMethodBindingController(mCurrentUserId).setSelectedMethodId(id);
+            getInputMethodBindingController(userId).setSelectedMethodId(id);
 
             if (mActivityManagerInternal.isSystemReady()) {
                 Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
