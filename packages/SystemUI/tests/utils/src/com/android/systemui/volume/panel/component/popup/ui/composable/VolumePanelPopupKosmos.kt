@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.animation
+package com.android.systemui.volume.panel.component.popup.ui.composable
 
-import android.content.applicationContext
-import com.android.systemui.jank.interactionJankMonitor
+import com.android.systemui.animation.dialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.statusbar.phone.systemUIDialogFactory
 
-val Kosmos.dialogTransitionAnimator by Fixture {
-    fakeDialogTransitionAnimator(
-        // The main thread is checked in a bunch of places inside the different transitions
-        // animators, so we have to pass the real main executor here.
-        mainExecutor = applicationContext.mainExecutor,
-        interactionJankMonitor = interactionJankMonitor,
-    )
-}
+val Kosmos.volumePanelPopup: VolumePanelPopup by
+    Kosmos.Fixture { VolumePanelPopup(systemUIDialogFactory, dialogTransitionAnimator) }
