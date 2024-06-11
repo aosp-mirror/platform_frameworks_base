@@ -420,7 +420,6 @@ android_app {
     kotlincflags: ["-Xjvm-default=all"],
     optimize: {
         shrink_resources: false,
-        optimized_shrink_resources: false,
         proguard_flags_files: ["proguard.flags"],
     },
 
@@ -478,7 +477,6 @@ systemui_optimized_java_defaults {
                 optimize: true,
                 shrink: true,
                 shrink_resources: true,
-                optimized_shrink_resources: true,
                 ignore_warnings: false,
                 proguard_compatibility: false,
             },
