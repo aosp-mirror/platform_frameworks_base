@@ -1218,8 +1218,8 @@
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"এতিয়াই স্ক্ৰীন সলনি কৰক"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"ফ’নটো আনফ’ল্ড কৰক"</string>
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"স্ক্ৰীন সলনি কৰিবনে?"</string>
-    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"অধিক ৰিজ’লিউছনৰ বাবে, পিছফালৰ কেমেৰাটো ব্যৱহাৰ কৰক"</string>
-    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"অধিক ৰিজ’লিউছনৰ বাবে, ফ’নটো লুটিয়াই দিয়ক"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"অধিক ৰিজ’লিউশ্বনৰ বাবে, পিছফালৰ কেমেৰাটো ব্যৱহাৰ কৰক"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"অধিক ৰিজ’লিউশ্বনৰ বাবে, ফ’নটো লুটিয়াই দিয়ক"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"জপাব পৰা ডিভাইচৰ জাপ খুলি থকা হৈছে"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"জপাব পৰা ডিভাইচৰ ওলোটাই থকা হৈছে"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ফ’ল্ড কৰা"</string>

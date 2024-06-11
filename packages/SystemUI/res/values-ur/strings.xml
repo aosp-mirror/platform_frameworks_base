@@ -269,7 +269,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"محفوظ ہے"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"غیر منسلک کریں"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"فعال کریں"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"کل دوبارہ خودکار طور پر آن ہوگا"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"کل دوبارہ خودکار طور پر آن کریں"</string>
     <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"فوری اشتراک، میرا آلہ ڈھونڈیں، اور آلہ کے مقام جیسی خصوصیات بلوٹوتھ کا استعمال کرتی ہیں"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> بیٹری"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"آڈیو"</string>
