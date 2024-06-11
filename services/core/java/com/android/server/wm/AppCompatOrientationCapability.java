@@ -38,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.utils.OptPropFactory;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.LongSupplier;
 
 class AppCompatOrientationCapability {
 
@@ -58,7 +59,8 @@ class AppCompatOrientationCapability {
                                    @NonNull LetterboxConfiguration letterboxConfiguration,
                                    @NonNull ActivityRecord activityRecord) {
         mActivityRecord = activityRecord;
-        mOrientationCapabilityState = new OrientationCapabilityState(mActivityRecord);
+        mOrientationCapabilityState = new OrientationCapabilityState(mActivityRecord,
+                System::currentTimeMillis);
         final BooleanSupplier isPolicyForIgnoringRequestedOrientationEnabled = asLazy(
                 letterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
         mIgnoreRequestedOrientationOptProp = optPropBuilder.create(
@@ -214,8 +216,12 @@ class AppCompatOrientationCapability {
         private long mTimeMsLastSetOrientationRequest = 0;
         // Counter for ActivityRecord#setRequestedOrientation
         private int mSetOrientationRequestCounter = 0;
+        @VisibleForTesting
+        LongSupplier mCurrentTimeMillisSupplier;
 
-        OrientationCapabilityState(@NonNull ActivityRecord activityRecord) {
+        OrientationCapabilityState(@NonNull ActivityRecord activityRecord,
+                @NonNull LongSupplier currentTimeMillisSupplier) {
+            mCurrentTimeMillisSupplier = currentTimeMillisSupplier;
             mIsOverrideToNosensorOrientationEnabled =
                     activityRecord.info.isChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR);
             mIsOverrideToPortraitOrientationEnabled =
@@ -238,7 +244,7 @@ class AppCompatOrientationCapability {
          * Updates the orientation request counter using a specific timeout.
          */
         void updateOrientationRequestLoopState() {
-            final long currTimeMs = System.currentTimeMillis();
+            final long currTimeMs = mCurrentTimeMillisSupplier.getAsLong();
             final long elapsedTime = currTimeMs - mTimeMsLastSetOrientationRequest;
             if (elapsedTime < SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS) {
                 mSetOrientationRequestCounter++;
