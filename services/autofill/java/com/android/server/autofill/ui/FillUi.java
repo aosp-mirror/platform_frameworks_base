@@ -682,12 +682,20 @@ final class FillUi {
                 Slog.v(TAG, "AutofillWindowPresenter.show(): fit=" + fitsSystemWindows
                         + ", params=" + paramsToString(p));
             }
-            UiThread.getHandler().post(() -> mWindow.show(p));
+            UiThread.getHandler().post(() -> {
+                if (mWindow != null) {
+                    mWindow.show(p);
+                }
+            });
         }
 
         @Override
         public void hide(Rect transitionEpicenter) {
-            UiThread.getHandler().post(mWindow::hide);
+            UiThread.getHandler().post(() -> {
+                if (mWindow != null) {
+                    mWindow.hide();
+                }
+            });
         }
     }
 
