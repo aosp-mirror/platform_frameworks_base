@@ -6290,7 +6290,7 @@ public final class ActiveServices {
                 final ComponentName clientSideComponentName =
                         cr.aliasComponent != null ? cr.aliasComponent : r.name;
                 try {
-                    cr.conn.connected(r.name, null, true);
+                    cr.conn.connected(clientSideComponentName, null, true);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failure disconnecting service " + r.shortInstanceName
                           + " to connection " + c.get(i).conn.asBinder()
