@@ -1040,7 +1040,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // the animation played. This puts the layers back into the correct order.
         for (int i = displays.size() - 1; i >= 0; --i) {
             if (displays.valueAt(i) == null) continue;
-            updateDisplayLayers(displays.valueAt(i), t);
+            assignLayers(displays.valueAt(i), t);
         }
 
         for (int i = 0; i < info.getRootCount(); ++i) {
@@ -1048,12 +1048,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
     }
 
-    private static void updateDisplayLayers(DisplayContent dc, SurfaceControl.Transaction t) {
-        dc.mTransitionController.mBuildingFinishLayers = true;
+    /** Assigns the layers for the start or end state of transition. */
+    static void assignLayers(WindowContainer<?> wc, SurfaceControl.Transaction t) {
+        wc.mTransitionController.mBuildingFinishLayers = true;
         try {
-            dc.assignChildLayers(t);
+            wc.assignChildLayers(t);
         } finally {
-            dc.mTransitionController.mBuildingFinishLayers = false;
+            wc.mTransitionController.mBuildingFinishLayers = false;
         }
     }
 
@@ -2643,7 +2644,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             rootLeash.setUnreleasedWarningCallSite("Transition.calculateTransitionRoots");
             // Update layers to start transaction because we prevent assignment during collect, so
             // the layer of transition root can be correct.
-            updateDisplayLayers(dc, startT);
+            assignLayers(dc, startT);
             startT.setLayer(rootLeash, leashReference.getLastLayer());
             outInfo.addRootLeash(endDisplayId, rootLeash,
                     ancestor.getBounds().left, ancestor.getBounds().top);
