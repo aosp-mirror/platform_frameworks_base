@@ -180,14 +180,19 @@ constructor(
                     override fun show(
                         sensorId: Int,
                         @BiometricRequestConstants.RequestReason reason: Int
-                    ) =
+                    ) {
+                        Log.d(TAG, "ISidefpsController#show invoked $sensorId, $reason")
                         if (reason.isReasonToAutoShow(activityTaskManager)) {
                             show(SideFpsUiRequestSource.AUTO_SHOW, reason)
                         } else {
                             hide(SideFpsUiRequestSource.AUTO_SHOW)
                         }
+                    }
 
-                    override fun hide(sensorId: Int) = hide(SideFpsUiRequestSource.AUTO_SHOW)
+                    override fun hide(sensorId: Int) {
+                        Log.d(TAG, "ISidefpsController#hide invoked $sensorId")
+                        hide(SideFpsUiRequestSource.AUTO_SHOW)
+                    }
                 }
             )
             listenForAlternateBouncerVisibility()
@@ -247,9 +252,9 @@ constructor(
     /** Hides the fps overlay if shown. */
     fun hide(request: SideFpsUiRequestSource) {
         SideFpsControllerRefactor.assertInLegacyMode()
-        Log.d(TAG, "hide(request=${request.name}): removing request")
-        requests.remove(request)
         mainExecutor.execute {
+            Log.d(TAG, "hide(request=${request.name}): removing request")
+            requests.remove(request)
             if (requests.isEmpty()) {
                 traceSection("SideFpsController#hide(${request.name})") {
                     Log.d(

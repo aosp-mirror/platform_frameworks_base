@@ -201,9 +201,6 @@ public class PipTransition extends PipTransitionController {
             animator.cancel();
         }
         mExitTransition = mTransitions.startTransition(type, out, this);
-        if (mPipOrganizer.getOutPipWindowingMode() == WINDOWING_MODE_UNDEFINED) {
-            mHomeTransitionObserver.notifyHomeVisibilityChanged(false /* isVisible */);
-        }
     }
 
     @Override
@@ -644,6 +641,9 @@ public class PipTransition extends PipTransitionController {
         if (mPipOrganizer.mPipOverlay != null) {
             startTransaction.remove(mPipOrganizer.mPipOverlay);
             mPipOrganizer.clearContentOverlay();
+        }
+        if (mPipOrganizer.getOutPipWindowingMode() == WINDOWING_MODE_UNDEFINED) {
+            mHomeTransitionObserver.notifyHomeVisibilityChanged(false /* isVisible */);
         }
         if (pipChange == null) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,

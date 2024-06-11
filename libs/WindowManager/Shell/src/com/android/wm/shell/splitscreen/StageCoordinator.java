@@ -1525,6 +1525,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 prepareExitSplitScreen(mTopStageAfterFoldDismiss, wct);
                 mSplitTransitions.startDismissTransition(wct, this,
                         mTopStageAfterFoldDismiss, EXIT_REASON_DEVICE_FOLDED);
+                setSplitsVisible(false);
             } else {
                 exitSplitScreen(
                         mTopStageAfterFoldDismiss == STAGE_TYPE_MAIN ? mMainStage : mSideStage,
@@ -1825,7 +1826,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     void finishEnterSplitScreen(SurfaceControl.Transaction finishT) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "finishEnterSplitScreen");
-        mSplitLayout.update(finishT, true /* resetImePosition */);
+        mSplitLayout.update(null, true /* resetImePosition */);
         mMainStage.getSplitDecorManager().inflate(mContext, mMainStage.mRootLeash,
                 getMainStageBounds());
         mSideStage.getSplitDecorManager().inflate(mContext, mSideStage.mRootLeash,
