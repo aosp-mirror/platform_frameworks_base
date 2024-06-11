@@ -3526,6 +3526,15 @@
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_content_description_expand_icon">Expand icon</string>
 
+    <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_back_gesture_button">Back gesture</string>
+    <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_home_gesture_button">Home gesture</string>
+    <!-- Label for button opening tutorial on using Action key from keyboard [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_action_key_button">Action key</string>
+    <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_done_button">Done</string>
+
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>
     <!-- Content description for keyboard backlight brightness value [CHAR LIMIT=NONE] -->
