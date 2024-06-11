@@ -281,8 +281,10 @@
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Tự động bật lại vào ngày mai"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Các tính năng như Chia sẻ nhanh và Tìm thiết bị của tôi đều sử dụng Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth sẽ bật vào sáng mai"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Chia sẻ âm thanh"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Đang chia sẻ âm thanh"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> pin"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Âm thanh"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Tai nghe"</string>
@@ -361,18 +363,13 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Bạn gặp loại vấn đề gì khi dùng thiết bị?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Chọn loại vấn đề"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Ghi màn hình"</string>
-    <!-- no translation found for performance (6552785217174378320) -->
-    <skip />
-    <!-- no translation found for user_interface (3712869377953950887) -->
-    <skip />
-    <!-- no translation found for thermal (6758074791325414831) -->
-    <skip />
+    <string name="performance" msgid="6552785217174378320">"Hiệu suất"</string>
+    <string name="user_interface" msgid="3712869377953950887">"Giao diện người dùng"</string>
+    <string name="thermal" msgid="6758074791325414831">"Nhiệt"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Chế độ một tay"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Thiết bị trợ thính"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Đang hoạt động"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Đã ngắt kết nối"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Thiết bị trợ thính"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Ghép nối thiết bị mới"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Nhấp để ghép nối thiết bị mới"</string>
@@ -933,7 +930,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Ứng dụng đang chạy trong nền"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Tắt dữ liệu di động?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Bạn sẽ không có quyền sử dụng dữ liệu hoặc truy cập Internet thông qua chế độ <xliff:g id="CARRIER">%s</xliff:g>. Bạn chỉ có thể truy cập Internet thông qua Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Bạn sẽ không có quyền sử dụng dữ liệu hoặc truy cập Internet thông qua mạng <xliff:g id="CARRIER">%s</xliff:g>. Bạn chỉ có thể truy cập Internet thông qua Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"nhà mạng của bạn"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Chuyển về <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Dữ liệu di động sẽ không tự động chuyển dựa trên tình trạng phủ sóng"</string>
@@ -1275,8 +1272,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"gập"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"mở"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
-    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"Mức pin bút cảm ứng <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Hãy kết nối bút cảm ứng với bộ sạc"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bút cảm ứng bị yếu pin"</string>
     <string name="video_camera" msgid="7654002575156149298">"Máy quay video"</string>
@@ -1328,8 +1324,7 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Lối tắt tìm kiếm"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Biểu tượng Thu gọn"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Biểu tượng Mở rộng"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"hoặc"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Đèn nền bàn phím"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Độ sáng %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Điều khiển nhà"</string>
