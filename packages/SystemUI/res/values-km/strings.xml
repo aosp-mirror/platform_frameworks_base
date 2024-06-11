@@ -1062,7 +1062,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi នឹងមិន​ភ្ជាប់ដោយស្វ័យ​ប្រវត្តិក្នុងពេលនេះទេ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"មើលទាំងអស់"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ដើម្បី​ប្ដូរ​បណ្ដាញ សូមផ្ដាច់​អ៊ីសឺរណិត"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ដើម្បីធ្វើឱ្យ​បទពិសោធន៍ប្រើប្រាស់​ឧបករណ៍ប្រសើរឡើង កម្មវិធី និងសេវាកម្ម​នៅតែអាចស្កេនរក​បណ្ដាញ Wi‑Fi បានគ្រប់ពេល ទោះបីជា​នៅពេលដែលបិទ Wi‑Fi ក៏ដោយ។ អ្នកអាចប្ដូរវាបាន​នៅក្នុង​ការកំណត់​ការស្កេន Wi‑Fi។ "<annotation id="link">"ប្ដូរ"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ដើម្បីធ្វើឱ្យ​បទពិសោធប្រើប្រាស់​ឧបករណ៍ប្រសើរឡើង កម្មវិធី និងសេវាកម្ម​នៅតែអាចស្កេនរក​បណ្ដាញ Wi‑Fi បានគ្រប់ពេល ទោះបីជា​នៅពេលដែលបិទ Wi‑Fi ក៏ដោយ។ អ្នកអាចប្ដូរវាបាន​នៅក្នុង​ការកំណត់​ការស្កេន Wi‑Fi។ "<annotation id="link">"ប្ដូរ"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"បិទមុខងារពេល​ជិះ​យន្តហោះ"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ចង់បញ្ចូល​ប្រអប់​ខាងក្រោម​ទៅក្នុង​ការកំណត់រហ័ស"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"បញ្ចូល​ប្រអប់"</string>

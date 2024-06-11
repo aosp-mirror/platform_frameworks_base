@@ -794,7 +794,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Mobilní data"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je vypnuta"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je vypnutá"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth je vypnuto"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Režim Nerušit je vypnut"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Režim Nerušit je zapnutý"</string>
@@ -804,7 +804,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikace běžící na pozadí"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Klepnutím zobrazíte podrobnosti o využití baterie a dat"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Vypnout mobilní data?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Prostřednictvím <xliff:g id="CARRIER">%s</xliff:g> nebudete moci používat data ani internet. Internet bude dostupný pouze přes Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Prostřednictvím operátora <xliff:g id="CARRIER">%s</xliff:g> nebudete moct používat data ani internet. Internet bude dostupný pouze přes Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vašeho operátora"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Přepnout zpět na operátora <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobilní data se nebudou automaticky přepínat podle dostupnosti"</string>
@@ -1072,7 +1072,7 @@
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nové informace"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivní aplikace"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Tyto aplikace jsou spuštěné a aktivní, i když je nepoužíváte. Zlepšuje to jejich funkčnost, ale může to mít dopad na výdrž baterie."</string>
-    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Konec"</string>
+    <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zastavit"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zastaveno"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Hotovo"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Zkopírováno"</string>

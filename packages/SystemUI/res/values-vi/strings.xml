@@ -804,7 +804,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Ứng dụng đang chạy trong nền"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Nhấn để biết chi tiết về mức sử dụng dữ liệu và pin"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Tắt dữ liệu di động?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Bạn sẽ không có quyền sử dụng dữ liệu hoặc truy cập Internet thông qua chế độ <xliff:g id="CARRIER">%s</xliff:g>. Bạn chỉ có thể truy cập Internet thông qua Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Bạn sẽ không có quyền sử dụng dữ liệu hoặc truy cập Internet thông qua mạng <xliff:g id="CARRIER">%s</xliff:g>. Bạn chỉ có thể truy cập Internet thông qua Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"nhà mạng của bạn"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Chuyển về <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Dữ liệu di động sẽ không tự động chuyển dựa trên tình trạng phủ sóng"</string>

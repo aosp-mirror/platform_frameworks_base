@@ -257,7 +257,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"المستخدم"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"الإنترنت"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"الشبكات متوفرة"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"تتوفّر شبكات"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"الشبكات غير متوفرة"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"‏لا تتوفر أي شبكة Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"جارٍ التفعيل…"</string>
