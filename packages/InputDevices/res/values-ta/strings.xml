@@ -52,8 +52,6 @@
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"ஜார்ஜியன்"</string>
     <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"தாய் (கேட்மேனி)"</string>
     <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"தாய் (பட்டாசொட்டே)"</string>
-    <!-- no translation found for keyboard_layout_serbian_latin (3128791759390046571) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_montenegrin_latin (1467832503378949945) -->
-    <skip />
+    <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"செர்பியன் (லத்தீன்)"</string>
+    <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"மாண்டினெக்ரன் (லத்தீன்)"</string>
 </resources>

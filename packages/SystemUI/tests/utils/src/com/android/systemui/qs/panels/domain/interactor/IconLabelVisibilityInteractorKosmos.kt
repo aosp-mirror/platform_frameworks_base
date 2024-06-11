@@ -19,12 +19,11 @@ package com.android.systemui.qs.panels.domain.interactor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.log.core.FakeLogBuffer
-import com.android.systemui.qs.panels.data.repository.iconLabelVisibilityRepository
 
 val Kosmos.iconLabelVisibilityInteractor by
     Kosmos.Fixture {
         IconLabelVisibilityInteractor(
-            iconLabelVisibilityRepository,
+            qsPreferencesInteractor,
             FakeLogBuffer.Factory.create(),
             applicationCoroutineScope
         )

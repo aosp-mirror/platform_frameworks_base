@@ -23,8 +23,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
-import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE;
+import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
@@ -839,9 +839,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyTaskChanges(Task tr, WindowContainerTransaction.Change c) {
-        int effects = applyChanges(tr, c);
         final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
+        // Check bounds change transaction at the beginning because it may pause updating window
+        // surface position. Then the following changes won't apply intermediate position.
+        if (t != null) {
+            tr.setMainWindowSizeChangeTransaction(t);
+        }
 
+        int effects = applyChanges(tr, c);
         if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_HIDDEN) != 0) {
             if (tr.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, c.getHidden())) {
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
@@ -872,10 +877,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         if (childWindowingMode > -1) {
             tr.forAllActivities(a -> { a.setWindowingMode(childWindowingMode); });
-        }
-
-        if (t != null) {
-            tr.setMainWindowSizeChangeTransaction(t);
         }
 
         Rect enterPipBounds = c.getEnterPipBounds();
@@ -1594,11 +1595,31 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE: {
-                taskFragment.getTask().moveOrCreateDecorSurfaceFor(taskFragment);
+                final Task task = taskFragment.getTask();
+                if (task == null) {
+                    break;
+                }
+                // If any TaskFragment in the Task is collected by the transition, we make the decor
+                // surface visible in sync with the TaskFragment transition. Otherwise, we make the
+                // decor surface visible immediately.
+                final TaskFragment syncTaskFragment = transition != null
+                        ? task.getTaskFragment(transition.mParticipants::contains)
+                        : null;
+
+                if (syncTaskFragment != null) {
+                    task.moveOrCreateDecorSurfaceFor(taskFragment, false /* visible */);
+                    task.setDecorSurfaceVisible(syncTaskFragment.getSyncTransaction());
+                } else {
+                    task.moveOrCreateDecorSurfaceFor(taskFragment, true /* visible */);
+                }
                 break;
             }
             case OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE: {
-                taskFragment.getTask().removeDecorSurface();
+                final Task task = taskFragment.getTask();
+                if (task == null) {
+                    break;
+                }
+                task.removeDecorSurface();
                 break;
             }
             case OP_TYPE_SET_DIM_ON_TASK: {
@@ -1613,6 +1634,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             case OP_TYPE_SET_DECOR_SURFACE_BOOSTED: {
                 if (Flags.activityEmbeddingInteractiveDividerFlag()) {
+                    final Task task = taskFragment.getTask();
+                    if (task == null) {
+                        break;
+                    }
                     final SurfaceControl.Transaction clientTransaction =
                             operation.getSurfaceTransaction();
                     if (clientTransaction != null) {
@@ -1621,10 +1646,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         // any invalid operations.
                         clientTransaction.sanitize(caller.mPid, caller.mUid);
                     }
-                    taskFragment.getTask().setDecorSurfaceBoosted(
+
+                    task.requestDecorSurfaceBoosted(
                             taskFragment,
                             operation.getBooleanValue() /* isBoosted */,
                             clientTransaction);
+
+                    // The decor surface boost/unboost must be applied after the transition is
+                    // completed. Otherwise, the decor surface could be moved before Shell completes
+                    // the transition, causing flicker.
+                    runAfterTransition(transition, task::commitDecorSurfaceBoostedState);
                 }
                 break;
             }
@@ -1635,6 +1666,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
         return effects;
+    }
+
+    /**
+     * Executes the provided {@code runnable} after the {@code transition}. If the
+     * {@code transition} is {@code null}, the {@code runnable} is executed immediately.
+     */
+    private static void runAfterTransition(
+            @Nullable Transition transition, @NonNull Runnable runnable) {
+        if (transition == null) {
+            runnable.run();
+        } else {
+            transition.addTransitionEndedListener(runnable);
+        }
     }
 
     private boolean validateTaskFragmentOperation(
@@ -1818,7 +1862,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
             task.getParent().positionChildAt(
                     hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
-                    task, false /* includingParents */);
+                    task, hop.includingParents());
         }
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
@@ -2344,6 +2388,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             position = POSITION_TOP;
         }
         ownerTask.addChild(taskFragment, position);
+        EventLogTags.writeWmTfCreated(System.identityHashCode(taskFragment), ownerTask.mTaskId);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         if (!creationParams.getInitialRelativeBounds().isEmpty()) {
             // The surface operations for the task fragment should sync with the transition.

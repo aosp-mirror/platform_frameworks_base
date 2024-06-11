@@ -202,10 +202,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Vaš poslovni profil više nije dostupan na ovom uređaju"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Previše pokušaja unosa zaporke"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator je ustupio uređaj za osobnu upotrebu"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Privatni prostor je uklonjen"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Vaša organizacija ne dopušta privatne prostore na ovom upravljanom uređaju."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Uređaj je upravljan"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Vaša organizacija upravlja ovim uređajem i može nadzirati mrežni promet. Dodirnite za pojedinosti."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikacije mogu pristupiti vašoj lokaciji"</string>
@@ -1415,7 +1413,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Omogućen je način testnog okvira"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Vratite na tvorničke postavke da biste onemogućili način testnog okvira."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serijska konzola omogućena"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Izvedba je otežana. Provjerite početni program za pokretanje da biste onemogućili konzolu."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Izvedba je otežana. Provjerite pokretač operativnog sustava da biste onemogućili konzolu."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Omogućen je eksperimentalni MTE"</string>
     <string name="mte_override_notification_message" msgid="2441170442725738942">"To može utjecati na izvedbu i stabilnost. Ponovno pokrenite da biste onemogućili. Ako je omogućeno pomoću arm64.memtag.bootctl, prethodno postavite na \"none\"."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Tekućina ili prljavština u USB priključku"</string>
@@ -2199,7 +2197,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Lijevo na plohi za smjerove"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Desno na plohi za smjerove"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"U središtu plohe za smjerove"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Traka naslova aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Paket <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> premješten je u spremnik OGRANIČENO"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"šalje sliku"</string>
@@ -2411,6 +2408,8 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privatni prostor"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Zajedničko"</string>
+    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
+    <skip />
     <string name="redacted_notification_message" msgid="1520587845842228816">"Skriven je osjetljiv sadržaj obavijesti"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Sadržaj aplikacije sakriven je od dijeljenja zaslona radi sigurnosti"</string>

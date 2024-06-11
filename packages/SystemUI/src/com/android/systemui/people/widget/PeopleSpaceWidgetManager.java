@@ -23,7 +23,6 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN;
 import static android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD;
-import static android.appwidget.flags.Flags.drawDataParcel;
 import static android.appwidget.flags.Flags.generatedPreviews;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
@@ -72,7 +71,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -113,8 +111,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.wm.shell.bubbles.Bubbles;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1456,54 +1452,13 @@ public class PeopleSpaceWidgetManager implements Dumpable {
         if (DEBUG) {
             Log.d(TAG, "Updating People Space widget preview for user " + user.getIdentifier());
         }
-        if (!drawDataParcel() || (!Build.IS_USERDEBUG && !Build.IS_ENG)) {
-            updateGeneratedPreviewForUserInternal(provider, user,
-                    new RemoteViews(mContext.getPackageName(),
-                        R.layout.people_space_placeholder_layout));
-        } else {
-            mBgExecutor.execute(updateGeneratedPreviewFromDrawInstructionsForUser(provider, user));
-        }
-    }
-
-    private void updateGeneratedPreviewForUserInternal(@NonNull final ComponentName provider,
-            @NonNull final UserHandle user, @NonNull final RemoteViews rv) {
         boolean success = mAppWidgetManager.setWidgetPreview(
                 provider, WIDGET_CATEGORY_HOME_SCREEN | WIDGET_CATEGORY_KEYGUARD,
-                rv);
+                new RemoteViews(mContext.getPackageName(),
+                        R.layout.people_space_placeholder_layout));
         if (DEBUG && !success) {
             Log.d(TAG, "Failed to update generated preview for user " + user.getIdentifier());
         }
         mUpdatedPreviews.put(user.getIdentifier(), success);
-    }
-
-    private Runnable updateGeneratedPreviewFromDrawInstructionsForUser(
-            @NonNull final ComponentName provider, @NonNull final UserHandle user) {
-        return () -> {
-            if (DEBUG) {
-                Log.d(TAG, "Parsing People Space widget preview from binary for user "
-                        + user.getIdentifier());
-            }
-            if (!generatedPreviews() || mUpdatedPreviews.get(user.getIdentifier())
-                    || !mUserManager.isUserUnlocked(user)) {
-                // Conditions may have changed given this is called from background thread
-                return;
-            }
-            try (InputStream is = mContext.getResources().openRawResource(R.raw.widget)
-            ) {
-                final byte[] preview = new byte[(int) is.available()];
-                final int result = is.read(preview);
-                if (DEBUG && result == -1) {
-                    Log.d(TAG, "Failed parsing previews from binary for user "
-                            + user.getIdentifier());
-                }
-                updateGeneratedPreviewForUserInternal(provider, user, new RemoteViews(
-                        new RemoteViews.DrawInstructions.Builder(
-                                Collections.singletonList(preview)).build()));
-            } catch (IOException e) {
-                if (DEBUG) {
-                    Log.e(TAG, "Failed to generate preview for people widget", e);
-                }
-            }
-        };
     }
 }

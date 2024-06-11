@@ -2196,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad\'дын сол баскычы"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad\'дын оң баскычы"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad\'дын ортоңку баскычы"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунун маалымат тилкеси."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ЧЕКТЕЛГЕН чакага коюлган"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"сүрөт жөнөттү"</string>
@@ -2408,6 +2407,8 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Жеке мейкиндик"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Клон"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Жалпы"</string>
+    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
+    <skip />
     <string name="redacted_notification_message" msgid="1520587845842228816">"Купуя билдирменин мазмуну жашырылган"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Коопсуздук үчүн колдонмодогу контент бөлүшүлгөн экрандан жашырылды"</string>

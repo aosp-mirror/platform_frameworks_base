@@ -36,8 +36,8 @@ import com.android.systemui.media.controls.domain.pipeline.MediaSessionBasedFilt
 import com.android.systemui.media.controls.domain.pipeline.MediaTimeoutListener
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
-import com.android.systemui.media.controls.util.MediaControlsRefactorFlag
 import com.android.systemui.media.controls.util.MediaFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -127,7 +127,7 @@ constructor(
     val currentMedia: StateFlow<List<MediaCommonModel>> = mediaFilterRepository.currentMedia
 
     override fun start() {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (!mediaFlags.isSceneContainerEnabled()) {
             return
         }
 
@@ -256,8 +256,6 @@ constructor(
     companion object {
         val unsupported: Nothing
             get() =
-                error(
-                    "Code path not supported when ${MediaControlsRefactorFlag.FLAG_NAME} is enabled"
-                )
+                error("Code path not supported when ${SceneContainerFlag.DESCRIPTION} is enabled")
     }
 }

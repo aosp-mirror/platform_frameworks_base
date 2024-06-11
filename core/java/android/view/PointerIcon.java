@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -43,7 +44,12 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.flags.Flags;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.util.XmlUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Represents an icon that can be used as a mouse pointer.
@@ -164,6 +170,29 @@ public final class PointerIcon implements Parcelable {
     // every time we need to resolve the icon (i.e. on each input event).
     private static final SparseArray<PointerIcon> SYSTEM_ICONS = new SparseArray<>();
 
+    /** @hide */
+    @IntDef(prefix = {"POINTER_ICON_VECTOR_STYLE_FILL_"}, value = {
+            POINTER_ICON_VECTOR_STYLE_FILL_BLACK,
+            POINTER_ICON_VECTOR_STYLE_FILL_GREEN,
+            POINTER_ICON_VECTOR_STYLE_FILL_YELLOW,
+            POINTER_ICON_VECTOR_STYLE_FILL_PINK,
+            POINTER_ICON_VECTOR_STYLE_FILL_BLUE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PointerIconVectorStyleFill {}
+
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_BLACK = 0;
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_GREEN = 1;
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_YELLOW = 2;
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_PINK = 3;
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_BLUE = 4;
+
+    // If adding a PointerIconVectorStyleFill, update END value for {@link SystemSettingsValidators}
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_BEGIN =
+            POINTER_ICON_VECTOR_STYLE_FILL_BLACK;
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_END =
+            POINTER_ICON_VECTOR_STYLE_FILL_BLUE;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mType;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -261,7 +290,7 @@ public final class PointerIcon implements Parcelable {
         }
 
         final PointerIcon icon = new PointerIcon(type);
-        icon.loadResource(context.getResources(), resourceId);
+        icon.loadResource(context.getResources(), resourceId, context.getTheme());
         return icon;
     }
 
@@ -324,7 +353,7 @@ public final class PointerIcon implements Parcelable {
         }
 
         PointerIcon icon = new PointerIcon(TYPE_CUSTOM);
-        icon.loadResource(resources, resourceId);
+        icon.loadResource(resources, resourceId, null);
         return icon;
     }
 
@@ -443,7 +472,8 @@ public final class PointerIcon implements Parcelable {
         return new BitmapDrawable(resources, bitmap);
     }
 
-    private void loadResource(@NonNull Resources resources, @XmlRes int resourceId) {
+    private void loadResource(@NonNull Resources resources, @XmlRes int resourceId,
+            @Nullable Resources.Theme theme) {
         final XmlResourceParser parser = resources.getXml(resourceId);
         final int bitmapRes;
         final float hotSpotX;
@@ -467,7 +497,7 @@ public final class PointerIcon implements Parcelable {
             throw new IllegalArgumentException("<pointer-icon> is missing bitmap attribute.");
         }
 
-        Drawable drawable = resources.getDrawable(bitmapRes);
+        Drawable drawable = resources.getDrawable(bitmapRes, theme);
         if (drawable instanceof AnimationDrawable) {
             // Extract animation frame bitmaps.
             final AnimationDrawable animationDrawable = (AnimationDrawable) drawable;
@@ -649,6 +679,27 @@ public final class PointerIcon implements Parcelable {
     }
 
     /**
+     * Convert fill style constant to resource ID.
+     *
+     * @hide
+     */
+    public static int vectorFillStyleToResource(@PointerIconVectorStyleFill int fillStyle) {
+        return switch (fillStyle) {
+            case POINTER_ICON_VECTOR_STYLE_FILL_BLACK ->
+                    com.android.internal.R.style.PointerIconVectorStyleFillBlack;
+            case POINTER_ICON_VECTOR_STYLE_FILL_GREEN ->
+                    com.android.internal.R.style.PointerIconVectorStyleFillGreen;
+            case POINTER_ICON_VECTOR_STYLE_FILL_YELLOW ->
+                    com.android.internal.R.style.PointerIconVectorStyleFillYellow;
+            case POINTER_ICON_VECTOR_STYLE_FILL_PINK ->
+                    com.android.internal.R.style.PointerIconVectorStyleFillPink;
+            case POINTER_ICON_VECTOR_STYLE_FILL_BLUE ->
+                    com.android.internal.R.style.PointerIconVectorStyleFillBlue;
+            default -> com.android.internal.R.style.PointerIconVectorStyleFillBlack;
+        };
+    }
+
+    /**
      * Sets whether drop shadow will draw in the native code.
      *
      * @hide
@@ -657,5 +708,15 @@ public final class PointerIcon implements Parcelable {
     @FlaggedApi(Flags.FLAG_ENABLE_VECTOR_CURSORS)
     public void setDrawNativeDropShadow(boolean drawNativeDropShadow) {
         mDrawNativeDropShadow = drawNativeDropShadow;
+    }
+
+    /**
+     * Gets the PointerIcon's bitmap.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public Bitmap getBitmap() {
+        return mBitmap;
     }
 }

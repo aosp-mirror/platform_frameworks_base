@@ -57,7 +57,8 @@ public class DozeBrightnessStrategyTest {
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mDozeBrightnessModeStrategy.updateBrightness(
-                        new StrategyExecutionRequest(displayPowerRequest, 0.2f));
+                        new StrategyExecutionRequest(displayPowerRequest, 0.2f,
+                                /* userSetBrightnessChanged= */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 }

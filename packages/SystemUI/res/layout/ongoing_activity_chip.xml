@@ -40,6 +40,7 @@
 
         <ImageView
             android:src="@*android:drawable/ic_phone"
+            android:id="@+id/ongoing_activity_chip_icon"
             android:layout_width="@dimen/ongoing_activity_chip_icon_size"
             android:layout_height="@dimen/ongoing_activity_chip_icon_size"
             android:tint="?android:attr/colorPrimary"

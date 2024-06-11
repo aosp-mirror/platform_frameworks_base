@@ -41,10 +41,10 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.util.SparseArray;
 
 import androidx.annotation.Nullable;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -53,7 +53,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.nano.SystemUIProtoDump;
-import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QSFactory;
@@ -95,7 +94,7 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Provider;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class QSTileHostTest extends SysuiTestCase {
 
@@ -133,8 +132,6 @@ public class QSTileHostTest extends SysuiTestCase {
 
     private SparseArray<SharedPreferences> mSharedPreferencesByUser;
 
-    private FakeFeatureFlags mFeatureFlags;
-
     private QSPipelineFlagsRepository mQSPipelineFlagsRepository;
 
     private FakeExecutor mMainExecutor;
@@ -144,7 +141,6 @@ public class QSTileHostTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mFeatureFlags = new FakeFeatureFlags();
 
         mSetFlagsRule.disableFlags(FLAG_QS_NEW_PIPELINE);
         mSetFlagsRule.disableFlags(FLAG_QS_NEW_TILES);
@@ -170,12 +166,12 @@ public class QSTileHostTest extends SysuiTestCase {
         saveSetting("");
         setUpTileFactory();
         mQSTileHost = new TestQSTileHost(mContext, () -> null, mDefaultFactory, mMainExecutor,
-                mPluginManager, mTunerService, () -> mAutoTiles, mShadeController,
+                mPluginManager, mTunerService, () -> mAutoTiles, () -> mShadeController,
                 mQSLogger, mUserTracker, mSecureSettings, mCustomTileStatePersister,
                 mTileLifecycleManagerFactory, mUserFileManager, mQSPipelineFlagsRepository);
         mMainExecutor.runAllReady();
 
-        mSecureSettings.registerContentObserverForUser(SETTING, new ContentObserver(null) {
+        mSecureSettings.registerContentObserverForUserSync(SETTING, new ContentObserver(null) {
             @Override
             public void onChange(boolean selfChange) {
                 super.onChange(selfChange);
@@ -689,7 +685,7 @@ public class QSTileHostTest extends SysuiTestCase {
                 QSFactory defaultFactory, Executor mainExecutor,
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles,
-                ShadeController shadeController, QSLogger qsLogger,
+                Lazy<ShadeController> shadeController, QSLogger qsLogger,
                 UserTracker userTracker, SecureSettings secureSettings,
                 CustomTileStatePersister customTileStatePersister,
                 TileLifecycleManager.Factory tileLifecycleManagerFactory,

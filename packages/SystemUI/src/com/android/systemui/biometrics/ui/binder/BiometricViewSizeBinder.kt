@@ -93,6 +93,7 @@ object BiometricViewSizeBinder {
 
         if (constraintBp()) {
             val leftGuideline = view.requireViewById<Guideline>(R.id.leftGuideline)
+            val topGuideline = view.requireViewById<Guideline>(R.id.topGuideline)
             val rightGuideline = view.requireViewById<Guideline>(R.id.rightGuideline)
             val midGuideline = view.findViewById<Guideline>(R.id.midGuideline)
 
@@ -355,20 +356,32 @@ object BiometricViewSizeBinder {
                                 )
                             }
 
+                            if (bounds.top >= 0) {
+                                mediumConstraintSet.setGuidelineBegin(topGuideline.id, bounds.top)
+                                smallConstraintSet.setGuidelineBegin(topGuideline.id, bounds.top)
+                            } else if (bounds.top < 0) {
+                                mediumConstraintSet.setGuidelineEnd(
+                                    topGuideline.id,
+                                    abs(bounds.top)
+                                )
+                                smallConstraintSet.setGuidelineEnd(topGuideline.id, abs(bounds.top))
+                            }
+
                             if (midGuideline != null) {
-                                if (bounds.bottom >= 0) {
-                                    midGuideline.setGuidelineEnd(bounds.bottom)
-                                    mediumConstraintSet.setGuidelineEnd(
-                                        midGuideline.id,
-                                        bounds.bottom
-                                    )
-                                } else if (bounds.bottom < 0) {
-                                    midGuideline.setGuidelineBegin(abs(bounds.bottom))
-                                    mediumConstraintSet.setGuidelineBegin(
-                                        midGuideline.id,
-                                        abs(bounds.bottom)
-                                    )
-                                }
+                                val left =
+                                    if (bounds.left >= 0) {
+                                        bounds.left
+                                    } else {
+                                        view.width - abs(bounds.left)
+                                    }
+                                val right =
+                                    if (bounds.right >= 0) {
+                                        view.width - abs(bounds.right)
+                                    } else {
+                                        bounds.right
+                                    }
+                                val mid = (left + right) / 2
+                                mediumConstraintSet.setGuidelineBegin(midGuideline.id, mid)
                             }
                         }
                     }

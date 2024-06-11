@@ -1439,6 +1439,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 resultTo.removeResultsLocked(r, resultWho, requestCode);
             }
 
+            final int origCallingUid = Binder.getCallingUid();
+            final int origCallingPid = Binder.getCallingPid();
             final long origId = Binder.clearCallingIdentity();
             // TODO(b/64750076): Check if calling pid should really be -1.
             try {
@@ -1446,13 +1448,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     options = new SafeActivityOptions(ActivityOptions.makeBasic());
                 }
 
-                // Fixes b/230492947
+                // Fixes b/230492947 b/337726734
                 // Prevents background activity launch through #startNextMatchingActivity
-                // An activity going into the background could still go back to the foreground
-                // if the intent used matches both:
-                // - the activity in the background
-                // - a second activity.
-                options.getOptions(r).setAvoidMoveToFront();
+                // launchedFromUid of the calling activity represents the app that launches it.
+                // It may have BAL privileges (i.e. the Launcher App). Using its identity to
+                // launch to launch next matching activity causes BAL.
+                // Change the realCallingUid to the calling activity's uid.
+                // In ActivityStarter, when caller is set, the callingUid and callingPid are
+                // ignored. So now both callingUid and realCallingUid is set to the caller app.
                 final int res = getActivityStartController()
                         .obtainStarter(intent, "startNextMatchingActivity")
                         .setCaller(r.app.getThread())
@@ -1465,8 +1468,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         .setCallingUid(r.launchedFromUid)
                         .setCallingPackage(r.launchedFromPackage)
                         .setCallingFeatureId(r.launchedFromFeatureId)
-                        .setRealCallingPid(-1)
-                        .setRealCallingUid(r.launchedFromUid)
+                        .setRealCallingPid(origCallingPid)
+                        .setRealCallingUid(origCallingUid)
                         .setActivityOptions(options)
                         .setUserId(userId)
                         .execute();
@@ -1507,7 +1510,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         a.persistableMode = ActivityInfo.PERSIST_NEVER;
         a.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         a.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
-        a.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
+        a.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS | ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
         a.configChanges = 0xffffffff;
 
         if (homePanelDream()) {

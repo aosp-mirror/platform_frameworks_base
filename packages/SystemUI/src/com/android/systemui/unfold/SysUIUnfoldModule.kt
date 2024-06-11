@@ -36,6 +36,7 @@ import dagger.multibindings.IntoMap
 import dagger.multibindings.IntoSet
 import java.util.Optional
 import javax.inject.Named
+import javax.inject.Qualifier
 import javax.inject.Scope
 
 @Scope @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class SysUIUnfoldScope
@@ -54,8 +55,17 @@ import javax.inject.Scope
 @Module(subcomponents = [SysUIUnfoldComponent::class])
 class SysUIUnfoldModule {
 
+    /**
+     * Qualifier for dependencies bound in [com.android.systemui.unfold.SysUIUnfoldModule]
+     */
+    @Qualifier
+    @MustBeDocumented
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class BoundFromSysUiUnfoldModule
+
     @Provides
     @SysUISingleton
+    @BoundFromSysUiUnfoldModule
     fun provideSysUIUnfoldComponent(
         provider: Optional<UnfoldTransitionProgressProvider>,
         rotationProvider: Optional<NaturalRotationUnfoldProgressProvider>,

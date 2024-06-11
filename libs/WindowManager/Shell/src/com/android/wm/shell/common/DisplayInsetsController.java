@@ -199,6 +199,16 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             }
         }
 
+        private void setImeInputTargetRequestedVisibility(boolean visible) {
+            CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
+            if (listeners == null) {
+                return;
+            }
+            for (OnInsetsChangedListener listener : listeners) {
+                listener.setImeInputTargetRequestedVisibility(visible);
+            }
+        }
+
         @BinderThread
         private class DisplayWindowInsetsControllerImpl
                 extends IDisplayWindowInsetsController.Stub {
@@ -238,6 +248,14 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
                     @Nullable ImeTracker.Token statsToken) throws RemoteException {
                 mMainExecutor.execute(() -> {
                     PerDisplay.this.hideInsets(types, fromIme, statsToken);
+                });
+            }
+
+            @Override
+            public void setImeInputTargetRequestedVisibility(boolean visible)
+                    throws RemoteException {
+                mMainExecutor.execute(() -> {
+                    PerDisplay.this.setImeInputTargetRequestedVisibility(visible);
                 });
             }
         }
@@ -291,5 +309,12 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          */
         default void hideInsets(@InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {}
+
+        /**
+         * Called to set the requested visibility of the IME in DisplayImeController. Invoked by
+         * {@link com.android.server.wm.DisplayContent.RemoteInsetsControlTarget}.
+         * @param visible requested status of the IME
+         */
+        default void setImeInputTargetRequestedVisibility(boolean visible) {}
     }
 }

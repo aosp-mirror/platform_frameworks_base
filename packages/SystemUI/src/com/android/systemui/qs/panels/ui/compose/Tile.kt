@@ -17,6 +17,8 @@
 package com.android.systemui.qs.panels.ui.compose
 
 import android.graphics.drawable.Animatable
+import android.service.quicksettings.Tile.STATE_ACTIVE
+import android.service.quicksettings.Tile.STATE_INACTIVE
 import android.text.TextUtils
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
@@ -49,6 +51,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,14 +78,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
-import com.android.compose.theme.colorAttr
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.load
-import com.android.systemui.qs.panels.ui.viewmodel.ActiveTileColorAttributes
 import com.android.systemui.qs.panels.ui.viewmodel.AvailableEditActions
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileColorAttributes
 import com.android.systemui.qs.panels.ui.viewmodel.TileUiState
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toUiState
@@ -108,10 +108,12 @@ fun Tile(
         tile.state
             .mapLatest { it.toUiState() }
             .collectAsStateWithLifecycle(tile.currentState.toUiState())
+    val colors = TileDefaults.getColorForState(state.state)
+
     val context = LocalContext.current
 
     Expandable(
-        color = colorAttr(state.colors.background),
+        color = colors.background,
         shape = RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius)),
     ) {
         Row(
@@ -121,7 +123,7 @@ fun Tile(
                         onClick = { tile.onClick(it) },
                         onLongClick = { tile.onLongClick(it) }
                     )
-                    .tileModifier(state.colors),
+                    .tileModifier(colors),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = tileHorizontalArrangement(iconOnly),
         ) {
@@ -139,7 +141,7 @@ fun Tile(
                 label = state.label.toString(),
                 secondaryLabel = state.secondaryLabel.toString(),
                 icon = icon,
-                colors = state.colors,
+                colors = colors,
                 iconOnly = iconOnly,
                 showLabels = showLabels,
             )
@@ -165,7 +167,7 @@ fun TileLazyGrid(
 @Composable
 fun DefaultEditTileGrid(
     tiles: List<EditTileViewModel>,
-    iconOnlySpecs: Set<TileSpec>,
+    isIconOnly: (TileSpec) -> Boolean,
     columns: GridCells,
     modifier: Modifier,
     onAddTile: (TileSpec, Int) -> Unit,
@@ -176,8 +178,6 @@ fun DefaultEditTileGrid(
     val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
         onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
     }
-    val isIconOnly: (TileSpec) -> Boolean =
-        remember(iconOnlySpecs) { { tileSpec: TileSpec -> tileSpec in iconOnlySpecs } }
 
     TileLazyGrid(modifier = modifier, columns = columns) {
         // These Text are just placeholders to see the different sections. Not final UI.
@@ -294,7 +294,7 @@ fun EditTile(
     modifier: Modifier = Modifier,
 ) {
     val label = tileViewModel.label.load() ?: tileViewModel.tileSpec.spec
-    val colors = ActiveTileColorAttributes
+    val colors = TileDefaults.inactiveTileColors()
 
     Row(
         modifier = modifier.tileModifier(colors).semantics { this.contentDescription = label },
@@ -363,10 +363,10 @@ private fun TileIcon(
 }
 
 @Composable
-private fun Modifier.tileModifier(colors: TileColorAttributes): Modifier {
+private fun Modifier.tileModifier(colors: TileColors): Modifier {
     return fillMaxWidth()
         .clip(RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius)))
-        .background(colorAttr(colors.background))
+        .background(colors.background)
         .padding(horizontal = dimensionResource(id = R.dimen.qs_label_container_margin))
 }
 
@@ -389,7 +389,7 @@ private fun TileContent(
     label: String,
     secondaryLabel: String?,
     icon: Icon,
-    colors: TileColorAttributes,
+    colors: TileColors,
     iconOnly: Boolean,
     showLabels: Boolean = false,
     animateIconToEnd: Boolean = false,
@@ -399,13 +399,13 @@ private fun TileContent(
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxHeight()
     ) {
-        TileIcon(icon, colorAttr(colors.icon), animateIconToEnd)
+        TileIcon(icon, colors.icon, animateIconToEnd)
 
         if (iconOnly && showLabels) {
             Text(
                 label,
                 maxLines = 2,
-                color = colorAttr(colors.label),
+                color = colors.label,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
             )
@@ -416,13 +416,13 @@ private fun TileContent(
         Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()) {
             Text(
                 label,
-                color = colorAttr(colors.label),
+                color = colors.label,
                 modifier = Modifier.basicMarquee(),
             )
             if (!TextUtils.isEmpty(secondaryLabel)) {
                 Text(
                     secondaryLabel ?: "",
-                    color = colorAttr(colors.secondaryLabel),
+                    color = colors.secondaryLabel,
                     modifier = Modifier.basicMarquee(),
                 )
             }
@@ -433,12 +433,55 @@ private fun TileContent(
 @Composable
 fun tileHeight(iconWithLabel: Boolean = false): Dp {
     return if (iconWithLabel) {
-        TileDimensions.IconTileWithLabelHeight
+        TileDefaults.IconTileWithLabelHeight
     } else {
         dimensionResource(id = R.dimen.qs_tile_height)
     }
 }
 
-private object TileDimensions {
+private data class TileColors(
+    val background: Color,
+    val label: Color,
+    val secondaryLabel: Color,
+    val icon: Color,
+)
+
+private object TileDefaults {
     val IconTileWithLabelHeight = 100.dp
+
+    @Composable
+    fun activeTileColors(): TileColors =
+        TileColors(
+            background = MaterialTheme.colorScheme.primary,
+            label = MaterialTheme.colorScheme.onPrimary,
+            secondaryLabel = MaterialTheme.colorScheme.onPrimary,
+            icon = MaterialTheme.colorScheme.onPrimary,
+        )
+
+    @Composable
+    fun inactiveTileColors(): TileColors =
+        TileColors(
+            background = MaterialTheme.colorScheme.surfaceVariant,
+            label = MaterialTheme.colorScheme.onSurfaceVariant,
+            secondaryLabel = MaterialTheme.colorScheme.onSurfaceVariant,
+            icon = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+    @Composable
+    fun unavailableTileColors(): TileColors =
+        TileColors(
+            background = MaterialTheme.colorScheme.surface,
+            label = MaterialTheme.colorScheme.onSurface,
+            secondaryLabel = MaterialTheme.colorScheme.onSurface,
+            icon = MaterialTheme.colorScheme.onSurface,
+        )
+
+    @Composable
+    fun getColorForState(state: Int): TileColors {
+        return when (state) {
+            STATE_ACTIVE -> activeTileColors()
+            STATE_INACTIVE -> inactiveTileColors()
+            else -> unavailableTileColors()
+        }
+    }
 }

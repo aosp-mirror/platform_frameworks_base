@@ -25,6 +25,12 @@
         <option name="test-file-name" value="FrameworksImeTests.apk" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="input keyevent KEYCODE_WAKEUP" />
+        <option name="run-command" value="wm dismiss-keyguard" />
+        <option name="run-command" value="settings put secure immersive_mode_confirmations confirmed" />
+    </target_preparer>
+
     <option name="test-tag" value="FrameworksImeTests" />
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >

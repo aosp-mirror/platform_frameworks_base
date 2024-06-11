@@ -28,7 +28,6 @@ import com.android.systemui.authentication.data.repository.fakeAuthenticationRep
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -36,7 +35,6 @@ import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintA
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
-import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.qs.FooterActionsController
@@ -46,6 +44,8 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneContainerStartable
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
 import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModel
@@ -55,7 +55,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -82,11 +81,8 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     private val sceneBackInteractor = kosmos.sceneBackInteractor
     private val sceneContainerStartable = kosmos.sceneContainerStartable
 
-    private val mediaDataManager = mock<MediaDataManager>()
-
     private lateinit var underTest: QuickSettingsSceneViewModel
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
         kosmos.fakeFeatureFlagsClassic.set(Flags.NEW_NETWORK_SLICE_UI, false)
@@ -95,7 +91,6 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         underTest =
             QuickSettingsSceneViewModel(
                 applicationScope = testScope.backgroundScope,
-                deviceEntryInteractor = kosmos.deviceEntryInteractor,
                 brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
                 shadeHeaderViewModel = kosmos.shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
@@ -112,6 +107,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             val destinations by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             qsFlexiglassAdapter.setCustomizing(false)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
@@ -128,9 +124,10 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                         Swipe(
                             fromSource = Edge.Bottom,
                             direction = SwipeDirection.Up,
-                        ) to UserActionResult(Scenes.Gone)
+                        ) to UserActionResult(SceneFamilies.Home)
                     )
                 )
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -142,6 +139,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val backScene by collectLastValue(sceneBackInteractor.backScene)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
             sceneInteractor.changeScene(Scenes.QuickSettings, "reason")
             assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
@@ -155,9 +153,10 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                         Swipe(
                             fromSource = Edge.Bottom,
                             direction = SwipeDirection.Up,
-                        ) to UserActionResult(Scenes.Lockscreen)
+                        ) to UserActionResult(SceneFamilies.Home)
                     )
                 )
+            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
@@ -165,6 +164,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             val destinations by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             qsFlexiglassAdapter.setCustomizing(false)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
@@ -179,9 +179,10 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                         Swipe(
                             fromSource = Edge.Bottom,
                             direction = SwipeDirection.Up,
-                        ) to UserActionResult(Scenes.Lockscreen)
+                        ) to UserActionResult(SceneFamilies.Home)
                     )
                 )
+            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
@@ -199,6 +200,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, true)
             val destinations by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             qsFlexiglassAdapter.setCustomizing(false)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
@@ -215,9 +217,10 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                         Swipe(
                             fromSource = Edge.Bottom,
                             direction = SwipeDirection.Up,
-                        ) to UserActionResult(Scenes.Gone),
+                        ) to UserActionResult(SceneFamilies.Home)
                     )
                 )
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
     @Test

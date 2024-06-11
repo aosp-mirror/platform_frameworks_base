@@ -285,6 +285,9 @@ class DragResizeInputListener implements AutoCloseable {
         private boolean mShouldHandleEvents;
         private int mLastCursorType = PointerIcon.TYPE_DEFAULT;
         private Rect mDragStartTaskBounds;
+        // The id of the particular pointer in a MotionEvent that we are listening to for drag
+        // resize events. For example, if multiple fingers are touching the screen, then each one
+        // has a separate pointer id, but we only accept drag input from one.
         private int mDragPointerId = -1;
 
         private TaskResizeInputEventReceiver(@NonNull Context context,
@@ -395,6 +398,8 @@ class DragResizeInputListener implements AutoCloseable {
                     mShouldHandleEvents = mDragResizeWindowGeometry.shouldHandleEvent(e, isTouch,
                             new Point() /* offset */);
                     if (mShouldHandleEvents) {
+                        // Save the id of the pointer for this drag interaction; we will use the
+                        // same pointer for all subsequent MotionEvents in this interaction.
                         mDragPointerId = e.getPointerId(0);
                         float x = e.getX(0);
                         float y = e.getY(0);
@@ -420,9 +425,16 @@ class DragResizeInputListener implements AutoCloseable {
                         break;
                     }
                     mInputManager.pilferPointers(mInputChannel.getToken());
-                    int dragPointerIndex = e.findPointerIndex(mDragPointerId);
-                    float rawX = e.getRawX(dragPointerIndex);
-                    float rawY = e.getRawY(dragPointerIndex);
+                    final int dragPointerIndex = e.findPointerIndex(mDragPointerId);
+                    if (dragPointerIndex < 0) {
+                        ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                                "%s: Handling action move, but ignore event due to invalid "
+                                        + "pointer index",
+                                TAG);
+                        break;
+                    }
+                    final float rawX = e.getRawX(dragPointerIndex);
+                    final float rawY = e.getRawY(dragPointerIndex);
                     final Rect taskBounds = mCallback.onDragPositioningMove(rawX, rawY);
                     updateInputSinkRegionForDrag(taskBounds);
                     result = true;
@@ -431,7 +443,14 @@ class DragResizeInputListener implements AutoCloseable {
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
                     if (mShouldHandleEvents) {
-                        int dragPointerIndex = e.findPointerIndex(mDragPointerId);
+                        final int dragPointerIndex = e.findPointerIndex(mDragPointerId);
+                        if (dragPointerIndex < 0) {
+                            ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                                    "%s: Handling action %d, but ignore event due to invalid "
+                                            + "pointer index",
+                                    TAG, e.getActionMasked());
+                            break;
+                        }
                         final Rect taskBounds = mCallback.onDragPositioningEnd(
                                 e.getRawX(dragPointerIndex), e.getRawY(dragPointerIndex));
                         // If taskBounds has changed, setGeometry will be called and update the

@@ -174,5 +174,10 @@ public class ProtoLogImplTest {
             this.mLogToLogcat = logToLogcat;
         }
 
+        @Override
+        public int getId() {
+            return ordinal();
+        }
+
     }
 }
