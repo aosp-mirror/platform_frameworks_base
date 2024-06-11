@@ -25,7 +25,6 @@ import com.android.systemui.util.mockito.mock
 val Kosmos.shadeLockscreenInteractor by
     Kosmos.Fixture {
         ShadeLockscreenInteractorImpl(
-            applicationScope = applicationCoroutineScope,
             backgroundScope = applicationCoroutineScope,
             shadeInteractor = shadeInteractorImpl,
             sceneInteractor = sceneInteractor,

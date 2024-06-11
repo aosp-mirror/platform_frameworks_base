@@ -36,7 +36,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -239,7 +241,14 @@ constructor(
         loggingReason: String,
     ) {
         val currentSceneKey = currentScene.value
-        val resolvedScene = sceneFamilyResolvers.get()[toScene]?.resolvedScene?.value ?: toScene
+        val resolvedScene =
+            sceneFamilyResolvers.get()[toScene]?.let { familyResolver ->
+                if (familyResolver.includesScene(currentSceneKey)) {
+                    return
+                } else {
+                    familyResolver.resolvedScene.value
+                }
+            } ?: toScene
         if (
             !validateSceneChange(
                 from = currentSceneKey,
@@ -320,8 +329,9 @@ constructor(
      * Returns the [concrete scene][Scenes] for [sceneKey] if it is a [scene family][SceneFamilies],
      * otherwise returns a singleton [Flow] containing [sceneKey].
      */
-    fun resolveSceneFamily(sceneKey: SceneKey): Flow<SceneKey> =
-        sceneFamilyResolvers.get()[sceneKey]?.resolvedScene ?: flowOf(sceneKey)
+    fun resolveSceneFamily(sceneKey: SceneKey): Flow<SceneKey> = flow {
+        emitAll(sceneFamilyResolvers.get()[sceneKey]?.resolvedScene ?: flowOf(sceneKey))
+    }
 
     private fun isVisibleInternal(
         raw: Boolean = repository.isVisible.value,
@@ -365,4 +375,12 @@ constructor(
 
         return from != to
     }
+
+    /** Returns a flow indicating if the currently visible scene can be resolved from [family]. */
+    fun isCurrentSceneInFamily(family: SceneKey): Flow<Boolean> =
+        currentScene.map { currentScene -> isSceneInFamily(currentScene, family) }
+
+    /** Returns `true` if [scene] can be resolved from [family]. */
+    fun isSceneInFamily(scene: SceneKey, family: SceneKey): Boolean =
+        sceneFamilyResolvers.get()[family]?.includesScene(scene) == true
 }
