@@ -161,7 +161,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ரத்துசெய்"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"இணைத்தலானது உங்கள் தொடர்புகள், அழைப்பு வரலாறுக்கான அணுகலை வழங்குகிறது."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> உடன் இணைய முடியவில்லை."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"தவறான பின் அல்லது கடவுச்சொல் காரணமாக <xliff:g id="DEVICE_NAME">%1$s</xliff:g> உடன் இணைக்க முடியவில்லை."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"தவறான பின் அல்லது கடவுச்சாவி காரணமாக <xliff:g id="DEVICE_NAME">%1$s</xliff:g> உடன் இணைக்க முடியவில்லை."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> உடன் இணைக்க முடியவில்லை."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> இணைப்பதை நிராகரித்தது."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"கணினி"</string>
