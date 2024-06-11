@@ -251,7 +251,7 @@
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"स्क्रीन सेवर"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"कैमरे का ऐक्सेस"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"माइक्रोफ़ोन का ऐक्सेस"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"उपलब्ध"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"उपलब्ध है"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ब्लॉक किया गया है"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"मीडिया डिवाइस"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"उपयोगकर्ता"</string>
@@ -314,8 +314,8 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"स्टैंडर्ड"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"सामान्य"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ज़्यादा"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"क्या आपको डिवाइस का माइक्रोफ़ोन अनब्लॉक करना है?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"क्या आपको डिवाइस का कैमरा अनब्लॉक करना है?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"क्या आपको माइक्रोफ़ोन का ऐक्सेस अनब्लॉक करना है?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"क्या आपको कैमरे का ऐक्सेस अनब्लॉक करना है?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"क्या आप डिवाइस का कैमरा और माइक्रोफ़ोन अनब्लॉक करना चाहते हैं?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ऐसा करने से, सभी ऐप्लिकेशन और सेवाओं के लिए माइक्रोफ़ोन का ऐक्सेस अनब्लॉक हो जाएगा और वे इसका इस्तेमाल कर पाएंगी."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ऐसा करने से, सभी ऐप्लिकेशन और सेवाओं के लिए कैमरे का ऐक्सेस अनब्लॉक हो जाएगा और वे इसका इस्तेमाल कर पाएंगी."</string>
@@ -863,7 +863,7 @@
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"दायां हैंडल"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"नीचे का हैंडल"</string>
     <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"ज़ूम करने की सुविधा वाली सेटिंग"</string>
-    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"ज़ूम करने की सुविधा का साइज़"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"ज़ूम का साइज़"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"ज़ूम करें"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"मध्यम"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"छोटा"</string>

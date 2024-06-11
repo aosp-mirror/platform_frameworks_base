@@ -217,7 +217,7 @@
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Không làm phiền."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth bật."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Báo thức được đặt cho <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Chuông báo được đặt cho <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"Nhiều thời gian hơn."</string>
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Ít thời gian hơn."</string>
     <string name="accessibility_casting_turned_off" msgid="1387906158563374962">"Đã ngừng truyền màn hình."</string>
@@ -499,11 +499,11 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Không, cảm ơn"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Đã ghim ứng dụng"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Đã bỏ ghim ứng dụng"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Gọi"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Cuộc gọi"</string>
     <string name="stream_system" msgid="7663148785370565134">"Hệ thống"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Chuông"</string>
     <string name="stream_music" msgid="2188224742361847580">"Nội dung nghe nhìn"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"Báo thức"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"Chuông báo"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Thông báo"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Tần số đa chuông kép"</string>
@@ -528,7 +528,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"Bật chế độ trình diễn"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Hiển thị chế độ trình diễn"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Báo thức"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Chuông báo"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Ví"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Thiết lập để mua hàng nhanh hơn và an toàn hơn bằng điện thoại"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hiện tất cả"</string>
@@ -541,7 +541,7 @@
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Đang cập nhật"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Hồ sơ công việc"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Chế độ trên máy bay"</string>
-    <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy báo thức tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
+    <string name="zen_alarm_warning" msgid="7844303238486849503">"Bạn sẽ không nghe thấy chuông báo tiếp theo lúc <xliff:g id="WHEN">%1$s</xliff:g> của mình"</string>
     <string name="alarm_template" msgid="2234991538018805736">"lúc <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"vào <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Điểm phát sóng"</string>

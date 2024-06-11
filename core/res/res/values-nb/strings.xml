@@ -325,7 +325,7 @@
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Samtalelogger"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"lese og skrive samtaleloggen"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
-    <string name="permgroupdesc_phone" msgid="270048070781478204">"ring og administrer anrop"</string>
+    <string name="permgroupdesc_phone" msgid="270048070781478204">"ringe og administrere anrop"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Kroppssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"få tilgang til sensordata om de vitale tegnene dine"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Varsler"</string>
