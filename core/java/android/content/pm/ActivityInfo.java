@@ -941,6 +941,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             CONFIG_COLOR_MODE,
             CONFIG_FONT_SCALE,
             CONFIG_GRAMMATICAL_GENDER,
+            CONFIG_ASSETS_PATHS,
+            CONFIG_RESOURCES_UNUSED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Config {}
@@ -1060,8 +1062,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * can itself handle asset path changes.  Set from the {@link android.R.attr#configChanges}
      * attribute. This is not a core resource configuration, but a higher-level value, so its
      * constant starts at the high bits.
-     * @hide We do not want apps handling this yet, but we do need some kind of bit for diffs.
      */
+    @FlaggedApi(android.content.res.Flags.FLAG_HANDLE_ALL_CONFIG_CHANGES)
     public static final int CONFIG_ASSETS_PATHS = 0x80000000;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
@@ -1087,6 +1089,30 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * constant starts at the high bits.
      */
     public static final int CONFIG_FONT_WEIGHT_ADJUSTMENT = 0x10000000;
+
+    /**
+     * <p>This is probably not the constant you want, the resources compiler supports a less
+     * dangerous version of it, 'allKnown', that only suppresses all currently existing
+     * configuration change restarts depending on your target SDK rather than whatever the latest
+     * SDK supports, allowing the application to work with resources on future Platform versions.
+     *
+     * <p>Bit in {@link #configChanges} that indicates that the activity doesn't use Android
+     * Resources at all and doesn't need to be restarted on any configuration changes. This bit
+     * disables all restarts for configuration dimensions available in the current target SDK as
+     * well as dimensions introduced in future SDKs. Use it only if the activity doesn't need
+     * anything from its resources, and doesn't depend on any libraries that may provide resources
+     * and need to respond to configuration changes. When set,
+     * {@link Activity#onConfigurationChanged(Configuration)} will be called instead of a restart,
+     * and it’s up to the implementation to ensure that no stale resource values remain loaded
+     * anywhere in the code.
+     *
+     * <p>This overrides all other bits, and this is recommended to be used individually.
+     *
+     * <p>This is not a core resource configuration, but a higher-level value, so its constant
+     * starts at the high bits.
+     */
+    @FlaggedApi(android.content.res.Flags.FLAG_HANDLE_ALL_CONFIG_CHANGES)
+    public static final int CONFIG_RESOURCES_UNUSED = 0x8000000;
 
     /** @hide
      * Unfortunately the constants for config changes in native code are
@@ -1640,7 +1666,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION},
      * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT},
      * {@link #CONFIG_DENSITY}, {@link #CONFIG_LAYOUT_DIRECTION},
-     * {@link #CONFIG_COLOR_MODE}, and {link #CONFIG_GRAMMATICAL_GENDER}.
+     * {@link #CONFIG_COLOR_MODE}, {@link #CONFIG_GRAMMATICAL_GENDER},
+     * {@link #CONFIG_ASSETS_PATHS}, and {@link #CONFIG_RESOURCES_UNUSED}.
      * Set from the {@link android.R.attr#configChanges} attribute.
      */
     public int configChanges;
