@@ -314,8 +314,7 @@ class DesktopModeLoggerTransitionObserver(
             WindowManager.TRANSIT_WAKE -> EnterReason.SCREEN_ON
             Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP -> EnterReason.APP_HANDLE_DRAG
             TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON -> EnterReason.APP_HANDLE_MENU_BUTTON
-            // TODO(b/344822506): Create and update EnterReason to APP_FROM_OVERVIEW
-            TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW -> EnterReason.UNKNOWN_ENTER
+            TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW -> EnterReason.APP_FROM_OVERVIEW
             TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT -> EnterReason.KEYBOARD_SHORTCUT_ENTER
             WindowManager.TRANSIT_OPEN -> EnterReason.APP_FREEFORM_INTENT
             else -> EnterReason.UNKNOWN_ENTER

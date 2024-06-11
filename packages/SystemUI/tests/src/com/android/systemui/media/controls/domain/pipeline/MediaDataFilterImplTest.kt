@@ -663,6 +663,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                     true
                 )
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+            repository.setOrderedMedia()
 
             assertThat(currentMedia).containsExactly(controlCommonModel)
             verify(listener)
@@ -706,6 +707,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                     true
                 )
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+            repository.setOrderedMedia()
             assertThat(currentMedia).containsExactly(controlCommonModel)
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
@@ -760,6 +762,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                 )
 
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+            repository.setOrderedMedia()
 
             assertThat(currentMedia).containsExactly(controlCommonModel)
             verify(listener)
@@ -834,6 +837,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                 )
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+            repository.setOrderedMedia()
 
             assertThat(currentMedia).containsExactly(controlCommonModel)
             verify(listener)
@@ -922,6 +926,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             // If there is media that was recently played but inactive
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+            repository.setOrderedMedia()
 
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
@@ -986,6 +991,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             // WHEN we have media that was recently played, but not currently active
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+            repository.setOrderedMedia()
 
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
@@ -1039,6 +1045,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             // WHEN we have media that was recently played, but not currently active
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+            repository.setOrderedMedia()
 
             verify(listener)
                 .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))

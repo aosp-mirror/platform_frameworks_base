@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.systemui.dreams.DreamOverlayStatusBarView
+<com.android.systemui.ambient.statusbar.ui.AmbientStatusBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/dream_overlay_status_bar"
@@ -118,4 +118,4 @@
             android:contentDescription="@string/assistant_attention_content_description" />
 
     </LinearLayout>
-</com.android.systemui.dreams.DreamOverlayStatusBarView>
+</com.android.systemui.ambient.statusbar.ui.AmbientStatusBarView>

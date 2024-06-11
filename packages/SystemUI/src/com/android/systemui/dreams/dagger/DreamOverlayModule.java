@@ -25,9 +25,11 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.util.Preconditions;
+import com.android.systemui.ambient.statusbar.dagger.AmbientStatusBarComponent;
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarView;
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayContainerView;
-import com.android.systemui.dreams.DreamOverlayStatusBarView;
 import com.android.systemui.res.R;
 import com.android.systemui.touch.TouchInsetManager;
 
@@ -60,7 +62,7 @@ public abstract class DreamOverlayModule {
     public static DreamOverlayContainerView providesDreamOverlayContainerView(
             LayoutInflater layoutInflater) {
         return Preconditions.checkNotNull((DreamOverlayContainerView)
-                layoutInflater.inflate(R.layout.dream_overlay_container, null),
+                        layoutInflater.inflate(R.layout.dream_overlay_container, null),
                 "R.layout.dream_layout_container could not be properly inflated");
     }
 
@@ -95,13 +97,23 @@ public abstract class DreamOverlayModule {
     /** */
     @Provides
     @DreamOverlayComponent.DreamOverlayScope
-    public static DreamOverlayStatusBarView providesDreamOverlayStatusBarView(
+    public static AmbientStatusBarView providesDreamOverlayStatusBarView(
             DreamOverlayContainerView view) {
         return Preconditions.checkNotNull(view.findViewById(R.id.dream_overlay_status_bar),
                 "R.id.status_bar must not be null");
     }
 
-    /** */
+    /**
+     * Provides the view controller for the {@link AmbientStatusBarView}
+     */
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    public static AmbientStatusBarViewController providesStatusBarViewController(
+            AmbientStatusBarView view, AmbientStatusBarComponent.Factory factory) {
+        return factory.create(view).getController();
+    }
+
+    /**  */
     @Provides
     @DreamOverlayComponent.DreamOverlayScope
     @Named(MAX_BURN_IN_OFFSET)

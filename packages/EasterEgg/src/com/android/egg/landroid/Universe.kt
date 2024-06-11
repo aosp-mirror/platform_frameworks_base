@@ -43,11 +43,9 @@ const val CRAFT_SPEED_LIMIT = 5_000f
 const val MAIN_ENGINE_ACCEL = 1000f // thrust effect, pixels per second squared
 const val LAUNCH_MECO = 2f // how long to suspend gravity when launching
 
-const val SCALED_THRUST = true
+const val LANDING_REMOVAL_TIME = 3600f // one hour of simulation time
 
-interface Removable {
-    fun canBeRemoved(): Boolean
-}
+const val SCALED_THRUST = true
 
 open class Planet(
     val orbitCenter: Vec2,
@@ -321,7 +319,7 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
                         //
                         (1..10).forEach {
                             Spark(
-                                    lifetime = rng.nextFloatInRange(0.5f, 2f),
+                                    ttl = rng.nextFloatInRange(0.5f, 2f),
                                     style = Spark.Style.DOT,
                                     color = Color.White,
                                     size = 1f
@@ -359,13 +357,22 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
         entities
             .filterIsInstance<Removable>()
             .filter(predicate = Removable::canBeRemoved)
-            .filterIsInstance<Entity>()
-            .forEach { remove(it) }
+            .forEach { remove(it as Entity) }
+
+        constraints
+            .filterIsInstance<Removable>()
+            .filter(predicate = Removable::canBeRemoved)
+            .forEach { remove(it as Constraint) }
     }
 }
 
-class Landing(var ship: Spacecraft?, val planet: Planet, val angle: Float, val text: String = "") :
-    Constraint {
+class Landing(
+    var ship: Spacecraft?,
+    val planet: Planet,
+    val angle: Float,
+    val text: String = "",
+    private val fuse: Fuse = Fuse(LANDING_REMOVAL_TIME)
+) : Constraint, Removable by fuse {
     override fun solve(sim: Simulator, dt: Float) {
         ship?.let { ship ->
             val landingVector = Vec2.makeWithAngleMag(angle, ship.radius + planet.radius)
@@ -373,17 +380,20 @@ class Landing(var ship: Spacecraft?, val planet: Planet, val angle: Float, val t
             ship.pos = (ship.pos * 0.5f) + (desiredPos * 0.5f) // @@@ FIXME
             ship.angle = angle
         }
+
+        fuse.update(dt)
     }
 }
 
 class Spark(
-    var lifetime: Float,
+    var ttl: Float,
     collides: Boolean = false,
     mass: Float = 0f,
     val style: Style = Style.LINE,
     val color: Color = Color.Gray,
-    val size: Float = 2f
-) : Removable, Body() {
+    val size: Float = 2f,
+    val fuse: Fuse = Fuse(ttl)
+) : Removable by fuse, Body(name = "Spark") {
     enum class Style {
         LINE,
         LINE_ABSOLUTE,
@@ -398,10 +408,7 @@ class Spark(
     }
     override fun update(sim: Simulator, dt: Float) {
         super.update(sim, dt)
-        lifetime -= dt
-    }
-    override fun canBeRemoved(): Boolean {
-        return lifetime < 0
+        fuse.update(dt)
     }
 }
 
@@ -486,11 +493,11 @@ class Spacecraft : Body() {
             // exhaust
             sim.add(
                 Spark(
-                        lifetime = sim.rng.nextFloatInRange(0.5f, 1f),
+                        ttl = sim.rng.nextFloatInRange(0.5f, 1f),
                         collides = true,
                         mass = 1f,
                         style = Spark.Style.RING,
-                        size = 3f,
+                        size = 1f,
                         color = Color(0x40FFFFFF)
                     )
                     .also { spark ->

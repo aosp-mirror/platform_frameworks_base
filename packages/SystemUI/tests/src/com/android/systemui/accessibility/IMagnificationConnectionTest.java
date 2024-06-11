@@ -39,6 +39,7 @@ import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.testing.TestableLooper;
 import android.view.Display;
+import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IMagnificationConnectionCallback;
@@ -99,6 +100,8 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private AccessibilityLogger mA11yLogger;
+    @Mock
+    private IWindowManager mIWindowManager;
 
     private IMagnificationConnection mIMagnificationConnection;
     private Magnification mMagnification;
@@ -117,9 +120,10 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         assertNotNull(mTestableLooper);
         mMagnification = new Magnification(getContext(),
-                mTestableLooper.getLooper(), getContext().getMainExecutor(), mCommandQueue,
+                mTestableLooper.getLooper(), mContext.getMainExecutor(), mCommandQueue,
                 mModeSwitchesController, mSysUiState, mOverviewProxyService, mSecureSettings,
-                mDisplayTracker, getContext().getSystemService(DisplayManager.class), mA11yLogger);
+                mDisplayTracker, getContext().getSystemService(DisplayManager.class),
+                mA11yLogger, mIWindowManager);
         mMagnification.mWindowMagnificationControllerSupplier =
                 new FakeWindowMagnificationControllerSupplier(
                         mContext.getSystemService(DisplayManager.class));
