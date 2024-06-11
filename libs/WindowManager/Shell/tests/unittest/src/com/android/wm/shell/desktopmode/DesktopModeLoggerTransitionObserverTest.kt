@@ -187,7 +187,6 @@ class DesktopModeLoggerTransitionObserverTest {
     }
 
     @Test
-    // TODO(b/344822506): Update test when we add enter reason for app from overview
     fun transitEnterDesktopFromAppFromOverview_logTaskAddedAndEnterReasonUnknown() {
         val change = createChange(TRANSIT_TO_FRONT, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
         val transitionInfo =
@@ -200,7 +199,7 @@ class DesktopModeLoggerTransitionObserverTest {
 
         assertThat(sessionId).isNotNull()
         verify(desktopModeEventLogger, times(1))
-            .logSessionEnter(eq(sessionId!!), eq(EnterReason.UNKNOWN_ENTER))
+            .logSessionEnter(eq(sessionId!!), eq(EnterReason.APP_FROM_OVERVIEW))
         verify(desktopModeEventLogger, times(1)).logTaskAdded(eq(sessionId), any())
         verifyZeroInteractions(desktopModeEventLogger)
     }
