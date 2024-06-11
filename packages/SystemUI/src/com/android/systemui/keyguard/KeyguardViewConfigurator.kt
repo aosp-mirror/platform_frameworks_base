@@ -53,7 +53,6 @@ import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
-import com.android.systemui.keyguard.ui.view.layout.KeyguardBlueprintCommandListener
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
@@ -89,7 +88,6 @@ constructor(
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
-    private val keyguardBlueprintCommandListener: KeyguardBlueprintCommandListener,
     private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
     private val configuration: ConfigurationState,
@@ -105,7 +103,6 @@ constructor(
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val lockscreenContentViewModel: LockscreenContentViewModel,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
-    private val keyguardBlueprintViewBinder: KeyguardBlueprintViewBinder,
     private val clockInteractor: KeyguardClockInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
 ) : CoreStartable {
@@ -152,7 +149,7 @@ constructor(
                 cs.connect(composeView.id, BOTTOM, PARENT_ID, BOTTOM)
                 keyguardRootView.addView(composeView)
             } else {
-                keyguardBlueprintViewBinder.bind(
+                KeyguardBlueprintViewBinder.bind(
                     keyguardRootView,
                     keyguardBlueprintViewModel,
                     keyguardClockViewModel,
@@ -160,7 +157,6 @@ constructor(
                 )
             }
         }
-        keyguardBlueprintCommandListener.start()
     }
 
     fun bindIndicationArea() {
@@ -200,12 +196,14 @@ constructor(
             KeyguardRootViewBinder.bind(
                 keyguardRootView,
                 keyguardRootViewModel,
+                keyguardBlueprintViewModel,
                 configuration,
                 occludingAppDeviceEntryMessageViewModel,
                 chipbarCoordinator,
                 screenOffAnimationController,
                 shadeInteractor,
                 clockInteractor,
+                keyguardClockViewModel,
                 interactionJankMonitor,
                 deviceEntryHapticsInteractor,
                 vibratorHelper,

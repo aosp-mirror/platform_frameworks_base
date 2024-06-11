@@ -18,6 +18,7 @@ package com.android.systemui.communal.widgets
 
 import android.app.ActivityOptions
 import android.app.PendingIntent
+import android.appwidget.AppWidgetHostView
 import android.content.Intent
 import android.util.Pair
 import android.view.View
@@ -26,9 +27,11 @@ import androidx.core.util.component1
 import androidx.core.util.component2
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.ui.view.getNearestParent
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
 
+@SysUISingleton
 class WidgetInteractionHandler
 @Inject
 constructor(
@@ -55,7 +58,7 @@ constructor(
         pendingIntent: PendingIntent,
         launchOptions: Pair<Intent, ActivityOptions>,
     ): Boolean {
-        val hostView = view.getNearestParent<CommunalAppWidgetHostView>()
+        val hostView = view.getNearestParent<AppWidgetHostView>()
         val animationController = hostView?.let(ActivityTransitionAnimator.Controller::fromView)
         val (fillInIntent, activityOptions) = launchOptions
 

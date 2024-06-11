@@ -34,6 +34,8 @@ import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.model.DisabledReason
+import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl.Companion.GLANCEABLE_HUB_BACKGROUND_SETTING
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -43,6 +45,7 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -214,6 +217,32 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
                     AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD +
                         AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
                 )
+        }
+
+    @Test
+    fun backgroundType_defaultValue() =
+        testScope.runTest {
+            val backgroundType by collectLastValue(underTest.getBackground(PRIMARY_USER))
+            assertThat(backgroundType).isEqualTo(CommunalBackgroundType.DEFAULT)
+        }
+
+    @Test
+    fun backgroundType_verifyAllValues() =
+        testScope.runTest {
+            val backgroundType by collectLastValue(underTest.getBackground(PRIMARY_USER))
+            for (type in CommunalBackgroundType.entries) {
+                kosmos.fakeSettings.putIntForUser(
+                    GLANCEABLE_HUB_BACKGROUND_SETTING,
+                    type.value,
+                    PRIMARY_USER.id
+                )
+                assertWithMessage(
+                        "Expected $type when $GLANCEABLE_HUB_BACKGROUND_SETTING is set to" +
+                            " ${type.value} but was $backgroundType"
+                    )
+                    .that(backgroundType)
+                    .isEqualTo(type)
+            }
         }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {

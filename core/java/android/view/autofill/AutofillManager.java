@@ -3575,40 +3575,14 @@ public final class AutofillManager {
         // isCredential field indicates that the developer might be calling Credman, and we should
         // suppress autofill dialogs. But it is not a good enough indicator that there is a valid
         // credman option.
-        if (view.isCredential()) {
-            return true;
-        }
-        return containsAutofillHintPrefix(view, View.AUTOFILL_HINT_CREDENTIAL_MANAGER);
+        return view.isCredential() || isCredmanRequested(view);
     }
 
     private boolean isCredmanRequested(View view) {
         if (view == null) {
             return false;
         }
-        if (view.getViewCredentialHandler() != null) {
-            return true;
-        }
-
-        String[] hints = view.getAutofillHints();
-        if (hints == null) {
-            return false;
-        }
-        // if hint starts with 'credential=', then we assume that there is a valid
-        // credential option set by the client.
-        return containsAutofillHintPrefix(view, View.AUTOFILL_HINT_CREDENTIAL_MANAGER + "=");
-    }
-
-    private boolean containsAutofillHintPrefix(View view, String prefix) {
-        String[] hints = view.getAutofillHints();
-        if (hints == null) {
-            return false;
-        }
-        for (String hint : hints) {
-            if (hint != null && hint.startsWith(prefix)) {
-                return true;
-            }
-        }
-        return false;
+        return view.getViewCredentialHandler() != null;
     }
 
     /**

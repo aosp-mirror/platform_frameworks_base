@@ -21,6 +21,7 @@ import android.annotation.DrawableRes
 import android.annotation.RawRes
 import android.content.res.Configuration
 import android.graphics.Rect
+import android.hardware.face.Face
 import android.util.RotationUtils
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor

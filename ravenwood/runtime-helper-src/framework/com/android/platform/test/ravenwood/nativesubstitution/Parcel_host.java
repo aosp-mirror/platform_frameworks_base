@@ -164,6 +164,9 @@ public class Parcel_host {
         p.mPos = pos;
     }
     public static void nativeSetDataCapacity(long nativePtr, int size) {
+        if (size < 0) {
+            throw new IllegalArgumentException("size < 0: size=" + size);
+        }
         var p = getInstance(nativePtr);
         if (p.getCapacity() < size) {
             p.forceSetCapacity(size);

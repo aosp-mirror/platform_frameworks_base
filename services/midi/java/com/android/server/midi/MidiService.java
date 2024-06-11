@@ -287,6 +287,7 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void deviceAdded(Device device) {
+            Log.d(TAG, "deviceAdded() " + device.getUserId() + " userId:" + getUserId());
             // ignore devices that our client cannot access
             if (!device.isUidAllowed(mUid) || !device.isUserIdAllowed(getUserId())) return;
 
@@ -301,6 +302,7 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void deviceRemoved(Device device) {
+            Log.d(TAG, "deviceRemoved() " + device.getUserId() + " userId:" + getUserId());
             // ignore devices that our client cannot access
             if (!device.isUidAllowed(mUid) || !device.isUserIdAllowed(getUserId())) return;
 
@@ -315,6 +317,7 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void deviceStatusChanged(Device device, MidiDeviceStatus status) {
+            Log.d(TAG, "deviceStatusChanged() " + device.getUserId() + " userId:" + getUserId());
             // ignore devices that our client cannot access
             if (!device.isUidAllowed(mUid) || !device.isUserIdAllowed(getUserId())) return;
 
@@ -1303,7 +1306,7 @@ public class MidiService extends IMidiManager.Stub {
             String[] inputPortNames, String[] outputPortNames, Bundle properties,
             IMidiDeviceServer server, ServiceInfo serviceInfo,
             boolean isPrivate, int uid, int defaultProtocol, int userId) {
-        Log.d(TAG, "addDeviceLocked()" + uid + " type:" + type);
+        Log.d(TAG, "addDeviceLocked() " + uid + " type:" + type + " userId:" + userId);
 
         // Limit the number of devices per app.
         int deviceCountForApp = 0;

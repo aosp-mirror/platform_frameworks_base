@@ -70,10 +70,10 @@ data class ThumbnailData(
 
         @JvmStatic
         fun wrap(taskIds: IntArray?, snapshots: Array<TaskSnapshot>?): HashMap<Int, ThumbnailData> {
-            return if (taskIds == null || snapshots == null || taskIds.size != snapshots.size) {
-                HashMap()
-            } else {
-                HashMap(taskIds.associateWith { taskId -> fromSnapshot(snapshots[taskId]) })
+            return hashMapOf<Int, ThumbnailData>().apply {
+                if (taskIds != null && snapshots != null && taskIds.size == snapshots.size) {
+                    repeat(snapshots.size) { put(taskIds[it], fromSnapshot(snapshots[it])) }
+                }
             }
         }
 

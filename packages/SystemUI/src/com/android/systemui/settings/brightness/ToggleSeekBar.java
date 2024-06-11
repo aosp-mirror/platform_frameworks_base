@@ -16,11 +16,15 @@
 
 package com.android.systemui.settings.brightness;
 
+import static com.android.systemui.Flags.brightnessSliderFocusState;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.SeekBar;
+
+import com.android.systemui.res.R;
 
 public class ToggleSeekBar extends SeekBar {
     private String mAccessibilityLabel;
@@ -59,6 +63,14 @@ public class ToggleSeekBar extends SeekBar {
             setHovered(false);
         }
         return true;
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        if (brightnessSliderFocusState()) {
+            setBackground(mContext.getDrawable(R.drawable.brightness_slider_focus_bg));
+        }
     }
 
     public void setAccessibilityLabel(String label) {

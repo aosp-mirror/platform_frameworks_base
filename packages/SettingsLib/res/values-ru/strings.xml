@@ -281,7 +281,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Показывать в меню кнопки питания пункт для отправки отчета об ошибке"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Не выключать экран"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Во время зарядки экран будет всегда включен"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Включить snoop-логи HCI Bluetooth"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Включить snoop-логи Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Сохранять все пакеты Bluetooth (перезапустите Bluetooth после изменения этой настройки)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Заводская разблокировка"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Разрешить разблокировку загрузчика ОС"</string>

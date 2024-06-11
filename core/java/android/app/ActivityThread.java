@@ -355,7 +355,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private static final String DEFAULT_FULL_BACKUP_AGENT = "android.app.backup.FullBackupAgent";
 
-    private static final long BINDER_CALLBACK_THROTTLE_MS = 10_100L;
+    private static final long BINDER_CALLBACK_THROTTLE = 10_100L;
     private long mBinderCallbackLast = -1;
 
     /**
@@ -7500,7 +7500,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     + data.instrumentationName + ": " + e.toString(), e);
             }
             try {
-                timestampApplicationOnCreateNs = SystemClock.elapsedRealtimeNanos();
+                timestampApplicationOnCreateNs = SystemClock.uptimeNanos();
                 mInstrumentation.callApplicationOnCreate(app);
             } catch (Exception e) {
                 timestampApplicationOnCreateNs = 0;
@@ -7551,13 +7551,12 @@ public final class ActivityThread extends ClientTransactionHandler
             @Override
             public void onTransactionError(int pid, int code, int flags, int err) {
                 final long now = SystemClock.uptimeMillis();
-                if (now < mBinderCallbackLast + BINDER_CALLBACK_THROTTLE_MS) {
+                if (now < mBinderCallbackLast + BINDER_CALLBACK_THROTTLE) {
                     Slog.d(TAG, "Too many transaction errors, throttling freezer binder callback.");
                     return;
                 }
                 mBinderCallbackLast = now;
                 try {
-                    Log.wtfStack(TAG, "Binder Transaction Error");
                     mgr.frozenBinderTransactionDetected(pid, code, flags, err);
                 } catch (RemoteException ex) {
                     throw ex.rethrowFromSystemServer();

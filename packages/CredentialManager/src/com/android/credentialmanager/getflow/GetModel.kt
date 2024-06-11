@@ -19,7 +19,7 @@ package com.android.credentialmanager.getflow
 import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.credentials.flags.Flags.credmanBiometricApiEnabled
 import android.graphics.drawable.Drawable
-import androidx.credentials.PriorityHints
+import androidx.credentials.CredentialOption
 import com.android.credentialmanager.R
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.ProviderInfo
@@ -322,10 +322,10 @@ internal class CredentialEntryInfoComparatorByTypeThenTimestamp(
         // First rank by priorities of each credential type.
         if (p0.rawCredentialType != p1.rawCredentialType) {
             val p0Priority = typePriorityMap.getOrDefault(
-                    p0.rawCredentialType, PriorityHints.PRIORITY_DEFAULT
+                    p0.rawCredentialType, CredentialOption.PRIORITY_DEFAULT
             )
             val p1Priority = typePriorityMap.getOrDefault(
-                    p1.rawCredentialType, PriorityHints.PRIORITY_DEFAULT
+                    p1.rawCredentialType, CredentialOption.PRIORITY_DEFAULT
             )
             if (p0Priority < p1Priority) {
                 return -1

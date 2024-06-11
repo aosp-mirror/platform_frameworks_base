@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.util.Slog;
 
 /**
  * Base feature action class for &lt;Request ARC Initiation&gt;/&lt;Request ARC Termination&gt;.
@@ -38,13 +39,14 @@ abstract class RequestArcAction extends HdmiCecFeatureAction {
      * @param source {@link HdmiCecLocalDevice} instance
      * @param avrAddress address of AV receiver. It should be AUDIO_SYSTEM type
      * @param callback callback to inform about the status of the action
-     * @throws IllegalArgumentException if device type of sourceAddress and avrAddress
-     *                      is invalid
      */
     RequestArcAction(HdmiCecLocalDevice source, int avrAddress, IHdmiControlCallback callback) {
         super(source, callback);
-        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiDeviceInfo.DEVICE_TV);
-        HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        if (!HdmiUtils.verifyAddressType(getSourceAddress(), HdmiDeviceInfo.DEVICE_TV) ||
+                !HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)) {
+            Slog.w(TAG, "Device type mismatch, stop the action.");
+            finish();
+        }
         mAvrAddress = avrAddress;
     }
 

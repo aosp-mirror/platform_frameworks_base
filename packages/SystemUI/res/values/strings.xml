@@ -699,9 +699,9 @@
     <!-- QuickSettings: Bluetooth auto on info text when enabled [CHAR LIMIT=NONE]-->
     <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow morning</string>
     <!-- QuickSettings: Bluetooth dialog audio sharing button text [CHAR LIMIT=50]-->
-    <string name="quick_settings_bluetooth_audio_sharing_button">Audio Sharing</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button">Share audio</string>
     <!-- QuickSettings: Bluetooth dialog audio sharing button text when sharing audio [CHAR LIMIT=50]-->
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing Audio</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing audio</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
@@ -895,11 +895,9 @@
     <string name="qs_record_issue_dropdown_screenrecord">Screen record</string>
 
     <!-- QuickSettings: Issue Type Drop down choices list in Record Issue Start Dialog [CHAR LIMIT=30] -->
-    <string-array name="qs_record_issue_types">
-        <item>Performance</item>
-        <item>User Interface</item>
-        <item>Battery</item>
-    </string-array>
+    <string name="performance">Performance</string>
+    <string name="user_interface">User Interface</string>
+    <string name="thermal">Thermal</string>
 
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
@@ -907,6 +905,10 @@
     <!-- Hearing devices -->
     <!-- QuickSettings: Hearing devices [CHAR LIMIT=NONE] -->
     <string name="quick_settings_hearing_devices_label">Hearing devices</string>
+    <!-- QuickSettings: Hearing Devices' secondary label shown when the hearing aids are currently connected. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hearing_devices_connected">Active</string>
+    <!-- QuickSettings: Hearing devices' secondary label shown when there is no connected hearing aids. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hearing_devices_disconnected">Disconnected</string>
     <!-- QuickSettings: Quick Settings Hearing devices dialog title [CHAR LIMIT=30] -->
     <string name="quick_settings_hearing_devices_dialog_title">Hearing devices</string>
     <!-- QuickSettings: Hearing devices dialog pair new device [CHAR LIMIT=NONE]-->
@@ -917,6 +919,8 @@
     <string name="hearing_devices_presets_error">Couldn\'t update preset</string>
     <!-- QuickSettings: Title for hearing aids presets. Preset is a set of hearing aid settings. User can apply different settings in different environments (e.g. Outdoor, Restaurant, Home) [CHAR LIMIT=40]-->
     <string name="hearing_devices_preset_label">Preset</string>
+    <!-- QuickSettings: Tool name for hearing devices dialog related tools [CHAR LIMIT=40]-->
+    <string name="live_caption_title">Live Caption</string>
 
     <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
@@ -1942,15 +1946,15 @@
     <!-- Name used to refer to the "Back" key on the keyboard. -->
     <string name="keyboard_key_back">Back</string>
     <!-- Name used to refer to the "Up" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_up">Up arrow</string>
+    <string name="keyboard_key_dpad_up" translatable="false">Up arrow</string>
     <!-- Name used to refer to the "Down" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_down">Down arrow</string>
+    <string name="keyboard_key_dpad_down" translatable="false">Down arrow</string>
     <!-- Name used to refer to the "Left" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_left">Left arrow</string>
+    <string name="keyboard_key_dpad_left" translatable="false">Left arrow</string>
     <!-- Name used to refer to the "Right" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_right">Right arrow</string>
+    <string name="keyboard_key_dpad_right" translatable="false">Right arrow</string>
     <!-- Name used to refer to the "Center" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_center">Center</string>
+    <string name="keyboard_key_dpad_center" translatable="false">Center</string>
     <!-- Name used to refer to the "Tab" key on the keyboard. -->
     <string name="keyboard_key_tab">Tab</string>
     <!-- Name used to refer to the "Space" key on the keyboard. -->
@@ -3367,7 +3371,7 @@
     <string name="rotation_tile_with_posture_secondary_label_template">%1$s / %2$s</string>
     <!-- Title for notification of low stylus battery with percentage. "percentage" is
         the value of the battery capacity remaining [CHAR LIMIT=none]-->
-    <string name="stylus_battery_low_percentage"><xliff:g id="percentage" example="16%">%s</xliff:g> battery remaining</string>
+    <string name="stylus_battery_low_percentage">Stylus battery <xliff:g id="percentage" example="16%">%s</xliff:g></string>
     <!-- Subtitle for the notification sent when a stylus battery is low. [CHAR LIMIT=none]-->
     <string name="stylus_battery_low_subtitle">Connect your stylus to a charger</string>
 
@@ -3486,6 +3490,53 @@
     <string name="privacy_dialog_active_app_usage_2">In use by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g> \u2022 <xliff:g id="proxy_label" example="Speech services">%3$s</xliff:g>)</string>
     <!-- Label for recent app usage of a phone sensor with sub-attribution and proxy label in the privacy dialog [CHAR LIMIT=NONE] -->
     <string name="privacy_dialog_recent_app_usage_2">Recently used by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g> \u2022 <xliff:g id="proxy_label" example="Speech services">%3$s</xliff:g>)</string>
+
+    <!-- Title of the keyboard shortcut helper category "System". The helper is a component that
+         shows the user which keyboard shortcuts they can use. The "System" shortcuts are for
+         example "Take a screenshot" or "Go back". [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_system">System</string>
+    <!-- Title of the keyboard shortcut helper category "Multitasking". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "Multitasking" shortcuts are
+         for example "Enter split screen". [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_multitasking">Multitasking</string>
+    <!-- Title of the keyboard shortcut helper category "Input". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "Input" shortcuts are
+         the ones provided by the keyboard. Examples are "Access emoji" or "Switch to next language"
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_input">Input</string>
+    <!-- Title of the keyboard shortcut helper category "App shortcuts". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "App shortcuts" are
+         for example "Open browser" or "Open calculator". [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_app_shortcuts">App shortcuts</string>
+    <!-- Title of the keyboard shortcut helper category "Accessibility". The helper is a component
+         that shows the user which keyboard shortcuts they can use. The "Accessibility" shortcuts
+         are for example "Turn on talkback". [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_category_a11y">Accessibility</string>
+    <!-- Title at the top of the keyboard shortcut helper UI. The helper is a component
+         that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_title">Keyboard shortcuts</string>
+    <!-- Placeholder text shown in the search box of the keyboard shortcut helper, when the user
+         hasn't typed in anything in the search box yet. The helper is a  component that shows the
+         user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_search_placeholder">Search shortcuts</string>
+    <!-- Content description of the icon that allows to collapse a keyboard shortcut helper category
+         panel. The helper is a  component that shows the  user which keyboard shortcuts they can
+         use. The helper shows shortcuts in categories, which can be collapsed or expanded.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_content_description_collapse_icon">Collapse icon</string>
+    <!-- Content description of the icon that allows to expand a keyboard shortcut helper category
+         panel. The helper is a  component that shows the  user which keyboard shortcuts they can
+         use. The helper shows shortcuts in categories, which can be collapsed or expanded.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_content_description_expand_icon">Expand icon</string>
+    <!-- Word that separates different possible key combinations of a shortcut. For example the
+         "Go to home screen" shortcut could be triggered using "home button" OR "ctrl + h".
+         This is that "or" separator.
+         The keyboard shortcut helper is a  component that shows the  user which keyboard shortcuts
+         they can use.
+         [CHAR LIMIT=NONE]
+          -->
+    <string name="shortcut_helper_key_combinations_or_separator">or</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>

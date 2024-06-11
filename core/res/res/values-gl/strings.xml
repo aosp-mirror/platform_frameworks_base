@@ -201,10 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"O teu perfil de traballo xa non está dispoñible neste dispositivo"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Demasiados intentos de introdución do contrasinal"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"O administrador renunciou ao dispositivo para uso persoal"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Quitouse o espazo privado"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"A túa organización non permite espazos privados neste dispositivo xestionado."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"O dispositivo está xestionado"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"A túa organización xestiona este dispositivo e pode controlar o tráfico de rede. Toca para obter máis detalles."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"As aplicacións poden acceder á túa localización"</string>
@@ -331,7 +329,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"acceder a ficheiros no teu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acceder a música e audio do dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"fotos e vídeos"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"acceder a fotos e vídeos do dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar audio"</string>
@@ -348,7 +346,7 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensores corporais"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceder aos datos dos sensores sobre as túas constantes vitais"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notificacións"</string>
-    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"mostra notificacións"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"mostrar notificacións"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar contido da ventá"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecciona o contido dunha ventá coa que estás interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activar a exploración táctil"</string>
@@ -2198,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Cruceta: esquerda"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Cruceta: dereita"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Cruceta: centro"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de subtítulos de <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> incluíuse no grupo RESTRINXIDO"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"enviouse unha imaxe"</string>
@@ -2410,6 +2407,8 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espazo privado"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clonado"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Compartido"</string>
+    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
+    <skip />
     <string name="redacted_notification_message" msgid="1520587845842228816">"Contido confidencial da notificación oculto"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Por motivos de seguranza, ocultouse o contido da aplicación para que no se mostre na pantalla compartida"</string>

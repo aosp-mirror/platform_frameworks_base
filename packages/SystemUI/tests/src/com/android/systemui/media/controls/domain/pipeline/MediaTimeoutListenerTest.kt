@@ -20,7 +20,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.MediaTestUtils
@@ -65,7 +65,7 @@ private fun <T> anyObject(): T {
 }
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class MediaTimeoutListenerTest : SysuiTestCase() {
 
     @Mock private lateinit var mediaControllerFactory: MediaControllerFactory
