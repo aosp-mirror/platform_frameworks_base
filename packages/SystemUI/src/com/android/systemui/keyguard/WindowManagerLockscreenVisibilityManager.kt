@@ -185,25 +185,11 @@ constructor(
     /**
      * Sets the lockscreen state WM-side by calling ATMS#setLockScreenShown.
      *
-     * [lockscreenShowing] defaults to true, since it's only ever null during the boot sequence,
-     * when we haven't yet called ATMS#setLockScreenShown. Typically,
-     * setWmLockscreenState(lockscreenShowing = true) is called early in the boot sequence, before
-     * setWmLockscreenState(aodVisible = true), so we don't expect to need to use this default, but
-     * if so, true should be the right choice.
+     * If [lockscreenShowing] is null, it means we don't know if the lockscreen is showing yet. This
+     * will be decided by the [KeyguardTransitionBootInteractor] shortly.
      */
     private fun setWmLockscreenState(
-        lockscreenShowing: Boolean =
-            this.isLockscreenShowing
-                ?: true.also {
-                    Log.d(
-                        TAG,
-                        "Using isLockscreenShowing=true default in setWmLockscreenState, " +
-                            "because setAodVisible was called before the first " +
-                            "setLockscreenShown call during boot. This is not typical, but is " +
-                            "theoretically possible. If you're investigating the lockscreen " +
-                            "showing unexpectedly, start here."
-                    )
-                },
+        lockscreenShowing: Boolean? = this.isLockscreenShowing,
         aodVisible: Boolean = this.isAodVisible
     ) {
         Log.d(
@@ -213,10 +199,27 @@ constructor(
                 "aodVisible=$aodVisible)."
         )
 
+        if (lockscreenShowing == null) {
+            Log.d(
+                TAG,
+                "isAodVisible=$aodVisible, but lockscreenShowing=null. Waiting for" +
+                    "non-null lockscreenShowing before calling ATMS#setLockScreenShown, which" +
+                    "will happen once KeyguardTransitionBootInteractor starts the boot transition."
+            )
+            this.isAodVisible = aodVisible
+            return
+        }
+
         if (this.isLockscreenShowing == lockscreenShowing && this.isAodVisible == aodVisible) {
             return
         }
 
+        Log.d(
+            TAG,
+            "ATMS#setLockScreenShown(" +
+                "isLockscreenShowing=$lockscreenShowing, " +
+                "aodVisible=$aodVisible)."
+        )
         activityTaskManagerService.setLockScreenShown(lockscreenShowing, aodVisible)
         this.isLockscreenShowing = lockscreenShowing
         this.isAodVisible = aodVisible
