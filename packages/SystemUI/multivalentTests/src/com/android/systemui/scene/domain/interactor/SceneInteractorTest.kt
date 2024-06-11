@@ -32,6 +32,7 @@ import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.data.repository.setSceneTransition
+import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.model.SceneFamilies
@@ -41,6 +42,7 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runCurrent
@@ -399,8 +401,8 @@ class SceneInteractorTest : SysuiTestCase() {
     @Test
     fun resolveSceneFamily_home() =
         testScope.runTest {
-            assertThat(underTest.resolveSceneFamily(SceneFamilies.Home))
-                .isEqualTo(kosmos.homeSceneFamilyResolver.resolvedScene)
+            assertThat(underTest.resolveSceneFamily(SceneFamilies.Home).first())
+                .isEqualTo(kosmos.homeSceneFamilyResolver.resolvedScene.value)
         }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams;
+package com.android.systemui.ambient.statusbar.ui;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -39,10 +39,10 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * {@link DreamOverlayStatusBarView} is the view responsible for displaying the status bar in a
+ * {@link AmbientStatusBarView} is the view responsible for displaying the status bar in a
  * dream. The status bar displays conditional status icons such as "priority mode" and "no wifi".
  */
-public class DreamOverlayStatusBarView extends ConstraintLayout {
+public class AmbientStatusBarView extends ConstraintLayout {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "STATUS_ICON_" }, value = {
@@ -76,20 +76,20 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
     private static final float KEY_SHADOW_ALPHA = 0.35f;
     private static final float AMBIENT_SHADOW_ALPHA = 0.4f;
 
-    public DreamOverlayStatusBarView(Context context) {
+    public AmbientStatusBarView(Context context) {
         this(context, null);
     }
 
-    public DreamOverlayStatusBarView(Context context, AttributeSet attrs) {
+    public AmbientStatusBarView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public DreamOverlayStatusBarView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public AmbientStatusBarView(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
         mContext = context;
     }
 
-    public DreamOverlayStatusBarView(
+    public AmbientStatusBarView(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }

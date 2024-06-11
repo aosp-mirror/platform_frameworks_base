@@ -1898,6 +1898,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // Don't do recursive work.
             return;
         }
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "RWC_ensureActivitiesVisible");
         mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
             // First the front root tasks. In case any are not fullscreen and are in front of home.
@@ -1907,6 +1908,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         } finally {
             mTaskSupervisor.endActivityVisibilityUpdate();
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 

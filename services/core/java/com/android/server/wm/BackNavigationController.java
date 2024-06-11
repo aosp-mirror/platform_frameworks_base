@@ -200,6 +200,7 @@ class BackNavigationController {
             }
             infoBuilder.setOnBackInvokedCallback(callbackInfo.getCallback());
             infoBuilder.setAnimationCallback(callbackInfo.isAnimationCallback());
+            infoBuilder.setTouchableRegion(window.getFrame());
             mNavigationMonitor.startMonitor(window, navigationObserver);
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "

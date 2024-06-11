@@ -7,6 +7,7 @@ import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.dreams.ui.viewmodel.DreamViewModel
 import com.android.systemui.log.core.FakeLogBuffer
@@ -43,7 +44,7 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
     @Mock private lateinit var mockAnimator: AnimatorSet
     @Mock private lateinit var blurUtils: BlurUtils
     @Mock private lateinit var hostViewController: ComplicationHostViewController
-    @Mock private lateinit var statusBarViewController: DreamOverlayStatusBarViewController
+    @Mock private lateinit var statusBarViewController: AmbientStatusBarViewController
     @Mock private lateinit var stateController: DreamOverlayStateController
     @Mock private lateinit var transitionViewModel: DreamViewModel
     private val logBuffer = FakeLogBuffer.Factory.create()
