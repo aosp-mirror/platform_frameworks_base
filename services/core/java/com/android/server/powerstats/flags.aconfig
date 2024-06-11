@@ -1,0 +1,13 @@
+
+package: "com.android.server.powerstats"
+container: "system"
+
+flag {
+    name: "alarm_based_powerstats_logging"
+    namespace: "backstage_power"
+    description: "Utilize new OomAdjuster implementation"
+    bug: "294598168"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
