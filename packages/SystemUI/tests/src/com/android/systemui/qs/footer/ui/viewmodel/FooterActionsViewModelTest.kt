@@ -18,10 +18,10 @@ package com.android.systemui.qs.footer.ui.viewmodel
 
 import android.graphics.drawable.Drawable
 import android.os.UserManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.view.ContextThemeWrapper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.Utils
 import com.android.settingslib.drawable.UserIconDrawable
@@ -57,7 +57,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class FooterActionsViewModelTest : SysuiTestCase() {
     private val testScope = TestScope()

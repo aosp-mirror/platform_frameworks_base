@@ -25,9 +25,9 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.testing.AndroidTestingRunner;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Locale;
 
 /** Tests for {@link MenuInfoRepository}. */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MenuInfoRepositoryTest extends SysuiTestCase {
     @Rule

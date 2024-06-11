@@ -51,7 +51,6 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
@@ -61,6 +60,8 @@ import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneContainerStartable
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
@@ -91,7 +92,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -169,8 +169,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { mock() })
 
-    @Mock private lateinit var mediaDataManager: MediaDataManager
-
     private lateinit var emergencyAffordanceManager: EmergencyAffordanceManager
     private lateinit var telecomManager: TelecomManager
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
@@ -205,7 +203,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         shadeSceneViewModel =
             ShadeSceneViewModel(
                 applicationScope = testScope.backgroundScope,
-                deviceEntryInteractor = deviceEntryInteractor,
                 shadeHeaderViewModel = kosmos.shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
@@ -280,6 +277,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
             val destinationScenes by collectLastValue(shadeSceneViewModel.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
             assertCurrentScene(Scenes.Lockscreen)
 
@@ -288,9 +286,10 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             assertCurrentScene(Scenes.Shade)
 
             val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
-            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Lockscreen)
+            assertThat(upDestinationSceneKey).isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
             emulateUserDrivenTransition(
-                to = upDestinationSceneKey,
+                to = homeScene,
             )
         }
 
@@ -299,6 +298,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val destinationScenes by collectLastValue(shadeSceneViewModel.destinationScenes)
             val canSwipeToEnter by collectLastValue(deviceEntryInteractor.canSwipeToEnter)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
 
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
 
@@ -314,9 +314,10 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             assertCurrentScene(Scenes.Shade)
 
             val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
-            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
+            assertThat(upDestinationSceneKey).isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
             emulateUserDrivenTransition(
-                to = upDestinationSceneKey,
+                to = homeScene,
             )
         }
 

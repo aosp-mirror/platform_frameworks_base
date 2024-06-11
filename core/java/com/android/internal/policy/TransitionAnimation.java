@@ -1299,6 +1299,21 @@ public class TransitionAnimation {
                 == HardwareBuffer.USAGE_PROTECTED_CONTENT;
     }
 
+    /**
+     * Returns the luminance in 0~1. The surface control is the source of the hardware buffer,
+     * which will be used if the buffer is protected from reading.
+     */
+    public static float getBorderLuma(@NonNull HardwareBuffer hwBuffer,
+            @NonNull ColorSpace colorSpace, @NonNull SurfaceControl sourceSurfaceControl) {
+        if (hasProtectedContent(hwBuffer)) {
+            // The buffer cannot be read. Capture another buffer which excludes protected content
+            // from the source surface.
+            return getBorderLuma(sourceSurfaceControl, hwBuffer.getWidth(), hwBuffer.getHeight());
+        }
+        // Use the existing buffer directly.
+        return getBorderLuma(hwBuffer, colorSpace);
+    }
+
     /** Returns the luminance in 0~1. */
     public static float getBorderLuma(SurfaceControl surfaceControl, int w, int h) {
         final ScreenCapture.ScreenshotHardwareBuffer buffer =

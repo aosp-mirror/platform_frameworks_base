@@ -86,6 +86,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* iconLevel= */ 0,
                 /* number= */ 0,
                 "contentDescription",
+                StatusBarIcon.Type.SystemIcon,
             )
         underTest.setIconFromTile(slotName, externalIcon)
 
@@ -114,6 +115,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* iconLevel= */ 0,
                 /* number= */ 0,
                 "contentDescription",
+                StatusBarIcon.Type.SystemIcon,
             )
         commandQueueCallbacks.setIcon(slotName, externalIcon)
 
@@ -240,6 +242,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* iconLevel= */ 0,
                 /* number= */ 0,
                 "externalDescription",
+                StatusBarIcon.Type.SystemIcon,
             )
         underTest.setIconFromTile(slotName, startingExternalIcon)
 
@@ -278,6 +281,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* iconLevel= */ 0,
                 /* number= */ 0,
                 "externalDescription",
+                StatusBarIcon.Type.SystemIcon,
             )
         underTest.setIconFromTile(slotName, startingExternalIcon)
 
@@ -290,6 +294,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* iconLevel= */ 0,
                 /* number= */ 0,
                 "newExternalDescription",
+                StatusBarIcon.Type.SystemIcon,
             )
         underTest.setIconFromTile(slotName, newExternalIcon)
 
@@ -325,6 +330,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* iconLevel= */ 0,
                 /* number= */ 0,
                 "externalDescription",
+                StatusBarIcon.Type.SystemIcon,
             )
         commandQueueCallbacks.setIcon(slotName, startingExternalIcon)
 
@@ -337,6 +343,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* iconLevel= */ 0,
                 /* number= */ 0,
                 "newExternalDescription",
+                StatusBarIcon.Type.SystemIcon,
             )
         commandQueueCallbacks.setIcon(slotName, newExternalIcon)
 
@@ -404,6 +411,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
             /* iconLevel= */ 0,
             /* number= */ 0,
             "contentDescription",
+            StatusBarIcon.Type.SystemIcon,
         )
     }
 }

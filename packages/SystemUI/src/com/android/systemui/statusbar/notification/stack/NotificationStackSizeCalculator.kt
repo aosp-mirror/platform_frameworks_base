@@ -73,7 +73,8 @@ constructor(
     private var maxNotificationsExcludesMedia = false
 
     /** Whether we allow keyguard to show less important notifications above the shelf. */
-    private var limitLockScreenToImportant = false
+    private val limitLockScreenToOneImportant
+        get() = NotificationMinimalismPrototype.V2.isEnabled
 
     /** Minimum space between two notifications, see [calculateGapAndDividerHeight]. */
     private var dividerHeight by notNull<Float>()
@@ -89,7 +90,7 @@ constructor(
     }
 
     private fun allowedByPolicy(stackHeight: StackHeight): Boolean =
-        if (limitLockScreenToImportant && stackHeight.includesLessImportantNotification) {
+        if (stackHeight.shouldForceIntoShelf) {
             log { "\tallowedByPolicy = false" }
             false
         } else {
@@ -333,8 +334,8 @@ constructor(
         // changes during the lockscreen <=> full shade transition.
         val shelfHeightWithSpaceBefore: Float,
 
-        /** Whether this stack height includes less at least one important notification. */
-        val includesLessImportantNotification: Boolean
+        /** Whether the stack should actually be forced into the shelf before this height. */
+        val shouldForceIntoShelf: Boolean
     )
 
     private fun computeHeightPerNotificationLimit(
@@ -347,7 +348,7 @@ constructor(
         var previous: ExpandableView? = null
         val onLockscreen = onLockscreen()
 
-        var includesLessImportantNotification = false
+        val counter = if (limitLockScreenToOneImportant) BucketTypeCounter() else null
 
         // Only shelf. This should never happen, since we allow 1 view minimum (EmptyViewState).
         yield(
@@ -355,7 +356,7 @@ constructor(
                 notifsHeight = 0f,
                 notifsHeightSavingSpace = 0f,
                 shelfHeightWithSpaceBefore = shelfHeight,
-                includesLessImportantNotification = includesLessImportantNotification,
+                shouldForceIntoShelf = false,
             )
         )
 
@@ -381,17 +382,9 @@ constructor(
                     spaceBeforeShelf + shelfHeight
                 }
 
-            if (limitLockScreenToImportant && !includesLessImportantNotification) {
-                val bucket = (currentNotification as? ExpandableNotificationRow)?.entry?.bucket
-                includesLessImportantNotification =
-                    when (bucket) {
-                        null,
-                        BUCKET_MEDIA_CONTROLS,
-                        BUCKET_HEADS_UP,
-                        BUCKET_FOREGROUND_SERVICE,
-                        BUCKET_PRIORITY_PEOPLE -> false
-                        else -> true
-                    }
+            if (counter != null) {
+                val entry = (currentNotification as? ExpandableNotificationRow)?.entry
+                counter.incrementForBucket(entry?.bucket)
             }
 
             log {
@@ -404,7 +397,7 @@ constructor(
                     notifsHeight = notifications,
                     notifsHeightSavingSpace = notifsWithCollapsedHun,
                     shelfHeightWithSpaceBefore = shelfWithSpaceBefore,
-                    includesLessImportantNotification = includesLessImportantNotification,
+                    shouldForceIntoShelf = counter?.shouldForceIntoShelf() ?: false
                 )
             )
         }
@@ -415,8 +408,6 @@ constructor(
             infiniteIfNegative(
                 if (NotificationMinimalismPrototype.V1.isEnabled) {
                     NotificationMinimalismPrototype.V1.maxNotifs
-                } else if (NotificationMinimalismPrototype.V2.isEnabled) {
-                    1
                 } else {
                     resources.getInteger(R.integer.keyguard_max_notification_count)
                 }
@@ -424,7 +415,6 @@ constructor(
         maxNotificationsExcludesMedia =
             NotificationMinimalismPrototype.V1.isEnabled ||
                 NotificationMinimalismPrototype.V2.isEnabled
-        limitLockScreenToImportant = NotificationMinimalismPrototype.V2.isEnabled
 
         dividerHeight =
             max(1f, resources.getDimensionPixelSize(R.dimen.notification_divider_height).toFloat())
@@ -552,4 +542,24 @@ constructor(
     /** Returns the last index where [predicate] returns true, or -1 if it was always false. */
     private fun <T> Sequence<T>.lastIndexWhile(predicate: (T) -> Boolean): Int =
         takeWhile(predicate).count() - 1
+
+    /** Counts the number of notifications for each type of bucket */
+    data class BucketTypeCounter(
+        var ongoing: Int = 0,
+        var important: Int = 0,
+        var other: Int = 0,
+    ) {
+        fun incrementForBucket(@PriorityBucket bucket: Int?) {
+            when (bucket) {
+                BUCKET_MEDIA_CONTROLS,
+                null -> Unit // not counted as notifications at all
+                BUCKET_TOP_ONGOING -> ongoing++
+                BUCKET_HEADS_UP -> important++
+                BUCKET_TOP_UNSEEN -> important++
+                else -> other++
+            }
+        }
+
+        fun shouldForceIntoShelf(): Boolean = ongoing > 1 || important > 1 || other > 0
+    }
 }

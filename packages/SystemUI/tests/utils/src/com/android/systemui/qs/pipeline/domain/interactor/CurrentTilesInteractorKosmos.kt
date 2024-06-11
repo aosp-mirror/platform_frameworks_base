@@ -24,6 +24,7 @@ import com.android.systemui.qs.external.tileLifecycleManagerFactory
 import com.android.systemui.qs.pipeline.data.repository.customTileAddedRepository
 import com.android.systemui.qs.pipeline.data.repository.installedTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.minimumTilesRepository
+import com.android.systemui.qs.pipeline.data.repository.retailModeRepository
 import com.android.systemui.qs.pipeline.data.repository.tileSpecRepository
 import com.android.systemui.qs.pipeline.shared.logging.qsLogger
 import com.android.systemui.qs.pipeline.shared.pipelineFlagsRepository
@@ -39,6 +40,7 @@ val Kosmos.currentTilesInteractor: CurrentTilesInteractor by
             installedTilesRepository,
             userRepository,
             minimumTilesRepository,
+            retailModeRepository,
             customTileStatePersister,
             { newQSTileFactory },
             qsTileFactory,

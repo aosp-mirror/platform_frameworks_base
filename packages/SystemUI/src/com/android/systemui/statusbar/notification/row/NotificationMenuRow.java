@@ -242,7 +242,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     public void onLayout() {
         mIconsPlaced = false; // Force icons to be re-placed
         setMenuLocation();
-        mParent.removeListener();
+        mParent.setLayoutListener(null);
     }
 
     private void createMenuViews(boolean resetState) {

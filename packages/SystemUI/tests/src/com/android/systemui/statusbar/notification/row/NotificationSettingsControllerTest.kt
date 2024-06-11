@@ -102,6 +102,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         verify(userTracker).addCallback(any(), any())
         verify(dumpManager).registerNormalDumpable(anyString(), eq(controller))
     }
+
     @Test
     fun updateContentObserverRegistration_onUserChange_noSettingsListeners() {
         verify(userTracker).addCallback(capture(userTrackerCallbackCaptor), any())
@@ -112,10 +113,11 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         userCallback.onUserChanged(userId, context)
 
         // Validate: Nothing to do, since we aren't monitoring settings
-        verify(secureSettings, never()).unregisterContentObserver(any())
+        verify(secureSettings, never()).unregisterContentObserverSync(any())
         verify(secureSettings, never())
-            .registerContentObserverForUser(any(Uri::class.java), anyBoolean(), any(), anyInt())
+            .registerContentObserverForUserSync(any(Uri::class.java), anyBoolean(), any(), anyInt())
     }
+
     @Test
     fun updateContentObserverRegistration_onUserChange_withSettingsListeners() {
         // When: someone is listening to a setting
@@ -129,9 +131,9 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         userCallback.onUserChanged(userId, context)
 
         // Validate: The tracker is unregistered and re-registered with the new user
-        verify(secureSettings).unregisterContentObserver(any())
+        verify(secureSettings).unregisterContentObserverSync(any())
         verify(secureSettings)
-            .registerContentObserverForUser(eq(settingUri1), eq(false), any(), eq(userId))
+            .registerContentObserverForUserSync(eq(settingUri1), eq(false), any(), eq(userId))
     }
 
     @Test
@@ -140,7 +142,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         verifyZeroInteractions(secureSettings)
         testableLooper.processAllMessages()
         verify(secureSettings)
-            .registerContentObserverForUser(
+            .registerContentObserverForUserSync(
                 eq(settingUri1),
                 eq(false),
                 any(),
@@ -149,7 +151,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
 
         controller.addCallback(settingUri1, Mockito.mock(Listener::class.java))
         verify(secureSettings)
-            .registerContentObserverForUser(any(Uri::class.java), anyBoolean(), any(), anyInt())
+            .registerContentObserverForUserSync(any(Uri::class.java), anyBoolean(), any(), anyInt())
     }
 
     @Test
@@ -158,7 +160,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         verifyZeroInteractions(secureSettings)
         testableLooper.processAllMessages()
         verify(secureSettings)
-            .registerContentObserverForUser(
+            .registerContentObserverForUserSync(
                 eq(settingUri1),
                 eq(false),
                 any(),
@@ -170,7 +172,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         verifyNoMoreInteractions(secureSettings)
         testableLooper.processAllMessages()
         verify(secureSettings)
-            .registerContentObserverForUser(
+            .registerContentObserverForUserSync(
                 eq(settingUri2),
                 eq(false),
                 any(),
@@ -186,7 +188,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         verifyZeroInteractions(secureSettings)
         testableLooper.processAllMessages()
         verify(secureSettings)
-            .registerContentObserverForUser(
+            .registerContentObserverForUserSync(
                 eq(settingUri1),
                 eq(false),
                 any(),
@@ -198,18 +200,18 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         verifyNoMoreInteractions(secureSettings)
         testableLooper.processAllMessages()
         verify(secureSettings)
-            .registerContentObserverForUser(eq(settingUri2), anyBoolean(), any(), anyInt())
+            .registerContentObserverForUserSync(eq(settingUri2), anyBoolean(), any(), anyInt())
         clearInvocations(secureSettings)
 
         controller.removeCallback(settingUri2, listenerSetting2)
         testableLooper.processAllMessages()
-        verify(secureSettings, never()).unregisterContentObserver(any())
+        verify(secureSettings, never()).unregisterContentObserverSync(any())
         clearInvocations(secureSettings)
 
         controller.removeCallback(settingUri1, listenerSetting1)
         verifyNoMoreInteractions(secureSettings)
         testableLooper.processAllMessages()
-        verify(secureSettings).unregisterContentObserver(any())
+        verify(secureSettings).unregisterContentObserverSync(any())
     }
 
     @Test
@@ -253,7 +255,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         verify(secureSettings)
-            .registerContentObserverForUser(
+            .registerContentObserverForUserSync(
                 any(Uri::class.java),
                 anyBoolean(),
                 capture(settingsObserverCaptor),

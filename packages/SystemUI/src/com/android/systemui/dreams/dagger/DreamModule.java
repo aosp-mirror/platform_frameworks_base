@@ -33,8 +33,8 @@ import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.DreamOverlayService;
 import com.android.systemui.dreams.SystemDialogsCloser;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
-import com.android.systemui.dreams.homecontrols.DreamActivityProvider;
-import com.android.systemui.dreams.homecontrols.DreamActivityProviderImpl;
+import com.android.systemui.dreams.homecontrols.DreamServiceDelegate;
+import com.android.systemui.dreams.homecontrols.DreamServiceDelegateImpl;
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamService;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.pipeline.shared.TileSpec;
@@ -202,8 +202,8 @@ public interface DreamModule {
     }
 
 
-    /** Provides activity for dream service */
+    /** Provides delegate to allow for testing of dream service */
     @Binds
-    DreamActivityProvider bindActivityProvider(DreamActivityProviderImpl impl);
+    DreamServiceDelegate bindDreamDelegate(DreamServiceDelegateImpl impl);
 
 }

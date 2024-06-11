@@ -78,7 +78,7 @@ class AvalancheControllerTest : SysuiTestCase() {
 
         // Initialize AvalancheController and TestableHeadsUpManager during setUp instead of
         // declaration, where mocks are null
-        mAvalancheController = AvalancheController(dumpManager)
+        mAvalancheController = AvalancheController(dumpManager, mUiEventLoggerFake)
 
         testableHeadsUpManager =
             TestableHeadsUpManager(

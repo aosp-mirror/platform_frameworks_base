@@ -307,7 +307,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
             } else {
                 // Set the horizontal paddings unless the view is the Compose implementation of the
                 // footer actions.
-                if (view.getTag(R.id.tag_compose_qs_footer_actions) == null) {
+                if (view.getId() != R.id.qs_footer_actions) {
                     view.setPaddingRelative(
                             mContentHorizontalPadding,
                             view.getPaddingTop(),

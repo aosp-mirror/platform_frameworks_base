@@ -131,8 +131,9 @@ internal fun promptInfo(
     negativeButton: String = "neg",
 ): PromptInfo {
     val info = PromptInfo()
-    info.logoRes = logoRes
-    info.logoBitmap = logoBitmap
+    if (logoBitmap != null) {
+        info.setLogo(logoRes, logoBitmap)
+    }
     info.logoDescription = logoDescription
     info.title = title
     info.subtitle = subtitle

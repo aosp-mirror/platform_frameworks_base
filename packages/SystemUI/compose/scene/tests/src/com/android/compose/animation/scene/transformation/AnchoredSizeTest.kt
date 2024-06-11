@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene.transformation
 
+import android.platform.test.annotations.MotionTest
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import platform.test.motion.compose.createComposeMotionTestRule
 import platform.test.motion.testing.createGoldenPathManager
 
 @RunWith(AndroidJUnit4::class)
+@MotionTest
 class AnchoredSizeTest {
     private val goldenPaths =
         createGoldenPathManager("frameworks/base/packages/SystemUI/compose/scene/tests/goldens")

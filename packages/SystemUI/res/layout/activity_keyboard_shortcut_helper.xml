@@ -5,9 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/shortcut_helper_sheet"
-        style="@style/Widget.Material3.BottomSheet"
+        style="@style/ShortcutHelperBottomSheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -19,13 +19,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <TextView
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/shortcut_helper_compose_container"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textAppearance="?textAppearanceDisplayLarge"
-            android:background="?colorTertiaryContainer"
-            android:text="Shortcut Helper Content" />
-    </LinearLayout>
+            android:layout_height="match_parent" />
+    </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

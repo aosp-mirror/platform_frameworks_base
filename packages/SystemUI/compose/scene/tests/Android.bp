@@ -37,6 +37,7 @@ android_test {
     ],
 
     static_libs: [
+        "platform-test-annotations",
         "PlatformComposeSceneTransitionLayoutTestsUtils",
         "PlatformMotionTestingCompose",
         "androidx.test.runner",

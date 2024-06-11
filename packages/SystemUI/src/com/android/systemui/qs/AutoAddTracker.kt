@@ -52,7 +52,9 @@ private const val DELIMITER = ","
  *
  * It also handles restore gracefully.
  */
-class AutoAddTracker @VisibleForTesting constructor(
+class AutoAddTracker
+@VisibleForTesting
+constructor(
     private val secureSettings: SecureSettings,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val qsHost: QSHost,
@@ -66,39 +68,43 @@ class AutoAddTracker @VisibleForTesting constructor(
         private val FILTER = IntentFilter(Intent.ACTION_SETTING_RESTORED)
     }
 
-    @GuardedBy("autoAdded")
-    private val autoAdded = ArraySet<String>()
+    @GuardedBy("autoAdded") private val autoAdded = ArraySet<String>()
     private var restoredTiles: Map<String, AutoTile>? = null
 
     override val currentUserId: Int
         get() = userId
 
-    private val contentObserver = object : ContentObserver(mainHandler) {
-        override fun onChange(
-            selfChange: Boolean,
-            uris: Collection<Uri>,
-            flags: Int,
-            _userId: Int
-        ) {
-            if (_userId != userId) {
-                // Ignore changes outside of our user. We'll load the correct value on user change
-                return
+    private val contentObserver =
+        object : ContentObserver(mainHandler) {
+            override fun onChange(
+                selfChange: Boolean,
+                uris: Collection<Uri>,
+                flags: Int,
+                _userId: Int
+            ) {
+                if (_userId != userId) {
+                    // Ignore changes outside of our user. We'll load the correct value on user
+                    // change
+                    return
+                }
+                loadTiles()
             }
-            loadTiles()
         }
-    }
 
-    private val restoreReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action != Intent.ACTION_SETTING_RESTORED) return
-            processRestoreIntent(intent)
+    private val restoreReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action != Intent.ACTION_SETTING_RESTORED) return
+                processRestoreIntent(intent)
+            }
         }
-    }
 
     private fun processRestoreIntent(intent: Intent) {
         when (intent.getStringExtra(Intent.EXTRA_SETTING_NAME)) {
             Settings.Secure.QS_TILES -> {
-                restoredTiles = intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE)
+                restoredTiles =
+                    intent
+                        .getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE)
                         ?.split(DELIMITER)
                         ?.mapIndexed(::AutoTile)
                         ?.associateBy(AutoTile::tileType)
@@ -109,13 +115,11 @@ class AutoAddTracker @VisibleForTesting constructor(
             }
             Settings.Secure.QS_AUTO_ADDED_TILES -> {
                 restoredTiles?.let { restoredTiles ->
-                    val restoredAutoAdded = intent
-                            .getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE)
-                            ?.split(DELIMITER)
+                    val restoredAutoAdded =
+                        intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE)?.split(DELIMITER)
                             ?: emptyList()
-                    val autoAddedBeforeRestore = intent
-                            .getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE)
-                            ?.split(DELIMITER)
+                    val autoAddedBeforeRestore =
+                        intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE)?.split(DELIMITER)
                             ?: emptyList()
 
                     val tilesToRemove = restoredAutoAdded.filter { it !in restoredTiles }
@@ -123,50 +127,51 @@ class AutoAddTracker @VisibleForTesting constructor(
                         Log.d(TAG, "Removing tiles: $tilesToRemove")
                         qsHost.removeTiles(tilesToRemove)
                     }
-                    val tiles = synchronized(autoAdded) {
-                        autoAdded.clear()
-                        autoAdded.addAll(restoredAutoAdded + autoAddedBeforeRestore)
-                        getTilesFromListLocked()
-                    }
+                    val tiles =
+                        synchronized(autoAdded) {
+                            autoAdded.clear()
+                            autoAdded.addAll(restoredAutoAdded + autoAddedBeforeRestore)
+                            getTilesFromListLocked()
+                        }
                     saveTiles(tiles)
-                } ?: run {
-                    Log.w(TAG, "${Settings.Secure.QS_AUTO_ADDED_TILES} restored before " +
-                            "${Settings.Secure.QS_TILES} for user $userId")
                 }
+                    ?: run {
+                        Log.w(
+                            TAG,
+                            "${Settings.Secure.QS_AUTO_ADDED_TILES} restored before " +
+                                "${Settings.Secure.QS_TILES} for user $userId"
+                        )
+                    }
             }
             else -> {} // Do nothing for other Settings
         }
     }
 
-    /**
-     * Init method must be called after construction to start listening
-     */
+    /** Init method must be called after construction to start listening */
     fun initialize() {
         dumpManager.registerDumpable(TAG, this)
         loadTiles()
-        secureSettings.registerContentObserverForUser(
-                secureSettings.getUriFor(Settings.Secure.QS_AUTO_ADDED_TILES),
-                contentObserver,
-                UserHandle.USER_ALL
+        secureSettings.registerContentObserverForUserSync(
+            secureSettings.getUriFor(Settings.Secure.QS_AUTO_ADDED_TILES),
+            contentObserver,
+            UserHandle.USER_ALL
         )
         registerBroadcastReceiver()
     }
 
-    /**
-     * Unregister listeners, receivers and observers
-     */
+    /** Unregister listeners, receivers and observers */
     fun destroy() {
         dumpManager.unregisterDumpable(TAG)
-        secureSettings.unregisterContentObserver(contentObserver)
+        secureSettings.unregisterContentObserverSync(contentObserver)
         unregisterBroadcastReceiver()
     }
 
     private fun registerBroadcastReceiver() {
         broadcastDispatcher.registerReceiver(
-                restoreReceiver,
-                FILTER,
-                backgroundExecutor,
-                UserHandle.of(userId)
+            restoreReceiver,
+            FILTER,
+            backgroundExecutor,
+            UserHandle.of(userId)
         )
     }
 
@@ -186,13 +191,9 @@ class AutoAddTracker @VisibleForTesting constructor(
     fun getRestoredTilePosition(tile: String): Int =
         restoredTiles?.get(tile)?.index ?: QSHost.POSITION_AT_END
 
-    /**
-     * Returns `true` if the tile has been auto-added before
-     */
+    /** Returns `true` if the tile has been auto-added before */
     fun isAdded(tile: String): Boolean {
-        return synchronized(autoAdded) {
-            tile in autoAdded
-        }
+        return synchronized(autoAdded) { tile in autoAdded }
     }
 
     /**
@@ -201,13 +202,14 @@ class AutoAddTracker @VisibleForTesting constructor(
      * From here on, [isAdded] will return true for that tile.
      */
     fun setTileAdded(tile: String) {
-        val tiles = synchronized(autoAdded) {
-            if (autoAdded.add(tile)) {
-                getTilesFromListLocked()
-            } else {
-                null
+        val tiles =
+            synchronized(autoAdded) {
+                if (autoAdded.add(tile)) {
+                    getTilesFromListLocked()
+                } else {
+                    null
+                }
             }
-        }
         tiles?.let { saveTiles(it) }
     }
 
@@ -217,13 +219,14 @@ class AutoAddTracker @VisibleForTesting constructor(
      * This allows for this tile to be auto-added again in the future.
      */
     fun setTileRemoved(tile: String) {
-        val tiles = synchronized(autoAdded) {
-            if (autoAdded.remove(tile)) {
-                getTilesFromListLocked()
-            } else {
-                null
+        val tiles =
+            synchronized(autoAdded) {
+                if (autoAdded.remove(tile)) {
+                    getTilesFromListLocked()
+                } else {
+                    null
+                }
             }
-        }
         tiles?.let { saveTiles(it) }
     }
 
@@ -233,12 +236,12 @@ class AutoAddTracker @VisibleForTesting constructor(
 
     private fun saveTiles(tiles: String) {
         secureSettings.putStringForUser(
-                Settings.Secure.QS_AUTO_ADDED_TILES,
-                tiles,
-                /* tag */ null,
-                /* makeDefault */ false,
-                userId,
-                /* overrideableByRestore */ true
+            Settings.Secure.QS_AUTO_ADDED_TILES,
+            tiles,
+            /* tag */ null,
+            /* makeDefault */ false,
+            userId,
+            /* overrideableByRestore */ true
         )
     }
 
@@ -261,7 +264,9 @@ class AutoAddTracker @VisibleForTesting constructor(
     }
 
     @SysUISingleton
-    class Builder @Inject constructor(
+    class Builder
+    @Inject
+    constructor(
         private val secureSettings: SecureSettings,
         private val broadcastDispatcher: BroadcastDispatcher,
         private val qsHost: QSHost,
@@ -278,13 +283,13 @@ class AutoAddTracker @VisibleForTesting constructor(
 
         fun build(): AutoAddTracker {
             return AutoAddTracker(
-                    secureSettings,
-                    broadcastDispatcher,
-                    qsHost,
-                    dumpManager,
-                    handler,
-                    executor,
-                    userId
+                secureSettings,
+                broadcastDispatcher,
+                qsHost,
+                dumpManager,
+                handler,
+                executor,
+                userId
             )
         }
     }

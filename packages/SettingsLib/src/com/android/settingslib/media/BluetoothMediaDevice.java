@@ -17,6 +17,8 @@ package com.android.settingslib.media;
 
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
@@ -37,21 +39,14 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     private static final String TAG = "BluetoothMediaDevice";
 
-    private CachedBluetoothDevice mCachedDevice;
+    private final CachedBluetoothDevice mCachedDevice;
     private final AudioManager mAudioManager;
 
     BluetoothMediaDevice(
-            Context context,
-            CachedBluetoothDevice device,
-            MediaRoute2Info info) {
-        this(context, device, info, null);
-    }
-
-    BluetoothMediaDevice(
-            Context context,
-            CachedBluetoothDevice device,
-            MediaRoute2Info info,
-            RouteListingPreference.Item item) {
+            @NonNull Context context,
+            @NonNull CachedBluetoothDevice device,
+            @Nullable MediaRoute2Info info,
+            @Nullable RouteListingPreference.Item item) {
         super(context, info, item);
         mCachedDevice = device;
         mAudioManager = context.getSystemService(AudioManager.class);

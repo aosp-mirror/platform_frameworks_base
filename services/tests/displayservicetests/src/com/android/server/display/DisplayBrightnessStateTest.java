@@ -58,6 +58,7 @@ public class DisplayBrightnessStateTest {
                 .setShouldUseAutoBrightness(shouldUseAutoBrightness)
                 .setShouldUpdateScreenBrightnessSetting(shouldUpdateScreenBrightnessSetting)
                 .setBrightnessAdjustmentFlag(brightnessAdjustmentFlag)
+                .setIsUserInitiatedChange(true)
                 .build();
 
         assertEquals(displayBrightnessState.getBrightness(), brightness, FLOAT_DELTA);
@@ -109,7 +110,9 @@ public class DisplayBrightnessStateTest {
                 .append("\n    mBrightnessEvent:")
                 .append(Objects.toString(displayBrightnessState.getBrightnessEvent(), "null"))
                 .append("\n    mBrightnessAdjustmentFlag:")
-                .append(displayBrightnessState.getBrightnessAdjustmentFlag());
+                .append(displayBrightnessState.getBrightnessAdjustmentFlag())
+                .append("\n    mIsUserInitiatedChange:")
+                .append(displayBrightnessState.isUserInitiatedChange());
         return sb.toString();
     }
 }

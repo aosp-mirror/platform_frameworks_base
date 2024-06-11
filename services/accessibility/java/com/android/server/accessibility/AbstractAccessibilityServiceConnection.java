@@ -1724,9 +1724,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void resetLocked() {
-        if (Flags.resettableDynamicProperties()) {
-            mAccessibilityServiceInfo.resetDynamicallyConfigurableProperties();
-        }
+        mAccessibilityServiceInfo.resetDynamicallyConfigurableProperties();
         mSystemSupport.getKeyEventDispatcher().flush(this);
         try {
             // Clear the proxy in the other process so this

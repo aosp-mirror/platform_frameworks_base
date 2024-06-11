@@ -28,6 +28,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -368,7 +369,7 @@ public class WindowOnBackInvokedDispatcherTest {
         callbackInfo.getCallback().onBackInvoked();
 
         waitForIdle();
-        verify(mCallback1).onBackInvoked();
+        verify(mCallback1, timeout(/*millis*/ 1000)).onBackInvoked();
         verify(mCallback1, never()).onBackCancelled();
     }
 

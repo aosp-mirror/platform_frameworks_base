@@ -52,8 +52,6 @@
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"ጂዮርጂያኛ"</string>
     <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"ታይላንድኛ (ኬድማኒ)"</string>
     <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"ታይላንድኛ (ፓታሾት)"</string>
-    <!-- no translation found for keyboard_layout_serbian_latin (3128791759390046571) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_montenegrin_latin (1467832503378949945) -->
-    <skip />
+    <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"ሰርቢያኛ (ላቲን)"</string>
+    <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"ሞንቴኔግሮኛ (ላቲን)"</string>
 </resources>

@@ -22,10 +22,6 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.LockIconView.ICON_LOCK
 import com.android.systemui.doze.util.getBurnInOffset
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
-import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
-import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
-import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.Dispatchers
@@ -104,7 +100,7 @@ class LegacyLockIconViewControllerWithCoroutinesTest : LegacyLockIconViewControl
 
             // WHEN dozing updates
             mUnderTest.mIsDozingCallback.accept(true)
-            mUnderTest.mDozeTransitionCallback.accept(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
+            mUnderTest.mDozeTransitionCallback.accept(1f)
 
             // THEN the view's translation is updated to use the AoD burn-in offsets
             verify(mLockIconView).setTranslationY(burnInOffset.toFloat())
@@ -113,7 +109,7 @@ class LegacyLockIconViewControllerWithCoroutinesTest : LegacyLockIconViewControl
 
             // WHEN the device is no longer dozing
             mUnderTest.mIsDozingCallback.accept(false)
-            mUnderTest.mDozeTransitionCallback.accept(TransitionStep(AOD, LOCKSCREEN, 0f, FINISHED))
+            mUnderTest.mDozeTransitionCallback.accept(0f)
 
             // THEN the view is updated to NO translation (no burn-in offsets anymore)
             verify(mLockIconView).setTranslationY(0f)

@@ -31,6 +31,8 @@ import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintA
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.viewmodel.notificationsShadeSceneViewModel
 import com.android.systemui.testKosmos
@@ -62,7 +64,9 @@ class NotificationsShadeSceneViewModelTest : SysuiTestCase() {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
             lockDevice()
 
-            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value)
+                .isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
@@ -72,7 +76,8 @@ class NotificationsShadeSceneViewModelTest : SysuiTestCase() {
             lockDevice()
             unlockDevice()
 
-            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(Scenes.Gone)
+            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -85,7 +90,9 @@ class NotificationsShadeSceneViewModelTest : SysuiTestCase() {
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
-            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value)
+                .isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
@@ -96,10 +103,12 @@ class NotificationsShadeSceneViewModelTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
+            sceneInteractor // force the lazy; this will kick off StateFlows
             runCurrent()
             sceneInteractor.changeScene(Scenes.Gone, "reason")
 
-            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(Scenes.Gone)
+            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value).isEqualTo(Scenes.Gone)
         }
 
     private fun TestScope.lockDevice() {

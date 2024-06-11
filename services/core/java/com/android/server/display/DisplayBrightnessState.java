@@ -47,6 +47,8 @@ public final class DisplayBrightnessState {
     private final BrightnessEvent mBrightnessEvent;
     private final int mBrightnessAdjustmentFlag;
 
+    private final boolean mIsUserInitiatedChange;
+
     private DisplayBrightnessState(Builder builder) {
         mBrightness = builder.getBrightness();
         mSdrBrightness = builder.getSdrBrightness();
@@ -60,6 +62,7 @@ public final class DisplayBrightnessState {
         mShouldUpdateScreenBrightnessSetting = builder.shouldUpdateScreenBrightnessSetting();
         mBrightnessEvent = builder.getBrightnessEvent();
         mBrightnessAdjustmentFlag = builder.getBrightnessAdjustmentFlag();
+        mIsUserInitiatedChange = builder.isUserInitiatedChange();
     }
 
     /**
@@ -148,6 +151,13 @@ public final class DisplayBrightnessState {
         return mBrightnessAdjustmentFlag;
     }
 
+    /**
+     * Gets if the current brightness changes are because of a user initiated change
+     */
+    public boolean isUserInitiatedChange() {
+        return mIsUserInitiatedChange;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("DisplayBrightnessState:");
@@ -168,6 +178,7 @@ public final class DisplayBrightnessState {
         stringBuilder.append("\n    mBrightnessEvent:")
                 .append(Objects.toString(mBrightnessEvent, "null"));
         stringBuilder.append("\n    mBrightnessAdjustmentFlag:").append(mBrightnessAdjustmentFlag);
+        stringBuilder.append("\n    mIsUserInitiatedChange:").append(mIsUserInitiatedChange);
         return stringBuilder.toString();
     }
 
@@ -199,7 +210,8 @@ public final class DisplayBrightnessState {
                 && mShouldUpdateScreenBrightnessSetting
                     == otherState.shouldUpdateScreenBrightnessSetting()
                 && Objects.equals(mBrightnessEvent, otherState.getBrightnessEvent())
-                && mBrightnessAdjustmentFlag == otherState.getBrightnessAdjustmentFlag();
+                && mBrightnessAdjustmentFlag == otherState.getBrightnessAdjustmentFlag()
+                && mIsUserInitiatedChange == otherState.isUserInitiatedChange();
     }
 
     @Override
@@ -207,7 +219,8 @@ public final class DisplayBrightnessState {
         return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason,
                 mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mMinBrightness,
                 mCustomAnimationRate,
-                mShouldUpdateScreenBrightnessSetting, mBrightnessEvent, mBrightnessAdjustmentFlag);
+                mShouldUpdateScreenBrightnessSetting, mBrightnessEvent, mBrightnessAdjustmentFlag,
+                mIsUserInitiatedChange);
     }
 
     /**
@@ -236,6 +249,8 @@ public final class DisplayBrightnessState {
 
         public int mBrightnessAdjustmentFlag = 0;
 
+        private boolean mIsUserInitiatedChange;
+
         /**
          * Create a builder starting with the values from the specified {@link
          * DisplayBrightnessState}.
@@ -257,6 +272,7 @@ public final class DisplayBrightnessState {
                     state.shouldUpdateScreenBrightnessSetting());
             builder.setBrightnessEvent(state.getBrightnessEvent());
             builder.setBrightnessAdjustmentFlag(state.getBrightnessAdjustmentFlag());
+            builder.setIsUserInitiatedChange(state.isUserInitiatedChange());
             return builder;
         }
 
@@ -462,6 +478,21 @@ public final class DisplayBrightnessState {
          */
         public Builder setBrightnessAdjustmentFlag(int brightnessAdjustmentFlag) {
             mBrightnessAdjustmentFlag = brightnessAdjustmentFlag;
+            return this;
+        }
+
+        /**
+         * Gets if the current change is a user initiated change
+         */
+        public boolean isUserInitiatedChange() {
+            return mIsUserInitiatedChange;
+        }
+
+        /**
+         * This is used to set if the current change is a user initiated change
+         */
+        public Builder setIsUserInitiatedChange(boolean isUserInitiatedChange) {
+            mIsUserInitiatedChange = isUserInitiatedChange;
             return this;
         }
     }

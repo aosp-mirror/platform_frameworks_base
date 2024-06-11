@@ -16,7 +16,7 @@
 
 package com.android.systemui.retail.domain.interactor
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.retail.data.repository.FakeRetailModeRepository
@@ -25,7 +25,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class RetailModeInteractorImplTest : SysuiTestCase() {
 
     private val retailModeRepository = FakeRetailModeRepository()

@@ -42,14 +42,6 @@ object Flags {
     @JvmField val NULL_FLAG = unreleasedFlag("null_flag")
 
     // 100 - notification
-    // TODO(b/297792660): Tracking Bug
-    @JvmField val UNCLEARED_TRANSIENT_HUN_FIX =
-        releasedFlag("uncleared_transient_hun_fix")
-
-    // TODO(b/298308067): Tracking Bug
-    @JvmField val SWIPE_UNCLEARED_TRANSIENT_VIEW_FIX =
-        releasedFlag("swipe_uncleared_transient_view_fix")
-
     // TODO(b/254512751): Tracking Bug
     val NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
         unreleasedFlag("notification_pipeline_developer_logging")
@@ -67,14 +59,6 @@ object Flags {
             R.bool.config_notificationToContents,
             "notification_drag_to_contents"
         )
-
-    /**
-     * This flag controls whether we register a listener for StatsD notification memory reports.
-     * For statsd to actually call the listener however, a server-side toggle needs to be
-     * enabled as well.
-     */
-    val NOTIFICATION_MEMORY_LOGGING_ENABLED =
-            releasedFlag("notification_memory_logging_enabled")
 
     // TODO(b/280783617): Tracking Bug
     @Keep
@@ -169,12 +153,6 @@ object Flags {
     @JvmField
     val WALLPAPER_PICKER_GRID_APPLY_BUTTON =
             unreleasedFlag("wallpaper_picker_grid_apply_button")
-
-    /** Keyguard Migration */
-
-    // TODO(b/297037052): Tracking bug.
-    @JvmField
-    val REMOVE_NPVC_BOTTOM_AREA_USAGE = unreleasedFlag("remove_npvc_bottom_area_usage")
 
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
@@ -400,9 +378,6 @@ object Flags {
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag("warn_on_blocking_binder_transactions")
 
-    // TODO:(b/283203305): Tracking bug
-    @JvmField val TRIM_FONT_CACHES_AT_UNLOCK = unreleasedFlag("trim_font_caches_on_unlock")
-
     // TODO(b/298380520): Tracking Bug
     @JvmField
     val USER_TRACKER_BACKGROUND_CALLBACKS = unreleasedFlag("user_tracker_background_callbacks")
@@ -472,14 +447,6 @@ object Flags {
     /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
     @JvmField
     val ENABLE_CLOCK_KEYGUARD_PRESENTATION = releasedFlag("enable_clock_keyguard_presentation")
-
-    /** Enable the Compose implementation of the PeopleSpaceActivity. */
-    @JvmField
-    val COMPOSE_PEOPLE_SPACE = releasedFlag("compose_people_space")
-
-    /** Enable the Compose implementation of the Quick Settings footer actions. */
-    @JvmField
-    val COMPOSE_QS_FOOTER_ACTIONS = releasedFlag("compose_qs_footer_actions")
 
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField

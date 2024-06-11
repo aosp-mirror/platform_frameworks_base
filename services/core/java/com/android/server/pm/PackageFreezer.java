@@ -62,6 +62,12 @@ final class PackageFreezer implements AutoCloseable {
 
     PackageFreezer(String packageName, int userId, String killReason,
             PackageManagerService pm, int exitInfoReason, @Nullable InstallRequest request) {
+        this(packageName, userId, killReason, pm, exitInfoReason, request, false);
+    }
+
+    PackageFreezer(String packageName, int userId, String killReason,
+            PackageManagerService pm, int exitInfoReason, @Nullable InstallRequest request,
+            boolean waitAppKilled) {
         mPm = pm;
         mPackageName = packageName;
         mInstallRequest = request;
@@ -77,7 +83,7 @@ final class PackageFreezer implements AutoCloseable {
             ps = mPm.mSettings.getPackageLPr(mPackageName);
         }
         if (ps != null) {
-            if (Flags.waitApplicationKilled()) {
+            if (waitAppKilled && Flags.waitApplicationKilled()) {
                 mPm.killApplicationSync(ps.getPackageName(), ps.getAppId(), userId, killReason,
                         exitInfoReason);
             } else {

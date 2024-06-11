@@ -39,6 +39,18 @@ constructor(
         notificationListRepository.hasFilteredOutSeenNotifications.value = value
     }
 
+    /** Set the entry that is identified as the top ongoing notification. */
+    fun setTopOngoingNotification(entry: NotificationEntry?) {
+        if (NotificationMinimalismPrototype.V2.isUnexpectedlyInLegacyMode()) return
+        notificationListRepository.topOngoingNotificationKey.value = entry?.key
+    }
+
+    /** Determine if the given notification is the top ongoing notification. */
+    fun isTopOngoingNotification(entry: NotificationEntry?): Boolean =
+        if (NotificationMinimalismPrototype.V2.isUnexpectedlyInLegacyMode()) false
+        else
+            entry != null && notificationListRepository.topOngoingNotificationKey.value == entry.key
+
     /** Set the entry that is identified as the top unseen notification. */
     fun setTopUnseenNotification(entry: NotificationEntry?) {
         if (NotificationMinimalismPrototype.V2.isUnexpectedlyInLegacyMode()) return

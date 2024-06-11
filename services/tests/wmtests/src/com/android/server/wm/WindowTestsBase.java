@@ -1016,6 +1016,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
             public void topFocusedWindowChanged(ComponentName component,
                     int requestedVisibleTypes) {
             }
+
+            @Override
+            public void setImeInputTargetRequestedVisibility(boolean visible) {
+            }
         };
     }
 
