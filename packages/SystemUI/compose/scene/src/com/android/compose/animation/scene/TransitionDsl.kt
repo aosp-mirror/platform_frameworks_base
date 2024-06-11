@@ -20,6 +20,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
@@ -192,7 +193,7 @@ interface OverscrollBuilder : BaseTransitionBuilder {
     )
 }
 
-interface OverscrollScope {
+interface OverscrollScope : Density {
     /**
      * Return the absolute distance between fromScene and toScene, if available, otherwise
      * [DistanceUnspecified].

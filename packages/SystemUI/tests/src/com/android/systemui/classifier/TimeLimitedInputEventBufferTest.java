@@ -19,11 +19,11 @@ package com.android.systemui.classifier;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import android.testing.AndroidTestingRunner;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class TimeLimitedInputEventBufferTest extends SysuiTestCase {
 
     private static final long MAX_AGE_MS = 100;

@@ -22,7 +22,7 @@ import java.util.function.Supplier
 data class TileUiState(
     val label: CharSequence,
     val secondaryLabel: CharSequence,
-    val colors: TileColorAttributes,
+    val state: Int,
     val icon: Supplier<QSTile.Icon>,
 )
 
@@ -30,7 +30,7 @@ fun QSTile.State.toUiState(): TileUiState {
     return TileUiState(
         label ?: "",
         secondaryLabel ?: "",
-        colors(),
+        state,
         icon?.let { Supplier { icon } } ?: iconSupplier,
     )
 }

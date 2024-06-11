@@ -191,3 +191,23 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "disable_handwriting_initiator_for_ime"
+  namespace: "text"
+  description: "Don't initiate handwriting for IME views."
+  bug: "343304685"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "fix_null_typeface_bolding"
+  namespace: "text"
+  description: "Use a bold typeface when bolding is enabled and the original typeface is null"
+  bug: "314811487"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

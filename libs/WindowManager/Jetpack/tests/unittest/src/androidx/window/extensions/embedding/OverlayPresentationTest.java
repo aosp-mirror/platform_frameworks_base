@@ -29,6 +29,7 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMock
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPairRuleBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPlaceholderRuleBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTfContainer;
 import static androidx.window.extensions.embedding.SplitPresenter.sanitizeBounds;
 import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
 
@@ -408,6 +409,22 @@ public class OverlayPresentationTest {
     }
 
     @Test
+    public void testSanitizeBounds_taskInSplitScreen() {
+        final TaskFragmentContainer overlayContainer =
+                createTestOverlayContainer(TASK_ID, "test1");
+        TaskContainer taskContainer = overlayContainer.getTaskContainer();
+        spyOn(taskContainer);
+        doReturn(new Rect(TASK_BOUNDS.left + TASK_BOUNDS.width() / 2, TASK_BOUNDS.top,
+                TASK_BOUNDS.right, TASK_BOUNDS.bottom)).when(taskContainer).getBounds();
+        final Rect taskBounds = taskContainer.getBounds();
+        final Rect bounds = new Rect(taskBounds.width() / 2, 0, taskBounds.width(),
+                taskBounds.height());
+
+        assertThat(sanitizeBounds(bounds, null, overlayContainer)
+                .isEmpty()).isFalse();
+    }
+
+    @Test
     public void testCreateOrUpdateOverlayTaskFragmentIfNeeded_createOverlay() {
         final Rect bounds = new Rect(0, 0, 100, 100);
         mSplitController.setActivityStackAttributesCalculator(params ->
@@ -530,8 +547,8 @@ public class OverlayPresentationTest {
 
     @Test
     public void testUpdateActivityStackAttributes_nullContainer_earlyReturn() {
-        final TaskFragmentContainer container = mSplitController.newContainer(mActivity,
-                mActivity.getTaskId());
+        final TaskFragmentContainer container = createTfContainer(mSplitController,
+                mActivity.getTaskId(), mActivity);
         mSplitController.updateActivityStackAttributes(
                 ActivityStack.Token.createFromBinder(container.getTaskFragmentToken()),
                 new ActivityStackAttributes.Builder().build());
@@ -837,8 +854,9 @@ public class OverlayPresentationTest {
         final Intent intent = new Intent();
         final IBinder fillTaskActivityToken = new Binder();
         final IBinder lastOverlayToken = new Binder();
-        final TaskFragmentContainer overlayContainer = mSplitController.newContainer(intent,
-                mActivity, TASK_ID);
+        final TaskFragmentContainer overlayContainer =
+                new TaskFragmentContainer.Builder(mSplitController, TASK_ID, mActivity)
+                        .setPendingAppearedIntent(intent).build();
         final TaskFragmentContainer.OverlayContainerRestoreParams params = mock(
                 TaskFragmentContainer.OverlayContainerRestoreParams.class);
         doReturn(params).when(mSplitController).getOverlayContainerRestoreParams(any(), any());
@@ -884,8 +902,8 @@ public class OverlayPresentationTest {
     @NonNull
     private TaskFragmentContainer createMockTaskFragmentContainer(
             @NonNull Activity activity, boolean isVisible) {
-        final TaskFragmentContainer container = mSplitController.newContainer(activity,
-                activity.getTaskId());
+        final TaskFragmentContainer container = createTfContainer(mSplitController,
+                activity.getTaskId(), activity);
         setupTaskFragmentInfo(container, activity, isVisible);
         return container;
     }
@@ -918,10 +936,13 @@ public class OverlayPresentationTest {
             @Nullable Activity launchingActivity) {
         final Activity activity = launchingActivity != null
                 ? launchingActivity : createMockActivity();
-        TaskFragmentContainer overlayContainer = mSplitController.newContainer(
-                null /* pendingAppearedActivity */, mIntent, activity, taskId,
-                null /* pairedPrimaryContainer */, tag, Bundle.EMPTY,
-                associateLaunchingActivity);
+        TaskFragmentContainer overlayContainer =
+                new TaskFragmentContainer.Builder(mSplitController, taskId, activity)
+                        .setPendingAppearedIntent(mIntent)
+                        .setOverlayTag(tag)
+                        .setLaunchOptions(Bundle.EMPTY)
+                        .setAssociatedActivity(associateLaunchingActivity ? activity : null)
+                        .build();
         setupTaskFragmentInfo(overlayContainer, createMockActivity(), isVisible);
         return overlayContainer;
     }

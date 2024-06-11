@@ -16,18 +16,21 @@
 
 package com.android.systemui.communal.ui.compose
 
-import android.appwidget.AppWidgetHostView
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.SizeF
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
 import android.widget.FrameLayout
+import android.widget.RemoteViews
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -129,6 +132,7 @@ import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
+import com.android.systemui.Flags.glanceableHubAnimateTimerActivityStarts
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -141,6 +145,7 @@ import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.PopupType
+import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -151,6 +156,7 @@ import kotlinx.coroutines.launch
 fun CommunalHub(
     modifier: Modifier = Modifier,
     viewModel: BaseCommunalViewModel,
+    interactionHandler: RemoteViews.InteractionHandler? = null,
     dialogFactory: SystemUIDialogFactory? = null,
     widgetConfigurator: WidgetConfigurator? = null,
     onOpenWidgetPicker: (() -> Unit)? = null,
@@ -162,7 +168,6 @@ fun CommunalHub(
     var removeButtonCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var toolbarSize: IntSize? by remember { mutableStateOf(null) }
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
-    var isDraggingToRemove by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
     val contentListState = rememberContentListState(widgetConfigurator, communalContent, viewModel)
     val reorderingWidgets by viewModel.reorderingWidgets.collectAsStateWithLifecycle()
@@ -250,17 +255,17 @@ fun CommunalHub(
                     contentOffset = contentOffset,
                     setGridCoordinates = { gridCoordinates = it },
                     updateDragPositionForRemove = { offset ->
-                        isDraggingToRemove =
-                            isPointerWithinCoordinates(
-                                offset = gridCoordinates?.let { it.positionInWindow() + offset },
-                                containerToCheck = removeButtonCoordinates
-                            )
-                        isDraggingToRemove
+                        isPointerWithinEnabledRemoveButton(
+                            removeEnabled = removeButtonEnabled,
+                            offset = gridCoordinates?.let { it.positionInWindow() + offset },
+                            containerToCheck = removeButtonCoordinates
+                        )
                     },
                     gridState = gridState,
                     contentListState = contentListState,
                     selectedKey = selectedKey,
                     widgetConfigurator = widgetConfigurator,
+                    interactionHandler = interactionHandler,
                 )
             }
         }
@@ -390,6 +395,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
     widgetConfigurator: WidgetConfigurator?,
+    interactionHandler: RemoteViews.InteractionHandler?,
 ) {
     var gridModifier =
         Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
@@ -446,6 +452,14 @@ private fun BoxScope.CommunalHubLazyGrid(
                 val selected by
                     remember(index) { derivedStateOf { list[index].key == selectedKey.value } }
                 DraggableItem(
+                    modifier =
+                        if (dragDropState.draggingItemIndex == index) {
+                            Modifier
+                        } else {
+                            Modifier.animateItem(
+                                placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                            )
+                        },
                     dragDropState = dragDropState,
                     selected = selected,
                     enabled = list[index].isWidgetContent(),
@@ -459,7 +473,8 @@ private fun BoxScope.CommunalHubLazyGrid(
                         selected = selected && !isDragging,
                         widgetConfigurator = widgetConfigurator,
                         index = index,
-                        contentListState = contentListState
+                        contentListState = contentListState,
+                        interactionHandler = interactionHandler,
                     )
                 }
             } else {
@@ -470,7 +485,8 @@ private fun BoxScope.CommunalHubLazyGrid(
                     size = size,
                     selected = false,
                     index = index,
-                    contentListState = contentListState
+                    contentListState = contentListState,
+                    interactionHandler = interactionHandler,
                 )
             }
         }
@@ -640,11 +656,16 @@ private fun AnimatedVisibilityScope.ButtonToEditWidgets(
                         enter =
                             fadeIn(
                                 initialAlpha = 0f,
-                                animationSpec = tween(durationMillis = 500, easing = LinearEasing)
+                                animationSpec = tween(durationMillis = 83, easing = LinearEasing)
                             ),
                         exit =
                             fadeOut(
-                                animationSpec = tween(durationMillis = 500, easing = LinearEasing)
+                                animationSpec =
+                                    tween(
+                                        durationMillis = 83,
+                                        delayMillis = 167,
+                                        easing = LinearEasing
+                                    )
                             )
                     )
                     .background(colors.secondary, RoundedCornerShape(50.dp)),
@@ -658,7 +679,7 @@ private fun AnimatedVisibilityScope.ButtonToEditWidgets(
                                 animationSpec =
                                     tween(
                                         durationMillis = 167,
-                                        delayMillis = 500,
+                                        delayMillis = 83,
                                         easing = LinearEasing
                                     )
                             ),
@@ -745,6 +766,7 @@ private fun CommunalContent(
     widgetConfigurator: WidgetConfigurator? = null,
     index: Int,
     contentListState: ContentListState,
+    interactionHandler: RemoteViews.InteractionHandler?,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
@@ -764,7 +786,7 @@ private fun CommunalContent(
         is CommunalContentModel.WidgetContent.PendingWidget ->
             PendingWidgetPlaceholder(model, modifier)
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
-        is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
+        is CommunalContentModel.Smartspace -> SmartspaceContent(interactionHandler, model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
         is CommunalContentModel.Umo -> Umo(viewModel, modifier)
     }
@@ -1077,13 +1099,19 @@ fun PendingWidgetPlaceholder(
 
 @Composable
 private fun SmartspaceContent(
+    interactionHandler: RemoteViews.InteractionHandler?,
     model: CommunalContentModel.Smartspace,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
         modifier = modifier,
         factory = { context ->
-            AppWidgetHostView(context).apply { updateAppWidget(model.remoteViews) }
+            SmartspaceAppWidgetHostView(context).apply {
+                if (glanceableHubAnimateTimerActivityStarts()) {
+                    interactionHandler?.let { setInteractionHandler(it) }
+                }
+                updateAppWidget(model.remoteViews)
+            }
         },
         // For reusing composition in lazy lists.
         onReset = {},
@@ -1195,11 +1223,13 @@ private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingIn
  * Check whether the pointer position that the item is being dragged at is within the coordinates of
  * the remove button in the toolbar. Returns true if the item is removable.
  */
-private fun isPointerWithinCoordinates(
+@VisibleForTesting
+fun isPointerWithinEnabledRemoveButton(
+    removeEnabled: Boolean,
     offset: Offset?,
     containerToCheck: LayoutCoordinates?
 ): Boolean {
-    if (offset == null || containerToCheck == null) {
+    if (!removeEnabled || offset == null || containerToCheck == null) {
         return false
     }
     val container = containerToCheck.boundsInWindow()

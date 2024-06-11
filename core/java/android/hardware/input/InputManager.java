@@ -963,11 +963,10 @@ public final class InputManager {
      * originate from the system, just that we were unable to verify it. This can
      * happen for a number of reasons during normal operation.
      *
-     * @param event The {@link android.view.InputEvent} to check
+     * @param event The {@link android.view.InputEvent} to check.
      *
      * @return {@link android.view.VerifiedInputEvent}, which is a subset of the provided
-     * {@link android.view.InputEvent}
-     *         {@code null} if the event could not be verified.
+     *     {@link android.view.InputEvent}, or {@code null} if the event could not be verified.
      */
     @Nullable
     public VerifiedInputEvent verifyInputEvent(@NonNull InputEvent event) {

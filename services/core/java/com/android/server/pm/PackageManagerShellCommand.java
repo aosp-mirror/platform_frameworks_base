@@ -330,6 +330,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGetOemPermissions();
                 case "get-signature-permission-allowlist":
                     return runGetSignaturePermissionAllowlist();
+                case "get-shared-uid-allowlist":
+                    return runGetSharedUidAllowlist();
                 case "trim-caches":
                     return runTrimCaches();
                 case "create-user":
@@ -2944,6 +2946,9 @@ class PackageManagerShellCommand extends ShellCommand {
             case "system-ext":
                 allowlist = permissionAllowlist.getSystemExtSignatureAppAllowlist();
                 break;
+            case "apex":
+                allowlist = permissionAllowlist.getApexSignatureAppAllowlist();
+                break;
             default:
                 getErrPrintWriter().println("Error: unknown partition: " + partition);
                 return 1;
@@ -2966,6 +2971,20 @@ class PackageManagerShellCommand extends ShellCommand {
                 }
             }
             ipw.decreaseIndent();
+        }
+        return 0;
+    }
+
+    private int runGetSharedUidAllowlist() {
+        final var allowlist = SystemConfig.getInstance().getPackageToSharedUidAllowList();
+        final var pw = getOutPrintWriter();
+        final var allowlistSize = allowlist.size();
+        for (var allowlistIndex = 0; allowlistIndex < allowlistSize; allowlistIndex++) {
+            final var packageName = allowlist.keyAt(allowlistIndex);
+            final var sharedUserName = allowlist.valueAt(allowlistIndex);
+            pw.print(packageName);
+            pw.print(" ");
+            pw.println(sharedUserName);
         }
         return 0;
     }
@@ -3380,7 +3399,7 @@ class PackageManagerShellCommand extends ShellCommand {
         params.sessionParams = sessionParams;
         // Allowlist all permissions by default
         sessionParams.installFlags |= PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
-        // Set package source to other by default
+        // Set package source to other by default. Can be overridden by "--package-source"
         sessionParams.setPackageSource(PackageInstaller.PACKAGE_SOURCE_OTHER);
 
         // Encodes one of the states:
@@ -3566,6 +3585,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--ignore-dexopt-profile":
                     sessionParams.installFlags |= PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE;
+                    break;
+                case "--package-source":
+                    sessionParams.setPackageSource(Integer.parseInt(getNextArg()));
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
@@ -4904,7 +4926,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  get-signature-permission-allowlist PARTITION");
         pw.println("    Prints the signature permission allowlist for a partition.");
-        pw.println("    PARTITION is one of system, vendor, product and system-ext");
+        pw.println("    PARTITION is one of system, vendor, product, system-ext and apex");
+        pw.println("");
+        pw.println("  get-shared-uid-allowlist");
+        pw.println("    Prints the shared UID allowlist.");
         pw.println("");
         pw.println("  trim-caches DESIRED_FREE_SPACE [internal|UUID]");
         pw.println("    Trim cache files to reach the given free space.");

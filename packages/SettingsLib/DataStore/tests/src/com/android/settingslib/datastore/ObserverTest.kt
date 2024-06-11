@@ -58,7 +58,7 @@ class ObserverTest {
         var observer: Observer? = Observer { counter.incrementAndGet() }
         observable.addObserver(observer!!, executor1)
 
-        observable.notifyChange(ChangeReason.UPDATE)
+        observable.notifyChange(DataChangeReason.UPDATE)
         assertThat(counter.get()).isEqualTo(1)
 
         // trigger GC, the observer callback should not be invoked
@@ -66,7 +66,7 @@ class ObserverTest {
         System.gc()
         System.runFinalization()
 
-        observable.notifyChange(ChangeReason.UPDATE)
+        observable.notifyChange(DataChangeReason.UPDATE)
         assertThat(counter.get()).isEqualTo(1)
     }
 
@@ -75,17 +75,17 @@ class ObserverTest {
         observable.addObserver(observer1, executor1)
         observable.addObserver(observer2, executor2)
 
-        observable.notifyChange(ChangeReason.DELETE)
+        observable.notifyChange(DataChangeReason.DELETE)
 
-        verify(observer1).onChanged(ChangeReason.DELETE)
-        verify(observer2).onChanged(ChangeReason.DELETE)
+        verify(observer1).onChanged(DataChangeReason.DELETE)
+        verify(observer2).onChanged(DataChangeReason.DELETE)
 
         reset(observer1, observer2)
         observable.removeObserver(observer2)
 
-        observable.notifyChange(ChangeReason.UPDATE)
-        verify(observer1).onChanged(ChangeReason.UPDATE)
-        verify(observer2, never()).onChanged(ChangeReason.UPDATE)
+        observable.notifyChange(DataChangeReason.UPDATE)
+        verify(observer1).onChanged(DataChangeReason.UPDATE)
+        verify(observer2, never()).onChanged(DataChangeReason.UPDATE)
     }
 
     @Test
@@ -93,7 +93,7 @@ class ObserverTest {
         // ConcurrentModificationException is raised if it is not implemented correctly
         val observer = Observer { observable.addObserver(observer1, executor1) }
         observable.addObserver(observer, executor1)
-        observable.notifyChange(ChangeReason.UPDATE)
+        observable.notifyChange(DataChangeReason.UPDATE)
         observable.removeObserver(observer)
     }
 }

@@ -105,7 +105,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     // The threshold for back swipe full progress.
     private float mBackSwipeLinearThreshold;
     private float mNonLinearProgressFactor;
-    private boolean mImeDispatchingActive;
 
     public WindowOnBackInvokedDispatcher(@NonNull Context context, Looper looper) {
         mChecker = new Checker(context);
@@ -176,17 +175,18 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 mImeDispatcher.registerOnBackInvokedCallback(priority, callback);
                 return;
             }
-            if ((callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback
-                    || callback instanceof ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
-                    && !isOnBackInvokedCallbackEnabled()) {
+            if (callback instanceof ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback) {
                 // Fall back to compat back key injection if legacy back behaviour should be used.
-                return;
+                if (!isOnBackInvokedCallbackEnabled()) return;
+                if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback
+                        && mImeBackAnimationController != null) {
+                    // register ImeBackAnimationController instead to play predictive back animation
+                    callback = mImeBackAnimationController;
+                }
             }
+
             if (!mOnBackInvokedCallbacks.containsKey(priority)) {
                 mOnBackInvokedCallbacks.put(priority, new ArrayList<>());
-            }
-            if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback) {
-                callback = mImeBackAnimationController;
             }
             ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
 
@@ -250,7 +250,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      */
     public boolean isBackGestureInProgress() {
         synchronized (mLock) {
-            return mTouchTracker.isActive() || mImeDispatchingActive;
+            return mTouchTracker.isActive();
         }
     }
 
@@ -308,16 +308,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             OnBackInvokedCallbackInfo callbackInfo = null;
             if (callback != null) {
                 int priority = mAllCallbacks.get(callback);
-                final IOnBackInvokedCallback iCallback =
-                        callback instanceof ImeOnBackInvokedDispatcher
-                                .ImeOnBackInvokedCallback
-                                ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
-                                callback).getIOnBackInvokedCallback()
-                                : new OnBackInvokedCallbackWrapper(
-                                        callback,
-                                        mTouchTracker,
-                                        mProgressAnimator,
-                                        mHandler);
+                final IOnBackInvokedCallback iCallback = new OnBackInvokedCallbackWrapper(
+                        callback, mTouchTracker, mProgressAnimator, mHandler);
                 callbackInfo = new OnBackInvokedCallbackInfo(
                         iCallback,
                         priority,
@@ -367,10 +359,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         float linearDistance = Math.min(maxDistance, mBackSwipeLinearThreshold);
         mTouchTracker.setProgressThresholds(
                 linearDistance, maxDistance, mNonLinearProgressFactor);
-        if (mImeDispatcher != null) {
-            mImeDispatcher.setProgressThresholds(
-                    linearDistance, maxDistance, mNonLinearProgressFactor);
-        }
     }
 
     /**
@@ -402,46 +390,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
     }
 
-    /**
-     * Called when we start dispatching to a callback registered from IME.
-     */
-    public void onStartImeDispatching() {
-        synchronized (mLock) {
-            mImeDispatchingActive = true;
-        }
-    }
-
-    /**
-     * Called when we stop dispatching to a callback registered from IME.
-     */
-    public void onStopImeDispatching() {
-        synchronized (mLock) {
-            mImeDispatchingActive = false;
-        }
-    }
-
-    static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
-        static class CallbackRef {
-            final WeakReference<OnBackInvokedCallback> mWeakRef;
-            final OnBackInvokedCallback mStrongRef;
-            CallbackRef(@NonNull OnBackInvokedCallback callback, boolean useWeakRef) {
-                if (useWeakRef) {
-                    mWeakRef = new WeakReference<>(callback);
-                    mStrongRef = null;
-                } else {
-                    mStrongRef = callback;
-                    mWeakRef = null;
-                }
-            }
-
-            OnBackInvokedCallback get() {
-                if (mStrongRef != null) {
-                    return mStrongRef;
-                }
-                return mWeakRef.get();
-            }
-        }
-        final CallbackRef mCallbackRef;
+    private static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
+        @NonNull
+        private final WeakReference<OnBackInvokedCallback> mCallback;
         @NonNull
         private final BackProgressAnimator mProgressAnimator;
         @NonNull
@@ -454,19 +405,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 @NonNull BackTouchTracker touchTracker,
                 @NonNull BackProgressAnimator progressAnimator,
                 @NonNull Handler handler) {
-            mCallbackRef = new CallbackRef(callback, true /* useWeakRef */);
-            mTouchTracker = touchTracker;
-            mProgressAnimator = progressAnimator;
-            mHandler = handler;
-        }
-
-        OnBackInvokedCallbackWrapper(
-                @NonNull OnBackInvokedCallback callback,
-                @NonNull BackTouchTracker touchTracker,
-                @NonNull BackProgressAnimator progressAnimator,
-                @NonNull Handler handler,
-                boolean useWeakRef) {
-            mCallbackRef = new CallbackRef(callback, useWeakRef);
+            mCallback = new WeakReference<>(callback);
             mTouchTracker = touchTracker;
             mProgressAnimator = progressAnimator;
             mHandler = handler;
@@ -489,18 +428,23 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                         backEvent.getTouchX(), backEvent.getTouchY(), backEvent.getSwipeEdge());
 
                 if (callback != null) {
-                    callback.onBackStarted(new BackEvent(
-                            backEvent.getTouchX(),
-                            backEvent.getTouchY(),
-                            backEvent.getProgress(),
-                            backEvent.getSwipeEdge()));
+                    callback.onBackStarted(BackEvent.fromBackMotionEvent(backEvent));
                     mProgressAnimator.onBackStarted(backEvent, callback::onBackProgressed);
                 }
             });
         }
 
         @Override
-        public void onBackProgressed(BackMotionEvent backEvent) { }
+        public void onBackProgressed(BackMotionEvent backEvent) {
+            // This is only called in some special cases such as when activity embedding is active
+            // or when the activity is letterboxed. Otherwise mProgressAnimator#onBackProgressed is
+            // called from WindowOnBackInvokedDispatcher#onMotionEvent
+            mHandler.post(() -> {
+                if (getBackAnimationCallback() != null) {
+                    mProgressAnimator.onBackProgressed(backEvent);
+                }
+            });
+        }
 
         @Override
         public void onBackCancelled() {
@@ -517,10 +461,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             mHandler.post(() -> {
                 mTouchTracker.reset();
                 boolean isInProgress = mProgressAnimator.isBackAnimationInProgress();
-                mProgressAnimator.reset();
-                // TODO(b/333957271): Re-introduce auto fling progress generation.
-                final OnBackInvokedCallback callback = mCallbackRef.get();
+                final OnBackInvokedCallback callback = mCallback.get();
                 if (callback == null) {
+                    mProgressAnimator.reset();
                     Log.d(TAG, "Trying to call onBackInvoked() on a null callback reference.");
                     return;
                 }
@@ -528,7 +471,13 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                     Log.w(TAG, "ProgressAnimator was not in progress, skip onBackInvoked().");
                     return;
                 }
-                callback.onBackInvoked();
+                OnBackAnimationCallback animationCallback = getBackAnimationCallback();
+                if (animationCallback != null) {
+                    mProgressAnimator.onBackInvoked(callback::onBackInvoked);
+                } else {
+                    mProgressAnimator.reset();
+                    callback.onBackInvoked();
+                }
             });
         }
 
@@ -539,7 +488,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
         @Nullable
         private OnBackAnimationCallback getBackAnimationCallback() {
-            OnBackInvokedCallback callback = mCallbackRef.get();
+            OnBackInvokedCallback callback = mCallback.get();
             return callback instanceof OnBackAnimationCallback ? (OnBackAnimationCallback) callback
                     : null;
         }
@@ -570,10 +519,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         mImeDispatcher = imeDispatcher;
         mImeDispatcher.setHandler(mHandler);
-        mImeDispatcher.setProgressThresholds(
-                mTouchTracker.getLinearDistance(),
-                mTouchTracker.getMaxDistance(),
-                mTouchTracker.getNonLinearFactor());
     }
 
     /** Returns true if a non-null {@link ImeOnBackInvokedDispatcher} has been set. **/

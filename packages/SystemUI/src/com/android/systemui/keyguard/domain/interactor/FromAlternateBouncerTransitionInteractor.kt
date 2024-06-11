@@ -24,10 +24,10 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 
 @ExperimentalCoroutinesApi
 @SysUISingleton
@@ -57,7 +58,7 @@ constructor(
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
-    private val keyguardInteractor: KeyguardInteractor,
+    keyguardInteractor: KeyguardInteractor,
     private val communalInteractor: CommunalInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
@@ -70,6 +71,7 @@ constructor(
         bgDispatcher = bgDispatcher,
         powerInteractor = powerInteractor,
         keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+        keyguardInteractor = keyguardInteractor,
     ) {
 
     override fun start() {
@@ -82,7 +84,7 @@ constructor(
     val surfaceBehindVisibility: Flow<Boolean?> =
         combine(
                 transitionInteractor.startedKeyguardTransitionStep,
-                transitionInteractor.transitionStepsFromState(KeyguardState.ALTERNATE_BOUNCER)
+                transitionInteractor.transition(Edge.create(from = KeyguardState.ALTERNATE_BOUNCER))
             ) { startedStep, fromBouncerStep ->
                 if (startedStep.to != KeyguardState.GONE) {
                     return@combine null

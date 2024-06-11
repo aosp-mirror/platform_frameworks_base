@@ -19,7 +19,7 @@ package com.android.systemui.controls.management
 
 import android.content.Context
 import android.content.DialogInterface
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
@@ -39,7 +39,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class PanelConfirmationDialogFactoryTest : SysuiTestCase() {
 
     @Mock private lateinit var mockDialog : SystemUIDialog

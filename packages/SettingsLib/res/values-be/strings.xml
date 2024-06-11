@@ -84,7 +84,7 @@
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Адключана"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Адключэнне..."</string>
-    <string name="bluetooth_connecting" msgid="5871702668260192755">"Злучэнне..."</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"Падключэнне..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Спалучэнне..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без званкоў)"</string>

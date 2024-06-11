@@ -39,7 +39,7 @@ import org.junit.runner.RunWith
 class DesktopModeUiEventLoggerTest : ShellTestCase() {
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
     private lateinit var logger: DesktopModeUiEventLogger
-    private val instanceIdSequence = InstanceIdSequence(10)
+    private val instanceIdSequence = InstanceIdSequence(/* instanceIdMax */ 1 shl 20)
 
 
     @Before

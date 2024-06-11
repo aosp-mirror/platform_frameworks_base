@@ -51,6 +51,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
@@ -148,9 +149,12 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return new IOnDeviceSandboxedInferenceService.Stub() {
                 @Override
-                public void registerRemoteStorageService(IRemoteStorageService storageService) {
+                public void registerRemoteStorageService(IRemoteStorageService storageService,
+                        IRemoteCallback remoteCallback) throws RemoteException {
                     Objects.requireNonNull(storageService);
                     mRemoteStorageService = storageService;
+                    remoteCallback.sendResult(
+                            Bundle.EMPTY); //to notify caller uid to system-server.
                 }
 
                 @Override

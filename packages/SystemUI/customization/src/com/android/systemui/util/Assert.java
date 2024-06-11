@@ -79,6 +79,21 @@ public class Assert {
         }
     }
 
+    /**
+     * Asserts that the current thread is the same as the given thread, or that the current thread
+     * is the test thread.
+     * @param expected The looper we expected to be running on
+     */
+    public static void isCurrentThread(Looper expected) {
+        if (!expected.isCurrentThread()
+                && (sTestThread == null || sTestThread != Thread.currentThread())) {
+            throw new IllegalStateException("Called on wrong thread thread."
+                    + " wanted " + expected.getThread().getName()
+                    + " but instead got Thread.currentThread()="
+                    + Thread.currentThread().getName());
+        }
+    }
+
     public static void isNotMainThread() {
         if (sMainLooper.isCurrentThread()
                 && (sTestThread == null || sTestThread == Thread.currentThread())) {

@@ -147,8 +147,9 @@ constructor(
                 deviceEntryIconViewModel.get().udfpsLocation.value?.let { udfpsLocation ->
                     Log.d(
                         "DeviceEntrySection",
-                        "udfpsLocation=$udfpsLocation" +
-                            " unusedAuthController=${authController.udfpsLocation}"
+                        "udfpsLocation=$udfpsLocation, " +
+                            "scaledLocation=(${udfpsLocation.centerX},${udfpsLocation.centerY}), " +
+                            "unusedAuthController=${authController.udfpsLocation}"
                     )
                     centerIcon(
                         Point(udfpsLocation.centerX.toInt(), udfpsLocation.centerY.toInt()),
@@ -218,6 +219,38 @@ constructor(
                 ConstraintSet.START,
                 sensorRect.left
             )
+        }
+
+        // This is only intended to be here until the KeyguardBottomAreaRefactor flag is enabled
+        // Without this logic, the lock icon location changes but the KeyguardBottomAreaView is not
+        // updated and visible ui layout jank occurs. This is due to AmbientIndicationContainer
+        // being in NPVC and laying out prior to the KeyguardRootView.
+        // Remove when both DeviceEntryUdfpsRefactor and KeyguardBottomAreaRefactor are enabled.
+        if (DeviceEntryUdfpsRefactor.isEnabled && !KeyguardBottomAreaRefactor.isEnabled) {
+            with(notificationPanelView) {
+                val isUdfpsSupported = deviceEntryIconViewModel.get().isUdfpsSupported.value
+                val bottomAreaViewRight = findViewById<View>(R.id.keyguard_bottom_area)?.right ?: 0
+                findViewById<View>(R.id.ambient_indication_container)?.let {
+                    val (ambientLeft, ambientTop) = it.locationOnScreen
+                    if (isUdfpsSupported) {
+                        // make top of ambient indication view the bottom of the lock icon
+                        it.layout(
+                            ambientLeft,
+                            sensorRect.bottom,
+                            bottomAreaViewRight - ambientLeft,
+                            ambientTop + it.measuredHeight
+                        )
+                    } else {
+                        // make bottom of ambient indication view the top of the lock icon
+                        it.layout(
+                            ambientLeft,
+                            sensorRect.top - it.measuredHeight,
+                            bottomAreaViewRight - ambientLeft,
+                            sensorRect.top
+                        )
+                    }
+                }
+            }
         }
     }
 }

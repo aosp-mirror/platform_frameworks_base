@@ -948,6 +948,22 @@ public final class DisplayDeviceConfigTest {
         assertThat(supportedModeData.vsyncRate).isEqualTo(120);
     }
 
+    @Test
+    public void testLowLightBlockingZoneSupportedModesFromConfigFile() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        RefreshRateData refreshRateData = mDisplayDeviceConfig.getRefreshRateData();
+        assertNotNull(refreshRateData);
+        assertThat(refreshRateData.lowLightBlockingZoneSupportedModes).hasSize(2);
+        SupportedModeData supportedModeData =
+                refreshRateData.lowLightBlockingZoneSupportedModes.get(0);
+        assertThat(supportedModeData.refreshRate).isEqualTo(60);
+        assertThat(supportedModeData.vsyncRate).isEqualTo(60);
+        supportedModeData = refreshRateData.lowLightBlockingZoneSupportedModes.get(1);
+        assertThat(supportedModeData.refreshRate).isEqualTo(240);
+        assertThat(supportedModeData.vsyncRate).isEqualTo(240);
+    }
+
     private String getValidLuxThrottling() {
         return "<luxThrottling>\n"
                 + "    <brightnessLimitMap>\n"
@@ -1115,6 +1131,19 @@ public final class DisplayDeviceConfigTest {
                 + "        <second>120</second>\n"
                 + "    </point>\n"
                 + "</lowPowerSupportedModes>\n";
+    }
+
+    private String getLowLightVrrSupportedModesConfig() {
+        return "<supportedModes>\n"
+                + "    <point>\n"
+                + "        <first>60</first>\n"
+                + "        <second>60</second>\n"
+                + "    </point>\n"
+                + "    <point>\n"
+                + "        <first>240</first>\n"
+                + "        <second>240</second>\n"
+                + "    </point>\n"
+                + "</supportedModes>\n";
     }
 
     private String getHdrBrightnessConfig() {
@@ -1624,6 +1653,7 @@ public final class DisplayDeviceConfigTest {
                 +                   "<nits>-1</nits>\n"
                 +               "</displayBrightnessPoint>\n"
                 +           "</blockingZoneThreshold>\n"
+                + getLowLightVrrSupportedModesConfig()
                 +       "</lowerBlockingZoneConfigs>\n"
                 +       "<higherBlockingZoneConfigs>\n"
                 +           "<defaultRefreshRate>90</defaultRefreshRate>\n"

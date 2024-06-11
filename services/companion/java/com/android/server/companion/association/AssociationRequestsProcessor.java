@@ -347,6 +347,8 @@ public class AssociationRequestsProcessor {
      * Set association tag.
      */
     public void setAssociationTag(int associationId, String tag) {
+        Slog.i(TAG, "Setting association tag=[" + tag + "] to id=[" + associationId + "]...");
+
         AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
                 associationId);
         association = (new AssociationInfo.Builder(association)).setTag(tag).build();

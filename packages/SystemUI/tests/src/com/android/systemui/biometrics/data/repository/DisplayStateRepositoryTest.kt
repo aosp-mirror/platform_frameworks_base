@@ -21,6 +21,7 @@ import android.view.Display
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DisplayInfo
 import android.view.Surface
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.DisplayStateRepository
@@ -42,12 +43,11 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mockito.spy
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class DisplayStateRepositoryTest : SysuiTestCase() {
     private val display = mock<Display>()
     private val testScope = TestScope(StandardTestDispatcher())

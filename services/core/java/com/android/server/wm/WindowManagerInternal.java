@@ -340,6 +340,19 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+      * An interface to be notified about requested changes in the IME visibility.
+      */
+    public interface OnImeRequestedChangedListener {
+        /**
+         * Called when the requested IME visibility is changed.
+         *
+         * @param windowToken The window token
+         * @param imeVisible {@code true} if the IME should be shown, {@code false} to hide
+         */
+        void onImeRequestedChanged(IBinder windowToken, boolean imeVisible);
+    }
+
+    /**
      * An interface to customize drag and drop behaviors.
      */
     public interface IDragDropCallback {
@@ -681,6 +694,14 @@ public abstract class WindowManagerInternal {
       */
     public abstract void setOnHardKeyboardStatusChangeListener(
         OnHardKeyboardStatusChangeListener listener);
+
+
+    /**
+     * Sets the callback listener for requested IME visibility changes in ImeInsetsSourceProvider
+     *
+     * @param listener The listener to set
+     */
+    public abstract void setOnImeRequestedChangedListener(OnImeRequestedChangedListener listener);
 
     /**
      * Requests the window manager to resend the windows for accessibility on specified display.

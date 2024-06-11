@@ -45,6 +45,7 @@ public class FallbackBrightnessStrategy implements DisplayBrightnessStrategy{
                 // The fallback brightness might change due to clamping. Make sure we tell the rest
                 // of the system by updating the setting
                 .setShouldUpdateScreenBrightnessSetting(true)
+                .setIsUserInitiatedChange(strategyExecutionRequest.isUserSetBrightnessChanged())
                 .build();
     }
 

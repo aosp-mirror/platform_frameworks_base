@@ -404,6 +404,7 @@ java_defaults {
         "android.hardware.common.fmq-V1-java",
         "bouncycastle-repackaged-unbundled",
         "com.android.sysprop.foldlockbehavior",
+        "com.android.sysprop.view",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
