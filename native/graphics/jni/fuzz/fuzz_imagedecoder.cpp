@@ -31,6 +31,20 @@ struct PixelFreer {
 
 using PixelPointer = std::unique_ptr<void, PixelFreer>;
 
+AImageDecoder* init(const uint8_t* data, size_t size, bool useFileDescriptor) {
+    AImageDecoder* decoder = nullptr;
+    if (useFileDescriptor) {
+        constexpr char testFd[] = "tempFd";
+        int32_t fileDesc = open(testFd, O_RDWR | O_CREAT | O_TRUNC);
+        write(fileDesc, data, size);
+        AImageDecoder_createFromFd(fileDesc, &decoder);
+        close(fileDesc);
+    } else {
+        AImageDecoder_createFromBuffer(data, size, &decoder);
+    }
+    return decoder;
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     FuzzedDataProvider dataProvider = FuzzedDataProvider(data, size);
     /**
@@ -39,8 +53,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
      */
     const int32_t dataSize = dataProvider.ConsumeIntegralInRange<int32_t>(0, (size * 80) / 100);
     std::vector<uint8_t> inputBuffer = dataProvider.ConsumeBytes<uint8_t>(dataSize);
-    AImageDecoder* decoder = nullptr;
-    AImageDecoder_createFromBuffer(inputBuffer.data(), inputBuffer.size(), &decoder);
+    AImageDecoder* decoder =
+            init(inputBuffer.data(), inputBuffer.size(), dataProvider.ConsumeBool());
     if (!decoder) {
         return 0;
     }
