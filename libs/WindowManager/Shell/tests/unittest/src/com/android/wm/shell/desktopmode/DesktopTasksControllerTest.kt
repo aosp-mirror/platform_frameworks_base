@@ -24,6 +24,7 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ActivityInfo.CONFIG_DENSITY
@@ -668,6 +669,20 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun moveToDesktop_systemUIActivity_doesNothing() {
+    val task = setUpFullscreenTask()
+
+    // Set task as systemUI package
+    val systemUIPackageName = context.resources.getString(
+      com.android.internal.R.string.config_systemUi)
+    val baseComponent = ComponentName(systemUIPackageName, /* class */ "")
+    task.baseActivity = baseComponent
+
+    controller.moveToDesktop(task, transitionSource = UNKNOWN)
+    verifyEnterDesktopWCTNotExecuted()
+  }
+
+  @Test
   fun moveToDesktop_deviceSupported_taskIsMovedToDesktop() {
     val task = setUpFullscreenTask()
 
@@ -1170,6 +1185,21 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun handleRequest_systemUIActivity_returnSwitchToFullscreenWCT() {
+    val task = setUpFreeformTask()
+
+    // Set task as systemUI package
+    val systemUIPackageName = context.resources.getString(
+      com.android.internal.R.string.config_systemUi)
+    val baseComponent = ComponentName(systemUIPackageName, /* class */ "")
+    task.baseActivity = baseComponent
+
+    val result = controller.handleRequest(Binder(), createTransition(task))
+    assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
+  }
+
+  @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun handleRequest_backTransition_singleActiveTask_noToken() {
     val task = setUpFreeformTask()
@@ -1581,6 +1611,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       bounds: Rect? = null
   ): RunningTaskInfo {
     val task = createFreeformTask(displayId, bounds)
+    val activityInfo = ActivityInfo()
+    task.topActivityInfo = activityInfo
     whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
     desktopModeTaskRepository.addActiveTask(displayId, task.taskId)
     desktopModeTaskRepository.addOrMoveFreeformTaskToTop(displayId, task.taskId)
