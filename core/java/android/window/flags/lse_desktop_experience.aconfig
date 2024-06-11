@@ -113,3 +113,10 @@ flag {
     description: "Introduces a new observer in shell to track the task stack."
     bug: "341932484"
 }
+
+flag {
+    name: "enable_desktop_windowing_size_constraints"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable min/max window size constraints when resizing a window in desktop windowing mode"
+    bug: "327589741"
+}
