@@ -51,7 +51,7 @@ def main():
         nargs='?',
         default='',
         help=
-        'REPO_PATH in repo upload to determine whether the check should run for this project.')
+        'REPO_PROJECT in repo upload to determine whether the check should run for this project.')
 
     # Parse the arguments
     args = parser.parse_args()
@@ -108,16 +108,16 @@ def main():
     sys.exit(0)
 
 
-def should_run_path(path, files):
+def should_run_path(project, files):
     """Returns a boolean if this check should run with these paths.
     If you want to check for a particular subdirectory under the path,
     add a check here, call should_run_files and check for a specific sub dir path in should_run_files.
     """
-    if not path:
+    if not project:
         return False
-    if path == 'frameworks/base':
+    if project == 'platform/frameworks/base':
         return should_run_files(files)
-    # Default case, run for all other paths which calls this script.
+    # Default case, run for all other projects which calls this script.
     return True
 
 
