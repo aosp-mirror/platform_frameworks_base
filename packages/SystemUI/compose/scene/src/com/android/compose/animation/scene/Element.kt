@@ -294,10 +294,9 @@ internal class ElementNode(
         val isNotPartOfAnyOngoingTransitions = transitions.isNotEmpty() && transition == null
         if (isNotPartOfAnyOngoingTransitions || isOtherSceneOverscrolling) {
             recursivelyClearPlacementValues()
+            sceneState.lastSize = Element.SizeUnspecified
 
             val placeable = measurable.measure(constraints)
-            sceneState.lastSize = placeable.size()
-
             return layout(placeable.width, placeable.height) { /* Do not place */ }
         }
 

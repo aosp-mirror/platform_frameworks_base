@@ -1900,4 +1900,41 @@ class ElementTest {
         }
         rule.onNode(isElement(TestElements.Foo, SceneB)).assertPositionInRootIsEqualTo(20.dp, 20.dp)
     }
+
+    @Test
+    fun lastSizeIsUnspecifiedWhenOverscrollingOtherScene() = runTest {
+        val state =
+            rule.runOnIdle {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions { overscroll(SceneA, Orientation.Horizontal) }
+                )
+            }
+
+        @Composable
+        fun SceneScope.Foo() {
+            Box(Modifier.element(TestElements.Foo).size(10.dp))
+        }
+
+        lateinit var layoutImpl: SceneTransitionLayoutImpl
+        rule.setContent {
+            SceneTransitionLayoutForTesting(state, onLayoutImpl = { layoutImpl = it }) {
+                scene(SceneA) { Foo() }
+                scene(SceneB) { Foo() }
+            }
+        }
+
+        // Overscroll A => B on A.
+        rule.runOnUiThread {
+            state.startTransition(
+                transition(from = SceneA, to = SceneB, progress = { -1f }, onFinish = neverFinish())
+            )
+        }
+        rule.waitForIdle()
+
+        assertThat(
+                layoutImpl.elements.getValue(TestElements.Foo).sceneStates.getValue(SceneB).lastSize
+            )
+            .isEqualTo(Element.SizeUnspecified)
+    }
 }
