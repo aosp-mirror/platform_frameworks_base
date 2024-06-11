@@ -204,48 +204,57 @@ static bool validatePointerProperties(JNIEnv* env, jobject pointerPropertiesObj)
 }
 
 static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
-        float xOffset, float yOffset, PointerCoords* outRawPointerCoords) {
-    outRawPointerCoords->clear();
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_X,
-            env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.x) - xOffset);
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_Y,
-            env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.y) - yOffset);
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_PRESSURE,
-            env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.pressure));
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_SIZE,
-            env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.size));
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR,
-            env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.touchMajor));
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR,
-            env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.touchMinor));
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR,
-            env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.toolMajor));
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR,
-            env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.toolMinor));
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION,
-            env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.orientation));
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_X,
-                                      env->GetFloatField(pointerCoordsObj,
-                                                         gPointerCoordsClassInfo.relativeX));
-    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_Y,
-                                      env->GetFloatField(pointerCoordsObj,
-                                                         gPointerCoordsClassInfo.relativeY));
-    outRawPointerCoords->isResampled =
+                                  PointerCoords& outRawPointerCoords) {
+    outRawPointerCoords.clear();
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_X,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.x));
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_Y,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.y));
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_PRESSURE,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.pressure));
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_SIZE,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.size));
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.touchMajor));
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.touchMinor));
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.toolMajor));
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.toolMinor));
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.orientation));
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_X,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.relativeX));
+    outRawPointerCoords.setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_Y,
+                                     env->GetFloatField(pointerCoordsObj,
+                                                        gPointerCoordsClassInfo.relativeY));
+    outRawPointerCoords.isResampled =
             env->GetBooleanField(pointerCoordsObj, gPointerCoordsClassInfo.isResampled);
 
     BitSet64 bits =
             BitSet64(env->GetLongField(pointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits));
     if (!bits.isEmpty()) {
-        jfloatArray valuesArray = jfloatArray(env->GetObjectField(pointerCoordsObj,
-                gPointerCoordsClassInfo.mPackedAxisValues));
+        jfloatArray valuesArray = jfloatArray(
+                env->GetObjectField(pointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisValues));
         if (valuesArray) {
-            jfloat* values = static_cast<jfloat*>(
-                    env->GetPrimitiveArrayCritical(valuesArray, NULL));
+            jfloat* values =
+                    static_cast<jfloat*>(env->GetPrimitiveArrayCritical(valuesArray, NULL));
 
             uint32_t index = 0;
             do {
                 uint32_t axis = bits.clearFirstMarkedBit();
-                outRawPointerCoords->setAxisValue(axis, values[index++]);
+                outRawPointerCoords.setAxisValue(axis, values[index++]);
             } while (!bits.isEmpty());
 
             env->ReleasePrimitiveArrayCritical(valuesArray, values, JNI_ABORT);
@@ -343,6 +352,10 @@ static jlong android_view_MotionEvent_nativeInitialize(
         event = std::make_unique<MotionEvent>();
     }
 
+    ui::Transform transform;
+    transform.set(xOffset, yOffset);
+    const ui::Transform inverseTransform = transform.inverse();
+
     PointerProperties pointerProperties[pointerCount];
     PointerCoords rawPointerCoords[pointerCount];
 
@@ -359,22 +372,22 @@ static jlong android_view_MotionEvent_nativeInitialize(
             jniThrowNullPointerException(env, "pointerCoords");
             return 0;
         }
-        pointerCoordsToNative(env, pointerCoordsObj, xOffset, yOffset, &rawPointerCoords[i]);
+        pointerCoordsToNative(env, pointerCoordsObj, rawPointerCoords[i]);
         if (rawPointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION) != 0.f) {
             flags |= AMOTION_EVENT_PRIVATE_FLAG_SUPPORTS_ORIENTATION |
                     AMOTION_EVENT_PRIVATE_FLAG_SUPPORTS_DIRECTIONAL_ORIENTATION;
         }
+        MotionEvent::calculateTransformedCoordsInPlace(rawPointerCoords[i], source, flags,
+                                                       inverseTransform);
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
-    ui::Transform transform;
-    transform.set(xOffset, yOffset);
-    ui::Transform identityTransform;
+    static const ui::Transform kIdentityTransform;
     event->initialize(InputEvent::nextId(), deviceId, source, ui::LogicalDisplayId{displayId},
                       INVALID_HMAC, action, 0, flags, edgeFlags, metaState, buttonState,
                       static_cast<MotionClassification>(classification), transform, xPrecision,
                       yPrecision, AMOTION_EVENT_INVALID_CURSOR_POSITION,
-                      AMOTION_EVENT_INVALID_CURSOR_POSITION, identityTransform, downTimeNanos,
+                      AMOTION_EVENT_INVALID_CURSOR_POSITION, kIdentityTransform, downTimeNanos,
                       eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
     return reinterpret_cast<jlong>(event.release());
@@ -395,6 +408,8 @@ static void android_view_MotionEvent_nativeAddBatch(JNIEnv* env, jclass clazz,
         return;
     }
 
+    const ui::Transform inverseTransform = event->getTransform().inverse();
+
     PointerCoords rawPointerCoords[pointerCount];
 
     for (size_t i = 0; i < pointerCount; i++) {
@@ -403,8 +418,9 @@ static void android_view_MotionEvent_nativeAddBatch(JNIEnv* env, jclass clazz,
             jniThrowNullPointerException(env, "pointerCoords");
             return;
         }
-        pointerCoordsToNative(env, pointerCoordsObj, event->getRawXOffset(), event->getRawYOffset(),
-                              &rawPointerCoords[i]);
+        pointerCoordsToNative(env, pointerCoordsObj, rawPointerCoords[i]);
+        MotionEvent::calculateTransformedCoordsInPlace(rawPointerCoords[i], event->getSource(),
+                                                       event->getFlags(), inverseTransform);
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
