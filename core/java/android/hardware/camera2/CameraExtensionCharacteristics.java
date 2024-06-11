@@ -280,6 +280,7 @@ public final class CameraExtensionCharacteristics {
         private final int PROXY_SERVICE_DELAY_MS = 2000;
         private ExtensionConnectionManager mConnectionManager = new ExtensionConnectionManager();
         private boolean mPermissionForFallbackEnabled = false;
+        private boolean mIsFallbackEnabled = false;
 
         // Singleton, don't allow construction
         private CameraExtensionManagerGlobal() {}
@@ -327,6 +328,7 @@ public final class CameraExtensionCharacteristics {
                                 "Choosing the fallback software implementation service: "
                                 + serviceName);
                         intent.setClassName(packageName, serviceName);
+                        mIsFallbackEnabled = true;
                     }
                 }
 
@@ -438,7 +440,7 @@ public final class CameraExtensionCharacteristics {
                     releaseProxyConnectionLocked(ctx, extension);
                 }
 
-                if (Flags.concertMode() && ret && useFallback) {
+                if (Flags.concertMode() && ret && useFallback && mIsFallbackEnabled) {
                     try {
                         InitializeSessionHandler cb = new InitializeSessionHandler(ctx);
                         initializeSession(cb, extension);
