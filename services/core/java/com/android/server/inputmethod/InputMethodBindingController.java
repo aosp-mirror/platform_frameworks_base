@@ -17,6 +17,7 @@
 package com.android.server.inputmethod;
 
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
+import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -91,6 +92,7 @@ final class InputMethodBindingController {
 
     /** The display id for which the latest startInput was called. */
     @GuardedBy("ImfLock.class") private int mDisplayIdToShowIme = INVALID_DISPLAY;
+    @GuardedBy("ImfLock.class") private int mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
 
     @Nullable private CountDownLatch mLatchForTesting;
 
@@ -608,5 +610,15 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class")
     int getDisplayIdToShowIme() {
         return mDisplayIdToShowIme;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setDeviceIdToShowIme(int deviceId) {
+        mDeviceIdToShowIme = deviceId;
+    }
+
+    @GuardedBy("ImfLock.class")
+    int getDeviceIdToShowIme() {
+        return mDeviceIdToShowIme;
     }
 }
