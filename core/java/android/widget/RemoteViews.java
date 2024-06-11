@@ -1002,6 +1002,55 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_EMPTY_VIEW_ACTION_TAG;
         }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(RemoteViewsProto.Action.SET_EMPTY_VIEW_ACTION);
+            out.write(RemoteViewsProto.SetEmptyViewAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.write(RemoteViewsProto.SetEmptyViewAction.EMPTY_VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(RemoteViewsProto.Action.SET_EMPTY_VIEW_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.SetEmptyViewAction.VIEW_ID:
+                        values.put(RemoteViewsProto.SetEmptyViewAction.VIEW_ID,
+                                in.readString(RemoteViewsProto.SetEmptyViewAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.SetEmptyViewAction.EMPTY_VIEW_ID:
+                        values.put(RemoteViewsProto.SetEmptyViewAction.EMPTY_VIEW_ID,
+                                in.readString(RemoteViewsProto.SetEmptyViewAction.EMPTY_VIEW_ID));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values, new long[]{RemoteViewsProto.SetEmptyViewAction.VIEW_ID,
+                    RemoteViewsProto.SetEmptyViewAction.EMPTY_VIEW_ID});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.SetEmptyViewAction.VIEW_ID);
+                int emptyViewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.SetEmptyViewAction.EMPTY_VIEW_ID);
+                return new SetEmptyView(viewId, emptyViewId);
+            };
+        }
     }
 
     private static class SetPendingIntentTemplate extends Action {
@@ -1242,6 +1291,68 @@ public class RemoteViews implements Parcelable, Filter {
 
             mItems.visitUris(visitor);
         }
+
+        @Override
+        public boolean canWriteToProto() {
+            // Skip actions that do not contain items (intent only actions)
+            return mItems != null;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            if (mItems == null) return;
+            final long token = out.start(
+                    RemoteViewsProto.Action.SET_REMOTE_COLLECTION_ITEM_LIST_ADAPTER_ACTION);
+            out.write(RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            final long itemsToken = out.start(
+                    RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.ITEMS);
+            mItems.writeToProto(context, out, /* attached= */ true);
+            out.end(itemsToken);
+            out.end(token);
+        }
+    }
+
+    private PendingResources<Action> createSetRemoteCollectionItemListAdapterActionFromProto(
+            ProtoInputStream in) throws Exception {
+        final LongSparseArray<Object> values = new LongSparseArray<>();
+
+        final long token = in.start(
+                RemoteViewsProto.Action.SET_REMOTE_COLLECTION_ITEM_LIST_ADAPTER_ACTION);
+        while (in.nextField() != NO_MORE_FIELDS) {
+            switch (in.getFieldNumber()) {
+                case (int) RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.VIEW_ID:
+                    values.put(RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.VIEW_ID,
+                            in.readString(
+                                    RemoteViewsProto
+                                            .SetRemoteCollectionItemListAdapterAction.VIEW_ID));
+                    break;
+                case (int) RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.ITEMS:
+                    final long itemsToken = in.start(
+                            RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.ITEMS);
+                    values.put(RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.ITEMS,
+                            RemoteCollectionItems.createFromProto(in));
+                    in.end(itemsToken);
+                    break;
+                default:
+                    Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                            + ProtoUtils.currentFieldToString(in));
+            }
+        }
+        in.end(token);
+
+        checkContainsKeys(values,
+                new long[]{RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.VIEW_ID,
+                        RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.ITEMS});
+
+        return (context, resources, rootData, depth) -> {
+            int viewId = getAsIdentifier(resources, values,
+                    RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.VIEW_ID);
+            return new SetRemoteCollectionItemListAdapterAction(viewId,
+                    ((PendingResources<RemoteCollectionItems>) values.get(
+                            RemoteViewsProto.SetRemoteCollectionItemListAdapterAction.ITEMS))
+                            .create(context, resources, rootData, depth));
+        };
     }
 
     /**
@@ -2035,6 +2146,68 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_DRAWABLE_TINT_TAG;
         }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(RemoteViewsProto.Action.SET_DRAWABLE_TINT_ACTION);
+            out.write(RemoteViewsProto.SetDrawableTintAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.write(RemoteViewsProto.SetDrawableTintAction.COLOR_FILTER, mColorFilter);
+            out.write(RemoteViewsProto.SetDrawableTintAction.FILTER_MODE,
+                    PorterDuff.modeToInt(mFilterMode));
+            out.write(RemoteViewsProto.SetDrawableTintAction.TARGET_BACKGROUND, mTargetBackground);
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(RemoteViewsProto.Action.SET_DRAWABLE_TINT_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.SetDrawableTintAction.VIEW_ID:
+                        values.put(RemoteViewsProto.SetDrawableTintAction.VIEW_ID,
+                                in.readString(RemoteViewsProto.SetDrawableTintAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.SetDrawableTintAction.TARGET_BACKGROUND:
+                        values.put(RemoteViewsProto.SetDrawableTintAction.TARGET_BACKGROUND,
+                                in.readBoolean(
+                                        RemoteViewsProto.SetDrawableTintAction.TARGET_BACKGROUND));
+                        break;
+                    case (int) RemoteViewsProto.SetDrawableTintAction.COLOR_FILTER:
+                        values.put(RemoteViewsProto.SetDrawableTintAction.COLOR_FILTER,
+                                in.readInt(RemoteViewsProto.SetDrawableTintAction.COLOR_FILTER));
+                        break;
+                    case (int) RemoteViewsProto.SetDrawableTintAction.FILTER_MODE:
+                        values.put(RemoteViewsProto.SetDrawableTintAction.FILTER_MODE,
+                                PorterDuff.intToMode(in.readInt(
+                                        RemoteViewsProto.SetDrawableTintAction.FILTER_MODE)));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values, new long[]{RemoteViewsProto.SetDrawableTintAction.VIEW_ID});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.SetDrawableTintAction.VIEW_ID);
+                return new SetDrawableTint(viewId, (boolean) values.get(
+                        RemoteViewsProto.SetDrawableTintAction.TARGET_BACKGROUND, false),
+                        (int) values.get(RemoteViewsProto.SetDrawableTintAction.COLOR_FILTER, 0),
+                        (PorterDuff.Mode) values.get(
+                                RemoteViewsProto.SetDrawableTintAction.FILTER_MODE));
+            };
+        }
     }
 
     /**
@@ -2046,7 +2219,7 @@ public class RemoteViews implements Parcelable, Filter {
      * target {@link View#getBackground()}.
      * <p>
      */
-    private class SetRippleDrawableColor extends Action {
+    private static class SetRippleDrawableColor extends Action {
         ColorStateList mColorStateList;
 
         SetRippleDrawableColor(@IdRes int id, ColorStateList colorStateList) {
@@ -2080,6 +2253,58 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_RIPPLE_DRAWABLE_COLOR_TAG;
+        }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(RemoteViewsProto.Action.SET_RIPPLE_DRAWABLE_COLOR_ACTION);
+            out.write(RemoteViewsProto.SetRippleDrawableColorAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            writeColorStateListToProto(out, mColorStateList,
+                    RemoteViewsProto.SetRippleDrawableColorAction.COLOR_STATE_LIST);
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(RemoteViewsProto.Action.SET_RIPPLE_DRAWABLE_COLOR_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.SetRippleDrawableColorAction.VIEW_ID:
+                        values.put(RemoteViewsProto.SetRippleDrawableColorAction.VIEW_ID,
+                                in.readString(
+                                        RemoteViewsProto.SetRippleDrawableColorAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.SetRippleDrawableColorAction.COLOR_STATE_LIST:
+                        values.put(RemoteViewsProto.SetRippleDrawableColorAction.COLOR_STATE_LIST,
+                                createColorStateListFromProto(in,
+                                        RemoteViewsProto
+                                                .SetRippleDrawableColorAction.COLOR_STATE_LIST));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values,
+                    new long[]{RemoteViewsProto.SetRippleDrawableColorAction.VIEW_ID,
+                            RemoteViewsProto.SetRippleDrawableColorAction.COLOR_STATE_LIST});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.SetRippleDrawableColorAction.VIEW_ID);
+                return new SetRippleDrawableColor(viewId, (ColorStateList) values.get(
+                        RemoteViewsProto.SetRippleDrawableColorAction.COLOR_STATE_LIST));
+            };
         }
     }
 
@@ -2985,6 +3210,82 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return RESOURCE_REFLECTION_ACTION_TAG;
+        }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(RemoteViewsProto.Action.RESOURCE_REFLECTION_ACTION);
+            out.write(RemoteViewsProto.ResourceReflectionAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.write(RemoteViewsProto.ResourceReflectionAction.METHOD_NAME, mMethodName);
+            out.write(RemoteViewsProto.ResourceReflectionAction.PARAMETER_TYPE, mType);
+            out.write(RemoteViewsProto.ResourceReflectionAction.RESOURCE_TYPE, mResourceType);
+            if (mResId != 0) {
+                out.write(RemoteViewsProto.ResourceReflectionAction.RES_ID,
+                        appResources.getResourceName(mResId));
+            }
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(RemoteViewsProto.Action.RESOURCE_REFLECTION_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.ResourceReflectionAction.VIEW_ID:
+                        values.put(RemoteViewsProto.ResourceReflectionAction.VIEW_ID,
+                                in.readString(RemoteViewsProto.ResourceReflectionAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.ResourceReflectionAction.METHOD_NAME:
+                        values.put(RemoteViewsProto.ResourceReflectionAction.METHOD_NAME,
+                                in.readString(
+                                        RemoteViewsProto.ResourceReflectionAction.METHOD_NAME));
+                        break;
+                    case (int) RemoteViewsProto.ResourceReflectionAction.RESOURCE_TYPE:
+                        values.put(RemoteViewsProto.ResourceReflectionAction.RESOURCE_TYPE,
+                                in.readInt(
+                                        RemoteViewsProto.ResourceReflectionAction.RESOURCE_TYPE));
+                        break;
+                    case (int) RemoteViewsProto.ResourceReflectionAction.RES_ID:
+                        values.put(RemoteViewsProto.ResourceReflectionAction.RES_ID,
+                                in.readString(RemoteViewsProto.ResourceReflectionAction.RES_ID));
+                        break;
+                    case (int) RemoteViewsProto.ResourceReflectionAction.PARAMETER_TYPE:
+                        values.put(RemoteViewsProto.ResourceReflectionAction.PARAMETER_TYPE,
+                                in.readInt(
+                                        RemoteViewsProto.ResourceReflectionAction.PARAMETER_TYPE));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values, new long[]{RemoteViewsProto.ResourceReflectionAction.VIEW_ID,
+                    RemoteViewsProto.ResourceReflectionAction.METHOD_NAME,
+                    RemoteViewsProto.ResourceReflectionAction.PARAMETER_TYPE});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.ResourceReflectionAction.VIEW_ID);
+
+                int resId = (values.indexOfKey(RemoteViewsProto.ResourceReflectionAction.RES_ID)
+                        >= 0) ? getAsIdentifier(resources, values,
+                        RemoteViewsProto.ResourceReflectionAction.RES_ID) : 0;
+                return new ResourceReflectionAction(viewId,
+                        (String) values.get(RemoteViewsProto.ResourceReflectionAction.METHOD_NAME),
+                        (int) values.get(RemoteViewsProto.ResourceReflectionAction.PARAMETER_TYPE),
+                        (int) values.get(RemoteViewsProto.ResourceReflectionAction.RESOURCE_TYPE,
+                                0), resId);
+            };
         }
     }
 
@@ -4592,6 +4893,61 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_INT_TAG_TAG;
         }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(RemoteViewsProto.Action.SET_INT_TAG_ACTION);
+            out.write(RemoteViewsProto.SetIntTagAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.write(RemoteViewsProto.SetIntTagAction.KEY,
+                    appResources.getResourceName(mKey)); // rebase
+            out.write(RemoteViewsProto.SetIntTagAction.TAG, mTag);
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(RemoteViewsProto.Action.SET_INT_TAG_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.SetIntTagAction.VIEW_ID:
+                        values.put(RemoteViewsProto.SetIntTagAction.VIEW_ID,
+                                in.readString(RemoteViewsProto.SetIntTagAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.SetIntTagAction.KEY:
+                        values.put(RemoteViewsProto.SetIntTagAction.KEY,
+                                in.readString(RemoteViewsProto.SetIntTagAction.KEY));
+                        break;
+                    case (int) RemoteViewsProto.SetIntTagAction.TAG:
+                        values.put(RemoteViewsProto.SetIntTagAction.TAG,
+                                in.readInt(RemoteViewsProto.SetIntTagAction.TAG));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values, new long[]{RemoteViewsProto.SetIntTagAction.VIEW_ID,
+                    RemoteViewsProto.SetIntTagAction.KEY});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.SetIntTagAction.VIEW_ID);
+                int keyId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.SetIntTagAction.KEY);
+                return new SetIntTagAction(viewId, keyId,
+                        (int) values.get(RemoteViewsProto.SetIntTagAction.TAG, 0));
+            };
+        }
     }
 
     private static class SetCompoundButtonCheckedAction extends Action {
@@ -4641,6 +4997,56 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_COMPOUND_BUTTON_CHECKED_TAG;
+        }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(
+                    RemoteViewsProto.Action.SET_COMPOUND_BUTTON_CHECKED_ACTION);
+            out.write(RemoteViewsProto.SetCompoundButtonCheckedAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.write(RemoteViewsProto.SetCompoundButtonCheckedAction.CHECKED, mChecked);
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(RemoteViewsProto.Action.SET_COMPOUND_BUTTON_CHECKED_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.SetCompoundButtonCheckedAction.VIEW_ID:
+                        values.put(RemoteViewsProto.SetCompoundButtonCheckedAction.VIEW_ID,
+                                in.readString(
+                                        RemoteViewsProto.SetCompoundButtonCheckedAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.SetCompoundButtonCheckedAction.CHECKED:
+                        values.put(RemoteViewsProto.SetCompoundButtonCheckedAction.CHECKED,
+                                in.readBoolean(
+                                        RemoteViewsProto.SetCompoundButtonCheckedAction.CHECKED));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values,
+                    new long[]{RemoteViewsProto.SetCompoundButtonCheckedAction.VIEW_ID});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.SetCompoundButtonCheckedAction.VIEW_ID);
+                return new SetCompoundButtonCheckedAction(viewId, (boolean) values.get(
+                        RemoteViewsProto.SetCompoundButtonCheckedAction.CHECKED, false));
+            };
         }
     }
 
@@ -4705,6 +5111,61 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_RADIO_GROUP_CHECKED;
+        }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(RemoteViewsProto.Action.SET_RADIO_GROUP_CHECKED_ACTION);
+            out.write(RemoteViewsProto.SetRadioGroupCheckedAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            if (mCheckedId != -1) {
+                out.write(RemoteViewsProto.SetRadioGroupCheckedAction.CHECKED_ID,
+                        appResources.getResourceName(mCheckedId));
+            }
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(RemoteViewsProto.Action.SET_RADIO_GROUP_CHECKED_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.SetRadioGroupCheckedAction.VIEW_ID:
+                        values.put(RemoteViewsProto.SetRadioGroupCheckedAction.VIEW_ID,
+                                in.readString(RemoteViewsProto.SetRadioGroupCheckedAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.SetRadioGroupCheckedAction.CHECKED_ID:
+                        values.put(RemoteViewsProto.SetRadioGroupCheckedAction.CHECKED_ID,
+                                in.readString(
+                                        RemoteViewsProto.SetRadioGroupCheckedAction.CHECKED_ID));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values,
+                    new long[]{RemoteViewsProto.SetRadioGroupCheckedAction.VIEW_ID});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.SetRadioGroupCheckedAction.VIEW_ID);
+
+                int checkedId = (values.indexOfKey(
+                        RemoteViewsProto.SetRadioGroupCheckedAction.CHECKED_ID) >= 0)
+                        ? getAsIdentifier(resources, values,
+                        RemoteViewsProto.SetRadioGroupCheckedAction.CHECKED_ID) : -1;
+                return new SetRadioGroupCheckedAction(viewId, checkedId);
+            };
         }
     }
 
@@ -8417,6 +8878,7 @@ public class RemoteViews implements Parcelable, Filter {
         public static PendingResources<RemoteCollectionItems> createFromProto(ProtoInputStream in)
                 throws Exception {
             final LongSparseArray<Object> values = new LongSparseArray<>();
+
             values.put(RemoteViewsProto.RemoteCollectionItems.IDS, new ArrayList<Long>());
             values.put(RemoteViewsProto.RemoteCollectionItems.VIEWS,
                     new ArrayList<PendingResources<RemoteViews>>());
@@ -9174,6 +9636,22 @@ public class RemoteViews implements Parcelable, Filter {
                 return ReflectionAction.createFromProto(in);
             case (int) RemoteViewsProto.Action.REMOVE_FROM_PARENT_ACTION:
                 return RemoveFromParentAction.createFromProto(in);
+            case (int) RemoteViewsProto.Action.RESOURCE_REFLECTION_ACTION:
+                return ResourceReflectionAction.createFromProto(in);
+            case (int) RemoteViewsProto.Action.SET_COMPOUND_BUTTON_CHECKED_ACTION:
+                return SetCompoundButtonCheckedAction.createFromProto(in);
+            case (int) RemoteViewsProto.Action.SET_DRAWABLE_TINT_ACTION:
+                return SetDrawableTint.createFromProto(in);
+            case (int) RemoteViewsProto.Action.SET_EMPTY_VIEW_ACTION:
+                return SetEmptyView.createFromProto(in);
+            case (int) RemoteViewsProto.Action.SET_INT_TAG_ACTION:
+                return SetIntTagAction.createFromProto(in);
+            case (int) RemoteViewsProto.Action.SET_RADIO_GROUP_CHECKED_ACTION:
+                return SetRadioGroupCheckedAction.createFromProto(in);
+            case (int) RemoteViewsProto.Action.SET_REMOTE_COLLECTION_ITEM_LIST_ADAPTER_ACTION:
+                return rv.createSetRemoteCollectionItemListAdapterActionFromProto(in);
+            case (int) RemoteViewsProto.Action.SET_RIPPLE_DRAWABLE_COLOR_ACTION:
+                return SetRippleDrawableColor.createFromProto(in);
             default:
                 throw new RuntimeException("Unhandled field while reading Action proto!\n"
                         + ProtoUtils.currentFieldToString(in));
