@@ -24,16 +24,18 @@ import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState.KEYGUARD
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import java.util.UUID
@@ -59,7 +61,6 @@ constructor(
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
     keyguardInteractor: KeyguardInteractor,
-    private val flags: FeatureFlags,
     private val shadeRepository: ShadeRepository,
     powerInteractor: PowerInteractor,
     private val glanceableHubTransitions: GlanceableHubTransitions,
@@ -97,14 +98,13 @@ constructor(
      * LOCKSCREEN is running.
      */
     val surfaceBehindVisibility: Flow<Boolean?> =
-        transitionInteractor.startedKeyguardTransitionStep
-            .map { startedStep ->
-                if (startedStep.to != KeyguardState.GONE) {
-                    // LOCKSCREEN to anything but GONE does not require any special surface
-                    // visibility handling.
-                    return@map null
-                }
-
+        transitionInteractor
+            .transition(
+                edge = Edge.create(from = KeyguardState.LOCKSCREEN, to = Scenes.Gone),
+                edgeWithoutSceneContainer =
+                    Edge.create(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+            )
+            .map<TransitionStep, Boolean?> {
                 true // Make the surface visible during LS -> GONE transitions.
             }
             .onStart {
