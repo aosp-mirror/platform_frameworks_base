@@ -8361,7 +8361,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private interface PendingResources<T> {
+    interface PendingResources<T> {
         T create(Context context, Resources appResources, HierarchyRootData rootData, int depth)
                 throws Exception;
     }
