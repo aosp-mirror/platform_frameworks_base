@@ -42,6 +42,7 @@ class FakeAudioRepository : AudioRepository {
 
     private val models: MutableMap<AudioStream, MutableStateFlow<AudioStreamModel>> = mutableMapOf()
     private val lastAudibleVolumes: MutableMap<AudioStream, Int> = mutableMapOf()
+    private val deviceCategories: MutableMap<String, Int> = mutableMapOf()
 
     private fun getAudioStreamModelState(
         audioStream: AudioStream
@@ -102,5 +103,13 @@ class FakeAudioRepository : AudioRepository {
 
     override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
         mutableRingerMode.value = mode
+    }
+
+    fun setBluetoothAudioDeviceCategory(bluetoothAddress: String, category: Int) {
+        deviceCategories[bluetoothAddress] = category
+    }
+
+    override suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int {
+        return deviceCategories[bluetoothAddress] ?: AudioManager.AUDIO_DEVICE_CATEGORY_UNKNOWN
     }
 }
