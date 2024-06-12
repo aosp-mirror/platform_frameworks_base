@@ -37,8 +37,10 @@ import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionR
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsMediaProjectionChip
+import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
+import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsScreenRecordChip
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsShareToAppChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
 import com.android.systemui.statusbar.data.model.StatusBarMode
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository.Companion.DISPLAY_ID
@@ -55,6 +57,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 
 @SmallTest
@@ -76,6 +79,11 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             kosmos.ongoingActivityChipsViewModel,
             kosmos.applicationCoroutineScope,
         )
+
+    @Before
+    fun setUp() {
+        setUpPackageManagerForMediaProjection(kosmos)
+    }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_started_isTrue() =
@@ -405,9 +413,9 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden)
 
             kosmos.fakeMediaProjectionRepository.mediaProjectionState.value =
-                MediaProjectionState.EntireScreen
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
 
-            assertIsMediaProjectionChip(latest)
+            assertIsShareToAppChip(latest)
         }
 
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =
