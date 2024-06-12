@@ -56,6 +56,18 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
     }
 
     @Test
+    fun getDialogMessage_notProjecting_isGenericMessage() {
+        val result =
+            underTest.getDialogMessage(
+                MediaProjectionState.NotProjecting,
+                R.string.accessibility_home,
+                R.string.cast_to_other_device_stop_dialog_message_specific_app,
+            )
+
+        assertThat(result).isEqualTo(context.getString(R.string.accessibility_home))
+    }
+
+    @Test
     fun getDialogMessage_entireScreen_isGenericMessage() {
         val result =
             underTest.getDialogMessage(

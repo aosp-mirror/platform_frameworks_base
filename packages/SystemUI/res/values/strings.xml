@@ -323,6 +323,8 @@
     <string name="screenrecord_stop_dialog_title">Stop recording screen?</string>
     <!-- Text telling a user that they will stop recording their screen if they click the "Stop recording" button [CHAR LIMIT=100] -->
     <string name="screenrecord_stop_dialog_message">You will stop recording your screen</string>
+    <!-- Text telling a user that they will stop recording the contents of the specified [app_name] if they click the "Stop recording" button. Note that the app name will appear in bold. [CHAR LIMIT=100] -->
+    <string name="screenrecord_stop_dialog_message_specific_app">You will stop recording &lt;b><xliff:g id="app_name" example="Photos App">%1$s</xliff:g>&lt;/b></string>
     <!-- Button to stop a screen recording [CHAR LIMIT=35] -->
     <string name="screenrecord_stop_dialog_button">Stop recording</string>
 

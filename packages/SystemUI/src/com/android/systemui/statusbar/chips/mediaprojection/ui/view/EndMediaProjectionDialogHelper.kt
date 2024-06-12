@@ -49,11 +49,15 @@ constructor(
      *   specify which app is currently being projected.
      */
     fun getDialogMessage(
-        state: MediaProjectionState.Projecting,
+        state: MediaProjectionState,
         @StringRes genericMessageResId: Int,
         @StringRes specificAppMessageResId: Int,
     ): CharSequence {
         when (state) {
+            // NotProjecting might happen if there's a bit of lag between when the screen recording
+            // starts and when MediaProjection is aware that it's started, so handle it here just in
+            // case.
+            is MediaProjectionState.NotProjecting,
             is MediaProjectionState.Projecting.EntireScreen ->
                 return context.getString(genericMessageResId)
             is MediaProjectionState.Projecting.SingleTask -> {

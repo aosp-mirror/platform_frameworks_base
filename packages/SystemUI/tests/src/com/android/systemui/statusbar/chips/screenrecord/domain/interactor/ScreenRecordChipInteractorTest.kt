@@ -23,11 +23,16 @@ import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.screenrecord.ui.view.EndScreenRecordingDialogDelegate
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
@@ -45,9 +50,10 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 class ScreenRecordChipInteractorTest : SysuiTestCase() {
-    private val kosmos = Kosmos()
+    private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
     private val screenRecordRepo = kosmos.screenRecordRepository
+    private val mediaProjectionRepo = kosmos.fakeMediaProjectionRepository
     private val systemClock = kosmos.fakeSystemClock
     private val mockSystemUIDialog = mock<SystemUIDialog>()
 
@@ -66,7 +72,7 @@ class ScreenRecordChipInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        whenever(kosmos.mockSystemUIDialogFactory.create(any<SystemUIDialog.Delegate>()))
+        whenever(kosmos.mockSystemUIDialogFactory.create(any<EndScreenRecordingDialogDelegate>()))
             .thenReturn(mockSystemUIDialog)
     }
 
@@ -124,16 +130,66 @@ class ScreenRecordChipInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_clickListenerShowsDialog() =
+    fun chip_notProjecting_clickListenerShowsDialog() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionRepo.mediaProjectionState.value = MediaProjectionState.NotProjecting
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
 
             // Dialogs must be created on the main thread
             context.mainExecutor.execute {
                 clickListener.onClick(chipView)
+                // EndScreenRecordingDialogDelegate will test that the dialog has the right message
+                verify(kosmos.mockDialogTransitionAnimator)
+                    .showFromView(
+                        eq(mockSystemUIDialog),
+                        eq(chipBackgroundView),
+                        eq(null),
+                        anyBoolean(),
+                    )
+            }
+        }
+
+    @Test
+    fun chip_projectingEntireScreen_clickListenerShowsDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen("host.package")
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+
+            // Dialogs must be created on the main thread
+            context.mainExecutor.execute {
+                clickListener.onClick(chipView)
+                // EndScreenRecordingDialogDelegate will test that the dialog has the right message
+                verify(kosmos.mockDialogTransitionAnimator)
+                    .showFromView(
+                        eq(mockSystemUIDialog),
+                        eq(chipBackgroundView),
+                        eq(null),
+                        anyBoolean(),
+                    )
+            }
+        }
+
+    @Test
+    fun chip_projectingSingleTask_clickListenerShowsDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.SingleTask("host.package", createTask(taskId = 1))
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+
+            // Dialogs must be created on the main thread
+            context.mainExecutor.execute {
+                clickListener.onClick(chipView)
+                // EndScreenRecordingDialogDelegate will test that the dialog has the right message
                 verify(kosmos.mockDialogTransitionAnimator)
                     .showFromView(
                         eq(mockSystemUIDialog),

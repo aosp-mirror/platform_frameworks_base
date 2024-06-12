@@ -17,26 +17,34 @@
 package com.android.systemui.statusbar.chips.screenrecord.ui.view
 
 import android.os.Bundle
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 
 /** A dialog that lets the user stop an ongoing screen recording. */
 class EndScreenRecordingDialogDelegate(
-    private val systemUIDialogFactory: SystemUIDialog.Factory,
+    private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
     private val interactor: ScreenRecordChipInteractor,
+    private val state: MediaProjectionState,
 ) : SystemUIDialog.Delegate {
 
     override fun createDialog(): SystemUIDialog {
-        return systemUIDialogFactory.create(this)
+        return endMediaProjectionDialogHelper.createDialog(this)
     }
 
     override fun beforeCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
         with(dialog) {
             setIcon(ScreenRecordChipInteractor.ICON)
             setTitle(R.string.screenrecord_stop_dialog_title)
-            // TODO(b/332662551): Use a different message if they're sharing just a single app.
-            setMessage(R.string.screenrecord_stop_dialog_message)
+            setMessage(
+                endMediaProjectionDialogHelper.getDialogMessage(
+                    state,
+                    genericMessageResId = R.string.screenrecord_stop_dialog_message,
+                    specificAppMessageResId = R.string.screenrecord_stop_dialog_message_specific_app
+                )
+            )
             // No custom on-click, because the dialog will automatically be dismissed when the
             // button is clicked anyway.
             setNegativeButton(R.string.close_dialog_button, /* onClick= */ null)
