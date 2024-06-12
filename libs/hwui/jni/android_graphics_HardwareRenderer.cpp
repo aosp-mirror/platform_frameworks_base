@@ -234,6 +234,27 @@ static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
     }
 }
 
+/*
+ * This method is similar to android_view_ThreadedRenderer_setSurface above, but
+ * pases in a Surface pointer instead of a Surface object.
+ *
+ * This was added for Android O and P compatibility to replace the method
+ * 'nHwuiSetSurface' in android_view_Surface.cpp.
+ */
+static void android_view_ThreadedRenderer_setSurfacePtr(JNIEnv* env, jclass clazz,
+                                                        jlong rendererPtr, jlong surfacePtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
+    sp<ANativeWindow> win = reinterpret_cast<Surface*>(surfacePtr);
+    if (win != NULL) {
+        win->incStrong((void*)layoutlibFromSurface);
+    }
+    ANativeWindow* window = win.get();
+    proxy->setSurface(window, false);
+    if (window) {
+        ANativeWindow_release(window);
+    }
+}
+
 static void android_view_ThreadedRenderer_setSurfaceControl(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong surfaceControlPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -931,6 +952,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetName", "(JLjava/lang/String;)V", (void*)android_view_ThreadedRenderer_setName},
         {"nSetSurface", "(JLandroid/view/Surface;Z)V",
          (void*)android_view_ThreadedRenderer_setSurface},
+        {"nSetSurfacePtr", "(JJ)V", (void*)android_view_ThreadedRenderer_setSurfacePtr},
         {"nSetSurfaceControl", "(JJ)V", (void*)android_view_ThreadedRenderer_setSurfaceControl},
         {"nPause", "(J)Z", (void*)android_view_ThreadedRenderer_pause},
         {"nSetStopped", "(JZ)V", (void*)android_view_ThreadedRenderer_setStopped},
