@@ -308,6 +308,20 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void close_forMultipleTimes() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int errorCode = RadioTuner.ERROR_SERVER_DIED;
+        mTunerSessions[0].close(errorCode);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onError(errorCode);
+
+        mTunerSessions[0].close(errorCode);
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onError(errorCode);
+        expect.withMessage("Close state of broadcast radio service session for multiple times")
+                .that(mTunerSessions[0].isClosed()).isTrue();
+    }
+
+    @Test
     public void closeSessions_withMultipleSessions_withError() throws Exception {
         int numSessions = 3;
         openAidlClients(numSessions);
