@@ -269,7 +269,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"נשמר"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ניתוק"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"הפעלה"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"החיבור יופעל שוב אוטומטית מחר"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"יופעל שוב אוטומטית מחר"</string>
     <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"‏תכונות כמו \'שיתוף מהיר\', \'איפה המכשיר שלי\' ומיקום המכשיר משתמשות בחיבור Bluetooth"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> סוללה"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"אודיו"</string>
@@ -1151,7 +1151,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"‏ה-Wi-Fi לא יתחבר באופן אוטומטי בינתיים"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"הצגת הכול"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"כדי לעבור בין רשתות, צריך לנתק את האתרנט"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏כדי לשפר את חוויית השימוש במכשיר, אפליקציות ושירותים יוכלו לחפש רשתות Wi-Fi בכל שלב, גם כאשר ה-Wi-Fi כבוי. אפשר לשנות זאת בהגדרות של חיפוש נקודות Wi-Fi. "<annotation id="link">"שינוי"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏כדי לשפר את חוויית השימוש במכשיר, אפליקציות ושירותים יוכלו לחפש רשתות Wi-Fi בכל שלב, גם כאשר ה-Wi-Fi כבוי. אפשר לשנות את זה בהגדרות של חיפוש נקודות Wi-Fi. "<annotation id="link">"שינוי"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"השבתה של מצב טיסה"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"אפליקציית <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את הלחצן הבא"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"להוסיף לחצן"</string>

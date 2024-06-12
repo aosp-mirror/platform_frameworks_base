@@ -1271,5 +1271,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroiluminación del teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivel %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controles de la casa"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Accede rápidamente a controles de la casa como prot. de pantalla"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Usa rápidamente los controles de la casa como protector de pantalla"</string>
 </resources>
