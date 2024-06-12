@@ -33,6 +33,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -128,6 +130,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
+import com.android.compose.animation.Easings.Emphasized
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
@@ -176,6 +179,10 @@ fun CommunalHub(
         derivedStateOf { selectedKey.value != null || reorderingWidgets }
     }
     val isEmptyState by viewModel.isEmptyState.collectAsStateWithLifecycle(initialValue = false)
+    val isCommunalContentVisible by
+        viewModel.isCommunalContentVisible.collectAsStateWithLifecycle(
+            initialValue = !viewModel.isEditMode
+        )
 
     val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     val contentOffset = beforeContentPadding(contentPadding).toOffset()
@@ -248,47 +255,88 @@ fun CommunalHub(
                     viewModel = viewModel,
                 )
             } else {
-                CommunalHubLazyGrid(
-                    communalContent = communalContent,
-                    viewModel = viewModel,
-                    contentPadding = contentPadding,
-                    contentOffset = contentOffset,
-                    setGridCoordinates = { gridCoordinates = it },
-                    updateDragPositionForRemove = { offset ->
-                        isPointerWithinEnabledRemoveButton(
-                            removeEnabled = removeButtonEnabled,
-                            offset = gridCoordinates?.let { it.positionInWindow() + offset },
-                            containerToCheck = removeButtonCoordinates
+                val slideOffsetInPx =
+                    with(LocalDensity.current) { Dimensions.SlideOffsetY.toPx().toInt() }
+                AnimatedVisibility(
+                    visible = isCommunalContentVisible,
+                    enter =
+                        fadeIn(
+                            animationSpec =
+                                tween(durationMillis = 83, delayMillis = 83, easing = LinearEasing)
+                        ) +
+                            slideInVertically(
+                                animationSpec = tween(durationMillis = 1000, easing = Emphasized),
+                                initialOffsetY = { -slideOffsetInPx }
+                            ),
+                    exit =
+                        fadeOut(
+                            animationSpec = tween(durationMillis = 167, easing = LinearEasing)
+                        ) +
+                            slideOutVertically(
+                                animationSpec = tween(durationMillis = 1000, easing = Emphasized),
+                                targetOffsetY = { -slideOffsetInPx }
+                            ),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Box {
+                        CommunalHubLazyGrid(
+                            communalContent = communalContent,
+                            viewModel = viewModel,
+                            contentPadding = contentPadding,
+                            contentOffset = contentOffset,
+                            setGridCoordinates = { gridCoordinates = it },
+                            updateDragPositionForRemove = { offset ->
+                                isPointerWithinEnabledRemoveButton(
+                                    removeEnabled = removeButtonEnabled,
+                                    offset =
+                                        gridCoordinates?.let { it.positionInWindow() + offset },
+                                    containerToCheck = removeButtonCoordinates
+                                )
+                            },
+                            gridState = gridState,
+                            contentListState = contentListState,
+                            selectedKey = selectedKey,
+                            widgetConfigurator = widgetConfigurator,
+                            interactionHandler = interactionHandler,
                         )
-                    },
-                    gridState = gridState,
-                    contentListState = contentListState,
-                    selectedKey = selectedKey,
-                    widgetConfigurator = widgetConfigurator,
-                    interactionHandler = interactionHandler,
-                )
+                    }
+                }
             }
         }
 
-        if (viewModel.isEditMode && onOpenWidgetPicker != null && onEditDone != null) {
-            Toolbar(
-                setToolbarSize = { toolbarSize = it },
-                setRemoveButtonCoordinates = { removeButtonCoordinates = it },
-                onEditDone = onEditDone,
-                onOpenWidgetPicker = onOpenWidgetPicker,
-                onRemoveClicked = {
-                    val index =
-                        selectedKey.value?.let { key ->
-                            contentListState.list.indexOfFirst { it.key == key }
+        if (onOpenWidgetPicker != null && onEditDone != null) {
+            AnimatedVisibility(
+                visible = viewModel.isEditMode && isCommunalContentVisible,
+                enter =
+                    fadeIn(animationSpec = tween(durationMillis = 250, easing = LinearEasing)) +
+                        slideInVertically(
+                            animationSpec = tween(durationMillis = 1000, easing = Emphasized),
+                        ),
+                exit =
+                    fadeOut(animationSpec = tween(durationMillis = 167, easing = LinearEasing)) +
+                        slideOutVertically(
+                            animationSpec = tween(durationMillis = 1000, easing = Emphasized)
+                        ),
+            ) {
+                Toolbar(
+                    setToolbarSize = { toolbarSize = it },
+                    setRemoveButtonCoordinates = { removeButtonCoordinates = it },
+                    onEditDone = onEditDone,
+                    onOpenWidgetPicker = onOpenWidgetPicker,
+                    onRemoveClicked = {
+                        val index =
+                            selectedKey.value?.let { key ->
+                                contentListState.list.indexOfFirst { it.key == key }
+                            }
+                        index?.let {
+                            contentListState.onRemove(it)
+                            contentListState.onSaveList()
+                            viewModel.setSelectedKey(null)
                         }
-                    index?.let {
-                        contentListState.onRemove(it)
-                        contentListState.onSaveList()
-                        viewModel.setSelectedKey(null)
-                    }
-                },
-                removeEnabled = removeButtonEnabled
-            )
+                    },
+                    removeEnabled = removeButtonEnabled
+                )
+            }
         }
         if (currentPopup == PopupType.CtaTile) {
             PopupOnDismissCtaTile(viewModel::onHidePopup)
@@ -1331,6 +1379,7 @@ object Dimensions {
             horizontal = ToolbarButtonPaddingHorizontal,
         )
     val IconSize = 40.dp
+    val SlideOffsetY = 30.dp
 }
 
 private object Colors {

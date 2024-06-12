@@ -37,6 +37,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
@@ -107,6 +108,7 @@ constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        listenForTransitionAndChangeScene()
 
         communalViewModel.setEditModeOpen(true)
 
@@ -138,6 +140,22 @@ constructor(
         }
     }
 
+    // Handle scene change to show the activity and animate in its content
+    private fun listenForTransitionAndChangeScene() {
+        lifecycleScope.launch {
+            communalViewModel.canShowEditMode.collect {
+                communalViewModel.changeScene(
+                    CommunalScenes.Blank,
+                    CommunalTransitionKeys.ToEditMode
+                )
+                // wait till transitioned to Blank scene, then animate in communal content in
+                // edit mode
+                communalViewModel.currentScene.first { it == CommunalScenes.Blank }
+                communalViewModel.setEditModeState(EditModeState.SHOWING)
+            }
+        }
+    }
+
     private fun onOpenWidgetPicker() {
         lifecycleScope.launch {
             communalViewModel.onOpenWidgetPicker(
@@ -150,9 +168,11 @@ constructor(
 
     private fun onEditDone() {
         lifecycleScope.launch {
+            communalViewModel.cleanupEditModeState()
+
             communalViewModel.changeScene(
                 CommunalScenes.Communal,
-                CommunalTransitionKeys.SimpleFade
+                CommunalTransitionKeys.FromEditMode
             )
 
             // Wait for the current scene to be idle on communal.
@@ -192,6 +212,7 @@ constructor(
 
     override fun onDestroy() {
         super.onDestroy()
+        communalViewModel.cleanupEditModeState()
         communalViewModel.setEditModeOpen(false)
     }
 

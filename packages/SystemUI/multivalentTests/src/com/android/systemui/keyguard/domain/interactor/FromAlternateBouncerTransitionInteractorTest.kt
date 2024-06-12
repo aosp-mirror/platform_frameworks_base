@@ -39,6 +39,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -165,5 +166,38 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.ALTERNATE_BOUNCER,
                     to = KeyguardState.OCCLUDED
                 )
+        }
+
+    @Test
+    fun transitionToGone_whenOpeningGlanceableHubEditMode() =
+        testScope.runTest {
+            kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(true)
+            runCurrent()
+
+            // On Glanceable hub and edit mode activity is started
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.ALTERNATE_BOUNCER,
+                testScope
+            )
+            reset(transitionRepository)
+
+            kosmos.communalInteractor.setEditModeOpen(true)
+            runCurrent()
+
+            // Auth and alternate bouncer is hidden
+            kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(false)
+            advanceTimeBy(200) // advance past delay
+
+            // Then no transition should occur yet
+            assertThat(transitionRepository).noTransitionsStarted()
+
+            // When keyguard is going away
+            kosmos.fakeKeyguardRepository.setKeyguardGoingAway(true)
+            runCurrent()
+
+            // Then transition to GONE should occur
+            assertThat(transitionRepository)
+                .startedTransition(from = KeyguardState.ALTERNATE_BOUNCER, to = KeyguardState.GONE)
         }
 }
