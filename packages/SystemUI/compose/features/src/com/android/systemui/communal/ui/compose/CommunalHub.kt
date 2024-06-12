@@ -26,7 +26,6 @@ import android.widget.RemoteViews
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -46,6 +45,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -585,24 +585,23 @@ private fun Toolbar(
                 )
                 .onSizeChanged { setToolbarSize(it) },
     ) {
-        val spacerModifier = Modifier.width(ButtonDefaults.IconSpacing)
-
-        if (!removeEnabled) {
-            Button(
-                modifier = Modifier.align(Alignment.CenterStart),
-                onClick = onOpenWidgetPicker,
-                colors = filledButtonColors(),
-                contentPadding = Dimensions.ButtonPadding
-            ) {
-                Icon(Icons.Default.Add, stringResource(R.string.hub_mode_add_widget_button_text))
-                Spacer(spacerModifier)
-                Text(
-                    text = stringResource(R.string.hub_mode_add_widget_button_text),
-                )
-            }
+        ToolbarButton(
+            isPrimary = !removeEnabled,
+            modifier = Modifier.align(Alignment.CenterStart),
+            onClick = onOpenWidgetPicker,
+        ) {
+            Icon(Icons.Default.Add, stringResource(R.string.hub_mode_add_widget_button_text))
+            Text(
+                text = stringResource(R.string.hub_mode_add_widget_button_text),
+            )
         }
 
-        if (removeEnabled) {
+        AnimatedVisibility(
+            modifier = Modifier.align(Alignment.Center),
+            visible = removeEnabled,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             Button(
                 onClick = onRemoveClicked,
                 colors = filledButtonColors(),
@@ -610,33 +609,97 @@ private fun Toolbar(
                 modifier =
                     Modifier.graphicsLayer { alpha = removeButtonAlpha }
                         .onGloballyPositioned { setRemoveButtonCoordinates(it) }
-                        .align(Alignment.Center)
             ) {
-                RemoveButtonContent(spacerModifier)
+                Row(
+                    horizontalArrangement =
+                        Arrangement.spacedBy(
+                            ButtonDefaults.IconSpacing,
+                            Alignment.CenterHorizontally
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.Close, stringResource(R.string.button_to_remove_widget))
+                    Text(
+                        text = stringResource(R.string.button_to_remove_widget),
+                    )
+                }
             }
         }
 
-        if (!removeEnabled) {
-            Button(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                onClick = onEditDone,
-                colors = filledButtonColors(),
-                contentPadding = Dimensions.ButtonPadding
+        ToolbarButton(
+            isPrimary = !removeEnabled,
+            modifier = Modifier.align(Alignment.CenterEnd),
+            onClick = onEditDone,
+        ) {
+            Icon(
+                Icons.Default.Check,
+                stringResource(id = R.string.hub_mode_editing_exit_button_text)
+            )
+            Text(
+                text = stringResource(R.string.hub_mode_editing_exit_button_text),
+            )
+        }
+    }
+}
+
+/**
+ * Toolbar button that displays as a filled button if primary, and an outline button if secondary.
+ */
+@Composable
+private fun ToolbarButton(
+    isPrimary: Boolean = true,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit
+) {
+    val colors = LocalAndroidColorScheme.current
+    AnimatedVisibility(
+        visible = isPrimary,
+        modifier = modifier,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Button(
+            onClick = onClick,
+            colors = filledButtonColors(),
+            contentPadding = Dimensions.ButtonPadding,
+        ) {
+            Row(
+                horizontalArrangement =
+                    Arrangement.spacedBy(ButtonDefaults.IconSpacing, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    Icons.Default.Check,
-                    stringResource(id = R.string.hub_mode_editing_exit_button_text)
-                )
-                Spacer(spacerModifier)
-                Text(
-                    text = stringResource(R.string.hub_mode_editing_exit_button_text),
-                )
+                content()
+            }
+        }
+    }
+
+    AnimatedVisibility(
+        visible = !isPrimary,
+        modifier = modifier,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        OutlinedButton(
+            onClick = onClick,
+            colors =
+                ButtonDefaults.outlinedButtonColors(
+                    contentColor = colors.primary,
+                ),
+            border = BorderStroke(width = 2.0.dp, color = colors.primary),
+            contentPadding = Dimensions.ButtonPadding,
+        ) {
+            Row(
+                horizontalArrangement =
+                    Arrangement.spacedBy(ButtonDefaults.IconSpacing, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                content()
             }
         }
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun AnimatedVisibilityScope.ButtonToEditWidgets(
     onClick: () -> Unit,
@@ -736,15 +799,6 @@ private fun PopupOnDismissCtaTile(onHidePopup: () -> Unit) {
             )
         }
     }
-}
-
-@Composable
-private fun RemoveButtonContent(spacerModifier: Modifier) {
-    Icon(Icons.Default.Close, stringResource(R.string.button_to_remove_widget))
-    Spacer(spacerModifier)
-    Text(
-        text = stringResource(R.string.button_to_remove_widget),
-    )
 }
 
 @Composable
