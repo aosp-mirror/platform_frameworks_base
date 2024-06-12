@@ -528,10 +528,6 @@ final class InputMethodSettings {
         return imi;
     }
 
-    boolean isSubtypeSelected() {
-        return getSelectedInputMethodSubtypeHashCode() != NOT_A_SUBTYPE_ID;
-    }
-
     private int getSelectedInputMethodSubtypeHashCode() {
         return getInt(Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
                 NOT_A_SUBTYPE_ID);
