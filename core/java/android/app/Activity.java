@@ -9291,11 +9291,11 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "dispatchMultiWindowModeChanged " + this + ": " + isInMultiWindowMode
                         + " " + newConfig);
+        mIsInMultiWindowMode = isInMultiWindowMode;
         mFragments.dispatchMultiWindowModeChanged(isInMultiWindowMode, newConfig);
         if (mWindow != null) {
             mWindow.onMultiWindowModeChanged();
         }
-        mIsInMultiWindowMode = isInMultiWindowMode;
         onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
@@ -9304,11 +9304,11 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "dispatchPictureInPictureModeChanged " + this + ": " + isInPictureInPictureMode
                         + " " + newConfig);
+        mIsInPictureInPictureMode = isInPictureInPictureMode;
         mFragments.dispatchPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
         if (mWindow != null) {
             mWindow.onPictureInPictureModeChanged(isInPictureInPictureMode);
         }
-        mIsInPictureInPictureMode = isInPictureInPictureMode;
         onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
 
