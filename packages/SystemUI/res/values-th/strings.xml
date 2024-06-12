@@ -279,10 +279,12 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ยกเลิกการเชื่อมต่อ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"เปิดใช้งาน"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"เปิดอีกครั้งโดยอัตโนมัติในวันพรุ่งนี้"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"ฟีเจอร์ต่างๆ เช่น Quick Share และหาอุปกรณ์ของฉัน ใช้บลูทูธ"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"ฟีเจอร์ต่างๆ เช่น Quick Share และ \"หาอุปกรณ์ของฉัน\" ใช้บลูทูธ"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"บลูทูธจะเปิดพรุ่งนี้เช้า"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"การแชร์เสียง"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"กำลังแชร์เสียง"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"เสียง"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ชุดหูฟัง"</string>
@@ -366,10 +368,8 @@
     <string name="thermal" msgid="6758074791325414831">"ความร้อน"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"โหมดมือเดียว"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"เครื่องช่วยฟัง"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"ใช้งานอยู่"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"ยกเลิกการเชื่อมต่อแล้ว"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"เครื่องช่วยฟัง"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"จับคู่อุปกรณ์ใหม่"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"คลิกเพื่อจับคู่อุปกรณ์ใหม่"</string>
@@ -1324,8 +1324,7 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ค้นหาแป้นพิมพ์ลัด"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ไอคอนยุบ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ไอคอนขยาย"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"หรือ"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ไฟแบ็กไลต์ของแป้นพิมพ์"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"ระดับที่ %1$d จาก %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ระบบควบคุมอุปกรณ์สมาร์ทโฮม"</string>

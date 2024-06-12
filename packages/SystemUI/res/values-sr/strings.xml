@@ -281,8 +281,10 @@
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Аутоматски поново укључи сутра"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Функције као што су Quick Share и Пронађи мој уређај користе Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth ће се укључити сутра ујутру"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Дељење звука"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Дели се звук"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Слушалице"</string>
@@ -366,10 +368,8 @@
     <string name="thermal" msgid="6758074791325414831">"Термална камера"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим једном руком"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Слушни апарати"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Активно"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Веза је прекинута"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Слушни апарати"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Упари нови уређај"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Кликните да бисте упарили нов уређај"</string>
@@ -1324,8 +1324,7 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Пречице претраге"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за скупљање"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за проширивање"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Позадинско осветљење тастатуре"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. ниво од %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Контроле за дом"</string>

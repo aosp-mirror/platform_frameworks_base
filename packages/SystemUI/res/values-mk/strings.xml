@@ -281,8 +281,10 @@
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Автоматски вклучи повторно утре"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Функциите како „Брзо споделување“ и „Најди го мојот уред“ користат Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth ќе се вклучи утре наутро"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Споделување аудио"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Се споделува аудио"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Батерија: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Слушалки"</string>
@@ -301,7 +303,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Корисник"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Интернет"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Мрежите се достапни"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Достапни се мрежи"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Не се достапни мрежи"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Нема достапни Wi-Fi мрежи"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Се вклучува…"</string>
@@ -361,18 +363,13 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Кој дел од доживувањето на уредот беше засегнат?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Изберете тип проблем"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Снимање екран"</string>
-    <!-- no translation found for performance (6552785217174378320) -->
-    <skip />
-    <!-- no translation found for user_interface (3712869377953950887) -->
-    <skip />
-    <!-- no translation found for thermal (6758074791325414831) -->
-    <skip />
+    <string name="performance" msgid="6552785217174378320">"Изведба"</string>
+    <string name="user_interface" msgid="3712869377953950887">"Кориснички интерфејс"</string>
+    <string name="thermal" msgid="6758074791325414831">"Термално"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим со една рака"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Слушни апарати"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Активно"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Не е поврзано"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Слушни апарати"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Спари нов уред"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Кликнете за да спарите нов уред"</string>
@@ -689,8 +686,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматски"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибрации"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибрации и се појавува подолу во делот со разговори"</string>
-    <string name="notification_channel_summary_default" msgid="777294388712200605">"Може да ѕвони или вибрира во зависност од поставките за уредот"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Може да ѕвони или вибрира во зависност од поставките на уредот. Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Може да ѕвони или да вибрира во зависност од поставките за уредот"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Може да ѕвони или да вибрира во зависност од поставките за уредот. Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Дозволете системот да определи дали известувањево треба да испушти звук или да вибрира"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Статус:&lt;/b&gt; поставено на „Стандардно“"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус:&lt;/b&gt; намалено на „Тивко“"</string>
@@ -1210,7 +1207,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{Активна е # апликација}one{Активни се # апликација}other{Активни се # апликации}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Нови информации"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Активни апликации"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Овие апликации се активни и работат, дури и кога не ги користите. Ова ја подобрува нивната функционалност, но може да влијае и на траењето на батеријата."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Овие апликации се активни и работат дури и кога не ги користите. Ова ја подобрува нивната функционалност, но може и да влијае на траењето на батеријата."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Запри"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Запрено"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Готово"</string>
@@ -1275,8 +1272,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"затворен"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"отворен"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
-    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"Батерија на пенкало: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Поврзете го пенкалото со полнач"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Слаба батерија на пенкало"</string>
     <string name="video_camera" msgid="7654002575156149298">"Видеокамера"</string>
@@ -1328,8 +1324,7 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Кратенки за пребарување"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за собирање"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за проширување"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Осветлување на тастатура"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Ниво %1$d од %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Контроли за домот"</string>

@@ -281,8 +281,8 @@
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‏‏‏‎‎‎‎‎‏‏‏‎‎‏‎‏‏‎‏‏‏‎‎‎‏‏‎‏‏‎‏‏‏‎‏‎‏‎‏‏‏‎‎‎‎‏‎‎‏‏‎‏‏‎‎‏‎‎Automatically turn on again tomorrow‎‏‎‎‏‎"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‎‏‏‏‏‎‏‎‎‏‏‏‎‎‏‎‏‎‎‏‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‎‎‎‏‎‎‎‎‎‎‏‎‏‎‎‎‏‏‎‎‎Features like Quick Share and Find My Device use Bluetooth‎‏‎‎‏‎"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‎‏‎‎‎‎‏‏‏‎‎‎‏‎‏‏‎‎‏‎‏‏‎‎‏‏‏‏‎‏‏‎‏‏‏‏‏‎‎‏‏‎‎‎‎‎‏‎‏‎‎‏‎‏‏‏‎Bluetooth will turn on tomorrow morning‎‏‎‎‏‎"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‏‏‎‎‎‎‏‎‏‎‎‎‏‏‏‎‎‎‎‏‎‏‏‏‎‎‏‎‏‎‎‎‎‏‏‎‏‏‏‎‎‏‎‎‎‏‏‏‏‎‏‏‏‎‎Audio Sharing‎‏‎‎‏‎"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‏‎‏‏‎‎‏‏‎‎‎‏‏‎‎‏‎‎‎‏‏‎‏‎‎‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‎‎‎‏‎‎‎‏‏‏‎‎‎Sharing Audio‎‏‎‎‏‎"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‏‎‏‏‎‎‎‏‏‎‎‏‏‏‎‎‎‎‎‏‎‏‎‎‏‏‏‏‎‎‎‎‎‎‏‏‎‏‏‎‎‎‏‏‎‎‎‎‎‏‏‏‎‎Share audio‎‏‎‎‏‎"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‏‎‎‏‏‎‎‎‎‏‏‎‎‎‎‎‏‏‎‎‏‏‏‏‎‎‎‎‎‎‎‎‎‎‏‏‎‏‏‎‏‎‏‎‏‎‎‏‏‎‎‎‎‎‎‎‎Sharing audio‎‏‎‎‏‎"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‎‎‎‏‎‎‏‏‎‎‏‎‎‏‎‏‎‎‏‏‏‏‎‏‎‏‏‏‏‎‏‏‏‏‏‎‎‎‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‏‎‎‏‎‎‏‏‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>‎‏‎‎‏‏‏‎ battery‎‏‎‎‏‎"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‏‏‎‏‎‏‎‎‎‏‎‎‏‏‎‏‎‎‎‏‎‏‎‏‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‎‎‎‏‏‎‏‎‏‎‏‏‎‎‏‎Audio‎‏‎‎‏‎"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‏‎‏‏‏‎‏‎‏‎‎‎‎‏‎‎‏‎‎‏‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‏‏‏‎‎‏‏‎‏‏‎‎‏‎‏‎‎‎Headset‎‏‎‎‏‎"</string>
@@ -1322,8 +1322,7 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‎‏‎‏‎‏‏‎‎‏‏‏‏‎‎‏‏‏‎‎‏‎‏‎‏‎‎‎‏‎‎‎‎‏‎‏‎‏‎‎‎‏‎‎‏‏‎‏‏‎‎‏‎‏‏‎Search shortcuts‎‏‎‎‏‎"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‏‎‏‎‎‏‎‎‏‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‏‎‎‏‎‎‎‏‏‏‎‏‏‎‏‏‏‏‎‎‏‏‎‎‏‏‏‎‏‎‎Collapse icon‎‏‎‎‏‎"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎‎‎‏‏‎‎‏‎‏‏‎‎‎‎‏‎‎‎‎‏‎‏‏‎‎‎‏‎‎‎‏‎‏‏‏‎‎‏‎‎‎‏‎‏‏‏‎‏‏‎‏‏‏‎‎Expand icon‎‏‎‎‏‎"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‎‎‏‎‏‏‏‎‎‎‎‏‎‏‏‏‏‏‎‎‎‏‏‎‏‏‎‎‏‎‏‎‏‏‎‏‏‎‎‎‎‎‏‏‏‏‏‏‏‎‎‏‎‎‎or‎‏‎‎‏‎"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‎‏‎‏‏‎‎‏‏‎‎‏‎‏‏‏‎‎‎‏‏‎‏‎‎‎Keyboard backlight‎‏‎‎‏‎"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‎‏‎‎‎‎‎‎‎‏‏‏‏‏‏‏‎‎‏‏‏‎‏‎‏‏‎‎‎‏‎‏‎‎‎‏‎‏‏‎‏‎‎‏‎‏‎‏‎‎‎‎‏‎‎Level %1$d of %2$d‎‏‎‎‏‎"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‎‎‎‏‏‎‎‎‎‏‎‏‏‏‏‎‏‎‏‏‏‎‏‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‏‏‎‏‎‎‎‎‏‎Home Controls‎‏‎‎‏‎"</string>
