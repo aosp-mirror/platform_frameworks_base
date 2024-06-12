@@ -748,6 +748,10 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
         return AudioSystem.setMasterMute(mute);
     }
 
+    public void listenForSystemPropertyChange(String systemPropertyName, Runnable callback) {
+        AudioSystem.listenForSystemPropertyChange(systemPropertyName, callback);
+    }
+
     /**
      * Part of AudioService dump
      * @param pw

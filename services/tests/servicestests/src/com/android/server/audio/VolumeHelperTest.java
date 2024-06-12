@@ -160,7 +160,7 @@ public class VolumeHelperTest {
                 @NonNull PermissionEnforcer enforcer,
                 AudioServerPermissionProvider permissionProvider) {
             super(context, audioSystem, systemServer, settings, audioVolumeGroupHelper,
-                    audioPolicy, looper, appOps, enforcer, permissionProvider);
+                    audioPolicy, looper, appOps, enforcer, permissionProvider, r -> r.run());
         }
 
         public void setDeviceForStream(int stream, int device) {

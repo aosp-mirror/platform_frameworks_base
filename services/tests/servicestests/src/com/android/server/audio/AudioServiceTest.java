@@ -87,7 +87,7 @@ public class AudioServiceTest {
                 .thenReturn(AppOpsManager.MODE_ALLOWED);
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSpySystemServer,
                 mSettingsAdapter, mAudioVolumeGroupHelper, mMockAudioPolicy, null,
-                mMockAppOpsManager, mMockPermissionEnforcer, mMockPermissionProvider);
+                mMockAppOpsManager, mMockPermissionEnforcer, mMockPermissionProvider, r -> r.run());
     }
 
     /**
