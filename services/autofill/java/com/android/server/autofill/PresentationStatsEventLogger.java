@@ -675,7 +675,14 @@ public final class PresentationStatsEventLogger {
             } else if (autofillIds.contains(autofillId)) {
                 if (sVerbose) {
                     Slog.v(TAG, "Logging autofill for id:" + autofillId);
-                    event.mViewFillSuccessCount++;
+                }
+                event.mViewFillSuccessCount++;
+                autofillIds.remove(autofillId);
+                event.mAlreadyFilledAutofillIds.add(autofillId);
+            } else if (event.mAlreadyFilledAutofillIds.contains(autofillId)) {
+                if (sVerbose) {
+                    Slog.v(TAG, "Successfully filled autofillId:" + autofillId
+                            + " already processed ");
                 }
             } else {
                 Slog.w(TAG, "Successfully filled autofillId:" + autofillId
@@ -850,6 +857,7 @@ public final class PresentationStatsEventLogger {
         int mViewFilledButUnexpectedCount = 0;
 
         ArraySet<AutofillId> mAutofillIdsAttemptedAutofill;
+        ArraySet<AutofillId> mAlreadyFilledAutofillIds = new ArraySet<>();
         PresentationStatsEventInternal() {}
     }
 
