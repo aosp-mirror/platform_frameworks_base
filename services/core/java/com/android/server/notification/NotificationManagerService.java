@@ -224,6 +224,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
@@ -4532,6 +4533,34 @@ public class NotificationManagerService extends SystemService {
                 return ParceledListSlice.emptyList();
             }
             return mPreferencesHelper.getNotificationChannelsBypassingDnd(pkg, uid);
+        }
+
+        @Override
+        public List<String> getPackagesBypassingDnd(int userId,
+                                                    boolean includeConversationChannels) {
+            checkCallerIsSystem();
+
+            final ArraySet<String> packageNames = new ArraySet<>();
+
+            for (int user : mUm.getProfileIds(userId, false)) {
+                List<PackageInfo> pkgs = mPackageManagerClient.getInstalledPackagesAsUser(0, user);
+                for (PackageInfo pi : pkgs) {
+                    String pkg = pi.packageName;
+                    // If any NotificationChannel for this package is bypassing, the
+                    // package is considered bypassing.
+                    for (NotificationChannel channel : getNotificationChannelsBypassingDnd(pkg,
+                            pi.applicationInfo.uid).getList()) {
+                        // Skips non-demoted conversation channels.
+                        if (!includeConversationChannels
+                                && !TextUtils.isEmpty(channel.getConversationId())
+                                && !channel.isDemoted()) {
+                            continue;
+                        }
+                        packageNames.add(pkg);
+                    }
+                }
+            }
+            return new ArrayList<String>(packageNames);
         }
 
         @Override
