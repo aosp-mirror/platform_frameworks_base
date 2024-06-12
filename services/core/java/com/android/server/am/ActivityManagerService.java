@@ -1663,6 +1663,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int BIND_APPLICATION_TIMEOUT_HARD_MSG = 83;
     static final int SERVICE_FGS_TIMEOUT_MSG = 84;
     static final int SERVICE_FGS_CRASH_TIMEOUT_MSG = 85;
+    static final int FOLLOW_UP_OOMADJUSTER_UPDATE_MSG = 86;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -2035,6 +2036,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } break;
                 case SERVICE_FGS_CRASH_TIMEOUT_MSG: {
                     mServices.onFgsCrashTimeout((ServiceRecord) msg.obj);
+                } break;
+                case FOLLOW_UP_OOMADJUSTER_UPDATE_MSG: {
+                    handleFollowUpOomAdjusterUpdate();
                 } break;
             }
         }
@@ -5101,6 +5105,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mAnrHelper.appNotResponding(app, TimeoutRecord.forAppStart(anrMessage));
+    }
+
+    private void handleFollowUpOomAdjusterUpdate() {
+        // Remove any existing duplicate messages on the handler here while no lock is being held.
+        // If another follow up update is needed, it will be scheduled by OomAdjuster.
+        mHandler.removeMessages(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG);
+        synchronized (this) {
+            mOomAdjuster.updateOomAdjFollowUpTargetsLocked();
+        }
     }
 
     /**
