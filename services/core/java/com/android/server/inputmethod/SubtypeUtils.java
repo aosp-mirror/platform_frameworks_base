@@ -102,7 +102,7 @@ final class SubtypeUtils {
         return subtypes;
     }
 
-    static boolean isValidSubtypeId(InputMethodInfo imi, int subtypeHashCode) {
+    static boolean isValidSubtypeHashCode(InputMethodInfo imi, int subtypeHashCode) {
         return getSubtypeIdFromHashCode(imi, subtypeHashCode) != NOT_A_SUBTYPE_ID;
     }
 
@@ -312,7 +312,7 @@ final class SubtypeUtils {
         final int selectedSubtypeHashCode = SecureSettingsWrapper.getInt(
                 Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, NOT_A_SUBTYPE_ID, userId);
         if (selectedSubtypeHashCode != NOT_A_SUBTYPE_ID && currentSubtype != null
-                && isValidSubtypeId(imi, currentSubtype.hashCode())) {
+                && isValidSubtypeHashCode(imi, currentSubtype.hashCode())) {
             return currentSubtype;
         }
 
