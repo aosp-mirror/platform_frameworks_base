@@ -87,9 +87,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4
-import platform.test.runner.parameterized.Parameter
-import platform.test.runner.parameterized.Parameters
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -97,6 +94,8 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 private const val USER_ID = 4
 private const val REQUEST_ID = 4L
@@ -1401,7 +1400,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         allowCredentialFallback: Boolean = false,
         description: String? = null,
         contentView: PromptContentView? = null,
-        logoRes: Int = -1,
+        logoRes: Int = 0,
         logoBitmap: Bitmap? = null,
         logoDescription: String? = null,
         packageName: String = OP_PACKAGE_NAME,
@@ -1440,8 +1439,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             descriptionFromApp = description,
             contentViewFromApp = contentView,
             logoResFromApp = logoRes,
-            logoBitmapFromApp =
-                if (logoRes != -1) logoDrawableFromAppRes.toBitmap() else logoBitmap,
+            logoBitmapFromApp = if (logoRes != 0) logoDrawableFromAppRes.toBitmap() else logoBitmap,
             logoDescriptionFromApp = logoDescription,
             packageName = packageName,
         )
@@ -1627,7 +1625,7 @@ private fun PromptSelectorInteractor.initializePrompt(
     allowCredentialFallback: Boolean = false,
     descriptionFromApp: String? = null,
     contentViewFromApp: PromptContentView? = null,
-    logoResFromApp: Int = -1,
+    logoResFromApp: Int = 0,
     logoBitmapFromApp: Bitmap? = null,
     logoDescriptionFromApp: String? = null,
     packageName: String = OP_PACKAGE_NAME,
