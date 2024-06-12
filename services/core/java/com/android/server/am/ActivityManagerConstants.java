@@ -231,7 +231,7 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
     static final long DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS = 60 * 1000;
-    static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = true;
+    static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = false;
 
     static final int DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS = 3000;
 
