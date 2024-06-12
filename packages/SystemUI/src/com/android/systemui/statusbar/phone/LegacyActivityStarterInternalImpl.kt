@@ -228,6 +228,7 @@ constructor(
         associatedView: View?,
         animationController: ActivityTransitionAnimator.Controller?,
         showOverLockscreen: Boolean,
+        skipLockscreenChecks: Boolean,
         fillInIntent: Intent?,
         extraOptions: Bundle?,
     ) {
@@ -246,10 +247,10 @@ constructor(
         val actuallyShowOverLockscreen =
             showOverLockscreen &&
                 intent.isActivity &&
-                activityIntentHelper.wouldPendingShowOverLockscreen(
+                    (skipLockscreenChecks || activityIntentHelper.wouldPendingShowOverLockscreen(
                     intent,
                     lockScreenUserManager.currentUserId
-                )
+                    ))
 
         val animate =
             !willLaunchResolverActivity &&

@@ -1048,15 +1048,6 @@ flag {
   bug: "343505271"
 }
 
-flag {
-  name: "glanceable_hub_animate_timer_activity_starts"
-  namespace: "systemui"
-  description: "Properly animates activity starts from live timers on the glanceable hub"
-  bug: "345741071"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
 
 flag {
   name: "new_touchpad_gestures_tutorial"
