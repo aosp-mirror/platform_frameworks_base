@@ -100,7 +100,7 @@
   </string-array>
   <string-array name="orientation_labels">
     <item msgid="4061931020926489228">"প\'ৰ্ট্ৰেইট"</item>
-    <item msgid="3199660090246166812">"লেণ্ডস্কেইপ"</item>
+    <item msgid="3199660090246166812">"লেণ্ডস্কে’প"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ফাইলত লিখিব পৰা নহ\'ল"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"দুঃখিত, প্ৰিণ্টিঙৰ কাম নহ\'ল। পুনৰ চেষ্টা কৰক।"</string>
