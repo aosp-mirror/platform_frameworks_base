@@ -21,7 +21,7 @@ import androidx.compose.ui.util.fastCoerceAtMost
 import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.Scene
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransitionState
 
@@ -61,7 +61,7 @@ internal sealed interface PropertyTransformation<T> : Transformation {
     // to these internal classes.
     fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: Scene,
+        scene: SceneKey,
         element: Element,
         sceneState: Element.SceneState,
         transition: TransitionState.Transition,
