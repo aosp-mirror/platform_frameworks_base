@@ -421,6 +421,19 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void tune_withClosedTuner_fails() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector sel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        mTunerSessions[0].close();
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> mTunerSessions[0].tune(sel));
+
+        expect.withMessage("Exception for tuning on closed tuner").that(thrown).hasMessageThat()
+                .contains("Tuner is closed");
+    }
+
+    @Test
     public void step_withDirectionUp() throws Exception {
         long initFreq = AM_FM_FREQUENCY_LIST[1];
         ProgramSelector initialSel = AidlTestUtils.makeFmSelector(initFreq);
@@ -1149,6 +1162,20 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void onCurrentProgramInfoChanged_withLowerSdkVersion_doesNotInvokesCallback()
+            throws Exception {
+        doReturn(false).when(() -> CompatChanges.isChangeEnabled(
+                eq(ConversionUtils.RADIO_U_VERSION_REQUIRED), anyInt()));
+        openAidlClients(/* numClients= */ 1);
+
+        mHalTunerCallback.onCurrentProgramInfoChanged(
+                AidlTestUtils.programInfoToHalProgramInfo(TEST_DAB_INFO));
+
+        verify(mAidlTunerCallbackMocks[0], after(CALLBACK_TIMEOUT_MS).never())
+                .onCurrentProgramInfoChanged(any());
+    }
+
+    @Test
     public void onTuneFailed_forTunerCallback() throws Exception {
         int numSessions = 3;
         openAidlClients(numSessions);
@@ -1162,6 +1189,20 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
                     .onTuneFailed(RadioTuner.TUNER_RESULT_CANCELED, sel);
         }
+    }
+
+    @Test
+    public void onTuneFailed_withLowerSdkVersion_doesNotInvokesCallback()
+            throws Exception {
+        doReturn(false).when(() -> CompatChanges.isChangeEnabled(
+                eq(ConversionUtils.RADIO_U_VERSION_REQUIRED), anyInt()));
+        openAidlClients(/* numClients= */ 1);
+
+        mHalTunerCallback.onTuneFailed(Result.CANCELED,
+                ConversionUtils.programSelectorToHalProgramSelector(TEST_DAB_SELECTOR));
+
+        verify(mAidlTunerCallbackMocks[0], after(CALLBACK_TIMEOUT_MS).never())
+                .onTuneFailed(anyInt(), any());
     }
 
     @Test
@@ -1229,6 +1270,36 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
                     .onParametersUpdated(parametersExpected);
         }
+    }
+
+    @Test
+    public void openSession_withNonNullAntennaState() throws Exception {
+        boolean antennaConnected = false;
+        android.hardware.radio.ITunerCallback callback =
+                mock(android.hardware.radio.ITunerCallback.class);
+        openAidlClients(/* numClients= */ 1);
+        mHalTunerCallback.onAntennaStateChange(antennaConnected);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onAntennaState(antennaConnected);
+
+        mRadioModule.openSession(callback);
+
+        verify(callback, CALLBACK_TIMEOUT).onAntennaState(antennaConnected);
+    }
+
+    @Test
+    public void openSession_withNonNullCurrentProgramInfo() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector initialSel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        RadioManager.ProgramInfo tuneInfo = AidlTestUtils.makeProgramInfo(initialSel,
+                SIGNAL_QUALITY);
+        mTunerSessions[0].tune(initialSel);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(tuneInfo);
+        android.hardware.radio.ITunerCallback callback =
+                mock(android.hardware.radio.ITunerCallback.class);
+
+        mRadioModule.openSession(callback);
+
+        verify(callback, CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(tuneInfo);
     }
 
     private void openAidlClients(int numClients) throws Exception {
