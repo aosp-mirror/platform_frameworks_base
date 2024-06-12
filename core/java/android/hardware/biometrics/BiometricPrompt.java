@@ -780,10 +780,15 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         public void onDialogDismissed(int reason) {
             // Check the reason and invoke OnClickListener(s) if necessary
             if (reason == DISMISSED_REASON_NEGATIVE) {
-                mNegativeButtonInfo.executor.execute(() -> {
-                    mNegativeButtonInfo.listener.onClick(null, DialogInterface.BUTTON_NEGATIVE);
-                    mIsPromptShowing = false;
-                });
+                if (mNegativeButtonInfo != null) {
+                    mNegativeButtonInfo.executor.execute(() -> {
+                        mNegativeButtonInfo.listener.onClick(null, DialogInterface.BUTTON_NEGATIVE);
+                        mIsPromptShowing = false;
+                    });
+                } else {
+                    mAuthenticationCallback.onAuthenticationError(BIOMETRIC_ERROR_USER_CANCELED,
+                            null /* errString */);
+                }
             } else if (reason == DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS) {
                 if (mContentViewMoreOptionsButtonInfo != null) {
                     mContentViewMoreOptionsButtonInfo.executor.execute(() -> {
