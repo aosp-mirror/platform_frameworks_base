@@ -112,7 +112,7 @@ constructor(
                 keyguardTransitionInteractor.transitionState.map { step ->
                     val startingProgress = lastChangeStep.value
                     val progress = step.value
-                    if (step.to == AOD && progress >= startingProgress) {
+                    if (step.to == AOD && progress >= startingProgress && startingProgress < 1f) {
                         val adjustedProgress =
                             ((progress - startingProgress) / (1F - startingProgress)).coerceIn(
                                 0F,
