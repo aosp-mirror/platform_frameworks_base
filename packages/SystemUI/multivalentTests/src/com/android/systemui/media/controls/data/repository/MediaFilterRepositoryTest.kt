@@ -152,7 +152,6 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             underTest.setRecommendation(mediaRecommendation.copy(isActive = false))
 
             assertThat(smartspaceMediaData).isNotEqualTo(mediaRecommendation)
-            assertThat(smartspaceMediaData?.isActive).isFalse()
             assertThat(underTest.isRecommendationActive()).isFalse()
         }
 

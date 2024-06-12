@@ -218,7 +218,7 @@ constructor(
                         mediaFromRecPackageName = null
                         _currentMedia.value = sortedMap.values.toList()
                     }
-                } else if (sortedMap.size > sortedMedia.size && it.active) {
+                } else if (sortedMap.size > _currentMedia.value.size && it.active) {
                     _currentMedia.value = sortedMap.values.toList()
                 } else {
                     // When loading an update for an existing media control.
