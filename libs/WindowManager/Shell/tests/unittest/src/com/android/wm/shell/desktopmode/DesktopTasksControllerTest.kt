@@ -488,7 +488,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     setUpLandscapeDisplay()
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
   }
 
@@ -499,7 +499,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     setUpLandscapeDisplay()
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
   }
 
@@ -511,7 +511,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     setUpLandscapeDisplay()
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(RESIZABLE_PORTRAIT_BOUNDS)
   }
 
@@ -523,7 +523,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     setUpLandscapeDisplay()
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
   }
 
@@ -538,7 +538,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     setUpLandscapeDisplay()
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_PORTRAIT_BOUNDS)
   }
 
@@ -549,7 +549,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     setUpPortraitDisplay()
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
   }
 
@@ -563,7 +563,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     setUpPortraitDisplay()
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
   }
 
@@ -578,7 +578,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     setUpPortraitDisplay()
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(RESIZABLE_LANDSCAPE_BOUNDS)
   }
 
@@ -593,7 +593,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     setUpPortraitDisplay()
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
   }
 
@@ -609,7 +609,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     setUpPortraitDisplay()
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_LANDSCAPE_BOUNDS)
   }
 
@@ -619,7 +619,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
     tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FULLSCREEN
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
   }
 
@@ -629,7 +629,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
     tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FREEFORM
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_UNDEFINED)
   }
@@ -637,7 +637,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   fun moveToDesktop_nonExistentTask_doesNothing() {
     controller.moveToDesktop(999, transitionSource = UNKNOWN)
-    verifyWCTNotExecuted()
+    verifyEnterDesktopWCTNotExecuted()
   }
 
   @Test
@@ -649,7 +649,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     whenever(recentTasksController.findTaskInBackground(anyInt())).thenReturn(task)
 
     controller.moveToDesktop(task.taskId, transitionSource = UNKNOWN)
-    with(getLatestMoveToDesktopWct()) {
+    with(getLatestEnterDesktopWct()) {
       assertLaunchTaskAt(0, task.taskId, WINDOWING_MODE_FREEFORM)
     }
   }
@@ -664,7 +664,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         }
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    verifyWCTNotExecuted()
+    verifyEnterDesktopWCTNotExecuted()
   }
 
   @Test
@@ -673,7 +673,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
 
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
   }
 
@@ -687,7 +687,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveToDesktop(fullscreenTask, transitionSource = UNKNOWN)
 
-    with(getLatestMoveToDesktopWct()) {
+    with(getLatestEnterDesktopWct()) {
       // Operations should include home task, freeform task
       assertThat(hierarchyOps).hasSize(3)
       assertReorderSequence(homeTask, freeformTask, fullscreenTask)
@@ -705,7 +705,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveToDesktop(fullscreenTask, transitionSource = UNKNOWN)
 
-    with(getLatestMoveToDesktopWct()) {
+    with(getLatestEnterDesktopWct()) {
       // Operations should include wallpaper intent, freeform task, fullscreen task
       assertThat(hierarchyOps).hasSize(3)
       assertPendingIntentAt(index = 0, desktopWallpaperIntent)
@@ -729,7 +729,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveToDesktop(fullscreenTaskDefault, transitionSource = UNKNOWN)
 
-    with(getLatestMoveToDesktopWct()) {
+    with(getLatestEnterDesktopWct()) {
       // Check that hierarchy operations do not include tasks from second display
       assertThat(hierarchyOps.map { it.container }).doesNotContain(homeTaskSecond.token.asBinder())
       assertThat(hierarchyOps.map { it.container })
@@ -741,7 +741,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun moveToDesktop_splitTaskExitsSplit() {
     val task = setUpSplitScreenTask()
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
     verify(splitScreenController)
         .prepareExitSplitScreen(any(), anyInt(), eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE))
@@ -751,7 +751,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun moveToDesktop_fullscreenTaskDoesNotExitSplit() {
     val task = setUpFullscreenTask()
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
     verify(splitScreenController, never())
         .prepareExitSplitScreen(any(), anyInt(), eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE))
@@ -766,7 +766,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveToDesktop(newTask, transitionSource = UNKNOWN)
 
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(wct.hierarchyOps.size).isEqualTo(taskLimit + 1) // visible tasks + home
     wct.assertReorderAt(0, homeTask)
     for (i in 1..<taskLimit) { // Skipping freeformTasks[0]
@@ -800,7 +800,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   fun moveToFullscreen_nonExistentTask_doesNothing() {
     controller.moveToFullscreen(999, transitionSource = UNKNOWN)
-    verifyWCTNotExecuted()
+    verifyExitDesktopWCTNotExecuted()
   }
 
   @Test
@@ -1247,7 +1247,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveFocusedTaskToDesktop(DEFAULT_DISPLAY, transitionSource = UNKNOWN)
 
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task1.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_FREEFORM)
   }
@@ -1268,7 +1268,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveFocusedTaskToDesktop(DEFAULT_DISPLAY, transitionSource = UNKNOWN)
 
-    val wct = getLatestMoveToDesktopWct()
+    val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task4.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_FREEFORM)
     verify(splitScreenController)
@@ -1699,7 +1699,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     return arg.value
   }
 
-  private fun getLatestMoveToDesktopWct(): WindowContainerTransaction {
+  private fun getLatestEnterDesktopWct(): WindowContainerTransaction {
     val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
     if (ENABLE_SHELL_TRANSITIONS) {
       verify(enterDesktopTransitionHandler).moveToDesktop(arg.capture(), any())
@@ -1736,6 +1736,22 @@ class DesktopTasksControllerTest : ShellTestCase() {
   private fun verifyWCTNotExecuted() {
     if (ENABLE_SHELL_TRANSITIONS) {
       verify(transitions, never()).startTransition(anyInt(), any(), isNull())
+    } else {
+      verify(shellTaskOrganizer, never()).applyTransaction(any())
+    }
+  }
+
+  private fun verifyExitDesktopWCTNotExecuted() {
+    if (ENABLE_SHELL_TRANSITIONS) {
+      verify(exitDesktopTransitionHandler, never()).startTransition(any(), any(), any(), any())
+    } else {
+      verify(shellTaskOrganizer, never()).applyTransaction(any())
+    }
+  }
+
+  private fun verifyEnterDesktopWCTNotExecuted() {
+    if (ENABLE_SHELL_TRANSITIONS) {
+      verify(enterDesktopTransitionHandler, never()).moveToDesktop(any(), any())
     } else {
       verify(shellTaskOrganizer, never()).applyTransaction(any())
     }
