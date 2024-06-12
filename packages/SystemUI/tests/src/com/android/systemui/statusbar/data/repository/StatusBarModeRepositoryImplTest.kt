@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.phone.LetterboxAppearance
 import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
+import com.android.systemui.statusbar.phone.ongoingcall.data.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -390,7 +391,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            ongoingCallRepository.setHasOngoingCall(true)
+            ongoingCallRepository.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 34))
             onSystemBarAttributesChanged(
                 requestedVisibleTypes = WindowInsets.Type.navigationBars(),
             )
@@ -403,7 +404,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            ongoingCallRepository.setHasOngoingCall(true)
+            ongoingCallRepository.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 789))
             onSystemBarAttributesChanged(
                 requestedVisibleTypes = WindowInsets.Type.statusBars(),
                 appearance = APPEARANCE_OPAQUE_STATUS_BARS,
@@ -417,7 +418,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.statusBarAppearance)
 
-            ongoingCallRepository.setHasOngoingCall(false)
+            ongoingCallRepository.setOngoingCallState(OngoingCallModel.NoCall)
             onSystemBarAttributesChanged(
                 requestedVisibleTypes = WindowInsets.Type.navigationBars(),
                 appearance = APPEARANCE_OPAQUE_STATUS_BARS,

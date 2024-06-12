@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.phone.BoundsPair
 import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
+import com.android.systemui.statusbar.phone.ongoingcall.data.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -224,8 +225,8 @@ constructor(
                 modifiedStatusBarAttributes,
                 isTransientShown,
                 isInFullscreenMode,
-                ongoingCallRepository.hasOngoingCall,
-            ) { modifiedAttributes, isTransientShown, isInFullscreenMode, hasOngoingCall ->
+                ongoingCallRepository.ongoingCallState,
+            ) { modifiedAttributes, isTransientShown, isInFullscreenMode, ongoingCallState ->
                 if (modifiedAttributes == null) {
                     null
                 } else {
@@ -234,7 +235,7 @@ constructor(
                             modifiedAttributes.appearance,
                             isTransientShown,
                             isInFullscreenMode,
-                            hasOngoingCall,
+                            hasOngoingCall = ongoingCallState is OngoingCallModel.InCall,
                         )
                     StatusBarAppearance(
                         statusBarMode,
