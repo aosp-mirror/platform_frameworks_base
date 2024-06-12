@@ -368,6 +368,7 @@ filegroup {
         "tests/src/**/systemui/shared/system/RemoteTransitionTest.java",
         "tests/src/**/systemui/navigationbar/NavigationBarControllerImplTest.java",
         "tests/src/**/systemui/bluetooth/qsdialog/AudioSharingInteractorTest.kt",
+        "tests/src/**/systemui/bluetooth/qsdialog/DeviceItemActionInteractorTest.kt",
         "tests/src/**/systemui/notetask/quickaffordance/NoteTaskQuickAffordanceConfigTest.kt",
         "tests/src/**/systemui/notetask/LaunchNotesRoleSettingsTrampolineActivityTest.kt",
         "tests/src/**/systemui/notetask/shortcut/LaunchNoteTaskActivityTest.kt",
