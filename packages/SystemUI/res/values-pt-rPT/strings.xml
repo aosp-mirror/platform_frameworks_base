@@ -804,7 +804,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps em execução em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Toque para obter detalhes acerca da utilização da bateria e dos dados"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Desativar os dados móveis?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Não terá acesso a dados ou à Internet através do operador <xliff:g id="CARRIER">%s</xliff:g>. A Internet estará disponível apenas por Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Não vai ter acesso aos dados nem à Internet através do operador <xliff:g id="CARRIER">%s</xliff:g>. A Internet vai estar disponível só por Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"o seu operador"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Mudar de novo para <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Os dados móveis não vão mudar automaticamente com base na disponibilidade"</string>
