@@ -29,6 +29,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -188,7 +189,10 @@ constructor(
                 callNotificationInfo
                     // This shouldn't happen, but protect against it in case
                     ?: return OngoingCallModel.NoCall
-            return OngoingCallModel.InCall(currentInfo.callStartTime)
+            return OngoingCallModel.InCall(
+                startTimeMs = currentInfo.callStartTime,
+                intent = currentInfo.intent,
+            )
         } else {
             return OngoingCallModel.NoCall
         }
@@ -213,18 +217,29 @@ constructor(
         val timeView = currentChipView?.getTimeView()
 
         if (currentChipView != null && timeView != null) {
-            if (currentCallNotificationInfo.hasValidStartTime()) {
-                timeView.setShouldHideText(false)
-                timeView.base =
-                    currentCallNotificationInfo.callStartTime - systemClock.currentTimeMillis() +
-                        systemClock.elapsedRealtime()
-                timeView.start()
-            } else {
-                timeView.setShouldHideText(true)
-                timeView.stop()
+            if (!Flags.statusBarScreenSharingChips()) {
+                // If the new status bar screen sharing chips are enabled, then the display logic
+                // for *all* status bar chips (both the call chip and the screen sharing chips) are
+                // handled by CollapsedStatusBarViewBinder, *not* this class. We need to disable
+                // this class from making any display changes because the new chips use the same
+                // view as the old call chip.
+                // TODO(b/332662551): We should move this whole controller class to recommended
+                // architecture so that we don't need to awkwardly disable only some parts of this
+                // class.
+                if (currentCallNotificationInfo.hasValidStartTime()) {
+                    timeView.setShouldHideText(false)
+                    timeView.base =
+                        currentCallNotificationInfo.callStartTime -
+                            systemClock.currentTimeMillis() + systemClock.elapsedRealtime()
+                    timeView.start()
+                } else {
+                    timeView.setShouldHideText(true)
+                    timeView.stop()
+                }
+                updateChipClickListener()
             }
-            updateChipClickListener()
 
+            // But, this class still needs to do the non-display logic regardless of the flag.
             uidObserver.registerWithUid(currentCallNotificationInfo.uid)
             if (!currentCallNotificationInfo.statusBarSwipedAway) {
                 statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(true)
@@ -247,6 +262,10 @@ constructor(
     }
 
     private fun updateChipClickListener() {
+        if (Flags.statusBarScreenSharingChips()) {
+            return
+        }
+
         if (callNotificationInfo == null) {
             return
         }
@@ -289,7 +308,9 @@ constructor(
 
     private fun removeChip() {
         callNotificationInfo = null
-        tearDownChipView()
+        if (!Flags.statusBarScreenSharingChips()) {
+            tearDownChipView()
+        }
         statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(false)
         swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
         sendStateChangeEvent()

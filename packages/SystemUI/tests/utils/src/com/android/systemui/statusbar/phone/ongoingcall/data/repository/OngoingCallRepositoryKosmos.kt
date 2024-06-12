@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.ui.viewmodel
+package com.android.systemui.statusbar.phone.ongoingcall.data.repository
 
-import com.android.systemui.statusbar.chips.call.domain.interactor.CallChipInteractor
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.android.systemui.kosmos.Kosmos
 
-class FakeCallChipInteractor : CallChipInteractor() {
-    override val chip: MutableStateFlow<OngoingActivityChipModel> =
-        MutableStateFlow(OngoingActivityChipModel.Hidden)
-}
+val Kosmos.ongoingCallRepository: OngoingCallRepository by
+    Kosmos.Fixture { OngoingCallRepository() }

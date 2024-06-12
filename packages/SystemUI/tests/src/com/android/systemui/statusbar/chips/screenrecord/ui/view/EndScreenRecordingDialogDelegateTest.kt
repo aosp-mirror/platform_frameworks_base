@@ -23,7 +23,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
-import com.android.systemui.statusbar.chips.ui.viewmodel.screenRecordChipInteractor
+import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.screenRecordChipInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.google.common.truth.Truth.assertThat

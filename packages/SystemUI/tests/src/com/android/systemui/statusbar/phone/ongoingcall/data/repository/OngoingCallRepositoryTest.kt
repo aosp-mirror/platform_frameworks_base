@@ -28,7 +28,7 @@ class OngoingCallRepositoryTest : SysuiTestCase() {
 
     @Test
     fun hasOngoingCall_matchesSet() {
-        val inCallModel = OngoingCallModel.InCall(startTimeMs = 654)
+        val inCallModel = OngoingCallModel.InCall(startTimeMs = 654, intent = null)
         underTest.setOngoingCallState(inCallModel)
 
         assertThat(underTest.ongoingCallState.value).isEqualTo(inCallModel)

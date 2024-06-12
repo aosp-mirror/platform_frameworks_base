@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone.ongoingcall.data.model
 
+import android.app.PendingIntent
+
 /** Represents the state of any ongoing calls. */
 sealed interface OngoingCallModel {
     /** There is no ongoing call. */
@@ -28,6 +30,7 @@ sealed interface OngoingCallModel {
      *   `when` field. Importantly, this time is relative to
      *   [com.android.systemui.util.time.SystemClock.currentTimeMillis], **not**
      *   [com.android.systemui.util.time.SystemClock.elapsedRealtime].
+     * @property intent the intent associated with the call notification.
      */
-    data class InCall(val startTimeMs: Long) : OngoingCallModel
+    data class InCall(val startTimeMs: Long, val intent: PendingIntent?) : OngoingCallModel
 }
