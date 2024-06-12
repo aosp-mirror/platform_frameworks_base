@@ -619,7 +619,18 @@ class GnssNetworkConnectivityHandler {
                 ServiceState state = telephonyManager.getServiceState();
                 if (state != null && state.isUsingNonTerrestrialNetwork()) {
                     networkRequestBuilder.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
-                    networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_SATELLITE);
+                    try {
+                        networkRequestBuilder.addTransportType(NetworkCapabilities
+                                .TRANSPORT_SATELLITE);
+                        networkRequestBuilder.removeCapability(NetworkCapabilities
+                                .NET_CAPABILITY_NOT_BANDWIDTH_CONSTRAINED);
+                    } catch (IllegalArgumentException ignored) {
+                        // In case TRANSPORT_SATELLITE or NET_CAPABILITY_NOT_BANDWIDTH_CONSTRAINED
+                        // are not recognized, meaning an old connectivity module runs on new
+                        // android in which case no network with such capabilities will be brought
+                        // up, so it's safe to ignore the exception.
+                        // TODO: Can remove the try-catch in next quarter release.
+                    }
                 }
             }
         }
