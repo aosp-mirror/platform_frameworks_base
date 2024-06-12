@@ -50,6 +50,7 @@ import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.notification.NotificationUtils.interpolate
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
@@ -77,7 +78,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import kotlinx.coroutines.flow.transform
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -327,28 +328,35 @@ constructor(
      * This uses legacyShadeExpansion to process swipe up events. In the future, the touch input
      * signal should be sent directly to transitions.
      */
-    val dismissAlpha: Flow<Float?> =
+    val dismissAlpha: Flow<Float> =
         shadeRepository.legacyShadeExpansion
-            .filter { it < 1f }
             .sampleCombine(
                 statusBarState,
                 keyguardTransitionInteractor.currentKeyguardState,
+                keyguardTransitionInteractor.transitionState,
                 isKeyguardDismissible,
             )
-            .map {
-                (legacyShadeExpansion, statusBarState, currentKeyguardState, isKeyguardDismissible)
-                ->
+            .filter { (_, _, _, step, _) -> !step.transitionState.isTransitioning() }
+            .transform {
+                (
+                    legacyShadeExpansion,
+                    statusBarState,
+                    currentKeyguardState,
+                    step,
+                    isKeyguardDismissible) ->
                 if (
                     statusBarState == StatusBarState.KEYGUARD &&
                         isKeyguardDismissible &&
-                        currentKeyguardState == LOCKSCREEN
+                        currentKeyguardState == LOCKSCREEN &&
+                        legacyShadeExpansion != 1f
                 ) {
-                    MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion)
-                } else {
-                    null
+                    emit(MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion))
+                } else if (legacyShadeExpansion == 0f || legacyShadeExpansion == 1f) {
+                    // Resets alpha state
+                    emit(1f)
                 }
             }
-            .onStart { emit(null) }
+            .onStart { emit(1f) }
             .distinctUntilChanged()
 
     val keyguardTranslationY: Flow<Float> =
