@@ -80,6 +80,7 @@ import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
 import com.android.systemui.keyguard.ui.binder.WindowManagerLockscreenVisibilityViewBinder;
@@ -118,6 +119,7 @@ public class KeyguardService extends Service {
     private final ShellTransitions mShellTransitions;
     private final DisplayTracker mDisplayTracker;
     private final PowerInteractor mPowerInteractor;
+    private final KeyguardInteractor mKeyguardInteractor;
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
     private final Executor mMainExecutor;
 
@@ -338,6 +340,7 @@ public class KeyguardService extends Service {
             WindowManagerOcclusionManager windowManagerOcclusionManager,
             Lazy<SceneInteractor> sceneInteractorLazy,
             @Main Executor mainExecutor,
+            KeyguardInteractor keyguardInteractor,
             KeyguardEnabledInteractor keyguardEnabledInteractor) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
@@ -347,6 +350,7 @@ public class KeyguardService extends Service {
         mDisplayTracker = displayTracker;
         mFlags = featureFlags;
         mPowerInteractor = powerInteractor;
+        mKeyguardInteractor = keyguardInteractor;
         mSceneInteractorLazy = sceneInteractorLazy;
         mMainExecutor = mainExecutor;
 
@@ -474,6 +478,7 @@ public class KeyguardService extends Service {
         public void onDreamingStarted() {
             trace("onDreamingStarted");
             checkPermission();
+            mKeyguardInteractor.setDreaming(true);
             mKeyguardViewMediator.onDreamingStarted();
         }
 
@@ -481,6 +486,7 @@ public class KeyguardService extends Service {
         public void onDreamingStopped() {
             trace("onDreamingStopped");
             checkPermission();
+            mKeyguardInteractor.setDreaming(false);
             mKeyguardViewMediator.onDreamingStopped();
         }
 

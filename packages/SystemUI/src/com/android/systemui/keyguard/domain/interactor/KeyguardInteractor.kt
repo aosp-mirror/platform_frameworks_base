@@ -482,6 +482,10 @@ constructor(
         repository.topClippingBounds.value = top
     }
 
+    fun setDreaming(isDreaming: Boolean) {
+        repository.setDreaming(isDreaming)
+    }
+
     /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */
     fun showKeyguard() {
         fromGoneTransitionInteractor.get().showKeyguard()
