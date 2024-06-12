@@ -484,7 +484,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun moveToDesktop_landscapeDevice_resizable_undefinedOrientation_defaultLandscapeBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val task = setUpFullscreenTask()
     setUpLandscapeDisplay()
 
@@ -496,7 +495,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun moveToDesktop_landscapeDevice_resizable_landscapeOrientation_defaultLandscapeBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val task = setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_LANDSCAPE)
     setUpLandscapeDisplay()
 
@@ -508,7 +506,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun moveToDesktop_landscapeDevice_resizable_portraitOrientation_resizablePortraitBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val task =
         setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_PORTRAIT, shouldLetterbox = true)
     setUpLandscapeDisplay()
@@ -521,7 +518,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun moveToDesktop_landscapeDevice_unResizable_landscapeOrientation_defaultLandscapeBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val task =
         setUpFullscreenTask(isResizable = false, screenOrientation = SCREEN_ORIENTATION_LANDSCAPE)
     setUpLandscapeDisplay()
@@ -534,7 +530,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun moveToDesktop_landscapeDevice_unResizable_portraitOrientation_unResizablePortraitBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val task =
         setUpFullscreenTask(
             isResizable = false,
@@ -550,7 +545,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun moveToDesktop_portraitDevice_resizable_undefinedOrientation_defaultPortraitBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val task = setUpFullscreenTask(deviceOrientation = ORIENTATION_PORTRAIT)
     setUpPortraitDisplay()
 
@@ -562,7 +556,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun moveToDesktop_portraitDevice_resizable_portraitOrientation_defaultPortraitBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val task =
         setUpFullscreenTask(
             deviceOrientation = ORIENTATION_PORTRAIT,
@@ -577,7 +570,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun moveToDesktop_portraitDevice_resizable_landscapeOrientation_resizableLandscapeBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val task =
         setUpFullscreenTask(
             deviceOrientation = ORIENTATION_PORTRAIT,
@@ -593,7 +585,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun moveToDesktop_portraitDevice_unResizable_portraitOrientation_defaultPortraitBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val task =
         setUpFullscreenTask(
             isResizable = false,
@@ -609,7 +600,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun moveToDesktop_portraitDevice_unResizable_landscapeOrientation_unResizableLandscapeBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val task =
         setUpFullscreenTask(
             isResizable = false,
@@ -675,33 +665,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveToDesktop(task, transitionSource = UNKNOWN)
     verifyWCTNotExecuted()
-  }
-
-  @Test
-  fun moveToDesktop_deviceNotSupported_doesNothing() {
-    val task = setUpFullscreenTask()
-
-    // Simulate non compatible device
-    doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-    verifyWCTNotExecuted()
-  }
-
-  @Test
-  fun moveToDesktop_deviceNotSupported_deviceRestrictionsOverridden_taskIsMovedToDesktop() {
-    val task = setUpFullscreenTask()
-
-    // Simulate non compatible device
-    doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
-
-    // Simulate enforce device restrictions system property overridden to false
-    whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(false)
-
-    controller.moveToDesktop(task, transitionSource = UNKNOWN)
-
-    val wct = getLatestMoveToDesktopWct()
-    assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
   }
 
   @Test
@@ -1332,7 +1295,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_landscapeDevice_resizable_undefinedOrientation_defaultLandscapeBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
     whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
@@ -1349,7 +1311,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_landscapeDevice_resizable_landscapeOrientation_defaultLandscapeBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
     whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
@@ -1366,7 +1327,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_landscapeDevice_resizable_portraitOrientation_resizablePortraitBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
     whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
@@ -1384,7 +1344,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_landscapeDevice_unResizable_landscapeOrientation_defaultLandscapeBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
     whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
@@ -1402,7 +1361,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_landscapeDevice_unResizable_portraitOrientation_unResizablePortraitBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
     whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
@@ -1423,7 +1381,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_portraitDevice_resizable_undefinedOrientation_defaultPortraitBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
     whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
@@ -1440,7 +1397,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_portraitDevice_resizable_portraitOrientation_defaultPortraitBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
     whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
@@ -1460,7 +1416,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_portraitDevice_resizable_landscapeOrientation_resizableLandscapeBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
     whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
@@ -1481,7 +1436,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_portraitDevice_unResizable_portraitOrientation_defaultPortraitBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
     whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
@@ -1502,7 +1456,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_portraitDevice_unResizable_landscapeOrientation_unResizableLandscapeBounds() {
-    doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
     whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
@@ -1685,7 +1638,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
             Rect(0, 0, DISPLAY_DIMENSION_SHORT, DISPLAY_DIMENSION_LONG)
       }
     }
-    whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
     whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
     runningTasks.add(task)
     return task
@@ -1703,7 +1655,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   private fun setUpSplitScreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
     val task = createSplitScreenTask(displayId)
-    whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
     whenever(splitScreenController.isTaskInSplitScreen(task.taskId)).thenReturn(true)
     whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
     runningTasks.add(task)
