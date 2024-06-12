@@ -17,10 +17,9 @@ package android.animation
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.view.animation.LinearInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.test.filters.SmallTest
-import com.android.app.animation.Interpolators
-import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -29,7 +28,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 @RunWithLooper
-class AnimatorTestRulePrecisionTest : SysuiTestCase() {
+class AnimatorTestRulePrecisionTest {
 
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
@@ -43,7 +42,7 @@ class AnimatorTestRulePrecisionTest : SysuiTestCase() {
         crossinline onEndAction: (animator: Animator) -> Unit,
     ) {
         ObjectAnimator.ofFloat(this, propertyName, 0f, 1f).also {
-            it.interpolator = Interpolators.LINEAR
+            it.interpolator = LINEAR_INTERPOLATOR
             it.duration = duration
             it.startDelay = startDelay
             it.doOnEnd(onEndAction)
@@ -189,5 +188,9 @@ class AnimatorTestRulePrecisionTest : SysuiTestCase() {
         assertThat(ended1).isTrue()
         assertThat(ended2).isTrue()
         assertThat(AnimationHandler.getAnimationCount()).isEqualTo(0)
+    }
+
+    private companion object {
+        private val LINEAR_INTERPOLATOR = LinearInterpolator()
     }
 }
