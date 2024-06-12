@@ -531,8 +531,26 @@ public final class LocalFloatingToolbarPopup implements FloatingToolbarPopup {
         int rootViewTopOnWindow = mTmpCoords[1];
         int windowLeftOnScreen = rootViewLeftOnScreen - rootViewLeftOnWindow;
         int windowTopOnScreen = rootViewTopOnScreen - rootViewTopOnWindow;
-        mCoordsOnWindow.set(
-                Math.max(0, x - windowLeftOnScreen), Math.max(0, y - windowTopOnScreen));
+        // In some cases, app can have specific Window for Android UI components such as EditText.
+        // In this case, Window bounds != App bounds. Hence, instead of ensuring non-negative
+        // PopupWindow coords, app bounds should be used to limit the coords. For instance,
+        //  ____  <- |
+        // |   |     |W1 & App bounds
+        // |___|    |
+        // |W2 |    | W2 has smaller bounds and contain EditText where PopupWindow will be opened.
+        // ----  <-|
+        // Here, we'll open PopupWindow upwards, but as PopupWindow is anchored based on W2, it
+        // will have negative Y coords. This negative Y is safe to use because it's still within app
+        // bounds. However, if it gets out of app bounds, we should clamp it to 0.
+        Rect appBounds = mContext
+                .getResources().getConfiguration().windowConfiguration.getAppBounds();
+        mCoordsOnWindow.set(x - windowLeftOnScreen, y - windowTopOnScreen);
+        if (rootViewLeftOnScreen + mCoordsOnWindow.x < appBounds.left) {
+            mCoordsOnWindow.x = 0;
+        }
+        if (rootViewTopOnScreen + mCoordsOnWindow.y < appBounds.top) {
+            mCoordsOnWindow.y = 0;
+        }
     }
 
     /**
