@@ -1126,26 +1126,31 @@ public class OomAdjuster {
         final int numLru = lruList.size();
         if (mConstants.USE_TIERED_CACHED_ADJ) {
             final long now = mInjector.getUptimeMillis();
+            int uiTargetAdj = 10;
             for (int i = numLru - 1; i >= 0; i--) {
                 ProcessRecord app = lruList.get(i);
                 final ProcessStateRecord state = app.mState;
                 final ProcessCachedOptimizerRecord opt = app.mOptRecord;
-                if (!app.isKilledByAm() && app.getThread() != null && state.getCurAdj()
-                        >= UNKNOWN_ADJ) {
+                if (!app.isKilledByAm() && app.getThread() != null
+                        && (state.getCurAdj() >= UNKNOWN_ADJ
+                            || (state.hasShownUi() && state.getCurAdj() >= CACHED_APP_MIN_ADJ))) {
                     final ProcessServiceRecord psr = app.mServices;
                     int targetAdj = CACHED_APP_MIN_ADJ;
 
                     if (opt != null && opt.isFreezeExempt()) {
                         // BIND_WAIVE_PRIORITY and the like get oom_adj 900
                         targetAdj += 0;
+                    } else if (state.hasShownUi() && uiTargetAdj < 15) {
+                        // The most recent 5 apps that have shown UI get 910-914
+                        targetAdj += uiTargetAdj++;
                     } else if ((state.getSetAdj() >= CACHED_APP_MIN_ADJ)
                             && (state.getLastStateTime()
                                     + mConstants.TIERED_CACHED_ADJ_DECAY_TIME) < now) {
                         // Older cached apps get 950
                         targetAdj += 50;
                     } else {
-                        // Newer cached apps get 910
-                        targetAdj += 10;
+                        // Newer cached apps get 920
+                        targetAdj += 20;
                     }
                     state.setCurRawAdj(targetAdj);
                     state.setCurAdj(psr.modifyRawOomAdj(targetAdj));
