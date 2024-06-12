@@ -2407,8 +2407,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ପ୍ରାଇଭେଟ ସ୍ପେସ"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"କ୍ଲୋନ"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"କମ୍ୟୁନାଲ"</string>
-    <!-- no translation found for private_space_biometric_prompt_title (5777592909271728154) -->
-    <skip />
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"ପ୍ରାଇଭେଟ ସ୍ପେସ"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"ସମ୍ୱେଦନଶୀଳ ବିଜ୍ଞପ୍ତି ବିଷୟବସ୍ତୁକୁ ଲୁଚାଯାଇଛି"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ସୁରକ୍ଷା ପାଇଁ ସ୍କ୍ରିନ ସେୟାରରୁ ଆପ ବିଷୟବସ୍ତୁକୁ ଲୁଚାଯାଇଛି"</string>
