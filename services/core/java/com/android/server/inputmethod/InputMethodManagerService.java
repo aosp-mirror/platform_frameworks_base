@@ -486,9 +486,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     @NonNull
-    InputMethodBindingController getInputMethodBindingController(@UserIdInt int userId) {
-        return mUserDataRepository.getOrCreate(userId).mBindingController;
+    UserDataRepository.UserData getUserData(@UserIdInt int userId) {
+        return mUserDataRepository.getOrCreate(userId);
     }
+
+    @GuardedBy("ImfLock.class")
+    @NonNull
+    InputMethodBindingController getInputMethodBindingController(@UserIdInt int userId) {
+        return getUserData(userId).mBindingController;
+    }
+
 
     /**
      * Id obtained with {@link InputMethodInfo#getId()} for the currently selected input method.
@@ -1168,7 +1175,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final int userId = user.getUserIdentifier();
             SecureSettingsWrapper.onUserStarting(userId);
             synchronized (ImfLock.class) {
-                mService.mUserDataRepository.getOrCreate(userId);
+                mService.getUserData(userId);
                 if (mService.mExperimentalConcurrentMultiUserModeEnabled) {
                     if (mService.mCurrentUserId != userId && mService.mSystemReady) {
                         mService.experimentalInitializeVisibleBackgroundUserLocked(userId);
@@ -1290,7 +1297,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     bindingControllerForTesting != null ? bindingControllerForTesting
                             : bindingControllerFactory);
             for (int id : mUserManagerInternal.getUserIds()) {
-                mUserDataRepository.getOrCreate(id);
+                getUserData(id);
             }
 
             final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
@@ -2489,8 +2496,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     void resetCurrentMethodAndClientLocked(@UnbindReason int unbindClientReason) {
-        final var bindingController =
-                mUserDataRepository.getOrCreate(mCurrentUserId).mBindingController;
+        final var bindingController = getInputMethodBindingController(mCurrentUserId);
         bindingController.setSelectedMethodId(null);
 
         // Callback before clean-up binding states.
