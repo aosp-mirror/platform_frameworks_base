@@ -25,6 +25,7 @@ import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_LOCATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED;
 import static android.view.flags.Flags.sensitiveContentPrematureProtectionRemovedFix;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsSource.ID_IME;
@@ -269,6 +270,7 @@ import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneFallbackEventHandler;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.BaseSurfaceHolder;
@@ -1563,6 +1565,9 @@ public final class ViewRootImpl implements ViewParent,
                     if (pendingInsetsController != null) {
                         pendingInsetsController.replayAndAttach(mInsetsController);
                     }
+                }
+                if (mView instanceof DecorView) {
+                    mWindowAttributes.privateFlags |= PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED;
                 }
 
                 try {
