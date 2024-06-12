@@ -252,7 +252,10 @@ private fun BoxScope.AnimatedLinearGradient() {
     Box(
         Modifier.matchParentSize()
             .background(colors.primary)
-            .animatedRadialGradientBackground(colors.primary, colors.primaryContainer)
+            .animatedRadialGradientBackground(
+                toColor = colors.primary,
+                fromColor = colors.primaryContainer.copy(alpha = 0.6f)
+            )
     )
     BackgroundTopScrim()
 }
