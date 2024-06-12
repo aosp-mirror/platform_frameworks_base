@@ -417,7 +417,7 @@ final class InputMethodSettings {
                             try {
                                 final int hashCode = Integer.parseInt(subtypeHashCode);
                                 // Check whether the subtype id is valid or not
-                                if (SubtypeUtils.isValidSubtypeId(imi, hashCode)) {
+                                if (SubtypeUtils.isValidSubtypeHashCode(imi, hashCode)) {
                                     return s;
                                 } else {
                                     return NOT_A_SUBTYPE_ID_STR;
@@ -644,7 +644,7 @@ final class InputMethodSettings {
             if (subtypeHashCode == NOT_A_SUBTYPE_ID) {
                 continue;  // NOT_A_SUBTYPE_ID must not be saved
             }
-            if (!SubtypeUtils.isValidSubtypeId(imi, subtypeHashCode)) {
+            if (!SubtypeUtils.isValidSubtypeHashCode(imi, subtypeHashCode)) {
                 continue;  // this subtype does not exist in InputMethodInfo.
             }
             if (validSubtypeHashCodes.indexOf(subtypeHashCode) >= 0) {
