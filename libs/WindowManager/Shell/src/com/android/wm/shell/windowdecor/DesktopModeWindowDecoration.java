@@ -831,12 +831,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // We want handle to remain pressed if the pointer moves outside of it during a drag.
         handle.setPressed((inHandle && action == ACTION_DOWN)
                 || (handle.isPressed() && action != ACTION_UP && action != ACTION_CANCEL));
-        if (isHandleMenuActive() && !isMenuAboveStatusBar()) {
+        if (isHandleMenuActive() && !isHandleMenuAboveStatusBar()) {
             mHandleMenu.checkMotionEvent(ev);
         }
     }
 
-    private boolean isMenuAboveStatusBar() {
+    private boolean isHandleMenuAboveStatusBar() {
         return Flags.enableAdditionalWindowsAboveStatusBar() && !mTaskInfo.isFreeform();
     }
 

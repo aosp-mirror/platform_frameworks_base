@@ -446,6 +446,7 @@ final class ConversionUtils {
                         sel.secondaryIds[i]);
                 if (id == null) {
                     Slogf.e(TAG, "invalid secondary id: %s", sel.secondaryIds[i]);
+                    continue;
                 }
                 secondaryIdList.add(id);
             }

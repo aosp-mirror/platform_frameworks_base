@@ -27,6 +27,7 @@ import android.hardware.broadcastradio.ConfigFlag;
 import android.hardware.broadcastradio.DabTableEntry;
 import android.hardware.broadcastradio.IdentifierType;
 import android.hardware.broadcastradio.Metadata;
+import android.hardware.broadcastradio.ProgramFilter;
 import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
 import android.hardware.broadcastradio.Properties;
@@ -41,6 +42,7 @@ import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.ServiceSpecificException;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.util.ArraySet;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
@@ -93,6 +95,11 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     private static final long TEST_HD_LOCATION_VALUE =  0x4E647007665CF6L;
     private static final long TEST_VENDOR_ID_VALUE = 9_901;
 
+    private static final ProgramSelector.Identifier TEST_INVALID_ID =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_INVALID, 1);
+    private static final ProgramIdentifier TEST_HAL_INVALID_ID =
+            AidlTestUtils.makeHalIdentifier(IdentifierType.INVALID, 1);
+
     private static final ProgramSelector.Identifier TEST_DAB_SID_EXT_ID =
             new ProgramSelector.Identifier(
                     ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT, TEST_DAB_DMB_SID_EXT_VALUE);
@@ -139,7 +146,7 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     private static final int TEST_ANNOUNCEMENT_FREQUENCY = FM_LOWER_LIMIT + FM_SPACING;
 
     private static final RadioManager.ModuleProperties MODULE_PROPERTIES =
-            convertToModuleProperties();
+            createModuleProperties();
     private static final Announcement ANNOUNCEMENT =
             ConversionUtils.announcementFromHalAnnouncement(
                     AidlTestUtils.makeAnnouncement(TEST_ENABLED_TYPE, TEST_ANNOUNCEMENT_FREQUENCY));
@@ -291,6 +298,37 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void propertiesFromHalProperties_withoutAmFmAndDabConfigs() {
+        RadioManager.ModuleProperties properties = createModuleProperties(/* amFmConfig= */ null,
+                new DabTableEntry[]{});
+
+        expect.withMessage("Empty AM/FM config")
+                .that(properties.getBands()).asList().isEmpty();
+        expect.withMessage("Empty DAB config")
+                .that(properties.getDabFrequencyTable()).isNull();
+    }
+
+    @Test
+    public void propertiesFromHalProperties_withInvalidBand() {
+        AmFmRegionConfig amFmRegionConfig = new AmFmRegionConfig();
+        amFmRegionConfig.ranges = new AmFmBandRange[]{createAmFmBandRange(/* lowerBound= */ 50000,
+                /* upperBound= */ 60000, /* spacing= */ 10),
+                createAmFmBandRange(FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING)};
+
+        RadioManager.ModuleProperties properties = createModuleProperties(amFmRegionConfig,
+                new DabTableEntry[]{});
+
+        RadioManager.BandDescriptor[] bands = properties.getBands();
+        expect.withMessage("Band descriptors").that(bands).hasLength(1);
+        expect.withMessage("FM band frequency lower limit")
+                .that(bands[0].getLowerLimit()).isEqualTo(FM_LOWER_LIMIT);
+        expect.withMessage("FM band frequency upper limit")
+                .that(bands[0].getUpperLimit()).isEqualTo(FM_UPPER_LIMIT);
+        expect.withMessage("FM band frequency spacing")
+                .that(bands[0].getSpacing()).isEqualTo(FM_SPACING);
+    }
+
+    @Test
     public void identifierToHalProgramIdentifier_withDabId() {
         ProgramIdentifier halDabId =
                 ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_SID_EXT_ID);
@@ -358,6 +396,13 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void identifierFromHalProgramIdentifier_withInvalidIdentifier() {
+        expect.withMessage("Identifier converted from invalid HAL identifier")
+                .that(ConversionUtils.identifierFromHalProgramIdentifier(TEST_HAL_INVALID_ID))
+                .isNull();
+    }
+
+    @Test
     public void programSelectorToHalProgramSelector_withValidSelector() {
         android.hardware.broadcastradio.ProgramSelector halDabSelector =
                 ConversionUtils.programSelectorToHalProgramSelector(TEST_DAB_SELECTOR);
@@ -366,6 +411,23 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
                 .that(halDabSelector.primaryId).isEqualTo(TEST_HAL_DAB_SID_EXT_ID);
         expect.withMessage("Secondary identifiers of converted HAL DAB selector")
                 .that(halDabSelector.secondaryIds).asList()
+                .containsExactly(TEST_HAL_DAB_FREQUENCY_ID, TEST_HAL_DAB_ENSEMBLE_ID);
+    }
+
+    @Test
+    public void programSelectorToHalProgramSelector_withInvalidSecondaryId() {
+        ProgramSelector dabSelector = new ProgramSelector(ProgramSelector.PROGRAM_TYPE_DAB,
+                TEST_DAB_SID_EXT_ID, new ProgramSelector.Identifier[]{TEST_INVALID_ID,
+                    TEST_DAB_FREQUENCY_ID, TEST_DAB_ENSEMBLE_ID}, /* vendorIds= */ null);
+
+        android.hardware.broadcastradio.ProgramSelector halDabSelector =
+                ConversionUtils.programSelectorToHalProgramSelector(dabSelector);
+
+        expect.withMessage("Primary identifier of converted HAL DAB selector with invalid "
+                        + "secondary id").that(halDabSelector.primaryId)
+                .isEqualTo(TEST_HAL_DAB_SID_EXT_ID);
+        expect.withMessage("Secondary identifiers of converted HAL DAB selector with "
+                        + "invalid secondary id").that(halDabSelector.secondaryIds).asList()
                 .containsExactly(TEST_HAL_DAB_FREQUENCY_ID, TEST_HAL_DAB_ENSEMBLE_ID);
     }
 
@@ -382,6 +444,33 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
                 .that(dabSelector.getPrimaryId()).isEqualTo(TEST_DAB_SID_EXT_ID);
         expect.withMessage("Secondary identifiers of converted DAB selector")
                 .that(dabSelector.getSecondaryIds()).asList()
+                .containsExactly(TEST_DAB_FREQUENCY_ID, TEST_DAB_ENSEMBLE_ID);
+    }
+
+    @Test
+    public void programSelectorFromHalProgramSelector_withInvalidSelector() {
+        android.hardware.broadcastradio.ProgramSelector invalidSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_INVALID_ID, new ProgramIdentifier[]{});
+
+        expect.withMessage("Selector converted from invalid HAL selector")
+                .that(ConversionUtils.programSelectorFromHalProgramSelector(invalidSelector))
+                .isNull();
+    }
+
+    @Test
+    public void programSelectorFromHalProgramSelector_withInvalidSecondaryId() {
+        android.hardware.broadcastradio.ProgramSelector halDabSelector =
+                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{
+                        TEST_HAL_INVALID_ID, TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
+
+        ProgramSelector dabSelector =
+                ConversionUtils.programSelectorFromHalProgramSelector(halDabSelector);
+
+        expect.withMessage("Primary identifier of converted DAB selector with invalid "
+                        + "secondary id").that(dabSelector.getPrimaryId())
+                .isEqualTo(TEST_DAB_SID_EXT_ID);
+        expect.withMessage("Secondary identifiers of converted DAB selector with invalid "
+                        + "secondary id").that(dabSelector.getSecondaryIds()).asList()
                 .containsExactly(TEST_DAB_FREQUENCY_ID, TEST_DAB_ENSEMBLE_ID);
     }
 
@@ -622,11 +711,47 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
                 .isEqualTo(TEST_ALBUM_ART);
     }
 
-    private static RadioManager.ModuleProperties convertToModuleProperties() {
+    @Test
+    public void getBands_withInvalidFrequency() {
+        expect.withMessage("Band for invalid frequency")
+                .that(Utils.getBand(/* freq= */ 110000)).isEqualTo(Utils.FrequencyBand.UNKNOWN);
+    }
+
+    @Test
+    public void filterToHalProgramFilter_withNullFilter() {
+        ProgramFilter filter = ConversionUtils.filterToHalProgramFilter(null);
+
+        expect.withMessage("Filter identifier types").that(filter.identifierTypes)
+                .asList().isEmpty();
+        expect.withMessage("Filter identifiers").that(filter.identifiers).asList()
+                .isEmpty();
+    }
+
+    @Test
+    public void filterToHalProgramFilter_withInvalidIdentifier() {
+        Set<ProgramSelector.Identifier> identifiers =
+                new ArraySet<ProgramSelector.Identifier>(2);
+        identifiers.add(TEST_INVALID_ID);
+        identifiers.add(TEST_DAB_SID_EXT_ID);
+        ProgramList.Filter filter = new ProgramList.Filter(/* identifierTypes */ new ArraySet<>(),
+                identifiers, /* includeCategories= */ true, /* excludeModifications= */ false);
+        ProgramFilter halFilter = ConversionUtils.filterToHalProgramFilter(filter);
+
+        expect.withMessage("Filter identifiers with invalid ones removed")
+                .that(halFilter.identifiers).asList().containsExactly(
+                        ConversionUtils.identifierToHalProgramIdentifier(TEST_DAB_SID_EXT_ID));
+    }
+
+    private static RadioManager.ModuleProperties createModuleProperties() {
         AmFmRegionConfig amFmConfig = createAmFmRegionConfig();
         DabTableEntry[] dabTableEntries = new DabTableEntry[]{
                 createDabTableEntry(DAB_ENTRY_LABEL_1, DAB_ENTRY_FREQUENCY_1),
                 createDabTableEntry(DAB_ENTRY_LABEL_2, DAB_ENTRY_FREQUENCY_2)};
+        return createModuleProperties(amFmConfig, dabTableEntries);
+    }
+
+    private static RadioManager.ModuleProperties createModuleProperties(
+            AmFmRegionConfig amFmConfig, DabTableEntry[] dabTableEntries) {
         Properties properties = createHalProperties();
 
         return ConversionUtils.propertiesFromHalProperties(TEST_ID, TEST_SERVICE_NAME, properties,

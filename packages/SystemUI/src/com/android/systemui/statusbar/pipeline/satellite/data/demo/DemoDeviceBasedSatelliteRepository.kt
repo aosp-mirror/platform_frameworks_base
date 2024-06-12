@@ -36,6 +36,7 @@ constructor(
 ) : DeviceBasedSatelliteRepository {
     private var demoCommandJob: Job? = null
 
+    override val isSatelliteProvisioned = MutableStateFlow(true)
     override val connectionState = MutableStateFlow(SatelliteConnectionState.Unknown)
     override val signalStrength = MutableStateFlow(0)
     override val isSatelliteAllowedForCurrentLocation = MutableStateFlow(true)

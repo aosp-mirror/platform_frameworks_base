@@ -3892,9 +3892,10 @@ public final class ActiveServices {
                 return;
             }
 
-            final long lastTopTime = sr.app.mState.getLastTopTime();
-            final long constantTimeLimit = getTimeLimitForFgsType(fgsType);
+            final boolean currentlyTop = sr.app.mState.getCurProcState() <= PROCESS_STATE_TOP;
             final long nowUptime = SystemClock.uptimeMillis();
+            final long lastTopTime = currentlyTop ? nowUptime : sr.app.mState.getLastTopTime();
+            final long constantTimeLimit = getTimeLimitForFgsType(fgsType);
             if (lastTopTime != Long.MIN_VALUE && constantTimeLimit > (nowUptime - lastTopTime)) {
                 // Discard any other messages for this service
                 mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_FGS_TIMEOUT_MSG, sr);

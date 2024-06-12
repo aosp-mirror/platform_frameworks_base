@@ -29,8 +29,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.timeout;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
-import static com.google.common.truth.Truth.assertWithMessage;
-
 import static org.junit.Assert.assertThrows;
 
 import android.graphics.Bitmap;
@@ -57,8 +55,11 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
 import com.android.server.broadcastradio.RadioServiceUserController;
 
+import com.google.common.truth.Expect;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -97,6 +98,9 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
     private ITunerCallback mHalTunerCallback;
     private ProgramInfo mHalCurrentInfo;
     private TunerSession[] mTunerSessions;
+
+    @Rule
+    public final Expect mExpect = Expect.create();
 
     @Mock
     private UserHandle mUserHandleMock;
@@ -206,7 +210,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
         openAidlClients(numSessions);
 
         for (int index = 0; index < numSessions; index++) {
-            assertWithMessage("Session of index %s close state", index)
+            mExpect.withMessage("Session of index %s close state", index)
                     .that(mTunerSessions[index].isClosed()).isFalse();
         }
     }
@@ -238,7 +242,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         RadioManager.BandConfig config = mTunerSessions[0].getConfiguration();
 
-        assertWithMessage("Session configuration").that(config)
+        mExpect.withMessage("Session configuration").that(config)
                 .isEqualTo(FM_BAND_CONFIG);
     }
 
@@ -248,7 +252,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         mTunerSessions[0].setMuted(/* mute= */ false);
 
-        assertWithMessage("Session mute state after setting unmuted")
+        mExpect.withMessage("Session mute state after setting unmuted")
                 .that(mTunerSessions[0].isMuted()).isFalse();
     }
 
@@ -258,7 +262,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         mTunerSessions[0].setMuted(/* mute= */ true);
 
-        assertWithMessage("Session mute state after setting muted")
+        mExpect.withMessage("Session mute state after setting muted")
                 .that(mTunerSessions[0].isMuted()).isTrue();
     }
 
@@ -268,7 +272,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         mTunerSessions[0].close();
 
-        assertWithMessage("Close state of broadcast radio service session")
+        mExpect.withMessage("Close state of broadcast radio service session")
                 .that(mTunerSessions[0].isClosed()).isTrue();
     }
 
@@ -282,11 +286,11 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         for (int index = 0; index < numSessions; index++) {
             if (index == closeIdx) {
-                assertWithMessage(
+                mExpect.withMessage(
                         "Close state of broadcast radio service session of index %s", index)
                         .that(mTunerSessions[index].isClosed()).isTrue();
             } else {
-                assertWithMessage(
+                mExpect.withMessage(
                         "Close state of broadcast radio service session of index %s", index)
                         .that(mTunerSessions[index].isClosed()).isFalse();
             }
@@ -301,7 +305,21 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
         mTunerSessions[0].close(errorCode);
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onError(errorCode);
-        assertWithMessage("Close state of broadcast radio service session")
+        mExpect.withMessage("Close state of broadcast radio service session")
+                .that(mTunerSessions[0].isClosed()).isTrue();
+    }
+
+    @Test
+    public void close_forMultipleTimes() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int errorCode = RadioTuner.ERROR_SERVER_DIED;
+        mTunerSessions[0].close(errorCode);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onError(errorCode);
+
+        mTunerSessions[0].close(errorCode);
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onError(errorCode);
+        mExpect.withMessage("State of closing broadcast radio service session twice")
                 .that(mTunerSessions[0].isClosed()).isTrue();
     }
 
@@ -315,7 +333,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         for (int index = 0; index < numSessions; index++) {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT).onError(errorCode);
-            assertWithMessage("Close state of broadcast radio service session of index %s", index)
+            mExpect.withMessage("Close state of broadcast radio service session of index %s", index)
                     .that(mTunerSessions[index].isClosed()).isTrue();
         }
     }
@@ -365,7 +383,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
         UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
                 () -> mTunerSessions[0].tune(unsupportedSelector));
 
-        assertWithMessage("Exception for tuning on unsupported program selector")
+        mExpect.withMessage("Exception for tuning on unsupported program selector")
                 .that(thrown).hasMessageThat().contains("tune: NOT_SUPPORTED");
     }
 
@@ -393,8 +411,21 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].tune(sel);
         });
 
-        assertWithMessage("Unknown error HAL exception when tuning")
+        mExpect.withMessage("Unknown error HAL exception when tuning")
                 .that(thrown).hasMessageThat().contains(Result.toString(Result.UNKNOWN_ERROR));
+    }
+
+    @Test
+    public void tune_withClosedTuner_fails() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector sel = TestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        mTunerSessions[0].close();
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> mTunerSessions[0].tune(sel));
+
+        mExpect.withMessage("Exception for tuning on closed tuner").that(thrown).hasMessageThat()
+                .contains("Tuner is closed");
     }
 
     @Test
@@ -454,7 +485,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].step(/* directionDown= */ true, /* skipSubChannel= */ false);
         });
 
-        assertWithMessage("Exception for stepping when HAL is in invalid state")
+        mExpect.withMessage("Exception for stepping when HAL is in invalid state")
                 .that(thrown).hasMessageThat().contains(Result.toString(Result.INVALID_STATE));
     }
 
@@ -533,7 +564,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].seek(/* directionDown= */ true, /* skipSubChannel= */ false);
         });
 
-        assertWithMessage("Internal error HAL exception when seeking")
+        mExpect.withMessage("Internal error HAL exception when seeking")
                 .that(thrown).hasMessageThat().contains(Result.toString(Result.INTERNAL_ERROR));
     }
 
@@ -566,7 +597,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].cancel();
         });
 
-        assertWithMessage("Exception for canceling when HAL throws remote exception")
+        mExpect.withMessage("Exception for canceling when HAL throws remote exception")
                 .that(thrown).hasMessageThat().contains(exceptionMessage);
     }
 
@@ -579,7 +610,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].getImage(imageId);
         });
 
-        assertWithMessage("Get image exception")
+        mExpect.withMessage("Get image exception")
                 .that(thrown).hasMessageThat().contains("Image ID is missing");
     }
 
@@ -590,7 +621,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         Bitmap imageTest = mTunerSessions[0].getImage(imageId);
 
-        assertWithMessage("Null image").that(imageTest).isEqualTo(null);
+        mExpect.withMessage("Null image").that(imageTest).isEqualTo(null);
     }
 
     @Test
@@ -603,7 +634,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].getImage(/* id= */ 1);
         });
 
-        assertWithMessage("Exception for getting image when HAL throws remote exception")
+        mExpect.withMessage("Exception for getting image when HAL throws remote exception")
                 .that(thrown).hasMessageThat().contains(exceptionMessage);
     }
 
@@ -649,7 +680,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].startProgramListUpdates(/* filter= */ null);
         });
 
-        assertWithMessage("Unknown error HAL exception when updating program list")
+        mExpect.withMessage("Unknown error HAL exception when updating program list")
                 .that(thrown).hasMessageThat().contains(Result.toString(Result.UNKNOWN_ERROR));
     }
 
@@ -686,7 +717,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
         boolean isSupported = mTunerSessions[0].isConfigFlagSupported(flag);
 
         verify(mHalTunerSessionMock).isConfigFlagSet(eq(flag), any());
-        assertWithMessage("Config flag %s is supported", flag).that(isSupported).isFalse();
+        mExpect.withMessage("Config flag %s is supported", flag).that(isSupported).isFalse();
     }
 
     @Test
@@ -697,7 +728,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
         boolean isSupported = mTunerSessions[0].isConfigFlagSupported(flag);
 
         verify(mHalTunerSessionMock).isConfigFlagSet(eq(flag), any());
-        assertWithMessage("Config flag %s is supported", flag).that(isSupported).isTrue();
+        mExpect.withMessage("Config flag %s is supported", flag).that(isSupported).isTrue();
     }
 
     @Test
@@ -709,7 +740,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].setConfigFlag(flag, /* value= */ true);
         });
 
-        assertWithMessage("Exception for setting unsupported flag %s", flag)
+        mExpect.withMessage("Exception for setting unsupported flag %s", flag)
                 .that(thrown).hasMessageThat().contains("setConfigFlag: NOT_SUPPORTED");
     }
 
@@ -755,7 +786,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].isConfigFlagSet(flag);
         });
 
-        assertWithMessage("Exception for checking if unsupported flag %s is set", flag)
+        mExpect.withMessage("Exception for checking if unsupported flag %s is set", flag)
                 .that(thrown).hasMessageThat().contains("isConfigFlagSet: NOT_SUPPORTED");
     }
 
@@ -768,7 +799,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
         boolean isSet = mTunerSessions[0].isConfigFlagSet(flag);
 
-        assertWithMessage("Config flag %s is set", flag)
+        mExpect.withMessage("Config flag %s is set", flag)
                 .that(isSet).isEqualTo(expectedConfigFlagValue);
     }
 
@@ -782,7 +813,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].isConfigFlagSet(flag);
         });
 
-        assertWithMessage("Exception for checking config flag when HAL throws remote exception")
+        mExpect.withMessage("Exception for checking config flag when HAL throws remote exception")
                 .that(thrown).hasMessageThat().contains("Failed to check flag");
     }
 
@@ -822,7 +853,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].setParameters(parametersSet);
         });
 
-        assertWithMessage("Exception for setting parameters when HAL throws remote exception")
+        mExpect.withMessage("Exception for setting parameters when HAL throws remote exception")
                 .that(thrown).hasMessageThat().contains(exceptionMessage);
     }
 
@@ -848,7 +879,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].getParameters(parameterKeys);
         });
 
-        assertWithMessage("Exception for getting parameters when HAL throws remote exception")
+        mExpect.withMessage("Exception for getting parameters when HAL throws remote exception")
                 .that(thrown).hasMessageThat().contains(exceptionMessage);
     }
 
@@ -892,6 +923,36 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
                     .onParametersUpdated(parametersExpected);
         }
+    }
+
+    @Test
+    public void openSession_withNonNullAntennaState() throws Exception {
+        boolean antennaConnected = false;
+        android.hardware.radio.ITunerCallback callback =
+                mock(android.hardware.radio.ITunerCallback.class);
+        openAidlClients(/* numClients= */ 1);
+        mHalTunerCallback.onAntennaStateChange(antennaConnected);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onAntennaState(antennaConnected);
+
+        mRadioModule.openSession(callback);
+
+        verify(callback, CALLBACK_TIMEOUT).onAntennaState(antennaConnected);
+    }
+
+    @Test
+    public void openSession_withNonNullCurrentProgramInfo() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector initialSel = TestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        RadioManager.ProgramInfo tuneInfo = TestUtils.makeProgramInfo(initialSel,
+                SIGNAL_QUALITY);
+        mTunerSessions[0].tune(initialSel);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(tuneInfo);
+        android.hardware.radio.ITunerCallback callback =
+                mock(android.hardware.radio.ITunerCallback.class);
+
+        mRadioModule.openSession(callback);
+
+        verify(callback, CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(tuneInfo);
     }
 
     private void openAidlClients(int numClients) throws Exception {

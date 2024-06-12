@@ -368,6 +368,7 @@ filegroup {
         "tests/src/**/systemui/shared/system/RemoteTransitionTest.java",
         "tests/src/**/systemui/navigationbar/NavigationBarControllerImplTest.java",
         "tests/src/**/systemui/bluetooth/qsdialog/AudioSharingInteractorTest.kt",
+        "tests/src/**/systemui/bluetooth/qsdialog/DeviceItemActionInteractorTest.kt",
         "tests/src/**/systemui/notetask/quickaffordance/NoteTaskQuickAffordanceConfigTest.kt",
         "tests/src/**/systemui/notetask/LaunchNotesRoleSettingsTrampolineActivityTest.kt",
         "tests/src/**/systemui/notetask/shortcut/LaunchNoteTaskActivityTest.kt",
@@ -784,7 +785,6 @@ android_app {
     kotlincflags: ["-Xjvm-default=all"],
     optimize: {
         shrink_resources: false,
-        optimized_shrink_resources: false,
         proguard_flags_files: ["proguard.flags"],
     },
 
@@ -921,7 +921,6 @@ systemui_optimized_java_defaults {
                 optimize: true,
                 shrink: true,
                 shrink_resources: true,
-                optimized_shrink_resources: true,
                 ignore_warnings: false,
                 proguard_compatibility: false,
             },

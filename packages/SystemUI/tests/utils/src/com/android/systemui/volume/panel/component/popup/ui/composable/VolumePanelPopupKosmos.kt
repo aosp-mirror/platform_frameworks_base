@@ -13,17 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.bluetooth.qsdialog
 
-import com.android.systemui.dagger.SysUISingleton
-import dagger.Binds
-import dagger.Module
+package com.android.systemui.volume.panel.component.popup.ui.composable
 
-@Module
-interface BluetoothTileDialogModule {
-    @Binds
-    @SysUISingleton
-    fun bindDeviceItemActionInteractor(
-        impl: DeviceItemActionInteractorImpl
-    ): DeviceItemActionInteractor
-}
+import com.android.systemui.animation.dialogTransitionAnimator
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.phone.systemUIDialogFactory
+
+val Kosmos.volumePanelPopup: VolumePanelPopup by
+    Kosmos.Fixture { VolumePanelPopup(systemUIDialogFactory, dialogTransitionAnimator) }

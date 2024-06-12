@@ -113,6 +113,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private DisplayInsetsController mDisplayInsetsController;
     @Mock
     private IRecentTasksListener mRecentTasksListener;
+    @Mock
+    private TaskStackTransitionObserver mTaskStackTransitionObserver;
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -139,7 +141,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 mDisplayInsetsController, mMainExecutor));
         mRecentTasksControllerReal = new RecentTasksController(mContext, mShellInit,
                 mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
-                Optional.of(mDesktopModeTaskRepository), mMainExecutor);
+                Optional.of(mDesktopModeTaskRepository), mTaskStackTransitionObserver,
+                mMainExecutor);
         mRecentTasksController = spy(mRecentTasksControllerReal);
         mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
                 null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
@@ -554,6 +557,30 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mRecentTasksControllerReal.onTaskRemoved(taskInfo);
 
         verify(mRecentTasksListener, never()).onRunningTaskVanished(any());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    public void onTaskMovedToFront_TaskStackObserverEnabled_triggersOnTaskMovedToFront()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskMovedToFrontThroughTransition(taskInfo);
+
+        verify(mRecentTasksListener).onTaskMovedToFront(taskInfo);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    public void onTaskMovedToFront_TaskStackObserverEnabled_doesNotTriggersOnTaskMovedToFront()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskMovedToFront(taskInfo);
+
+        verify(mRecentTasksListener, never()).onTaskMovedToFront(any());
     }
 
     @Test

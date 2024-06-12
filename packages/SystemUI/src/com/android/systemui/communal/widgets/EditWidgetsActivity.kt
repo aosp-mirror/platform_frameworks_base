@@ -70,8 +70,6 @@ constructor(
 
     private var shouldOpenWidgetPickerOnStart = false
 
-    private var lockOnDestroy = false
-
     private val addWidgetActivityLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(StartActivityForResult()) { result ->
             when (result.resultCode) {
@@ -97,8 +95,7 @@ constructor(
                                 run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
                             }
                         }
-                    }
-                        ?: run { Log.w(TAG, "No data in result.") }
+                    } ?: run { Log.w(TAG, "No data in result.") }
                 }
                 else ->
                     Log.w(
@@ -160,9 +157,9 @@ constructor(
 
             // Wait for the current scene to be idle on communal.
             communalViewModel.isIdleOnCommunal.first { it }
-            // Then finish the activity (this helps to avoid a flash of lockscreen when locking
-            // in onDestroy()).
-            lockOnDestroy = true
+
+            // Lock to go back to the hub after exiting.
+            lockNow()
             finish()
         }
     }
@@ -196,8 +193,6 @@ constructor(
     override fun onDestroy() {
         super.onDestroy()
         communalViewModel.setEditModeOpen(false)
-
-        if (lockOnDestroy) lockNow()
     }
 
     private fun lockNow() {

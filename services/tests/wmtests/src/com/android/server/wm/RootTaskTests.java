@@ -1235,12 +1235,18 @@ public class RootTaskTests extends WindowTestsBase {
         assertEquals(STOPPING, activity2.getState());
         assertThat(mSupervisor.mStoppingActivities).contains(activity2);
 
+        registerTestTransitionPlayer();
+        final Transition transition = display.mTransitionController
+                .requestCloseTransitionIfNeeded(rootTask1);
+        transition.collectClose(rootTask1);
         // The display becomes empty. Since there is no next activity to be idle, the activity
         // should be destroyed immediately with updating configuration to restore original state.
         final ActivityRecord activity1 = finishTopActivity(rootTask1);
         assertEquals(DESTROYING, activity1.getState());
         verify(mRootWindowContainer).ensureVisibilityAndConfig(eq(null) /* starting */,
                 eq(display), anyBoolean());
+        assertTrue("Transition must be ready if there is no next running activity",
+                transition.allReady());
     }
 
     private ActivityRecord finishTopActivity(Task task) {
