@@ -2028,12 +2028,15 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                     getBarTransitions().setBackgroundOverrideAlpha(1f);
                 }
             }
-            updateScreenPinningGestures();
+
+            // Update the window layout params when the nav mode changes as that will affect the
+            // system gesture insets
+            setNavBarMode(mode);
+            repositionNavigationBar(mCurrentRotation);
 
             if (!canShowSecondaryHandle()) {
                 resetSecondaryHandle();
             }
-            setNavBarMode(mode);
             mView.setShouldShowSwipeUpUi(mOverviewProxyService.shouldShowSwipeUpUI());
         }
     };
