@@ -32,8 +32,11 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -76,6 +79,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun transitionToGone_keyguardOccluded_biometricAuthenticated() =
         testScope.runTest {
             transitionRepository.sendTransitionSteps(
@@ -89,6 +93,25 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(true)
             runCurrent()
             kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(null)
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(from = KeyguardState.ALTERNATE_BOUNCER, to = KeyguardState.GONE)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun transitionToGone_keyguardOccludedThenAltBouncer_authed_wmStateRefactor() =
+        testScope.runTest {
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.OCCLUDED,
+                to = KeyguardState.ALTERNATE_BOUNCER,
+                testScope
+            )
+            reset(transitionRepository)
+
+            // Authentication results in calling startDismissKeyguardTransition.
+            kosmos.keyguardTransitionInteractor.startDismissKeyguardTransition()
             runCurrent()
 
             assertThat(transitionRepository)
