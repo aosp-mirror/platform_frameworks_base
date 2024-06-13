@@ -69,9 +69,7 @@ import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UNBIND_SERVICE;
 import static android.content.Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
-import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
-import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL;
 import static android.media.audio.Flags.roForegroundAudioControl;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
@@ -2309,14 +2307,8 @@ public class OomAdjuster {
                                     != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
 
                     if (roForegroundAudioControl()) { // flag check
-                        // TODO revisit restriction of FOREGROUND_AUDIO_CONTROL when it can be
-                        //      limited to specific FGS types
-                        //final int fgsAudioType = FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-                        //        | FOREGROUND_SERVICE_TYPE_CAMERA
-                        //        | FOREGROUND_SERVICE_TYPE_MICROPHONE
-                        //        | FOREGROUND_SERVICE_TYPE_PHONE_CALL;
-                        //capabilityFromFGS |= (psr.getForegroundServiceTypes() & fgsAudioType) != 0
-                        //        ? PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL : 0;
+                        // TODO(b/335373208) - revisit restriction of FOREGROUND_AUDIO_CONTROL
+                        //  when it can be limited to specific FGS types
                         capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL;
                     }
 
