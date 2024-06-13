@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN ძალიან მოკლეა. უნდა შედგებოდეს სულ ცოტა 4 ციფრისგან."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"სცადეთ მოგვიანებით"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"სრულ ეკრანზე ნახვა"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"გამოსვლისათვის, გაასრიალეთ ზემოდან ქვემოთ."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"გასაგებია"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"შეატრიალეთ უკეთესი ხედისთვის"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"გახსენით <xliff:g id="NAME">%s</xliff:g> სრულ ეკრანზე უკეთესი ხედისთვის"</string>

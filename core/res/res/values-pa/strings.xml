@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ਪਿੰਨ ਬਹੁਤ ਜ਼ਿਆਦਾ ਛੋਟਾ ਹੈ। ਘੱਟੋ-ਘੱਟ 4 ਅੰਕ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ਪੂਰੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦੇਖੋ"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"ਬਾਹਰ ਜਾਣ ਲਈ, ਉਪਰੋਂ ਹੇਠਾਂ ਸਵਾਈਪ ਕਰੋ।"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ਸਮਝ ਲਿਆ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ ਘੁਮਾਓ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ <xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਪੂਰੀ-ਸਕ੍ਰੀਨ ਵਿੱਚ ਖੋਲ੍ਹੋ"</string>
