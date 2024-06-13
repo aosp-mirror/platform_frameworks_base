@@ -162,6 +162,7 @@ constructor(
             KeyguardState.LOCKSCREEN, -> 1f
         }
     }
+
     val useBackgroundProtection: StateFlow<Boolean> = isUdfpsSupported
     val burnInOffsets: Flow<BurnInOffsets> =
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled
@@ -263,13 +264,7 @@ constructor(
     val accessibilityDelegateHint: Flow<DeviceEntryIconView.AccessibilityHintType> =
         accessibilityInteractor.isEnabled.flatMapLatest { touchExplorationEnabled ->
             if (touchExplorationEnabled) {
-                combine(iconType, isInteractive) { iconType, isInteractive ->
-                    if (isInteractive || iconType == DeviceEntryIconView.IconType.LOCK) {
-                        iconType.toAccessibilityHintType()
-                    } else {
-                        DeviceEntryIconView.AccessibilityHintType.NONE
-                    }
-                }
+                iconType.map { it.toAccessibilityHintType() }
             } else {
                 flowOf(DeviceEntryIconView.AccessibilityHintType.NONE)
             }
@@ -289,8 +284,7 @@ constructor(
     private fun DeviceEntryIconView.IconType.toAccessibilityHintType():
         DeviceEntryIconView.AccessibilityHintType {
         return when (this) {
-            DeviceEntryIconView.IconType.LOCK ->
-                DeviceEntryIconView.AccessibilityHintType.AUTHENTICATE
+            DeviceEntryIconView.IconType.LOCK -> DeviceEntryIconView.AccessibilityHintType.BOUNCER
             DeviceEntryIconView.IconType.UNLOCK -> DeviceEntryIconView.AccessibilityHintType.ENTER
             DeviceEntryIconView.IconType.FINGERPRINT,
             DeviceEntryIconView.IconType.NONE -> DeviceEntryIconView.AccessibilityHintType.NONE
