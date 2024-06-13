@@ -459,6 +459,12 @@
          start of this area. -->
     <dimen name="desktop_mode_customizable_caption_margin_end">152dp</dimen>
 
+    <!-- The default minimum allowed window width when resizing a window in desktop mode. -->
+    <dimen name="desktop_mode_minimum_window_width">386dp</dimen>
+
+    <!-- The default minimum allowed window height when resizing a window in desktop mode. -->
+    <dimen name="desktop_mode_minimum_window_height">352dp</dimen>
+
     <!-- The width of the maximize menu in desktop mode. -->
     <dimen name="desktop_mode_maximize_menu_width">228dp</dimen>
 
