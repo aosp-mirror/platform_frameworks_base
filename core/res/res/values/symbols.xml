@@ -1619,6 +1619,7 @@
   <java-symbol type="layout" name="restrictions_pin_challenge" />
   <java-symbol type="layout" name="restrictions_pin_setup" />
   <java-symbol type="layout" name="immersive_mode_cling" />
+  <java-symbol type="id" name="immersive_cling_icon" />
   <java-symbol type="layout" name="user_switching_dialog" />
   <java-symbol type="layout" name="common_tab_settings" />
   <java-symbol type="layout" name="resolver_list_per_profile" />
