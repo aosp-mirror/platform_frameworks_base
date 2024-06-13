@@ -1709,7 +1709,7 @@ public class ThermalManagerService extends SystemService {
                     ArrayList<Sample> samples = mSamples.computeIfAbsent(temperature.getName(),
                             k -> new ArrayList<>(RING_BUFFER_SIZE));
                     if (samples.size() == RING_BUFFER_SIZE) {
-                        samples.removeFirst();
+                        samples.remove(0);
                     }
                     samples.add(new Sample(now, temperature.getValue()));
                 }
@@ -1806,7 +1806,7 @@ public class ThermalManagerService extends SystemService {
                         continue;
                     }
 
-                    float currentTemperature = samples.getLast().temperature;
+                    float currentTemperature = samples.get(0).temperature;
 
                     if (samples.size() < MINIMUM_SAMPLE_COUNT) {
                         // Don't try to forecast, just use the latest one we have
