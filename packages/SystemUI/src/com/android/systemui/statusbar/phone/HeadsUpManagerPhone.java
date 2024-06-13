@@ -202,6 +202,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
      * Gets the touchable region needed for heads up notifications. Returns null if no touchable
      * region is required (ie: no heads up notification currently exists).
      */
+    // TODO(b/347007367): With scene container enabled this method may report outdated regions
     @Override
     public @Nullable Region getTouchableRegion() {
         NotificationEntry topEntry = getTopEntry();
