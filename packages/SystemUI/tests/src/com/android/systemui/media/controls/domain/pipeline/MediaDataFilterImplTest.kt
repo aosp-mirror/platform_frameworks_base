@@ -755,7 +755,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
             // THEN we should treat the media as active instead
-            val dataCurrentAndActive = dataCurrent.copy(active = true)
+            val dataCurrentAndActive =
+                dataMain.copy(active = true, lastActive = clock.elapsedRealtime())
             controlCommonModel =
                 controlCommonModel.copy(
                     mediaLoadingModel.copy(
@@ -825,7 +826,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
             // THEN we should treat the media as active instead
-            val dataCurrentAndActive = dataCurrent.copy(active = true)
+            val dataCurrentAndActive =
+                dataMain.copy(active = true, lastActive = clock.elapsedRealtime())
             verify(listener)
                 .onMediaDataLoaded(
                     eq(KEY),
@@ -917,7 +919,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             runCurrent()
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-            val dataCurrentAndActive = dataCurrent.copy(active = true)
+            val dataCurrentAndActive =
+                dataMain.copy(active = true, lastActive = clock.elapsedRealtime())
             verify(listener)
                 .onMediaDataLoaded(
                     eq(KEY),
@@ -1091,7 +1094,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
             // THEN we should treat the media as active instead
-            val dataCurrentAndActive = dataCurrent.copy(active = true)
+            val dataCurrentAndActive =
+                dataMain.copy(active = true, lastActive = clock.elapsedRealtime())
             controlCommonModel =
                 controlCommonModel.copy(
                     mediaLoadingModel.copy(
