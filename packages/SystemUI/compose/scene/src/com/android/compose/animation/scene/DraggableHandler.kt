@@ -692,6 +692,8 @@ private class SwipeTransition(
         return startOffsetAnimation {
             val animatable = Animatable(dragOffset, OffsetVisibilityThreshold)
             val isTargetGreater = targetOffset > animatable.value
+            val startedWhenOvercrollingTargetScene =
+                if (targetScene == fromScene) progress < 0f else progress > 1f
             val job =
                 coroutineScope
                     // Important: We start atomically to make sure that we start the coroutine even
@@ -718,10 +720,19 @@ private class SwipeTransition(
                                 if (bouncingScene == null) {
                                     val isBouncing =
                                         if (isTargetGreater) {
-                                            value > targetOffset
+                                            if (startedWhenOvercrollingTargetScene) {
+                                                value >= targetOffset
+                                            } else {
+                                                value > targetOffset
+                                            }
                                         } else {
-                                            value < targetOffset
+                                            if (startedWhenOvercrollingTargetScene) {
+                                                value <= targetOffset
+                                            } else {
+                                                value < targetOffset
+                                            }
                                         }
+
                                     if (isBouncing) {
                                         bouncingScene = targetScene
 
@@ -739,7 +750,6 @@ private class SwipeTransition(
                                 }
                             }
                         } finally {
-                            bouncingScene = null
                             snapToScene(targetScene)
                         }
                     }
