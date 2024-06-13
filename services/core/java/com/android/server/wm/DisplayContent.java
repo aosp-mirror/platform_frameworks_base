@@ -5719,15 +5719,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
     boolean supportsSystemDecorations() {
+        boolean forceDesktopModeOnDisplay = forceDesktopMode();
+
+        if (com.android.window.flags.Flags.rearDisplayDisableForceDesktopSystemDecorations()) {
+            // System decorations should not be forced on a rear display due to security policies.
+            forceDesktopModeOnDisplay =
+                    forceDesktopModeOnDisplay && ((mDisplay.getFlags() & Display.FLAG_REAR) == 0);
+        }
+
         return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
                 || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                || forceDesktopMode())
+                || forceDesktopModeOnDisplay)
                 // VR virtual display will be used to run and render 2D app within a VR experience.
                 && mDisplayId != mWmService.mVr2dDisplayId
                 // Do not show system decorations on untrusted virtual display.
-                && isTrusted()
-                // No system decoration on rear display.
-                && (mDisplay.getFlags() & Display.FLAG_REAR) == 0;
+                && isTrusted();
     }
 
     /**
