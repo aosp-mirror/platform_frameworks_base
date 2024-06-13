@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.call.domain.interactor
+package com.android.systemui.statusbar.chips.call.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.plugins.activityStarter
+import com.android.systemui.statusbar.chips.call.domain.interactor.callChipInteractor
+import com.android.systemui.util.time.fakeSystemClock
 
-val Kosmos.callChipInteractor: CallChipInteractor by
-    Kosmos.Fixture { CallChipInteractor(repository = ongoingCallRepository) }
+val Kosmos.callChipViewModel: CallChipViewModel by
+    Kosmos.Fixture {
+        CallChipViewModel(
+            scope = applicationCoroutineScope,
+            interactor = callChipInteractor,
+            systemClock = fakeSystemClock,
+            activityStarter = activityStarter,
+        )
+    }

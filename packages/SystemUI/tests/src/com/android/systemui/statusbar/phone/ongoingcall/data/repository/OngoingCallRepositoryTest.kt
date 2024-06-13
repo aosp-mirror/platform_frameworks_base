@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.phone.ongoingcall.data.repository
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.phone.ongoingcall.data.model.OngoingCallModel
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 

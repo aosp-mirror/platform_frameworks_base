@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.ongoingcall.data.model
+package com.android.systemui.statusbar.phone.ongoingcall.shared.model
 
 import android.app.PendingIntent
 

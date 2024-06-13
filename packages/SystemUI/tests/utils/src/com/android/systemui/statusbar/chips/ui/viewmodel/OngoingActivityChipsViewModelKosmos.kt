@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.statusbar.chips.call.domain.interactor.callChipInteractor
+import com.android.systemui.statusbar.chips.call.ui.viewmodel.callChipViewModel
 import com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.castToOtherDeviceChipViewModel
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.screenRecordChipInteractor
 import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.shareToAppChipViewModel
@@ -30,6 +30,6 @@ val Kosmos.ongoingActivityChipsViewModel: OngoingActivityChipsViewModel by
             screenRecordChipInteractor = screenRecordChipInteractor,
             shareToAppChipViewModel = shareToAppChipViewModel,
             castToOtherDeviceChipViewModel = castToOtherDeviceChipViewModel,
-            callChipInteractor = callChipInteractor,
+            callChipViewModel = callChipViewModel,
         )
     }

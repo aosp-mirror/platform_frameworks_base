@@ -16,77 +16,16 @@
 
 package com.android.systemui.statusbar.chips.call.domain.interactor
 
-import com.android.internal.jank.InteractionJankMonitor
-import com.android.systemui.animation.ActivityTransitionAnimator
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.res.R
-import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
-import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
-import com.android.systemui.statusbar.phone.ongoingcall.data.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
-import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 /** Interactor for the ongoing phone call chip shown in the status bar. */
-// TODO(b/332662551): Convert this into a view model.
 @SysUISingleton
-open class CallChipInteractor
+class CallChipInteractor
 @Inject
 constructor(
-    @Application private val scope: CoroutineScope,
     repository: OngoingCallRepository,
-    systemClock: SystemClock,
-    private val activityStarter: ActivityStarter,
-) : OngoingActivityChipViewModel {
-    override val chip: StateFlow<OngoingActivityChipModel> =
-        repository.ongoingCallState
-            .map { state ->
-                when (state) {
-                    is OngoingCallModel.NoCall -> OngoingActivityChipModel.Hidden
-                    is OngoingCallModel.InCall -> {
-                        // This mimics OngoingCallController#updateChip.
-                        // TODO(b/332662551): Handle `state.startTimeMs = 0` correctly (see
-                        // b/192379214 and
-                        // OngoingCallController.CallNotificationInfo.hasValidStartTime).
-                        val startTimeInElapsedRealtime =
-                            state.startTimeMs - systemClock.currentTimeMillis() +
-                                systemClock.elapsedRealtime()
-                        OngoingActivityChipModel.Shown(
-                            icon =
-                                Icon.Resource(
-                                    com.android.internal.R.drawable.ic_phone,
-                                    contentDescription = null,
-                                ),
-                            startTimeMs = startTimeInElapsedRealtime,
-                        ) {
-                            if (state.intent != null) {
-                                val backgroundView =
-                                    it.requireViewById<ChipBackgroundContainer>(
-                                        R.id.ongoing_activity_chip_background
-                                    )
-                                // TODO(b/332662551): Log the click event.
-                                // This mimics OngoingCallController#updateChipClickListener.
-                                activityStarter.postStartActivityDismissingKeyguard(
-                                    state.intent,
-                                    ActivityTransitionAnimator.Controller.fromView(
-                                        backgroundView,
-                                        InteractionJankMonitor
-                                            .CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+) {
+    val ongoingCallState = repository.ongoingCallState
 }
