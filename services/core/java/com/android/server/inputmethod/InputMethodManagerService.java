@@ -569,12 +569,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     EditorInfo mCurEditorInfo;
 
     /**
-     * The current subtype of the current input method.
-     */
-    @MultiUserUnawareField
-    private InputMethodSubtype mCurrentSubtype;
-
-    /**
      * Map of window perceptible states indexed by their associated window tokens.
      *
      * The value {@code true} indicates that IME has not been mostly hidden via
@@ -1055,7 +1049,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     // one now available?
                     changed = chooseNewDefaultIMELocked();
                 } else if (!changed && isPackageModified(curIm.getPackageName())) {
-                    // Even if the current input method is still available, mCurrentSubtype could
+                    // Even if the current input method is still available, current subtype could
                     // be obsolete when the package is modified in practice.
                     changed = true;
                 }
@@ -3102,7 +3096,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 notifyInputMethodSubtypeChangedLocked(userId, info, null);
                 return;
             }
-            final InputMethodSubtype oldSubtype = mCurrentSubtype;
+            final InputMethodSubtype oldSubtype = bindingController.getCurrentSubtype();
             final InputMethodSubtype newSubtype;
             if (subtypeId >= 0 && subtypeId < subtypeCount) {
                 newSubtype = info.getSubtypeAt(subtypeId);
@@ -4114,7 +4108,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (!calledWithValidTokenLocked(token)) {
                 return false;
             }
-            final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+            final int userId = mCurrentUserId;
+            final var bindingController = getInputMethodBindingController(userId);
+            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             final Pair<String, String> lastIme = settings.getLastInputMethodAndSubtype();
             final InputMethodInfo lastImi;
             if (lastIme != null) {
@@ -4122,13 +4118,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             } else {
                 lastImi = null;
             }
+            final var currentSubtype = bindingController.getCurrentSubtype();
             String targetLastImiId = null;
             int subtypeId = NOT_A_SUBTYPE_ID;
             if (lastIme != null && lastImi != null) {
-                final boolean imiIdIsSame = lastImi.getId().equals(getSelectedMethodIdLocked());
+                final boolean imiIdIsSame = lastImi.getId().equals(
+                        bindingController.getSelectedMethodId());
                 final int lastSubtypeHash = Integer.parseInt(lastIme.second);
-                final int currentSubtypeHash = mCurrentSubtype == null ? NOT_A_SUBTYPE_ID
-                        : mCurrentSubtype.hashCode();
+                final int currentSubtypeHash = currentSubtype == null ? NOT_A_SUBTYPE_ID
+                        : currentSubtype.hashCode();
                 // If the last IME is the same as the current IME and the last subtype is not
                 // defined, there is no need to switch to the last IME.
                 if (!imiIdIsSame || lastSubtypeHash != currentSubtypeHash) {
@@ -4138,7 +4136,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
 
             if (TextUtils.isEmpty(targetLastImiId)
-                    && !InputMethodUtils.canAddToLastInputMethod(mCurrentSubtype)) {
+                    && !InputMethodUtils.canAddToLastInputMethod(currentSubtype)) {
                 // This is a safety net. If the currentSubtype can't be added to the history
                 // and the framework couldn't find the last ime, we will make the last ime be
                 // the most applicable enabled keyboard subtype of the system imes.
@@ -4146,11 +4144,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 if (enabled != null) {
                     final int enabledCount = enabled.size();
                     final String locale;
-                    if (mCurrentSubtype != null
-                            && !TextUtils.isEmpty(mCurrentSubtype.getLocale())) {
-                        locale = mCurrentSubtype.getLocale();
+                    if (currentSubtype != null
+                            && !TextUtils.isEmpty(currentSubtype.getLocale())) {
+                        locale = currentSubtype.getLocale();
                     } else {
-                        locale = SystemLocaleWrapper.get(mCurrentUserId).get(0).toString();
+                        locale = SystemLocaleWrapper.get(userId).get(0).toString();
                     }
                     for (int i = 0; i < enabledCount; ++i) {
                         final InputMethodInfo imi = enabled.get(i);
@@ -4198,9 +4196,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     private boolean switchToNextInputMethodLocked(@Nullable IBinder token, boolean onlyCurrentIme) {
         final int userId = mCurrentUserId;
-        final var currentImi = getInputMethodBindingController(userId).getSelectedMethod();
+        final var bindingController = getInputMethodBindingController(userId);
+        final var currentImi = bindingController.getSelectedMethod();
         final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                onlyCurrentIme, currentImi, mCurrentSubtype);
+                onlyCurrentIme, currentImi, bindingController.getCurrentSubtype());
         if (nextSubtype == null) {
             return false;
         }
@@ -4216,9 +4215,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 return false;
             }
             final int userId = mCurrentUserId;
-            final var currentImi = getInputMethodBindingController(userId).getSelectedMethod();
+            final var bindingController = getInputMethodBindingController(userId);
+            final var currentImi = bindingController.getSelectedMethod();
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    false /* onlyCurrentIme */, currentImi, mCurrentSubtype);
+                    false /* onlyCurrentIme */, currentImi, bindingController.getCurrentSubtype());
             return nextSubtype != null;
         }
     }
@@ -4650,12 +4650,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 }
                 return;
             }
-            if (mCurrentUserId != mSwitchingController.getUserId()) {
+            final int userId = mCurrentUserId;
+            if (userId != mSwitchingController.getUserId()) {
                 return;
             }
-            final var imi = getInputMethodBindingController(mCurrentUserId).getSelectedMethod();
+            final var imi = getInputMethodBindingController(userId).getSelectedMethod();
             if (imi != null) {
-                mSwitchingController.onUserActionLocked(imi, mCurrentSubtype);
+                mSwitchingController.onUserActionLocked(imi,
+                        getInputMethodBindingController(userId).getCurrentSubtype());
             }
         }
     }
@@ -5442,9 +5444,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeId,
             boolean setSubtypeOnly) {
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+        final int userId = mCurrentUserId;
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
+        final var bindingController = getInputMethodBindingController(userId);
         settings.saveCurrentInputMethodAndSubtypeToHistory(getSelectedMethodIdLocked(),
-                mCurrentSubtype);
+                bindingController.getCurrentSubtype());
 
         // Set Subtype here
         final int newSubtypeHashcode;
@@ -5465,9 +5469,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 newSubtype = getCurrentInputMethodSubtypeLocked();
             }
         }
-        mCurrentSubtype = newSubtype;
         settings.putSelectedSubtype(newSubtypeHashcode);
-        notifyInputMethodSubtypeChangedLocked(settings.getUserId(), imi, mCurrentSubtype);
+        bindingController.setCurrentSubtype(newSubtype);
+        notifyInputMethodSubtypeChangedLocked(settings.getUserId(), imi, newSubtype);
 
         if (!setSubtypeOnly) {
             // Set InputMethod here
@@ -5555,9 +5559,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (imi == null || imi.getSubtypeCount() == 0) {
             return null;
         }
-        mCurrentSubtype = SubtypeUtils.getCurrentInputMethodSubtype(imi, settings,
-                mCurrentSubtype);
-        return mCurrentSubtype;
+        final var bindingController = getInputMethodBindingController(userId);
+        final var subtype = SubtypeUtils.getCurrentInputMethodSubtype(imi, settings,
+                bindingController.getCurrentSubtype());
+        bindingController.setCurrentSubtype(subtype);
+        return subtype;
     }
 
     /**
@@ -5623,14 +5629,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     private void switchKeyboardLayoutLocked(int direction) {
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+        final int userId = mCurrentUserId;
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
 
         final InputMethodInfo currentImi = settings.getMethodMap().get(getSelectedMethodIdLocked());
         if (currentImi == null) {
             return;
         }
+        final var bindingController = getInputMethodBindingController(userId);
         final InputMethodSubtypeHandle currentSubtypeHandle =
-                InputMethodSubtypeHandle.of(currentImi, mCurrentSubtype);
+                InputMethodSubtypeHandle.of(currentImi, bindingController.getCurrentSubtype());
         final InputMethodSubtypeHandle nextSubtypeHandle =
                 mHardwareKeyboardShortcutController.onSubtypeSwitch(currentSubtypeHandle,
                         direction > 0);

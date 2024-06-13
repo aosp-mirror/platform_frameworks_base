@@ -46,6 +46,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -84,6 +85,7 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") @Nullable private IInputMethodInvoker mCurMethod;
     @GuardedBy("ImfLock.class") private int mCurMethodUid = Process.INVALID_UID;
     @GuardedBy("ImfLock.class") @Nullable private IBinder mCurToken;
+    @GuardedBy("ImfLock.class") @Nullable private InputMethodSubtype mCurrentSubtype;
     @GuardedBy("ImfLock.class") private int mCurTokenDisplayId = INVALID_DISPLAY;
     @GuardedBy("ImfLock.class") private int mCurSeq;
     @GuardedBy("ImfLock.class") private boolean mVisibleBound;
@@ -214,6 +216,28 @@ final class InputMethodBindingController {
     @Nullable
     IBinder getCurToken() {
         return mCurToken;
+    }
+
+    /**
+     * The current {@link InputMethodSubtype} of the current input method.
+     *
+     * @return the current {@link InputMethodSubtype} of the current input method. {@code null}
+     *         means that there is no {@link InputMethodSubtype} currently selected
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    InputMethodSubtype getCurrentSubtype() {
+        return mCurrentSubtype;
+    }
+
+    /**
+     * Sets the current {@link InputMethodSubtype} of the current input method.
+     *
+     * @param currentSubtype the current {@link InputMethodSubtype} of the current input method
+     */
+    @GuardedBy("ImfLock.class")
+    void setCurrentSubtype(@Nullable InputMethodSubtype currentSubtype) {
+        mCurrentSubtype = currentSubtype;
     }
 
     /**
