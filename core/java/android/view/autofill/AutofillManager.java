@@ -4308,14 +4308,16 @@ public final class AutofillManager {
 
             if (mIsTrackedSaveView && mVisibleTrackedIds.isEmpty()) {
                 if (sVerbose) {
-                    Log.v(TAG, "No more visible ids. Invisible = " + mInvisibleTrackedIds);
+                    Log.v(TAG, "No more visible tracked save ids. Invisible = "
+                            + mInvisibleTrackedIds);
                 }
                 finishSessionLocked(/* commitReason= */ COMMIT_REASON_VIEW_CHANGED);
 
             }
             if (mVisibleDialogTrackedIds.isEmpty()) {
                 if (sVerbose) {
-                    Log.v(TAG, "No more visible ids. Invisible = " + mInvisibleDialogTrackedIds);
+                    Log.v(TAG, "No more visible tracked fill dialog ids. Invisible = "
+                            + mInvisibleDialogTrackedIds);
                 }
                 processNoVisibleTrackedAllViews();
             }

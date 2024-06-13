@@ -5441,9 +5441,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         try {
             if (sVerbose) {
-                Slog.v(TAG, "updateTrackedIdsLocked(): " + trackedViews + " => " + fillableIds
-                        + " triggerId: " + saveTriggerId + " saveOnFinish:" + saveOnFinish
-                        + " flags: " + flags + " hasSaveInfo: " + (saveInfo != null));
+                Slog.v(TAG, "updateTrackedIdsLocked(): trackedViews: " + trackedViews
+                        + " fillableIds: " + fillableIds + " triggerId: " + saveTriggerId
+                        + " saveOnFinish:" + saveOnFinish + " flags: " + flags
+                        + " hasSaveInfo: " + (saveInfo != null));
             }
             mClient.setTrackedViews(id, toArray(trackedViews), mSaveOnAllViewsInvisible,
                     saveOnFinish, toArray(fillableIds), saveTriggerId);
