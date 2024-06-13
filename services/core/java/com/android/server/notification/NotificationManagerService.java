@@ -1022,7 +1022,7 @@ public class NotificationManagerService extends SystemService {
             summary.getSbn().getNotification().color = summaryAttr.iconColor;
             summary.getSbn().getNotification().visibility = summaryAttr.visibility;
             mHandler.post(new EnqueueNotificationRunnable(userId, summary, isAppForeground,
-                    mPostNotificationTrackerFactory.newTracker(null)));
+                    /* isAppProvided= */ false, mPostNotificationTrackerFactory.newTracker(null)));
         }
     }
 
@@ -1649,7 +1649,7 @@ public class NotificationManagerService extends SystemService {
                         // Force isAppForeground true here, because for sysui's purposes we
                         // want to adjust the flag behaviour.
                         mHandler.post(new EnqueueNotificationRunnable(r.getUser().getIdentifier(),
-                                r, true /* isAppForeground*/,
+                                r, /* isAppForeground= */ true , /* isAppProvided= */ false,
                                 mPostNotificationTrackerFactory.newTracker(null)));
                     }
                 }
@@ -1680,7 +1680,7 @@ public class NotificationManagerService extends SystemService {
                         // want to be able to adjust the flag behaviour.
                         mHandler.post(
                                 new EnqueueNotificationRunnable(r.getUser().getIdentifier(), r,
-                                        /* foreground= */ true,
+                                        /* foreground= */ true, /* isAppProvided= */ false,
                                         mPostNotificationTrackerFactory.newTracker(null)));
                     }
                 }
@@ -2705,7 +2705,7 @@ public class NotificationManagerService extends SystemService {
                 enqueueNotificationInternal(r.getSbn().getPackageName(), r.getSbn().getOpPkg(),
                         r.getSbn().getUid(), r.getSbn().getInitialPid(), r.getSbn().getTag(),
                         r.getSbn().getId(),  r.getSbn().getNotification(), userId, muteOnReturn,
-                        false /* byForegroundService */);
+                        /* byForegroundService= */ false, /* isAppProvided= */ false);
             } catch (Exception e) {
                 Slog.e(TAG, "Cannot un-snooze notification", e);
             }
@@ -2850,6 +2850,7 @@ public class NotificationManagerService extends SystemService {
                     final boolean isAppForeground =
                             mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
                     mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground,
+                            /* isAppProvided= */ false,
                             mPostNotificationTrackerFactory.newTracker(null)));
                 }
             }
@@ -3762,7 +3763,7 @@ public class NotificationManagerService extends SystemService {
                 Notification notification, int userId) throws RemoteException {
             enqueueNotificationInternal(pkg, opPkg, Binder.getCallingUid(),
                     Binder.getCallingPid(), tag, id, notification, userId,
-                    false /* byForegroundService */);
+                    /* byForegroundService= */ false, /* isAppProvided= */ true);
         }
 
         @Override
@@ -6996,7 +6997,7 @@ public class NotificationManagerService extends SystemService {
         public void enqueueNotification(String pkg, String opPkg, int callingUid, int callingPid,
                 String tag, int id, Notification notification, int userId) {
             enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
-                    userId, false /* byForegroundService */);
+                    userId, /* byForegroundService= */ false , /* isAppProvided= */ true);
         }
 
         @Override
@@ -7004,7 +7005,7 @@ public class NotificationManagerService extends SystemService {
                 String tag, int id, Notification notification, int userId,
                 boolean byForegroundService) {
             enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
-                    userId, byForegroundService);
+                    userId, byForegroundService, /* isAppProvided= */ true);
         }
 
         @Override
@@ -7216,7 +7217,8 @@ public class NotificationManagerService extends SystemService {
                 r.getSbn().getInitialPid(), r.getSbn().getTag(),
                 r.getSbn().getId(), r.getNotification(),
                 r.getSbn().getUserId(), /* postSilently= */ true,
-                /* byForegroundService= */ false);
+                /* byForegroundService= */ false,
+                /* isAppProvided= */ false);
     }
 
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted) {
@@ -7277,19 +7279,21 @@ public class NotificationManagerService extends SystemService {
 
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
-            int incomingUserId, boolean byForegroundService) {
+            int incomingUserId, boolean byForegroundService, boolean isAppProvided) {
         enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
-                incomingUserId, false /* postSilently */, byForegroundService);
+                incomingUserId, false /* postSilently */, byForegroundService, isAppProvided);
     }
 
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
-            int incomingUserId, boolean postSilently, boolean byForegroundService) {
+            int incomingUserId, boolean postSilently, boolean byForegroundService,
+            boolean isAppProvided) {
         PostNotificationTracker tracker = acquireWakeLockForPost(pkg, callingUid);
         boolean enqueued = false;
         try {
             enqueued = enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id,
-                    notification, incomingUserId, postSilently, tracker, byForegroundService);
+                    notification, incomingUserId, postSilently, tracker, byForegroundService,
+                    isAppProvided);
         } finally {
             if (!enqueued) {
                 tracker.cancel();
@@ -7315,7 +7319,7 @@ public class NotificationManagerService extends SystemService {
     private boolean enqueueNotificationInternal(final String pkg, final String opPkg,  //HUI
             final int callingUid, final int callingPid, final String tag, final int id,
             final Notification notification, int incomingUserId, boolean postSilently,
-            PostNotificationTracker tracker, boolean byForegroundService) {
+            PostNotificationTracker tracker, boolean byForegroundService, boolean isAppProvided) {
         if (DBG) {
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id
                     + " notification=" + notification);
@@ -7516,7 +7520,8 @@ public class NotificationManagerService extends SystemService {
         // Need escalated privileges to get package importance.
         final int packageImportance = getPackageImportanceWithIdentity(pkg);
         boolean isAppForeground = packageImportance == IMPORTANCE_FOREGROUND;
-        mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground, tracker));
+        mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground,
+                /* isAppProvided= */ isAppProvided, tracker));
         return true;
     }
 
@@ -7896,6 +7901,7 @@ public class NotificationManagerService extends SystemService {
                             mHandler.post(
                                     new EnqueueNotificationRunnable(
                                             r.getUser().getIdentifier(), r, isAppForeground,
+                                            /* isAppProvided= */ false,
                                             mPostNotificationTrackerFactory.newTracker(null)));
                         }
                     }
@@ -8466,13 +8472,15 @@ public class NotificationManagerService extends SystemService {
         private final NotificationRecord r;
         private final int userId;
         private final boolean isAppForeground;
+        private final boolean isAppProvided;
         private final PostNotificationTracker mTracker;
 
         EnqueueNotificationRunnable(int userId, NotificationRecord r, boolean foreground,
-                PostNotificationTracker tracker) {
+                boolean isAppProvided, PostNotificationTracker tracker) {
             this.userId = userId;
             this.r = r;
             this.isAppForeground = foreground;
+            this.isAppProvided = isAppProvided;
             this.mTracker = checkNotNull(tracker);
         }
 
@@ -8557,9 +8565,10 @@ public class NotificationManagerService extends SystemService {
                     if (old != null) {
                         enqueueStatus = EVENTLOG_ENQUEUE_STATUS_UPDATE;
                     }
+                    int appProvided = isAppProvided ? 1 : 0;
                     EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
                             pkg, id, tag, userId, notification.toString(),
-                            enqueueStatus);
+                            enqueueStatus, appProvided);
                 }
 
                 // tell the assistant service about the notification
@@ -8719,7 +8728,7 @@ public class NotificationManagerService extends SystemService {
                                         // was not autogrouped onPost, to avoid an unnecessary sort.
                                         // We add the autogroup key to the notification without a
                                         // sort here, and it'll be sorted below with extractSignals.
-                                        addAutogroupKeyLocked(key, /*requestSort=*/false);
+                                        addAutogroupKeyLocked(key, /* requestSort= */false);
                                     }
                                 }
                             }
@@ -11344,7 +11353,7 @@ public class NotificationManagerService extends SystemService {
             record.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
 
             mHandler.post(new EnqueueNotificationRunnable(record.getUser().getIdentifier(),
-                    record, isAppForeground,
+                    record, isAppForeground, /* isAppProvided= */ false,
                     mPostNotificationTrackerFactory.newTracker(null)));
         }
     }
