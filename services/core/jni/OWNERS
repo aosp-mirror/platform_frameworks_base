@@ -5,8 +5,8 @@ per-file com_android_server_lights_LightsService.cpp = michaelwr@google.com, san
 per-file com_android_server_input_* = file:/INPUT_OWNERS
 
 # Power
-per-file com_android_server_HardwarePropertiesManagerService.cpp = michaelwr@google.com, santoscordon@google.com
-per-file com_android_server_power_PowerManagerService.* = michaelwr@google.com, santoscordon@google.com
+per-file com_android_server_HardwarePropertiesManagerService.cpp = file:/services/core/java/com/android/server/power/OWNERS
+per-file com_android_server_power_PowerManagerService.* = file:/services/core/java/com/android/server/power/OWNERS
 
 # BatteryStats
 per-file com_android_server_am_BatteryStatsService.cpp = file:/BATTERY_STATS_OWNERS
