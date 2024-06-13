@@ -3121,6 +3121,8 @@
 
     <!-- Accessibility label for a11y action to show the bouncer (pin/pattern/password) screen lock [CHAR LIMIT=NONE] -->
     <string name="accessibility_bouncer">enter screen lock</string>
+    <!-- Accessibility label for side fingerprint sensor indicator [CHAR LIMIT=NONE] -->
+    <string name="accessibility_side_fingerprint_indicator_label">Touch the fingerprint sensor. It\u2019s the shorter button on the side of the phone</string>
     <!-- Accessibility label for fingerprint sensor [CHAR LIMIT=NONE] -->
     <string name="accessibility_fingerprint_label">Fingerprint sensor</string>
     <!-- Accessibility action for tapping on an affordance that will bring up the user's
