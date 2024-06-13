@@ -1,0 +1,34 @@
+/*
+ * Copyright 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.ondeviceintelligence;
+
+option java_package = "com.android.server.ondeviceintelligence";
+option java_multiple_files = true;
+
+
+message InferenceInfo {
+  // Uid for the caller app.
+  optional int32 uid = 1;
+  // Inference start time(milliseconds from the epoch time).
+  optional int64 start_time_ms = 2;
+  // Inference end time(milliseconds from the epoch time).
+  optional int64 end_time_ms = 3;
+  // Suspended time in milliseconds.
+  optional int64 suspended_time_ms = 4;
+}
