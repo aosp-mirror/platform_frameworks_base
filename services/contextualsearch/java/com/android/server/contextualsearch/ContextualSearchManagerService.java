@@ -466,12 +466,25 @@ public class ContextualSearchManagerService extends SystemService {
                 issueToken();
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(ContextualSearchManager.EXTRA_TOKEN, mToken);
-                try {
-                    callback.onResult(
+                // We get take the screenshot with the system server's identity because the system
+                // server has READ_FRAME_BUFFER permission to get the screenshot.
+                Binder.withCleanCallingIdentity(() -> {
+                    if (mWmInternal != null) {
+                        bundle.putParcelable(ContextualSearchManager.EXTRA_SCREENSHOT,
+                                mWmInternal.takeAssistScreenshot(Set.of(
+                                        TYPE_STATUS_BAR,
+                                        TYPE_NAVIGATION_BAR,
+                                        TYPE_NAVIGATION_BAR_PANEL,
+                                        TYPE_POINTER))
+                                .asBitmap().asShared());
+                    }
+                    try {
+                        callback.onResult(
                             new ContextualSearchState(null, null, bundle));
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error invoking ContextualSearchCallback", e);
-                }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error invoking ContextualSearchCallback", e);
+                    }
+                });
             }
             synchronized (mLock) {
                 mStateCallback = callback;
