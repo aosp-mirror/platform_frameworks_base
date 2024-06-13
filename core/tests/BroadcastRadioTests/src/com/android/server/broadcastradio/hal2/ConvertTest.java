@@ -21,7 +21,6 @@ import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
 import android.hardware.broadcastradio.V2_0.DabTableEntry;
 import android.hardware.broadcastradio.V2_0.IdentifierType;
 import android.hardware.broadcastradio.V2_0.Properties;
-import android.hardware.broadcastradio.V2_0.VendorKeyValue;
 import android.hardware.radio.Announcement;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
@@ -149,6 +148,26 @@ public final class ConvertTest {
     }
 
     @Test
+    public void propertiesFromHalProperties_withInvalidBand() {
+        AmFmRegionConfig amFmRegionConfig = new AmFmRegionConfig();
+        amFmRegionConfig.ranges = new ArrayList<>(Arrays.asList(createAmFmBandRange(
+                /* lowerBound= */ 50000, /* upperBound= */ 60000, /* spacing= */ 10),
+                createAmFmBandRange(FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING)));
+
+        RadioManager.ModuleProperties properties = convertToModuleProperties(amFmRegionConfig,
+                new ArrayList<>());
+
+        RadioManager.BandDescriptor[] bands = properties.getBands();
+        expect.withMessage("Band descriptors").that(bands).hasLength(1);
+        expect.withMessage("FM band frequency lower limit")
+                .that(bands[0].getLowerLimit()).isEqualTo(FM_LOWER_LIMIT);
+        expect.withMessage("FM band frequency upper limit")
+                .that(bands[0].getUpperLimit()).isEqualTo(FM_UPPER_LIMIT);
+        expect.withMessage("FM band frequency spacing")
+                .that(bands[0].getSpacing()).isEqualTo(FM_SPACING);
+    }
+
+    @Test
     public void announcementFromHalAnnouncement_typesMatch() {
         expect.withMessage("Announcement type")
                 .that(ANNOUNCEMENT.getType()).isEqualTo(TEST_ENABLED_TYPE);
@@ -173,20 +192,31 @@ public final class ConvertTest {
                 .that(ANNOUNCEMENT.getVendorInfo()).isEmpty();
     }
 
+    @Test
+    public void getBands_withInvalidFrequency() {
+        expect.withMessage("Band for invalid frequency")
+                .that(Utils.getBand(/* freq= */ 110000)).isEqualTo(FrequencyBand.UNKNOWN);
+    }
+
     private static RadioManager.ModuleProperties convertToModuleProperties() {
         AmFmRegionConfig amFmConfig = createAmFmRegionConfig();
         List<DabTableEntry> dabTableEntries = Arrays.asList(
                 createDabTableEntry(DAB_ENTRY_LABEL_1, DAB_ENTRY_FREQUENCY_1),
                 createDabTableEntry(DAB_ENTRY_LABEL_2, DAB_ENTRY_FREQUENCY_2));
-        Properties properties = createHalProperties();
 
+        return convertToModuleProperties(amFmConfig, dabTableEntries);
+    }
+
+    private static RadioManager.ModuleProperties convertToModuleProperties(
+            AmFmRegionConfig amFmConfig, List<DabTableEntry> dabTableEntries) {
+        Properties properties = createHalProperties();
         return Convert.propertiesFromHal(TEST_ID, TEST_SERVICE_NAME, properties,
                 amFmConfig, dabTableEntries);
     }
 
     private static AmFmRegionConfig createAmFmRegionConfig() {
         AmFmRegionConfig amFmRegionConfig = new AmFmRegionConfig();
-        amFmRegionConfig.ranges = new ArrayList<AmFmBandRange>(Arrays.asList(
+        amFmRegionConfig.ranges = new ArrayList<>(Arrays.asList(
                 createAmFmBandRange(FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING),
                 createAmFmBandRange(AM_LOWER_LIMIT, AM_UPPER_LIMIT, AM_SPACING)));
         return amFmRegionConfig;
@@ -216,7 +246,7 @@ public final class ConvertTest {
         halProperties.product = TEST_PRODUCT;
         halProperties.version = TEST_VERSION;
         halProperties.serial = TEST_SERIAL;
-        halProperties.vendorInfo = new ArrayList<VendorKeyValue>(Arrays.asList(
+        halProperties.vendorInfo = new ArrayList<>(Arrays.asList(
                 TestUtils.makeVendorKeyValue(VENDOR_INFO_KEY_1, VENDOR_INFO_VALUE_1),
                 TestUtils.makeVendorKeyValue(VENDOR_INFO_KEY_2, VENDOR_INFO_VALUE_2)));
         return halProperties;

@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.bluetooth.qsdialog
 
-import com.android.systemui.dagger.SysUISingleton
-import dagger.Binds
-import dagger.Module
+package com.android.server.power.stats;
 
-@Module
-interface BluetoothTileDialogModule {
-    @Binds
-    @SysUISingleton
-    fun bindDeviceItemActionInteractor(
-        impl: DeviceItemActionInteractorImpl
-    ): DeviceItemActionInteractor
+import android.hardware.power.stats.EnergyConsumerType;
+import android.os.BatteryConsumer;
+
+public class GnssPowerStatsCollector extends EnergyConsumerPowerStatsCollector {
+
+    GnssPowerStatsCollector(Injector injector) {
+        super(injector, BatteryConsumer.POWER_COMPONENT_GNSS,
+                BatteryConsumer.powerComponentIdToString(BatteryConsumer.POWER_COMPONENT_GNSS),
+                EnergyConsumerType.GNSS, /* energy consumer name */ null,
+                new GnssPowerStatsLayout());
+    }
 }

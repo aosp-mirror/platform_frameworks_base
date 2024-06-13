@@ -3892,9 +3892,10 @@ public final class ActiveServices {
                 return;
             }
 
-            final long lastTopTime = sr.app.mState.getLastTopTime();
-            final long constantTimeLimit = getTimeLimitForFgsType(fgsType);
+            final boolean currentlyTop = sr.app.mState.getCurProcState() <= PROCESS_STATE_TOP;
             final long nowUptime = SystemClock.uptimeMillis();
+            final long lastTopTime = currentlyTop ? nowUptime : sr.app.mState.getLastTopTime();
+            final long constantTimeLimit = getTimeLimitForFgsType(fgsType);
             if (lastTopTime != Long.MIN_VALUE && constantTimeLimit > (nowUptime - lastTopTime)) {
                 // Discard any other messages for this service
                 mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_FGS_TIMEOUT_MSG, sr);
@@ -6290,7 +6291,7 @@ public final class ActiveServices {
                 final ComponentName clientSideComponentName =
                         cr.aliasComponent != null ? cr.aliasComponent : r.name;
                 try {
-                    cr.conn.connected(r.name, null, true);
+                    cr.conn.connected(clientSideComponentName, null, true);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failure disconnecting service " + r.shortInstanceName
                           + " to connection " + c.get(i).conn.asBinder()

@@ -3249,16 +3249,20 @@
     <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
         android:protectionLevel="signature|appop" />
 
-    <!-- Allows applications to access profiles with ACCESS_HIDDEN_PROFILES user property
-     <p>Protection level: normal
-     @FlaggedApi("android.multiuser.enable_permission_to_access_hidden_profiles") -->
+    <!-- Allows applications to access profiles with
+        {@code android.content.pm.UserProperties#PROFILE_API_VISIBILITY_HIDDEN} user property, e.g.
+        {@link android.os.UserManager#USER_TYPE_PROFILE_PRIVATE}.
+        <p>Protection level: normal
+        @FlaggedApi("android.multiuser.enable_permission_to_access_hidden_profiles") -->
     <permission android:name="android.permission.ACCESS_HIDDEN_PROFILES"
         android:label="@string/permlab_accessHiddenProfile"
         android:description="@string/permdesc_accessHiddenProfile"
         android:protectionLevel="normal" />
 
-    <!-- @SystemApi @hide Allows privileged applications to get details about hidden profile
-        users.
+    <!-- @SystemApi @hide Allows privileged applications to get details about profiles with
+        {@code android.content.pm.UserProperties#PROFILE_API_VISIBILITY_HIDDEN} user property, e.g.
+        {@link android.os.UserManager#USER_TYPE_PROFILE_PRIVATE}. Removes extra requirements such
+        as having {@link android.app.role.RoleManager#ROLE_HOME} role for LauncherApps APIs.
         @FlaggedApi("android.multiuser.enable_permission_to_access_hidden_profiles") -->
     <permission
         android:name="android.permission.ACCESS_HIDDEN_PROFILES_FULL"
@@ -8193,6 +8197,17 @@
     -->
     <permission android:name="android.permission.SETUP_FSVERITY"
                 android:protectionLevel="signature|privileged"/>
+
+    <!--
+        @TestApi
+        Signature permission reserved for testing. This should never be used to
+        gate any actual functionality.
+        <p>
+        Protection level: signature
+        @hide
+    -->
+    <permission android:name="android.permission.RESERVED_FOR_TESTING_SIGNATURE"
+                android:protectionLevel="signature"/>
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

@@ -555,7 +555,12 @@ constructor(
 
                 override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                     super.onTransitionAnimationStart(isExpandingFullyAbove)
-
+                    if (communalHub()) {
+                        communalSceneInteractor.snapToScene(
+                            CommunalScenes.Blank,
+                            ActivityTransitionAnimator.TIMINGS.totalDuration
+                        )
+                    }
                     // Double check that the keyguard is still showing and not going
                     // away, but if so set the keyguard occluded. Typically, WM will let
                     // KeyguardViewMediator know directly, but we're overriding that to
@@ -581,9 +586,6 @@ constructor(
                     // collapse the shade (or at least run the post collapse runnables)
                     // later on.
                     centralSurfaces?.setIsLaunchingActivityOverLockscreen(false, false)
-                    if (communalHub()) {
-                        communalSceneInteractor.snapToScene(CommunalScenes.Blank)
-                    }
                     delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
                 }
 

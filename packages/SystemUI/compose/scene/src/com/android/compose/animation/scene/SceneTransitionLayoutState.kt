@@ -226,6 +226,12 @@ sealed interface TransitionState {
         val toScene: SceneKey,
     ) : TransitionState {
         /**
+         * The key of this transition. This should usually be null, but it can be specified to use a
+         * specific set of transformations associated to this transition.
+         */
+        open val key: TransitionKey? = null
+
+        /**
          * The progress of the transition. This is usually in the `[0; 1]` range, but it can also be
          * less than `0` or greater than `1` when using transitions with a spring AnimationSpec or
          * when flinging quickly during a swipe gesture.
@@ -455,11 +461,7 @@ internal abstract class BaseSceneTransitionLayoutState(
      *
      * Important: you *must* call [finishTransition] once the transition is finished.
      */
-    internal fun startTransition(
-        transition: TransitionState.Transition,
-        transitionKey: TransitionKey? = null,
-        chain: Boolean = true,
-    ) {
+    internal fun startTransition(transition: TransitionState.Transition, chain: Boolean = true) {
         checkThread()
 
         // Compute the [TransformationSpec] when the transition starts.
@@ -469,7 +471,9 @@ internal abstract class BaseSceneTransitionLayoutState(
 
         // Update the transition specs.
         transition.transformationSpec =
-            transitions.transitionSpec(fromScene, toScene, key = transitionKey).transformationSpec()
+            transitions
+                .transitionSpec(fromScene, toScene, key = transition.key)
+                .transformationSpec()
         if (orientation != null) {
             transition.updateOverscrollSpecs(
                 fromSpec = transitions.overscrollSpec(fromScene, orientation),
@@ -568,9 +572,10 @@ internal abstract class BaseSceneTransitionLayoutState(
                     originalTransition = transitionState,
                     fromScene = targetCurrentScene,
                     toScene = matchingLink.targetTo,
+                    key = matchingLink.targetTransitionKey,
                 )
 
-            stateLink.target.startTransition(linkedTransition, matchingLink.targetTransitionKey)
+            stateLink.target.startTransition(linkedTransition)
             activeTransitionLinks[stateLink] = linkedTransition
         }
     }
@@ -763,7 +768,7 @@ internal class HoistedSceneTransitionLayoutState(
 /** A [MutableSceneTransitionLayoutState] that holds the value for the current scene. */
 internal class MutableSceneTransitionLayoutStateImpl(
     initialScene: SceneKey,
-    override var transitions: SceneTransitions,
+    override var transitions: SceneTransitions = transitions {},
     private val canChangeScene: (SceneKey) -> Boolean = { true },
     stateLinks: List<StateLink> = emptyList(),
     enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,

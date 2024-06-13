@@ -3933,11 +3933,28 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 + packageName + ": " + e);
                     }
                     if (mUserController.isUserRunning(user, userRunningFlags)) {
+
+                        String description;
+                        if (reason == null) {
+                            description = "from pid " + callingPid;
+
+                            // Add the name of the process if it's available
+                            final ProcessRecord callerApp;
+                            synchronized (mPidsSelfLocked) {
+                                callerApp = mPidsSelfLocked.get(callingPid);
+                            }
+                            if (callerApp != null) {
+                                description += " (" + callerApp.processName + ")";
+                            }
+                        } else {
+                            description = reason;
+                        }
+
                         forceStopPackageLocked(packageName, UserHandle.getAppId(pkgUid),
                                 false /* callerWillRestart */, false /* purgeCache */,
                                 true /* doIt */, false /* evenPersistent */,
-                                false /* uninstalling */, true /* packageStateStopped */, user,
-                                reason == null ? ("from pid " + callingPid) : reason);
+                                false /* uninstalling */, true /* packageStateStopped */,
+                                user, description);
                         finishForceStopPackageLocked(packageName, pkgUid);
                     }
                 }
@@ -10207,19 +10224,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         addStartInfoTimestampInternal(key, timestampNs, userId, callingUid);
     }
 
-    @Override
-    public void reportStartInfoViewTimestamps(long renderThreadDrawStartTimeNs,
-            long framePresentedTimeNs) {
-        int callingUid = Binder.getCallingUid();
-        int userId = UserHandle.getUserId(callingUid);
-        addStartInfoTimestampInternal(
-                ApplicationStartInfo.START_TIMESTAMP_INITIAL_RENDERTHREAD_FRAME,
-                renderThreadDrawStartTimeNs, userId, callingUid);
-        addStartInfoTimestampInternal(
-                ApplicationStartInfo.START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE,
-                framePresentedTimeNs, userId, callingUid);
-    }
-
     private void addStartInfoTimestampInternal(int key, long timestampNs, int userId, int uid) {
         mProcessList.getAppStartInfoTracker().addTimestampToStart(
                 Settings.getPackageNameForUid(mContext, uid),
@@ -15274,15 +15278,50 @@ public class ActivityManagerService extends IActivityManager.Stub
             BackgroundStartPrivileges backgroundStartPrivileges,
             @Nullable int[] broadcastAllowList,
             @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
-        final int cookie = BroadcastQueue.traceBegin("broadcastIntentLockedTraced");
-        final int res = broadcastIntentLockedTraced(callerApp, callerPackage, callerFeatureId,
-                intent, resolvedType, resultToApp, resultTo, resultCode, resultData, resultExtras,
-                requiredPermissions, excludedPermissions, excludedPackages, appOp,
-                BroadcastOptions.fromBundleNullable(bOptions), ordered, sticky,
-                callingPid, callingUid, realCallingUid, realCallingPid, userId,
-                backgroundStartPrivileges, broadcastAllowList, filterExtrasForReceiver);
-        BroadcastQueue.traceEnd(cookie);
-        return res;
+        final int cookie = traceBroadcastIntentBegin(intent, resultTo, ordered, sticky,
+                callingUid, realCallingUid, userId);
+        try {
+            final int res = broadcastIntentLockedTraced(callerApp, callerPackage, callerFeatureId,
+                    intent, resolvedType, resultToApp, resultTo, resultCode, resultData,
+                    resultExtras, requiredPermissions, excludedPermissions, excludedPackages,
+                    appOp, BroadcastOptions.fromBundleNullable(bOptions), ordered, sticky,
+                    callingPid, callingUid, realCallingUid, realCallingPid, userId,
+                    backgroundStartPrivileges, broadcastAllowList, filterExtrasForReceiver);
+            return res;
+        } finally {
+            traceBroadcastIntentEnd(cookie);
+        }
+    }
+
+    private static int traceBroadcastIntentBegin(Intent intent, IIntentReceiver resultTo,
+            boolean ordered, boolean sticky, int callingUid, int realCallingUid, int userId) {
+        if (!Flags.traceReceiverRegistration()) {
+            return BroadcastQueue.traceBegin("broadcastIntentLockedTraced");
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            final StringBuilder sb = new StringBuilder("broadcastIntent: ");
+            sb.append(callingUid); sb.append('/');
+            final String action = intent.getAction();
+            sb.append(action == null ? null : action); sb.append('/');
+            sb.append("0x"); sb.append(Integer.toHexString(intent.getFlags())); sb.append('/');
+            sb.append(ordered ? "O" : "_");
+            sb.append(sticky ? "S" : "_");
+            sb.append(resultTo != null ? "C" : "_");
+            sb.append('/');
+            sb.append('u'); sb.append(userId);
+            if (callingUid != realCallingUid) {
+                sb.append('/');
+                sb.append("sender="); sb.append(realCallingUid);
+            }
+            return BroadcastQueue.traceBegin(sb.toString());
+        }
+        return 0;
+    }
+
+    private static void traceBroadcastIntentEnd(int cookie) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            BroadcastQueue.traceEnd(cookie);
+        }
     }
 
     @GuardedBy("this")

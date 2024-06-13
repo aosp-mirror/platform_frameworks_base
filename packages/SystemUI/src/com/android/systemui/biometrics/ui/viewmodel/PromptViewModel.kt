@@ -262,7 +262,8 @@ constructor(
                 _forceLargeSize,
                 displayStateInteractor.isLargeScreen,
                 displayStateInteractor.currentRotation,
-            ) { forceLarge, isLargeScreen, rotation ->
+                modalities
+            ) { forceLarge, isLargeScreen, rotation, modalities ->
                 when {
                     forceLarge ||
                         isLargeScreen ||
@@ -270,7 +271,8 @@ constructor(
                         PromptPosition.Bottom
                     rotation == DisplayRotation.ROTATION_90 -> PromptPosition.Right
                     rotation == DisplayRotation.ROTATION_270 -> PromptPosition.Left
-                    rotation == DisplayRotation.ROTATION_180 -> PromptPosition.Top
+                    rotation == DisplayRotation.ROTATION_180 && modalities.hasUdfps ->
+                        PromptPosition.Top
                     else -> PromptPosition.Bottom
                 }
             }
@@ -362,7 +364,14 @@ constructor(
                                 landscapeMediumBottomPadding
                             )
                         }
-                    PromptPosition.Top -> Rect()
+                    PromptPosition.Top ->
+                        if (size.isSmall) {
+                            Rect(0, 0, 0, portraitSmallBottomPadding)
+                        } else if (size.isMedium && modalities.hasUdfps) {
+                            Rect(0, 0, 0, sensorBounds.bottom)
+                        } else {
+                            Rect(0, 0, 0, portraitMediumBottomPadding)
+                        }
                 }
             }
             .distinctUntilChanged()
@@ -504,7 +513,6 @@ constructor(
             .map {
                 when {
                     !(customBiometricPrompt() && constraintBp()) || it == null -> null
-                    it.logoRes != -1 -> context.resources.getDrawable(it.logoRes, context.theme)
                     it.logoBitmap != null -> BitmapDrawable(context.resources, it.logoBitmap)
                     else -> context.getUserBadgedIcon(it, iconProvider, activityTaskManager)
                 }

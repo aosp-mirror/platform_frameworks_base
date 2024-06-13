@@ -78,10 +78,50 @@ filegroup {
     visibility: ["//visibility:private"],
 }
 
+// Tests where robolectric conversion caused errors in SystemUITests at runtime
+filegroup {
+    name: "SystemUI-tests-broken-robofiles-sysui-run",
+    srcs: [
+        "tests/src/**/systemui/broadcast/BroadcastDispatcherTest.kt",
+        "tests/src/**/systemui/broadcast/ActionReceiverTest.kt",
+        "tests/src/**/systemui/doze/DozeMachineTest.java",
+        "tests/src/**/systemui/globalactions/GlobalActionsDialogLiteTest.java",
+        "tests/src/**/systemui/globalactions/GlobalActionsImeTest.java",
+        "tests/src/**/systemui/keyguard/data/repository/KeyguardTransitionRepositoryTest.kt",
+        "tests/src/**/systemui/media/controls/domain/pipeline/LegacyMediaDataManagerImplTest.kt",
+        "tests/src/**/systemui/media/controls/domain/pipeline/MediaDataProcessorTest.kt",
+        "tests/src/**/systemui/media/dialog/MediaOutputAdapterTest.java",
+        "tests/src/**/systemui/media/dialog/MediaOutputBaseDialogTest.java",
+        "tests/src/**/systemui/media/dialog/MediaOutputBroadcastDialogTest.java",
+        "tests/src/**/systemui/media/dialog/MediaOutputDialogTest.java",
+        "tests/src/**/systemui/mediaprojection/permission/MediaProjectionPermissionDialogDelegateTest.kt",
+    ],
+}
+
 // Tests where robolectric failed at runtime. (go/multivalent-tests)
 filegroup {
     name: "SystemUI-tests-broken-robofiles-run",
     srcs: [
+        "tests/src/**/systemui/accessibility/AccessibilityButtonModeObserverTest.java",
+        "tests/src/**/systemui/accessibility/AccessibilityButtonTargetsObserverTest.java",
+        "tests/src/**/systemui/accessibility/FullscreenMagnificationControllerTest.java",
+        "tests/src/**/systemui/accessibility/WindowMagnificationAnimationControllerTest.java",
+        "tests/src/**/systemui/animation/FontInterpolatorTest.kt",
+        "tests/src/**/systemui/animation/TextAnimatorTest.kt",
+        "tests/src/**/systemui/animation/TextInterpolatorTest.kt",
+        "tests/src/**/systemui/animation/ActivityTransitionAnimatorTest.kt",
+        "tests/src/**/systemui/animation/AnimatorTestRuleOrderTest.kt",
+        "tests/src/**/systemui/animation/DialogTransitionAnimatorTest.kt",
+        "tests/src/**/systemui/broadcast/ActionReceiverTest.kt",
+        "tests/src/**/systemui/broadcast/BroadcastDispatcherTest.kt",
+        "tests/src/**/systemui/compose/ComposeInitializerTest.kt",
+        "tests/src/**/systemui/controls/ui/ControlsActivityTest.kt",
+        "tests/src/**/systemui/controls/management/ControlsEditingActivityTest.kt",
+        "tests/src/**/systemui/controls/management/ControlsRequestDialogTest.kt",
+        "tests/src/**/systemui/controls/ui/DetailDialogTest.kt",
+        "tests/src/**/systemui/doze/DozeMachineTest.kt",
+        "tests/src/**/systemui/fontscaling/FontScalingDialogDelegateTest.kt",
+        "tests/src/**/systemui/keyguard/CustomizationProviderTest.kt",
         "tests/src/**/systemui/globalactions/GlobalActionsColumnLayoutTest.java",
         "tests/src/**/systemui/globalactions/GlobalActionsDialogLiteTest.java",
         "tests/src/**/systemui/globalactions/GlobalActionsImeTest.java",
@@ -176,9 +216,7 @@ filegroup {
     ],
 }
 
-// We are running robolectric tests in the tests directory as well as
-// multivalent tests.  If you add a test, and it doesn't run in robolectric,
-// it should be added to this exclusion list. go/multivalent-tests
+// Tests where robolectric failed at compile time. (go/multivalent-tests)
 filegroup {
     name: "SystemUI-tests-broken-robofiles-compile",
     srcs: [
@@ -330,6 +368,7 @@ filegroup {
         "tests/src/**/systemui/shared/system/RemoteTransitionTest.java",
         "tests/src/**/systemui/navigationbar/NavigationBarControllerImplTest.java",
         "tests/src/**/systemui/bluetooth/qsdialog/AudioSharingInteractorTest.kt",
+        "tests/src/**/systemui/bluetooth/qsdialog/DeviceItemActionInteractorTest.kt",
         "tests/src/**/systemui/notetask/quickaffordance/NoteTaskQuickAffordanceConfigTest.kt",
         "tests/src/**/systemui/notetask/LaunchNotesRoleSettingsTrampolineActivityTest.kt",
         "tests/src/**/systemui/notetask/shortcut/LaunchNoteTaskActivityTest.kt",
@@ -746,7 +785,6 @@ android_app {
     kotlincflags: ["-Xjvm-default=all"],
     optimize: {
         shrink_resources: false,
-        optimized_shrink_resources: false,
         proguard_flags_files: ["proguard.flags"],
     },
 
@@ -811,6 +849,7 @@ android_robolectric_test {
     exclude_srcs: [
         ":SystemUI-tests-broken-robofiles-compile",
         ":SystemUI-tests-broken-robofiles-run",
+        ":SystemUI-tests-broken-robofiles-sysui-run",
     ],
     static_libs: [
         "RoboTestLibraries",
@@ -882,7 +921,6 @@ systemui_optimized_java_defaults {
                 optimize: true,
                 shrink: true,
                 shrink_resources: true,
-                optimized_shrink_resources: true,
                 ignore_warnings: false,
                 proguard_compatibility: false,
             },

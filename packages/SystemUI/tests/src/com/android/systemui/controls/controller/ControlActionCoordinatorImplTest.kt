@@ -16,8 +16,8 @@
 
 package com.android.systemui.controls.ui
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import android.testing.AndroidTestingRunner
 import android.view.HapticFeedbackConstants
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
@@ -48,7 +48,7 @@ import org.mockito.MockitoAnnotations
 import java.util.Optional
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ControlActionCoordinatorImplTest : SysuiTestCase() {
     @Mock
     private lateinit var vibratorHelper: VibratorHelper

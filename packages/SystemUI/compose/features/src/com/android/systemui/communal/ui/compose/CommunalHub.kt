@@ -16,13 +16,13 @@
 
 package com.android.systemui.communal.ui.compose
 
-import android.appwidget.AppWidgetHostView
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.SizeF
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
 import android.widget.FrameLayout
+import android.widget.RemoteViews
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -132,6 +132,7 @@ import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
+import com.android.systemui.Flags.glanceableHubAnimateTimerActivityStarts
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -144,6 +145,7 @@ import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.PopupType
+import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -154,6 +156,7 @@ import kotlinx.coroutines.launch
 fun CommunalHub(
     modifier: Modifier = Modifier,
     viewModel: BaseCommunalViewModel,
+    interactionHandler: RemoteViews.InteractionHandler? = null,
     dialogFactory: SystemUIDialogFactory? = null,
     widgetConfigurator: WidgetConfigurator? = null,
     onOpenWidgetPicker: (() -> Unit)? = null,
@@ -262,6 +265,7 @@ fun CommunalHub(
                     contentListState = contentListState,
                     selectedKey = selectedKey,
                     widgetConfigurator = widgetConfigurator,
+                    interactionHandler = interactionHandler,
                 )
             }
         }
@@ -391,6 +395,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
     widgetConfigurator: WidgetConfigurator?,
+    interactionHandler: RemoteViews.InteractionHandler?,
 ) {
     var gridModifier =
         Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
@@ -468,7 +473,8 @@ private fun BoxScope.CommunalHubLazyGrid(
                         selected = selected && !isDragging,
                         widgetConfigurator = widgetConfigurator,
                         index = index,
-                        contentListState = contentListState
+                        contentListState = contentListState,
+                        interactionHandler = interactionHandler,
                     )
                 }
             } else {
@@ -479,7 +485,8 @@ private fun BoxScope.CommunalHubLazyGrid(
                     size = size,
                     selected = false,
                     index = index,
-                    contentListState = contentListState
+                    contentListState = contentListState,
+                    interactionHandler = interactionHandler,
                 )
             }
         }
@@ -759,6 +766,7 @@ private fun CommunalContent(
     widgetConfigurator: WidgetConfigurator? = null,
     index: Int,
     contentListState: ContentListState,
+    interactionHandler: RemoteViews.InteractionHandler?,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
@@ -778,7 +786,7 @@ private fun CommunalContent(
         is CommunalContentModel.WidgetContent.PendingWidget ->
             PendingWidgetPlaceholder(model, modifier)
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
-        is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
+        is CommunalContentModel.Smartspace -> SmartspaceContent(interactionHandler, model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
         is CommunalContentModel.Umo -> Umo(viewModel, modifier)
     }
@@ -1091,13 +1099,19 @@ fun PendingWidgetPlaceholder(
 
 @Composable
 private fun SmartspaceContent(
+    interactionHandler: RemoteViews.InteractionHandler?,
     model: CommunalContentModel.Smartspace,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
         modifier = modifier,
         factory = { context ->
-            AppWidgetHostView(context).apply { updateAppWidget(model.remoteViews) }
+            SmartspaceAppWidgetHostView(context).apply {
+                if (glanceableHubAnimateTimerActivityStarts()) {
+                    interactionHandler?.let { setInteractionHandler(it) }
+                }
+                updateAppWidget(model.remoteViews)
+            }
         },
         // For reusing composition in lazy lists.
         onReset = {},

@@ -36,7 +36,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -156,6 +158,28 @@ constructor(
             )
 
     /**
+     * The amount of transition into or out of the given [scene].
+     *
+     * The value will be `0` if not in this scene or `1` when fully in the given scene.
+     */
+    fun transitionProgress(scene: SceneKey): Flow<Float> {
+        return transitionState.flatMapLatest { transition ->
+            when (transition) {
+                is ObservableTransitionState.Idle -> {
+                    flowOf(if (transition.currentScene == scene) 1f else 0f)
+                }
+                is ObservableTransitionState.Transition -> {
+                    when {
+                        transition.toScene == scene -> transition.progress
+                        transition.fromScene == scene -> transition.progress.map { 1f - it }
+                        else -> flowOf(0f)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Returns the keys of all scenes in the container.
      *
      * The scenes will be sorted in z-order such that the last one is the one that should be
@@ -217,7 +241,14 @@ constructor(
         loggingReason: String,
     ) {
         val currentSceneKey = currentScene.value
-        val resolvedScene = sceneFamilyResolvers.get()[toScene]?.resolvedScene?.value ?: toScene
+        val resolvedScene =
+            sceneFamilyResolvers.get()[toScene]?.let { familyResolver ->
+                if (familyResolver.includesScene(currentSceneKey)) {
+                    return
+                } else {
+                    familyResolver.resolvedScene.value
+                }
+            } ?: toScene
         if (
             !validateSceneChange(
                 from = currentSceneKey,
@@ -298,8 +329,9 @@ constructor(
      * Returns the [concrete scene][Scenes] for [sceneKey] if it is a [scene family][SceneFamilies],
      * otherwise returns a singleton [Flow] containing [sceneKey].
      */
-    fun resolveSceneFamily(sceneKey: SceneKey): Flow<SceneKey> =
-        sceneFamilyResolvers.get()[sceneKey]?.resolvedScene ?: flowOf(sceneKey)
+    fun resolveSceneFamily(sceneKey: SceneKey): Flow<SceneKey> = flow {
+        emitAll(sceneFamilyResolvers.get()[sceneKey]?.resolvedScene ?: flowOf(sceneKey))
+    }
 
     private fun isVisibleInternal(
         raw: Boolean = repository.isVisible.value,
@@ -343,4 +375,12 @@ constructor(
 
         return from != to
     }
+
+    /** Returns a flow indicating if the currently visible scene can be resolved from [family]. */
+    fun isCurrentSceneInFamily(family: SceneKey): Flow<Boolean> =
+        currentScene.map { currentScene -> isSceneInFamily(currentScene, family) }
+
+    /** Returns `true` if [scene] can be resolved from [family]. */
+    fun isSceneInFamily(scene: SceneKey, family: SceneKey): Boolean =
+        sceneFamilyResolvers.get()[family]?.includesScene(scene) == true
 }

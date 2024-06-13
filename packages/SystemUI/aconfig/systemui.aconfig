@@ -981,6 +981,16 @@ flag {
 }
 
 flag {
+  name: "media_controls_lockscreen_shade_bug_fix"
+  namespace: "systemui"
+  description: "Use ShadeInteractor for media location changes"
+  bug: "319244625"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   namespace: "systemui"
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."
@@ -1036,6 +1046,16 @@ flag {
   namespace: "systemui"
   description: "Allows users to exit dream to keyguard with glanceable hub enabled"
   bug: "343505271"
+}
+
+flag {
+  name: "glanceable_hub_animate_timer_activity_starts"
+  namespace: "systemui"
+  description: "Properly animates activity starts from live timers on the glanceable hub"
+  bug: "345741071"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {

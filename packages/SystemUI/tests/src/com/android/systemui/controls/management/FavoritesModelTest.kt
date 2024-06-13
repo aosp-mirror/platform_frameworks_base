@@ -17,8 +17,8 @@
 package com.android.systemui.controls.management
 
 import android.content.ComponentName
-import android.testing.AndroidTestingRunner
 import androidx.recyclerview.widget.RecyclerView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlInterface
@@ -43,7 +43,7 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class FavoritesModelTest : SysuiTestCase() {
 
     companion object {

@@ -227,11 +227,11 @@ class DeviceEntryIconViewModelTest : SysuiTestCase() {
             assertThat(accessibilityDelegateHint)
                 .isEqualTo(DeviceEntryIconView.AccessibilityHintType.AUTHENTICATE)
 
-            // non-interactive lock icon
+            // interactive lock icon for non udfps as well so that user can navigate to bouncer
             fingerprintPropertyRepository.supportsRearFps()
 
             assertThat(accessibilityDelegateHint)
-                .isEqualTo(DeviceEntryIconView.AccessibilityHintType.NONE)
+                .isEqualTo(DeviceEntryIconView.AccessibilityHintType.AUTHENTICATE)
         }
 
     @Test

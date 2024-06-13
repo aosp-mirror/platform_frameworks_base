@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
@@ -85,6 +86,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Answers
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.anyFloat
@@ -132,6 +134,8 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var mGlanceableHubContainerController: GlanceableHubContainerController
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private lateinit var sysUiUnfoldComponent: SysUIUnfoldComponent
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
@@ -209,6 +213,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
                 dozeScrimController,
                 notificationShadeWindowController,
                 unfoldTransitionProgressProvider,
+                Optional.of(sysUiUnfoldComponent),
                 keyguardUnlockAnimationController,
                 notificationInsetsController,
                 ambientState,

@@ -62,6 +62,8 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.heads
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.phone.scrimController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.fakeWifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.wifiInteractor
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.util.time.systemClock
@@ -130,6 +132,8 @@ class KosmosJavaAdapter() {
     val shadeController by lazy { kosmos.shadeController }
     val shadeRepository by lazy { kosmos.shadeRepository }
     val shadeInteractor by lazy { kosmos.shadeInteractor }
+    val wifiInteractor by lazy { kosmos.wifiInteractor }
+    val fakeWifiRepository by lazy { kosmos.fakeWifiRepository }
 
     val ongoingActivityChipsViewModel by lazy { kosmos.ongoingActivityChipsViewModel }
     val scrimController by lazy { kosmos.scrimController }

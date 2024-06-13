@@ -48,6 +48,7 @@ import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.UdfpsUtils
+import com.android.systemui.biometrics.Utils.toBitmap
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
@@ -86,10 +87,12 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameter
+import platform.test.runner.parameterized.Parameters
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
@@ -105,7 +108,7 @@ private const val OP_PACKAGE_NAME_CAN_NOT_BE_FOUND = "can.not.be.found"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCase() {
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
@@ -127,7 +130,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
     private val defaultLogoIconWithOverrides = context.getDrawable(R.drawable.ic_add)
     private val logoResFromApp = R.drawable.ic_cake
-    private val logoFromApp = context.getDrawable(logoResFromApp)
+    private val logoDrawableFromAppRes = context.getDrawable(logoResFromApp)
     private val logoBitmapFromApp = Bitmap.createBitmap(400, 400, Bitmap.Config.RGB_565)
     private val defaultLogoDescription = "Test Android App"
     private val logoDescriptionFromApp = "Test Cake App"
@@ -221,7 +224,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         context.setMockPackageManager(packageManager)
         val resources = context.getOrCreateTestableResources()
-        resources.addOverride(logoResFromApp, logoFromApp)
+        resources.addOverride(logoResFromApp, logoDrawableFromAppRes)
         resources.addOverride(
             R.array.biometric_dialog_package_names_for_logo_with_overrides,
             arrayOf(packageNameForLogoWithOverrides)
@@ -1249,7 +1252,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Test
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun descriptionOverriddenByVerticalListContentView() =
-        runGenericTest(contentView = promptContentView, description = "test description") {
+        runGenericTest(description = "test description", contentView = promptContentView) {
             val contentView by collectLastValue(viewModel.contentView)
             val description by collectLastValue(viewModel.description)
 
@@ -1261,8 +1264,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun descriptionOverriddenByContentViewWithMoreOptionsButton() =
         runGenericTest(
-            contentView = promptContentViewWithMoreOptionsButton,
-            description = "test description"
+            description = "test description",
+            contentView = promptContentViewWithMoreOptionsButton
         ) {
             val contentView by collectLastValue(viewModel.contentView)
             val description by collectLastValue(viewModel.description)
@@ -1322,8 +1325,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_resSetByApp() =
         runGenericTest(logoRes = logoResFromApp) {
+            val expectedBitmap = context.getDrawable(logoResFromApp).toBitmap()
             val logo by collectLastValue(viewModel.logo)
-            assertThat(logo).isEqualTo(logoFromApp)
+            assertThat((logo as BitmapDrawable).bitmap.sameAs(expectedBitmap)).isTrue()
         }
 
     @Test
@@ -1436,7 +1440,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             descriptionFromApp = description,
             contentViewFromApp = contentView,
             logoResFromApp = logoRes,
-            logoBitmapFromApp = logoBitmap,
+            logoBitmapFromApp =
+                if (logoRes != -1) logoDrawableFromAppRes.toBitmap() else logoBitmap,
             logoDescriptionFromApp = logoDescription,
             packageName = packageName,
         )
@@ -1476,7 +1481,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     companion object {
         @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         fun data(): Collection<TestCase> = singleModalityTestCases + coexTestCases
 
         private val singleModalityTestCases =
@@ -1629,8 +1634,6 @@ private fun PromptSelectorInteractor.initializePrompt(
 ) {
     val info =
         PromptInfo().apply {
-            logoRes = logoResFromApp
-            logoBitmap = logoBitmapFromApp
             logoDescription = logoDescriptionFromApp
             title = "t"
             subtitle = "s"
@@ -1640,6 +1643,9 @@ private fun PromptSelectorInteractor.initializePrompt(
             isDeviceCredentialAllowed = allowCredentialFallback
             isConfirmationRequested = requireConfirmation
         }
+    if (logoBitmapFromApp != null) {
+        info.setLogo(logoResFromApp, logoBitmapFromApp)
+    }
 
     setPrompt(
         info,

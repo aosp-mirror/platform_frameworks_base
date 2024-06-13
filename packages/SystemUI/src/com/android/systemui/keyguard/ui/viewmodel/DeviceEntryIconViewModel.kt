@@ -264,7 +264,7 @@ constructor(
         accessibilityInteractor.isEnabled.flatMapLatest { touchExplorationEnabled ->
             if (touchExplorationEnabled) {
                 combine(iconType, isInteractive) { iconType, isInteractive ->
-                    if (isInteractive) {
+                    if (isInteractive || iconType == DeviceEntryIconView.IconType.LOCK) {
                         iconType.toAccessibilityHintType()
                     } else {
                         DeviceEntryIconView.AccessibilityHintType.NONE

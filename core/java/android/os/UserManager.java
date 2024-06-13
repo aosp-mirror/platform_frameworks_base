@@ -1907,6 +1907,31 @@ public class UserManager {
             "no_near_field_communication_radio";
 
     /**
+     * This user restriction specifies if Near-field communication is disallowed to change
+     * on the device. If Near-field communication is disallowed it cannot be changed via Settings.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile on the parent profile.
+     * In both cases, the restriction applies globally on the device and will not allow Near-field
+     * communication state being changed.
+     *
+     * <p>
+     * Near-field communication (NFC) is a radio technology that allows two devices (like your phone
+     * and a payments terminal) to communicate with each other when they're close together.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_USER_RESTRICTION)
+    public static final String DISALLOW_CHANGE_NEAR_FIELD_COMMUNICATION_RADIO =
+            "no_change_near_field_communication_radio";
+
+    /**
      * This user restriction specifies if Thread network is disallowed on the device. If Thread
      * network is disallowed it cannot be turned on via Settings.
      *
@@ -2007,6 +2032,7 @@ public class UserManager {
             DISALLOW_CAMERA,
             DISALLOW_CAMERA_TOGGLE,
             DISALLOW_CELLULAR_2G,
+            DISALLOW_CHANGE_NEAR_FIELD_COMMUNICATION_RADIO,
             DISALLOW_CHANGE_WIFI_STATE,
             DISALLOW_CONFIG_BLUETOOTH,
             DISALLOW_CONFIG_BRIGHTNESS,

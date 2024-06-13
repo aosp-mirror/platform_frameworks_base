@@ -101,8 +101,10 @@ class UiAutomationManager {
             SystemActionPerformer systemActionPerformer,
             AccessibilityWindowManager awm, int flags) {
         accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
-        Slogf.i(LOG_TAG, "Registering UiTestAutomationService (id=%s) when called by user %d",
-                accessibilityServiceInfo.getId(), Binder.getCallingUserHandle().getIdentifier());
+        Slogf.i(LOG_TAG, "Registering UiTestAutomationService (id=%s, flags=0x%x) when"
+                        + " called by user %d",
+                accessibilityServiceInfo.getId(), flags,
+                Binder.getCallingUserHandle().getIdentifier());
         if (mUiAutomationService != null) {
             throw new IllegalStateException(
                     "UiAutomationService " + mUiAutomationService.mServiceInterface

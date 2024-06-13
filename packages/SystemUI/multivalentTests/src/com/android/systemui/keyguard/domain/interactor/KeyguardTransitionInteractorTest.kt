@@ -125,68 +125,6 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun dozeAmountTransitionTest_AodToFromLockscreen() =
-        testScope.runTest {
-            val dozeAmountSteps by collectValues(underTest.dozeAmountTransition)
-
-            val steps = mutableListOf<TransitionStep>()
-
-            steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
-            steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
-            steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
-            steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
-            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.8f, RUNNING))
-            steps.add(TransitionStep(LOCKSCREEN, AOD, 0.9f, RUNNING))
-            steps.add(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
-
-            steps.forEach {
-                repository.sendTransitionStep(it)
-                runCurrent()
-            }
-
-            assertThat(dozeAmountSteps.subList(0, 3))
-                .isEqualTo(
-                    listOf(
-                        steps[0].copy(value = 1f - steps[0].value),
-                        steps[1].copy(value = 1f - steps[1].value),
-                        steps[2].copy(value = 1f - steps[2].value),
-                    )
-                )
-            assertThat(dozeAmountSteps.subList(3, 7)).isEqualTo(steps.subList(3, 7))
-        }
-
-    @Test
-    fun dozeAmountTransitionTest_AodToFromGone() =
-        testScope.runTest {
-            val dozeAmountSteps by collectValues(underTest.dozeAmountTransition)
-
-            val steps = mutableListOf<TransitionStep>()
-
-            steps.add(TransitionStep(AOD, GONE, 0f, STARTED))
-            steps.add(TransitionStep(AOD, GONE, 0.3f, RUNNING))
-            steps.add(TransitionStep(AOD, GONE, 1f, FINISHED))
-            steps.add(TransitionStep(GONE, AOD, 0f, STARTED))
-            steps.add(TransitionStep(GONE, AOD, 0.1f, RUNNING))
-            steps.add(TransitionStep(GONE, AOD, 0.3f, RUNNING))
-            steps.add(TransitionStep(GONE, AOD, 1f, FINISHED))
-
-            steps.forEach {
-                repository.sendTransitionStep(it)
-                runCurrent()
-            }
-
-            assertThat(dozeAmountSteps.subList(0, 3))
-                .isEqualTo(
-                    listOf(
-                        steps[0].copy(value = 1f - steps[0].value),
-                        steps[1].copy(value = 1f - steps[1].value),
-                        steps[2].copy(value = 1f - steps[2].value),
-                    )
-                )
-            assertThat(dozeAmountSteps.subList(3, 7)).isEqualTo(steps.subList(3, 7))
-        }
-
-    @Test
     fun finishedKeyguardStateTests() =
         testScope.runTest {
             val finishedSteps by collectValues(underTest.finishedKeyguardState)

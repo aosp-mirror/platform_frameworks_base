@@ -538,8 +538,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
                 @Override
                 public void onAnimationStart(Animator animation) {
+                    ValueAnimator valueAnimator = (ValueAnimator) animation;
+                    float value = (float) valueAnimator.getAnimatedValue();
                     SurfaceControl.Transaction t = mTransactionPool.acquire();
-                    t.setPosition(mImeSourceControl.getLeash(), x, startY);
+                    t.setPosition(mImeSourceControl.getLeash(), x, value);
                     if (DEBUG) {
                         Slog.d(TAG, "onAnimationStart d:" + mDisplayId + " top:"
                                 + imeTop(hiddenY) + "->" + imeTop(shownY)
@@ -549,7 +551,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             imeTop(shownY), mAnimationDirection == DIRECTION_SHOW, isFloating, t);
                     mAnimateAlpha = (flags & ImePositionProcessor.IME_ANIMATION_NO_ALPHA) == 0;
                     final float alpha = (mAnimateAlpha || isFloating)
-                            ? (startY - hiddenY) / (shownY - hiddenY)
+                            ? (value - hiddenY) / (shownY - hiddenY)
                             : 1.f;
                     t.setAlpha(mImeSourceControl.getLeash(), alpha);
                     if (mAnimationDirection == DIRECTION_SHOW) {
@@ -560,7 +562,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     if (DEBUG_IME_VISIBILITY) {
                         EventLog.writeEvent(IMF_IME_REMOTE_ANIM_START,
                                 mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
-                                mDisplayId, mAnimationDirection, alpha, startY , endY,
+                                mDisplayId, mAnimationDirection, alpha, value, endY,
                                 Objects.toString(mImeSourceControl.getLeash()),
                                 Objects.toString(mImeSourceControl.getInsetsHint()),
                                 Objects.toString(mImeSourceControl.getSurfacePosition()),

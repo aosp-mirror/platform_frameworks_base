@@ -172,6 +172,7 @@ public class SettingsToPropertiesMapper {
         "haptics",
         "hardware_backed_security_mainline",
         "input",
+        "llvm_and_toolchains",
         "lse_desktop_experience",
         "machine_learning",
         "mainline_modularization",
