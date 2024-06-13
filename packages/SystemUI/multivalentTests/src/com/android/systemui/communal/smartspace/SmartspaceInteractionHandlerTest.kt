@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.widgets
+package com.android.systemui.communal.smartspace
 
 import android.app.PendingIntent
 import android.content.Intent
@@ -26,6 +26,7 @@ import androidx.core.util.component2
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.plugins.ActivityStarter
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,7 +39,7 @@ import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class WidgetInteractionHandlerTest : SysuiTestCase() {
+class SmartspaceInteractionHandlerTest : SysuiTestCase() {
     private val activityStarter = mock<ActivityStarter>()
 
     private val testIntent =
@@ -50,21 +51,21 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
         )
     private val testResponse = RemoteResponse.fromPendingIntent(testIntent)
 
-    private val underTest: WidgetInteractionHandler by lazy {
-        WidgetInteractionHandler(activityStarter)
+    private val underTest: SmartspaceInteractionHandler by lazy {
+        SmartspaceInteractionHandler(activityStarter)
     }
 
     @Test
-    fun launchAnimatorIsUsedForWidgetView() {
+    fun launchAnimatorIsUsedForSmartspaceView() {
         val parent = FrameLayout(context)
-        val view = CommunalAppWidgetHostView(context)
+        val view = SmartspaceAppWidgetHostView(context)
         parent.addView(view)
         val (fillInIntent, activityOptions) = testResponse.getLaunchOptions(view)
 
         underTest.onInteraction(view, testIntent, testResponse)
 
         verify(activityStarter)
-            .startPendingIntentMaybeDismissingKeyguard(
+            .startPendingIntentWithoutDismissing(
                 eq(testIntent),
                 eq(false),
                 isNull(),
@@ -84,7 +85,7 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
         underTest.onInteraction(view, testIntent, testResponse)
 
         verify(activityStarter)
-            .startPendingIntentMaybeDismissingKeyguard(
+            .startPendingIntentWithoutDismissing(
                 eq(testIntent),
                 eq(false),
                 isNull(),

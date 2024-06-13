@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.widgets
+package com.android.systemui.communal.smartspace
 
 import android.app.ActivityOptions
 import android.app.PendingIntent
@@ -23,19 +23,18 @@ import android.view.View
 import android.widget.RemoteViews
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.communal.util.InteractionHandlerDelegate
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
 
-@SysUISingleton
-class WidgetInteractionHandler
-@Inject
-constructor(
+/**
+ * Handles interactions on smartspace elements on the hub.
+ */
+class SmartspaceInteractionHandler @Inject constructor(
     private val activityStarter: ActivityStarter,
 ) : RemoteViews.InteractionHandler {
-
     private val delegate = InteractionHandlerDelegate(
-        findViewToAnimate = { view -> view is CommunalAppWidgetHostView },
+        findViewToAnimate = { view -> view is SmartspaceAppWidgetHostView },
         intentStarter = this::startIntent,
     )
 
@@ -45,20 +44,19 @@ constructor(
         response: RemoteViews.RemoteResponse
     ): Boolean = delegate.onInteraction(view, pendingIntent, response)
 
-
     private fun startIntent(
         pendingIntent: PendingIntent,
         fillInIntent: Intent,
         extraOptions: ActivityOptions,
-        controller: ActivityTransitionAnimator.Controller?
+        animationController: ActivityTransitionAnimator.Controller?
     ): Boolean {
-        activityStarter.startPendingIntentMaybeDismissingKeyguard(
+        activityStarter.startPendingIntentWithoutDismissing(
             pendingIntent,
             /* dismissShade = */ false,
             /* intentSentUiThreadCallback = */ null,
-            controller,
+            animationController,
             fillInIntent,
-            extraOptions.toBundle(),
+            extraOptions.toBundle()
         )
         return true
     }

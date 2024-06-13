@@ -25,9 +25,9 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntRect
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.theme.LocalAndroidColorScheme
+import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
-import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
 import com.android.systemui.keyguard.ui.composable.section.LockSection
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -38,7 +38,7 @@ class CommunalContent
 @Inject
 constructor(
     private val viewModel: CommunalViewModel,
-    private val interactionHandler: WidgetInteractionHandler,
+    private val interactionHandler: SmartspaceInteractionHandler,
     private val dialogFactory: SystemUIDialogFactory,
     private val lockSection: LockSection,
     private val ambientStatusBarSection: AmbientStatusBarSection,

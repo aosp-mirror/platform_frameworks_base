@@ -135,7 +135,6 @@ import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
-import com.android.systemui.Flags.glanceableHubAnimateTimerActivityStarts
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -1209,9 +1208,7 @@ private fun SmartspaceContent(
         modifier = modifier,
         factory = { context ->
             SmartspaceAppWidgetHostView(context).apply {
-                if (glanceableHubAnimateTimerActivityStarts()) {
-                    interactionHandler?.let { setInteractionHandler(it) }
-                }
+                interactionHandler?.let { setInteractionHandler(it) }
                 updateAppWidget(model.remoteViews)
             }
         },
