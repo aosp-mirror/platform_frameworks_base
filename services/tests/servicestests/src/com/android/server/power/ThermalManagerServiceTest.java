@@ -551,7 +551,7 @@ public class ThermalManagerServiceTest {
 
         // Add some time-series data
         for (int i = 1; i < 20; ++i) {
-            samples.add(watcher.createSampleForTesting(1000 * i, 25.0f + 0.5f * i));
+            samples.add(0, watcher.createSampleForTesting(1000 * i, 25.0f + 0.5f * i));
         }
 
         // Now the forecast should vary depending on how far ahead we are trying to predict
