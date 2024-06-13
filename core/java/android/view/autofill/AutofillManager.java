@@ -3010,14 +3010,32 @@ public final class AutofillManager {
                 mLastAutofilledData.put(view.getAutofillId(), targetValue);
             }
             view.setAutofilled(true, hideHighlight);
+            if (sDebug) {
+                Log.d(TAG, "View " + view.getAutofillId() + " autofilled synchronously.");
+            }
             try {
                 mService.setViewAutofilled(mSessionId, view.getAutofillId(), mContext.getUserId());
             } catch (RemoteException e) {
                 // The failure could be a consequence of something going wrong on the server side.
                 // Do nothing here since it's just logging, but it's possible follow-up actions may
                 // fail.
+                Log.w(TAG, "Unable to log due to " + e);
+            }
+        } else {
+            if (sDebug) {
+                Log.d(TAG, "View " + view.getAutofillId() + " " + view.getClass().toString()
+                        + " from " + view.getClass().getPackageName()
+                        + " : didn't fill in synchronously. It may fill asynchronously.");
             }
         }
+    }
+
+    /**
+     * Returns String with text "null" if the object is null, or the actual string represented by
+     * the object.
+     */
+    private @NonNull String getString(Object obj) {
+        return obj == null ? "null" : obj.toString();
     }
 
     private void onGetCredentialException(int sessionId, AutofillId id, String errorType,
