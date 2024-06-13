@@ -59,9 +59,11 @@ import com.android.systemui.communal.ui.compose.Dimensions.SlideOffsetY
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
+import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.SceneTransitionLayoutDataSource
+import kotlin.time.DurationUnit
 
 object Communal {
     object Elements {
@@ -89,6 +91,10 @@ private object TransitionDuration {
 val sceneTransitions = transitions {
     to(CommunalScenes.Communal, key = CommunalTransitionKeys.SimpleFade) {
         spec = tween(durationMillis = 250)
+        fade(AllElements)
+    }
+    to(CommunalScenes.Blank, key = CommunalTransitionKeys.SimpleFade) {
+        spec = tween(durationMillis = TO_GONE_DURATION.toInt(DurationUnit.MILLISECONDS))
         fade(AllElements)
     }
     to(CommunalScenes.Communal) {
