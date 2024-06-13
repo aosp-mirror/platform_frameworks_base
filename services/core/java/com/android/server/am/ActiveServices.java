@@ -127,6 +127,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE_EXECUTING;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ProcessList.UNKNOWN_ADJ;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -4303,7 +4304,7 @@ public final class ActiveServices {
                 // queued up in the app side as they're one way calls. And we'll also hold off
                 // the service timeout timer until the process is unfrozen.
                 mAm.mOomAdjuster.updateAppFreezeStateLSP(callerApp, OOM_ADJ_REASON_BIND_SERVICE,
-                        true);
+                        true, UNKNOWN_ADJ);
             }
 
             final boolean wasStopped = hostApp == null ? wasStopped(s) : false;

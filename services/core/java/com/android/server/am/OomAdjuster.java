@@ -1829,7 +1829,8 @@ public class OomAdjuster {
             state.setNoKillOnBgRestrictedAndIdle(false);
             // If this UID is currently allowlisted, it should not be frozen.
             final UidRecord uidRec = app.getUidRecord();
-            app.mOptRecord.setShouldNotFreeze(uidRec != null && uidRec.isCurAllowListed());
+            app.mOptRecord.setShouldNotFreeze(uidRec != null && uidRec.isCurAllowListed(),
+                    ProcessCachedOptimizerRecord.SHOULD_NOT_FREEZE_REASON_UID_ALLOWLISTED, mAdjSeq);
         }
 
         final int appUid = app.info.uid;
@@ -2669,7 +2670,9 @@ public class OomAdjuster {
 
         if (client.mOptRecord.shouldNotFreeze()) {
             // Propagate the shouldNotFreeze flag down the bindings.
-            if (app.mOptRecord.setShouldNotFreeze(true, dryRun)) {
+            if (app.mOptRecord.setShouldNotFreeze(true, dryRun,
+                    app.mOptRecord.shouldNotFreezeReason()
+                    | client.mOptRecord.shouldNotFreezeReason(), mAdjSeq)) {
                 // Bail out early, as we only care about the return value for a dryrun.
                 return true;
             }
@@ -2736,7 +2739,10 @@ public class OomAdjuster {
             if (cr.hasFlag(Context.BIND_ALLOW_OOM_MANAGEMENT)) {
                 // Similar to BIND_WAIVE_PRIORITY, keep it unfrozen.
                 if (clientAdj < CACHED_APP_MIN_ADJ) {
-                    if (app.mOptRecord.setShouldNotFreeze(true, dryRun)) {
+                    if (app.mOptRecord.setShouldNotFreeze(true, dryRun,
+                            app.mOptRecord.shouldNotFreezeReason()
+                            | ProcessCachedOptimizerRecord
+                            .SHOULD_NOT_FREEZE_REASON_BINDER_ALLOW_OOM_MANAGEMENT, mAdjSeq)) {
                         // Bail out early, as we only care about the return value for a dryrun.
                         return true;
                     }
@@ -2973,7 +2979,10 @@ public class OomAdjuster {
             // bound by an unfrozen app via a WPRI binding has to remain
             // unfrozen.
             if (clientAdj < CACHED_APP_MIN_ADJ) {
-                if (app.mOptRecord.setShouldNotFreeze(true, dryRun)) {
+                if (app.mOptRecord.setShouldNotFreeze(true, dryRun,
+                        app.mOptRecord.shouldNotFreezeReason()
+                        | ProcessCachedOptimizerRecord
+                        .SHOULD_NOT_FREEZE_REASON_BIND_WAIVE_PRIORITY, mAdjSeq)) {
                     // Bail out early, as we only care about the return value for a dryrun.
                     return true;
                 }
@@ -3114,7 +3123,9 @@ public class OomAdjuster {
         }
         if (client.mOptRecord.shouldNotFreeze()) {
             // Propagate the shouldNotFreeze flag down the bindings.
-            if (app.mOptRecord.setShouldNotFreeze(true, dryRun)) {
+            if (app.mOptRecord.setShouldNotFreeze(true, dryRun,
+                    app.mOptRecord.shouldNotFreezeReason()
+                    | client.mOptRecord.shouldNotFreezeReason(), mAdjSeq)) {
                 // Bail out early, as we only care about the return value for a dryrun.
                 return true;
             }
@@ -3473,7 +3484,7 @@ public class OomAdjuster {
             changes |= ActivityManagerService.ProcessChangeItem.CHANGE_ACTIVITIES;
         }
 
-        updateAppFreezeStateLSP(app, oomAdjReson, false);
+        updateAppFreezeStateLSP(app, oomAdjReson, false, oldOomAdj);
 
         if (state.getReportedProcState() != state.getCurProcState()) {
             state.setReportedProcState(state.getCurProcState());
@@ -3870,16 +3881,37 @@ public class OomAdjuster {
 
     @GuardedBy({"mService", "mProcLock"})
     void updateAppFreezeStateLSP(ProcessRecord app, @OomAdjReason int oomAdjReason,
-            boolean immediate) {
+            boolean immediate, int oldOomAdj) {
         if (!mCachedAppOptimizer.useFreezer()) {
             return;
+        }
+
+        final ProcessCachedOptimizerRecord opt = app.mOptRecord;
+        final ProcessStateRecord state = app.mState;
+        if (Flags.traceUpdateAppFreezeStateLsp()) {
+            final boolean oomAdjChanged =
+                    (state.getCurAdj() >= FREEZER_CUTOFF_ADJ ^ oldOomAdj >= FREEZER_CUTOFF_ADJ)
+                    || oldOomAdj == UNKNOWN_ADJ;
+            final boolean shouldNotFreezeChanged = opt.shouldNotFreezeAdjSeq() == mAdjSeq;
+            if ((oomAdjChanged || shouldNotFreezeChanged)
+                    && Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        CachedAppOptimizer.ATRACE_FREEZER_TRACK,
+                        "updateAppFreezeStateLSP " + app.processName
+                        + " isFreezeExempt: " + opt.isFreezeExempt()
+                        + " isFrozen: " + opt.isFrozen()
+                        + " shouldNotFreeze: " + opt.shouldNotFreeze()
+                        + " shouldNotFreezeReason: " + opt.shouldNotFreezeReason()
+                        + " curAdj: " + state.getCurAdj()
+                        + " oldOomAdj: " + oldOomAdj
+                        + " immediate: " + immediate);
+            }
         }
 
         if (app.mOptRecord.isFreezeExempt()) {
             return;
         }
 
-        final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         // if an app is already frozen and shouldNotFreeze becomes true, immediately unfreeze
         if (opt.isFrozen() && opt.shouldNotFreeze()) {
             mCachedAppOptimizer.unfreezeAppLSP(app,
@@ -3887,7 +3919,6 @@ public class OomAdjuster {
             return;
         }
 
-        final ProcessStateRecord state = app.mState;
         // Use current adjustment when freezing, set adjustment when unfreezing.
         if (state.getCurAdj() >= FREEZER_CUTOFF_ADJ && !opt.isFrozen()
                 && !opt.shouldNotFreeze()) {
