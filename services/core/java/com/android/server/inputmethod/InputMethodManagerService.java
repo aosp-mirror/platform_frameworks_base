@@ -2005,17 +2005,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     @NonNull
     InputBindResult attachNewInputLocked(@StartInputReason int startInputReason, boolean initial) {
+        final int userId = mCurrentUserId;
+        final var bindingController = getInputMethodBindingController(userId);
         if (!mBoundToMethod) {
-            getCurMethodLocked().bindInput(mCurClient.mBinding);
+            bindingController.getCurMethod().bindInput(mCurClient.mBinding);
             mBoundToMethod = true;
         }
 
         final boolean restarting = !initial;
         final Binder startInputToken = new Binder();
-        final var bindingController = getInputMethodBindingController(mCurrentUserId);
         final StartInputInfo info = new StartInputInfo(mCurrentUserId,
-                getCurTokenLocked(),
-                getCurTokenDisplayIdLocked(), bindingController.getCurId(), startInputReason,
+                bindingController.getCurToken(), bindingController.getCurTokenDisplayId(),
+                bindingController.getCurId(), startInputReason,
                 restarting, UserHandle.getUserId(mCurClient.mUid),
                 mCurClient.mSelfReportedDisplayId, mImeBindingState.mFocusedWindow, mCurEditorInfo,
                 mImeBindingState.mFocusedWindowSoftInputMode,
@@ -2028,9 +2029,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // same-user scenarios.
         // That said ignoring cross-user scenario will never affect IMEs that do not have
         // INTERACT_ACROSS_USERS(_FULL) permissions, which is actually almost always the case.
-        if (mCurrentUserId == UserHandle.getUserId(
-                mCurClient.mUid)) {
-            mPackageManagerInternal.grantImplicitAccess(mCurrentUserId, null /* intent */,
+        if (userId == UserHandle.getUserId(mCurClient.mUid)) {
+            mPackageManagerInternal.grantImplicitAccess(userId, null /* intent */,
                     UserHandle.getAppId(bindingController.getCurMethodUid()),
                     mCurClient.mUid, true /* direct */);
         }
@@ -2060,7 +2060,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
 
         final var curId = bindingController.getCurId();
-        final InputMethodInfo curInputMethodInfo = InputMethodSettingsRepository.get(mCurrentUserId)
+        final InputMethodInfo curInputMethodInfo = InputMethodSettingsRepository.get(userId)
                 .getMethodMap().get(curId);
         final boolean suppressesSpellChecker =
                 curInputMethodInfo != null && curInputMethodInfo.suppressesSpellChecker();
