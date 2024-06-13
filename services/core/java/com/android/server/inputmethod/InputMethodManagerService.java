@@ -4186,10 +4186,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     private boolean switchToNextInputMethodLocked(@Nullable IBinder token, boolean onlyCurrentIme) {
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+        final int userId = mCurrentUserId;
+        final var currentImi = getInputMethodBindingController(userId).getSelectedMethod();
         final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                onlyCurrentIme, settings.getMethodMap().get(getSelectedMethodIdLocked()),
-                mCurrentSubtype);
+                onlyCurrentIme, currentImi, mCurrentSubtype);
         if (nextSubtype == null) {
             return false;
         }
@@ -4204,10 +4204,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (!calledWithValidTokenLocked(token)) {
                 return false;
             }
-            final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
+            final int userId = mCurrentUserId;
+            final var currentImi = getInputMethodBindingController(userId).getSelectedMethod();
             final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    false /* onlyCurrentIme */,
-                    settings.getMethodMap().get(getSelectedMethodIdLocked()), mCurrentSubtype);
+                    false /* onlyCurrentIme */, currentImi, mCurrentSubtype);
             return nextSubtype != null;
         }
     }
@@ -4642,8 +4642,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             if (mCurrentUserId != mSwitchingController.getUserId()) {
                 return;
             }
-            final InputMethodInfo imi = InputMethodSettingsRepository.get(mCurrentUserId)
-                    .getMethodMap().get(getSelectedMethodIdLocked());
+            final var imi = getInputMethodBindingController(mCurrentUserId).getSelectedMethod();
             if (imi != null) {
                 mSwitchingController.onUserActionLocked(imi, mCurrentSubtype);
             }
