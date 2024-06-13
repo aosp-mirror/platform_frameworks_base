@@ -195,6 +195,18 @@ final class InputMethodBindingController {
     }
 
     /**
+     * Returns {@link InputMethodInfo} that is queried from {@link #getSelectedMethodId()}.
+     *
+     * @return {@link InputMethodInfo} whose IME ID is the same as {@link #getSelectedMethodId()}.
+     *         {@code null} otherwise
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    InputMethodInfo getSelectedMethod() {
+        return InputMethodSettingsRepository.get(mUserId).getMethodMap().get(mSelectedMethodId);
+    }
+
+    /**
      * The token we have made for the currently active input method, to
      * identify it in the future.
      */
