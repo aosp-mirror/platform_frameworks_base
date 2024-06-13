@@ -3721,7 +3721,7 @@ public class NotificationStackScrollLayout
 
     protected boolean isInsideQsHeader(MotionEvent ev) {
         if (SceneContainerFlag.isEnabled()) {
-            return ev.getY() < mScrollViewFields.getScrimClippingShape().getBounds().getTop();
+            return ev.getY() < mScrollViewFields.getStackTop();
         }
 
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
