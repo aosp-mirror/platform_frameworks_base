@@ -175,17 +175,14 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
 
-            // Dialogs must be created on the main thread
-            context.mainExecutor.execute {
-                clickListener.onClick(chipView)
-                verify(kosmos.mockDialogTransitionAnimator)
-                    .showFromView(
-                        eq(mockCastDialog),
-                        eq(chipBackgroundView),
-                        eq(null),
-                        ArgumentMatchers.anyBoolean(),
-                    )
-            }
+            clickListener.onClick(chipView)
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    eq(mockCastDialog),
+                    eq(chipBackgroundView),
+                    eq(null),
+                    ArgumentMatchers.anyBoolean(),
+                )
         }
 
     @Test
@@ -201,16 +198,13 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
 
-            // Dialogs must be created on the main thread
-            context.mainExecutor.execute {
-                clickListener.onClick(chipView)
-                verify(kosmos.mockDialogTransitionAnimator)
-                    .showFromView(
-                        eq(mockCastDialog),
-                        eq(chipBackgroundView),
-                        eq(null),
-                        ArgumentMatchers.anyBoolean(),
-                    )
-            }
+            clickListener.onClick(chipView)
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    eq(mockCastDialog),
+                    eq(chipBackgroundView),
+                    eq(null),
+                    ArgumentMatchers.anyBoolean(),
+                )
         }
 }

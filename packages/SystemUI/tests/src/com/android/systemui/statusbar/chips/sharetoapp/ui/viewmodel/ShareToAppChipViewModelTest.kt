@@ -178,17 +178,14 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
 
-            // Dialogs must be created on the main thread
-            context.mainExecutor.execute {
-                clickListener.onClick(chipView)
-                verify(kosmos.mockDialogTransitionAnimator)
-                    .showFromView(
-                        eq(mockShareDialog),
-                        eq(chipBackgroundView),
-                        eq(null),
-                        ArgumentMatchers.anyBoolean(),
-                    )
-            }
+            clickListener.onClick(chipView)
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    eq(mockShareDialog),
+                    eq(chipBackgroundView),
+                    eq(null),
+                    ArgumentMatchers.anyBoolean(),
+                )
         }
 
     @Test
@@ -203,16 +200,13 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
 
-            // Dialogs must be created on the main thread
-            context.mainExecutor.execute {
-                clickListener.onClick(chipView)
-                verify(kosmos.mockDialogTransitionAnimator)
-                    .showFromView(
-                        eq(mockShareDialog),
-                        eq(chipBackgroundView),
-                        eq(null),
-                        ArgumentMatchers.anyBoolean(),
-                    )
-            }
+            clickListener.onClick(chipView)
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    eq(mockShareDialog),
+                    eq(chipBackgroundView),
+                    eq(null),
+                    ArgumentMatchers.anyBoolean(),
+                )
         }
 }

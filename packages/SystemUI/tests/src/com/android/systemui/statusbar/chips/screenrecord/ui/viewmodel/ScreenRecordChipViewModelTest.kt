@@ -138,18 +138,15 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
 
-            // Dialogs must be created on the main thread
-            context.mainExecutor.execute {
-                clickListener.onClick(chipView)
-                // EndScreenRecordingDialogDelegate will test that the dialog has the right message
-                verify(kosmos.mockDialogTransitionAnimator)
-                    .showFromView(
-                        eq(mockSystemUIDialog),
-                        eq(chipBackgroundView),
-                        eq(null),
-                        ArgumentMatchers.anyBoolean(),
-                    )
-            }
+            clickListener.onClick(chipView)
+            // EndScreenRecordingDialogDelegate will test that the dialog has the right message
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    eq(mockSystemUIDialog),
+                    eq(chipBackgroundView),
+                    eq(null),
+                    ArgumentMatchers.anyBoolean(),
+                )
         }
 
     @Test
@@ -162,18 +159,15 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
 
-            // Dialogs must be created on the main thread
-            context.mainExecutor.execute {
-                clickListener.onClick(chipView)
-                // EndScreenRecordingDialogDelegate will test that the dialog has the right message
-                verify(kosmos.mockDialogTransitionAnimator)
-                    .showFromView(
-                        eq(mockSystemUIDialog),
-                        eq(chipBackgroundView),
-                        eq(null),
-                        ArgumentMatchers.anyBoolean(),
-                    )
-            }
+            clickListener.onClick(chipView)
+            // EndScreenRecordingDialogDelegate will test that the dialog has the right message
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    eq(mockSystemUIDialog),
+                    eq(chipBackgroundView),
+                    eq(null),
+                    ArgumentMatchers.anyBoolean(),
+                )
         }
 
     @Test
@@ -189,17 +183,14 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
 
-            // Dialogs must be created on the main thread
-            context.mainExecutor.execute {
-                clickListener.onClick(chipView)
-                // EndScreenRecordingDialogDelegate will test that the dialog has the right message
-                verify(kosmos.mockDialogTransitionAnimator)
-                    .showFromView(
-                        eq(mockSystemUIDialog),
-                        eq(chipBackgroundView),
-                        eq(null),
-                        ArgumentMatchers.anyBoolean(),
-                    )
-            }
+            clickListener.onClick(chipView)
+            // EndScreenRecordingDialogDelegate will test that the dialog has the right message
+            verify(kosmos.mockDialogTransitionAnimator)
+                .showFromView(
+                    eq(mockSystemUIDialog),
+                    eq(chipBackgroundView),
+                    eq(null),
+                    ArgumentMatchers.anyBoolean(),
+                )
         }
 }
