@@ -70,6 +70,7 @@ import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATU
 import static com.android.server.autofill.Helper.containsCharsInOrder;
 import static com.android.server.autofill.Helper.createSanitizers;
 import static com.android.server.autofill.Helper.getNumericValue;
+import static com.android.server.autofill.Helper.SaveInfoStats;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.Helper.toArray;
@@ -3217,11 +3218,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return saveInfo == null ? 0 : saveInfo.getFlags();
     }
 
-    static class SaveInfoStats {
-        public int saveInfoCount;
-        public int saveDataTypeCount;
-    }
-
     /**
      * Get statistic information of save info in current session. Specifically
      *   1. how many save info the current session has.
@@ -3231,42 +3227,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     private SaveInfoStats getSaveInfoStatsLocked() {
-        SaveInfoStats retSaveInfoStats = new SaveInfoStats();
-        retSaveInfoStats.saveInfoCount = -1;
-        retSaveInfoStats.saveDataTypeCount = -1;
-
         if (mContexts == null) {
             if (sVerbose) {
                 Slog.v(TAG, "getSaveInfoStatsLocked(): mContexts is null");
             }
-        } else if (mResponses == null) {
-            // Happens when the activity / session was finished before the service replied, or
-            // when the service cannot autofill it (and returned a null response).
-            if (sVerbose) {
-                Slog.v(TAG, "getSaveInfoStatsLocked(): mResponses is null");
-            }
-            return retSaveInfoStats;
-        } else {
-            int numSaveInfos = 0;
-            int numSaveDataTypes = 0;
-            ArraySet<Integer> saveDataTypeSeen = new ArraySet<>();
-            final int numResponses = mResponses.size();
-            for (int responseNum = 0; responseNum < numResponses; responseNum++) {
-                final FillResponse response = mResponses.valueAt(responseNum);
-                if (response != null && response.getSaveInfo() != null) {
-                    numSaveInfos += 1;
-                    int saveDataType = response.getSaveInfo().getType();
-                    if (!saveDataTypeSeen.contains(saveDataType)) {
-                        saveDataTypeSeen.add(saveDataType);
-                        numSaveDataTypes += 1;
-                    }
-                }
-            }
-            retSaveInfoStats.saveInfoCount = numSaveInfos;
-            retSaveInfoStats.saveDataTypeCount = numSaveDataTypes;
+            return new SaveInfoStats(-1, -1);
         }
-
-        return retSaveInfoStats;
+        return Helper.getSaveInfoStatsFromFillResponses(mResponses);
     }
 
     /**
