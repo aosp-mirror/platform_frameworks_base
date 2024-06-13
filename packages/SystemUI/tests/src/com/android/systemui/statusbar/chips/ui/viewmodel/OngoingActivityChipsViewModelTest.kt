@@ -22,6 +22,7 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
@@ -39,8 +40,7 @@ import org.junit.Test
 
 @SmallTest
 class OngoingActivityChipsViewModelTest : SysuiTestCase() {
-
-    private val kosmos = Kosmos()
+    private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
 
     private val screenRecordState = kosmos.screenRecordRepository.screenRecordState

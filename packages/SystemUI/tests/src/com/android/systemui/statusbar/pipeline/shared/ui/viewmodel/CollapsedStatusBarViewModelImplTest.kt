@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.assertLogsWtf
@@ -63,7 +64,10 @@ import org.junit.Test
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
-    private val kosmos = Kosmos().apply { testDispatcher = UnconfinedTestDispatcher() }
+    private val kosmos = Kosmos().also {
+        it.testCase = this
+        it.testDispatcher = UnconfinedTestDispatcher()
+    }
 
     private val testScope = kosmos.testScope
 
