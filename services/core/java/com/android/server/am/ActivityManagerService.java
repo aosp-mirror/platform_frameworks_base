@@ -14642,7 +14642,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final StringBuilder sb = new StringBuilder("registerReceiver: ");
             sb.append(Binder.getCallingUid()); sb.append('/');
             sb.append(receiverId == null ? "null" : receiverId); sb.append('/');
-            final int actionsCount = filter.countActions();
+            final int actionsCount = filter.safeCountActions();
             if (actionsCount > 0) {
                 for (int i = 0; i < actionsCount; ++i) {
                     sb.append(filter.getAction(i));
