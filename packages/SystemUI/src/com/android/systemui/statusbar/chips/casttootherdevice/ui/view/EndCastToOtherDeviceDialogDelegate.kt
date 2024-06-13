@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.mediaprojection.ui.view
+package com.android.systemui.statusbar.chips.casttootherdevice.ui.view
 
 import android.os.Bundle
-import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractor
+import com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.CastToOtherDeviceChipViewModel.Companion.CAST_TO_OTHER_DEVICE_ICON
+import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
+import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.phone.SystemUIDialog
 
-/** A dialog that lets the user stop an ongoing share-screen-to-app event. */
-class EndShareToAppDialogDelegate(
+/** A dialog that lets the user stop an ongoing cast-screen-to-other-device event. */
+class EndCastToOtherDeviceDialogDelegate(
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
-    private val interactor: MediaProjectionChipInteractor,
-    private val state: MediaProjectionState.Projecting,
+    private val stopAction: () -> Unit,
+    private val state: ProjectionChipModel.Projecting,
 ) : SystemUIDialog.Delegate {
     override fun createDialog(): SystemUIDialog {
         return endMediaProjectionDialogHelper.createDialog(this)
@@ -34,20 +35,21 @@ class EndShareToAppDialogDelegate(
 
     override fun beforeCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
         with(dialog) {
-            setIcon(MediaProjectionChipInteractor.SHARE_TO_APP_ICON)
-            setTitle(R.string.share_to_app_stop_dialog_title)
+            setIcon(CAST_TO_OTHER_DEVICE_ICON)
+            setTitle(R.string.cast_to_other_device_stop_dialog_title)
             setMessage(
                 endMediaProjectionDialogHelper.getDialogMessage(
-                    state,
-                    genericMessageResId = R.string.share_to_app_stop_dialog_message,
-                    specificAppMessageResId = R.string.share_to_app_stop_dialog_message_specific_app
+                    state.projectionState,
+                    genericMessageResId = R.string.cast_to_other_device_stop_dialog_message,
+                    specificAppMessageResId =
+                        R.string.cast_to_other_device_stop_dialog_message_specific_app,
                 )
             )
             // No custom on-click, because the dialog will automatically be dismissed when the
             // button is clicked anyway.
             setNegativeButton(R.string.close_dialog_button, /* onClick= */ null)
-            setPositiveButton(R.string.share_to_app_stop_dialog_button) { _, _ ->
-                interactor.stopProjecting()
+            setPositiveButton(R.string.cast_to_other_device_stop_dialog_button) { _, _ ->
+                stopAction.invoke()
             }
         }
     }

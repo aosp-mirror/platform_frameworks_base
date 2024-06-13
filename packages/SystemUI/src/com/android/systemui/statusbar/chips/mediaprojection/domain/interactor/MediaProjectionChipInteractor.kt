@@ -17,23 +17,12 @@
 package com.android.systemui.statusbar.chips.mediaprojection.domain.interactor
 
 import android.content.pm.PackageManager
-import androidx.annotation.DrawableRes
-import com.android.systemui.animation.DialogTransitionAnimator
-import com.android.systemui.common.shared.model.ContentDescription
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
-import com.android.systemui.res.R
-import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor
-import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor.Companion.createDialogLaunchOnClickListener
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndCastToOtherDeviceDialogDelegate
-import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
-import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndShareToAppDialogDelegate
+import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import com.android.systemui.util.Utils
-import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,14 +32,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Interactor for media-projection-related chips in the status bar.
- *
- * There are two kinds of media projection events that will show chips in the status bar:
- * 1) Share-to-app: Sharing your phone screen content to another app on the same device. (Triggered
- *    from within each individual app.)
- * 2) Cast-to-other-device: Sharing your phone screen content to a different device. (Triggered from
- *    the Quick Settings Cast tile or from the Settings app.) This interactor handles both of those
- *    event types (though maybe not audio-only casting -- see b/342169876).
+ * Interactor for media projection events, used to show chips in the status bar for share-to-app and
+ * cast-to-other-device events. See
+ * [com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel] and
+ * [com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.CastToOtherDeviceChipViewModel]
+ * for more details on what those events are.
  */
 @SysUISingleton
 class MediaProjectionChipInteractor
@@ -59,25 +45,24 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val mediaProjectionRepository: MediaProjectionRepository,
     private val packageManager: PackageManager,
-    private val systemClock: SystemClock,
-    private val dialogTransitionAnimator: DialogTransitionAnimator,
-    private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
-) : OngoingActivityChipInteractor {
-    override val chip: StateFlow<OngoingActivityChipModel> =
+) {
+    val projection: StateFlow<ProjectionChipModel> =
         mediaProjectionRepository.mediaProjectionState
             .map { state ->
                 when (state) {
-                    is MediaProjectionState.NotProjecting -> OngoingActivityChipModel.Hidden
+                    is MediaProjectionState.NotProjecting -> ProjectionChipModel.NotProjecting
                     is MediaProjectionState.Projecting -> {
-                        if (isProjectionToOtherDevice(state.hostPackage)) {
-                            createCastToOtherDeviceChip(state)
-                        } else {
-                            createShareToAppChip(state)
-                        }
+                        val type =
+                            if (isProjectionToOtherDevice(state.hostPackage)) {
+                                ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE
+                            } else {
+                                ProjectionChipModel.Type.SHARE_TO_APP
+                            }
+                        ProjectionChipModel.Projecting(type, state)
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), ProjectionChipModel.NotProjecting)
 
     /** Stops the currently active projection. */
     fun stopProjecting() {
@@ -95,58 +80,5 @@ constructor(
         // because it means that any projection by those headless remote display packages will be
         // marked as going to a different device, even if that isn't always true. See b/321078669.
         return Utils.isHeadlessRemoteDisplayProvider(packageManager, packageName)
-    }
-
-    private fun createCastToOtherDeviceChip(
-        state: MediaProjectionState.Projecting,
-    ): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown(
-            icon =
-                Icon.Resource(
-                    CAST_TO_OTHER_DEVICE_ICON,
-                    ContentDescription.Resource(R.string.accessibility_casting)
-                ),
-            // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
-            startTimeMs = systemClock.elapsedRealtime(),
-            createDialogLaunchOnClickListener(
-                createCastToOtherDeviceDialogDelegate(state),
-                dialogTransitionAnimator,
-            ),
-        )
-    }
-
-    private fun createCastToOtherDeviceDialogDelegate(state: MediaProjectionState.Projecting) =
-        EndCastToOtherDeviceDialogDelegate(
-            endMediaProjectionDialogHelper,
-            this@MediaProjectionChipInteractor,
-            state,
-        )
-
-    private fun createShareToAppChip(
-        state: MediaProjectionState.Projecting,
-    ): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown(
-            // TODO(b/332662551): Use the right content description.
-            icon = Icon.Resource(SHARE_TO_APP_ICON, contentDescription = null),
-            // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
-            startTimeMs = systemClock.elapsedRealtime(),
-            createDialogLaunchOnClickListener(
-                createShareToAppDialogDelegate(state),
-                dialogTransitionAnimator
-            ),
-        )
-    }
-
-    private fun createShareToAppDialogDelegate(state: MediaProjectionState.Projecting) =
-        EndShareToAppDialogDelegate(
-            endMediaProjectionDialogHelper,
-            this@MediaProjectionChipInteractor,
-            state,
-        )
-
-    companion object {
-        // TODO(b/332662551): Use the right icon.
-        @DrawableRes val SHARE_TO_APP_ICON = R.drawable.ic_screenshot_share
-        @DrawableRes val CAST_TO_OTHER_DEVICE_ICON = R.drawable.ic_cast_connected
     }
 }

@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.domain.interactor
+package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import android.view.View
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import kotlinx.coroutines.flow.StateFlow
 
-/** Interface for an interactor that knows the state of a single type of ongoing activity chip. */
-interface OngoingActivityChipInteractor {
-    /** A flow modeling the chip that should be shown. */
+/**
+ * Interface for a view model that knows the display requirements for a single type of ongoing
+ * activity chip.
+ */
+interface OngoingActivityChipViewModel {
+    /** A flow modeling the chip that should be shown (or not shown). */
     val chip: StateFlow<OngoingActivityChipModel>
 
     companion object {

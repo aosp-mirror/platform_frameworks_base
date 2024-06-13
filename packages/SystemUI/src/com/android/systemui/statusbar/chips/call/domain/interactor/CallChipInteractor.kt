@@ -23,9 +23,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.phone.ongoingcall.data.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import com.android.systemui.util.time.SystemClock
@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Interactor for the ongoing phone call chip shown in the status bar. */
+// TODO(b/332662551): Convert this into a view model.
 @SysUISingleton
 open class CallChipInteractor
 @Inject
@@ -45,7 +46,7 @@ constructor(
     repository: OngoingCallRepository,
     systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
-) : OngoingActivityChipInteractor {
+) : OngoingActivityChipViewModel {
     override val chip: StateFlow<OngoingActivityChipModel> =
         repository.ongoingCallState
             .map { state ->

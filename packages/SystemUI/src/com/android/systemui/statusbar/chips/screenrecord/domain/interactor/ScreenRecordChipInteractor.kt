@@ -26,11 +26,11 @@ import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepos
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.ScreenRecordRepository
-import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor
-import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor.Companion.createDialogLaunchOnClickListener
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.screenrecord.ui.view.EndScreenRecordingDialogDelegate
+import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Interactor for the screen recording chip shown in the status bar. */
+// TODO(b/332662551): Convert this into a view model.
 @SysUISingleton
 class ScreenRecordChipInteractor
 @Inject
@@ -51,7 +52,7 @@ constructor(
     private val systemClock: SystemClock,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
-) : OngoingActivityChipInteractor {
+) : OngoingActivityChipViewModel {
     override val chip: StateFlow<OngoingActivityChipModel> =
         // ScreenRecordRepository has the main "is the screen being recorded?" state, and
         // MediaProjectionRepository has information about what specifically is being recorded (a

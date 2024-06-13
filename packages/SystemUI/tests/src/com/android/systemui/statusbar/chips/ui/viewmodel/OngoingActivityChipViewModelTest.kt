@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.domain.interactor
+package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import kotlin.test.Test
 import org.mockito.ArgumentMatchers.anyBoolean
@@ -32,7 +32,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
-class OngoingActivityChipInteractorTest : SysuiTestCase() {
+class OngoingActivityChipViewModelTest : SysuiTestCase() {
     private val mockSystemUIDialog = mock<SystemUIDialog>()
     private val dialogDelegate = SystemUIDialog.Delegate { mockSystemUIDialog }
     private val dialogTransitionAnimator = mock<DialogTransitionAnimator>()

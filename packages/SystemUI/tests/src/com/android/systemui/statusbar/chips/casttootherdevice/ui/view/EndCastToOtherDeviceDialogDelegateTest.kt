@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.mediaprojection.ui.view
+package com.android.systemui.statusbar.chips.casttootherdevice.ui.view
 
 import android.content.ComponentName
 import android.content.DialogInterface
@@ -31,6 +31,8 @@ import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionR
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.mediaProjectionChipInteractor
+import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
+import com.android.systemui.statusbar.chips.mediaprojection.ui.view.endMediaProjectionDialogHelper
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
@@ -142,8 +144,11 @@ class EndCastToOtherDeviceDialogDelegateTest : SysuiTestCase() {
         underTest =
             EndCastToOtherDeviceDialogDelegate(
                 kosmos.endMediaProjectionDialogHelper,
-                kosmos.mediaProjectionChipInteractor,
-                state,
+                stopAction = kosmos.mediaProjectionChipInteractor::stopProjecting,
+                ProjectionChipModel.Projecting(
+                    ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE,
+                    state,
+                ),
             )
     }
 

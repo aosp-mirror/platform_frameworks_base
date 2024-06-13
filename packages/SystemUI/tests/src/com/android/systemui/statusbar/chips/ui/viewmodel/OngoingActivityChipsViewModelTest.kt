@@ -29,9 +29,9 @@ import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
+import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.phone.ongoingcall.data.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.google.common.truth.Truth.assertThat
@@ -92,7 +92,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_screenRecordShowAndMediaProjectionShow_screenRecordShown() =
+    fun chip_screenRecordShowAndShareToAppShow_screenRecordShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value =
@@ -105,7 +105,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_mediaProjectionShowAndCallShow_mediaProjectionShown() =
+    fun chip_shareToAppShowAndCallShow_shareToAppShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             mediaProjectionState.value =
@@ -118,9 +118,10 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_screenRecordAndMediaProjectionHideAndCallShown_callShown() =
+    fun chip_screenRecordAndShareToAppAndCastToOtherHideAndCallShown_callShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
+            // MediaProjection covers both share-to-app and cast-to-other-device
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
             callRepo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 34, intent = null))
