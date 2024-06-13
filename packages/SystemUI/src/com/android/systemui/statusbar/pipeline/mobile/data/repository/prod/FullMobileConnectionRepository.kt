@@ -308,6 +308,21 @@ class FullMobileConnectionRepository(
                 activeRepo.value.inflateSignalStrength.value
             )
 
+    override val allowNetworkSliceIndicator =
+        activeRepo
+            .flatMapLatest { it.allowNetworkSliceIndicator }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = "allowSlice",
+                initialValue = activeRepo.value.allowNetworkSliceIndicator.value,
+            )
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                activeRepo.value.allowNetworkSliceIndicator.value
+            )
+
     override val numberOfLevels =
         activeRepo
             .flatMapLatest { it.numberOfLevels }
