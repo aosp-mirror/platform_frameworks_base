@@ -199,6 +199,7 @@ public class NotificationTestHelper {
                                 mock(NotifRemoteViewCache.class),
                                 mock(NotificationRemoteInputManager.class),
                                 mock(ConversationNotificationProcessor.class),
+                                mock(RichOngoingNotificationContentExtractor.class),
                                 mock(Executor.class),
                                 new MockSmartReplyInflater(),
                                 mock(NotifLayoutInflaterFactory.Provider.class),

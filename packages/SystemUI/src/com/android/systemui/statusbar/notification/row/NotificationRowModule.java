@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.row;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
+import com.android.systemui.statusbar.notification.row.shared.RichOngoingNotificationFlag;
 
 import dagger.Binds;
 import dagger.Module;
@@ -44,6 +45,19 @@ public abstract class NotificationRowModule {
             return refactoredImpl.get();
         } else {
             return legacyImpl.get();
+        }
+    }
+
+    /** Provides ron content model extractor. */
+    @Provides
+    @SysUISingleton
+    public static RichOngoingNotificationContentExtractor provideRonContentExtractor(
+            Provider<RichOngoingNotificationContentExtractorImpl> realImpl
+    ) {
+        if (RichOngoingNotificationFlag.isEnabled()) {
+            return realImpl.get();
+        } else {
+            return new NoOpRichOngoingNotificationContentExtractor();
         }
     }
 

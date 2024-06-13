@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.notification.row.shared.HeadsUpStatusBarMo
 import com.android.systemui.statusbar.notification.row.shared.NewRemoteViews
 import com.android.systemui.statusbar.notification.row.shared.NotificationContentModel
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
+import com.android.systemui.statusbar.notification.row.shared.RichOngoingContentModel
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater
@@ -102,6 +103,17 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             }
         }
 
+    private var fakeRonContentModel: RichOngoingContentModel? = null
+    private val fakeRonExtractor =
+        object : RichOngoingNotificationContentExtractor {
+            override fun extractContentModel(
+                entry: NotificationEntry,
+                builder: Notification.Builder,
+                systemUIContext: Context,
+                packageContext: Context
+            ): RichOngoingContentModel? = fakeRonContentModel
+        }
+
     @Before
     fun setUp() {
         allowTestableLooperAsMainThread()
@@ -118,6 +130,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
                 cache,
                 mock(),
                 mock<ConversationNotificationProcessor>(),
+                fakeRonExtractor,
                 mock(),
                 smartReplyStateInflater,
                 layoutInflaterFactoryProvider,
