@@ -64,14 +64,15 @@ class SmartspaceInteractionHandlerTest : SysuiTestCase() {
 
         underTest.onInteraction(view, testIntent, testResponse)
 
+        // Verify that we pass in a non-null animation controller
         verify(activityStarter)
             .startPendingIntentWithoutDismissing(
-                eq(testIntent),
-                eq(false),
-                isNull(),
-                notNull(),
-                refEq(fillInIntent),
-                refEq(activityOptions.toBundle()),
+                /* intent = */ eq(testIntent),
+                /* dismissShade = */ eq(false),
+                /* intentSentUiThreadCallback = */ isNull(),
+                /* animationController = */ notNull(),
+                /* fillInIntent = */ refEq(fillInIntent),
+                /* extraOptions = */ refEq(activityOptions.toBundle()),
             )
     }
 
@@ -84,14 +85,15 @@ class SmartspaceInteractionHandlerTest : SysuiTestCase() {
 
         underTest.onInteraction(view, testIntent, testResponse)
 
+        // Verify null is used as the animation controller
         verify(activityStarter)
             .startPendingIntentWithoutDismissing(
-                eq(testIntent),
-                eq(false),
-                isNull(),
-                isNull(),
-                refEq(fillInIntent),
-                refEq(activityOptions.toBundle()),
+                /* intent = */ eq(testIntent),
+                /* dismissShade = */ eq(false),
+                /* intentSentUiThreadCallback = */ isNull(),
+                /* animationController = */ isNull(),
+                /* fillInIntent = */ refEq(fillInIntent),
+                /* extraOptions = */ refEq(activityOptions.toBundle()),
             )
     }
 }
