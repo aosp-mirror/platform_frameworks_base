@@ -27,5 +27,53 @@ val Kosmos.instanceIdSequenceFake: InstanceIdSequenceFake by
 val Kosmos.qsEventLogger: QsEventLoggerFake by
     Kosmos.Fixture { QsEventLoggerFake(uiEventLoggerFake, instanceIdSequenceFake) }
 
-var Kosmos.newQSTileFactory by Kosmos.Fixture<NewQSTileFactory>()
-var Kosmos.qsTileFactory by Kosmos.Fixture<QSFactory>()
+var Kosmos.qsTileFactory by Fixture<QSFactory>()
+
+val Kosmos.fgsManagerController by Fixture { FakeFgsManagerController() }
+
+val Kosmos.footerActionsController by Fixture {
+    FooterActionsController(
+        fgsManagerController = fgsManagerController,
+    )
+}
+
+val Kosmos.qsSecurityFooterUtils by Fixture {
+    QSSecurityFooterUtils(
+        applicationContext,
+        devicePolicyManager,
+        userTracker,
+        fakeExecutorHandler,
+        activityStarter,
+        securityController,
+        looper,
+        dialogTransitionAnimator,
+    )
+}
+
+val Kosmos.footerActionsInteractor by Fixture {
+    FooterActionsInteractorImpl(
+        activityStarter = activityStarter,
+        metricsLogger = metricsLogger,
+        uiEventLogger = uiEventLogger,
+        deviceProvisionedController = deviceProvisionedController,
+        qsSecurityFooterUtils = qsSecurityFooterUtils,
+        fgsManagerController = fgsManagerController,
+        userSwitcherInteractor = userSwitcherInteractor,
+        securityRepository = securityRepository,
+        foregroundServicesRepository = foregroundServicesRepository,
+        userSwitcherRepository = userSwitcherRepository,
+        broadcastDispatcher = broadcastDispatcher,
+        bgDispatcher = testDispatcher,
+    )
+}
+
+val Kosmos.footerActionsViewModelFactory by Fixture {
+    FooterActionsViewModel.Factory(
+        context = applicationContext,
+        falsingManager = falsingManager,
+        footerActionsInteractor = footerActionsInteractor,
+        globalActionsDialogLiteProvider = { mock() },
+        activityStarter,
+        showPowerButton = true,
+    )
+}

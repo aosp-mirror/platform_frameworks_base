@@ -3065,12 +3065,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void setForceHideNonSystemOverlayWindowIfNeeded(boolean forceHide) {
+        final int baseType = getBaseType();
         if (mSession.mCanAddInternalSystemWindow
-                || (!isSystemAlertWindowType(mAttrs.type) && mAttrs.type != TYPE_TOAST)) {
+                || (!isSystemAlertWindowType(baseType) && baseType != TYPE_TOAST)) {
             return;
         }
 
-        if (mAttrs.type == TYPE_APPLICATION_OVERLAY && mAttrs.isSystemApplicationOverlay()
+        if (baseType == TYPE_APPLICATION_OVERLAY && mAttrs.isSystemApplicationOverlay()
                 && mSession.mCanCreateSystemApplicationOverlay) {
             return;
         }
