@@ -322,7 +322,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private final Handler mHandler;
 
     @NonNull
-    private final Handler mPackageMonitorHandler;
+    private final Handler mIoHandler;
 
     @MultiUserUnawareField
     @UserIdInt
@@ -1237,7 +1237,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             Context context,
             boolean experimentalConcurrentMultiUserModeEnabled,
             @Nullable ServiceThread serviceThreadForTesting,
-            @Nullable ServiceThread packageMonitorThreadForTesting,
+            @Nullable ServiceThread ioThreadForTesting,
             @Nullable IntFunction<InputMethodBindingController> bindingControllerForTesting) {
         synchronized (ImfLock.class) {
             mExperimentalConcurrentMultiUserModeEnabled =
@@ -1258,15 +1258,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             thread.start();
             mHandler = Handler.createAsync(thread.getLooper(), this);
             {
-                final ServiceThread packageMonitorThread =
-                        packageMonitorThreadForTesting != null
-                                ? packageMonitorThreadForTesting
+                final ServiceThread ioThread =
+                        ioThreadForTesting != null
+                                ? ioThreadForTesting
                                 : new ServiceThread(
                                         PACKAGE_MONITOR_THREAD_NAME,
                                         Process.THREAD_PRIORITY_FOREGROUND,
                                         true /* allowIo */);
-                packageMonitorThread.start();
-                mPackageMonitorHandler = Handler.createAsync(packageMonitorThread.getLooper());
+                ioThread.start();
+                mIoHandler = Handler.createAsync(ioThread.getLooper());
             }
             SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
             mImeTrackerService = new ImeTrackerService(serviceThreadForTesting != null
@@ -1537,7 +1537,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     }
                 }, "Lazily initialize IMMS#mImeDrawsImeNavBarRes");
 
-                mMyPackageMonitor.register(mContext, UserHandle.ALL, mPackageMonitorHandler);
+                mMyPackageMonitor.register(mContext, UserHandle.ALL, mIoHandler);
                 mSettingsObserver.registerContentObserverLocked(currentUserId);
 
                 final IntentFilter broadcastFilterForAllUsers = new IntentFilter();
