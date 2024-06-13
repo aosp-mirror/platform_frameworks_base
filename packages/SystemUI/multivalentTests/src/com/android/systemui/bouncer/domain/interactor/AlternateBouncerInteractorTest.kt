@@ -29,7 +29,6 @@ import com.android.systemui.biometrics.data.repository.fingerprintPropertyReposi
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
@@ -223,23 +222,14 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     }
 
     private fun givenAlternateBouncerSupported() {
-        if (DeviceEntryUdfpsRefactor.isEnabled) {
-            kosmos.fingerprintPropertyRepository.supportsUdfps()
-        } else {
-            kosmos.keyguardBouncerRepository.setAlternateBouncerUIAvailable(true)
-        }
+        kosmos.givenAlternateBouncerSupported()
     }
 
     private fun givenCanShowAlternateBouncer() {
-        givenAlternateBouncerSupported()
-        kosmos.keyguardBouncerRepository.setPrimaryShow(false)
-        kosmos.biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
-        kosmos.biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
-        whenever(kosmos.keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(false)
-        whenever(kosmos.keyguardStateController.isUnlocked).thenReturn(false)
+        kosmos.givenCanShowAlternateBouncer()
     }
 
     private fun givenCannotShowAlternateBouncer() {
-        kosmos.biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
+        kosmos.givenCannotShowAlternateBouncer()
     }
 }
