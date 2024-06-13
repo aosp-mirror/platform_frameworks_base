@@ -1559,7 +1559,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         subtitle: String? = "s",
         description: String? = null,
         contentView: PromptContentView? = null,
-        logoRes: Int = -1,
+        logoRes: Int = 0,
         logoBitmap: Bitmap? = null,
         logoDescription: String? = null,
         packageName: String = OP_PACKAGE_NAME,
@@ -1599,8 +1599,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             descriptionFromApp = description,
             contentViewFromApp = contentView,
             logoResFromApp = logoRes,
-            logoBitmapFromApp =
-                if (logoRes != -1) logoDrawableFromAppRes.toBitmap() else logoBitmap,
+            logoBitmapFromApp = if (logoRes != 0) logoDrawableFromAppRes.toBitmap() else logoBitmap,
             logoDescriptionFromApp = logoDescription,
             packageName = packageName,
         )
@@ -1787,7 +1786,7 @@ private fun PromptSelectorInteractor.initializePrompt(
     subtitleFromApp: String? = "s",
     descriptionFromApp: String? = null,
     contentViewFromApp: PromptContentView? = null,
-    logoResFromApp: Int = -1,
+    logoResFromApp: Int = 0,
     logoBitmapFromApp: Bitmap? = null,
     logoDescriptionFromApp: String? = null,
     packageName: String = OP_PACKAGE_NAME,
