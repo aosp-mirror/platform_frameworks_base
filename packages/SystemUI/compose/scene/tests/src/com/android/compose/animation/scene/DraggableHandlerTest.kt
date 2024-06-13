@@ -160,13 +160,14 @@ class DraggableHandlerTest {
             toScene: SceneKey? = null,
             progress: Float? = null,
             isUserInputOngoing: Boolean? = null
-        ) {
+        ): Transition {
             val transition = assertThat(transitionState).isTransition()
             currentScene?.let { assertThat(transition).hasCurrentScene(it) }
             fromScene?.let { assertThat(transition).hasFromScene(it) }
             toScene?.let { assertThat(transition).hasToScene(it) }
             progress?.let { assertThat(transition).hasProgress(it) }
             isUserInputOngoing?.let { assertThat(transition).hasIsUserInputOngoing(it) }
+            return transition
         }
 
         fun onDragStarted(
@@ -1017,7 +1018,7 @@ class DraggableHandlerTest {
         // Swipe up to scene B at progress = 200%.
         val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
         val dragController = onDragStarted(startedPosition = middle, overSlop = up(2f))
-        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 2f)
+        val transition = assertTransition(fromScene = SceneA, toScene = SceneB, progress = 2f)
 
         // Release the finger.
         dragController.onDragStopped(velocity = -velocityThreshold)
@@ -1026,6 +1027,9 @@ class DraggableHandlerTest {
         // 100% and that the overscroll on scene B is doing nothing, we are already idle.
         runCurrent()
         assertIdle(SceneB)
+
+        // Progress is snapped to 100%.
+        assertThat(transition).hasProgress(1f)
     }
 
     @Test

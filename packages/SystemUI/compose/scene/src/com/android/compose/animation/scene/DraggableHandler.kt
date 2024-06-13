@@ -705,6 +705,8 @@ private class SwipeTransition(
                         // coroutine if we don't need to animate.
                         if (skipAnimation) {
                             snapToScene(targetScene)
+                            cancelOffsetAnimation()
+                            dragOffset = targetOffset
                             return@launch
                         }
 
