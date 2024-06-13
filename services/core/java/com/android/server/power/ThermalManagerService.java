@@ -544,7 +544,7 @@ public class ThermalManagerService extends SystemService {
             if (!mHalReady.get()) {
                 FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED, getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__HAL_NOT_READY,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                 return Float.NaN;
             }
 
@@ -554,7 +554,7 @@ public class ThermalManagerService extends SystemService {
                 }
                 FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED, getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__INVALID_ARGUMENT,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                 return Float.NaN;
             }
 
@@ -1777,7 +1777,7 @@ public class ThermalManagerService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                     return Float.NaN;
                 }
 
@@ -1788,7 +1788,7 @@ public class ThermalManagerService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                     return Float.NaN;
                 }
 
@@ -1827,12 +1827,12 @@ public class ThermalManagerService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                 } else {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__SUCCESS,
-                            maxNormalized);
+                            maxNormalized, forecastSeconds);
                 }
                 return maxNormalized;
             }
