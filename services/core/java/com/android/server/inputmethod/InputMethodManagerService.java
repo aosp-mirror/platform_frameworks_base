@@ -3090,8 +3090,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             throw getExceptionForUnknownImeId(id);
         }
 
+        final var bindingController = getInputMethodBindingController(userId);
         // See if we need to notify a subtype change within the same IME.
-        if (id.equals(getSelectedMethodIdLocked())) {
+        if (id.equals(bindingController.getSelectedMethodId())) {
             final int subtypeCount = info.getSubtypeCount();
             if (subtypeCount <= 0) {
                 notifyInputMethodSubtypeChangedLocked(userId, info, null);
@@ -3126,7 +3127,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return;
         }
 
-        final var bindingController = getInputMethodBindingController(userId);
         // Changing to a different IME.
         if (bindingController.getDeviceIdToShowIme() != DEVICE_ID_DEFAULT
                 && deviceId == DEVICE_ID_DEFAULT) {
@@ -3149,7 +3149,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // mCurMethodId should be updated after setSelectedInputMethodAndSubtypeLocked()
             // because mCurMethodId is stored as a history in
             // setSelectedInputMethodAndSubtypeLocked().
-            getInputMethodBindingController(userId).setSelectedMethodId(id);
+            bindingController.setSelectedMethodId(id);
 
             if (mActivityManagerInternal.isSystemReady()) {
                 Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
