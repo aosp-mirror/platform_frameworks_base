@@ -400,7 +400,7 @@ public class InternetDialogDelegate implements
         });
         mDoneButton.setOnClickListener(v -> dialog.dismiss());
         mShareWifiButton.setOnClickListener(v -> {
-            if (mInternetDialogController.mayLaunchShareWifiSettings(mConnectedWifiEntry)) {
+            if (mInternetDialogController.mayLaunchShareWifiSettings(mConnectedWifiEntry, v)) {
                 mUiEventLogger.log(InternetDialogEvent.SHARE_WIFI_QS_BUTTON_CLICKED);
             }
         });

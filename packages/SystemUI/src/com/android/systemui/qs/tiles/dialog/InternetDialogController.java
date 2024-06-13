@@ -1374,15 +1374,12 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mDefaultDataSubId = defaultDataSubId;
     }
 
-    boolean mayLaunchShareWifiSettings(WifiEntry wifiEntry) {
+    boolean mayLaunchShareWifiSettings(WifiEntry wifiEntry, View view) {
         Intent intent = getConfiguratorQrCodeGeneratorIntentOrNull(wifiEntry);
         if (intent == null) {
             return false;
         }
-        if (mCallback != null) {
-            mCallback.dismissDialog();
-        }
-        mActivityStarter.startActivity(intent, false /* dismissShade */);
+        startActivity(intent, view);
         return true;
     }
 
