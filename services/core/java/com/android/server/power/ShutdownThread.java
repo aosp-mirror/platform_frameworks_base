@@ -48,6 +48,7 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.vibrator.persistence.VibrationXmlParser;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -743,6 +744,11 @@ public final class ShutdownThread extends Thread {
      */
     @VisibleForTesting // For testing vibrations without shutting down device
     void playShutdownVibration(Context context) {
+        if (mInjector.isShutdownVibrationDisabled(context)) {
+            Log.i(TAG, "Vibration disabled in config");
+            return;
+        }
+
         Vibrator vibrator = mInjector.getVibrator(context);
         if (!vibrator.hasVibrator()) {
             return;
@@ -919,6 +925,15 @@ public final class ShutdownThread extends Thread {
         public String getDefaultShutdownVibrationEffectFilePath(Context context) {
             return context.getResources().getString(
                     com.android.internal.R.string.config_defaultShutdownVibrationFile);
+        }
+
+        public boolean isShutdownVibrationDisabled(Context context) {
+            boolean disabledInConfig = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_disableShutdownVibrationInZen);
+            boolean isZenMode = Settings.Global.getInt(context.getContentResolver(),
+                    Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF)
+                    != Settings.Global.ZEN_MODE_OFF;
+            return disabledInConfig && isZenMode;
         }
     }
 }

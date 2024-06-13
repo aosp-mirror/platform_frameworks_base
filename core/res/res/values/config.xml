@@ -6972,6 +6972,9 @@
          Note that, indefinitely repeating vibrations are not allowed as shutdown vibrations. -->
     <string name="config_defaultShutdownVibrationFile" />
 
+    <!-- Whether or not vibration is disabled during shutdown -->
+    <bool name="config_disableShutdownVibrationInZen">false</bool>
+
     <!-- Whether single finger panning is enabled by default when magnification is on -->
     <bool name="config_enable_a11y_magnification_single_panning">false</bool>
 
