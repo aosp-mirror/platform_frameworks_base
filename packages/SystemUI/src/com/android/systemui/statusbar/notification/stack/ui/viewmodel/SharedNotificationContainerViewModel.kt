@@ -486,7 +486,7 @@ constructor(
                 dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
                 goneToAodTransitionViewModel.notificationAlpha,
                 goneToDreamingTransitionViewModel.lockscreenAlpha,
-                goneToDozingTransitionViewModel.lockscreenAlpha,
+                goneToDozingTransitionViewModel.notificationAlpha,
                 goneToLockscreenTransitionViewModel.lockscreenAlpha,
                 lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
                 lockscreenToGoneTransitionViewModel.notificationAlpha(viewState),
@@ -506,9 +506,7 @@ constructor(
                 combineTransform(
                     isTransitioningToHiddenKeyguard,
                     alphaForShadeAndQsExpansion,
-                ) {
-                    isTransitioningToHiddenKeyguard,
-                    alphaForShadeAndQsExpansion ->
+                ) { isTransitioningToHiddenKeyguard, alphaForShadeAndQsExpansion ->
                     if (!isTransitioningToHiddenKeyguard) {
                         emit(alphaForShadeAndQsExpansion)
                     }
