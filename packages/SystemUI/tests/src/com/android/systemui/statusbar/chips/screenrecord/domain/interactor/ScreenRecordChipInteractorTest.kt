@@ -16,8 +16,10 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
 
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
@@ -26,11 +28,21 @@ import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.viewmodel.screenRecordChipInteractor
+import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 class ScreenRecordChipInteractorTest : SysuiTestCase() {
@@ -38,8 +50,26 @@ class ScreenRecordChipInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val screenRecordRepo = kosmos.screenRecordRepository
     private val systemClock = kosmos.fakeSystemClock
+    private val mockSystemUIDialog = mock<SystemUIDialog>()
+
+    private val chipBackgroundView = mock<ChipBackgroundContainer>()
+    private val chipView =
+        mock<View>().apply {
+            whenever(
+                    this.requireViewById<ChipBackgroundContainer>(
+                        R.id.ongoing_activity_chip_background
+                    )
+                )
+                .thenReturn(chipBackgroundView)
+        }
 
     private val underTest = kosmos.screenRecordChipInteractor
+
+    @Before
+    fun setUp() {
+        whenever(kosmos.mockSystemUIDialogFactory.create(any<SystemUIDialog.Delegate>()))
+            .thenReturn(mockSystemUIDialog)
+    }
 
     @Test
     fun chip_doingNothingState_isHidden() =
@@ -70,7 +100,7 @@ class ScreenRecordChipInteractorTest : SysuiTestCase() {
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.stat_sys_screen_record)
+            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_screenrecord)
         }
 
     @Test
@@ -92,5 +122,26 @@ class ScreenRecordChipInteractorTest : SysuiTestCase() {
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             assertThat((latest as OngoingActivityChipModel.Shown).startTimeMs).isEqualTo(5678)
+        }
+
+    @Test
+    fun chip_clickListenerShowsDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+
+            // Dialogs must be created on the main thread
+            context.mainExecutor.execute {
+                clickListener.onClick(chipView)
+                verify(kosmos.mockDialogTransitionAnimator)
+                    .showFromView(
+                        eq(mockSystemUIDialog),
+                        eq(chipBackgroundView),
+                        eq(null),
+                        anyBoolean(),
+                    )
+            }
         }
 }

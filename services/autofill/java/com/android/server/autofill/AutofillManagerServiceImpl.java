@@ -478,7 +478,7 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    void setViewAutofilled(int sessionId, int uid, @NonNull AutofillId id) {
+    void setViewAutofilledLocked(int sessionId, int uid, @NonNull AutofillId id) {
         if (!isEnabledLocked()) {
             Slog.wtf(TAG, "Service not enabled");
             return;
@@ -488,7 +488,7 @@ final class AutofillManagerServiceImpl
             Slog.v(TAG, "setViewAutofilled(): no session for " + sessionId + "(" + uid + ")");
             return;
         }
-        session.setViewAutofilled(id);
+        session.setViewAutofilledLocked(id);
     }
 
     @GuardedBy("mLock")
@@ -792,10 +792,9 @@ final class AutofillManagerServiceImpl
      * Initializes the last fill selection after an autofill service returned a new
      * {@link FillResponse}.
      */
-    void setLastResponse(int sessionId, @NonNull FillResponse response) {
-        synchronized (mLock) {
+    @GuardedBy("mLock")
+    void setLastResponseLocked(int sessionId, @NonNull FillResponse response) {
             mEventHistory = new FillEventHistory(sessionId, response.getClientState());
-        }
     }
 
     void setLastAugmentedAutofillResponse(int sessionId) {

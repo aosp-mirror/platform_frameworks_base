@@ -1048,15 +1048,6 @@ flag {
   bug: "343505271"
 }
 
-flag {
-  name: "glanceable_hub_animate_timer_activity_starts"
-  namespace: "systemui"
-  description: "Properly animates activity starts from live timers on the glanceable hub"
-  bug: "345741071"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
 
 flag {
   name: "new_touchpad_gestures_tutorial"
@@ -1070,6 +1061,16 @@ flag {
    namespace: "systemui"
    description: "Decide whether to register wallpaper change broadcast receiver on background executor."
    bug: "327315860"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "enable_efficient_display_repository"
+   namespace: "systemui"
+   description: "Decide whether to use the new implementation of DisplayRepository that minimizes binder calls and background lock contention."
+   bug: "345472038"
    metadata {
      purpose: PURPOSE_BUGFIX
    }

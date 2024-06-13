@@ -1122,6 +1122,8 @@
     <dimen name="biometric_prompt_panel_max_width">640dp</dimen>
     <dimen name="biometric_prompt_land_small_horizontal_guideline_padding">344dp</dimen>
     <dimen name="biometric_prompt_two_pane_udfps_horizontal_guideline_padding">114dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_shorter_content_width">216dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_shorter_horizontal_guideline_padding">661dp</dimen>
     <dimen name="biometric_prompt_two_pane_medium_horizontal_guideline_padding">640dp</dimen>
     <dimen name="biometric_prompt_one_pane_medium_top_guideline_padding">119dp</dimen>
     <dimen name="biometric_prompt_one_pane_medium_horizontal_guideline_padding">0dp</dimen>

@@ -47,6 +47,7 @@ import android.app.contextualsearch.ContextualSearchManager;
 import android.app.contextualsearch.ContextualSearchState;
 import android.app.contextualsearch.IContextualSearchCallback;
 import android.app.contextualsearch.IContextualSearchManager;
+import android.app.contextualsearch.flags.Flags;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -91,6 +92,8 @@ public class ContextualSearchManagerService extends SystemService {
     private static final String TAG = ContextualSearchManagerService.class.getSimpleName();
     private static final int MSG_RESET_TEMPORARY_PACKAGE = 0;
     private static final int MAX_TEMP_PACKAGE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
+    private static final int MSG_INVALIDATE_TOKEN = 1;
+    private static final int MAX_TOKEN_VALID_DURATION_MS = 1_000 * 60 * 10; // 10 minutes
 
     private final Context mContext;
     private final ActivityTaskManagerInternal mAtmInternal;
@@ -145,6 +148,8 @@ public class ContextualSearchManagerService extends SystemService {
     private Handler mTemporaryHandler;
     @GuardedBy("this")
     private String mTemporaryPackage = null;
+    @GuardedBy("this")
+    private long mTokenValidDurationMs = MAX_TOKEN_VALID_DURATION_MS;
 
     @GuardedBy("mLock")
     private IContextualSearchCallback mStateCallback;
@@ -209,6 +214,29 @@ public class ContextualSearchManagerService extends SystemService {
             mTemporaryPackage = temporaryPackage;
             mTemporaryHandler.sendEmptyMessageDelayed(MSG_RESET_TEMPORARY_PACKAGE, durationMs);
             if (DEBUG_USER) Log.d(TAG, "mTemporaryPackage set to " + mTemporaryPackage);
+        }
+    }
+
+    void resetTokenValidDurationMs() {
+        setTokenValidDurationMs(MAX_TOKEN_VALID_DURATION_MS);
+    }
+
+    void setTokenValidDurationMs(int durationMs) {
+        synchronized (this) {
+            enforceOverridingPermission("setTokenValidDurationMs");
+            if (durationMs > MAX_TOKEN_VALID_DURATION_MS) {
+                throw new IllegalArgumentException(
+                        "Token max duration is " + MAX_TOKEN_VALID_DURATION_MS + " (called with "
+                                + durationMs + ")");
+            }
+            mTokenValidDurationMs = durationMs;
+            if (DEBUG_USER) Log.d(TAG, "mTokenValidDurationMs set to " + durationMs);
+        }
+    }
+
+    private long getTokenValidDurationMs() {
+        synchronized (this) {
+            return mTokenValidDurationMs;
         }
     }
 
@@ -356,7 +384,42 @@ public class ContextualSearchManagerService extends SystemService {
     }
 
     private class ContextualSearchManagerStub extends IContextualSearchManager.Stub {
+        @GuardedBy("this")
+        private Handler mTokenHandler;
         private @Nullable CallbackToken mToken;
+
+        private void invalidateToken() {
+            synchronized (this) {
+                if (mTokenHandler != null) {
+                    mTokenHandler.removeMessages(MSG_INVALIDATE_TOKEN);
+                    mTokenHandler = null;
+                }
+                if (DEBUG_USER) Log.d(TAG, "mToken invalidated.");
+                mToken = null;
+            }
+        }
+
+        private void issueToken() {
+            synchronized (this) {
+                mToken = new CallbackToken();
+                if (mTokenHandler == null) {
+                    mTokenHandler = new Handler(Looper.getMainLooper(), null, true) {
+                        @Override
+                        public void handleMessage(Message msg) {
+                            if (msg.what == MSG_INVALIDATE_TOKEN) {
+                                invalidateToken();
+                            } else {
+                                Slog.wtf(TAG, "invalid token handler msg: " + msg);
+                            }
+                        }
+                    };
+                } else {
+                    mTokenHandler.removeMessages(MSG_INVALIDATE_TOKEN);
+                }
+                mTokenHandler.sendEmptyMessageDelayed(
+                        MSG_INVALIDATE_TOKEN, getTokenValidDurationMs());
+            }
+        }
 
         @Override
         public void startContextualSearch(int entrypoint) {
@@ -364,7 +427,8 @@ public class ContextualSearchManagerService extends SystemService {
                 if (DEBUG_USER) Log.d(TAG, "startContextualSearch");
                 enforcePermission("startContextualSearch");
                 mAssistDataRequester.cancel();
-                mToken = new CallbackToken();
+                // Creates a new CallbackToken at mToken and an expiration handler.
+                issueToken();
                 // We get the launch intent with the system server's identity because the system
                 // server has READ_FRAME_BUFFER permission to get the screenshot and because only
                 // the system server can invoke non-exported activities.
@@ -397,7 +461,18 @@ public class ContextualSearchManagerService extends SystemService {
                 }
                 return;
             }
-            mToken = null;
+            invalidateToken();
+            if (Flags.enableTokenRefresh()) {
+                issueToken();
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(ContextualSearchManager.EXTRA_TOKEN, mToken);
+                try {
+                    callback.onResult(
+                            new ContextualSearchState(null, null, bundle));
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error invoking ContextualSearchCallback", e);
+                }
+            }
             synchronized (mLock) {
                 mStateCallback = callback;
             }

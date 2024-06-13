@@ -106,7 +106,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.function.Consumer;
 
 /**
  * An intent is an abstract description of an operation to be performed.  It
@@ -8327,27 +8326,6 @@ public class Intent implements Parcelable, Cloneable {
 
         } catch (IndexOutOfBoundsException e) {
             throw new URISyntaxException(uri, "illegal Intent URI format", i);
-        }
-    }
-
-    /**
-     * Note all {@link Uri} that are referenced internally, with the expectation that Uri permission
-     * grants will need to be issued to ensure the recipient of this object is able to render its
-     * contents.
-     * See b/281044385 for more context and examples about what happens when this isn't done
-     * correctly.
-     *
-     * @hide
-     */
-    public void visitUris(@NonNull Consumer<Uri> visitor) {
-        if (android.app.Flags.visitRiskyUris()) {
-            visitor.accept(mData);
-            if (mSelector != null) {
-                mSelector.visitUris(visitor);
-            }
-            if (mOriginalIntent != null) {
-                mOriginalIntent.visitUris(visitor);
-            }
         }
     }
 

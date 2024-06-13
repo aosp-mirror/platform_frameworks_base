@@ -898,13 +898,6 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
         mDecorToolbar.dismissPopupMenus();
     }
 
-    @Override
-    public void notifyContentChanged() {
-        mLastBaseContentInsets.setEmpty();
-        mLastBaseInnerInsets = WindowInsets.CONSUMED;
-        mLastInnerInsets = WindowInsets.CONSUMED;
-    }
-
     public static class LayoutParams extends MarginLayoutParams {
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);

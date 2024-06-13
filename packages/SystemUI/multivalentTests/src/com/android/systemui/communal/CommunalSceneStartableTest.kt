@@ -111,6 +111,25 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun keyguardGoesAway_whenInEditMode_doesNotChangeScene() =
+        with(kosmos) {
+            testScope.runTest {
+                val scene by collectLastValue(communalSceneInteractor.currentScene)
+                communalSceneInteractor.changeScene(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                communalInteractor.setEditModeOpen(true)
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = KeyguardState.GONE,
+                    testScope = this
+                )
+                // Scene change will be handled in EditWidgetsActivity not here
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
     @Ignore("Ignored until custom animations are implemented in b/322787129")
     @Test
     fun deviceDocked_forceCommunalScene() =

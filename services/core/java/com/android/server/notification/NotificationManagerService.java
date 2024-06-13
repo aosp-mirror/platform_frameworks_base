@@ -284,6 +284,7 @@ import android.service.notification.NotificationRecordProto;
 import android.service.notification.NotificationServiceDumpProto;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeProto;
 import android.service.notification.ZenPolicy;
@@ -5505,6 +5506,14 @@ public class NotificationManagerService extends SystemService {
 
             return mZenModeHelper.addAutomaticZenRule(rulePkg, automaticZenRule,
                     computeZenOrigin(fromUser), "addAutomaticZenRule", Binder.getCallingUid());
+        }
+
+        @Override
+        public void setManualZenRuleDeviceEffects(ZenDeviceEffects effects) throws RemoteException {
+            checkCallerIsSystem();
+
+            mZenModeHelper.setManualZenRuleDeviceEffects(effects, computeZenOrigin(true),
+                    "Update manual mode non-policy settings", Binder.getCallingUid());
         }
 
         @Override
