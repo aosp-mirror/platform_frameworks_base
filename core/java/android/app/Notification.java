@@ -6222,6 +6222,7 @@ public class Notification implements Parcelable
                 if (appIconRes != 0) {
                     mN.mAppIcon = Icon.createWithResource(mContext, appIconRes);
                     contentView.setImageViewIcon(R.id.icon, mN.mAppIcon);
+                    contentView.setBoolean(R.id.icon, "setShouldShowAppIcon", true);
                     usingAppIcon = true;
                 } else {
                     Log.w(TAG, "bindSmallIcon: could not get the app icon");
