@@ -92,6 +92,7 @@ constructor(
     private val remoteInputManager: NotificationRemoteInputManager,
     private val conversationProcessor: ConversationNotificationProcessor,
     private val ronExtractor: RichOngoingNotificationContentExtractor,
+    private val ronInflater: RichOngoingNotificationViewInflater,
     @NotifInflation private val inflationExecutor: Executor,
     private val smartReplyStateInflater: SmartReplyStateInflater,
     private val notifLayoutInflaterFactoryProvider: NotifLayoutInflaterFactory.Provider,
@@ -140,6 +141,7 @@ constructor(
                 entry,
                 conversationProcessor,
                 ronExtractor,
+                ronInflater,
                 row,
                 bindParams.isMinimized,
                 bindParams.usesIncreasedHeight,
@@ -264,6 +266,8 @@ constructor(
         when (inflateFlag) {
             FLAG_CONTENT_VIEW_CONTRACTED ->
                 row.privateLayout.performWhenContentInactive(VISIBLE_TYPE_CONTRACTED) {
+                    row.privateLayout.mContractedBinderHandle?.dispose()
+                    row.privateLayout.mContractedBinderHandle = null
                     row.privateLayout.setContractedChild(null)
                     remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED)
                 }
@@ -342,6 +346,7 @@ constructor(
         private val entry: NotificationEntry,
         private val conversationProcessor: ConversationNotificationProcessor,
         private val ronExtractor: RichOngoingNotificationContentExtractor,
+        private val ronInflater: RichOngoingNotificationViewInflater,
         private val row: ExpandableNotificationRow,
         private val isMinimized: Boolean,
         private val usesIncreasedHeight: Boolean,
@@ -453,6 +458,21 @@ constructor(
                         )
                     }
             }
+
+            if (reInflateFlags and CONTENT_VIEWS_TO_CREATE_RICH_ONGOING != 0) {
+                logger.logAsyncTaskProgress(entry, "inflating RON view")
+                inflationProgress.richOngoingNotificationViewHolder =
+                    inflationProgress.contentModel.richOngoingContentModel?.let {
+                        ronInflater.inflateView(
+                            contentModel = it,
+                            existingView = row.privateLayout.contractedChild,
+                            entry = entry,
+                            systemUiContext = context,
+                            parentView = row.privateLayout
+                        )
+                    }
+            }
+
             logger.logAsyncTaskProgress(entry, "getting row image resolver (on wrong thread!)")
             val imageResolver = row.imageResolver
             // wait for image resolver to finish preloading
@@ -558,6 +578,7 @@ constructor(
         var inflatedSmartReplyState: InflatedSmartReplyState? = null
         var expandedInflatedSmartReplies: InflatedSmartReplyViewHolder? = null
         var headsUpInflatedSmartReplies: InflatedSmartReplyViewHolder? = null
+        var richOngoingNotificationViewHolder: InflatedContentViewHolder? = null
 
         // Inflated SingleLineView that lacks the UI State
         var inflatedSingleLineView: HybridNotificationView? = null
@@ -651,7 +672,10 @@ constructor(
                         systemUIContext = systemUIContext,
                         packageContext = packageContext
                     )
-                } else null
+                } else {
+                    // if we're not re-inflating any RON views, make sure the model doesn't change
+                    entry.richOngoingContentModel.value
+                }
 
             val remoteViewsFlags = getRemoteViewsFlags(reInflateFlags, richOngoingContentModel)
 
@@ -1347,16 +1371,33 @@ constructor(
                 return false
             }
             logger.logAsyncTaskProgress(entry, "finishing")
-            setViewsFromRemoteViews(
-                reInflateFlags,
+
+            // before updating the content model, stop existing binding if necessary
+            val hasRichOngoingContentModel = result.contentModel.richOngoingContentModel != null
+            val requestedRichOngoing = reInflateFlags and CONTENT_VIEWS_TO_CREATE_RICH_ONGOING != 0
+            val rejectedRichOngoing = requestedRichOngoing && !hasRichOngoingContentModel
+            if (result.richOngoingNotificationViewHolder != null || rejectedRichOngoing) {
+                row.privateLayout.mContractedBinderHandle?.dispose()
+                row.privateLayout.mContractedBinderHandle = null
+            }
+
+            // set the content model after disposal and before setting new rich ongoing view
+            entry.setContentModel(result.contentModel)
+            result.inflatedSmartReplyState?.let { row.privateLayout.setInflatedSmartReplyState(it) }
+
+            // set normal remote views (skipping rich ongoing states when that model exists)
+            val remoteViewsFlags =
+                getRemoteViewsFlags(reInflateFlags, result.contentModel.richOngoingContentModel)
+            setContentViewsFromRemoteViews(
+                remoteViewsFlags,
                 entry,
                 remoteViewCache,
                 result,
                 row,
                 isMinimized,
             )
-            result.inflatedSmartReplyState?.let { row.privateLayout.setInflatedSmartReplyState(it) }
 
+            // set single line view
             if (
                 AsyncHybridViewInflation.isEnabled &&
                     reInflateFlags and FLAG_CONTENT_VIEW_SINGLE_LINE != 0
@@ -1372,14 +1413,29 @@ constructor(
                     row.privateLayout.setSingleLineView(result.inflatedSingleLineView)
                 }
             }
-            entry.setContentModel(result.contentModel)
+
+            // after updating the content model, set the view, then start the new binder
+            result.richOngoingNotificationViewHolder?.let { viewHolder ->
+                row.privateLayout.contractedChild = viewHolder.view
+                row.privateLayout.expandedChild = null
+                row.privateLayout.headsUpChild = null
+                row.privateLayout.setExpandedInflatedSmartReplies(null)
+                row.privateLayout.setHeadsUpInflatedSmartReplies(null)
+                row.privateLayout.mContractedBinderHandle =
+                    viewHolder.binder.setupContentViewBinder()
+                row.setExpandable(false)
+                remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED)
+                remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)
+                remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)
+            }
+
             Trace.endAsyncSection(APPLY_TRACE_METHOD, System.identityHashCode(row))
             endListener?.onAsyncInflationFinished(entry)
             return true
         }
 
-        private fun setViewsFromRemoteViews(
-            reInflateFlags: Int,
+        private fun setContentViewsFromRemoteViews(
+            @InflationFlag reInflateFlags: Int,
             entry: NotificationEntry,
             remoteViewCache: NotifRemoteViewCache,
             result: InflationProgress,

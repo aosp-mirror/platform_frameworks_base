@@ -216,6 +216,7 @@ class ExpandableNotificationRowBuilder(
                     conversationProcessor,
                     mock(),
                     mock(),
+                    mock(),
                     smartReplyStateInflater,
                     notifLayoutInflaterFactoryProvider,
                     mock(),

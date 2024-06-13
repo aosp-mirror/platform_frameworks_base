@@ -46,20 +46,28 @@ import com.android.systemui.statusbar.notification.row.shared.NewRemoteViews
 import com.android.systemui.statusbar.notification.row.shared.NotificationContentModel
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
 import com.android.systemui.statusbar.notification.row.shared.RichOngoingContentModel
+import com.android.systemui.statusbar.notification.row.shared.TimerContentModel
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater
+import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.DisposableHandle
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -114,6 +122,20 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             ): RichOngoingContentModel? = fakeRonContentModel
         }
 
+    private var fakeRonViewHolder: InflatedContentViewHolder? = null
+    private val fakeRonViewInflater =
+        spy(
+            object : RichOngoingNotificationViewInflater {
+                override fun inflateView(
+                    contentModel: RichOngoingContentModel,
+                    existingView: View?,
+                    entry: NotificationEntry,
+                    systemUiContext: Context,
+                    parentView: ViewGroup
+                ): InflatedContentViewHolder? = fakeRonViewHolder
+            }
+        )
+
     @Before
     fun setUp() {
         allowTestableLooperAsMainThread()
@@ -131,6 +153,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
                 mock(),
                 mock<ConversationNotificationProcessor>(),
                 fakeRonExtractor,
+                fakeRonViewInflater,
                 mock(),
                 smartReplyStateInflater,
                 layoutInflaterFactoryProvider,
@@ -357,6 +380,108 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
 
         // THEN inflated informs cache to remove remote view
         verify(cache).removeCachedView(eq(row.entry), eq(FLAG_CONTENT_VIEW_HEADS_UP))
+    }
+
+    @Test
+    fun testRonModelRequiredForRonView() {
+        fakeRonContentModel = null
+        val ronView = View(context)
+        fakeRonViewHolder = InflatedContentViewHolder(view = ronView, binder = mock())
+        // WHEN inflater inflates
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_CONTRACTED, row)
+        verify(fakeRonViewInflater, never()).inflateView(any(), any(), any(), any(), any())
+    }
+
+    @Test
+    fun testRonModelTriggersInflationOfRonView() {
+        val mockRonModel = mock<TimerContentModel>()
+        val ronView = View(context)
+        val mockBinder = mock<DeferredContentViewBinder>()
+
+        val entry = row.entry
+        val privateLayout = row.privateLayout
+
+        fakeRonContentModel = mockRonModel
+        fakeRonViewHolder = InflatedContentViewHolder(view = ronView, binder = mockBinder)
+        // WHEN inflater inflates
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_CONTRACTED, row)
+        // VERIFY that the inflater is invoked
+        verify(fakeRonViewInflater)
+            .inflateView(eq(mockRonModel), any(), eq(entry), any(), eq(privateLayout))
+        assertThat(row.privateLayout.contractedChild).isSameInstanceAs(ronView)
+        verify(mockBinder).setupContentViewBinder()
+    }
+
+    @Test
+    fun ronViewAppliesElementsInOrder() {
+        val oldHandle = mock<DisposableHandle>()
+        val mockRonModel = mock<TimerContentModel>()
+        val ronView = View(context)
+        val mockBinder = mock<DeferredContentViewBinder>()
+
+        row.privateLayout.mContractedBinderHandle = oldHandle
+        val entry = spy(row.entry)
+        row.entry = entry
+        val privateLayout = spy(row.privateLayout)
+        row.privateLayout = privateLayout
+
+        fakeRonContentModel = mockRonModel
+        fakeRonViewHolder = InflatedContentViewHolder(view = ronView, binder = mockBinder)
+        // WHEN inflater inflates
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_CONTRACTED, row)
+
+        // Validate that these 4 steps happen in this precise order
+        inOrder(oldHandle, entry, privateLayout, mockBinder) {
+            verify(oldHandle).dispose()
+            verify(entry).setContentModel(argThat { richOngoingContentModel === mockRonModel })
+            verify(privateLayout).setContractedChild(eq(ronView))
+            verify(mockBinder).setupContentViewBinder()
+        }
+    }
+
+    @Test
+    fun testRonNotReinflating() {
+        val handle0 = mock<DisposableHandle>()
+        val handle1 = mock<DisposableHandle>()
+        val ronView = View(context)
+        val mockRonModel1 = mock<TimerContentModel>()
+        val mockRonModel2 = mock<TimerContentModel>()
+        val mockBinder1 = mock<DeferredContentViewBinder>()
+        doReturn(handle1).whenever(mockBinder1).setupContentViewBinder()
+
+        row.privateLayout.mContractedBinderHandle = handle0
+        val entry = spy(row.entry)
+        row.entry = entry
+        val privateLayout = spy(row.privateLayout)
+        row.privateLayout = privateLayout
+
+        // WHEN inflater inflates both a model and a view
+        fakeRonContentModel = mockRonModel1
+        fakeRonViewHolder = InflatedContentViewHolder(view = ronView, binder = mockBinder1)
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_CONTRACTED, row)
+
+        // Validate that these 4 steps happen in this precise order
+        inOrder(handle0, entry, privateLayout, mockBinder1, handle1) {
+            verify(handle0).dispose()
+            verify(entry).setContentModel(argThat { richOngoingContentModel === mockRonModel1 })
+            verify(privateLayout).setContractedChild(eq(ronView))
+            verify(mockBinder1).setupContentViewBinder()
+            verify(handle1, never()).dispose()
+        }
+
+        clearInvocations(handle0, entry, privateLayout, mockBinder1, handle1)
+
+        // THEN when the inflater inflates just a model
+        fakeRonContentModel = mockRonModel2
+        fakeRonViewHolder = null
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_CONTRACTED, row)
+
+        // Validate that for reinflation, the only thing we do us update the model
+        verify(handle1, never()).dispose()
+        verify(entry).setContentModel(argThat { richOngoingContentModel === mockRonModel2 })
+        verify(privateLayout, never()).setContractedChild(any())
+        verify(mockBinder1, never()).setupContentViewBinder()
+        verify(handle1, never()).dispose()
     }
 
     @Test
