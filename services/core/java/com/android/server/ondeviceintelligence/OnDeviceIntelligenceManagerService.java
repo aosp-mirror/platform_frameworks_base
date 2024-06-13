@@ -191,6 +191,16 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
 
             mIsServiceEnabled = isServiceEnabled();
         }
+
+        //connect to remote services(if available) during boot phase.
+        if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+            try {
+                ensureRemoteInferenceServiceInitialized();
+                ensureRemoteIntelligenceServiceInitialized();
+            } catch (Exception e) {
+                Slog.w(TAG, "Couldn't pre-start remote ondeviceintelligence services.", e);
+            }
+        }
     }
 
     private void onDeviceConfigChange(@NonNull Set<String> keys) {
@@ -216,7 +226,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             public void getVersion(RemoteCallback remoteCallback) {
                 Slog.i(TAG, "OnDeviceIntelligenceManagerInternal getVersion");
                 Objects.requireNonNull(remoteCallback);
-                mContext.enforceCallingOrSelfPermission(
+                mContext.enforceCallingPermission(
                         Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
                 if (!mIsServiceEnabled) {
                     Slog.w(TAG, "Service not available");
@@ -241,7 +251,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                     throws RemoteException {
                 Slog.i(TAG, "OnDeviceIntelligenceManagerInternal getFeatures");
                 Objects.requireNonNull(featureCallback);
-                mContext.enforceCallingOrSelfPermission(
+                mContext.enforceCallingPermission(
                         Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
                 if (!mIsServiceEnabled) {
                     Slog.w(TAG, "Service not available");
@@ -279,7 +289,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                     throws RemoteException {
                 Slog.i(TAG, "OnDeviceIntelligenceManagerInternal getFeatures");
                 Objects.requireNonNull(listFeaturesCallback);
-                mContext.enforceCallingOrSelfPermission(
+                mContext.enforceCallingPermission(
                         Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
                 if (!mIsServiceEnabled) {
                     Slog.w(TAG, "Service not available");
@@ -323,7 +333,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 Slog.i(TAG, "OnDeviceIntelligenceManagerInternal getFeatureStatus");
                 Objects.requireNonNull(feature);
                 Objects.requireNonNull(featureDetailsCallback);
-                mContext.enforceCallingOrSelfPermission(
+                mContext.enforceCallingPermission(
                         Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
                 if (!mIsServiceEnabled) {
                     Slog.w(TAG, "Service not available");
@@ -367,7 +377,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 Slog.i(TAG, "OnDeviceIntelligenceManagerInternal requestFeatureDownload");
                 Objects.requireNonNull(feature);
                 Objects.requireNonNull(downloadCallback);
-                mContext.enforceCallingOrSelfPermission(
+                mContext.enforceCallingPermission(
                         Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
                 if (!mIsServiceEnabled) {
                     Slog.w(TAG, "Service not available");
@@ -407,7 +417,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                     sanitizeInferenceParams(request);
                     Objects.requireNonNull(tokenInfoCallback);
 
-                    mContext.enforceCallingOrSelfPermission(
+                    mContext.enforceCallingPermission(
                             Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
                     if (!mIsServiceEnabled) {
                         Slog.w(TAG, "Service not available");
@@ -450,7 +460,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                     Objects.requireNonNull(feature);
                     sanitizeInferenceParams(request);
                     Objects.requireNonNull(responseCallback);
-                    mContext.enforceCallingOrSelfPermission(
+                    mContext.enforceCallingPermission(
                             Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
                     if (!mIsServiceEnabled) {
                         Slog.w(TAG, "Service not available");
@@ -495,7 +505,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                     Objects.requireNonNull(feature);
                     sanitizeInferenceParams(request);
                     Objects.requireNonNull(streamingCallback);
-                    mContext.enforceCallingOrSelfPermission(
+                    mContext.enforceCallingPermission(
                             Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
                     if (!mIsServiceEnabled) {
                         Slog.w(TAG, "Service not available");
