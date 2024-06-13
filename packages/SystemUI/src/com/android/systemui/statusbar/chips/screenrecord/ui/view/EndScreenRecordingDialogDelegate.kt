@@ -16,18 +16,18 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.ui.view
 
+import android.app.ActivityManager
 import android.os.Bundle
-import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
-import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
+import com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenRecordChipViewModel
 import com.android.systemui.statusbar.phone.SystemUIDialog
 
 /** A dialog that lets the user stop an ongoing screen recording. */
 class EndScreenRecordingDialogDelegate(
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
-    private val interactor: ScreenRecordChipInteractor,
-    private val state: MediaProjectionState,
+    private val stopAction: () -> Unit,
+    private val recordedTask: ActivityManager.RunningTaskInfo?,
 ) : SystemUIDialog.Delegate {
 
     override fun createDialog(): SystemUIDialog {
@@ -36,11 +36,11 @@ class EndScreenRecordingDialogDelegate(
 
     override fun beforeCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
         with(dialog) {
-            setIcon(ScreenRecordChipInteractor.ICON)
+            setIcon(ScreenRecordChipViewModel.ICON)
             setTitle(R.string.screenrecord_stop_dialog_title)
             setMessage(
                 endMediaProjectionDialogHelper.getDialogMessage(
-                    state,
+                    recordedTask,
                     genericMessageResId = R.string.screenrecord_stop_dialog_message,
                     specificAppMessageResId = R.string.screenrecord_stop_dialog_message_specific_app
                 )
@@ -49,7 +49,7 @@ class EndScreenRecordingDialogDelegate(
             // button is clicked anyway.
             setNegativeButton(R.string.close_dialog_button, /* onClick= */ null)
             setPositiveButton(R.string.screenrecord_stop_dialog_button) { _, _ ->
-                interactor.stopRecording()
+                stopAction.invoke()
             }
         }
     }

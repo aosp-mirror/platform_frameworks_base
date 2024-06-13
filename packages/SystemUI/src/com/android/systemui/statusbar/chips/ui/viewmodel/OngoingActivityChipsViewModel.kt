@@ -20,7 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.chips.call.ui.viewmodel.CallChipViewModel
 import com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.CastToOtherDeviceChipViewModel
-import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
+import com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenRecordChipViewModel
 import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import javax.inject.Inject
@@ -41,7 +41,7 @@ class OngoingActivityChipsViewModel
 @Inject
 constructor(
     @Application scope: CoroutineScope,
-    screenRecordChipInteractor: ScreenRecordChipInteractor,
+    screenRecordChipViewModel: ScreenRecordChipViewModel,
     shareToAppChipViewModel: ShareToAppChipViewModel,
     castToOtherDeviceChipViewModel: CastToOtherDeviceChipViewModel,
     callChipViewModel: CallChipViewModel,
@@ -55,7 +55,7 @@ constructor(
      */
     val chip: StateFlow<OngoingActivityChipModel> =
         combine(
-                screenRecordChipInteractor.chip,
+                screenRecordChipViewModel.chip,
                 shareToAppChipViewModel.chip,
                 castToOtherDeviceChipViewModel.chip,
                 callChipViewModel.chip,

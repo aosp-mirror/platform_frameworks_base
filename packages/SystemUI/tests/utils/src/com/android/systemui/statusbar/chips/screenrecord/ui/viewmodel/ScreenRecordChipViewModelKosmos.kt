@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
+package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 
+import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
-import com.android.systemui.screenrecord.data.repository.screenRecordRepository
+import com.android.systemui.statusbar.chips.mediaprojection.ui.view.endMediaProjectionDialogHelper
+import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.screenRecordChipInteractor
+import com.android.systemui.util.time.fakeSystemClock
 
-val Kosmos.screenRecordChipInteractor: ScreenRecordChipInteractor by
+val Kosmos.screenRecordChipViewModel: ScreenRecordChipViewModel by
     Kosmos.Fixture {
-        ScreenRecordChipInteractor(
+        ScreenRecordChipViewModel(
             scope = applicationCoroutineScope,
-            screenRecordRepository = screenRecordRepository,
-            mediaProjectionRepository = fakeMediaProjectionRepository,
+            interactor = screenRecordChipInteractor,
+            endMediaProjectionDialogHelper = endMediaProjectionDialogHelper,
+            dialogTransitionAnimator = mockDialogTransitionAnimator,
+            systemClock = fakeSystemClock,
         )
     }

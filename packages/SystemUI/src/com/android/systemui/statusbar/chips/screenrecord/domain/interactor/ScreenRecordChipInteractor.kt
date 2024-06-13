@@ -16,22 +16,13 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
 
-import androidx.annotation.DrawableRes
-import com.android.systemui.animation.DialogTransitionAnimator
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
-import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.ScreenRecordRepository
-import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
-import com.android.systemui.statusbar.chips.screenrecord.ui.view.EndScreenRecordingDialogDelegate
-import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
-import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
-import com.android.systemui.util.time.SystemClock
+import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,7 +32,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Interactor for the screen recording chip shown in the status bar. */
-// TODO(b/332662551): Convert this into a view model.
 @SysUISingleton
 class ScreenRecordChipInteractor
 @Inject
@@ -49,11 +39,8 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val screenRecordRepository: ScreenRecordRepository,
     private val mediaProjectionRepository: MediaProjectionRepository,
-    private val systemClock: SystemClock,
-    private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
-    private val dialogTransitionAnimator: DialogTransitionAnimator,
-) : OngoingActivityChipViewModel {
-    override val chip: StateFlow<OngoingActivityChipModel> =
+) {
+    val screenRecordState: StateFlow<ScreenRecordChipModel> =
         // ScreenRecordRepository has the main "is the screen being recorded?" state, and
         // MediaProjectionRepository has information about what specifically is being recorded (a
         // single app or the entire screen)
@@ -62,37 +49,27 @@ constructor(
                 mediaProjectionRepository.mediaProjectionState,
             ) { screenRecordState, mediaProjectionState ->
                 when (screenRecordState) {
-                    is ScreenRecordModel.DoingNothing,
+                    is ScreenRecordModel.DoingNothing -> ScreenRecordChipModel.DoingNothing
                     // TODO(b/332662551): Implement the 3-2-1 countdown chip.
-                    is ScreenRecordModel.Starting -> OngoingActivityChipModel.Hidden
-                    is ScreenRecordModel.Recording ->
-                        OngoingActivityChipModel.Shown(
-                            // TODO(b/332662551): Also provide a content description.
-                            icon = Icon.Resource(ICON, contentDescription = null),
-                            startTimeMs = systemClock.elapsedRealtime(),
-                            createDialogLaunchOnClickListener(
-                                createDelegate(mediaProjectionState),
-                                dialogTransitionAnimator
-                            ),
-                        )
+                    is ScreenRecordModel.Starting ->
+                        ScreenRecordChipModel.Starting(screenRecordState.millisUntilStarted)
+                    is ScreenRecordModel.Recording -> {
+                        val recordedTask =
+                            if (
+                                mediaProjectionState is MediaProjectionState.Projecting.SingleTask
+                            ) {
+                                mediaProjectionState.task
+                            } else {
+                                null
+                            }
+                        ScreenRecordChipModel.Recording(recordedTask)
+                    }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), ScreenRecordChipModel.DoingNothing)
 
     /** Stops the recording. */
     fun stopRecording() {
         scope.launch { screenRecordRepository.stopRecording() }
-    }
-
-    private fun createDelegate(state: MediaProjectionState): EndScreenRecordingDialogDelegate {
-        return EndScreenRecordingDialogDelegate(
-            endMediaProjectionDialogHelper,
-            this@ScreenRecordChipInteractor,
-            state,
-        )
-    }
-
-    companion object {
-        @DrawableRes val ICON = R.drawable.ic_screenrecord
     }
 }

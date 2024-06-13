@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.ui.view
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
@@ -26,8 +27,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.mediaprojection.data.model.MediaProjectionState
-import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.endMediaProjectionDialogHelper
@@ -56,7 +56,7 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
 
     @Test
     fun icon() {
-        createAndSetDelegate(MediaProjectionState.NotProjecting)
+        createAndSetDelegate(recordedTask = null)
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
@@ -65,7 +65,7 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
 
     @Test
     fun title() {
-        createAndSetDelegate(ENTIRE_SCREEN)
+        createAndSetDelegate(recordedTask = null)
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
@@ -73,8 +73,8 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
     }
 
     @Test
-    fun message_notProjecting() {
-        createAndSetDelegate(MediaProjectionState.NotProjecting)
+    fun message_noRecordedTask() {
+        createAndSetDelegate(recordedTask = null)
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
@@ -82,29 +82,16 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
     }
 
     @Test
-    fun message_entireScreen() {
-        createAndSetDelegate(ENTIRE_SCREEN)
-
-        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
-
-        verify(sysuiDialog).setMessage(context.getString(R.string.screenrecord_stop_dialog_message))
-    }
-
-    @Test
-    fun message_singleTask() {
+    fun message_hasRecordedTask() {
         val baseIntent =
             Intent().apply { this.component = ComponentName("fake.task.package", "cls") }
         val appInfo = mock<ApplicationInfo>()
         whenever(appInfo.loadLabel(kosmos.packageManager)).thenReturn("Fake Package")
         whenever(kosmos.packageManager.getApplicationInfo(eq("fake.task.package"), any<Int>()))
             .thenReturn(appInfo)
+        val task = createTask(taskId = 1, baseIntent = baseIntent)
 
-        createAndSetDelegate(
-            MediaProjectionState.Projecting.SingleTask(
-                HOST_PACKAGE,
-                FakeActivityTaskManager.createTask(taskId = 1, baseIntent = baseIntent)
-            )
-        )
+        createAndSetDelegate(task)
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
@@ -117,7 +104,7 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
 
     @Test
     fun negativeButton() {
-        createAndSetDelegate(SINGLE_TASK)
+        createAndSetDelegate(recordedTask = createTask(taskId = 1))
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
@@ -127,7 +114,7 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
     @Test
     fun positiveButton() =
         kosmos.testScope.runTest {
-            createAndSetDelegate(MediaProjectionState.NotProjecting)
+            createAndSetDelegate(recordedTask = null)
 
             underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
@@ -149,22 +136,12 @@ class EndScreenRecordingDialogDelegateTest : SysuiTestCase() {
             assertThat(kosmos.screenRecordRepository.stopRecordingInvoked).isTrue()
         }
 
-    private fun createAndSetDelegate(state: MediaProjectionState) {
+    private fun createAndSetDelegate(recordedTask: ActivityManager.RunningTaskInfo?) {
         underTest =
             EndScreenRecordingDialogDelegate(
                 kosmos.endMediaProjectionDialogHelper,
-                kosmos.screenRecordChipInteractor,
-                state,
-            )
-    }
-
-    companion object {
-        private const val HOST_PACKAGE = "fake.host.package"
-        private val ENTIRE_SCREEN = MediaProjectionState.Projecting.EntireScreen(HOST_PACKAGE)
-        private val SINGLE_TASK =
-            MediaProjectionState.Projecting.SingleTask(
-                HOST_PACKAGE,
-                FakeActivityTaskManager.createTask(taskId = 1)
+                stopAction = kosmos.screenRecordChipInteractor::stopRecording,
+                recordedTask,
             )
     }
 }

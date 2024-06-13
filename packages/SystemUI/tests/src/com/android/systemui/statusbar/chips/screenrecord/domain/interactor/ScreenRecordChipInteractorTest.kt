@@ -16,11 +16,8 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
 
-import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.mockDialogTransitionAnimator
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
@@ -28,25 +25,13 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
-import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
-import com.android.systemui.statusbar.chips.screenrecord.ui.view.EndScreenRecordingDialogDelegate
-import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
-import com.android.systemui.statusbar.phone.SystemUIDialog
-import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
-import com.android.systemui.util.time.fakeSystemClock
+import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 @SmallTest
 class ScreenRecordChipInteractorTest : SysuiTestCase() {
@@ -54,149 +39,83 @@ class ScreenRecordChipInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val screenRecordRepo = kosmos.screenRecordRepository
     private val mediaProjectionRepo = kosmos.fakeMediaProjectionRepository
-    private val systemClock = kosmos.fakeSystemClock
-    private val mockSystemUIDialog = mock<SystemUIDialog>()
-
-    private val chipBackgroundView = mock<ChipBackgroundContainer>()
-    private val chipView =
-        mock<View>().apply {
-            whenever(
-                    this.requireViewById<ChipBackgroundContainer>(
-                        R.id.ongoing_activity_chip_background
-                    )
-                )
-                .thenReturn(chipBackgroundView)
-        }
 
     private val underTest = kosmos.screenRecordChipInteractor
 
-    @Before
-    fun setUp() {
-        whenever(kosmos.mockSystemUIDialogFactory.create(any<EndScreenRecordingDialogDelegate>()))
-            .thenReturn(mockSystemUIDialog)
-    }
-
     @Test
-    fun chip_doingNothingState_isHidden() =
+    fun screenRecordState_doingNothingState_matches() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.screenRecordState)
 
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.DoingNothing
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            assertThat(latest).isInstanceOf(ScreenRecordChipModel.DoingNothing::class.java)
         }
 
     @Test
-    fun chip_startingState_isHidden() =
+    fun screenRecordState_startingState_matches() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.screenRecordState)
 
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Starting(400)
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+            assertThat(latest).isEqualTo(ScreenRecordChipModel.Starting(400))
         }
 
     @Test
-    fun chip_recordingState_isShownWithIcon() =
+    fun screenRecordState_recordingState_matches() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.screenRecordState)
 
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_screenrecord)
+            assertThat(latest).isInstanceOf(ScreenRecordChipModel.Recording::class.java)
         }
 
     @Test
-    fun chip_timeResetsOnEachNewRecording() =
+    fun screenRecordState_projectionIsNotProjecting_recordedTaskNull() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.screenRecordState)
 
-            systemClock.setElapsedRealtime(1234)
-            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
-
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).startTimeMs).isEqualTo(1234)
-
-            screenRecordRepo.screenRecordState.value = ScreenRecordModel.DoingNothing
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
-
-            systemClock.setElapsedRealtime(5678)
-            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
-
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).startTimeMs).isEqualTo(5678)
-        }
-
-    @Test
-    fun chip_notProjecting_clickListenerShowsDialog() =
-        testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionRepo.mediaProjectionState.value = MediaProjectionState.NotProjecting
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
-
-            // Dialogs must be created on the main thread
-            context.mainExecutor.execute {
-                clickListener.onClick(chipView)
-                // EndScreenRecordingDialogDelegate will test that the dialog has the right message
-                verify(kosmos.mockDialogTransitionAnimator)
-                    .showFromView(
-                        eq(mockSystemUIDialog),
-                        eq(chipBackgroundView),
-                        eq(null),
-                        anyBoolean(),
-                    )
-            }
+            assertThat(latest).isEqualTo(ScreenRecordChipModel.Recording(recordedTask = null))
         }
 
     @Test
-    fun chip_projectingEntireScreen_clickListenerShowsDialog() =
+    fun screenRecordState_projectionIsEntireScreen_recordedTaskNull() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.screenRecordState)
+
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen("host.package")
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
-
-            // Dialogs must be created on the main thread
-            context.mainExecutor.execute {
-                clickListener.onClick(chipView)
-                // EndScreenRecordingDialogDelegate will test that the dialog has the right message
-                verify(kosmos.mockDialogTransitionAnimator)
-                    .showFromView(
-                        eq(mockSystemUIDialog),
-                        eq(chipBackgroundView),
-                        eq(null),
-                        anyBoolean(),
-                    )
-            }
+            assertThat(latest).isEqualTo(ScreenRecordChipModel.Recording(recordedTask = null))
         }
 
     @Test
-    fun chip_projectingSingleTask_clickListenerShowsDialog() =
+    fun screenRecordState_projectionIsSingleTask_recordedTaskMatches() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
+            val latest by collectLastValue(underTest.screenRecordState)
+
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            val task = createTask(taskId = 1)
             mediaProjectionRepo.mediaProjectionState.value =
-                MediaProjectionState.Projecting.SingleTask("host.package", createTask(taskId = 1))
+                MediaProjectionState.Projecting.SingleTask("host.package", task)
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            assertThat(latest).isEqualTo(ScreenRecordChipModel.Recording(recordedTask = task))
+        }
 
-            // Dialogs must be created on the main thread
-            context.mainExecutor.execute {
-                clickListener.onClick(chipView)
-                // EndScreenRecordingDialogDelegate will test that the dialog has the right message
-                verify(kosmos.mockDialogTransitionAnimator)
-                    .showFromView(
-                        eq(mockSystemUIDialog),
-                        eq(chipBackgroundView),
-                        eq(null),
-                        anyBoolean(),
-                    )
-            }
+    @Test
+    fun stopRecording_sendsToRepo() =
+        testScope.runTest {
+            assertThat(screenRecordRepo.stopRecordingInvoked).isFalse()
+
+            underTest.stopRecording()
+            runCurrent()
+
+            assertThat(screenRecordRepo.stopRecordingInvoked).isTrue()
         }
 }
