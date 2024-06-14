@@ -81,7 +81,9 @@ constructor(
                     WindowManager.LayoutParams.WRAP_CONTENT,
                     WindowManager.LayoutParams.WRAP_CONTENT,
                     WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                    Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS,
+                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
+                            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                     PixelFormat.TRANSLUCENT
                 )
                 .apply {
@@ -91,6 +93,8 @@ constructor(
                     layoutInDisplayCutoutMode =
                         WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
                     privateFlags = PRIVATE_FLAG_TRUSTED_OVERLAY or PRIVATE_FLAG_NO_MOVE_ANIMATION
+                    // Avoid announcing window title.
+                    accessibilityTitle = " "
                 }
 
     private val indicatorAsset: Flow<Int> =
