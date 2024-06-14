@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.phone.ongoingcall.data.repository
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.phone.ongoingcall.data.model.OngoingCallModel
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -28,7 +28,7 @@ class OngoingCallRepositoryTest : SysuiTestCase() {
 
     @Test
     fun hasOngoingCall_matchesSet() {
-        val inCallModel = OngoingCallModel.InCall(startTimeMs = 654)
+        val inCallModel = OngoingCallModel.InCall(startTimeMs = 654, intent = null)
         underTest.setOngoingCallState(inCallModel)
 
         assertThat(underTest.ongoingCallState.value).isEqualTo(inCallModel)

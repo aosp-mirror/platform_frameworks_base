@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.phone.ongoingcall.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.phone.ongoingcall.data.model.OngoingCallModel
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -118,6 +118,56 @@ class EndMediaProjectionDialogHelperTest : SysuiTestCase() {
     }
 
     @Test
+    fun getDialogMessage_nullTask_isGenericMessage() {
+        val result =
+            underTest.getDialogMessage(
+                specificTaskInfo = null,
+                R.string.accessibility_home,
+                R.string.cast_to_other_device_stop_dialog_message_specific_app,
+            )
+
+        assertThat(result).isEqualTo(context.getString(R.string.accessibility_home))
+    }
+
+    @Test
+    fun getDialogMessage_withTask_cannotFindPackage_isGenericMessage() {
+        val baseIntent =
+            Intent().apply { this.component = ComponentName("fake.task.package", "cls") }
+        whenever(kosmos.packageManager.getApplicationInfo(eq("fake.task.package"), any<Int>()))
+            .thenThrow(PackageManager.NameNotFoundException())
+        val task = createTask(taskId = 1, baseIntent = baseIntent)
+
+        val result =
+            underTest.getDialogMessage(
+                task,
+                R.string.accessibility_home,
+                R.string.cast_to_other_device_stop_dialog_message_specific_app
+            )
+
+        assertThat(result).isEqualTo(context.getString(R.string.accessibility_home))
+    }
+
+    @Test
+    fun getDialogMessage_withTask_findsPackage_isSpecificMessageWithAppLabel() {
+        val baseIntent =
+            Intent().apply { this.component = ComponentName("fake.task.package", "cls") }
+        val appInfo = mock<ApplicationInfo>()
+        whenever(appInfo.loadLabel(kosmos.packageManager)).thenReturn("Fake Package")
+        whenever(kosmos.packageManager.getApplicationInfo(eq("fake.task.package"), any<Int>()))
+            .thenReturn(appInfo)
+        val task = createTask(taskId = 1, baseIntent = baseIntent)
+
+        val result =
+            underTest.getDialogMessage(
+                task,
+                R.string.accessibility_home,
+                R.string.cast_to_other_device_stop_dialog_message_specific_app
+            )
+
+        assertThat(result.toString()).isEqualTo("You will stop casting Fake Package")
+    }
+
+    @Test
     fun getDialogMessage_appLabelHasSpecialCharacters_isEscaped() {
         val baseIntent =
             Intent().apply { this.component = ComponentName("fake.task.package", "cls") }

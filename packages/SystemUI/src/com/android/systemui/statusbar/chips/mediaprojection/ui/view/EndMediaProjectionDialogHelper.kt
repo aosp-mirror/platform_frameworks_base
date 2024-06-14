@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.mediaprojection.ui.view
 
 import android.annotation.StringRes
+import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.text.Html
@@ -41,6 +42,21 @@ constructor(
         return dialogFactory.create(delegate)
     }
 
+    /** See other [getDialogMessage]. */
+    fun getDialogMessage(
+        state: MediaProjectionState.Projecting,
+        @StringRes genericMessageResId: Int,
+        @StringRes specificAppMessageResId: Int,
+    ): CharSequence {
+        val specificTaskInfo =
+            if (state is MediaProjectionState.Projecting.SingleTask) {
+                state.task
+            } else {
+                null
+            }
+        return getDialogMessage(specificTaskInfo, genericMessageResId, specificAppMessageResId)
+    }
+
     /**
      * Returns the message to show in the dialog based on the specific media projection state.
      *
@@ -49,26 +65,23 @@ constructor(
      *   specify which app is currently being projected.
      */
     fun getDialogMessage(
-        state: MediaProjectionState.Projecting,
+        specificTaskInfo: ActivityManager.RunningTaskInfo?,
         @StringRes genericMessageResId: Int,
         @StringRes specificAppMessageResId: Int,
     ): CharSequence {
-        when (state) {
-            is MediaProjectionState.Projecting.EntireScreen ->
-                return context.getString(genericMessageResId)
-            is MediaProjectionState.Projecting.SingleTask -> {
-                val packageName =
-                    state.task.baseIntent.component?.packageName
-                        ?: return context.getString(genericMessageResId)
-                try {
-                    val appInfo = packageManager.getApplicationInfo(packageName, 0)
-                    val appName = appInfo.loadLabel(packageManager)
-                    return getSpecificAppMessageText(specificAppMessageResId, appName)
-                } catch (e: PackageManager.NameNotFoundException) {
-                    // TODO(b/332662551): Log this error.
-                    return context.getString(genericMessageResId)
-                }
-            }
+        if (specificTaskInfo == null) {
+            return context.getString(genericMessageResId)
+        }
+        val packageName =
+            specificTaskInfo.baseIntent.component?.packageName
+                ?: return context.getString(genericMessageResId)
+        return try {
+            val appInfo = packageManager.getApplicationInfo(packageName, 0)
+            val appName = appInfo.loadLabel(packageManager)
+            getSpecificAppMessageText(specificAppMessageResId, appName)
+        } catch (e: PackageManager.NameNotFoundException) {
+            // TODO(b/332662551): Log this error.
+            context.getString(genericMessageResId)
         }
     }
 

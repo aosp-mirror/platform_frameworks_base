@@ -32,6 +32,7 @@ import android.view.View
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
+import com.android.systemui.Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
@@ -42,8 +43,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import com.android.systemui.statusbar.phone.ongoingcall.data.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -204,7 +205,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     /** Regression test for b/192379214. */
     @Test
-    @DisableFlags(android.app.Flags.FLAG_SORT_SECTION_BY_TIME)
+    @DisableFlags(android.app.Flags.FLAG_SORT_SECTION_BY_TIME, FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
     fun onEntryUpdated_notificationWhenIsZero_timeHidden() {
         val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
         notification.modifyNotification(context).setWhen(0)
@@ -221,6 +222,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_SORT_SECTION_BY_TIME)
+    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
     fun onEntryUpdated_notificationWhenIsZero_timeShown() {
         val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
         notification.modifyNotification(context).setWhen(0)
@@ -236,6 +238,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
     fun onEntryUpdated_notificationWhenIsValid_timeShown() {
         val notification = NotificationEntryBuilder(createOngoingCallNotifEntry())
         notification.modifyNotification(context).setWhen(clock.currentTimeMillis())
@@ -542,6 +545,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
     fun chipClicked_clickEventLogged() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
 
@@ -554,6 +558,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     /** Regression test for b/212467440. */
     @Test
+    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
     fun chipClicked_activityStarterTriggeredWithUnmodifiedIntent() {
         val notifEntry = createOngoingCallNotifEntry()
         val pendingIntent = notifEntry.sbn.notification.contentIntent
@@ -578,6 +583,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     // [OngoingCallController.notifyChipVisibilityChanged] just delegates to that class.
 
     @Test
+    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
     fun callNotificationAdded_chipIsClickable() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
 
@@ -585,6 +591,15 @@ class OngoingCallControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+    fun callNotificationAdded_newChipsEnabled_chipNotClickable() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        assertThat(chipView.hasOnClickListeners()).isFalse()
+    }
+
+    @Test
+    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
     fun fullscreenIsTrue_chipStillClickable() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
         statusBarModeRepository.defaultDisplay.isInFullscreenMode.value = true
