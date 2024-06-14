@@ -612,7 +612,8 @@ public class LogModule {
     @SysUISingleton
     @SceneFrameworkLog
     public static LogBuffer provideSceneFrameworkLogBuffer(LogBufferFactory factory) {
-        return factory.create("SceneFramework", 50);
+        return factory
+                .create("SceneFramework", 50, /* systrace */ true, /* alwaysLogToLogcat */  true);
     }
 
     /** Provides a {@link LogBuffer} for the bluetooth QS tile dialog. */
