@@ -226,10 +226,14 @@ fun CommunalContainer(
 
         scene(
             CommunalScenes.Communal,
-            userActions =
-                mapOf(Swipe(SwipeDirection.Right, fromSource = Edge.Left) to CommunalScenes.Blank)
+            userActions = mapOf(Swipe(SwipeDirection.Right) to CommunalScenes.Blank)
         ) {
-            CommunalScene(backgroundType, colors, content)
+            CommunalScene(
+                backgroundType = backgroundType,
+                colors = colors,
+                content = content,
+                modifier = Modifier.horizontalNestedScrollToScene(),
+            )
         }
     }
 
