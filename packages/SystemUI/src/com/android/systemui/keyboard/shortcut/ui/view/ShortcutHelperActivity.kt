@@ -16,8 +16,11 @@
 
 package com.android.systemui.keyboard.shortcut.ui.view
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.graphics.Insets
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.view.WindowInsets
 import androidx.activity.BackEventCompat
@@ -83,7 +86,15 @@ constructor(
         }
     }
 
-    private fun onKeyboardSettingsClicked() {}
+    private fun onKeyboardSettingsClicked() {
+        try {
+            startActivity(Intent(Settings.ACTION_HARD_KEYBOARD_SETTINGS))
+        } catch (e: ActivityNotFoundException) {
+            // From the Settings docs: In some cases, a matching Activity may not exist, so ensure
+            // you safeguard against this.
+            e.printStackTrace()
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
