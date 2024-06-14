@@ -106,7 +106,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -697,7 +696,6 @@ constructor(
                 .onStart { emit(Unit) }
                 .map { getMediaLockScreenSetting() }
                 .distinctUntilChanged()
-                .flowOn(backgroundDispatcher)
                 .collectLatest {
                     allowMediaPlayerOnLockScreen = it
                     updateHostVisibility()
@@ -886,7 +884,8 @@ constructor(
                     val previousVisibleIndex =
                         MediaPlayerData.playerKeys().indexOfFirst { key -> it == key }
                     mediaCarouselScrollHandler.scrollToPlayer(previousVisibleIndex, mediaIndex)
-                } ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
+                }
+                    ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
             }
         } else if (isRtl && mediaContent.childCount > 0) {
             // In RTL, Scroll to the first player as it is the rightmost player in media carousel.

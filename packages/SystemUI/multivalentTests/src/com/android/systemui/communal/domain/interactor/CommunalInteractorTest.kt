@@ -52,6 +52,7 @@ import com.android.systemui.communal.domain.model.CommunalTransitionProgressMode
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
@@ -121,6 +122,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var communalPrefsRepository: FakeCommunalPrefsRepository
     private lateinit var editWidgetsActivityStarter: EditWidgetsActivityStarter
     private lateinit var sceneInteractor: SceneInteractor
+    private lateinit var communalSceneInteractor: CommunalSceneInteractor
     private lateinit var userTracker: FakeUserTracker
     private lateinit var activityStarter: ActivityStarter
     private lateinit var userManager: UserManager
@@ -141,6 +143,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         editWidgetsActivityStarter = kosmos.editWidgetsActivityStarter
         communalPrefsRepository = kosmos.fakeCommunalPrefsRepository
         sceneInteractor = kosmos.sceneInteractor
+        communalSceneInteractor = kosmos.communalSceneInteractor
         userTracker = kosmos.fakeUserTracker
         activityStarter = kosmos.activityStarter
         userManager = kosmos.userManager
@@ -815,7 +818,11 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun testShowWidgetEditorStartsActivity() =
         testScope.runTest {
+            val editModeState by collectLastValue(communalSceneInteractor.editModeState)
+
             underTest.showWidgetEditor()
+
+            assertThat(editModeState).isEqualTo(EditModeState.STARTING)
             verify(editWidgetsActivityStarter).startActivity()
         }
 

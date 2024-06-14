@@ -94,7 +94,7 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                                 is OngoingActivityChipModel.Shown -> {
                                     IconViewBinder.bind(chipModel.icon, chipIconView)
                                     ChipChronometerBinder.bind(chipModel.startTimeMs, chipTimeView)
-                                    // TODO(b/332662551): Attach click listener to chip
+                                    chipView.setOnClickListener(chipModel.onClickListener)
 
                                     listener.onOngoingActivityStatusChanged(
                                         hasOngoingActivity = true

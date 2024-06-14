@@ -7555,6 +7555,12 @@ public class Activity extends ContextThemeWrapper
      * the activity to be restarted). Otherwise, this will be used the next
      * time the activity is visible.
      *
+     * <aside class="note"><b>Note:</b> Device manufacturers can configure devices to override
+     *    (ignore) calls to this method to improve the layout of orientation-restricted apps. See
+     *    <a href="{@docRoot}guide/practices/device-compatibility-mode">
+     *      Device compatibility mode</a>.
+     * </aside>
+     *
      * @param requestedOrientation An orientation constant as used in
      * {@link ActivityInfo#screenOrientation ActivityInfo.screenOrientation}.
      */
@@ -9291,11 +9297,11 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "dispatchMultiWindowModeChanged " + this + ": " + isInMultiWindowMode
                         + " " + newConfig);
+        mIsInMultiWindowMode = isInMultiWindowMode;
         mFragments.dispatchMultiWindowModeChanged(isInMultiWindowMode, newConfig);
         if (mWindow != null) {
             mWindow.onMultiWindowModeChanged();
         }
-        mIsInMultiWindowMode = isInMultiWindowMode;
         onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
@@ -9304,11 +9310,11 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "dispatchPictureInPictureModeChanged " + this + ": " + isInPictureInPictureMode
                         + " " + newConfig);
+        mIsInPictureInPictureMode = isInPictureInPictureMode;
         mFragments.dispatchPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
         if (mWindow != null) {
             mWindow.onPictureInPictureModeChanged(isInPictureInPictureMode);
         }
-        mIsInPictureInPictureMode = isInPictureInPictureMode;
         onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
 

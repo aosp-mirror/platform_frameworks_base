@@ -42,6 +42,7 @@ import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenPolicy;
 import android.app.AutomaticZenRule;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenDeviceEffects;
 
 /** {@hide} */
 interface INotificationManager
@@ -227,6 +228,7 @@ interface INotificationManager
     int getRuleInstanceCount(in ComponentName owner);
     int getAutomaticZenRuleState(String id);
     void setAutomaticZenRuleState(String id, in Condition condition);
+    void setManualZenRuleDeviceEffects(in ZenDeviceEffects effects);
 
     byte[] getBackupPayload(int user);
     void applyRestore(in byte[] payload, int user);

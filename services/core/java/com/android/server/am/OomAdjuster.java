@@ -49,6 +49,7 @@ import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_BIND_SERVICE;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_COMPONENT_DISABLED;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_EXECUTING_SERVICE;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FINISH_RECEIVER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FOLLOW_UP;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_GET_PROVIDER;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_NONE;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_BEGIN;
@@ -68,9 +69,7 @@ import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UNBIND_SERVICE;
 import static android.content.Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
-import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
-import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL;
 import static android.media.audio.Flags.roForegroundAudioControl;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
@@ -91,6 +90,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_USAGE_STATS;
 import static com.android.server.am.ActivityManagerService.DISPATCH_OOM_ADJ_OBSERVER_MSG;
+import static com.android.server.am.ActivityManagerService.FOLLOW_UP_OOMADJUSTER_UPDATE_MSG;
 import static com.android.server.am.ActivityManagerService.IDLE_UIDS_MSG;
 import static com.android.server.am.ActivityManagerService.TAG_BACKUP;
 import static com.android.server.am.ActivityManagerService.TAG_LRU;
@@ -226,6 +226,8 @@ public class OomAdjuster {
                 return AppProtoEnums.OOM_ADJ_REASON_RESTRICTION_CHANGE;
             case OOM_ADJ_REASON_COMPONENT_DISABLED:
                 return AppProtoEnums.OOM_ADJ_REASON_COMPONENT_DISABLED;
+            case OOM_ADJ_REASON_FOLLOW_UP:
+                return AppProtoEnums.OOM_ADJ_REASON_FOLLOW_UP;
             default:
                 return AppProtoEnums.OOM_ADJ_REASON_UNKNOWN_TO_PROTO;
         }
@@ -280,6 +282,8 @@ public class OomAdjuster {
                 return OOM_ADJ_REASON_METHOD + "_restrictionChange";
             case OOM_ADJ_REASON_COMPONENT_DISABLED:
                 return OOM_ADJ_REASON_METHOD + "_componentDisabled";
+            case OOM_ADJ_REASON_FOLLOW_UP:
+                return OOM_ADJ_REASON_METHOD + "_followUp";
             default:
                 return "_unknown";
         }
@@ -370,6 +374,7 @@ public class OomAdjuster {
     protected final int[] mTmpSchedGroup = new int[1];
 
     final ActivityManagerService mService;
+    final Injector mInjector;
     final ProcessList mProcessList;
     final ActivityManagerGlobalLock mProcLock;
 
@@ -420,12 +425,33 @@ public class OomAdjuster {
     @GuardedBy("mService")
     protected int mProcessStateCurTop = PROCESS_STATE_TOP;
 
-    /** Overrideable by a test */
+    @GuardedBy("mService")
+    private final ArraySet<ProcessRecord> mFollowUpUpdateSet = new ArraySet<>();
+
+    private static final long NO_FOLLOW_UP_TIME = Long.MAX_VALUE;
+    @GuardedBy("mService")
+    private long mNextFollowUpUpdateUptimeMs = NO_FOLLOW_UP_TIME;
+
     @VisibleForTesting
-    protected boolean isChangeEnabled(@CachedCompatChangeId int cachedCompatChangeId,
+    public static class Injector {
+        boolean isChangeEnabled(@CachedCompatChangeId int cachedCompatChangeId,
+                ApplicationInfo app, boolean defaultValue) {
+            return PlatformCompatCache.getInstance()
+                    .isChangeEnabled(cachedCompatChangeId, app, defaultValue);
+        }
+
+        long getUptimeMillis() {
+            return SystemClock.uptimeMillis();
+        }
+
+        long getElapsedRealtimeMillis() {
+            return SystemClock.elapsedRealtime();
+        }
+    }
+
+    boolean isChangeEnabled(@CachedCompatChangeId int cachedCompatChangeId,
             ApplicationInfo app, boolean defaultValue) {
-        return PlatformCompatCache.getInstance()
-                .isChangeEnabled(cachedCompatChangeId, app, defaultValue);
+        return mInjector.isChangeEnabled(cachedCompatChangeId, app, defaultValue);
     }
 
     OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids) {
@@ -443,7 +469,18 @@ public class OomAdjuster {
 
     OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids,
             ServiceThread adjusterThread) {
+        this(service, processList, activeUids, adjusterThread, new Injector());
+    }
+
+    OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids,
+            Injector injector) {
+        this(service, processList, activeUids, createAdjusterThread(), injector);
+    }
+
+    OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids,
+            ServiceThread adjusterThread, Injector injector) {
         mService = service;
+        mInjector = injector;
         mProcessList = processList;
         mProcLock = service.mProcLock;
         mActiveUids = activeUids;
@@ -631,8 +668,8 @@ public class OomAdjuster {
             // processes, its adj could be still unknown as of now, assign one.
             processes.add(app);
             assignCachedAdjIfNecessary(processes);
-            applyOomAdjLSP(app, false, SystemClock.uptimeMillis(),
-                    SystemClock.elapsedRealtime(), oomAdjReason);
+            applyOomAdjLSP(app, false, mInjector.getUptimeMillis(),
+                    mInjector.getElapsedRealtimeMillis(), oomAdjReason);
         }
         mTmpProcessList.clear();
         mService.clearPendingTopAppLocked();
@@ -849,6 +886,40 @@ public class OomAdjuster {
     }
 
     @GuardedBy("mService")
+    void updateOomAdjFollowUpTargetsLocked() {
+        final long now = mInjector.getUptimeMillis();
+        long nextFollowUpUptimeMs = Long.MAX_VALUE;
+        mNextFollowUpUpdateUptimeMs = NO_FOLLOW_UP_TIME;
+        for (int i = mFollowUpUpdateSet.size() - 1; i >= 0; i--) {
+            final ProcessRecord proc = mFollowUpUpdateSet.valueAtUnchecked(i);
+            final long followUpUptimeMs = proc.mState.getFollowupUpdateUptimeMs();
+
+            if (proc.isKilled()) {
+                // Process is dead, just remove from follow up set.
+                mFollowUpUpdateSet.removeAt(i);
+            } else if (followUpUptimeMs <= now) {
+                // Add processes that need a follow up update.
+                mPendingProcessSet.add(proc);
+                proc.mState.setFollowupUpdateUptimeMs(NO_FOLLOW_UP_TIME);
+                mFollowUpUpdateSet.removeAt(i);
+            } else if (followUpUptimeMs < nextFollowUpUptimeMs) {
+                // Figure out when to schedule the next follow up update.
+                nextFollowUpUptimeMs = followUpUptimeMs;
+            } else if (followUpUptimeMs == NO_FOLLOW_UP_TIME) {
+                // The follow up is no longer needed for this process.
+                mFollowUpUpdateSet.removeAt(i);
+            }
+        }
+
+        if (nextFollowUpUptimeMs != Long.MAX_VALUE) {
+            // There is still at least one process that needs a follow up.
+            scheduleFollowUpOomAdjusterUpdateLocked(nextFollowUpUptimeMs, now);
+        }
+
+        updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_FOLLOW_UP);
+    }
+
+    @GuardedBy("mService")
     protected void performUpdateOomAdjPendingTargetsLocked(@OomAdjReason int oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
 
@@ -899,8 +970,8 @@ public class OomAdjuster {
         if (startProfiling) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReasonToString(oomAdjReason));
         }
-        final long now = SystemClock.uptimeMillis();
-        final long nowElapsed = SystemClock.elapsedRealtime();
+        final long now = mInjector.getUptimeMillis();
+        final long nowElapsed = mInjector.getElapsedRealtimeMillis();
         final long oldTime = now - mConstants.mMaxEmptyTimeMillis;
         final int numProc = activeProcesses.size();
 
@@ -1026,7 +1097,7 @@ public class OomAdjuster {
         updateUidsLSP(activeUids, nowElapsed);
 
         synchronized (mService.mProcessStats.mLock) {
-            final long nowUptime = SystemClock.uptimeMillis();
+            final long nowUptime = mInjector.getUptimeMillis();
             if (mService.mProcessStats.shouldWriteNowLocked(nowUptime)) {
                 mService.mHandler.post(new ActivityManagerService.ProcStatsRunnable(mService,
                         mService.mProcessStats));
@@ -1037,7 +1108,7 @@ public class OomAdjuster {
         }
 
         if (DEBUG_OOM_ADJ) {
-            final long duration = SystemClock.uptimeMillis() - now;
+            final long duration = mInjector.getUptimeMillis() - now;
             if (false) {
                 Slog.d(TAG_OOM_ADJ, "Did OOM ADJ in " + duration + "ms",
                         new RuntimeException("here").fillInStackTrace());
@@ -1051,7 +1122,7 @@ public class OomAdjuster {
     protected void assignCachedAdjIfNecessary(ArrayList<ProcessRecord> lruList) {
         final int numLru = lruList.size();
         if (mConstants.USE_TIERED_CACHED_ADJ) {
-            final long now = SystemClock.uptimeMillis();
+            final long now = mInjector.getUptimeMillis();
             for (int i = numLru - 1; i >= 0; i--) {
                 ProcessRecord app = lruList.get(i);
                 final ProcessStateRecord state = app.mState;
@@ -1734,6 +1805,10 @@ public class OomAdjuster {
         int prevProcState = getInitialProcState(app);
         int prevCapability = getInitialCapability(app);
 
+        // Remove any follow up update this process might have. It will be rescheduled if still
+        // needed.
+        app.mState.setFollowupUpdateUptimeMs(NO_FOLLOW_UP_TIME);
+
         if (app.getThread() == null) {
             state.setAdjSeq(mAdjSeq);
             state.setCurrentSchedulingGroup(SCHED_GROUP_BACKGROUND);
@@ -2001,6 +2076,8 @@ public class OomAdjuster {
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to recent fg: " + app);
             }
+            maybeSetProcessFollowUpUpdateLocked(app,
+                    state.getLastTopTime() + mConstants.TOP_TO_FGS_GRACE_DURATION, now);
         }
 
         // If the app was recently in the foreground and has expedited jobs running,
@@ -2021,6 +2098,9 @@ public class OomAdjuster {
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to recent fg for EJ: " + app);
             }
+            maybeSetProcessFollowUpUpdateLocked(app,
+                    state.getLastTopTime() + mConstants.TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION,
+                    now);
         }
 
         if (adj > PERCEPTIBLE_APP_ADJ
@@ -2086,7 +2166,7 @@ public class OomAdjuster {
             // app to be demoted to cached.
             if (procState >= PROCESS_STATE_LAST_ACTIVITY
                     && state.getSetProcState() == PROCESS_STATE_LAST_ACTIVITY
-                    && (state.getLastStateTime() + mConstants.MAX_PREVIOUS_TIME) < now) {
+                    && (state.getLastStateTime() + mConstants.MAX_PREVIOUS_TIME) <= now) {
                 procState = PROCESS_STATE_LAST_ACTIVITY;
                 schedGroup = SCHED_GROUP_BACKGROUND;
                 state.setAdjType("previous-expired");
@@ -2110,6 +2190,14 @@ public class OomAdjuster {
                         reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise procstate to prev: " + app);
                     }
                 }
+                final long lastStateTime;
+                if (state.getSetProcState() == PROCESS_STATE_LAST_ACTIVITY) {
+                    lastStateTime = state.getLastStateTime();
+                } else {
+                    lastStateTime = now;
+                }
+                maybeSetProcessFollowUpUpdateLocked(app,
+                        lastStateTime + mConstants.MAX_PREVIOUS_TIME, now);
             }
         }
 
@@ -2198,6 +2286,8 @@ public class OomAdjuster {
                                 reportOomAdjMessageLocked(TAG_OOM_ADJ,
                                         "Raise adj to started service: " + app);
                             }
+                            maybeSetProcessFollowUpUpdateLocked(app,
+                                    s.lastActivity + mConstants.MAX_SERVICE_INACTIVITY, now);
                         }
                     }
                     // If we have let the service slide into the background
@@ -2217,14 +2307,8 @@ public class OomAdjuster {
                                     != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
 
                     if (roForegroundAudioControl()) { // flag check
-                        // TODO revisit restriction of FOREGROUND_AUDIO_CONTROL when it can be
-                        //      limited to specific FGS types
-                        //final int fgsAudioType = FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-                        //        | FOREGROUND_SERVICE_TYPE_CAMERA
-                        //        | FOREGROUND_SERVICE_TYPE_MICROPHONE
-                        //        | FOREGROUND_SERVICE_TYPE_PHONE_CALL;
-                        //capabilityFromFGS |= (psr.getForegroundServiceTypes() & fgsAudioType) != 0
-                        //        ? PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL : 0;
+                        // TODO(b/335373208) - revisit restriction of FOREGROUND_AUDIO_CONTROL
+                        //  when it can be limited to specific FGS types
                         capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL;
                     }
 
@@ -2352,6 +2436,8 @@ public class OomAdjuster {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ,
                             "Raise adj to recent provider: " + app);
                 }
+                maybeSetProcessFollowUpUpdateLocked(app,
+                        ppr.getLastProviderTime() + mConstants.CONTENT_PROVIDER_RETAIN_TIME, now);
             }
             if (procState > PROCESS_STATE_LAST_ACTIVITY) {
                 procState = PROCESS_STATE_LAST_ACTIVITY;
@@ -2360,6 +2446,8 @@ public class OomAdjuster {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ,
                             "Raise procstate to recent provider: " + app);
                 }
+                maybeSetProcessFollowUpUpdateLocked(app,
+                        ppr.getLastProviderTime() + mConstants.CONTENT_PROVIDER_RETAIN_TIME, now);
             }
         }
 
@@ -3672,7 +3760,7 @@ public class OomAdjuster {
         if (N <= 0) {
             return;
         }
-        final long nowElapsed = SystemClock.elapsedRealtime();
+        final long nowElapsed = mInjector.getElapsedRealtimeMillis();
         final long maxBgTime = nowElapsed - mConstants.BACKGROUND_SETTLE_TIME;
         long nextTime = 0;
         if (mService.mLocalPowerManager != null) {
@@ -3907,7 +3995,7 @@ public class OomAdjuster {
         }
         // Take a dry run of the computeServiceHostOomAdjLSP, this would't be expensive
         // since it's only evaluating one service connection.
-        return computeServiceHostOomAdjLSP(cr, app, client, SystemClock.uptimeMillis(),
+        return computeServiceHostOomAdjLSP(cr, app, client, mInjector.getUptimeMillis(),
                 mService.getTopApp(), false, false, false, OOM_ADJ_REASON_NONE,
                 CACHED_APP_MIN_ADJ, false, true /* dryRun */);
     }
@@ -3942,7 +4030,7 @@ public class OomAdjuster {
             // The provider host process has better states than the client, so no change.
             return false;
         }
-        return computeProviderHostOomAdjLSP(null, app, client, SystemClock.uptimeMillis(),
+        return computeProviderHostOomAdjLSP(null, app, client, mInjector.getUptimeMillis(),
                 mService.getTopApp(), false, false, false, OOM_ADJ_REASON_NONE, CACHED_APP_MIN_ADJ,
                 false, true /* dryRun */);
     }
@@ -3969,5 +4057,44 @@ public class OomAdjuster {
             return true;
         }
         return false;
+    }
+
+    @GuardedBy("mService")
+    private void maybeSetProcessFollowUpUpdateLocked(ProcessRecord proc,
+            long updateUptimeMs, long now) {
+        if (!Flags.followUpOomadjUpdates()) {
+            return;
+        }
+        if (updateUptimeMs <= now) {
+            // Time sensitive period has already passed. No need to schedule a follow up.
+            return;
+        }
+
+        mFollowUpUpdateSet.add(proc);
+        proc.mState.setFollowupUpdateUptimeMs(updateUptimeMs);
+
+        scheduleFollowUpOomAdjusterUpdateLocked(updateUptimeMs, now);
+    }
+
+
+    @GuardedBy("mService")
+    private void scheduleFollowUpOomAdjusterUpdateLocked(long updateUptimeMs,
+            long now) {
+        if (updateUptimeMs + mConstants.FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION
+                >= mNextFollowUpUpdateUptimeMs) {
+            // Update time is too close or later than the next follow up update.
+            return;
+        }
+        if (updateUptimeMs < now + mConstants.FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION) {
+            // Use a minimum delay for the follow up to possibly batch multiple process
+            // evaluations and avoid rapid updates.
+            updateUptimeMs = now + mConstants.FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION;
+        }
+
+        // Schedulate a follow up update. Don't bother deleting existing handler messages, they
+        // will be cleared during the message while no locks are being held.
+        mNextFollowUpUpdateUptimeMs = updateUptimeMs;
+        mService.mHandler.sendEmptyMessageAtTime(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG,
+                mNextFollowUpUpdateUptimeMs);
     }
 }

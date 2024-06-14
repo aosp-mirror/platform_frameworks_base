@@ -2882,6 +2882,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         ContentResolver resolver = mContext.getContentResolver();
         boolean updateRotation = false;
+        boolean updateKidsModeSettings = false;
+        final boolean kidsModeEnabled;
         synchronized (mLock) {
             mEndcallBehavior = Settings.System.getIntForUser(resolver,
                     Settings.System.END_BUTTON_BEHAVIOR,
@@ -2995,20 +2997,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Secure.STYLUS_BUTTONS_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
             mInputManagerInternal.setStylusButtonMotionEventsEnabled(mStylusButtonsEnabled);
 
-            final boolean kidsModeEnabled = Settings.Secure.getIntForUser(resolver,
+            kidsModeEnabled = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.NAV_BAR_KIDS_MODE, 0, UserHandle.USER_CURRENT) == 1;
             if (mKidsModeEnabled != kidsModeEnabled) {
                 mKidsModeEnabled = kidsModeEnabled;
-                updateKidsModeSettings();
+                updateKidsModeSettings = true;
             }
+        }
+        if (updateKidsModeSettings) {
+            updateKidsModeSettings(kidsModeEnabled);
         }
         if (updateRotation) {
             updateRotation(true);
         }
     }
 
-    private void updateKidsModeSettings() {
-        if (mKidsModeEnabled) {
+    private void updateKidsModeSettings(boolean kidsModeEnabled) {
+        if (kidsModeEnabled) {
             // Needed since many Kids apps aren't optimised to support both orientations and it
             // will be hard for kids to understand the app compat mode.
             // TODO(229961548): Remove ignoreOrientationRequest exception for Kids Mode once

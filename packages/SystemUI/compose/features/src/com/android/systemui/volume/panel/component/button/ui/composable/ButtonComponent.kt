@@ -88,7 +88,7 @@ class ButtonComponent(
                         } else {
                             MaterialTheme.colorScheme.surface
                         },
-                    shape = RoundedCornerShape(28.dp),
+                    shape = RoundedCornerShape(20.dp),
                     contentColor =
                         if (viewModel.isActive) {
                             MaterialTheme.colorScheme.onTertiaryContainer

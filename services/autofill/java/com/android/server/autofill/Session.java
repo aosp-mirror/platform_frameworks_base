@@ -1677,22 +1677,23 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final LogMaker requestLog;
 
-        // Start a new FillResponse logger for the success case.
-        mFillResponseEventLogger.startLogForNewResponse();
-        mFillResponseEventLogger.maybeSetRequestId(requestId);
-        mFillResponseEventLogger.maybeSetAppPackageUid(uid);
-        mFillResponseEventLogger.maybeSetResponseStatus(RESPONSE_STATUS_SUCCESS);
-        mFillResponseEventLogger.startResponseProcessingTime();
-        // Time passed since session was created
-        final long fillRequestReceivedRelativeTimestamp =
-            SystemClock.elapsedRealtime() - mLatencyBaseTime;
-        mPresentationStatsEventLogger.maybeSetFillResponseReceivedTimestampMs(
-            (int) (fillRequestReceivedRelativeTimestamp));
-        mFillResponseEventLogger.maybeSetLatencyFillResponseReceivedMillis(
-            (int) (fillRequestReceivedRelativeTimestamp));
-        mFillResponseEventLogger.maybeSetDetectionPreference(getDetectionPreferenceForLogging());
-
         synchronized (mLock) {
+            // Start a new FillResponse logger for the success case.
+            mFillResponseEventLogger.startLogForNewResponse();
+            mFillResponseEventLogger.maybeSetRequestId(requestId);
+            mFillResponseEventLogger.maybeSetAppPackageUid(uid);
+            mFillResponseEventLogger.maybeSetResponseStatus(RESPONSE_STATUS_SUCCESS);
+            mFillResponseEventLogger.startResponseProcessingTime();
+            // Time passed since session was created
+            final long fillRequestReceivedRelativeTimestamp =
+                    SystemClock.elapsedRealtime() - mLatencyBaseTime;
+            mPresentationStatsEventLogger.maybeSetFillResponseReceivedTimestampMs(
+                    (int) (fillRequestReceivedRelativeTimestamp));
+            mFillResponseEventLogger.maybeSetLatencyFillResponseReceivedMillis(
+                    (int) (fillRequestReceivedRelativeTimestamp));
+            mFillResponseEventLogger.maybeSetDetectionPreference(
+                    getDetectionPreferenceForLogging());
+
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillRequestSuccess() rejected - session: "
                         + id + " destroyed");
@@ -1744,11 +1745,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.v(TAG, "Service requested to wait for delayed fill response.");
                 registerDelayedFillBroadcastLocked();
             }
-        }
 
-        mService.setLastResponse(id, response);
+            mService.setLastResponseLocked(id, response);
 
-        synchronized (mLock) {
             if (mLogViewEntered) {
                 mLogViewEntered = false;
                 mService.logViewEntered(id, null);
@@ -1821,16 +1820,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         int datasetCount = (datasetList == null) ? 0 : datasetList.size();
-        mFillResponseEventLogger.maybeSetTotalDatasetsProvided(datasetCount);
-        // It's possible that this maybe overwritten later on after PCC filtering.
-        mFillResponseEventLogger.maybeSetAvailableCount(datasetCount);
+        synchronized (mLock) {
+            mFillResponseEventLogger.maybeSetTotalDatasetsProvided(datasetCount);
+            // It's possible that this maybe overwritten later on after PCC filtering.
+            mFillResponseEventLogger.maybeSetAvailableCount(datasetCount);
 
-        // TODO(b/266379948): Ideally wait for PCC request to finish for a while more
-        // (say 100ms) before proceeding further on.
+            // TODO(b/266379948): Ideally wait for PCC request to finish for a while more
+            // (say 100ms) before proceeding further on.
 
-        processResponseLockedForPcc(response, response.getClientState(), requestFlags);
-        mFillResponseEventLogger.maybeSetLatencyResponseProcessingMillis();
-        mFillResponseEventLogger.logAndEndEvent();
+            processResponseLockedForPcc(response, response.getClientState(), requestFlags);
+            mFillResponseEventLogger.maybeSetLatencyResponseProcessingMillis();
+            mFillResponseEventLogger.logAndEndEvent();
+        }
     }
 
 
@@ -2381,21 +2382,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @Nullable CharSequence message) {
         boolean showMessage = !TextUtils.isEmpty(message);
 
-        // Start a new FillResponse logger for the failure or timeout case.
-        mFillResponseEventLogger.startLogForNewResponse();
-        mFillResponseEventLogger.maybeSetRequestId(requestId);
-        mFillResponseEventLogger.maybeSetAppPackageUid(uid);
-        mFillResponseEventLogger.maybeSetAvailableCount(
-                AVAILABLE_COUNT_WHEN_FILL_REQUEST_FAILED_OR_TIMEOUT);
-        mFillResponseEventLogger.maybeSetTotalDatasetsProvided(
-                AVAILABLE_COUNT_WHEN_FILL_REQUEST_FAILED_OR_TIMEOUT);
-        mFillResponseEventLogger.maybeSetDetectionPreference(getDetectionPreferenceForLogging());
-        final long fillRequestReceivedRelativeTimestamp =
-            SystemClock.elapsedRealtime() - mLatencyBaseTime;
-        mFillResponseEventLogger.maybeSetLatencyFillResponseReceivedMillis(
-            (int)(fillRequestReceivedRelativeTimestamp));
-
         synchronized (mLock) {
+            // Start a new FillResponse logger for the failure or timeout case.
+            mFillResponseEventLogger.startLogForNewResponse();
+            mFillResponseEventLogger.maybeSetRequestId(requestId);
+            mFillResponseEventLogger.maybeSetAppPackageUid(uid);
+            mFillResponseEventLogger.maybeSetAvailableCount(
+                    AVAILABLE_COUNT_WHEN_FILL_REQUEST_FAILED_OR_TIMEOUT);
+            mFillResponseEventLogger.maybeSetTotalDatasetsProvided(
+                    AVAILABLE_COUNT_WHEN_FILL_REQUEST_FAILED_OR_TIMEOUT);
+            mFillResponseEventLogger.maybeSetDetectionPreference(
+                    getDetectionPreferenceForLogging());
+            final long fillRequestReceivedRelativeTimestamp =
+                    SystemClock.elapsedRealtime() - mLatencyBaseTime;
+            mFillResponseEventLogger.maybeSetLatencyFillResponseReceivedMillis(
+                    (int) (fillRequestReceivedRelativeTimestamp));
+
             unregisterDelayedFillBroadcastLocked();
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillRequestFailureOrTimeout(req=" + requestId
@@ -2635,8 +2637,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + id + " destroyed");
                 return;
             }
+            mSaveEventLogger.maybeSetLatencySaveRequestMillis();
         }
-        mSaveEventLogger.maybeSetLatencySaveRequestMillis();
         mHandler.sendMessage(obtainMessage(
                 AutofillManagerServiceImpl::handleSessionSave,
                 mService, this));
@@ -3215,6 +3217,58 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return saveInfo == null ? 0 : saveInfo.getFlags();
     }
 
+    static class SaveInfoStats {
+        public int saveInfoCount;
+        public int saveDataTypeCount;
+    }
+
+    /**
+     * Get statistic information of save info in current session. Specifically
+     *   1. how many save info the current session has.
+     *   2. How many distinct save data types current session has.
+     *
+     * @return SaveInfoStats returns the above two number in a SaveInfoStats object
+     */
+    @GuardedBy("mLock")
+    private SaveInfoStats getSaveInfoStatsLocked() {
+        SaveInfoStats retSaveInfoStats = new SaveInfoStats();
+        retSaveInfoStats.saveInfoCount = -1;
+        retSaveInfoStats.saveDataTypeCount = -1;
+
+        if (mContexts == null) {
+            if (sVerbose) {
+                Slog.v(TAG, "getSaveInfoStatsLocked(): mContexts is null");
+            }
+        } else if (mResponses == null) {
+            // Happens when the activity / session was finished before the service replied, or
+            // when the service cannot autofill it (and returned a null response).
+            if (sVerbose) {
+                Slog.v(TAG, "getSaveInfoStatsLocked(): mResponses is null");
+            }
+            return retSaveInfoStats;
+        } else {
+            int numSaveInfos = 0;
+            int numSaveDataTypes = 0;
+            ArraySet<Integer> saveDataTypeSeen = new ArraySet<>();
+            final int numResponses = mResponses.size();
+            for (int responseNum = 0; responseNum < numResponses; responseNum++) {
+                final FillResponse response = mResponses.valueAt(responseNum);
+                if (response != null && response.getSaveInfo() != null) {
+                    numSaveInfos += 1;
+                    int saveDataType = response.getSaveInfo().getType();
+                    if (!saveDataTypeSeen.contains(saveDataType)) {
+                        saveDataTypeSeen.add(saveDataType);
+                        numSaveDataTypes += 1;
+                    }
+                }
+            }
+            retSaveInfoStats.saveInfoCount = numSaveInfos;
+            retSaveInfoStats.saveDataTypeCount = numSaveDataTypes;
+        }
+
+        return retSaveInfoStats;
+    }
+
     /**
      * Generates a {@link android.service.autofill.FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}
      * when necessary.
@@ -3227,7 +3281,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this,
                 Event.NO_SAVE_UI_REASON_NONE,
                 COMMIT_REASON_UNKNOWN));
-        logAllEvents(COMMIT_REASON_UNKNOWN);
+        synchronized (mLock) {
+            logAllEventsLocked(COMMIT_REASON_UNKNOWN);
+        }
     }
 
     /**
@@ -3251,6 +3307,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mSessionCommittedEventLogger.maybeSetCommitReason(commitReason);
         mSessionCommittedEventLogger.maybeSetRequestCount(mRequestCount);
+        SaveInfoStats saveInfoStats = getSaveInfoStatsLocked();
+        mSessionCommittedEventLogger.maybeSetSaveInfoCount(saveInfoStats.saveInfoCount);
+        mSessionCommittedEventLogger.maybeSetSaveDataTypeCount(saveInfoStats.saveDataTypeCount);
+        mSessionCommittedEventLogger.maybeSetLastFillResponseHasSaveInfo(
+                getSaveInfoLocked() != null);
         mSaveEventLogger.maybeSetSaveUiNotShownReason(NO_SAVE_REASON_NONE);
     }
 
@@ -4571,7 +4632,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                     FillResponse response = viewState.getSecondaryResponse();
                     if (response != null) {
-                        logPresentationStatsOnViewEntered(response, isCredmanRequested);
+                        logPresentationStatsOnViewEnteredLocked(response, isCredmanRequested);
                     }
 
                     // If the ViewState is ready to be displayed, onReady() will be called.
@@ -4662,7 +4723,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 FillResponse response = viewState.getResponse();
                 if (response != null) {
-                    logPresentationStatsOnViewEntered(response, isCredmanRequested);
+                    logPresentationStatsOnViewEnteredLocked(response, isCredmanRequested);
                 }
 
                 if (isSameViewEntered) {
@@ -4703,7 +4764,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     @GuardedBy("mLock")
-    private void logPresentationStatsOnViewEntered(FillResponse response,
+    private void logPresentationStatsOnViewEnteredLocked(FillResponse response,
             boolean isCredmanRequested) {
         mPresentationStatsEventLogger.maybeSetRequestId(response.getRequestId());
         mPresentationStatsEventLogger.maybeSetIsCredentialRequest(isCredmanRequested);
@@ -5061,7 +5122,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         getUiForShowing().showFillDialog(filledId, response, filterText,
                 mService.getServicePackageName(), mComponentName, serviceIcon, this,
-                id, mCompatMode, mPresentationStatsEventLogger);
+                id, mCompatMode, mPresentationStatsEventLogger, mLock);
         return true;
     }
 
@@ -5420,7 +5481,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Sets the state of views that failed to autofill.
      */
     @GuardedBy("mLock")
-    void setViewAutofilled(@NonNull AutofillId id) {
+    void setViewAutofilledLocked(@NonNull AutofillId id) {
         if (sVerbose) {
             Slog.v(TAG, "View autofilled: " + id);
         }
@@ -6603,6 +6664,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 boolean waitingDatasetAuth = false;
                 boolean hideHighlight = (entryCount == 1
                         && dataset.getFieldIds().get(0).equals(mCurrentViewId));
+                // Count how many views are filtered because they are not in current session
+                int numOfViewsFiltered = 0;
                 for (int i = 0; i < entryCount; i++) {
                     if (dataset.getFieldValues().get(i) == null) {
                         continue;
@@ -6615,6 +6678,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             Slog.v(TAG, "Skipping filling view: " +
                                     viewId + " as it isn't part of the current session: " + id);
                         }
+                        numOfViewsFiltered += 1;
                         continue;
                     }
                     ids.add(viewId);
@@ -6628,6 +6692,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         viewState.resetState(ViewState.STATE_WAITING_DATASET_AUTH);
                     }
                 }
+                mPresentationStatsEventLogger.maybeSetFilteredFillableViewsCount(
+                        numOfViewsFiltered);
                 if (!ids.isEmpty()) {
                     if (waitingDatasetAuth) {
                         mUi.hideFillUi(this);
@@ -6663,7 +6729,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     @GuardedBy("mLock")
-    private void logAllEvents(@AutofillCommitReason int val) {
+    private void logAllEventsLocked(@AutofillCommitReason int val) {
         if (sVerbose) {
             Slog.v(TAG, "logAllEvents(" + id + "): commitReason: " + val);
         }
@@ -6695,7 +6761,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (sVerbose) {
             Slog.v(TAG, "destroyLocked for session: " + id);
         }
-        logAllEvents(COMMIT_REASON_SESSION_DESTROYED);
+        logAllEventsLocked(COMMIT_REASON_SESSION_DESTROYED);
 
         if (mDestroyed) {
             return null;

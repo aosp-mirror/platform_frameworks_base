@@ -30,6 +30,7 @@ import android.hardware.biometrics.BiometricPrompt
 import android.hardware.biometrics.Flags.customBiometricPrompt
 import android.hardware.biometrics.PromptContentView
 import android.os.UserHandle
+import android.text.TextPaint
 import android.util.Log
 import android.util.RotationUtils
 import android.view.HapticFeedbackConstants
@@ -52,6 +53,7 @@ import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.res.R
+import com.android.systemui.util.kotlin.combine
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -260,15 +262,15 @@ constructor(
     val position: Flow<PromptPosition> =
         combine(
                 _forceLargeSize,
+                promptKind,
                 displayStateInteractor.isLargeScreen,
                 displayStateInteractor.currentRotation,
                 modalities
-            ) { forceLarge, isLargeScreen, rotation, modalities ->
+            ) { forceLarge, promptKind, isLargeScreen, rotation, modalities ->
                 when {
                     forceLarge ||
                         isLargeScreen ||
-                        promptKind.value.isOnePaneNoSensorLandscapeBiometric() ->
-                        PromptPosition.Bottom
+                        promptKind.isOnePaneNoSensorLandscapeBiometric() -> PromptPosition.Bottom
                     rotation == DisplayRotation.ROTATION_90 -> PromptPosition.Right
                     rotation == DisplayRotation.ROTATION_270 -> PromptPosition.Left
                     rotation == DisplayRotation.ROTATION_180 && modalities.hasUdfps ->
@@ -307,6 +309,10 @@ constructor(
     private val udfpsHorizontalGuidelinePadding =
         context.resources.getDimensionPixelSize(
             R.dimen.biometric_prompt_two_pane_udfps_horizontal_guideline_padding
+        )
+    private val udfpsHorizontalShorterGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_two_pane_udfps_shorter_horizontal_guideline_padding
         )
     private val mediumTopGuidelinePadding =
         context.resources.getDimensionPixelSize(
@@ -449,47 +455,6 @@ constructor(
             }
         }
 
-    /**
-     * Rect for positioning prompt guidelines (left, top, right, unused)
-     *
-     * Negative values are used to signify that guideline measuring should be flipped, measuring
-     * from opposite side of the screen
-     */
-    val guidelineBounds: Flow<Rect> =
-        combine(iconPosition, promptKind, size, position, modalities) {
-                _,
-                promptKind,
-                size,
-                position,
-                modalities ->
-                when (position) {
-                    PromptPosition.Bottom ->
-                        if (promptKind.isOnePaneNoSensorLandscapeBiometric()) {
-                            Rect(0, 0, 0, 0)
-                        } else {
-                            Rect(0, mediumTopGuidelinePadding, 0, 0)
-                        }
-                    PromptPosition.Right ->
-                        if (size.isSmall) {
-                            Rect(-smallHorizontalGuidelinePadding, 0, 0, 0)
-                        } else if (modalities.hasUdfps) {
-                            Rect(udfpsHorizontalGuidelinePadding, 0, 0, 0)
-                        } else {
-                            Rect(-mediumHorizontalGuidelinePadding, 0, 0, 0)
-                        }
-                    PromptPosition.Left ->
-                        if (size.isSmall) {
-                            Rect(0, 0, -smallHorizontalGuidelinePadding, 0)
-                        } else if (modalities.hasUdfps) {
-                            Rect(0, 0, udfpsHorizontalGuidelinePadding, 0)
-                        } else {
-                            Rect(0, 0, -mediumHorizontalGuidelinePadding, 0)
-                        }
-                    PromptPosition.Top -> Rect()
-                }
-            }
-            .distinctUntilChanged()
-
     /** Padding for prompt UI elements */
     val promptPadding: Flow<Rect> =
         combine(size, displayStateInteractor.currentRotation) { size, rotation ->
@@ -554,6 +519,81 @@ constructor(
     val description: Flow<String> =
         combine(contentView, originalDescription) { contentView, description ->
             if (contentView == null) description else ""
+        }
+
+    private val hasOnlyOneLineTitle: Flow<Boolean> =
+        combine(title, subtitle, contentView, description) {
+            title,
+            subtitle,
+            contentView,
+            description ->
+            if (subtitle.isNotEmpty() || contentView != null || description.isNotEmpty()) {
+                false
+            } else {
+                val maxWidth =
+                    context.resources.getDimensionPixelSize(
+                        R.dimen.biometric_prompt_two_pane_udfps_shorter_content_width
+                    )
+                val attributes =
+                    context.obtainStyledAttributes(
+                        R.style.TextAppearance_AuthCredential_Title,
+                        intArrayOf(android.R.attr.textSize)
+                    )
+                val paint = TextPaint()
+                paint.textSize = attributes.getDimensionPixelSize(0, 0).toFloat()
+                val textWidth = paint.measureText(title)
+                attributes.recycle()
+                textWidth / maxWidth <= 1
+            }
+        }
+
+    /**
+     * Rect for positioning prompt guidelines (left, top, right, unused)
+     *
+     * Negative values are used to signify that guideline measuring should be flipped, measuring
+     * from opposite side of the screen
+     */
+    val guidelineBounds: Flow<Rect> =
+        combine(iconPosition, promptKind, size, position, modalities, hasOnlyOneLineTitle) {
+                _,
+                promptKind,
+                size,
+                position,
+                modalities,
+                hasOnlyOneLineTitle ->
+                var left = 0
+                var top = 0
+                var right = 0
+                when (position) {
+                    PromptPosition.Bottom -> {
+                        val noSensorLandscape = promptKind.isOnePaneNoSensorLandscapeBiometric()
+                        top = if (noSensorLandscape) 0 else mediumTopGuidelinePadding
+                    }
+                    PromptPosition.Right ->
+                        left = getHorizontalPadding(size, modalities, hasOnlyOneLineTitle)
+                    PromptPosition.Left ->
+                        right = getHorizontalPadding(size, modalities, hasOnlyOneLineTitle)
+                    PromptPosition.Top -> {}
+                }
+                Rect(left, top, right, 0)
+            }
+            .distinctUntilChanged()
+
+    private fun getHorizontalPadding(
+        size: PromptSize,
+        modalities: BiometricModalities,
+        hasOnlyOneLineTitle: Boolean
+    ) =
+        if (size.isSmall) {
+            -smallHorizontalGuidelinePadding
+        } else if (modalities.hasUdfps) {
+            if (hasOnlyOneLineTitle) {
+                -udfpsHorizontalShorterGuidelinePadding
+            } else {
+                udfpsHorizontalGuidelinePadding
+            }
+        } else {
+            -mediumHorizontalGuidelinePadding
         }
 
     /** If the indicator (help, error) message should be shown. */

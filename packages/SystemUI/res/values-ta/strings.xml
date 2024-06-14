@@ -281,8 +281,10 @@
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"நாளைக்குத் தானாகவே மீண்டும் இயக்கப்படுதல்"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"விரைவுப் பகிர்தல், Find My Device போன்ற அம்சங்கள் புளூடூத்தைப் பயன்படுத்துகின்றன"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"நாளை காலை புளூடூத் இயக்கப்படும்"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"ஆடியோ பகிர்வு"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"ஆடியோ பகிரப்படுகிறது"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> பேட்டரி"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ஆடியோ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ஹெட்செட்"</string>
@@ -305,7 +307,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"நெட்வொர்க்குகள் கிடைக்கவில்லை"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"வைஃபை நெட்வொர்க்குகள் இல்லை"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"ஆன் செய்கிறது…"</string>
-    <string name="quick_settings_cast_title" msgid="3033553249449938182">"Cast"</string>
+    <string name="quick_settings_cast_title" msgid="3033553249449938182">"அலைபரப்பு"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"அனுப்புகிறது"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"பெயரிடப்படாத சாதனம்"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"சாதனங்கள் இல்லை"</string>
@@ -361,18 +363,13 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"சாதன அனுபவத்தின் எந்தப் பகுதி பாதிக்கப்பட்டது?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"சிக்கல் வகையைத் தேர்வுசெய்க"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ஸ்கிரீன் ரெக்கார்டு"</string>
-    <!-- no translation found for performance (6552785217174378320) -->
-    <skip />
-    <!-- no translation found for user_interface (3712869377953950887) -->
-    <skip />
-    <!-- no translation found for thermal (6758074791325414831) -->
-    <skip />
+    <string name="performance" msgid="6552785217174378320">"செயல்திறன்"</string>
+    <string name="user_interface" msgid="3712869377953950887">"பயனர் இடைமுகம்"</string>
+    <string name="thermal" msgid="6758074791325414831">"தெர்மல்"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"ஒற்றைக் கைப் பயன்முறை"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"செவித்துணைக் கருவிகள்"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"செயலில் உள்ளது"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"இணைக்கப்படவில்லை"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"செவித்துணைக் கருவிகள்"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"புதிய சாதனத்தை இணை"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"புதிய சாதனத்தை இணைக்க கிளிக் செய்யலாம்"</string>
@@ -1275,8 +1272,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"மடக்கப்பட்டது"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"விரிக்கப்பட்டது"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"ஸ்டைலஸ் பேட்டரி <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"உங்கள் ஸ்டைலஸைச் சார்ஜருடன் இணையுங்கள்"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ஸ்டைலஸின் பேட்டரி குறைவாக உள்ளது"</string>
     <string name="video_camera" msgid="7654002575156149298">"வீடியோ கேமரா"</string>
@@ -1328,8 +1324,7 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"தேடல் ஷார்ட்கட்கள்"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"சுருக்குவதற்கான ஐகான்"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"விரிவாக்குவதற்கான ஐகான்"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"அல்லது"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"கீபோர்டு பேக்லைட்"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"நிலை, %2$d இல் %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ஹோம் கன்ட்ரோல்கள்"</string>

@@ -281,8 +281,10 @@
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"कल फिर से अपने-आप चालू हो जाए"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"क्विक शेयर और Find My Device जैसी सुविधाएं, ब्लूटूथ का इस्तेमाल करती हैं"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ब्लूटूथ कल सुबह चालू होगा"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"ऑडियो शेयर करने की सुविधा"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"ऑडियो शेयर किया जा रहा है"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> बैटरी"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ऑडियो"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"हेडसेट"</string>
@@ -361,18 +363,13 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"आपके डिवाइस की कौनसी सुविधा पर असर पड़ा था?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"समस्या का टाइप चुनें"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"स्क्रीन रिकॉर्डर"</string>
-    <!-- no translation found for performance (6552785217174378320) -->
-    <skip />
-    <!-- no translation found for user_interface (3712869377953950887) -->
-    <skip />
-    <!-- no translation found for thermal (6758074791325414831) -->
-    <skip />
+    <string name="performance" msgid="6552785217174378320">"परफ़ॉर्मेंस"</string>
+    <string name="user_interface" msgid="3712869377953950887">"यूज़र इंटरफ़ेस"</string>
+    <string name="thermal" msgid="6758074791325414831">"थर्मल"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"वन-हैंडेड मोड"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"कान की मशीनें"</string>
-    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
-    <skip />
-    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
-    <skip />
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"ऐक्टिव"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"डिसकनेक्ट हो गया"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"कान की मशीनें"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"नया डिवाइस जोड़ें"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"नया डिवाइस जोड़ने के लिए क्लिक करें"</string>
@@ -1112,7 +1109,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> डिवाइस चुने गए"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(डिसकनेक्ट हो गया)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"स्विच नहीं किया जा सकता. फिर से कोशिश करने के लिए टैप करें."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"किसी डिवाइस को कनेक्ट करें"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"कोई डिवाइस कनेक्ट करें"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"इस सेशन को कास्ट करने के लिए, कृपया ऐप्लिकेशन खोलें."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"अनजान ऐप्लिकेशन"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्ट करना बंद करें"</string>
@@ -1275,8 +1272,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"डिवाइस फ़ोल्ड किया गया"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"डिवाइस अनफ़ोल्ड किया गया"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"स्टाइलस की बैटरी <xliff:g id="PERCENTAGE">%s</xliff:g> है"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"अपने स्टाइलस को चार्ज करें"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"स्टाइलस की बैटरी कम है"</string>
     <string name="video_camera" msgid="7654002575156149298">"वीडियो कैमरा"</string>
@@ -1328,8 +1324,7 @@
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"सर्च शॉर्टकट"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"छोटा करने का आइकॉन"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"बड़ा करने का आइकॉन"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"या"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"कीबोर्ड की बैकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d में से %1$d लेवल"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कंट्रोल"</string>

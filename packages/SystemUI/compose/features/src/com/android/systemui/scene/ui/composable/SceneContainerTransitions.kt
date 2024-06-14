@@ -59,6 +59,13 @@ val SceneContainerTransitions = transitions {
         goneToShadeTransition(durationScale = 0.9)
     }
     from(Scenes.Gone, to = Scenes.QuickSettings) { goneToQuickSettingsTransition() }
+    from(
+        Scenes.Gone,
+        to = Scenes.QuickSettings,
+        key = SlightlyFasterShadeCollapse,
+    ) {
+        goneToQuickSettingsTransition(durationScale = 0.9)
+    }
     from(Scenes.Gone, to = Scenes.QuickSettingsShade) { goneToQuickSettingsShadeTransition() }
     from(Scenes.Lockscreen, to = Scenes.Bouncer) { lockscreenToBouncerTransition() }
     from(Scenes.Lockscreen, to = Scenes.Communal) { lockscreenToCommunalTransition() }

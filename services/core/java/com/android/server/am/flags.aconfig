@@ -142,3 +142,13 @@ flag {
     bug: "244232958"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "follow_up_oomadj_updates"
+    namespace: "backstage_power"
+    description: "Schedule follow up OomAdjuster updates for time sensitive states."
+    bug: "333450932"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

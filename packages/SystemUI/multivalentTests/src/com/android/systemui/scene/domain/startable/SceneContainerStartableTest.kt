@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.android.systemui.scene.domain.startable
 
@@ -395,6 +395,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 )
             assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
             underTest.start()
+            runCurrent()
 
             kosmos.fakePowerRepository.updateWakefulness(
                 rawState = WakefulnessState.STARTING_TO_SLEEP,
@@ -1282,6 +1283,42 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(isShadeTouchable).isFalse()
 
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun switchToGone_whenSurfaceBehindLockscreenVisibleMidTransition() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val transitionStateFlow =
+                prepareState(
+                    authenticationMethod = AuthenticationMethodModel.None,
+                )
+            underTest.start()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            // Swipe to Gone, more than halfway
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Gone,
+                    currentScene = flowOf(Scenes.Gone),
+                    progress = flowOf(0.51f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(true),
+                )
+            runCurrent()
+            // Lift finger
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Gone,
+                    currentScene = flowOf(Scenes.Gone),
+                    progress = flowOf(0.51f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
 
     @Test
