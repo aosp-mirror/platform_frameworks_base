@@ -497,6 +497,8 @@ constructor(
                 occludedToLockscreenTransitionViewModel.lockscreenAlpha,
                 primaryBouncerToGoneTransitionViewModel.notificationAlpha,
                 primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,
+                glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
+                lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
             )
 
         return merge(
