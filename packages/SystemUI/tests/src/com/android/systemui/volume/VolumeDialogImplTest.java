@@ -89,7 +89,6 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
-import com.android.systemui.volume.ui.binder.VolumeDialogMenuIconBinder;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import dagger.Lazy;
@@ -150,8 +149,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     private VolumePanelNavigationInteractor mVolumePanelNavigationInteractor;
     @Mock
     private VolumeNavigator mVolumeNavigator;
-    @Mock
-    private VolumeDialogMenuIconBinder mVolumeDialogMenuIconBinder;
     @Mock
     private VolumePanelFlag mVolumePanelFlag;
     @Mock
@@ -220,7 +217,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mDumpManager,
                 mLazySecureSettings,
                 mVibratorHelper,
-                mVolumeDialogMenuIconBinder,
                 new FakeSystemClock(),
                 mVolumeDialogInteractor);
         mDialog.init(0, null);
