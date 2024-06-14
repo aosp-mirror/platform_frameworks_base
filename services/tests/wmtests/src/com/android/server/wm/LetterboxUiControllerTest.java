@@ -867,7 +867,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
                 /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
     }
     @Test
-    public void testOverrideOrientationIfNeeded_fullscreenOverride_cameraActivity_unchanged() {
+    public void testOverrideOrientationIfNeeded_userFullscreenOverride_cameraActivity_noChange() {
         doReturn(true).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled();
         doReturn(true).when(mLetterboxConfiguration)
                 .isCameraCompatTreatmentEnabledAtBuildTime();
@@ -875,9 +875,31 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         // Recreate DisplayContent with DisplayRotationCompatPolicy
         mActivity = setUpActivityWithComponent();
         mController = new LetterboxUiController(mWm, mActivity);
-        spyOn(mDisplayContent.mDisplayRotationCompatPolicy);
+        spyOn(mController);
+        doReturn(true).when(mController).shouldApplyUserFullscreenOverride();
 
-        doReturn(false).when(mDisplayContent.mDisplayRotationCompatPolicy)
+        spyOn(mDisplayContent.mDisplayRotationCompatPolicy);
+        doReturn(true).when(mDisplayContent.mDisplayRotationCompatPolicy)
+                .isCameraActive(mActivity, /* mustBeFullscreen= */ true);
+
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
+    }
+
+    @Test
+    public void testOverrideOrientationIfNeeded_systemFullscreenOverride_cameraActivity_noChange() {
+        doReturn(true).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled();
+        doReturn(true).when(mLetterboxConfiguration)
+                .isCameraCompatTreatmentEnabledAtBuildTime();
+
+        // Recreate DisplayContent with DisplayRotationCompatPolicy
+        mActivity = setUpActivityWithComponent();
+        mController = new LetterboxUiController(mWm, mActivity);
+        spyOn(mController);
+        doReturn(true).when(mController).isSystemOverrideToFullscreenEnabled();
+
+        spyOn(mDisplayContent.mDisplayRotationCompatPolicy);
+        doReturn(true).when(mDisplayContent.mDisplayRotationCompatPolicy)
                 .isCameraActive(mActivity, /* mustBeFullscreen= */ true);
 
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
@@ -1015,7 +1037,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testShouldEnableUserAspectRatioSettings_noIgnoreOrientaion_returnsFalse()
+    public void testShouldEnableUserAspectRatioSettings_noIgnoreOrientation_returnsFalse()
             throws Exception {
         prepareActivityForShouldApplyUserMinAspectRatioOverride(/* orientationRequest */ false);
         mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ true);
@@ -1063,7 +1085,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testShouldApplyUserMinAspectRatioOverride_noIgnoreOrientationreturnsFalse() {
+    public void testShouldApplyUserMinAspectRatioOverride_noIgnoreOrientation_returnsFalse() {
         prepareActivityForShouldApplyUserMinAspectRatioOverride(/* orientationRequest */ false);
 
         assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
