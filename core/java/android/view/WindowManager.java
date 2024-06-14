@@ -3307,6 +3307,11 @@ public interface WindowManager extends ViewManager {
         @UnsupportedAppUsage
         public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 1 << 6;
 
+        /** Window flag: the client side view can intercept back progress, so system does not
+         * need to pilfer pointers.
+         * {@hide} */
+        public static final int PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED = 1 << 7;
+
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
          * it is created.
@@ -3500,6 +3505,7 @@ public interface WindowManager extends ViewManager {
                 SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
                 PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION,
                 PRIVATE_FLAG_NO_MOVE_ANIMATION,
+                PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED,
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_OPTIMIZE_MEASURE,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
