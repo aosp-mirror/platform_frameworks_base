@@ -212,6 +212,7 @@ cc_test {
         "tests/AttributeResolution_test.cpp",
         "tests/BigBuffer_test.cpp",
         "tests/ByteBucketArray_test.cpp",
+        "tests/CombinedIterator_test.cpp",
         "tests/Config_test.cpp",
         "tests/ConfigDescription_test.cpp",
         "tests/ConfigLocale_test.cpp",
