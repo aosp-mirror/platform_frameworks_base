@@ -90,9 +90,6 @@ public class CompanionDeviceDiscoveryService extends Service {
             new MutableLiveData<>(Collections.emptyList());
     private static MutableLiveData<DiscoveryState> sStateLiveData =
             new MutableLiveData<>(DiscoveryState.NOT_STARTED);
-    private static final Object LOCK = new Object();
-    @GuardedBy("LOCK")
-    private static boolean sDiscoveryStarted = false;
 
     private BluetoothManager mBtManager;
     private BluetoothAdapter mBtAdapter;
@@ -108,6 +105,10 @@ public class CompanionDeviceDiscoveryService extends Service {
     private final Runnable mTimeoutRunnable = this::timeout;
 
     private boolean mStopAfterFirstMatch;
+
+    static final Object LOCK = new Object();
+    @GuardedBy("LOCK")
+    static boolean sDiscoveryStarted = false;
 
     /**
      * A state enum for devices' discovery.
