@@ -847,6 +847,28 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.NO_HAPTICS)
     }
 
+    @Test
+    fun plays_haptic_on_error_after_auth_when_confirmation_needed() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+
+        viewModel.showTemporaryError(
+            "still sad",
+            messageAfterError = "",
+            authenticateAfterError = false,
+            hapticFeedback = true,
+        )
+
+        val haptics by collectLastValue(viewModel.hapticsToPlay)
+        if (expectConfirmation) {
+            assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
+            assertThat(haptics?.flag).isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+        } else {
+            assertThat(haptics?.hapticFeedbackConstant)
+                .isEqualTo(HapticFeedbackConstants.CONFIRM)
+        }
+    }
+
     private suspend fun TestScope.showTemporaryErrors(
         restart: Boolean,
         helpAfterError: String = "",
@@ -994,7 +1016,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun authenticated_at_most_once() = runGenericTest {
+    fun authenticated_at_most_once_same_modality() = runGenericTest {
         val authenticating by collectLastValue(viewModel.isAuthenticating)
         val authenticated by collectLastValue(viewModel.isAuthenticated)
 
@@ -1048,6 +1070,38 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             viewModel.confirmAuthenticated()
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertButtonsVisible()
+        }
+
+        assertThat(authenticating).isFalse()
+        assertThat(authenticated?.isAuthenticated).isTrue()
+        assertThat(canTryAgain).isFalse()
+    }
+
+    @Test
+    fun second_authentication_acts_as_confirmation() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+
+        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+
+        val authenticating by collectLastValue(viewModel.isAuthenticating)
+        val authenticated by collectLastValue(viewModel.isAuthenticated)
+        val message by collectLastValue(viewModel.message)
+        val size by collectLastValue(viewModel.size)
+        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+
+        assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
+        if (expectConfirmation) {
+            assertThat(size).isEqualTo(PromptSize.MEDIUM)
+            assertButtonsVisible(
+                cancel = true,
+                confirm = true,
+            )
+
+            if (testCase.modalities.hasSfps) {
+                viewModel.showAuthenticated(BiometricModality.Fingerprint, 0)
+                assertThat(message).isEqualTo(PromptMessage.Empty)
+                assertButtonsVisible()
+            }
         }
 
         assertThat(authenticating).isFalse()
