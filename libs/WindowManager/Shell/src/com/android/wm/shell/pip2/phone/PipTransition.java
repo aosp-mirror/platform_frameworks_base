@@ -524,6 +524,20 @@ public class PipTransition extends PipTransitionController implements
     }
 
     @Override
+    public void finishTransition(@Nullable SurfaceControl.Transaction tx) {
+        WindowContainerTransaction wct = null;
+        if (tx != null && mPipTransitionState.mPipTaskToken != null) {
+            // Outside callers can only provide a transaction to be applied with the final draw.
+            // So no actual WM changes can be applied for this transition after this point.
+            wct = new WindowContainerTransaction();
+            wct.setBoundsChangeTransaction(mPipTransitionState.mPipTaskToken, tx);
+        }
+        if (mFinishCallback != null) {
+            mFinishCallback.onTransitionFinished(wct);
+        }
+    }
+
+    @Override
     public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
             @PipTransitionState.TransitionState int newState, @Nullable Bundle extra) {
         switch (newState) {
@@ -544,15 +558,6 @@ public class PipTransition extends PipTransitionController implements
             case PipTransitionState.EXITED_PIP:
                 mPipTransitionState.mPipTaskToken = null;
                 mPipTransitionState.mPinnedTaskLeash = null;
-                break;
-            case PipTransitionState.CHANGED_PIP_BOUNDS:
-                // Note: this might not be the end of the animation, rather animator just finished
-                // adjusting startTx and finishTx and is ready to finishTransition(). The animator
-                // can still continue playing the leash into the destination bounds after.
-                if (mFinishCallback != null) {
-                    mFinishCallback.onTransitionFinished(null);
-                    mFinishCallback = null;
-                }
                 break;
         }
     }
