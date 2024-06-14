@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -112,18 +111,5 @@ private fun TutorialButton(
         modifier = modifier.aspectRatio(0.66f)
     ) {
         Text(text = text, style = MaterialTheme.typography.headlineLarge)
-    }
-}
-
-@Composable
-private fun DoneButton(onDoneButtonClicked: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Button(onClick = onDoneButtonClicked) {
-            Text(stringResource(R.string.touchpad_tutorial_done_button))
-        }
     }
 }
