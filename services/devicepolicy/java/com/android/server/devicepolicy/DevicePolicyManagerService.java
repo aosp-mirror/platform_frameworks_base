@@ -2256,38 +2256,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (userHandle == UserHandle.USER_SYSTEM) {
                     mStateCache.setDeviceProvisioned(policy.mUserSetupComplete);
                 }
-                if (Flags.headlessSingleUserBadDeviceAdminStateFix()) {
-                    fixBadDeviceAdminStateForInternalUsers(userHandle, policy);
-                }
             }
             return policy;
-        }
-    }
-
-    private void fixBadDeviceAdminStateForInternalUsers(int userId, DevicePolicyData policy) {
-        ComponentName component = mOwners.getDeviceOwnerComponent();
-        int doUserId = mOwners.getDeviceOwnerUserId();
-        ComponentName cloudDpc = new ComponentName(
-                "com.google.android.apps.work.clouddpc",
-                "com.google.android.apps.work.clouddpc.receivers.CloudDeviceAdminReceiver");
-        if (component == null || doUserId != userId || !component.equals(cloudDpc)) {
-            return;
-        }
-        Slogf.i(LOG_TAG, "Attempting to apply a temp fix for cloudpc internal users' bad state.");
-        final int n = policy.mAdminList.size();
-        for (int i = 0; i < n; i++) {
-            ActiveAdmin admin = policy.mAdminList.get(i);
-            if (component.equals(admin.info.getComponent())) {
-                Slogf.i(LOG_TAG, "An ActiveAdmin already exists, fix not required.");
-                return;
-            }
-        }
-        DeviceAdminInfo dai = findAdmin(component, userId, /* throwForMissingPermission= */ false);
-        if (dai != null) {
-            ActiveAdmin ap = new ActiveAdmin(dai, /* parent */ false);
-            policy.mAdminMap.put(ap.info.getComponent(), ap);
-            policy.mAdminList.add(ap);
-            Slogf.i(LOG_TAG, "Fix applied, an ActiveAdmin has been added.");
         }
     }
 
