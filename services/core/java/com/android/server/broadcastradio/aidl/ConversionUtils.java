@@ -690,9 +690,6 @@ final class ConversionUtils {
                 || !identifierMeetsSdkVersionRequirement(info.getPhysicallyTunedTo(), uid)) {
             return false;
         }
-        if (info.getRelatedContent() == null) {
-            return true;
-        }
         Iterator<ProgramSelector.Identifier> relatedContentIt = info.getRelatedContent().iterator();
         while (relatedContentIt.hasNext()) {
             if (!identifierMeetsSdkVersionRequirement(relatedContentIt.next(), uid)) {
