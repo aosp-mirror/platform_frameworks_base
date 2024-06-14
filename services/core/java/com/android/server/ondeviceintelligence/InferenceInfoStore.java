@@ -21,9 +21,9 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService;
 import android.util.Slog;
+import android.util.Base64;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
@@ -53,7 +53,7 @@ public class InferenceInfoStore {
             String infoBytesBase64String = pb.getString(
                     OnDeviceSandboxedInferenceService.INFERENCE_INFO_BUNDLE_KEY);
             if (infoBytesBase64String != null) {
-                byte[] infoBytes = Base64.getDecoder().decode(infoBytesBase64String);
+                byte[] infoBytes = Base64.decode(infoBytesBase64String, Base64.DEFAULT);
                 com.android.server.ondeviceintelligence.nano.InferenceInfo inferenceInfo =
                         com.android.server.ondeviceintelligence.nano.InferenceInfo.parseFrom(
                                 infoBytes);
@@ -84,7 +84,9 @@ public class InferenceInfoStore {
     }
 
     private synchronized void add(com.android.server.ondeviceintelligence.nano.InferenceInfo info) {
-        while (System.currentTimeMillis() - inferenceInfos.first().getStartTimeMs() > maxAgeMs) {
+        while (!inferenceInfos.isEmpty()
+                && System.currentTimeMillis() - inferenceInfos.first().getStartTimeMs()
+                > maxAgeMs) {
             inferenceInfos.pollFirst();
         }
         inferenceInfos.add(toInferenceInfo(info));
