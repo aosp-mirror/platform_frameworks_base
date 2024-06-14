@@ -136,6 +136,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var handler: Handler
 
     @Mock
+    private lateinit var bgHandler: Handler
+
+    @Mock
     private lateinit var datePlugin: BcSmartspaceDataPlugin
 
     @Mock
@@ -265,6 +268,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 executor,
                 bgExecutor,
                 handler,
+                bgHandler,
                 Optional.of(datePlugin),
                 Optional.of(weatherPlugin),
                 Optional.of(plugin),
@@ -762,6 +766,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         // THEN the existing session is reused and views are registered
         verify(smartspaceManager, never()).createSmartspaceSession(any())
         verify(smartspaceView2).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(smartspaceView2).setBgHandler(bgHandler)
         verify(smartspaceView2).setTimeChangedDelegate(any())
         verify(smartspaceView2).registerDataProvider(plugin)
         verify(smartspaceView2).registerConfigProvider(configPlugin)
@@ -838,6 +843,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(dateSmartspaceView).setUiSurface(
                 BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         verify(dateSmartspaceView).setTimeChangedDelegate(any())
+        verify(dateSmartspaceView).setBgHandler(bgHandler)
         verify(dateSmartspaceView).registerDataProvider(datePlugin)
 
         verify(dateSmartspaceView).setPrimaryTextColor(anyInt())
@@ -851,6 +857,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(weatherSmartspaceView).setUiSurface(
                 BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         verify(weatherSmartspaceView).setTimeChangedDelegate(any())
+        verify(weatherSmartspaceView).setBgHandler(bgHandler)
         verify(weatherSmartspaceView).registerDataProvider(weatherPlugin)
 
         verify(weatherSmartspaceView).setPrimaryTextColor(anyInt())
@@ -863,6 +870,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         verify(smartspaceView).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         verify(smartspaceView).setTimeChangedDelegate(any())
+        verify(smartspaceView).setBgHandler(bgHandler)
         verify(smartspaceView).registerDataProvider(plugin)
         verify(smartspaceView).registerConfigProvider(configPlugin)
         verify(smartspaceSession)
@@ -988,6 +996,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun setUiSurface(uiSurface: String) {
             }
 
+            override fun setBgHandler(bgHandler: Handler?) {
+            }
+
             override fun setTimeChangedDelegate(
                 delegate: BcSmartspaceDataPlugin.TimeChangedDelegate?
             ) {}
@@ -1020,6 +1031,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun setUiSurface(uiSurface: String) {
             }
 
+            override fun setBgHandler(bgHandler: Handler?) {
+            }
+
             override fun setTimeChangedDelegate(
                 delegate: BcSmartspaceDataPlugin.TimeChangedDelegate?
             ) {}
@@ -1046,6 +1060,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             }
 
             override fun setUiSurface(uiSurface: String) {
+            }
+
+            override fun setBgHandler(bgHandler: Handler?) {
             }
 
             override fun setTimeChangedDelegate(
