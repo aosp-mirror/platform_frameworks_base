@@ -49,6 +49,10 @@ constructor(
             action = Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS,
             onReceive = { state.value = Inactive }
         )
+        registerBroadcastReceiver(
+            action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS,
+            onReceive = { state.value = Inactive }
+        )
         commandQueue.addCallback(
             object : CommandQueue.Callbacks {
                 override fun dismissKeyboardShortcutsMenu() {
