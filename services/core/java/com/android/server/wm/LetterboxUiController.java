@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
 import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
@@ -103,6 +104,7 @@ import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTy
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
+import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -230,6 +232,9 @@ final class LetterboxUiController {
     private boolean mLastShouldShowLetterboxUi;
 
     private boolean mDoubleTapEvent;
+
+    @FreeformCameraCompatMode
+    private int mFreeformCameraCompatMode = CAMERA_COMPAT_FREEFORM_NONE;
 
     LetterboxUiController(WindowManagerService wmService, ActivityRecord activityRecord) {
         mLetterboxConfiguration = wmService.mLetterboxConfiguration;
@@ -709,6 +714,15 @@ final class LetterboxUiController {
         return displayContent.mDisplayRotationCompatPolicy != null
                 && displayContent.mDisplayRotationCompatPolicy
                         .isTreatmentEnabledForActivity(mActivityRecord);
+    }
+
+    @FreeformCameraCompatMode
+    int getFreeformCameraCompatMode() {
+        return mFreeformCameraCompatMode;
+    }
+
+    void setFreeformCameraCompatMode(@FreeformCameraCompatMode int freeformCameraCompatMode) {
+        mFreeformCameraCompatMode = freeformCameraCompatMode;
     }
 
     private boolean isCompatChangeEnabled(long overrideChangeId) {
