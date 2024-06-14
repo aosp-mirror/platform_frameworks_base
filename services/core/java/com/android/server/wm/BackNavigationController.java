@@ -1366,8 +1366,6 @@ class BackNavigationController {
                                         ? task.getSurfaceControl()
                                         : mAdaptors[0].mTarget.getSurfaceControl());
                     }
-                    // remove starting surface.
-                    mStartingSurface = null;
                 }
             }
 
@@ -1384,7 +1382,10 @@ class BackNavigationController {
                         .removeWindowlessStartingSurface(mRequestedStartingSurfaceId,
                                 !openTransitionMatch);
                 mRequestedStartingSurfaceId = INVALID_TASK_ID;
-                mStartingSurface = null;
+                if (mStartingSurface != null && mStartingSurface.isValid()) {
+                    mStartingSurface.release();
+                    mStartingSurface = null;
+                }
             }
         }
 
