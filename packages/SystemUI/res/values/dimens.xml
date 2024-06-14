@@ -944,6 +944,9 @@
     <!-- Padding between signal cluster and battery icon -->
     <dimen name="signal_cluster_battery_padding">6dp</dimen>
 
+    <!-- end padding for battery icon in status bar -->
+    <dimen name="status_bar_battery_end_padding">0dp</dimen>
+
     <!-- Screen pinning request width -->
     <dimen name="screen_pinning_request_width">@dimen/match_parent</dimen>
     <!-- Screen pinning request nav button circle heights -->
