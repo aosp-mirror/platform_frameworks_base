@@ -411,7 +411,7 @@ public final class HintManagerService extends SystemService {
             FgThread.getHandler().post(() -> {
                 synchronized (mLock) {
                     boolean shouldCleanup = false;
-                    if (powerhintThreadCleanup()) {
+                    if (mPowerHalVersion >= 4 && powerhintThreadCleanup()) {
                         int prevProcState = mProcStatesCache.get(uid, Integer.MAX_VALUE);
                         shouldCleanup =
                                 prevProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
