@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"পিন খুবই ছোট৷ এটিকে কমপক্ষে ৪ সংখ্যার হতে হবে৷"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"পরে আবার চেষ্টা করুন"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"পূর্ণ স্ক্রিনে দেখা হচ্ছে"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"প্রস্থান করতে উপর থেকে নিচের দিকে সোয়াইপ করুন"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুঝেছি"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"আরও ভাল ক্যামেরা ভিউ পাওয়ার জন্য ঘোরান"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"আরও ভাল ভিউয়ের জন্য ফুল স্ক্রিনে <xliff:g id="NAME">%s</xliff:g> খুলুন"</string>
