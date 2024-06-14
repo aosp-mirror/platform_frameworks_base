@@ -916,6 +916,9 @@ public class BubbleData {
             ((Bubble) bubble).markAsAccessedAt(mTimeSource.currentTimeMillis());
         }
         mSelectedBubble = bubble;
+        if (isOverflow) {
+            mShowingOverflow = true;
+        }
         mStateChange.selectedBubble = bubble;
         mStateChange.selectionChanged = true;
     }
