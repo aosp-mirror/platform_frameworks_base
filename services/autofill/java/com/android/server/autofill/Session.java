@@ -30,7 +30,6 @@ import static android.service.autofill.Dataset.PICK_REASON_UNKNOWN;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_CREDMAN_BOTTOM_SHEET;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_DIALOG;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
-import static android.service.autofill.FillEventHistory.Event.UI_TYPE_MENU;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_UNKNOWN;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
@@ -2661,19 +2660,30 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // AutofillUiCallback
     @Override
-    public void onShown(int uiType) {
+    public void onShown(int uiType, int numDatasetsShown) {
         synchronized (mLock) {
+            mPresentationStatsEventLogger.maybeSetDisplayPresentationType(uiType);
+
             if (uiType == UI_TYPE_INLINE) {
-                if (mLoggedInlineDatasetShown) {
+                // Inline Suggestions are inflated one at a time
+                // This number will be reset when filtered
+                // This will also call maybeSetSuggestionPresentedTimestampMs
+                mPresentationStatsEventLogger.maybeIncrementCountShown();
+
+                if (!mLoggedInlineDatasetShown) {
                     // Chip inflation already logged, do not log again.
                     // This is needed because every chip inflation will call this.
-                    return;
+                    mService.logDatasetShown(this.id, mClientState, uiType);
+                    Slog.d(TAG, "onShown(): " + uiType + ", " + numDatasetsShown);
                 }
                 mLoggedInlineDatasetShown = true;
+            } else {
+                mPresentationStatsEventLogger.maybeSetCountShown(numDatasetsShown);
+                // Explicitly sets maybeSetSuggestionPresentedTimestampMs
+                mPresentationStatsEventLogger.maybeSetSuggestionPresentedTimestampMs();
+                mService.logDatasetShown(this.id, mClientState, uiType);
+                Slog.d(TAG, "onShown(): " + uiType + ", " + numDatasetsShown);
             }
-            mService.logDatasetShown(this.id, mClientState, uiType);
-            mPresentationStatsEventLogger.maybeSetSuggestionPresentedTimestampMs();
-            Slog.d(TAG, "onShown(): " + uiType);
         }
     }
 
@@ -2739,6 +2749,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
 
             mInlineSessionController.hideInlineSuggestionsUiLocked(id);
+            mPresentationStatsEventLogger.markShownCountAsResettable();
         }
     }
 
@@ -4868,7 +4879,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 currentView.maybeCallOnFillReady(flags);
             }
         }
-        mPresentationStatsEventLogger.onFieldTextUpdated(viewState);
+        if (textValue != null) {
+            mPresentationStatsEventLogger.onFieldTextUpdated(viewState, textValue.length());
+        }
 
         if (viewState.id.equals(this.mCurrentViewId)
                 && (viewState.getState() & ViewState.STATE_INLINE_SHOWN) != 0) {
@@ -4965,8 +4978,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 synchronized (mLock) {
                     final ViewState currentView = mViewStates.get(mCurrentViewId);
                     currentView.setState(ViewState.STATE_FILL_DIALOG_SHOWN);
-                    mPresentationStatsEventLogger.maybeSetCountShown(
-                            response.getDatasets(), mCurrentViewId);
                     mPresentationStatsEventLogger.maybeSetDisplayPresentationType(UI_TYPE_DIALOG);
                 }
                 // Just show fill dialog once, so disabled after shown.
@@ -4987,10 +4998,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     // back a response via callback.
                     final ViewState currentView = mViewStates.get(mCurrentViewId);
                     currentView.setState(ViewState.STATE_INLINE_SHOWN);
-                    // TODO(b/234475358): Log more accurate value of number of inline suggestions
-                    // shown, inflated, and filtered.
-                    mPresentationStatsEventLogger.maybeSetCountShown(
-                            response.getDatasets(), mCurrentViewId);
                     mPresentationStatsEventLogger.maybeSetInlinePresentationAndSuggestionHostUid(
                             mContext, userId);
                     return;
@@ -5002,12 +5009,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mService.getServicePackageName(), mComponentName,
                 serviceLabel, serviceIcon, this, mContext, id, mCompatMode,
                 mService.getMaster().getMaxInputLengthForAutofill());
-
-        synchronized (mLock) {
-            mPresentationStatsEventLogger.maybeSetCountShown(
-                    response.getDatasets(), mCurrentViewId);
-            mPresentationStatsEventLogger.maybeSetDisplayPresentationType(UI_TYPE_MENU);
-        }
 
         synchronized (mLock) {
             if (mUiShownTime == 0) {
@@ -5249,7 +5250,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                     @Override
                     public void onInflate() {
-                        Session.this.onShown(UI_TYPE_INLINE);
+                        Session.this.onShown(UI_TYPE_INLINE, 1);
                     }
                 }, mService.getMaster().getMaxInputLengthForAutofill());
         return mInlineSessionController.setInlineFillUiLocked(inlineFillUi);
