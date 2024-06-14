@@ -270,6 +270,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
 
     private static final int NOT_A_SUBTYPE_ID = InputMethodUtils.NOT_A_SUBTYPE_ID;
+
+    private static final int INVALID_SUBTYPE_HASHCODE =
+            InputMethodSettings.INVALID_SUBTYPE_HASHCODE;
+
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
     private static final String HANDLER_THREAD_NAME = "android.imms";
     private static final String PACKAGE_MONITOR_THREAD_NAME = "android.imms2";
@@ -5442,20 +5446,23 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 mCurrentSubtype);
 
         // Set Subtype here
+        final int newSubtypeHashcode;
         if (imi == null || subtypeId < 0) {
-            settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
+            newSubtypeHashcode = INVALID_SUBTYPE_HASHCODE;
             mCurrentSubtype = null;
         } else {
             if (subtypeId < imi.getSubtypeCount()) {
                 InputMethodSubtype subtype = imi.getSubtypeAt(subtypeId);
-                settings.putSelectedSubtype(subtype.hashCode());
+                newSubtypeHashcode = subtype.hashCode();
                 mCurrentSubtype = subtype;
             } else {
-                settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
+                // TODO(b/347093491): Probably this should be determined from the new subtype.
+                newSubtypeHashcode = INVALID_SUBTYPE_HASHCODE;
                 // If the subtype is not specified, choose the most applicable one
                 mCurrentSubtype = getCurrentInputMethodSubtypeLocked();
             }
         }
+        settings.putSelectedSubtype(newSubtypeHashcode);
         notifyInputMethodSubtypeChangedLocked(settings.getUserId(), imi, mCurrentSubtype);
 
         if (!setSubtypeOnly) {

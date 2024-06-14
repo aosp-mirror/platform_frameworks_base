@@ -58,7 +58,7 @@ final class InputMethodSettings {
      * used {@code -1} here. We cannot change this value as it's already saved into secure settings.
      * </p>
      */
-    private static final int INVALID_SUBTYPE_HASHCODE = -1;
+    static final int INVALID_SUBTYPE_HASHCODE = -1;
     /**
      * A string code that represents "no subtype" when a subtype hashcode is used.
      *
