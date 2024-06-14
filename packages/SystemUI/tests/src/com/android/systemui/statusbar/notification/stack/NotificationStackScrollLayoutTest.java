@@ -214,6 +214,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer // TODO(b/332574413) cover stack bounds integration with tests
     public void testUpdateStackHeight_qsExpansionGreaterThanZero() {
         final float expansionFraction = 0.2f;
         final float overExpansion = 50f;
@@ -891,6 +892,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer // NSSL has no more scroll logic when SceneContainer is on
     public void testNormalShade_hasNoTopOverscroll() {
         mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ false);

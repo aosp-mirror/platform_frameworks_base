@@ -834,7 +834,7 @@ public class NotificationStackScrollLayout
         drawDebugInfo(canvas, y, Color.RED, /* label= */ "y = " + y);
 
         if (SceneContainerFlag.isEnabled()) {
-            y = (int) mScrollViewFields.getStackTop();
+            y = (int) mAmbientState.getStackTop();
             drawDebugInfo(canvas, y, Color.RED, /* label= */ "getStackTop() = " + y);
 
             y = (int) mAmbientState.getStackCutoff();
@@ -1214,7 +1214,7 @@ public class NotificationStackScrollLayout
 
     @Override
     public void setStackTop(float stackTop) {
-        mScrollViewFields.setStackTop(stackTop);
+        mAmbientState.setStackTop(stackTop);
         // TODO(b/332574413): replace the following with using stackTop
         updateTopPadding(stackTop, isAddOrRemoveAnimationPending());
     }
@@ -1424,11 +1424,7 @@ public class NotificationStackScrollLayout
         if (mAmbientState.isBouncerInTransit() && mQsExpansionFraction > 0f) {
             fraction = BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(fraction);
         }
-        // TODO(b/322228881): Clean up scene container vs legacy behavior in NSSL
-        if (SceneContainerFlag.isEnabled()) {
-            // stackY should be driven by scene container, not NSSL
-            mAmbientState.setStackY(getTopPadding());
-        } else {
+        if (!SceneContainerFlag.isEnabled()) {
             final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
             mAmbientState.setStackY(stackY);
         }
@@ -3721,7 +3717,7 @@ public class NotificationStackScrollLayout
 
     protected boolean isInsideQsHeader(MotionEvent ev) {
         if (SceneContainerFlag.isEnabled()) {
-            return ev.getY() < mScrollViewFields.getStackTop();
+            return ev.getY() < mAmbientState.getStackTop();
         }
 
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
