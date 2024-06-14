@@ -8701,9 +8701,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!mOptOutEdgeToEdge && (!mResolveConfigHint.mUseOverrideInsetsForConfig
                 || getCompatDisplayInsets() != null
                 || (isFloating(parentWindowingMode)
-                        // Check the windowing mode of activity as well in case it is switching
-                        // between PiP and fullscreen.
-                        && isFloating(inOutConfig.windowConfiguration.getWindowingMode()))
+                        // Check the requested windowing mode of activity as well in case it is
+                        // switching between PiP and fullscreen.
+                        && (inOutConfig.windowConfiguration.getWindowingMode()
+                                == WINDOWING_MODE_UNDEFINED
+                                || isFloating(inOutConfig.windowConfiguration.getWindowingMode())))
                 || rotation == ROTATION_UNDEFINED)) {
             // If the insets configuration decoupled logic is not enabled for the app, or the app
             // already has a compat override, or the context doesn't contain enough info to
