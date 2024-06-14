@@ -12704,6 +12704,16 @@ public final class Settings {
          * @hide
          */
         public static final String CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode";
+
+        /**
+         * String property which contains the package name of the contextual
+         * search provider supplied by individual OEM's
+         * R.string.config_defaultContextualSearchPackageName.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String CONTEXTUAL_SEARCH_PACKAGE = "contextual_search_package";
     }
 
     /**

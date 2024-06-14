@@ -67,6 +67,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -168,11 +169,29 @@ public class ContextualSearchManagerService extends SystemService {
                 IWindowManager.Stub.asInterface(ServiceManager.getService(Context.WINDOW_SERVICE)),
                 mContext.getSystemService(AppOpsManager.class),
                 mAssistDataCallbacks, mLock, OP_ASSIST_STRUCTURE, OP_ASSIST_SCREENSHOT);
+
+        updateSecureSetting();
     }
 
     @Override
     public void onStart() {
         publishBinderService(CONTEXTUAL_SEARCH_SERVICE, new ContextualSearchManagerStub());
+    }
+
+    private void updateSecureSetting() {
+        // Write default package to secure setting every time there is a change. If OEM didn't
+        // supply a new value in their config, then we would write empty string.
+        Settings.Secure.putString(
+            mContext.getContentResolver(),
+            Settings.Secure.CONTEXTUAL_SEARCH_PACKAGE,
+            getContextualSearchPackageName());
+    }
+
+    private String getContextualSearchPackageName() {
+      synchronized (this) {
+         return mTemporaryPackage != null ? mTemporaryPackage : mContext
+                .getResources().getString(R.string.config_defaultContextualSearchPackageName);
+      }
     }
 
     void resetTemporaryPackage() {
@@ -184,6 +203,7 @@ public class ContextualSearchManagerService extends SystemService {
             }
             if (DEBUG_USER) Log.d(TAG, "mTemporaryPackage reset.");
             mTemporaryPackage = null;
+            updateSecureSetting();
         }
     }
 
@@ -212,6 +232,7 @@ public class ContextualSearchManagerService extends SystemService {
                 mTemporaryHandler.removeMessages(MSG_RESET_TEMPORARY_PACKAGE);
             }
             mTemporaryPackage = temporaryPackage;
+            updateSecureSetting();
             mTemporaryHandler.sendEmptyMessageDelayed(MSG_RESET_TEMPORARY_PACKAGE, durationMs);
             if (DEBUG_USER) Log.d(TAG, "mTemporaryPackage set to " + mTemporaryPackage);
         }
@@ -243,8 +264,7 @@ public class ContextualSearchManagerService extends SystemService {
     private Intent getResolvedLaunchIntent() {
         synchronized (this) {
             // If mTemporaryPackage is not null, use it to get the ContextualSearch intent.
-            String csPkgName = mTemporaryPackage != null ? mTemporaryPackage : mContext
-                    .getResources().getString(R.string.config_defaultContextualSearchPackageName);
+            String csPkgName = getContextualSearchPackageName();
             if (csPkgName.isEmpty()) {
                 // Return null if csPackageName is not specified.
                 return null;
