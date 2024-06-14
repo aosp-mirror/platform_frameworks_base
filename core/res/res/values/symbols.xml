@@ -5514,4 +5514,16 @@
   <java-symbol type="string" name="face_dangling_notification_msg" />
   <java-symbol type="string" name="biometric_dangling_notification_action_set_up" />
   <java-symbol type="string" name="biometric_dangling_notification_action_not_now" />
+
+  <!-- Priority Modes icons -->
+  <java-symbol type="drawable" name="ic_zen_mode_type_bedtime" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_driving" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_immersive" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_managed" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_other" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_schedule_calendar" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_schedule_time" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_theater" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_unknown" />
+
 </resources>
