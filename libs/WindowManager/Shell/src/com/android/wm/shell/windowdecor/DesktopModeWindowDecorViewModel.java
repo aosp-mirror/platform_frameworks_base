@@ -26,7 +26,6 @@ import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_HOVER_ENTER;
 import static android.view.MotionEvent.ACTION_HOVER_EXIT;
-import static android.view.MotionEvent.ACTION_HOVER_MOVE;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.statusBars;
@@ -103,6 +102,7 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionRegionListener;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
+import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -383,10 +383,32 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mWindowDecorByTaskId.remove(taskInfo.taskId);
     }
 
+    private void onMaximizeOrRestore(int taskId, String tag) {
+        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+        if (decoration == null) {
+            return;
+        }
+        InteractionJankMonitorUtils.beginTracing(
+                Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, mContext, decoration.mTaskSurface, tag);
+        mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo);
+        decoration.closeHandleMenu();
+        decoration.closeMaximizeMenu();
+    }
+
+    private void onSnapResize(int taskId, boolean left) {
+        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+        if (decoration == null) {
+            return;
+        }
+        mDesktopTasksController.snapToHalfScreen(decoration.mTaskInfo,
+                left ? SnapPosition.LEFT : SnapPosition.RIGHT);
+        decoration.closeHandleMenu();
+        decoration.closeMaximizeMenu();
+    }
+
     private class DesktopModeTouchEventListener extends GestureDetector.SimpleOnGestureListener
             implements View.OnClickListener, View.OnTouchListener, View.OnLongClickListener,
             View.OnGenericMotionListener, DragDetector.MotionEventHandler {
-        private static final int CLOSE_MAXIMIZE_MENU_DELAY_MS = 150;
 
         private final int mTaskId;
         private final WindowContainerToken mTaskToken;
@@ -405,7 +427,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         private boolean mTouchscreenInUse;
         private boolean mHasLongClicked;
         private int mDragPointerId = -1;
-        private final Runnable mCloseMaximizeWindowRunnable;
 
         private DesktopModeTouchEventListener(
                 RunningTaskInfo taskInfo,
@@ -416,11 +437,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             mDragDetector = new DragDetector(this);
             mGestureDetector = new GestureDetector(mContext, this);
             mDisplayId = taskInfo.displayId;
-            mCloseMaximizeWindowRunnable = () -> {
-                final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
-                if (decoration == null) return;
-                decoration.closeMaximizeMenu();
-            };
         }
 
         @Override
@@ -472,31 +488,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.collapse_menu_button) {
                 decoration.closeHandleMenu();
             } else if (id == R.id.maximize_window) {
-                InteractionJankMonitorUtils.beginTracing(
-                        Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, /* view= */ v,
-                        /* tag= */ "caption_bar_button");
-                final RunningTaskInfo taskInfo = decoration.mTaskInfo;
-                decoration.closeHandleMenu();
-                decoration.closeMaximizeMenu();
-                mDesktopTasksController.toggleDesktopTaskSize(taskInfo);
-            } else if (id == R.id.maximize_menu_maximize_button) {
-                InteractionJankMonitorUtils.beginTracing(
-                        Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, /* view= */ v,
-                        /* tag= */ "maximize_menu_option");
-                final RunningTaskInfo taskInfo = decoration.mTaskInfo;
-                mDesktopTasksController.toggleDesktopTaskSize(taskInfo);
-                decoration.closeHandleMenu();
-                decoration.closeMaximizeMenu();
-            } else if (id == R.id.maximize_menu_snap_left_button) {
-                final RunningTaskInfo taskInfo = decoration.mTaskInfo;
-                mDesktopTasksController.snapToHalfScreen(taskInfo, SnapPosition.LEFT);
-                decoration.closeHandleMenu();
-                decoration.closeMaximizeMenu();
-            } else if (id == R.id.maximize_menu_snap_right_button) {
-                final RunningTaskInfo taskInfo = decoration.mTaskInfo;
-                mDesktopTasksController.snapToHalfScreen(taskInfo, SnapPosition.RIGHT);
-                decoration.closeHandleMenu();
-                decoration.closeMaximizeMenu();
+                // TODO(b/346441962): move click detection logic into the decor's
+                //  {@link AppHeaderViewHolder}. Let it encapsulate the that and have it report
+                //  back to the decoration using
+                //  {@link DesktopModeWindowDecoration#setOnMaximizeOrRestoreClickListener}, which
+                //  should shared with the maximize menu's maximize/restore actions.
+                onMaximizeOrRestore(decoration.mTaskInfo.taskId, "caption_bar_button");
             }
         }
 
@@ -578,40 +575,26 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             return false;
         }
 
+        /**
+         * TODO(b/346441962): move this hover detection logic into the decor's
+         * {@link AppHeaderViewHolder}.
+         */
         @Override
         public boolean onGenericMotion(View v, MotionEvent ev) {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final int id = v.getId();
-            if (ev.getAction() == ACTION_HOVER_ENTER) {
-                if (!decoration.isMaximizeMenuActive() && id == R.id.maximize_window) {
-                    decoration.onMaximizeWindowHoverEnter();
-                } else if (id == R.id.maximize_window
-                        || MaximizeMenu.Companion.isMaximizeMenuView(id)) {
-                    // Re-hovering over any of the maximize menu views should keep the menu open by
-                    // cancelling any attempts to close the menu.
-                    mMainHandler.removeCallbacks(mCloseMaximizeWindowRunnable);
-                    if (id != R.id.maximize_window) {
-                        decoration.onMaximizeMenuHoverEnter(id, ev);
-                    }
+            if (ev.getAction() == ACTION_HOVER_ENTER && id == R.id.maximize_window) {
+                decoration.setAppHeaderMaximizeButtonHovered(true);
+                if (!decoration.isMaximizeMenuActive()) {
+                    decoration.onMaximizeButtonHoverEnter();
                 }
                 return true;
-            } else if (ev.getAction() == ACTION_HOVER_MOVE
-                    && MaximizeMenu.Companion.isMaximizeMenuView(id)) {
-                decoration.onMaximizeMenuHoverMove(id, ev);
-                mMainHandler.removeCallbacks(mCloseMaximizeWindowRunnable);
-            } else if (ev.getAction() == ACTION_HOVER_EXIT) {
-                if (!decoration.isMaximizeMenuActive() && id == R.id.maximize_window) {
-                    decoration.onMaximizeWindowHoverExit();
-                } else if (id == R.id.maximize_window
-                        || MaximizeMenu.Companion.isMaximizeMenuView(id)) {
-                    // Close menu if not hovering over maximize menu or maximize button after a
-                    // delay to give user a chance to re-enter view or to move from one maximize
-                    // menu view to another.
-                    mMainHandler.postDelayed(mCloseMaximizeWindowRunnable,
-                            CLOSE_MAXIMIZE_MENU_DELAY_MS);
-                    if (id != R.id.maximize_window) {
-                        decoration.onMaximizeMenuHoverExit(id, ev);
-                    }
+            }
+            if (ev.getAction() == ACTION_HOVER_EXIT && id == R.id.maximize_window) {
+                decoration.setAppHeaderMaximizeButtonHovered(false);
+                decoration.onMaximizeHoverStateChanged();
+                if (!decoration.isMaximizeMenuActive()) {
+                    decoration.onMaximizeButtonHoverExit();
                 }
                 return true;
             }
@@ -719,11 +702,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     && action != MotionEvent.ACTION_CANCEL)) {
                 return false;
             }
-            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
-            InteractionJankMonitorUtils.beginTracing(
-                    Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, mContext,
-                    /* surface= */ decoration.mTaskSurface, /* tag= */ "double_tap");
-            mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo);
+            onMaximizeOrRestore(mTaskId, "double_tap");
             return true;
         }
     }
@@ -1105,7 +1084,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(taskInfo, dragPositioningCallback);
-
+        windowDecoration.setOnMaximizeOrRestoreClickListener(this::onMaximizeOrRestore);
+        windowDecoration.setOnLeftSnapClickListener((taskId, tag) -> {
+            onSnapResize(taskId, true /* isLeft */);
+        });
+        windowDecoration.setOnRightSnapClickListener((taskId, tag) -> {
+            onSnapResize(taskId, false /* isLeft */);
+        });
         windowDecoration.setCaptionListeners(
                 touchEventListener, touchEventListener, touchEventListener, touchEventListener);
         windowDecoration.setExclusionRegionListener(mExclusionRegionListener);
