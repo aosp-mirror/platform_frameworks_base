@@ -4145,6 +4145,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void clearOrgOwnedProfileOwnerUserRestrictions(UserHandle parentUserHandle) {
         mUserManager.setUserRestriction(
                 UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, false, parentUserHandle);
+        if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                    false, UserHandle.SYSTEM);
+        }
         mUserManager.setUserRestriction(
                 UserManager.DISALLOW_ADD_USER, false, parentUserHandle);
     }
@@ -17890,6 +17894,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
                     isProfileOwnerOnOrganizationOwnedDevice,
                     parentUser);
+            if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+                // For HSUM, additionally set this on user 0 to block ADB from removing the profile.
+                mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                        isProfileOwnerOnOrganizationOwnedDevice,
+                        UserHandle.SYSTEM);
+            }
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER,
                     isProfileOwnerOnOrganizationOwnedDevice,
                     parentUser);
