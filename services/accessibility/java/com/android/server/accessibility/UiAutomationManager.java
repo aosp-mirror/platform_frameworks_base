@@ -274,8 +274,10 @@ class UiAutomationManager {
             mMainHandler.post(() -> {
                 try {
                     final IAccessibilityServiceClient serviceInterface;
+                    final UiAutomationService uiAutomationService;
                     synchronized (mLock) {
                         serviceInterface = mServiceInterface;
+                        uiAutomationService = mUiAutomationService;
                         if (serviceInterface == null) {
                             mService = null;
                         } else {
@@ -286,8 +288,8 @@ class UiAutomationManager {
                     // If the serviceInterface is null, the UiAutomation has been shut down on
                     // another thread.
                     if (serviceInterface != null) {
-                        if (Flags.addWindowTokenWithoutLock()) {
-                            mUiAutomationService.addWindowTokensForAllDisplays();
+                        if (Flags.addWindowTokenWithoutLock() && uiAutomationService != null) {
+                            uiAutomationService.addWindowTokensForAllDisplays();
                         }
                         if (mTrace.isA11yTracingEnabledForTypes(
                                 AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT)) {
