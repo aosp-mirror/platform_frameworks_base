@@ -421,10 +421,13 @@ flag {
 }
 
 flag {
-   name: "fast_unlock_transition"
+   name: "faster_unlock_transition"
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"
    bug: "298186160"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
