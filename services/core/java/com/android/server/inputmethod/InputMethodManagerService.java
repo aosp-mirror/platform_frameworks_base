@@ -3110,6 +3110,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 // If subtype is null, try to find the most applicable one from
                 // getCurrentInputMethodSubtype.
                 subtypeId = NOT_A_SUBTYPE_ID;
+                // TODO(b/347083680): The method below has questionable behaviors.
                 newSubtype = getCurrentInputMethodSubtypeLocked();
                 if (newSubtype != null) {
                     for (int i = 0; i < subtypeCount; ++i) {
@@ -5447,21 +5448,24 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         // Set Subtype here
         final int newSubtypeHashcode;
+        final InputMethodSubtype newSubtype;
         if (imi == null || subtypeId < 0) {
             newSubtypeHashcode = INVALID_SUBTYPE_HASHCODE;
-            mCurrentSubtype = null;
+            newSubtype = null;
         } else {
             if (subtypeId < imi.getSubtypeCount()) {
                 InputMethodSubtype subtype = imi.getSubtypeAt(subtypeId);
                 newSubtypeHashcode = subtype.hashCode();
-                mCurrentSubtype = subtype;
+                newSubtype = subtype;
             } else {
                 // TODO(b/347093491): Probably this should be determined from the new subtype.
                 newSubtypeHashcode = INVALID_SUBTYPE_HASHCODE;
                 // If the subtype is not specified, choose the most applicable one
-                mCurrentSubtype = getCurrentInputMethodSubtypeLocked();
+                // TODO(b/347083680): The method below has questionable behaviors.
+                newSubtype = getCurrentInputMethodSubtypeLocked();
             }
         }
+        mCurrentSubtype = newSubtype;
         settings.putSelectedSubtype(newSubtypeHashcode);
         notifyInputMethodSubtypeChangedLocked(settings.getUserId(), imi, mCurrentSubtype);
 
@@ -5512,6 +5516,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         synchronized (ImfLock.class) {
             if (mCurrentUserId == userId) {
+                // TODO(b/347083680): The method below has questionable behaviors.
                 return getCurrentInputMethodSubtypeLocked();
             }
 
@@ -5529,6 +5534,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      *
      * <p>TODO: Address code duplication between this and
      * {@link InputMethodSettings#getCurrentInputMethodSubtypeForNonCurrentUsers()}.</p>
+     *
+     * <p>Also this method has had questionable behaviors:</p>
+     * <ul>
+     *     <li>Calling this method can update {@link #mCurrentSubtype}.</li>
+     *     <li>This method may return {@link #mCurrentSubtype} as-is, even if it does not belong
+     *         to the current IME.</li>
+     * </ul>
+     * <p>TODO(b/347083680): Address above issues.</p>
      */
     @GuardedBy("ImfLock.class")
     InputMethodSubtype getCurrentInputMethodSubtypeLocked() {
