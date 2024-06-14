@@ -2064,21 +2064,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    boolean reportResumedActivityLocked(ActivityRecord r) {
-        // A resumed activity cannot be stopping. remove from list
-        mStoppingActivities.remove(r);
-
-        final Task rootTask = r.getRootTask();
-        if (rootTask.getDisplayArea().allResumedActivitiesComplete()) {
-            mRootWindowContainer.ensureActivitiesVisible();
-            // Make sure activity & window visibility should be identical
-            // for all displays in this stage.
-            mRootWindowContainer.executeAppTransitionForAllDisplay();
-            return true;
-        }
-        return false;
-    }
-
     // Called when WindowManager has finished animating the launchingBehind activity to the back.
     private void handleLaunchTaskBehindCompleteLocked(ActivityRecord r) {
         final Task task = r.getTask();
