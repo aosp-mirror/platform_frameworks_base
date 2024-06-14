@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.wifiIntera
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.util.time.systemClock
+import com.android.systemui.volume.domain.interactor.volumeDialogInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
@@ -136,6 +137,7 @@ class KosmosJavaAdapter() {
     val shadeInteractor by lazy { kosmos.shadeInteractor }
     val wifiInteractor by lazy { kosmos.wifiInteractor }
     val fakeWifiRepository by lazy { kosmos.fakeWifiRepository }
+    val volumeDialogInteractor by lazy { kosmos.volumeDialogInteractor }
 
     val ongoingActivityChipsViewModel by lazy { kosmos.ongoingActivityChipsViewModel }
     val scrimController by lazy { kosmos.scrimController }

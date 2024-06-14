@@ -41,6 +41,7 @@ import com.android.systemui.volume.VolumeDialogImpl;
 import com.android.systemui.volume.VolumeDialogModule;
 import com.android.systemui.volume.VolumePanelDialogReceiver;
 import com.android.systemui.volume.VolumeUI;
+import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent;
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory;
@@ -118,7 +119,8 @@ public interface VolumeModule {
             Lazy<SecureSettings> secureSettings,
             VibratorHelper vibratorHelper,
             VolumeDialogMenuIconBinder volumeDialogMenuIconBinder,
-            SystemClock systemClock) {
+            SystemClock systemClock,
+            VolumeDialogInteractor interactor) {
         VolumeDialogImpl impl = new VolumeDialogImpl(
                 context,
                 volumeDialogController,
@@ -138,7 +140,8 @@ public interface VolumeModule {
                 secureSettings,
                 vibratorHelper,
                 volumeDialogMenuIconBinder,
-                systemClock);
+                systemClock,
+                interactor);
         impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
         impl.setAutomute(true);
         impl.setSilentMode(false);

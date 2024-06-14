@@ -135,6 +135,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.AlphaTintDrawableWrapper;
 import com.android.systemui.util.RoundedCornerProgressDrawable;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.binder.VolumeDialogMenuIconBinder;
@@ -315,6 +316,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final com.android.systemui.util.time.SystemClock mSystemClock;
     private final VolumeDialogMenuIconBinder mVolumeDialogMenuIconBinder;
     private final VolumePanelFlag mVolumePanelFlag;
+    private final VolumeDialogInteractor mInteractor;
 
     public VolumeDialogImpl(
             Context context,
@@ -335,7 +337,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             Lazy<SecureSettings> secureSettings,
             VibratorHelper vibratorHelper,
             VolumeDialogMenuIconBinder volumeDialogMenuIconBinder,
-            com.android.systemui.util.time.SystemClock systemClock) {
+            com.android.systemui.util.time.SystemClock systemClock,
+            VolumeDialogInteractor interactor) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mHandler = new H(looper);
@@ -370,6 +373,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mVolumeDialogMenuIconBinder = volumeDialogMenuIconBinder;
         mDialogTimeoutMillis = DIALOG_TIMEOUT_MILLIS;
         mVolumePanelFlag = volumePanelFlag;
+        mInteractor = interactor;
 
         dumpManager.registerDumpable("VolumeDialogImpl", this);
 
@@ -1519,6 +1523,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mShowing = true;
         mIsAnimatingDismiss = false;
         mDialog.show();
+        mInteractor.onDialogShown();
         Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, keyguardLocked);
         mController.notifyVisible(true);
         mController.getCaptionsComponentState(false);
@@ -1605,6 +1610,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         }
         mIsAnimatingDismiss = true;
         mDialogView.animate().cancel();
+        mInteractor.onDialogDismissed();
         if (mShowing) {
             mShowing = false;
             // Only logs when the volume dialog visibility is changed.
