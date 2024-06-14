@@ -560,6 +560,44 @@ public class HintManagerServiceTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_POWERHINT_THREAD_CLEANUP)
+    public void testNoCleanupDeadThreadsForPrevPowerHalVersion() throws Exception {
+        reset(mIPowerMock);
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(3);
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+        int threadCount = 2;
+
+        // session 1 has 2 non-isolated tids
+        long sessionPtr1 = 111;
+        CountDownLatch stopLatch1 = new CountDownLatch(1);
+        int[] tids1 = createThreads(threadCount, stopLatch1);
+        when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID), eq(tids1),
+                eq(DEFAULT_TARGET_DURATION), anyInt(), any(SessionConfig.class)))
+                .thenReturn(sessionPtr1);
+        AppHintSession session1 = (AppHintSession) service.getBinderServiceInstance()
+                .createHintSessionWithConfig(token, tids1, DEFAULT_TARGET_DURATION,
+                        SessionTag.OTHER, new SessionConfig());
+        assertNotNull(session1);
+
+        // trigger UID state change by making the process foreground->background, but because the
+        // power hal version is too low, this should result in no cleanup as setThreads don't fire.
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+                CLEAN_UP_UID_DELAY_MILLIS));
+        verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
+        reset(mNativeWrapperMock);
+        // this should resume but not update the threads as no cleanup was performed
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+        verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
+    }
+
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_POWERHINT_THREAD_CLEANUP)
     public void testCleanupDeadThreads() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
