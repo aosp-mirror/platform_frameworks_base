@@ -51,13 +51,10 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
-import com.android.systemui.qs.footerActionsController
-import com.android.systemui.qs.footerActionsViewModelFactory
-import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
+import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
@@ -65,16 +62,14 @@ import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
-import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModel
+import com.android.systemui.shade.ui.viewmodel.shadeSceneViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
 import com.android.systemui.testKosmos
-import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -167,7 +162,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private var bouncerSceneJob: Job? = null
 
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { mock() })
+    private val qsFlexiglassAdapter = kosmos.fakeQSSceneAdapter
 
     private lateinit var emergencyAffordanceManager: EmergencyAffordanceManager
     private lateinit var telecomManager: TelecomManager
@@ -200,20 +195,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         bouncerActionButtonInteractor = kosmos.bouncerActionButtonInteractor
         bouncerViewModel = kosmos.bouncerViewModel
 
-        shadeSceneViewModel =
-            ShadeSceneViewModel(
-                applicationScope = testScope.backgroundScope,
-                shadeHeaderViewModel = kosmos.shadeHeaderViewModel,
-                qsSceneAdapter = qsFlexiglassAdapter,
-                notifications = kosmos.notificationsPlaceholderViewModel,
-                brightnessMirrorViewModel = kosmos.brightnessMirrorViewModel,
-                mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
-                shadeInteractor = kosmos.shadeInteractor,
-                footerActionsController = kosmos.footerActionsController,
-                footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
-                sceneInteractor = sceneInteractor,
-                unfoldTransitionInteractor = kosmos.unfoldTransitionInteractor,
-            )
+        shadeSceneViewModel = kosmos.shadeSceneViewModel
 
         val startable = kosmos.sceneContainerStartable
         startable.start()
