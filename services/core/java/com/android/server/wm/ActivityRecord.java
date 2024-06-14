@@ -10278,7 +10278,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (rootTask != null && rootTask.mTranslucentActivityWaiting == this) {
             rootTask.checkTranslucentActivityWaiting(null);
         }
-        final boolean andResume = shouldBeResumed(null /*activeActivity*/);
+        final boolean andResume = isState(RESUMED) || shouldBeResumed(null /*activeActivity*/);
         List<ResultInfo> pendingResults = null;
         List<ReferrerIntent> pendingNewIntents = null;
         if (andResume) {
