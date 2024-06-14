@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Inachaji"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Inachaji kwa kasi"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Inachaji pole pole"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hali ya kuchaji imeboreshwa ili kulinda betri"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kifuasi cha kuchaji kina hitilafu"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Imesitisha kuchaji ili kulinda betri yako"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kagua kifaa cha kuchaji"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Mtandao umefungwa"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Hakuna SIM"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM haiwezi kutumika."</string>
@@ -87,10 +87,10 @@
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Weka PIN ya SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Weka PIN ya SIM ya \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Zima eSIM ili utumie kifaa bila huduma ya vifaa vya mkononi."</string>
-    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM sasa imefungwa. Weka nambari ya PUK ili uendelee. Wasiliana na mtoa huduma za mtandao kwa maelezo."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM ya \"<xliff:g id="CARRIER">%1$s</xliff:g>\" sasa imezimwa. Weka nambari ya PUK ili uendelee. Wasiliana na mtoa huduma kwa maelezo."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Weka nambari ya PIN unayopendelea"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Thibitisha nambari ya PIN unayopendelea"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM sasa imefungwa. Weka namba ya PUK ili uendelee. Wasiliana na mtoa huduma za mtandao kwa maelezo."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM ya \"<xliff:g id="CARRIER">%1$s</xliff:g>\" sasa imezimwa. Weka namba ya PUK ili uendelee. Wasiliana na mtoa huduma kwa maelezo."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Weka namba ya PIN unayopendelea"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Thibitisha namba ya PIN unayopendelea"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"Inafungua SIM…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Andika PIN ya tarakimu 4 hadi 8."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Nambari ya PUK inafaa kuwa na tarakimu 8 au zaidi."</string>

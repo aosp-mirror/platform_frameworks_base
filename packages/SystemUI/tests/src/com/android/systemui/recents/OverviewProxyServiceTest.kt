@@ -17,16 +17,21 @@
 package com.android.systemui.recents
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.os.PowerManager
+import android.os.Process;
+import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import android.testing.TestableContext
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.app.AssistUtils
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
@@ -35,6 +40,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
 import com.android.systemui.model.SysUiState
+import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.navigationbar.NavigationBarController
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.recents.OverviewProxyService.ACTION_QUICKSTEP
@@ -50,6 +56,7 @@ import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_GOING_TO
 import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_WAKING
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.testKosmos
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -66,10 +73,14 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.atLeast
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.intThat
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -79,11 +90,12 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
     @Main private val executor: Executor = MoreExecutors.directExecutor()
 
+    private val kosmos = testKosmos()
     private lateinit var subject: OverviewProxyService
-    private val dumpManager = DumpManager()
+    @Mock private val dumpManager = DumpManager()
     private val displayTracker = FakeDisplayTracker(mContext)
     private val fakeSystemClock = FakeSystemClock()
-    private val sysUiState = SysUiState(displayTracker)
+    private val sysUiState = SysUiState(displayTracker, kosmos.sceneContainerPlugin)
     private val featureFlags = FakeFeatureFlags()
     private val wakefulnessLifecycle =
         WakefulnessLifecycle(mContext, null, fakeSystemClock, dumpManager)
@@ -109,6 +121,8 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     @Mock
     private lateinit var unfoldTransitionProgressForwarder:
         Optional<UnfoldTransitionProgressForwarder>
+    @Mock
+    private lateinit var broadcastDispatcher: BroadcastDispatcher
 
     @Before
     fun setUp() {
@@ -131,32 +145,11 @@ class OverviewProxyServiceTest : SysuiTestCase() {
         whenever(packageManager.resolveServiceAsUser(any(), anyInt(), anyInt()))
             .thenReturn(mock(ResolveInfo::class.java))
 
-        featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
-        subject =
-            OverviewProxyService(
-                context,
-                executor,
-                commandQueue,
-                shellInterface,
-                { navBarController },
-                { shadeViewController },
-                screenPinningRequest,
-                navModeController,
-                statusBarWinController,
-                sysUiState,
-                mock(),
-                userTracker,
-                wakefulnessLifecycle,
-                uiEventLogger,
-                displayTracker,
-                sysuiUnlockAnimationController,
-                inWindowLauncherUnlockAnimationManager,
-                assistUtils,
-                featureFlags,
-                FakeSceneContainerFlags(),
-                dumpManager,
-                unfoldTransitionProgressForwarder
-            )
+        mSetFlagsRule.disableFlags(
+            com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
+        )
+
+        subject = createOverviewProxyService(context)
     }
 
     @After
@@ -208,5 +201,67 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             .onSystemUiStateChanged(
                 intThat { it and SYSUI_STATE_WAKEFULNESS_MASK == WAKEFULNESS_GOING_TO_SLEEP }
             )
+    }
+
+    @Test
+    fun connectToOverviewService_primaryUser_expectBindService() {
+        val mockitoSession = ExtendedMockito.mockitoSession()
+                .spyStatic(Process::class.java)
+                .startMocking()
+        try {
+            `when`(Process.myUserHandle()).thenReturn(UserHandle.SYSTEM)
+            val spyContext = spy(context)
+            val ops = createOverviewProxyService(spyContext)
+            ops.startConnectionToCurrentUser()
+            verify(spyContext, atLeast(1)).bindServiceAsUser(any(), any(),
+                anyInt(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
+    }
+
+    @Test
+    fun connectToOverviewService_nonPrimaryUser_expectNoBindService() {
+        val mockitoSession = ExtendedMockito.mockitoSession()
+                .spyStatic(Process::class.java)
+                .startMocking()
+        try {
+            `when`(Process.myUserHandle()).thenReturn(UserHandle.of(12345))
+            val spyContext = spy(context)
+            val ops = createOverviewProxyService(spyContext)
+            ops.startConnectionToCurrentUser()
+            verify(spyContext, times(0)).bindServiceAsUser(any(), any(),
+                anyInt(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
+    }
+
+    private fun createOverviewProxyService(ctx: Context) : OverviewProxyService {
+        return OverviewProxyService(
+            ctx,
+            executor,
+            commandQueue,
+            shellInterface,
+            { navBarController },
+            { shadeViewController },
+            screenPinningRequest,
+            navModeController,
+            statusBarWinController,
+            sysUiState,
+            mock(),
+            userTracker,
+            wakefulnessLifecycle,
+            uiEventLogger,
+            displayTracker,
+            sysuiUnlockAnimationController,
+            inWindowLauncherUnlockAnimationManager,
+            assistUtils,
+            featureFlags,
+            FakeSceneContainerFlags(),
+            dumpManager,
+            unfoldTransitionProgressForwarder,
+            broadcastDispatcher
+        )
     }
 }

@@ -155,6 +155,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> після <xliff:g id="TIME_DELAY">{2}</xliff:g> сек."</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не переслано"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не переслано"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Безпека мобільної мережі"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Перевірте налаштування"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Отримано доступ до ідентифікатора пристрою"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Мережа (з’єднання: <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>) записала унікальний ідентифікатор вашого пристрою (IMSI) кілька разів (<xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g>) у період між <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> і <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"З’єднання з мережею <xliff:g id="NETWORK_NAME">%1$s</xliff:g> зашифровано"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Тепер вас підключено до безпечнішої мобільної мережі."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"З’єднання з мережею <xliff:g id="NETWORK_NAME">%1$s</xliff:g> не зашифровано"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Вас підключено до незашифрованої мобільної мережі. Ваші дзвінки, повідомлення й дані вразливі, і їх можуть перехопити."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Налаштування безпеки мобільної мережі"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Докладніше"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Сервісний код виконано."</string>
     <string name="fcError" msgid="5325116502080221346">"Пробл. підключення чи недійсний ідентифікатор."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -372,6 +382,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Дозволяє додатку зв\'язуватися з модулем Cell Broadcast, щоб переадресувати відповідні вхідні повідомлення. У деяких місцеположеннях сповіщення Cell Broadcast надсилаються для попередження про надзвичайні ситуації. Після повідомлення Cell Broadcast шкідливі додатки можуть перешкоджати роботі вашого пристрою."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Керування поточними дзвінками"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Дає змогу додатку переглядати поточні дзвінки на пристрої та керувати ними."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Доступ до останнього відомого ідентифікатора мобільної мережі."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Надає додатку доступ до останнього відомого ідентифікатора мобільної мережі, наданого постачальником послуг телефонії."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"читати широкомовні повідомлення мережі"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Дозволяє програмі читати широкомовні повідомлення мережі, отримані пристроєм. Широкомовні сповіщення мережі надсилаються в деяких країнах для попередження про надзвичайні ситуації. Шкідливі програми можуть втручатися у швидкодію чи роботу пристрою під час отримання широкомовного повідомлення мережі про надзвичайну ситуацію."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"читати підписані канали"</string>
@@ -436,6 +448,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Дозволяє додатку використовувати активні сервіси типу systemExempted"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"запускати активний сервіс типу fileManagement"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Дозволяє додатку використовувати активні сервіси типу fileManagement"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"запускати сервіс типу mediaProcessing в активному режимі"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Дозволяє додатку використовувати активні сервіси типу mediaProcessing"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"запускати сервіс типу specialUse в активному режимі"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Дозволяє додатку використовувати активні сервіси типу specialUse"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"визначати об’єм пам’яті програми"</string>
@@ -541,6 +555,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Дозволяє програмі використовувати інфрачервоний передавач телефону."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"установити фоновий малюнок"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Дозволяє програмі встановлювати фоновий малюнок системи."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Доступ до прихованих профілів"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Дозволяє додатку отримувати доступ до прихованих профілів."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"налаштовувати розмір фонового малюнка"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Дозволяє програмі встановлювати підказки щодо розміру фонового малюнка системи."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"устан. час. пояс"</string>
@@ -634,7 +650,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Доступ розблокуванням екрана"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Щоб продовжити, введіть дані для розблокування екрана"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Міцно притисніть палець до сканера"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Відбиток пальця не розпізнано. Повторіть спробу."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Відбиток пальця не розпізнано. Повторіть спробу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Очистьте сканер відбитків пальців і повторіть спробу"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Очистьте сканер і повторіть спробу"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Міцно притисніть палець до сканера"</string>
@@ -652,18 +668,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Відбиток пальця автентифіковано"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Обличчя автентифіковано"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Обличчя автентифіковано. Натисніть \"Підтвердити\""</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Сканер відбитків пальців недоступний."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Сканер відбитків пальців недоступний"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Не вдалося створити відбиток пальця"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Час очікування для налаштування відбитка пальця минув. Повторіть спробу."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Дію з відбитком пальця скасовано."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Користувач скасував дію з відбитком пальця."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Дію з відбитком пальця скасовано"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Користувач скасував дію з відбитком пальця"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Забагато спроб. Використайте натомість розблокування екрана."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Забагато спроб. Використайте натомість розблокування екрана."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Не вдалось обробити відбиток пальця. Повторіть спробу."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Відбитки пальців не зареєстровано."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На цьому пристрої немає сканера відбитків пальців."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчик тимчасово вимкнено."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Не вдається скористатися сканером відбитків пальців. Зверніться до постачальника послуг із ремонту."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Відбитки пальців не зареєстровано"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"На цьому пристрої немає сканера відбитків пальців"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Сканер тимчасово вимкнено"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Не вдається скористатися сканером відбитків пальців. Зверніться до постачальника послуг із ремонту."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Натиснуто кнопку живлення"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Відбиток пальця <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Доступ за відбитком пальця"</string>
@@ -698,7 +714,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Обличчя не видно. Утримуйте телефон на рівні очей."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Забагато рухів. Тримайте телефон нерухомо."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Повторно проскануйте обличчя."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Обличчя не розпізнано. Повторіть спробу."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Обличчя не розпізнано. Повторіть спробу."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Трохи змініть положення голови"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Дивіться на телефон прямо"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Дивіться на телефон прямо"</string>
@@ -809,6 +825,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Додаток зможе дискретизувати дані даних датчиків із частотою понад 200 Гц"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"оновлювати додаток без дій із боку користувача"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозволяє власнику оновлювати раніше встановлений додаток без дій із боку користувача"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"оновлювати стани перевірки контактних ключів E2EEE, які належать іншим додаткам"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Дозволяє додатку оновлювати стани перевірки контактних ключів E2EEE, які належать іншим додаткам"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Укажіть максимальну довжину та кількість символів для паролів розблокування екрана та PIN-кодів."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Відстежувати спроби розблокування екрана"</string>
@@ -1908,6 +1926,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"На вихідних"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Подія"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Під час сну"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Керує додаток <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Увімкнено"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Вимкнено"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> вимикає деякі звуки"</string>
@@ -1927,6 +1946,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Підтверджено"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Розгорнути"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Згорнути"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Згорнуто"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Розгорнуто"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"розгорнути або згорнути"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Периферійний USB-порт Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1967,6 +1988,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Увімкнути робочі додатки?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Увімкнути"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Екстрений виклик"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Налаштуйте блокування екрана"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Налаштувати блокування екрана"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Для доступу до приватного простору налаштуйте блокування екрана"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Додаток недоступний"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> зараз недоступний."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -2109,7 +2133,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Вимкнути"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Докладніше"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 адаптивні сповіщення замінено на покращені. Ця функція допомагає впорядковувати сповіщення й показує в них пропоновані дії та відповіді.\n\nПокращені сповіщення надають доступ до вмісту сповіщень, зокрема до такої особистої інформації, як повідомлення й імена контактів. Ця функція може автоматично закривати сповіщення чи реагувати на них, наприклад відповідати на телефонні дзвінки або керувати режимом \"Не турбувати\"."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 адаптивні сповіщення замінено на покращені. Ця функція допомагає впорядковувати сповіщення й показує в них пропоновані дії і відповіді.\n\nПокращені сповіщення надають доступ до вмісту сповіщень, зокрема до такої особистої інформації, як повідомлення й імена контактів. Ця функція може автоматично закривати сповіщення чи реагувати на них, наприклад відповідати на телефонні дзвінки або керувати режимом \"Не турбувати\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про програму"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Режим енергозбереження ввімкнено"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Заряд використовується економно, щоб подовжити час роботи акумулятора"</string>
@@ -2343,8 +2367,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Неможливо дублювати на дисплей"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Скористайтесь іншим кабелем і повторіть спробу"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Пристрій перегрівся й не зможе дублювати контент на дисплей, поки не охолоне"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Кабель може не підтримувати дисплеї"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Ваш кабель USB-C може не підключатися до дисплеїв належним чином"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen увімкнено"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує обидва екрани для показу контенту"</string>
@@ -2368,4 +2390,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Робочий профіль 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Тестовий профіль"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Спільний профіль"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Автоматично підключено до супутника"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Ви можете надсилати й отримувати повідомлення, не використовуючи Wi-Fi або мобільну мережу"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Відкрийте Повідомлення"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Як це працює"</string>
 </resources>

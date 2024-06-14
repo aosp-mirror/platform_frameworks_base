@@ -1,5 +1,8 @@
 package android.app.assist;
 
+import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -7,6 +10,10 @@ import android.annotation.SystemApi;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialOption;
+import android.credentials.GetCredentialException;
+import android.credentials.GetCredentialRequest;
+import android.credentials.GetCredentialResponse;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -15,6 +22,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.OutcomeReceiver;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PooledStringReader;
@@ -22,6 +30,7 @@ import android.os.PooledStringWriter;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.FillRequest;
+import android.service.credentials.CredentialProviderService;
 import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -637,6 +646,12 @@ public class AssistStructure implements Parcelable {
         AutofillId mAutofillId;
         @View.AutofillType int mAutofillType = View.AUTOFILL_TYPE_NONE;
         @Nullable String[] mAutofillHints;
+
+        @Nullable GetCredentialRequest mGetCredentialRequest;
+
+        @Nullable OutcomeReceiver<GetCredentialResponse, GetCredentialException>
+                mGetCredentialCallback;
+
         AutofillValue mAutofillValue;
         CharSequence[] mAutofillOptions;
         boolean mSanitized;
@@ -900,6 +915,7 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 mExtras = in.readBundle();
             }
+            mGetCredentialRequest = in.readTypedObject(GetCredentialRequest.CREATOR);
         }
 
         /**
@@ -1136,6 +1152,7 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 out.writeBundle(mExtras);
             }
+            out.writeTypedObject(mGetCredentialRequest, flags);
             return flags;
         }
 
@@ -1259,6 +1276,28 @@ public class AssistStructure implements Parcelable {
          */
         public boolean isCredential() {
             return mIsCredential;
+        }
+
+        /**
+         * Returns the request associated with this node
+         * @return
+         *
+         * @hide
+         */
+        @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
+        @Nullable
+        public GetCredentialRequest getCredentialManagerRequest() {
+            return mGetCredentialRequest;
+        }
+
+        /**
+         * @hide
+         */
+        @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
+        @Nullable
+        public OutcomeReceiver<GetCredentialResponse,
+                GetCredentialException> getCredentialManagerCallback() {
+            return mGetCredentialCallback;
         }
 
         /**
@@ -2139,6 +2178,19 @@ public class AssistStructure implements Parcelable {
             }
         }
 
+        @Nullable
+        @Override
+        public GetCredentialRequest getCredentialManagerRequest() {
+            return mNode.mGetCredentialRequest;
+        }
+
+        @Nullable
+        @Override
+        public OutcomeReceiver<
+                GetCredentialResponse, GetCredentialException> getCredentialManagerCallback() {
+            return mNode.mGetCredentialCallback;
+        }
+
         @Override
         public void asyncCommit() {
             synchronized (mAssist) {
@@ -2201,6 +2253,24 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setIsCredential(boolean isCredential) {
             mNode.mIsCredential = isCredential;
+        }
+
+        @Override
+        public void setCredentialManagerRequest(@NonNull GetCredentialRequest request,
+                @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
+            mNode.mGetCredentialRequest = request;
+            mNode.mGetCredentialCallback = callback;
+            for (CredentialOption option : request.getCredentialOptions()) {
+                ArrayList<AutofillId> ids = option.getCandidateQueryData()
+                        .getParcelableArrayList(
+                                CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId.class);
+                ids = ids != null ? ids : new ArrayList<>();
+                if (!ids.contains(getAutofillId())) {
+                    ids.add(getAutofillId());
+                }
+                option.getCandidateQueryData()
+                        .putParcelableArrayList(CredentialProviderService.EXTRA_AUTOFILL_ID, ids);
+            }
         }
 
         @Override
@@ -2510,7 +2580,7 @@ public class AssistStructure implements Parcelable {
         }
         AutofillId autofillId = node.getAutofillId();
         if (autofillId == null) {
-            Log.i(TAG, prefix + " NO autofill ID");
+            Log.i(TAG, prefix + " No autofill ID");
         } else {
             Log.i(TAG, prefix + "  Autofill info: id= " + autofillId
                     + ", type=" + node.getAutofillType()
@@ -2521,6 +2591,14 @@ public class AssistStructure implements Parcelable {
                     + ", important=" + node.getImportantForAutofill()
                     + ", visibility=" + node.getVisibility()
                     + ", isCredential=" + node.isCredential()
+            );
+        }
+        GetCredentialRequest getCredentialRequest = node.getCredentialManagerRequest();
+        if (getCredentialRequest == null) {
+            Log.i(TAG, prefix + " No Credential Manager Request");
+        } else {
+            Log.i(TAG, prefix + "  GetCredentialRequest: no. of options= "
+                    + getCredentialRequest.getCredentialOptions().size()
             );
         }
 

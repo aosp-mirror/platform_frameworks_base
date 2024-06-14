@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.onStart
 class DeviceEntryHapticsInteractor
 @Inject
 constructor(
-    deviceEntryInteractor: DeviceEntryInteractor,
+    deviceEntrySourceInteractor: DeviceEntrySourceInteractor,
     deviceEntryFingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
     deviceEntryBiometricAuthInteractor: DeviceEntryBiometricAuthInteractor,
     fingerprintPropertyRepository: FingerprintPropertyRepository,
@@ -80,7 +80,7 @@ constructor(
             }
 
     val playSuccessHaptic: Flow<Unit> =
-        deviceEntryInteractor.enteringDeviceFromBiometricUnlock
+        deviceEntrySourceInteractor.deviceEntryFromBiometricSource
             .sample(
                 combine(
                     powerButtonSideFpsEnrolled,

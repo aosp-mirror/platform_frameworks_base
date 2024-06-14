@@ -32,7 +32,9 @@ import android.nfc.INfcOemExtensionCallback;
 import android.nfc.INfcUnlockHandler;
 import android.nfc.ITagRemovedCallback;
 import android.nfc.INfcDta;
+import android.nfc.INfcWlcStateListener;
 import android.nfc.NfcAntennaInfo;
+import android.nfc.WlcListenerDeviceInfo;
 import android.os.Bundle;
 
 /**
@@ -87,8 +89,20 @@ interface INfcAdapter
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
     boolean enableReaderOption(boolean enable);
     boolean isObserveModeSupported();
+    boolean isObserveModeEnabled();
     boolean setObserveMode(boolean enabled);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+    boolean setWlcEnabled(boolean enable);
+    boolean isWlcEnabled();
+    void registerWlcStateListener(in INfcWlcStateListener listener);
+    void unregisterWlcStateListener(in INfcWlcStateListener listener);
+    WlcListenerDeviceInfo getWlcListenerDeviceInfo();
+
     void updateDiscoveryTechnology(IBinder b, int pollFlags, int listenFlags);
+
+    void notifyPollingLoop(in Bundle frame);
+    void notifyHceDeactivated();
     int sendVendorNciMessage(int mt, int gid, int oid, in byte[] payload);
     void registerVendorExtensionCallback(in INfcVendorNciCallback callbacks);
     void unregisterVendorExtensionCallback(in INfcVendorNciCallback callbacks);

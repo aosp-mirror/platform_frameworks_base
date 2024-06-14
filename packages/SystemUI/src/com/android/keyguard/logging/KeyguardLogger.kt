@@ -16,6 +16,7 @@
 
 package com.android.keyguard.logging
 
+import android.hardware.biometrics.BiometricSourceType
 import com.android.systemui.biometrics.AuthRippleController
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController
 import com.android.systemui.log.LogBuffer
@@ -94,6 +95,46 @@ constructor(
                 bool3 = dozing
             },
             { "updateDeviceEntryIndication animate:$bool1 visible:$bool2 dozing $bool3" }
+        )
+    }
+
+    fun logUpdateLockScreenUserLockedMsg(
+        userId: Int,
+        userUnlocked: Boolean,
+        encryptedOrLockdown: Boolean,
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = userId
+                bool1 = userUnlocked
+                bool2 = encryptedOrLockdown
+            },
+            {
+                "updateLockScreenUserLockedMsg userId=$int1 " +
+                    "userUnlocked:$bool1 encryptedOrLockdown:$bool2"
+            }
+        )
+    }
+
+    fun logDropNonFingerprintMessage(
+        message: CharSequence,
+        followUpMessage: CharSequence?,
+        biometricSourceType: BiometricSourceType?,
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = message.toString()
+                str2 = followUpMessage?.toString()
+                str3 = biometricSourceType?.name
+            },
+            {
+                "droppingNonFingerprintMessage message=$str1 " +
+                    "followUpMessage:$str2 biometricSourceType:$str3"
+            }
         )
     }
 

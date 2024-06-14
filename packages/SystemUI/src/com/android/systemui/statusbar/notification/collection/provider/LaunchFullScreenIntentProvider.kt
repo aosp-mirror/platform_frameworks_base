@@ -33,7 +33,7 @@ class LaunchFullScreenIntentProvider @Inject constructor() {
     private val listeners = ListenerSet<Listener>()
 
     /**
-     * Registers a listener with this provider. These listeners will be alerted whenever a full
+     * Registers a listener with this provider. These listeners will be updated whenever a full
      * screen intent should be launched for a notification entry.
      */
     fun registerListener(listener: Listener) {

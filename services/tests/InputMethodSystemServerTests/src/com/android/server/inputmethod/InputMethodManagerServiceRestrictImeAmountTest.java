@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.util.ArrayMap;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 
@@ -123,11 +122,9 @@ public class InputMethodManagerServiceRestrictImeAmountTest extends
 
     private List<InputMethodInfo> filterInputMethodServices(List<ResolveInfo> resolveInfoList,
             List<String> enabledComponents) {
-        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
-        final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
-        InputMethodManagerService.filterInputMethodServices(new ArrayMap<>(), methodMap, methodList,
-                enabledComponents, mContext, resolveInfoList);
-        return methodList;
+        final InputMethodMap methodMap = InputMethodManagerService.filterInputMethodServices(
+                AdditionalSubtypeMap.EMPTY_MAP, enabledComponents, mContext, resolveInfoList);
+        return methodMap.values();
     }
 
     private ResolveInfo createFakeSystemResolveInfo(String packageName, String componentName) {

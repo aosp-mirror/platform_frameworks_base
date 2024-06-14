@@ -38,7 +38,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
@@ -88,7 +88,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private DialogLaunchAnimator mDialogLaunchAnimator;
+    private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
     private PanelInteractor mPanelInteractor;
     @Mock
@@ -126,7 +126,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
                 mController,
                 mKeyguardDismissUtil,
                 mKeyguardStateController,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mPanelInteractor,
                 mMediaProjectionMetricsLogger,
                 mUserContextProvider
@@ -161,12 +161,13 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         ArgumentCaptor<Runnable> onStartRecordingClicked = ArgumentCaptor.forClass(Runnable.class);
         verify(mController).createScreenRecordDialog(any(), eq(mFeatureFlags),
-                eq(mDialogLaunchAnimator), eq(mActivityStarter), onStartRecordingClicked.capture());
+                eq(mDialogTransitionAnimator), eq(mActivityStarter),
+                onStartRecordingClicked.capture());
 
         // When starting the recording, we collapse the shade and disable the dialog animation.
         assertNotNull(onStartRecordingClicked.getValue());
         onStartRecordingClicked.getValue().run();
-        verify(mDialogLaunchAnimator).disableAllCurrentDialogsExitAnimations();
+        verify(mDialogTransitionAnimator).disableAllCurrentDialogsExitAnimations();
         verify(mPanelInteractor).collapsePanels();
     }
 
@@ -304,7 +305,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mController).createScreenRecordDialog(any(), eq(mFeatureFlags),
-                eq(mDialogLaunchAnimator), eq(mActivityStarter), any());
+                eq(mDialogTransitionAnimator), eq(mActivityStarter), any());
         var onDismissAction = ArgumentCaptor.forClass(ActivityStarter.OnDismissAction.class);
         verify(mKeyguardDismissUtil).executeWhenUnlocked(
                 onDismissAction.capture(), anyBoolean(), anyBoolean());

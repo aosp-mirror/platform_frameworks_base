@@ -18,6 +18,7 @@ package android.media.projection;
 
 import android.media.projection.IMediaProjectionCallback;
 import android.os.IBinder;
+import android.app.ActivityOptions.LaunchCookie;
 
 /** {@hide} */
 interface IMediaProjection {
@@ -38,22 +39,22 @@ interface IMediaProjection {
     void unregisterCallback(IMediaProjectionCallback callback);
 
     /**
-     * Returns the {@link android.os.IBinder} identifying the task to record, or {@code null} if
+     * Returns the {@link LaunchCookie} identifying the task to record, or {@code null} if
      * there is none.
      */
     @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
-    IBinder getLaunchCookie();
+    LaunchCookie getLaunchCookie();
 
     /**
-     * Updates the {@link android.os.IBinder} identifying the task to record, or {@code null} if
+     * Updates the {@link LaunchCookie} identifying the task to record, or {@code null} if
      * there is none.
      */
     @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
-    void setLaunchCookie(in IBinder launchCookie);
+    void setLaunchCookie(in LaunchCookie launchCookie);
 
     /**
      * Returns {@code true} if this token is still valid. A token is valid as long as the token

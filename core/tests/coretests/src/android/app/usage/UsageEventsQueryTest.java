@@ -15,14 +15,20 @@
  */
 package android.app.usage;
 
+import static android.app.usage.Flags.FLAG_FILTER_BASED_EVENT_QUERY_API;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import android.app.usage.UsageEvents.Event;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,7 +38,12 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class UsageEventsQueryTest {
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     @Test
+    @RequiresFlagsEnabled(FLAG_FILTER_BASED_EVENT_QUERY_API)
     public void testQueryDuration() {
         // Test with negative beginTimeMillis.
         long beginTimeMillis = -100;
@@ -97,6 +108,7 @@ public class UsageEventsQueryTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_FILTER_BASED_EVENT_QUERY_API)
     public void testQueryEventTypes() {
         Random rnd = new Random();
         UsageEventsQuery.Builder queryBuilder = new UsageEventsQuery.Builder(1000, 2000);
@@ -104,7 +116,7 @@ public class UsageEventsQueryTest {
         // Test with invalid event type.
         int eventType = Event.NONE - 1;
         try {
-            queryBuilder.addEventTypes(eventType);
+            queryBuilder.setEventTypes(eventType);
             fail("Invalid event type: " + eventType);
         } catch (IllegalArgumentException e) {
             // Expected, fall through.
@@ -112,7 +124,7 @@ public class UsageEventsQueryTest {
 
         eventType = Event.MAX_EVENT_TYPE + 1;
         try {
-            queryBuilder.addEventTypes(eventType);
+            queryBuilder.setEventTypes(eventType);
             fail("Invalid event type: " + eventType);
         } catch (IllegalArgumentException e) {
             // Expected, fall through.
@@ -121,14 +133,29 @@ public class UsageEventsQueryTest {
         // Test with valid and duplicate event types.
         eventType = rnd.nextInt(Event.MAX_EVENT_TYPE + 1);
         try {
-            UsageEventsQuery query = queryBuilder.addEventTypes(eventType, eventType, eventType)
+            UsageEventsQuery query = queryBuilder.setEventTypes(eventType, eventType, eventType)
                     .build();
-            Set<Integer> eventTypeSet = query.getEventTypes();
-            assertEquals(eventTypeSet.size(), 1);
-            int type = eventTypeSet.iterator().next();
+            final int[] eventTypesArray = query.getEventTypes();
+            assertEquals(eventTypesArray.length, 1);
+            int type = eventTypesArray[0];
             assertEquals(type, eventType);
         } catch (IllegalArgumentException e) {
             fail("Valid event type: " + eventType);
         }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_FILTER_BASED_EVENT_QUERY_API)
+    public void testQueryEventPackages() {
+        UsageEventsQuery.Builder queryBuilder = new UsageEventsQuery.Builder(1000, 2000);
+
+        // Test with duplicate package names and empty package name
+        final String pkgName = "test.package.name";
+        UsageEventsQuery query = queryBuilder.setPackageNames(pkgName, pkgName, "", pkgName)
+                .build();
+        Set<String> pkgNameSet = query.getPackageNames();
+        // Duplicated package names and empty package name will be ignored.
+        assertEquals(pkgNameSet.size(), 1);
+        assertEquals(pkgName, pkgNameSet.iterator().next());
     }
 }

@@ -70,3 +70,45 @@ flag {
     description: "Use BluetoothDevice.getAlias to populate the name of Bluetooth MediaRoute2Infos."
     bug: "314324170"
 }
+
+flag {
+     name: "enable_built_in_speaker_route_suitability_statuses"
+     namespace: "media_solutions"
+     description: "Make MediaRoute2Info provide information about routes suitability for transfer."
+     bug: "279555229"
+}
+
+flag {
+    name: "enable_notifying_activity_manager_with_media_session_status_change"
+    namespace: "media_solutions"
+    description: "Notify ActivityManager with the changes in playback state of the media session."
+    bug: "295518668"
+}
+
+flag {
+    name: "enable_get_transferable_routes"
+    namespace: "media_solutions"
+    description: "Exposes RoutingController#getTransferableRoutes() (previously hidden) to the public API."
+    bug: "323154573"
+}
+
+flag {
+    name: "enable_prevention_of_keep_alive_route_providers"
+    namespace: "media_solutions"
+    description: "Enables mechanisms to prevent route providers from keeping malicious apps alive."
+    bug: "263520343"
+}
+
+flag {
+    name: "enable_screen_off_scanning"
+    namespace: "media_solutions"
+    description: "Enable new MediaRouter2 API to enable watch companion apps to scan while the phone screen is off."
+    bug: "281072508"
+}
+
+flag {
+    name: "enable_null_session_in_media_browser_service"
+    namespace: "media_solutions"
+    description: "Enables apps owning a MediaBrowserService to disconnect all connected browsers."
+    bug: "263520343"
+}

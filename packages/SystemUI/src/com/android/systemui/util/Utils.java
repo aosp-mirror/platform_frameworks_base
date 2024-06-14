@@ -82,6 +82,14 @@ public class Utils {
     }
 
     /**
+     * Returns {@code true} if the device is a foldable device
+     */
+    public static boolean isDeviceFoldable(Context context) {
+        return context.getResources()
+                .getIntArray(com.android.internal.R.array.config_foldedDeviceStates).length != 0;
+    }
+
+    /**
      * Allow the media player to be shown in the QS area, controlled by 2 flags.
      * On by default, but can be disabled by setting either flag to 0/false.
      */

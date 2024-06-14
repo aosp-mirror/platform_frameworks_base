@@ -63,6 +63,13 @@ flag {
 }
 
 flag {
+    name: "enable_nfc_charging"
+    namespace: "nfc"
+    description: "Flag for NFC charging changes"
+    bug: "292143899"
+}
+
+flag {
     name: "enable_nfc_set_discovery_tech"
     is_exported: true
     namespace: "nfc"

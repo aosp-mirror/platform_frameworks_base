@@ -443,6 +443,8 @@ public class TrustAgentWrapper {
                 mPendingSuccessfulUnlock = false;
             }
 
+            // It's okay to use the "Inner" version of isDeviceLocked since they differ only for
+            // profiles, which cannot be switched to and thus don't support trust agents anyway.
             if (mTrustManagerService.isDeviceLockedInner(mUserId)) {
                 onDeviceLocked();
             } else {

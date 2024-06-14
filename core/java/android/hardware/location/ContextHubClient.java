@@ -15,11 +15,14 @@
  */
 package android.hardware.location;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
+import android.chre.flags.Flags;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -185,23 +188,75 @@ public class ContextHubClient implements Closeable {
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @ContextHubTransaction.Result
     public int sendMessageToNanoApp(@NonNull NanoAppMessage message) {
+        return doSendMessageToNanoApp(message, null);
+    }
+
+    /**
+     * Sends a reliable message to a nanoapp.
+     *
+     * This method is similar to {@link ContextHubClient#sendMessageToNanoApp} with the
+     * difference that it expects the message to be acknowledged by CHRE.
+     *
+     * The transaction succeeds after we received an ACK from CHRE without error.
+     * In all other cases the transaction will fail.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull
+    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
+    public ContextHubTransaction<Void> sendReliableMessageToNanoApp(
+            @NonNull NanoAppMessage message) {
+        if (!Flags.reliableMessageImplementation()) {
+            return null;
+        }
+
+        ContextHubTransaction<Void> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_RELIABLE_MESSAGE);
+
+        if (!mAttachedHub.supportsReliableMessages()) {
+            transaction.setResponse(new ContextHubTransaction.Response<Void>(
+                    ContextHubTransaction.RESULT_FAILED_NOT_SUPPORTED, null));
+            return transaction;
+        }
+
+        IContextHubTransactionCallback callback =
+                ContextHubTransactionHelper.createTransactionCallback(transaction);
+
+        @ContextHubTransaction.Result int result = doSendMessageToNanoApp(message, callback);
+        if (result != ContextHubTransaction.RESULT_SUCCESS) {
+            transaction.setResponse(new ContextHubTransaction.Response<Void>(result, null));
+        }
+
+        return transaction;
+    }
+
+    /**
+     * Sends a message to a nanoapp.
+     *
+     * @param message The message to send.
+     * @param transactionCallback The callback to use when the message is reliable. null for regular
+     *         messages.
+     * @return A {@link ContextHubTransaction.Result} error code.
+     */
+    @ContextHubTransaction.Result
+    private int doSendMessageToNanoApp(@NonNull NanoAppMessage message,
+            @Nullable IContextHubTransactionCallback transactionCallback) {
         Objects.requireNonNull(message, "NanoAppMessage cannot be null");
 
         int maxPayloadBytes = mAttachedHub.getMaxPacketLengthBytes();
+
         byte[] payload = message.getMessageBody();
         if (payload != null && payload.length > maxPayloadBytes) {
-            Log.e(
-                    TAG,
-                    "Message ("
-                            + payload.length
-                            + " bytes) exceeds max payload length ("
-                            + maxPayloadBytes
-                            + " bytes)");
+            Log.e(TAG,
+                    "Message (%d bytes) exceeds max payload length (%d bytes)".formatted(
+                            payload.length, maxPayloadBytes));
             return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
         }
 
         try {
-            return mClientProxy.sendMessageToNanoApp(message);
+            if (transactionCallback == null) {
+                return mClientProxy.sendMessageToNanoApp(message);
+            }
+            return mClientProxy.sendReliableMessageToNanoApp(message, transactionCallback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -224,16 +279,32 @@ public class ContextHubClient implements Closeable {
     /** @hide */
     public synchronized void callbackFinished() {
         try {
-            while (mClientProxy == null) {
-                try {
-                    this.wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+            waitForClientProxy();
             mClientProxy.callbackFinished();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public synchronized void reliableMessageCallbackFinished(int messageSequenceNumber,
+            byte errorCode) {
+        try {
+            waitForClientProxy();
+            mClientProxy.reliableMessageCallbackFinished(messageSequenceNumber, errorCode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    private void waitForClientProxy() {
+        while (mClientProxy == null) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -23,6 +24,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import com.android.server.telecom.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -113,7 +116,8 @@ public final class CallAttributes implements Parcelable {
     public static final int VIDEO_CALL = 2;
 
     /** @hide */
-    @IntDef(value = {SUPPORTS_SET_INACTIVE, SUPPORTS_STREAM, SUPPORTS_TRANSFER}, flag = true)
+    @IntDef(value = {SUPPORTS_SET_INACTIVE, SUPPORTS_STREAM, SUPPORTS_TRANSFER,
+            SUPPORTS_VIDEO_CALLING}, flag = true)
     @Retention(RetentionPolicy.SOURCE)
     public @interface CallCapability {
     }
@@ -133,6 +137,12 @@ public final class CallAttributes implements Parcelable {
      * The call can be completely transferred from one endpoint to another.
      */
     public static final int SUPPORTS_TRANSFER = 1 << 3;
+    /**
+     * The call supports video calling. This allows clients to gate video calling on a per call
+     * basis as opposed to re-registering the phone account.
+     */
+    @FlaggedApi(Flags.FLAG_TRANSACTIONAL_VIDEO_STATE)
+    public static final int SUPPORTS_VIDEO_CALLING = 1 << 4;
 
     /**
      * Build an instance of {@link CallAttributes}. In order to build a valid instance, a

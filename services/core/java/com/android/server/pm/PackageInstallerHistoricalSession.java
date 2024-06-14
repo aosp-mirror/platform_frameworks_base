@@ -19,6 +19,7 @@ package com.android.server.pm;
 import android.content.pm.PackageInstaller.PreapprovalDetails;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
+import android.content.pm.verify.domain.DomainSet;
 
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -76,6 +77,8 @@ public final class PackageInstallerHistoricalSession {
     private final boolean mSessionFailed;
     private final int mSessionErrorCode;
     private final String mSessionErrorMessage;
+    private final String mPreVerifiedDomains;
+    private final String mPackageName;
 
     PackageInstallerHistoricalSession(int sessionId, int userId, int originalInstallerUid,
             String originalInstallerPackageName, InstallSource installSource, int installerUid,
@@ -86,7 +89,8 @@ public final class PackageInstallerHistoricalSession {
             String finalMessage, SessionParams params, int parentSessionId,
             int[] childSessionIds, boolean sessionApplied, boolean sessionFailed,
             boolean sessionReady, int sessionErrorCode, String sessionErrorMessage,
-            PreapprovalDetails preapprovalDetails) {
+            PreapprovalDetails preapprovalDetails, DomainSet preVerifiedDomains,
+            String packageNameFromApk) {
         this.sessionId = sessionId;
         this.userId = userId;
         this.mOriginalInstallerUid = originalInstallerUid;
@@ -128,6 +132,14 @@ public final class PackageInstallerHistoricalSession {
         } else {
             this.mPreapprovalDetails = null;
         }
+        if (preVerifiedDomains != null) {
+            this.mPreVerifiedDomains = String.join(",", preVerifiedDomains.getDomains());
+        } else {
+            this.mPreVerifiedDomains = null;
+        }
+
+        this.mPackageName = preapprovalDetails != null ? preapprovalDetails.getPackageName()
+                : packageNameFromApk != null ? packageNameFromApk : params.appPackageName;
     }
 
     void dump(IndentingPrintWriter pw) {
@@ -170,6 +182,8 @@ public final class PackageInstallerHistoricalSession {
         pw.printPair("mSessionErrorCode", mSessionErrorCode);
         pw.printPair("mSessionErrorMessage", mSessionErrorMessage);
         pw.printPair("mPreapprovalDetails", mPreapprovalDetails);
+        pw.printPair("mPreVerifiedDomains", mPreVerifiedDomains);
+        pw.printPair("mAppPackageName", mPackageName);
         pw.println();
 
         pw.decreaseIndent();
@@ -198,6 +212,7 @@ public final class PackageInstallerHistoricalSession {
         info.createdMillis = mCreatedMillis;
         info.updatedMillis = mUpdatedMillis;
         info.installerUid = mInstallerUid;
+        info.appPackageName = mPackageName;
         return info;
     }
 }

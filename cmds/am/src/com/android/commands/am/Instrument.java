@@ -85,6 +85,7 @@ public class Instrument {
     public String profileFile = null;
     public boolean wait = false;
     public boolean rawMode = false;
+    public boolean captureLogcat = true;
     boolean protoStd = false;  // write proto to stdout
     boolean protoFile = false;  // write proto to a file
     String logPath = null;
@@ -266,16 +267,18 @@ public class Instrument {
             proto.write(InstrumentationData.TestStatus.RESULT_CODE, resultCode);
             writeBundle(proto, InstrumentationData.TestStatus.RESULTS, results);
 
-            if (resultCode == STATUS_TEST_STARTED) {
-                // Logcat -T takes wall clock time (!?)
-                mTestStartMs = System.currentTimeMillis();
-            } else {
-                if (mTestStartMs > 0) {
-                    proto.write(InstrumentationData.TestStatus.LOGCAT, readLogcat(mTestStartMs));
+            if (captureLogcat) {
+                if (resultCode == STATUS_TEST_STARTED) {
+                    // Logcat -T takes wall clock time (!?)
+                    mTestStartMs = System.currentTimeMillis();
+                } else {
+                    if (mTestStartMs > 0) {
+                        proto.write(InstrumentationData.TestStatus.LOGCAT,
+                                readLogcat(mTestStartMs));
+                    }
+                    mTestStartMs = 0;
                 }
-                mTestStartMs = 0;
             }
-
             proto.end(testStatusToken);
 
             outputProto(proto);

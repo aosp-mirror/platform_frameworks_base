@@ -187,7 +187,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* options */null,
                 /* inTask */null,
                 /* inTaskFragment */ null,
-                BalVerdict.ALLOW_BY_DEFAULT,
+                BalVerdict.ALLOW_PRIVILEGED,
                 /* intentGrants */null,
                 /* realCaiingUid */ -1);
 
@@ -217,7 +217,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* options= */null,
                 /* inTask= */null,
                 /* inTaskFragment= */ null,
-                BalVerdict.ALLOW_BY_DEFAULT,
+                BalVerdict.ALLOW_PRIVILEGED,
                 /* intentGrants= */null,
                 /* realCaiingUid */ -1);
 

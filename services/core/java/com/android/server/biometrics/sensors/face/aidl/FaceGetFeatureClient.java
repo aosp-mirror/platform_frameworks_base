@@ -34,7 +34,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
-import com.android.server.biometrics.sensors.face.hidl.AidlToHidlAdapter;
+import com.android.server.biometrics.sensors.face.hidl.HidlToAidlSessionAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -75,8 +75,8 @@ public class FaceGetFeatureClient extends HalClientMonitor<AidlSession> implemen
     protected void startHalOperation() {
         try {
             ISession session = getFreshDaemon().getSession();
-            if (session instanceof AidlToHidlAdapter) {
-                ((AidlToHidlAdapter) session).setFeature(mFeature);
+            if (session instanceof HidlToAidlSessionAdapter) {
+                ((HidlToAidlSessionAdapter) session).setFeature(mFeature);
             }
             session.getFeatures();
         } catch (RemoteException e) {

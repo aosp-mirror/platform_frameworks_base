@@ -71,7 +71,7 @@ public class TestableBubbleController extends BubbleController {
             BubblePositioner positioner,
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
-            Optional<DragAndDropController> dragAndDropController,
+            DragAndDropController dragAndDropController,
             ShellExecutor shellMainExecutor,
             Handler shellMainHandler,
             TaskViewTransitions taskViewTransitions,

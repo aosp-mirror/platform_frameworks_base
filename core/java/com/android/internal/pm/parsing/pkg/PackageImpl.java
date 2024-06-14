@@ -227,6 +227,9 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     private String requiredAccountType;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
+    private String mEmergencyInstaller;
+    @Nullable
+    @DataClass.ParcelWith(ForInternedString.class)
     private String overlayTarget;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
@@ -405,6 +408,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     // Derived fields
     private long mLongVersionCode;
     private int mLocaleConfigRes;
+    private boolean mAllowCrossUidActivitySwitchFromBelow;
 
     private List<AndroidPackageSplit> mSplits;
 
@@ -416,6 +420,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     private String[] mUsesSdkLibrariesSorted;
     @NonNull
     private String[] mUsesStaticLibrariesSorted;
+
+    private boolean mAppMetadataFileInApk = false;
 
     @NonNull
     public static PackageImpl forParsing(@NonNull String packageName, @NonNull String baseCodePath,
@@ -726,24 +732,9 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
                 this.usesSdkLibrariesVersionsMajor, versionMajor, true);
         this.usesSdkLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
                 this.usesSdkLibrariesCertDigests, certSha256Digests, true);
-        this.usesSdkLibrariesOptional = appendBoolean(this.usesSdkLibrariesOptional,
+        this.usesSdkLibrariesOptional = ArrayUtils.appendBoolean(this.usesSdkLibrariesOptional,
                 usesSdkLibrariesOptional);
         return this;
-    }
-
-    /**
-     * Adds value to given array if not already present, providing set-like
-     * behavior.
-     */
-    public static boolean[] appendBoolean(@Nullable boolean[] cur, boolean val) {
-        if (cur == null) {
-            return new boolean[] { val };
-        }
-        final int N = cur.length;
-        boolean[] ret = new boolean[N + 1];
-        System.arraycopy(cur, 0, ret, 0, N);
-        ret[N] = val;
-        return ret;
     }
 
     @Override
@@ -1074,6 +1065,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         return memtagMode;
     }
 
+    @Override
+    public boolean isAppMetadataFileInApk() {
+        return mAppMetadataFileInApk;
+    }
+
     @Nullable
     @Override
     public Bundle getMetaData() {
@@ -1288,6 +1284,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public String getRestrictedAccountType() {
         return restrictedAccountType;
+    }
+
+    @Nullable
+    @Override
+    public String getEmergencyInstaller() {
+        return mEmergencyInstaller;
     }
 
     @Override
@@ -1545,6 +1547,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public String getZygotePreloadName() {
         return zygotePreloadName;
+    }
+
+    @Override
+    public boolean isAllowCrossUidActivitySwitchFromBelow() {
+        return mAllowCrossUidActivitySwitchFromBelow;
     }
 
     @Override
@@ -2151,6 +2158,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
+    public PackageImpl setAppMetadataFileInApk(boolean fileInApk) {
+        mAppMetadataFileInApk = fileInApk;
+        return this;
+    }
+
+    @Override
     public PackageImpl setMetaData(@Nullable Bundle value) {
         metaData = value;
         return this;
@@ -2201,6 +2214,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public ParsingPackage setOnBackInvokedCallbackEnabled(boolean value) {
         setBoolean(Booleans.ENABLE_ON_BACK_INVOKED_CALLBACK, value);
+        return this;
+    }
+
+    @Override
+    public ParsingPackage setAllowCrossUidActivitySwitchFromBelow(boolean value) {
+        mAllowCrossUidActivitySwitchFromBelow = value;
         return this;
     }
 
@@ -2347,6 +2366,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public PackageImpl setRestrictedAccountType(@Nullable String restrictedAccountType) {
         this.restrictedAccountType = restrictedAccountType;
+        return this;
+    }
+
+    @Override
+    public PackageImpl setEmergencyInstaller(@Nullable String emergencyInstaller) {
+        this.mEmergencyInstaller = emergencyInstaller;
         return this;
     }
 
@@ -2656,6 +2681,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         if (!mKnownActivityEmbeddingCerts.isEmpty()) {
             appInfo.setKnownActivityEmbeddingCerts(mKnownActivityEmbeddingCerts);
         }
+        appInfo.allowCrossUidActivitySwitchFromBelow = mAllowCrossUidActivitySwitchFromBelow;
 
         return appInfo;
     }
@@ -3120,6 +3146,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         dest.writeString(this.mBaseApkPath);
         dest.writeString(this.restrictedAccountType);
         dest.writeString(this.requiredAccountType);
+        dest.writeString(this.mEmergencyInstaller);
         sForInternedString.parcel(this.overlayTarget, dest, flags);
         dest.writeString(this.overlayTargetOverlayableName);
         dest.writeString(this.overlayCategory);
@@ -3249,9 +3276,16 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         dest.writeInt(this.uid);
         dest.writeLong(this.mBooleans);
         dest.writeLong(this.mBooleans2);
+        dest.writeBoolean(this.mAllowCrossUidActivitySwitchFromBelow);
+        dest.writeBoolean(this.mAppMetadataFileInApk);
     }
 
     public PackageImpl(Parcel in) {
+        this(in, /* callback */ null);
+    }
+
+    public PackageImpl(@NonNull Parcel in, @Nullable ParsingPackageUtils.Callback callback) {
+        mCallback = callback;
         // We use the boot classloader for all classes that we load.
         final ClassLoader boot = Object.class.getClassLoader();
         this.supportsSmallScreens = sForBoolean.unparcel(in);
@@ -3270,6 +3304,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         this.mBaseApkPath = in.readString();
         this.restrictedAccountType = in.readString();
         this.requiredAccountType = in.readString();
+        this.mEmergencyInstaller = in.readString();
         this.overlayTarget = sForInternedString.unparcel(in);
         this.overlayTargetOverlayableName = in.readString();
         this.overlayCategory = in.readString();
@@ -3409,6 +3444,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         this.uid = in.readInt();
         this.mBooleans = in.readLong();
         this.mBooleans2 = in.readLong();
+        this.mAllowCrossUidActivitySwitchFromBelow = in.readBoolean();
+        this.mAppMetadataFileInApk = in.readBoolean();
 
         assignDerivedFields();
         assignDerivedFields2();

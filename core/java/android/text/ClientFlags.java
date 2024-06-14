@@ -54,4 +54,11 @@ public class ClientFlags {
     public static boolean fixLineHeightForLocale() {
         return TextFlags.isFeatureEnabled(Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE);
     }
+
+    /**
+     * @see Flags#icuBidiMigration()
+     */
+    public static boolean icuBidiMigration() {
+        return TextFlags.isFeatureEnabled(Flags.FLAG_ICU_BIDI_MIGRATION);
+    }
 }

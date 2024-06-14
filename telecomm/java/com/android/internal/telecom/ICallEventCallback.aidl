@@ -45,6 +45,8 @@ oneway interface ICallEventCallback {
     void onCallEndpointChanged(String callId, in CallEndpoint endpoint);
     void onAvailableCallEndpointsChanged(String callId, in List<CallEndpoint> endpoint);
     void onMuteStateChanged(String callId, boolean isMuted);
+    // -- Video Related
+    void onVideoStateChanged(String callId, int videoState);
     // -- Events
     void onEvent(String callId, String event, in Bundle extras);
     // hidden methods that help with cleanup

@@ -21,7 +21,10 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
+import static android.media.audio.Flags.FLAG_FOCUS_EXCLUSIVE_WITH_RECORDING;
 import static android.media.audio.Flags.FLAG_FOCUS_FREEZE_TEST_API;
+import static android.media.audio.Flags.FLAG_SUPPORTED_DEVICE_TYPES_API;
+import static android.media.audiopolicy.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -78,6 +81,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
@@ -98,6 +102,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -5120,6 +5125,70 @@ public class AudioManager {
     }
 
     /**
+     * Notifies an application with a focus listener of gain or loss of audio focus
+     *
+     * <p>This is similar to {@link #dispatchAudioFocusChange(AudioFocusInfo, int, AudioPolicy)} but
+     * with additional functionality  of fade. The players of the application with  audio focus
+     * change, provided they meet the active {@link FadeManagerConfiguration} requirements, are
+     * faded before dispatching the callback to the application. For example, players of the
+     * application losing audio focus will be faded out, whereas players of the application gaining
+     * audio focus will be faded in, if needed.
+     *
+     * <p>The applicability of fade is decided against the supplied active {@link AudioFocusInfo}.
+     * This list cannot be {@code null}. The list can be empty if no other active
+     * {@link AudioFocusInfo} available at the time of the dispatch.
+     *
+     * <p>The {@link FadeManagerConfiguration} supplied here is prioritized over existing fade
+     * configurations. If none supplied, either the {@link FadeManagerConfiguration} set through
+     * {@link AudioPolicy} or the default will be used to determine the fade properties.
+     *
+     * <p>This method can only be used by owners of an {@link AudioPolicy} configured with
+     * {@link AudioPolicy.Builder#setIsAudioFocusPolicy(boolean)} set to true.
+     *
+     * @param afi the recipient of the focus change, that has previously requested audio focus, and
+     *     that was received by the {@code AudioPolicy} through
+     *     {@link AudioPolicy.AudioPolicyFocusListener#onAudioFocusRequest(AudioFocusInfo, int)}
+     * @param focusChange one of focus gain types ({@link #AUDIOFOCUS_GAIN},
+     *     {@link #AUDIOFOCUS_GAIN_TRANSIENT}, {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} or
+     *     {@link #AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE})
+     *     or one of the focus loss types ({@link AudioManager#AUDIOFOCUS_LOSS},
+     *     {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT},
+     *     or {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK}).
+     *     <br>For the focus gain, the change type should be the same as the app requested
+     * @param ap a valid registered {@link AudioPolicy} configured as a focus policy.
+     * @param otherActiveAfis active {@link AudioFocusInfo} that are granted audio focus at the time
+     *     of dispatch
+     * @param transientFadeMgrConfig {@link FadeManagerConfiguration} that will be used for fading
+     *     players resulting from this dispatch. This is a transient configuration that is only
+     *     valid for this focus change and shall be discarded after processing this request.
+     * @return {@link #AUDIOFOCUS_REQUEST_FAILED} if the focus client didn't have a listener or if
+     *     there was an error sending the request, or {@link #AUDIOFOCUS_REQUEST_GRANTED} if the
+     *     dispatch was successfully sent, or {@link #AUDIOFOCUS_REQUEST_DELAYED} if
+     *     the request was successful but the dispatch of focus change was delayed due to a fade
+     *     operation.
+     * @hide
+     */
+    @FlaggedApi(FLAG_ENABLE_FADE_MANAGER_CONFIGURATION)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @FocusRequestResult
+    public int dispatchAudioFocusChangeWithFade(@NonNull AudioFocusInfo afi, int focusChange,
+            @NonNull AudioPolicy ap, @NonNull List<AudioFocusInfo> otherActiveAfis,
+            @Nullable FadeManagerConfiguration transientFadeMgrConfig) {
+        Objects.requireNonNull(afi, "AudioFocusInfo cannot be null");
+        Objects.requireNonNull(ap, "AudioPolicy cannot be null");
+        Objects.requireNonNull(otherActiveAfis, "Other active AudioFocusInfo list cannot be null");
+
+        IAudioService service = getService();
+        try {
+            return service.dispatchFocusChangeWithFade(afi, focusChange, ap.cb(), otherActiveAfis,
+                    transientFadeMgrConfig);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      * Used internally by telephony package to abandon audio focus, typically after a call or
      * when ringing ends and the call is rejected or not answered.
@@ -5437,6 +5506,26 @@ public class AudioManager {
             policy.invalidateCaptorsAndInjectors();
             service.unregisterAudioPolicy(policy.cb());
             policy.reset();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * @return All currently registered audio policy mixes.
+     */
+    @TestApi
+    @FlaggedApi(android.media.audiopolicy.Flags.FLAG_AUDIO_MIX_TEST_API)
+    @NonNull
+    public List<android.media.audiopolicy.AudioMix> getRegisteredPolicyMixes() {
+        if (!android.media.audiopolicy.Flags.audioMixTestApi()) {
+            return Collections.emptyList();
+        }
+
+        final IAudioService service = getService();
+        try {
+            return service.getRegisteredPolicyMixes();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -7771,6 +7860,51 @@ public class AudioManager {
     }
 
     /**
+     * Returns a Set of unique Integers corresponding to audio device type identifiers that can
+     * <i>potentially</i> be connected to the system and meeting the criteria specified in the
+     * <code>direction</code> parameter.
+     * Note that this set contains {@link AudioDeviceInfo} device type identifiers for both devices
+     * currently available <i>and</i> those that can be available if the user connects an audio
+     * peripheral. Examples include TYPE_WIRED_HEADSET if the Android device supports an analog
+     * headset jack or TYPE_USB_DEVICE if the Android device supports a USB host-mode port.
+     * These are generally a superset of device type identifiers associated with the
+     * AudioDeviceInfo objects returned from AudioManager.getDevices().
+     * @param direction The constant specifying whether input or output devices are queried.
+     * @see #GET_DEVICES_OUTPUTS
+     * @see #GET_DEVICES_INPUTS
+     * @return A (possibly zero-length) Set of Integer objects corresponding to the audio
+     * device types of devices supported by the implementation.
+     * @throws IllegalArgumentException If an invalid direction constant is specified.
+     */
+    @FlaggedApi(FLAG_SUPPORTED_DEVICE_TYPES_API)
+    public @NonNull Set<Integer>
+            getSupportedDeviceTypes(@AudioDeviceRole int direction) {
+        if (direction != GET_DEVICES_OUTPUTS && direction != GET_DEVICES_INPUTS) {
+            throw new IllegalArgumentException("AudioManager.getSupportedDeviceTypes(0x"
+                    + Integer.toHexString(direction) + ") - Invalid.");
+        }
+
+        IntArray internalDeviceTypes = new IntArray();
+        int status = AudioSystem.getSupportedDeviceTypes(direction, internalDeviceTypes);
+        if (status != AudioManager.SUCCESS) {
+            Log.e(TAG, "AudioManager.getSupportedDeviceTypes(" + direction + ") failed. status:"
+                    + status);
+        }
+
+        // convert to external (AudioDeviceInfo.getType()) device IDs
+        HashSet<Integer> externalDeviceTypes = new HashSet<Integer>();
+        for (int index = 0; index < internalDeviceTypes.size(); index++) {
+            // Set will eliminate any duplicates which AudioSystem.getSupportedDeviceTypes()
+            // returns
+            externalDeviceTypes.add(
+                    AudioDeviceInfo.convertInternalDeviceToDeviceType(
+                        internalDeviceTypes.get(index)));
+        }
+
+        return externalDeviceTypes;
+    }
+
+     /**
      * Returns an array of {@link AudioDeviceInfo} objects corresponding to the audio devices
      * currently connected to the system and meeting the criteria specified in the
      * <code>flags</code> parameter.
@@ -10010,6 +10144,28 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             return service.isVolumeControlUsingVolumeGroups();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Checks whether a notification sound should be played or not, as reported by the state
+     * of the audio framework. Querying whether playback should proceed is favored over
+     * playing and letting the sound be muted or not.
+     * @param aa the {@link AudioAttributes} of the notification about to maybe play
+     * @return true if the audio framework state is such that the notification should be played
+     *    because at time of checking, and the notification will be heard,
+     *    false otherwise
+     */
+    @TestApi
+    @FlaggedApi(FLAG_FOCUS_EXCLUSIVE_WITH_RECORDING)
+    @RequiresPermission(android.Manifest.permission.QUERY_AUDIO_STATE)
+    public boolean shouldNotificationSoundPlay(@NonNull final AudioAttributes aa) {
+        final IAudioService service = getService();
+        try {
+            return service.shouldNotificationSoundPlay(Objects.requireNonNull(aa));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

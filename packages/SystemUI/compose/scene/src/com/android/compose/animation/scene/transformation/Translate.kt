@@ -35,7 +35,7 @@ internal class Translate(
         layoutImpl: SceneTransitionLayoutImpl,
         scene: Scene,
         element: Element,
-        sceneValues: Element.TargetValues,
+        sceneState: Element.SceneState,
         transition: TransitionState.Transition,
         value: Offset,
     ): Offset {

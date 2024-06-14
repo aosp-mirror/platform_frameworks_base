@@ -17,19 +17,23 @@
 
 package com.android.systemui.statusbar.notification.icon.domain.interactor
 
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.statusbar.data.repository.NotificationListenerSettingsRepository
 import com.android.systemui.statusbar.notification.data.repository.NotificationsKeyguardViewStateRepository
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlin.jvm.optionals.getOrNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 
 /** Domain logic related to notification icons. */
 class NotificationIconsInteractor
@@ -37,10 +41,12 @@ class NotificationIconsInteractor
 constructor(
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
     private val bubbles: Optional<Bubbles>,
+    private val headsUpNotificationIconInteractor: HeadsUpNotificationIconInteractor,
     private val keyguardViewStateRepository: NotificationsKeyguardViewStateRepository,
 ) {
     /** Returns a subset of all active notifications based on the supplied filtration parameters. */
     fun filteredNotifSet(
+        forceShowHeadsUp: Boolean = false,
         showAmbient: Boolean = true,
         showLowPriority: Boolean = true,
         showDismissed: Boolean = true,
@@ -49,18 +55,21 @@ constructor(
     ): Flow<Set<ActiveNotificationModel>> {
         return combine(
             activeNotificationsInteractor.topLevelRepresentativeNotifications,
+            headsUpNotificationIconInteractor.isolatedNotification,
             keyguardViewStateRepository.areNotificationsFullyHidden,
-        ) { notifications, notifsFullyHidden ->
+        ) { notifications, isolatedNotifKey, notifsFullyHidden ->
             notifications
                 .asSequence()
                 .filter { model: ActiveNotificationModel ->
                     shouldShowNotificationIcon(
                         model = model,
+                        forceShowHeadsUp = forceShowHeadsUp,
                         showAmbient = showAmbient,
                         showLowPriority = showLowPriority,
                         showDismissed = showDismissed,
                         showRepliedMessages = showRepliedMessages,
                         showPulsing = showPulsing,
+                        isolatedNotifKey = isolatedNotifKey,
                         notifsFullyHidden = notifsFullyHidden,
                     )
                 }
@@ -70,14 +79,17 @@ constructor(
 
     private fun shouldShowNotificationIcon(
         model: ActiveNotificationModel,
+        forceShowHeadsUp: Boolean,
         showAmbient: Boolean,
         showLowPriority: Boolean,
         showDismissed: Boolean,
         showRepliedMessages: Boolean,
         showPulsing: Boolean,
+        isolatedNotifKey: String?,
         notifsFullyHidden: Boolean,
     ): Boolean {
         return when {
+            forceShowHeadsUp && model.key == isolatedNotifKey -> true
             !showAmbient && model.isAmbient -> false
             !showLowPriority && model.isSilent -> false
             !showDismissed && model.isRowDismissed -> false
@@ -94,34 +106,41 @@ constructor(
 class AlwaysOnDisplayNotificationIconsInteractor
 @Inject
 constructor(
+    @Background bgContext: CoroutineContext,
     deviceEntryInteractor: DeviceEntryInteractor,
     iconsInteractor: NotificationIconsInteractor,
 ) {
     val aodNotifs: Flow<Set<ActiveNotificationModel>> =
-        deviceEntryInteractor.isBypassEnabled.flatMapLatest { isBypassEnabled ->
-            iconsInteractor.filteredNotifSet(
-                showAmbient = false,
-                showDismissed = false,
-                showRepliedMessages = false,
-                showPulsing = !isBypassEnabled,
-            )
-        }
+        deviceEntryInteractor.isBypassEnabled
+            .flatMapLatest { isBypassEnabled ->
+                iconsInteractor.filteredNotifSet(
+                    showAmbient = false,
+                    showDismissed = false,
+                    showRepliedMessages = false,
+                    showPulsing = !isBypassEnabled,
+                )
+            }
+            .flowOn(bgContext)
 }
 
 /** Domain logic related to notification icons shown in the status bar. */
 class StatusBarNotificationIconsInteractor
 @Inject
 constructor(
+    @Background bgContext: CoroutineContext,
     iconsInteractor: NotificationIconsInteractor,
     settingsRepository: NotificationListenerSettingsRepository,
 ) {
     val statusBarNotifs: Flow<Set<ActiveNotificationModel>> =
-        settingsRepository.showSilentStatusIcons.flatMapLatest { showSilentIcons ->
-            iconsInteractor.filteredNotifSet(
-                showAmbient = false,
-                showLowPriority = showSilentIcons,
-                showDismissed = false,
-                showRepliedMessages = false,
-            )
-        }
+        settingsRepository.showSilentStatusIcons
+            .flatMapLatest { showSilentIcons ->
+                iconsInteractor.filteredNotifSet(
+                    forceShowHeadsUp = true,
+                    showAmbient = false,
+                    showLowPriority = showSilentIcons,
+                    showDismissed = false,
+                    showRepliedMessages = false,
+                )
+            }
+            .flowOn(bgContext)
 }

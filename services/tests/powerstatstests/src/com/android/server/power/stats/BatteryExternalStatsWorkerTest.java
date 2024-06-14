@@ -215,7 +215,7 @@ public class BatteryExternalStatsWorkerTest {
 
     public class TestBatteryStatsImpl extends BatteryStatsImpl {
         public TestBatteryStatsImpl(Context context) {
-            super(Clock.SYSTEM_CLOCK, null, null, null);
+            super(Clock.SYSTEM_CLOCK, null, null, null, null, null, null);
             mPowerProfile = new PowerProfile(context, true /* forTest */);
 
             SparseArray<int[]> cpusByPolicy = new SparseArray<>();

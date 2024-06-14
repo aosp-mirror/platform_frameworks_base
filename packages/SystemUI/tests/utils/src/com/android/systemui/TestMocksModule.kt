@@ -18,13 +18,16 @@ package com.android.systemui
 import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
 import android.os.UserManager
+import android.service.notification.NotificationListenerService
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.statusbar.IStatusBarService
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.ScreenLifecycle
@@ -34,11 +37,12 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.BiometricLog
 import com.android.systemui.log.dagger.BroadcastDispatcherLog
 import com.android.systemui.log.dagger.SceneFrameworkLog
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.model.SysUiState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationListener
@@ -48,9 +52,11 @@ import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.NotifCollection
+import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStatsLogger
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
@@ -58,6 +64,7 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
@@ -79,6 +86,7 @@ data class TestMocksModule(
     @get:Provides val deviceProvisionedController: DeviceProvisionedController = mock(),
     @get:Provides val dozeParameters: DozeParameters = mock(),
     @get:Provides val dumpManager: DumpManager = mock(),
+    @get:Provides val headsUpManager: HeadsUpManager = mock(),
     @get:Provides val guestResumeSessionReceiver: GuestResumeSessionReceiver = mock(),
     @get:Provides val keyguardBypassController: KeyguardBypassController = mock(),
     @get:Provides val keyguardSecurityModel: KeyguardSecurityModel = mock(),
@@ -88,8 +96,10 @@ data class TestMocksModule(
     val lockscreenShadeTransitionController: LockscreenShadeTransitionController = mock(),
     @get:Provides val mediaHierarchyManager: MediaHierarchyManager = mock(),
     @get:Provides val notifCollection: NotifCollection = mock(),
+    @get:Provides val notificationListLogger: NotificationStatsLogger = mock(),
     @get:Provides val notificationListener: NotificationListener = mock(),
     @get:Provides val notificationLockscreenUserManager: NotificationLockscreenUserManager = mock(),
+    @get:Provides val notificationPanelLogger: NotificationPanelLogger = mock(),
     @get:Provides val notificationMediaManager: NotificationMediaManager = mock(),
     @get:Provides val notificationShadeDepthController: NotificationShadeDepthController = mock(),
     @get:Provides
@@ -103,7 +113,7 @@ data class TestMocksModule(
     @get:Provides val statusBarWindowController: StatusBarWindowController = mock(),
     @get:Provides val wakefulnessLifecycle: WakefulnessLifecycle = mock(),
     @get:Provides val keyguardViewController: KeyguardViewController = mock(),
-    @get:Provides val dialogLaunchAnimator: DialogLaunchAnimator = mock(),
+    @get:Provides val dialogTransitionAnimator: DialogTransitionAnimator = mock(),
     @get:Provides val sysuiState: SysUiState = mock(),
     @get:Provides
     val unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider> =
@@ -111,12 +121,14 @@ data class TestMocksModule(
     @get:Provides val zenModeController: ZenModeController = mock(),
     @get:Provides val systemUIDialogManager: SystemUIDialogManager = mock(),
     @get:Provides val deviceEntryIconTransitions: Set<DeviceEntryIconTransition> = emptySet(),
+    @get:Provides val communalInteractor: CommunalInteractor = mock(),
+    @get:Provides val sceneLogger: SceneLogger = mock(),
 
     // log buffers
     @get:[Provides BroadcastDispatcherLog]
     val broadcastDispatcherLogger: LogBuffer = mock(),
     @get:[Provides SceneFrameworkLog]
-    val sceneLogger: LogBuffer = mock(),
+    val sceneLogBuffer: LogBuffer = mock(),
     @get:[Provides BiometricLog]
     val biometricLogger: LogBuffer = mock(),
     @get:Provides val lsShadeTransitionLogger: LSShadeTransitionLogger = mock(),
@@ -127,6 +139,10 @@ data class TestMocksModule(
     @get:Provides val displayMetrics: DisplayMetrics = mock(),
     @get:Provides val metricsLogger: MetricsLogger = mock(),
     @get:Provides val userManager: UserManager = mock(),
+
+    // system server mocks
+    @get:Provides val mockStatusBarService: IStatusBarService = mock(),
+    @get:Provides val mockNotificationListenerService: NotificationListenerService = mock(),
 ) {
     @Module
     interface Bindings {

@@ -16,11 +16,17 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static org.junit.Assert.assertNull;
+
+import android.app.Notification;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.NotificationHeaderView;
 import android.view.View;
+import android.widget.RemoteViews;
 
 import androidx.test.filters.SmallTest;
 
@@ -28,6 +34,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper;
 
 import org.junit.Assert;
@@ -40,6 +47,7 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+//@DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
 public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     private ExpandableNotificationRow mGroup;
@@ -138,6 +146,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     public void testLowPriorityHeaderCleared() {
         mGroup.setIsLowPriority(true);
         NotificationHeaderView lowPriorityHeaderView =
@@ -145,15 +154,86 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         Assert.assertEquals(View.VISIBLE, lowPriorityHeaderView.getVisibility());
         Assert.assertSame(mChildrenContainer, lowPriorityHeaderView.getParent());
         mGroup.setIsLowPriority(false);
-        Assert.assertNull(lowPriorityHeaderView.getParent());
-        Assert.assertNull(mChildrenContainer.getLowPriorityViewWrapper());
+        assertNull(lowPriorityHeaderView.getParent());
+        assertNull(mChildrenContainer.getLowPriorityViewWrapper());
     }
 
     @Test
+    @DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     public void testRecreateNotificationHeader_hasHeader() {
         mChildrenContainer.recreateNotificationHeader(null, false);
         Assert.assertNotNull("Children container must have a header after recreation",
                 mChildrenContainer.getCurrentHeaderView());
+    }
+
+    @Test
+    @EnableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
+    public void testSetLowPriorityWithAsyncInflation_noHeaderReInflation() {
+        mChildrenContainer.setIsLowPriority(true);
+        assertNull("We don't inflate header from the main thread with Async "
+                + "Inflation enabled", mChildrenContainer.getCurrentHeaderView());
+    }
+
+    @Test
+    @EnableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
+    public void setLowPriorityBeforeLowPriorityHeaderSet() {
+
+        //Given: the children container does not have a low-priority header, and is not low-priority
+        assertNull(mChildrenContainer.getLowPriorityViewWrapper());
+        mGroup.setIsLowPriority(false);
+
+        //When: set the children container to be low-priority and set the low-priority header
+        mGroup.setIsLowPriority(true);
+        mGroup.setLowPriorityGroupHeader(createHeaderView(/* lowPriorityHeader= */ true));
+
+        //Then: the low-priority group header should be visible
+        NotificationHeaderView lowPriorityHeaderView =
+                mChildrenContainer.getLowPriorityViewWrapper().getNotificationHeader();
+        Assert.assertEquals(View.VISIBLE, lowPriorityHeaderView.getVisibility());
+        Assert.assertSame(mChildrenContainer, lowPriorityHeaderView.getParent());
+
+        //When: set the children container to be not low-priority and set the normal header
+        mGroup.setIsLowPriority(false);
+        mGroup.setGroupHeader(createHeaderView(/* lowPriorityHeader= */ false));
+
+        //Then: the low-priority group header should not be visible , normal header should be
+        // visible
+        Assert.assertEquals(View.INVISIBLE, lowPriorityHeaderView.getVisibility());
+        Assert.assertEquals(
+                View.VISIBLE,
+                mChildrenContainer.getNotificationHeaderWrapper().getNotificationHeader()
+                        .getVisibility()
+        );
+    }
+
+    @Test
+    @EnableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
+    public void changeLowPriorityAfterHeaderSet() {
+
+        //Given: the children container does not have headers, and is not low-priority
+        assertNull(mChildrenContainer.getLowPriorityViewWrapper());
+        assertNull(mChildrenContainer.getNotificationHeaderWrapper());
+        mGroup.setIsLowPriority(false);
+
+        //When: set the set the normal header
+        mGroup.setGroupHeader(createHeaderView(/* lowPriorityHeader= */ false));
+
+        //Then: the group header should be visible
+        NotificationHeaderView headerView =
+                mChildrenContainer.getNotificationHeaderWrapper().getNotificationHeader();
+        Assert.assertEquals(View.VISIBLE, headerView.getVisibility());
+        Assert.assertSame(mChildrenContainer, headerView.getParent());
+
+        //When: set the set the row to be low priority, and set the low-priority header
+        mGroup.setIsLowPriority(true);
+        mGroup.setLowPriorityGroupHeader(createHeaderView(/* lowPriorityHeader= */ true));
+
+        //Then: the header view should not be visible, the low-priority group header should be
+        // visible
+        Assert.assertEquals(View.INVISIBLE, headerView.getVisibility());
+        NotificationHeaderView lowPriorityHeaderView =
+                mChildrenContainer.getLowPriorityViewWrapper().getNotificationHeader();
+        Assert.assertEquals(View.VISIBLE, lowPriorityHeaderView.getVisibility());
     }
 
     @Test
@@ -170,6 +250,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     public void applyRoundnessAndInvalidate_should_be_immediately_applied_on_header() {
         NotificationHeaderViewWrapper header = mChildrenContainer.getNotificationHeaderWrapper();
         Assert.assertEquals(0f, header.getTopRoundness(), 0.001f);
@@ -180,6 +261,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     public void applyRoundnessAndInvalidate_should_be_immediately_applied_on_headerLowPriority() {
         mChildrenContainer.setIsLowPriority(true);
 
@@ -189,5 +271,18 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         mChildrenContainer.requestTopRoundness(1f, SourceType.from(""), false);
 
         Assert.assertEquals(1f, header.getTopRoundness(), 0.001f);
+    }
+
+    private NotificationHeaderView createHeaderView(boolean lowPriority) {
+        Notification notification = mNotificationTestHelper.createNotification();
+        final Notification.Builder builder = Notification.Builder.recoverBuilder(getContext(),
+                notification);
+        RemoteViews headerRemoteViews;
+        if (lowPriority) {
+            headerRemoteViews = builder.makeLowPriorityContentView(true);
+        } else {
+            headerRemoteViews = builder.makeNotificationGroupHeader();
+        }
+        return (NotificationHeaderView) headerRemoteViews.apply(getContext(), mChildrenContainer);
     }
 }

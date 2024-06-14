@@ -18,17 +18,23 @@ package com.android.systemui.qs.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.Back
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.qs.FooterActionsController
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
-import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.privacyChipInteractor
+import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
@@ -36,23 +42,33 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobi
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val sceneInteractor = utils.sceneInteractor()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter { mock() }
+    private val qsFlexiglassAdapter = FakeQSSceneAdapter({ mock() })
+    private val footerActionsViewModel = mock<FooterActionsViewModel>()
+    private val footerActionsViewModelFactory =
+        mock<FooterActionsViewModel.Factory> {
+            whenever(create(any())).thenReturn(footerActionsViewModel)
+        }
+    private val footerActionsController = mock<FooterActionsController>()
 
     private var mobileIconsViewModel: MobileIconsViewModel =
         MobileIconsViewModel(
@@ -80,9 +96,10 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             ShadeHeaderViewModel(
                 applicationScope = testScope.backgroundScope,
                 context = context,
-                sceneInteractor = sceneInteractor,
                 mobileIconsInteractor = mobileIconsInteractor,
                 mobileIconsViewModel = mobileIconsViewModel,
+                privacyChipInteractor = kosmos.privacyChipInteractor,
+                clockInteractor = kosmos.shadeHeaderClockInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
 
@@ -90,7 +107,9 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             QuickSettingsSceneViewModel(
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
-                notifications = utils.notificationsPlaceholderViewModel(),
+                notifications = kosmos.notificationsPlaceholderViewModel,
+                footerActionsViewModelFactory,
+                footerActionsController,
             )
     }
 
@@ -103,8 +122,8 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
-                        UserAction.Back to SceneModel(SceneKey.Shade),
-                        UserAction.Swipe(Direction.UP) to SceneModel(SceneKey.Shade),
+                        Back to UserActionResult(Scenes.Shade),
+                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
                     )
                 )
         }
@@ -118,8 +137,16 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
-                        UserAction.Back to SceneModel(SceneKey.QuickSettings),
+                        Back to UserActionResult(Scenes.QuickSettings),
                     )
                 )
         }
+
+    @Test
+    fun gettingViewModelInitializesControllerOnlyOnce() {
+        underTest.getFooterActionsViewModel(mock())
+        underTest.getFooterActionsViewModel(mock())
+
+        verify(footerActionsController, times(1)).init()
+    }
 }

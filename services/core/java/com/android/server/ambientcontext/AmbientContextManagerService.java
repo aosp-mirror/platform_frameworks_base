@@ -226,20 +226,28 @@ public class AmbientContextManagerService extends
 
         List<AmbientContextManagerPerUserService> serviceList =
                 new ArrayList<>(serviceNames.length);
-        if (serviceNames.length == 2) {
+        if (serviceNames.length == 2
+                && !isDefaultService(serviceNames[0])
+                && !isDefaultWearableService(serviceNames[1])) {
             Slog.i(TAG, "Not using default services, "
                     + "services provided for testing should be exactly two services.");
-            if (!isDefaultService(serviceNames[0]) && !isDefaultWearableService(serviceNames[1])) {
-                serviceList.add(new DefaultAmbientContextManagerPerUserService(
-                        this, mLock, resolvedUserId,
-                        AmbientContextManagerPerUserService.ServiceType.DEFAULT, serviceNames[0]));
-                serviceList.add(new WearableAmbientContextManagerPerUserService(
-                        this, mLock, resolvedUserId,
-                        AmbientContextManagerPerUserService.ServiceType.WEARABLE,
-                        serviceNames[1]));
-            }
+            serviceList.add(
+                    new DefaultAmbientContextManagerPerUserService(
+                            this,
+                            mLock,
+                            resolvedUserId,
+                            AmbientContextManagerPerUserService.ServiceType.DEFAULT,
+                            serviceNames[0]));
+            serviceList.add(
+                    new WearableAmbientContextManagerPerUserService(
+                            this,
+                            mLock,
+                            resolvedUserId,
+                            AmbientContextManagerPerUserService.ServiceType.WEARABLE,
+                            serviceNames[1]));
             return serviceList;
-        } else {
+        }
+        if (serviceNames.length > 2) {
             Slog.i(TAG, "Incorrect number of services provided for testing.");
         }
 

@@ -36,7 +36,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 @Postsubmit
 class AndroidPackageParsingValidationTest {
     companion object {
-        private val parser2 = PackageParser2.forParsingFileWithDefaults()
+        private val parser2 = PackageParserUtils.forParsingFileWithDefaults()
         private val apks = ((PackageManagerService.SYSTEM_PARTITIONS)
                 .flatMap {
                     listOfNotNull(it.privAppFolder, it.appFolder, it.overlayFolder)
@@ -157,7 +157,7 @@ class AndroidPackageParsingValidationTest {
         validateTagCount("uses-library", 1000, tag)
         validateTagCount("activity-alias", 4000, tag)
         validateTagCount("provider", 8000, tag)
-        validateTagCount("activity", 40000, tag)
+        validateTagCount("activity", 30000, tag)
     }
 
     @Test
@@ -436,6 +436,13 @@ class AndroidPackageParsingValidationTest {
         validateTagCount("action", 20000, tag)
         validateTagCount("category", 40000, tag)
         validateTagCount("data", 40000, tag)
+        validateTagCount("uri-relative-filter-group", 100, tag)
+    }
+
+    @Test
+    fun parseUriRelativeFilterGroupTag() {
+        val tag = "uri-relative-filter-group"
+        validateTagCount("data", 100, tag)
     }
 
     @Test
@@ -465,7 +472,56 @@ class AndroidPackageParsingValidationTest {
             R.styleable.AndroidManifestData_pathAdvancedPattern,
             4000
         )
-        validateTagAttr(tag, "mimeType", R.styleable.AndroidManifestData_mimeType, 512)
+        validateTagAttr(tag, "query", R.styleable.AndroidManifestData_query, 4000)
+        validateTagAttr(
+            tag,
+            "queryPattern",
+            R.styleable.AndroidManifestData_queryPattern,
+            4000
+        )
+        validateTagAttr(
+            tag,
+            "queryPrefix",
+            R.styleable.AndroidManifestData_queryPrefix,
+            4000
+        )
+        validateTagAttr(tag,
+            "querySuffix",
+            R.styleable.AndroidManifestData_querySuffix,
+            4000
+        )
+        validateTagAttr(
+            tag,
+            "queryAdvancedPattern",
+            R.styleable.AndroidManifestData_queryAdvancedPattern,
+            4000
+        )
+        validateTagAttr(tag, "fragment", R.styleable.AndroidManifestData_query, 4000)
+        validateTagAttr(
+            tag,
+            "fragmentPattern",
+            R.styleable.AndroidManifestData_fragmentPattern,
+            4000
+        )
+        validateTagAttr(
+            tag,
+            "fragmentPrefix",
+            R.styleable.AndroidManifestData_fragmentPrefix,
+            4000
+        )
+        validateTagAttr(tag,
+            "fragmentSuffix",
+            R.styleable.AndroidManifestData_fragmentSuffix,
+            4000
+        )
+        validateTagAttr(
+            tag,
+            "fragmentAdvancedPattern",
+            R.styleable.AndroidManifestData_fragmentAdvancedPattern,
+            4000
+        )
+        validateTagAttr(tag, "mimeType", R.styleable.AndroidManifestData_mimeType, 255)
+        validateTagAttr(tag, "mimeGroup", R.styleable.AndroidManifestData_mimeGroup, 1024)
     }
 
     @Test

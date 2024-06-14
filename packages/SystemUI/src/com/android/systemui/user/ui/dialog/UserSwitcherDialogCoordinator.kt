@@ -24,7 +24,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.users.UserCreatingDialog
 import com.android.systemui.CoreStartable
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
@@ -52,7 +52,7 @@ constructor(
     @Application private val applicationScope: Lazy<CoroutineScope>,
     private val falsingManager: Lazy<FalsingManager>,
     private val broadcastSender: Lazy<BroadcastSender>,
-    private val dialogLaunchAnimator: Lazy<DialogLaunchAnimator>,
+    private val dialogTransitionAnimator: Lazy<DialogTransitionAnimator>,
     private val interactor: Lazy<UserSwitcherInteractor>,
     private val userDetailAdapterProvider: Provider<UserDetailView.Adapter>,
     private val eventLogger: Lazy<UiEventLogger>,
@@ -82,7 +82,7 @@ constructor(
                                     showEphemeralMessage = request.showEphemeralMessage,
                                     falsingManager = falsingManager.get(),
                                     broadcastSender = broadcastSender.get(),
-                                    dialogLaunchAnimator = dialogLaunchAnimator.get(),
+                                    dialogTransitionAnimator = dialogTransitionAnimator.get(),
                                 ),
                                 DialogCuj(
                                     InteractionJankMonitor.CUJ_USER_DIALOG_OPEN,
@@ -106,7 +106,7 @@ constructor(
                                     targetUserId = request.targetUserId,
                                     isKeyguardShowing = request.isKeyguardShowing,
                                     falsingManager = falsingManager.get(),
-                                    dialogLaunchAnimator = dialogLaunchAnimator.get(),
+                                    dialogTransitionAnimator = dialogTransitionAnimator.get(),
                                     onExitGuestUserListener = request.onExitGuestUser,
                                 ),
                                 DialogCuj(
@@ -122,7 +122,7 @@ constructor(
                                     uiEventLogger = eventLogger.get(),
                                     falsingManager = falsingManager.get(),
                                     activityStarter = activityStarter.get(),
-                                    dialogLaunchAnimator = dialogLaunchAnimator.get(),
+                                    dialogTransitionAnimator = dialogTransitionAnimator.get(),
                                 ),
                                 DialogCuj(
                                     InteractionJankMonitor.CUJ_USER_DIALOG_OPEN,
@@ -141,9 +141,9 @@ constructor(
                     }
                 currentDialog = dialog
 
-                val controller = request.expandable?.dialogLaunchController(dialogCuj)
+                val controller = request.expandable?.dialogTransitionController(dialogCuj)
                 if (controller != null) {
-                    dialogLaunchAnimator.get().show(dialog, controller)
+                    dialogTransitionAnimator.get().show(dialog, controller)
                 } else if (request.dialogShower != null && dialogCuj != null) {
                     request.dialogShower?.showDialog(dialog, dialogCuj)
                 } else {

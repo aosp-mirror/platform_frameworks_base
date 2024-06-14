@@ -14,8 +14,11 @@
   ~ limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:color="@android:color/system_on_surface_light" android:alpha="0.12"/>
-    <item android:state_hovered="true" android:color="@android:color/system_on_surface_light" android:alpha="0.08"/>
-    <item android:color="@android:color/system_on_surface_light" android:alpha="0.00"/>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+    <item android:state_pressed="true" android:color="?androidprv:attr/materialColorOnPrimaryFixed"
+          android:alpha="0.15"/>
+    <item android:state_hovered="true" android:color="?androidprv:attr/materialColorOnPrimaryFixed"
+          android:alpha="0.11"/>
+    <item android:color="@color/transparent" />
 </selector>

@@ -17,11 +17,11 @@ package com.android.systemui.flags
 
 import android.provider.DeviceConfig
 import com.android.internal.annotations.Keep
-import com.android.systemui.res.R
 import com.android.systemui.flags.FlagsFactory.releasedFlag
 import com.android.systemui.flags.FlagsFactory.resourceBooleanFlag
 import com.android.systemui.flags.FlagsFactory.sysPropBooleanFlag
 import com.android.systemui.flags.FlagsFactory.unreleasedFlag
+import com.android.systemui.res.R
 
 /**
  * List of [Flag] objects for use in SystemUI.
@@ -44,11 +44,11 @@ object Flags {
     // 100 - notification
     // TODO(b/297792660): Tracking Bug
     @JvmField val UNCLEARED_TRANSIENT_HUN_FIX =
-        unreleasedFlag("uncleared_transient_hun_fix", teamfood = true)
+        releasedFlag("uncleared_transient_hun_fix")
 
     // TODO(b/298308067): Tracking Bug
     @JvmField val SWIPE_UNCLEARED_TRANSIENT_VIEW_FIX =
-        unreleasedFlag("swipe_uncleared_transient_view_fix", teamfood = true)
+        releasedFlag("swipe_uncleared_transient_view_fix")
 
     // TODO(b/254512751): Tracking Bug
     val NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
@@ -102,17 +102,6 @@ object Flags {
             default = true
         )
 
-    /** Only notify group expansion listeners when a change happens. */
-    // TODO(b/292213543): Tracking Bug
-    @JvmField
-    val NOTIFICATION_GROUP_EXPANSION_CHANGE =
-            releasedFlag("notification_group_expansion_change")
-
-    // TODO(b/301955929)
-    @JvmField
-    val NOTIF_LS_BACKGROUND_THREAD =
-            releasedFlag("notification_lockscreen_mgr_bg_thread")
-
     // 200 - keyguard/lockscreen
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =
@@ -121,11 +110,6 @@ object Flags {
     // TODO(b/254512750): Tracking Bug
     val NEW_UNLOCK_SWIPE_ANIMATION = releasedFlag("new_unlock_swipe_animation")
     val CHARGING_RIPPLE = resourceBooleanFlag(R.bool.flag_charging_ripple, "charging_ripple")
-
-    // TODO(b/254512281): Tracking Bug
-    @JvmField
-    val BOUNCER_USER_SWITCHER =
-        resourceBooleanFlag(R.bool.config_enableBouncerUserSwitcher, "bouncer_user_switcher")
 
     // TODO(b/254512676): Tracking Bug
     @JvmField
@@ -208,10 +192,6 @@ object Flags {
     val WALLPAPER_PICKER_GRID_APPLY_BUTTON =
             unreleasedFlag("wallpaper_picker_grid_apply_button")
 
-    /** Provide new auth messages on the bouncer. */
-    // TODO(b/277961132): Tracking bug.
-    @JvmField val REVAMPED_BOUNCER_MESSAGES = unreleasedFlag("revamped_bouncer_messages")
-
     /** Keyguard Migration */
 
     // TODO(b/297037052): Tracking bug.
@@ -234,19 +214,6 @@ object Flags {
     // TODO(b/274443705): Tracking Bug
     @JvmField
     val WALLPAPER_PICKER_PREVIEW_ANIMATION = releasedFlag("wallpaper_picker_preview_animation")
-
-    /**
-     * TODO(b/278086361): Tracking bug
-     * Complete rewrite of the interactions between System UI and Window Manager involving keyguard
-     * state. When enabled, calls to ActivityTaskManagerService from System UI will exclusively
-     * occur from [WmLockscreenVisibilityManager] rather than the legacy KeyguardViewMediator.
-     *
-     * This flag is under development; some types of unlock may not animate properly if you enable
-     * it.
-     */
-    @JvmField
-    val KEYGUARD_WM_STATE_REFACTOR: UnreleasedFlag =
-            unreleasedFlag("keyguard_wm_state_refactor")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -357,15 +324,6 @@ object Flags {
     // TODO(b/254512673): Tracking Bug
     @JvmField val DREAM_MEDIA_TAP_TO_OPEN = unreleasedFlag("dream_media_tap_to_open")
 
-    // TODO(b/254513168): Tracking Bug
-    @JvmField val UMO_SURFACE_RIPPLE = releasedFlag("umo_surface_ripple")
-
-    // TODO(b/261734857): Tracking Bug
-    @JvmField val UMO_TURBULENCE_NOISE = releasedFlag("umo_turbulence_noise")
-
-    // TODO(b/263272731): Tracking Bug
-    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag("media_ttt_receiver_success_ripple")
-
     // TODO(b/266157412): Tracking Bug
     val MEDIA_RETAIN_SESSIONS = unreleasedFlag("media_retain_sessions")
 
@@ -380,9 +338,6 @@ object Flags {
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag("simulate_dock_through_charging")
-
-    // TODO(b/254512758): Tracking Bug
-    @JvmField val ROUNDED_BOX_RIPPLE = releasedFlag("rounded_box_ripple")
 
     // TODO(b/273509374): Tracking Bug
     @JvmField
@@ -414,12 +369,6 @@ object Flags {
     @Keep
     val WM_BUBBLE_BAR = sysPropBooleanFlag("persist.wm.debug.bubble_bar", default = false)
 
-    // TODO(b/260271148): Tracking bug
-    @Keep
-    @JvmField
-    val WM_DESKTOP_WINDOWING_2 =
-        sysPropBooleanFlag("persist.wm.debug.desktop_mode_2", default = false)
-
     // TODO(b/254513207): Tracking Bug to delete
     @Keep
     @JvmField
@@ -448,33 +397,9 @@ object Flags {
     // TODO(b/254512728): Tracking Bug
     @JvmField val NEW_BACK_AFFORDANCE = releasedFlag("new_back_affordance")
 
-    // TODO(b/255854141): Tracking Bug
-    @JvmField
-    val WM_ENABLE_PREDICTIVE_BACK_SYSUI =
-        unreleasedFlag("persist.wm.debug.predictive_back_sysui_enable", teamfood = true)
 
     // TODO(b/270987164): Tracking Bug
     @JvmField val TRACKPAD_GESTURE_FEATURES = releasedFlag("trackpad_gesture_features")
-
-    // TODO(b/263826204): Tracking Bug
-    @JvmField
-    val WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM =
-        unreleasedFlag("persist.wm.debug.predictive_back_bouncer_anim", teamfood = true)
-
-    // TODO(b/238475428): Tracking Bug
-    @JvmField
-    val WM_SHADE_ALLOW_BACK_GESTURE =
-        sysPropBooleanFlag("persist.wm.debug.shade_allow_back_gesture", default = false)
-
-    // TODO(b/238475428): Tracking Bug
-    @JvmField
-    val WM_SHADE_ANIMATE_BACK_GESTURE =
-        unreleasedFlag("persist.wm.debug.shade_animate_back_gesture", teamfood = false)
-
-    // TODO(b/265639042): Tracking Bug
-    @JvmField
-    val WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM =
-        unreleasedFlag("persist.wm.debug.predictive_back_qs_dialog_anim", teamfood = true)
 
     // TODO(b/273800936): Tracking Bug
     @JvmField val TRACKPAD_GESTURE_COMMON = releasedFlag("trackpad_gesture_common")
@@ -482,9 +407,6 @@ object Flags {
     // 1300 - screenshots
     // TODO(b/264916608): Tracking Bug
     @JvmField val SCREENSHOT_METADATA = unreleasedFlag("screenshot_metadata")
-
-    // TODO(b/266955521): Tracking bug
-    @JvmField val SCREENSHOT_DETECTION = releasedFlag("screenshot_detection")
 
     // TODO(b/251205791): Tracking Bug
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag("screenshot_app_clips")
@@ -521,6 +443,13 @@ object Flags {
     // TODO(b/283300105): Tracking Bug
     @JvmField val SCENE_CONTAINER_ENABLED = false
 
+    /**
+     * Whether the compose bouncer is enabled. This ensures ProGuard can
+     * remove unused code from our APK at compile time.
+     */
+    // TODO(b/280877228): Tracking Bug
+    @JvmField val COMPOSE_BOUNCER_ENABLED = false
+
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")
 
@@ -538,11 +467,6 @@ object Flags {
     @JvmField
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag("warn_on_blocking_binder_transactions")
-
-    // TODO(b/283071711): Tracking bug
-    @JvmField
-    val TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK =
-        unreleasedFlag("trim_resources_with_background_trim_on_lock")
 
     // TODO:(b/283203305): Tracking bug
     @JvmField val TRIM_FONT_CACHES_AT_UNLOCK = unreleasedFlag("trim_font_caches_on_unlock")
@@ -564,6 +488,13 @@ object Flags {
     val ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS =
         unreleasedFlag("enable_unfold_status_bar_animations")
 
+    // TODO(b/316157842): Tracking Bug
+    // Adds extra delay to notifications measure
+    @Keep
+    @JvmField
+    val ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE =
+        unreleasedFlag("enable_notifications_simulate_slow_measure")
+
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag("exp_flag_release")
 
@@ -581,10 +512,6 @@ object Flags {
     @JvmField
     val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION = unreleasedFlag("split_shade_subpixel_optimization")
 
-    // TODO(b/288868056): Tracking Bug
-    @JvmField
-    val PARTIAL_SCREEN_SHARING_TASK_SWITCHER = unreleasedFlag("pss_task_switcher")
-
     // TODO(b/278761837): Tracking Bug
     @JvmField val USE_NEW_ACTIVITY_STARTER = releasedFlag(name = "use_new_activity_starter")
 
@@ -600,29 +527,14 @@ object Flags {
     @JvmField
     val LOCKSCREEN_WALLPAPER_DREAM_ENABLED = unreleasedFlag("enable_lockscreen_wallpaper_dream")
 
-    // TODO(b/283084712): Tracking Bug
-    @JvmField val IMPROVED_HUN_ANIMATIONS = unreleasedFlag("improved_hun_animations")
-
     // TODO(b/283447257): Tracking bug
     @JvmField
     val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
         unreleasedFlag("bigpicture_notification_lazy_loading")
 
-    // TODO(b/292062937): Tracking bug
-    @JvmField
-    val NOTIFICATION_CLEARABLE_REFACTOR =
-            unreleasedFlag("notification_clearable_refactor")
-
     // TODO(b/283740863): Tracking Bug
     @JvmField
     val ENABLE_NEW_PRIVACY_DIALOG = releasedFlag("enable_new_privacy_dialog")
-
-    // TODO(b/289573946): Tracking Bug
-    @JvmField val PRECOMPUTED_TEXT = releasedFlag("precomputed_text")
-
-    // TODO(b/302087895): Tracking Bug
-    @JvmField val CALL_LAYOUT_ASYNC_SET_DATA =
-            unreleasedFlag("call_layout_async_set_data", teamfood = true)
 
     // TODO(b/302144438): Tracking Bug
     @JvmField val DECOUPLE_REMOTE_INPUT_DELEGATE_AND_CALLBACK_UPDATE =
@@ -649,10 +561,6 @@ object Flags {
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField
     val SHARE_WIFI_QS_BUTTON = releasedFlag("share_wifi_qs_button")
-
-    // TODO(b/287205379): Tracking bug
-    @JvmField
-    val QS_CONTAINER_GRAPH_OPTIMIZER = releasedFlag( "qs_container_graph_optimizer")
 
     /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
     @JvmField

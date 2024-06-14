@@ -16,22 +16,24 @@
 
 package com.android.protolog.tool
 
-import org.junit.Assert
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import com.android.protolog.tool.ProtoLogTool.PROTOLOG_IMPL_SRC_PATH
+import com.google.common.truth.Truth
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.OutputStream
 import java.util.jar.JarInputStream
+import java.util.regex.Pattern
+import org.junit.Assert
+import org.junit.Test
 
 class EndToEndTest {
 
     @Test
     fun e2e_transform() {
         val output = run(
-                src = "frameworks/base/org/example/Example.java" to """
+                srcs = mapOf("frameworks/base/org/example/Example.java" to """
                     package org.example;
                     import com.android.internal.protolog.common.ProtoLog;
                     import static com.android.internal.protolog.ProtoLogGroup.GROUP;
@@ -43,26 +45,29 @@ class EndToEndTest {
                             ProtoLog.d(GROUP, "Example: %s %d", argString, argInt);
                         }
                     }
-                """.trimIndent(),
+                """.trimIndent()),
                 logGroup = LogGroup("GROUP", true, false, "TAG_GROUP"),
                 commandOptions = CommandOptions(arrayOf("transform-protolog-calls",
                         "--protolog-class", "com.android.internal.protolog.common.ProtoLog",
-                        "--protolog-impl-class", "com.android.internal.protolog.ProtoLogImpl",
-                        "--protolog-cache-class",
-                        "com.android.server.wm.ProtoLogCache",
                         "--loggroups-class", "com.android.internal.protolog.ProtoLogGroup",
                         "--loggroups-jar", "not_required.jar",
+                        "--viewer-config-file-path", "not_required.pb",
                         "--output-srcjar", "out.srcjar",
                         "frameworks/base/org/example/Example.java"))
         )
         val outSrcJar = assertLoadSrcJar(output, "out.srcjar")
-        assertTrue(" 2066303299," in outSrcJar["frameworks/base/org/example/Example.java"]!!)
+        Truth.assertThat(outSrcJar["frameworks/base/org/example/Example.java"])
+                .containsMatch(Pattern.compile("\\{ String protoLogParam0 = " +
+                        "String\\.valueOf\\(argString\\); long protoLogParam1 = argInt; " +
+                        "com\\.android\\.internal\\.protolog.ProtoLogImpl_.*\\.d\\(" +
+                        "GROUP, -6872339441335321086L, 4, null, protoLogParam0, protoLogParam1" +
+                        "\\); \\}"))
     }
 
     @Test
     fun e2e_viewerConfig() {
         val output = run(
-                src = "frameworks/base/org/example/Example.java" to """
+                srcs = mapOf("frameworks/base/org/example/Example.java" to """
                     package org.example;
                     import com.android.internal.protolog.common.ProtoLog;
                     import static com.android.internal.protolog.ProtoLogGroup.GROUP;
@@ -74,17 +79,27 @@ class EndToEndTest {
                             ProtoLog.d(GROUP, "Example: %s %d", argString, argInt);
                         }
                     }
-                """.trimIndent(),
+                """.trimIndent()),
                 logGroup = LogGroup("GROUP", true, false, "TAG_GROUP"),
                 commandOptions = CommandOptions(arrayOf("generate-viewer-config",
                         "--protolog-class", "com.android.internal.protolog.common.ProtoLog",
                         "--loggroups-class", "com.android.internal.protolog.ProtoLogGroup",
                         "--loggroups-jar", "not_required.jar",
-                        "--viewer-conf", "out.json",
+                        "--viewer-config-type", "json",
+                        "--viewer-config", "out.json",
                         "frameworks/base/org/example/Example.java"))
         )
         val viewerConfigJson = assertLoadText(output, "out.json")
-        assertTrue("\"2066303299\"" in viewerConfigJson)
+        Truth.assertThat(viewerConfigJson).contains("""
+            "messages": {
+                "-6872339441335321086": {
+                  "message": "Example: %s %d",
+                  "level": "DEBUG",
+                  "group": "GROUP",
+                  "at": "org\/example\/Example.java"
+                }
+              }
+        """.trimIndent())
     }
 
     private fun assertLoadSrcJar(
@@ -112,21 +127,46 @@ class EndToEndTest {
     }
 
     fun run(
-        src: Pair<String, String>,
+        srcs: Map<String, String>,
         logGroup: LogGroup,
         commandOptions: CommandOptions
     ): Map<String, ByteArray> {
         val outputs = mutableMapOf<String, ByteArrayOutputStream>()
+
+        val srcs = srcs.toMutableMap()
+        srcs[PROTOLOG_IMPL_SRC_PATH] = """
+            package com.android.internal.protolog;
+
+            import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LEGACY_OUTPUT_FILE_PATH;
+            import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LEGACY_VIEWER_CONFIG_PATH;
+            import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.VIEWER_CONFIG_PATH;
+
+            import com.android.internal.protolog.common.ProtoLogToolInjected;
+
+            public class ProtoLogImpl {
+                @ProtoLogToolInjected(VIEWER_CONFIG_PATH)
+                private static String sViewerConfigPath;
+
+                @ProtoLogToolInjected(LEGACY_VIEWER_CONFIG_PATH)
+                private static String sLegacyViewerConfigPath;
+
+                @ProtoLogToolInjected(LEGACY_OUTPUT_FILE_PATH)
+                private static String sLegacyOutputFilePath;
+            }
+        """.trimIndent()
 
         ProtoLogTool.injector = object : ProtoLogTool.Injector {
             override fun fileOutputStream(file: String): OutputStream =
                     ByteArrayOutputStream().also { outputs[file] = it }
 
             override fun readText(file: File): String {
-                if (file.path == src.first) {
-                    return src.second
+                for (src in srcs.entries) {
+                    val filePath = src.key
+                    if (file.path == filePath) {
+                        return src.value
+                    }
                 }
-                throw FileNotFoundException("expected: ${src.first}, but was $file")
+                throw FileNotFoundException("$file not found in [${srcs.keys.joinToString()}].")
             }
 
             override fun readLogGroups(jarPath: String, className: String) = mapOf(

@@ -18,9 +18,8 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.mockPrimaryBouncerInteractor
 import com.android.systemui.flags.featureFlagsClassic
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -31,9 +30,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.bouncerToGoneFlows by Fixture {
     BouncerToGoneFlows(
-        interactor = keyguardTransitionInteractor,
         statusBarStateController = sysuiStatusBarStateController,
-        primaryBouncerInteractor = primaryBouncerInteractor,
+        primaryBouncerInteractor = mockPrimaryBouncerInteractor,
         keyguardDismissActionInteractor = mock(),
         featureFlags = featureFlagsClassic,
         shadeInteractor = shadeInteractor,

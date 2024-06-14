@@ -20,6 +20,29 @@ import android.util.Log
 import android.util.Log.TerribleFailureHandler
 import junit.framework.Assert
 
+/** Asserts that the given block does not make a call to Log.wtf */
+fun assertDoesNotLogWtf(
+    message: String = "Expected Log.wtf not to be called",
+    notLoggingBlock: () -> Unit,
+) {
+    var caught: TerribleFailureLog? = null
+    val newHandler = TerribleFailureHandler { tag, failure, system ->
+        caught = TerribleFailureLog(tag, failure, system)
+    }
+    val oldHandler = Log.setWtfHandler(newHandler)
+    try {
+        notLoggingBlock()
+    } finally {
+        Log.setWtfHandler(oldHandler)
+    }
+    caught?.let { throw AssertionError("$message: $it", it.failure) }
+}
+
+fun assertDoesNotLogWtf(
+    message: String = "Expected Log.wtf not to be called",
+    notLoggingRunnable: Runnable,
+) = assertDoesNotLogWtf(message = message) { notLoggingRunnable.run() }
+
 /**
  * Assert that the given block makes a call to Log.wtf
  *

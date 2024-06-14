@@ -49,6 +49,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.service.autofill.Flags;
 import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.Log;
@@ -3752,7 +3753,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         && !child.isActivityDeniedForAutofillForUnimportantView())
                     || (shouldIncludeAllChildrenViewWithAutofillTypeNotNone(afm)
                         && child.getAutofillType() != AUTOFILL_TYPE_NONE)
-                    || shouldIncludeAllChildrenViews(afm)){
+                    || shouldIncludeAllChildrenViews(afm)
+                    || (Flags.includeInvisibleViewGroupInAssistStructure()
+                    && child instanceof ViewGroup && child.getVisibility() != View.VISIBLE)) {
+                // If the child is a ViewGroup object and its visibility is not visible, include
+                // it as part of the assist structure. The children of these invisible ViewGroup
+                // objects are parsed and included in the assist structure. When the Autofill
+                // Provider determines the visibility of these children, it looks at their
+                // visibility as well as their parent's visibility. Omitting invisible parents
+                // will lead to the Autofill Provider incorrectly assuming that these children
+                // of invisible parents are actually visible.
                 list.add(child);
             } else if (child instanceof ViewGroup) {
                 ((ViewGroup) child).populateChildrenForAutofill(list, flags);

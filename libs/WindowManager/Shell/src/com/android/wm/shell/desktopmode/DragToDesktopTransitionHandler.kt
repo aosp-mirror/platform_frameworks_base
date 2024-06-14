@@ -26,6 +26,7 @@ import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
+import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP
@@ -33,10 +34,9 @@ import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_END_DRAG
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TransitionHandler
 import com.android.wm.shell.util.KtProtoLog
-import com.android.wm.shell.util.TransitionUtil
-import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator.Companion.DRAG_FREEFORM_SCALE
+import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import java.util.function.Supplier
 
 /**
@@ -69,6 +69,7 @@ class DragToDesktopTransitionHandler(
     private var dragToDesktopStateListener: DragToDesktopStateListener? = null
     private var splitScreenController: SplitScreenController? = null
     private var transitionState: TransitionState? = null
+    private lateinit var onTaskResizeAnimationListener: OnTaskResizeAnimationListener
 
     /** Whether a drag-to-desktop transition is in progress. */
     val inProgress: Boolean
@@ -84,6 +85,10 @@ class DragToDesktopTransitionHandler(
         splitScreenController = controller
     }
 
+    fun setOnTaskResizeAnimatorListener(listener: OnTaskResizeAnimationListener) {
+        onTaskResizeAnimationListener = listener
+    }
+
     /**
      * Starts a transition that performs a transient launch of Home so that Home is brought to the
      * front while still keeping the currently focused task that is being dragged resumed. This
@@ -96,10 +101,13 @@ class DragToDesktopTransitionHandler(
     fun startDragToDesktopTransition(
             taskId: Int,
             dragToDesktopAnimator: MoveToDesktopAnimator,
-            windowDecoration: DesktopModeWindowDecoration
     ) {
         if (inProgress) {
-            error("A drag to desktop is already in progress")
+            KtProtoLog.v(
+                    ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                    "DragToDesktop: Drag to desktop transition already in progress."
+            )
+            return
         }
 
         val options = ActivityOptions.makeBasic().apply {
@@ -124,14 +132,12 @@ class DragToDesktopTransitionHandler(
             TransitionState.FromSplit(
                     draggedTaskId = taskId,
                     dragAnimator = dragToDesktopAnimator,
-                    windowDecoration = windowDecoration,
                     startTransitionToken = startTransitionToken
             )
         } else {
             TransitionState.FromFullscreen(
                     draggedTaskId = taskId,
                     dragAnimator = dragToDesktopAnimator,
-                    windowDecoration = windowDecoration,
                     startTransitionToken = startTransitionToken
             )
         }
@@ -144,6 +150,12 @@ class DragToDesktopTransitionHandler(
      * inside the desktop drop zone.
      */
     fun finishDragToDesktopTransition(wct: WindowContainerTransaction) {
+        if (!inProgress) {
+            // Don't attempt to finish a drag to desktop transition since there is no transition in
+            // progress which means that the drag to desktop transition was never successfully
+            // started.
+            return
+        }
         if (requireTransitionState().startAborted) {
             // Don't attempt to complete the drag-to-desktop since the start transition didn't
             // succeed as expected. Just reset the state as if nothing happened.
@@ -161,6 +173,12 @@ class DragToDesktopTransitionHandler(
      * means the user wants to remain in their current windowing mode.
      */
     fun cancelDragToDesktopTransition() {
+        if (!inProgress) {
+            // Don't attempt to cancel a drag to desktop transition since there is no transition in
+            // progress which means that the drag to desktop transition was never successfully
+            // started.
+            return
+        }
         val state = requireTransitionState()
         if (state.startAborted) {
             // Don't attempt to cancel the drag-to-desktop since the start transition didn't
@@ -223,7 +241,7 @@ class DragToDesktopTransitionHandler(
                     show(change.leash)
                 }
             } else if (TransitionInfo.isIndependent(change, info)) {
-                // Root.
+                // Root(s).
                 when (state) {
                     is TransitionState.FromSplit -> {
                         state.splitRootChange = change
@@ -240,6 +258,9 @@ class DragToDesktopTransitionHandler(
                         }
                     }
                     is TransitionState.FromFullscreen -> {
+                        // Most of the time we expect one change/task here, which should be the
+                        // same that initiated the drag and that should be layered on top of
+                        // everything.
                         if (change.taskInfo?.taskId == state.draggedTaskId) {
                             state.draggedTaskChange = change
                             val bounds = change.endAbsBounds
@@ -249,7 +270,18 @@ class DragToDesktopTransitionHandler(
                                 show(change.leash)
                             }
                         } else {
-                            throw IllegalStateException("Expected root to be dragged task")
+                            // It's possible to see an additional change that isn't the dragged
+                            // task when the dragged task is translucent and so the task behind it
+                            // is included in the transition since it was visible and is now being
+                            // occluded by the Home task. Just layer it at the bottom and save it
+                            // in case we need to restore order if the drag is cancelled.
+                            state.otherRootChanges.add(change)
+                            val bounds = change.endAbsBounds
+                            startTransaction.apply {
+                                setLayer(change.leash, appLayers - i)
+                                setWindowCrop(change.leash, bounds.width(), bounds.height())
+                                show(change.leash)
+                            }
                         }
                     }
                 }
@@ -375,7 +407,7 @@ class DragToDesktopTransitionHandler(
             // Accept the merge by applying the merging transaction (applied by #showResizeVeil)
             // and finish callback. Show the veil and position the task at the first frame before
             // starting the final animation.
-            state.windowDecoration.showResizeVeil(t, animStartBounds)
+            onTaskResizeAnimationListener.onAnimationStart(state.draggedTaskId, t, animStartBounds)
             finishCallback.onTransitionFinished(null /* wct */)
 
             // Because the task surface was scaled down during the drag, we must use the animated
@@ -399,11 +431,15 @@ class DragToDesktopTransitionHandler(
                                         animBounds.height()
                                 )
                             }
-                            state.windowDecoration.updateResizeVeil(tx, animBounds)
+                            onTaskResizeAnimationListener.onBoundsChange(
+                                    state.draggedTaskId,
+                                    tx,
+                                    animBounds
+                            )
                         }
                         addListener(object : AnimatorListenerAdapter() {
                             override fun onAnimationEnd(animation: Animator) {
-                                state.windowDecoration.hideResizeVeil()
+                                onTaskResizeAnimationListener.onAnimationEnd(state.draggedTaskId)
                                 startTransitionFinishCb.onTransitionFinished(null /* null */)
                                 clearState()
                             }
@@ -499,8 +535,18 @@ class DragToDesktopTransitionHandler(
         val wct = WindowContainerTransaction()
         when (state) {
             is TransitionState.FromFullscreen -> {
+                // There may have been tasks sent behind home that are not the dragged task (like
+                // when the dragged task is translucent and that makes the task behind it visible).
+                // Restore the order of those first.
+                state.otherRootChanges.mapNotNull { it.container }.forEach { wc ->
+                    // TODO(b/322852244): investigate why even though these "other" tasks are
+                    //  reordered in front of home and behind the translucent dragged task, its
+                    //  surface is not visible on screen.
+                    wct.reorder(wc, true /* toTop */)
+                }
                 val wc = state.draggedTaskChange?.container
                         ?: error("Dragged task should be non-null before cancelling")
+                // Then the dragged task a the very top.
                 wct.reorder(wc, true /* toTop */)
             }
             is TransitionState.FromSplit -> {
@@ -536,7 +582,6 @@ class DragToDesktopTransitionHandler(
     sealed class TransitionState {
         abstract val draggedTaskId: Int
         abstract val dragAnimator: MoveToDesktopAnimator
-        abstract val windowDecoration: DesktopModeWindowDecoration
         abstract val startTransitionToken: IBinder
         abstract var startTransitionFinishCb: Transitions.TransitionFinishCallback?
         abstract var startTransitionFinishTransaction: SurfaceControl.Transaction?
@@ -549,7 +594,6 @@ class DragToDesktopTransitionHandler(
         data class FromFullscreen(
                 override val draggedTaskId: Int,
                 override val dragAnimator: MoveToDesktopAnimator,
-                override val windowDecoration: DesktopModeWindowDecoration,
                 override val startTransitionToken: IBinder,
                 override var startTransitionFinishCb: Transitions.TransitionFinishCallback? = null,
                 override var startTransitionFinishTransaction: SurfaceControl.Transaction? = null,
@@ -558,11 +602,11 @@ class DragToDesktopTransitionHandler(
                 override var draggedTaskChange: Change? = null,
                 override var cancelled: Boolean = false,
                 override var startAborted: Boolean = false,
+                var otherRootChanges: MutableList<Change> = mutableListOf()
         ) : TransitionState()
         data class FromSplit(
                 override val draggedTaskId: Int,
                 override val dragAnimator: MoveToDesktopAnimator,
-                override val windowDecoration: DesktopModeWindowDecoration,
                 override val startTransitionToken: IBinder,
                 override var startTransitionFinishCb: Transitions.TransitionFinishCallback? = null,
                 override var startTransitionFinishTransaction: SurfaceControl.Transaction? = null,

@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticati
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
@@ -50,6 +51,7 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var authController: AuthController
@@ -211,6 +213,39 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
 
             assertThat(authenticationStatus)
                 .isInstanceOf(FailFingerprintAuthenticationStatus::class.java)
+        }
+
+    @Test
+    fun onFingerprintFailed_failedAuthenticationStatusWithOtherStatuses() =
+        testScope.runTest {
+            val failStatus by
+                collectLastValue(
+                    underTest.authenticationStatus.filterIsInstance<
+                        FailFingerprintAuthenticationStatus
+                    >()
+                )
+            runCurrent()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateMonitorCallback.capture())
+            updateMonitorCallback.value.onBiometricAcquired(
+                BiometricSourceType.FINGERPRINT,
+                /* acquireInfo */ 0,
+            )
+            updateMonitorCallback.value.onBiometricAuthFailed(
+                BiometricSourceType.FINGERPRINT,
+            )
+            updateMonitorCallback.value.onBiometricHelp(
+                /* msgId */ 7,
+                /* errString */ "Not recognized.",
+                BiometricSourceType.FINGERPRINT,
+            )
+            updateMonitorCallback.value.onBiometricError(
+                /* msgId */ 7,
+                /* errString */ "Too many attempts.",
+                BiometricSourceType.FINGERPRINT,
+            )
+
+            assertThat(failStatus).isNotNull()
         }
 
     @Test

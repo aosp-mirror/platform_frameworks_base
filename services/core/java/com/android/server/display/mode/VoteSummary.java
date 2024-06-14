@@ -43,14 +43,14 @@ final class VoteSummary {
 
     final boolean mIsDisplayResolutionRangeVotingEnabled;
 
-    private final boolean mVsyncProximityVoteEnabled;
+    private final boolean mSupportedModesVoteEnabled;
     private final boolean mSupportsFrameRateOverride;
     private final boolean mLoggingEnabled;
 
-    VoteSummary(boolean isDisplayResolutionRangeVotingEnabled, boolean vsyncProximityVoteEnabled,
+    VoteSummary(boolean isDisplayResolutionRangeVotingEnabled, boolean supportedModesVoteEnabled,
             boolean loggingEnabled, boolean supportsFrameRateOverride) {
         mIsDisplayResolutionRangeVotingEnabled = isDisplayResolutionRangeVotingEnabled;
-        mVsyncProximityVoteEnabled = vsyncProximityVoteEnabled;
+        mSupportedModesVoteEnabled = supportedModesVoteEnabled;
         mLoggingEnabled = loggingEnabled;
         mSupportsFrameRateOverride = supportsFrameRateOverride;
         reset();
@@ -253,7 +253,7 @@ final class VoteSummary {
     }
 
     private boolean validateModeSupported(Display.Mode mode) {
-        if (supportedModes == null || !mVsyncProximityVoteEnabled) {
+        if (supportedModes == null || !mSupportedModesVoteEnabled) {
             return true;
         }
         for (SupportedModesVote.SupportedMode supportedMode : supportedModes) {
@@ -298,7 +298,7 @@ final class VoteSummary {
             return false;
         }
 
-        if (supportedModes != null && mVsyncProximityVoteEnabled && supportedModes.isEmpty()) {
+        if (supportedModes != null && mSupportedModesVoteEnabled && supportedModes.isEmpty()) {
             if (mLoggingEnabled) {
                 Slog.w(TAG, "Vote summary resulted in empty set (empty supportedModes)");
             }
@@ -370,7 +370,7 @@ final class VoteSummary {
                 + ", supportedModes=" + supportedModes
                 + ", mIsDisplayResolutionRangeVotingEnabled="
                 + mIsDisplayResolutionRangeVotingEnabled
-                + ", mVsyncProximityVoteEnabled=" + mVsyncProximityVoteEnabled
+                + ", mSupportedModesVoteEnabled=" + mSupportedModesVoteEnabled
                 + ", mSupportsFrameRateOverride=" + mSupportsFrameRateOverride + " }";
     }
 }

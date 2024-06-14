@@ -33,7 +33,6 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
-import android.util.Log;
 import android.util.MathUtils;
 
 import com.android.internal.util.Preconditions;
@@ -54,7 +53,6 @@ import java.util.StringJoiner;
  * <p>These effects may be any number of things, from single shot vibrations to complex waveforms.
  */
 public abstract class VibrationEffect implements Parcelable {
-    private static final String TAG = "VibrationEffect";
     // Stevens' coefficient to scale the perceived vibration intensity.
     private static final float SCALE_GAMMA = 0.65f;
     // If a vibration is playing for longer than 1s, it's probably not haptic feedback
@@ -397,32 +395,26 @@ public abstract class VibrationEffect implements Parcelable {
             return null;
         }
 
-        try {
-            final ContentResolver cr = context.getContentResolver();
-            Uri uncanonicalUri = cr.uncanonicalize(uri);
-            if (uncanonicalUri == null) {
-                // If we already had an uncanonical URI, it's possible we'll get null back here. In
-                // this case, just use the URI as passed in since it wasn't canonicalized in the
-                // first place.
-                uncanonicalUri = uri;
-            }
+        final ContentResolver cr = context.getContentResolver();
+        Uri uncanonicalUri = cr.uncanonicalize(uri);
+        if (uncanonicalUri == null) {
+            // If we already had an uncanonical URI, it's possible we'll get null back here. In
+            // this case, just use the URI as passed in since it wasn't canonicalized in the first
+            // place.
+            uncanonicalUri = uri;
+        }
 
-            for (int i = 0; i < uris.length && i < RINGTONES.length; i++) {
-                if (uris[i] == null) {
-                    continue;
-                }
-                Uri mappedUri = cr.uncanonicalize(Uri.parse(uris[i]));
-                if (mappedUri == null) {
-                    continue;
-                }
-                if (mappedUri.equals(uncanonicalUri)) {
-                    return get(RINGTONES[i]);
-                }
+        for (int i = 0; i < uris.length && i < RINGTONES.length; i++) {
+            if (uris[i] == null) {
+                continue;
             }
-        } catch (Exception e) {
-            // Don't give unexpected exceptions to callers if the Uri's ContentProvider is
-            // misbehaving - it's very unlikely to be mapped in that case anyway.
-            Log.e(TAG, "Exception getting default vibration for Uri " + uri, e);
+            Uri mappedUri = cr.uncanonicalize(Uri.parse(uris[i]));
+            if (mappedUri == null) {
+                continue;
+            }
+            if (mappedUri.equals(uncanonicalUri)) {
+                return get(RINGTONES[i]);
+            }
         }
         return null;
     }
@@ -599,9 +591,14 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * Scale given vibration intensity by the given factor.
      *
+     * <p> This scale is not necessarily linear and may apply a gamma correction to the scale
+     * factor before using it.
+     *
      * @param intensity   relative intensity of the effect, must be between 0 and 1
      * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
      *                    scale down the intensity, values larger than 1 will scale up
+     * @return the scaled intensity which will be values within [0, 1].
+     *
      * @hide
      */
     public static float scale(float intensity, float scaleFactor) {
@@ -629,6 +626,20 @@ public abstract class VibrationEffect implements Parcelable {
         float fx = (expX - 1f) / (expX + 1f);
 
         return MathUtils.constrain(a * fx, 0f, 1f);
+    }
+
+    /**
+     * Performs a linear scaling on the given vibration intensity by the given factor.
+     *
+     * @param intensity relative intensity of the effect, must be between 0 and 1.
+     * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
+     *                    scale down the intensity, values larger than 1 will scale up.
+     * @return the scaled intensity which will be values within [0, 1].
+     *
+     * @hide
+     */
+    public static float scaleLinearly(float intensity, float scaleFactor) {
+        return MathUtils.constrain(intensity * scaleFactor, 0f, 1f);
     }
 
     /**

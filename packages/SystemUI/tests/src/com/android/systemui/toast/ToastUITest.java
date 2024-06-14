@@ -18,7 +18,7 @@ package com.android.systemui.toast;
 
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
 
-import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -62,10 +62,10 @@ import android.widget.Toast;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.IntPair;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;

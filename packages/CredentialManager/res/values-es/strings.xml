@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Aunque nos dirigimos hacia un mundo sin contraseñas, estas seguirán estando disponibles junto con las llaves de acceso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Elige dónde guardar tus <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un gestor de contraseñas para guardar tu información e iniciar sesión más rápido la próxima vez"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"¿Crear llave de acceso para <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"¿Guardar la contraseña de <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"¿Crear llave de acceso para iniciar sesión en <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"¿Guardar contraseña para iniciar sesión en <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"¿Guardar la información de inicio de sesión de <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"llave de acceso"</string>
     <string name="password" msgid="6738570945182936667">"contraseña"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"De otro dispositivo"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Usar otro dispositivo"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ha cancelado la solicitud"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Opciones de inicio de sesión"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Más"</string>
 </resources>

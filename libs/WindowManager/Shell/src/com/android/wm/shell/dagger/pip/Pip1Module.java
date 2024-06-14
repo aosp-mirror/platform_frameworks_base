@@ -36,6 +36,7 @@ import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
@@ -124,12 +125,11 @@ public abstract class Pip1Module {
     static PhonePipMenuController providesPipPhoneMenuController(Context context,
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             SystemWindows systemWindows,
-            Optional<SplitScreenController> splitScreenOptional,
             PipUiEventLogger pipUiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return new PhonePipMenuController(context, pipBoundsState, pipMediaController,
-                systemWindows, splitScreenOptional, pipUiEventLogger, mainExecutor, mainHandler);
+                systemWindows, pipUiEventLogger, mainExecutor, mainHandler);
     }
 
     @WMSingleton
@@ -144,10 +144,12 @@ public abstract class Pip1Module {
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional) {
         return new PipTouchHandler(context, shellInit, menuPhoneController, pipBoundsAlgorithm,
                 pipBoundsState, sizeSpecSource, pipTaskOrganizer, pipMotionHelper,
-                floatingContentCoordinator, pipUiEventLogger, mainExecutor);
+                floatingContentCoordinator, pipUiEventLogger, mainExecutor,
+                pipPerfHintControllerOptional);
     }
 
     @WMSingleton
@@ -170,6 +172,7 @@ public abstract class Pip1Module {
             PipTransitionController pipTransitionController,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<SplitScreenController> splitScreenControllerOptional,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -177,8 +180,8 @@ public abstract class Pip1Module {
                 syncTransactionQueue, pipTransitionState, pipBoundsState, pipDisplayLayoutState,
                 pipBoundsAlgorithm, menuPhoneController, pipAnimationController,
                 pipSurfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
-                splitScreenControllerOptional, displayController, pipUiEventLogger,
-                shellTaskOrganizer, mainExecutor);
+                splitScreenControllerOptional, pipPerfHintControllerOptional, displayController,
+                pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 
     @WMSingleton
@@ -210,10 +213,11 @@ public abstract class Pip1Module {
             PipBoundsState pipBoundsState, PipTaskOrganizer pipTaskOrganizer,
             PhonePipMenuController menuController, PipSnapAlgorithm pipSnapAlgorithm,
             PipTransitionController pipTransitionController,
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional) {
         return new PipMotionHelper(context, pipBoundsState, pipTaskOrganizer,
                 menuController, pipSnapAlgorithm, pipTransitionController,
-                floatingContentCoordinator);
+                floatingContentCoordinator, pipPerfHintControllerOptional);
     }
 
     @WMSingleton

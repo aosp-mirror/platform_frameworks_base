@@ -28,10 +28,9 @@ import android.util.IndentingPrintWriter;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
-import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.RoundableState;
+import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 import com.android.systemui.util.DumpUtilsKt;
 
@@ -49,8 +48,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private float mOutlineAlpha = -1f;
     private boolean mAlwaysRoundBothCorners;
     private Path mTmpPath = new Path();
-    protected final RefactorFlag mImprovedHunAnimation =
-            RefactorFlag.forView(Flags.IMPROVED_HUN_ANIMATIONS);
 
     /**
      * {@code false} if the children views of the {@link ExpandableOutlineView} are translated when
@@ -126,7 +123,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             return EMPTY_PATH;
         }
         float bottomRadius = mAlwaysRoundBothCorners ? getMaxRadius() : getBottomCornerRadius();
-        if (!mImprovedHunAnimation.isEnabled() && (topRadius + bottomRadius > height)) {
+        if (!NotificationsImprovedHunAnimation.isEnabled() && (topRadius + bottomRadius > height)) {
             float overShoot = topRadius + bottomRadius - height;
             float currentTopRoundness = getTopRoundness();
             float currentBottomRoundness = getBottomRoundness();

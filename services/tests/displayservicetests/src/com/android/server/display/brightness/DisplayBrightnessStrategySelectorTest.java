@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.PowerManager;
 import android.view.Display;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -155,9 +156,22 @@ public final class DisplayBrightnessStrategySelectorTest {
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
                 DisplayManagerInternal.DisplayPowerRequest.class);
         displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+        displayPowerRequest.dozeScreenBrightness = 0.2f;
         when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
                 DISALLOW_AUTO_BRIGHTNESS_WHILE_DOZING);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
+                Display.STATE_DOZE), mDozeBrightnessModeStrategy);
+    }
+
+    @Test
+    public void selectStrategyDoesNotSelectDozeStrategyWhenInvalidBrightness() {
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
+                DisplayManagerInternal.DisplayPowerRequest.class);
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+        displayPowerRequest.dozeScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
+                DISALLOW_AUTO_BRIGHTNESS_WHILE_DOZING);
+        assertNotEquals(mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
                 Display.STATE_DOZE), mDozeBrightnessModeStrategy);
     }
 

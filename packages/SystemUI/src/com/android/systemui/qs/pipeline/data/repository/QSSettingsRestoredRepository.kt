@@ -6,6 +6,8 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.common.shared.model.PackageChangeModel.Empty.user
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -13,18 +15,28 @@ import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.data.repository.QSSettingsRestoredRepository.Companion.BUFFER_CAPACITY
 import com.android.systemui.qs.pipeline.data.repository.TilesSettingConverter.toTilesList
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /** Provides restored data (from Backup and Restore) for Quick Settings pipeline */
 interface QSSettingsRestoredRepository {
@@ -44,33 +56,86 @@ class QSSettingsRestoredBroadcastRepository
 @Inject
 constructor(
     broadcastDispatcher: BroadcastDispatcher,
+    private val deviceProvisionedController: DeviceProvisionedController,
     logger: QSPipelineLogger,
     @Application private val scope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : QSSettingsRestoredRepository {
 
-    override val restoreData =
-        flow {
-                val firstIntent = mutableMapOf<Int, Intent>()
-                broadcastDispatcher
-                    .broadcastFlow(INTENT_FILTER, UserHandle.ALL) { intent, receiver ->
-                        intent to receiver.sendingUserId
-                    }
-                    .filter { it.first.isCorrectSetting() }
-                    .collect { (intent, user) ->
-                        if (user !in firstIntent) {
-                            firstIntent[user] = intent
-                        } else {
-                            val firstRestored = firstIntent.remove(user)!!
-                            emit(processIntents(user, firstRestored, intent))
+    private val onUserSetupChangedForSomeUser =
+        conflatedCallbackFlow {
+                val callback =
+                    object : DeviceProvisionedController.DeviceProvisionedListener {
+                        override fun onUserSetupChanged() {
+                            trySend(Unit)
                         }
                     }
+                deviceProvisionedController.addCallback(callback)
+                awaitClose { deviceProvisionedController.removeCallback(callback) }
             }
-            .catch { Log.e(TAG, "Error parsing broadcast", it) }
+            .emitOnStart()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val restoreData =
+        run {
+                val mutex = Mutex()
+                val firstIntent = mutableMapOf<Int, Intent>()
+
+                val restoresFromTwoBroadcasts: Flow<RestoreData> =
+                    broadcastDispatcher
+                        .broadcastFlow(INTENT_FILTER, UserHandle.ALL) { intent, receiver ->
+                            intent to receiver.sendingUserId
+                        }
+                        .filter { it.first.isCorrectSetting() }
+                        .mapNotNull { (intent, user) ->
+                            mutex.withLock {
+                                if (user !in firstIntent) {
+                                    firstIntent[user] = intent
+                                    null
+                                } else {
+                                    val firstRestored = firstIntent.remove(user)!!
+                                    processIntents(user, firstRestored, intent)
+                                }
+                            }
+                        }
+                        .catch { Log.e(TAG, "Error parsing broadcast", it) }
+
+                val restoresFromUserSetup: Flow<RestoreData> =
+                    onUserSetupChangedForSomeUser
+                        .map {
+                            mutex.withLock {
+                                firstIntent
+                                    .filter { (userId, _) ->
+                                        deviceProvisionedController.isUserSetup(userId)
+                                    }
+                                    .onEach { firstIntent.remove(it.key) }
+                                    .map { processSingleIntent(it.key, it.value) }
+                                    .asFlow()
+                            }
+                        }
+                        .flattenConcat()
+                        .catch { Log.e(TAG, "Error parsing tiles intent after user setup", it) }
+                        .onEach { logger.logSettingsRestoredOnUserSetupComplete(it.userId) }
+                merge(restoresFromTwoBroadcasts, restoresFromUserSetup)
+            }
             .flowOn(backgroundDispatcher)
             .buffer(BUFFER_CAPACITY)
             .shareIn(scope, SharingStarted.Eagerly)
             .onEach(logger::logSettingsRestored)
+
+    private fun processSingleIntent(user: Int, intent: Intent): RestoreData {
+        intent.validateIntent()
+        if (intent.getStringExtra(Intent.EXTRA_SETTING_NAME) != TILES_SETTING) {
+            throw IllegalStateException(
+                "Single intent restored for user $user is not tiles: $intent"
+            )
+        }
+        return RestoreData(
+            (intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE) ?: "").toTilesList(),
+            emptySet(),
+            user,
+        )
+    }
 
     private fun processIntents(user: Int, intent1: Intent, intent2: Intent): RestoreData {
         intent1.validateIntent()

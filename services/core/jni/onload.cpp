@@ -55,6 +55,7 @@ int register_android_hardware_display_DisplayViewport(JNIEnv* env);
 int register_android_server_am_OomConnection(JNIEnv* env);
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env);
 int register_android_server_am_LowMemDetector(JNIEnv* env);
+int register_android_server_utils_AnrTimer(JNIEnv *env);
 int register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(JNIEnv* env);
 int register_com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker(JNIEnv* env);
 int register_android_server_com_android_server_pm_PackageManagerShellCommandDataLoader(JNIEnv* env);
@@ -69,6 +70,7 @@ int register_com_android_server_wm_TaskFpsCallbackController(JNIEnv* env);
 int register_com_android_server_display_DisplayControl(JNIEnv* env);
 int register_com_android_server_SystemClockTime(JNIEnv* env);
 int register_android_server_display_smallAreaDetectionController(JNIEnv* env);
+int register_com_android_server_accessibility_BrailleDisplayConnection(JNIEnv* env);
 };
 
 using namespace android;
@@ -116,6 +118,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_am_OomConnection(env);
     register_android_server_am_CachedAppOptimizer(env);
     register_android_server_am_LowMemDetector(env);
+    register_android_server_utils_AnrTimer(env);
     register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(env);
     register_com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker(env);
     register_android_server_com_android_server_pm_PackageManagerShellCommandDataLoader(env);
@@ -130,5 +133,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_com_android_server_display_DisplayControl(env);
     register_com_android_server_SystemClockTime(env);
     register_android_server_display_smallAreaDetectionController(env);
+    register_com_android_server_accessibility_BrailleDisplayConnection(env);
     return JNI_VERSION_1_4;
 }

@@ -1765,8 +1765,10 @@ public class CachedBluetoothDeviceTest {
     public void switchMemberDeviceContent_switchMainDevice_switchesSuccessful() {
         mCachedDevice.mRssi = RSSI_1;
         mCachedDevice.mJustDiscovered = JUSTDISCOVERED_1;
+        mCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
         mSubCachedDevice.mRssi = RSSI_2;
         mSubCachedDevice.mJustDiscovered = JUSTDISCOVERED_2;
+        mSubCachedDevice.setHearingAidInfo(getRightAshaHearingAidInfo());
         mCachedDevice.addMemberDevice(mSubCachedDevice);
 
         mCachedDevice.switchMemberDeviceContent(mSubCachedDevice);
@@ -1774,10 +1776,12 @@ public class CachedBluetoothDeviceTest {
         assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_2);
         assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
         assertThat(mCachedDevice.mDevice).isEqualTo(mSubDevice);
+        assertThat(mCachedDevice.getDeviceSide()).isEqualTo(HearingAidInfo.DeviceSide.SIDE_RIGHT);
         verify(mCachedDevice).fillData();
         assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_1);
         assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
         assertThat(mSubCachedDevice.mDevice).isEqualTo(mDevice);
+        assertThat(mSubCachedDevice.getDeviceSide()).isEqualTo(HearingAidInfo.DeviceSide.SIDE_LEFT);
         verify(mSubCachedDevice).fillData();
         assertThat(mCachedDevice.getMemberDevice().contains(mSubCachedDevice)).isTrue();
     }

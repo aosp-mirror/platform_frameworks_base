@@ -16,7 +16,7 @@
 
 package com.android.settingslib.enterprise;
 
-import android.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 class FakeDeviceAdminStringProvider implements DeviceAdminStringProvider {
 

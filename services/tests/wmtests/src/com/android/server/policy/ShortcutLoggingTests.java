@@ -95,8 +95,6 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         new int[]{KeyEvent.KEYCODE_NOTIFICATION},
                         KeyboardLogEvent.TOGGLE_NOTIFICATION_PANEL, KeyEvent.KEYCODE_NOTIFICATION,
                         0},
-                {"Meta + T -> Toggle Taskbar", new int[]{META_KEY, KeyEvent.KEYCODE_T},
-                        KeyboardLogEvent.TOGGLE_TASKBAR, KeyEvent.KEYCODE_T, META_ON},
                 {"Meta + Ctrl + S -> Take Screenshot",
                         new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_S},
                         KeyboardLogEvent.TAKE_SCREENSHOT, KeyEvent.KEYCODE_S, META_ON | CTRL_ON},
@@ -145,7 +143,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         KeyboardLogEvent.SYSTEM_MUTE, KeyEvent.KEYCODE_MUTE, 0},
                 {"Meta + Ctrl + DPAD_UP -> Split screen navigation",
                         new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_UP},
-                        KeyboardLogEvent.SPLIT_SCREEN_NAVIGATION, KeyEvent.KEYCODE_DPAD_UP,
+                        KeyboardLogEvent.MULTI_WINDOW_NAVIGATION, KeyEvent.KEYCODE_DPAD_UP,
                         META_ON | CTRL_ON},
                 {"Meta + Ctrl + DPAD_LEFT -> Split screen navigation",
                         new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_LEFT},
@@ -223,7 +221,11 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         KeyboardLogEvent.LAUNCH_DEFAULT_MAPS, KeyEvent.KEYCODE_M, META_ON},
                 {"Meta + S -> Launch Default Messaging App",
                         new int[]{META_KEY, KeyEvent.KEYCODE_S},
-                        KeyboardLogEvent.LAUNCH_DEFAULT_MESSAGING, KeyEvent.KEYCODE_S, META_ON}};
+                        KeyboardLogEvent.LAUNCH_DEFAULT_MESSAGING, KeyEvent.KEYCODE_S, META_ON},
+                {"Meta + Ctrl + DPAD_DOWN -> Enter desktop mode",
+                        new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_DOWN},
+                        KeyboardLogEvent.DESKTOP_MODE, KeyEvent.KEYCODE_DPAD_DOWN,
+                        META_ON | CTRL_ON}};
     }
 
     @Keep

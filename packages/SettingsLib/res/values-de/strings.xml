@@ -66,7 +66,7 @@
     <string name="connected_via_app" msgid="3532267661404276584">"Verbunden über <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Zum Anmelden tippen"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Kein Internet"</string>
-    <string name="private_dns_broken" msgid="1984159464346556931">"Auf den privaten DNS-Server kann nicht zugegriffen werden"</string>
+    <string name="private_dns_broken" msgid="1984159464346556931">"Auf den Server des privaten DNS kann nicht zugegriffen werden"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"Eingeschränkte Verbindung"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Kein Internet"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Anmeldung erforderlich"</string>
@@ -111,7 +111,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Dateiübertragung"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Eingabegerät"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetzugriff"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Zugriff auf Kontakte und Anrufliste geben"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Zugriff auf Kontakte und Anrufliste gewähren"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Die Daten werden z. B. für Anrufbenachrichtigungen verwendet"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Freigabe der Internetverbindung"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS"</string>
@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Bildverarbeitung"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Kopfhörer"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Eingabeperipherie"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"Hörgerät"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"WLAN: aus"</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"WLAN getrennt"</string>
@@ -300,10 +301,10 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Bluetooth-Audio-LDAC-Codec auslösen\nAuswahl: Wiedergabequalität"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Privates DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Privaten DNS-Modus auswählen"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Modus des privaten DNS auswählen"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Aus"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatisch"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostname des privaten DNS-Anbieters"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostname des Anbieters des privaten DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Verbindung nicht möglich"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
@@ -452,9 +453,11 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (Rot-Grün-Sehschwäche)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (Blau-Gelb-Sehschwäche)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farbkorrektur"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Die Farbkorrektur kann nützlich sein, wenn du:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Farben noch genauer sehen möchtest&lt;/li&gt; &lt;li&gt;&amp;nbsp;bestimmte Farben entfernen möchtest, um dich besser zu konzentrieren&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Die Farbkorrektur kann nützlich sein, wenn du:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Farben noch genauer sehen möchtest&lt;/li&gt; &lt;li&gt;&amp;nbsp;Bestimmte Farben entfernen möchtest, um dich besser zu konzentrieren&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Außer Kraft gesetzt von \"<xliff:g id="TITLE">%1$s</xliff:g>\""</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladevorgang zum Schutz des Akkus angehalten"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladezubehör prüfen"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Noch etwa <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Noch etwa <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Bei deinem Nutzungsmuster hast du noch ca. <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Voll in <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – voll in <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Laden wird optimiert"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – Laden wird optimiert"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – Wird geladen"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Unbekannt"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Wird aufgeladen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Schnelles Aufladen"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Kabelloses Laden"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Wird geladen"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Wird nicht geladen"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Verbunden, wird nicht geladen"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Verbunden, wird aber nicht geladen"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Aufgeladen"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Vollständig geladen"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Ladevorgang angehalten"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Durch den Administrator verwaltet"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Gesteuert durch eingeschränkte Einstellung"</string>
     <string name="disabled" msgid="8017887509554714950">"Deaktiviert"</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Jedes Mal fragen"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Bis zur Deaktivierung"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Gerade eben"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Dieses Smartphone"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Dieses Tablet"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Dieses Smartphone"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Dieses Tablet"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dock-Lautsprecher"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Externes Gerät"</string>
@@ -592,10 +596,10 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Nutzer"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Eingeschränkte Profile"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Neuen Nutzer hinzufügen?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kannst dieses Gerät zusammen mit anderen nutzen, indem du weitere Nutzer erstellst. Jeder erhält einen eigenen Bereich, in dem er Apps, den Hintergrund usw. personalisieren kann. Außerdem lassen sich Geräteeinstellungen wie WLAN ändern, die sich auf alle Nutzer auswirken.\n\nWenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren. Bedienungshilfen-Einstellungen und -Dienste werden möglicherweise nicht auf den neuen Nutzer übertragen."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kannst dieses Gerät zusammen mit anderen nutzen, indem du weitere Nutzer erstellst. Jeder erhält einen eigenen Bereich, in dem er Apps, den Hintergrund usw. personalisieren kann. Außerdem lassen sich Geräteeinstellungen wie WLAN ändern, die sich auf alle Nutzer auswirken.\n\nWenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren. Einstel­lun­gen und Dienste für die Bedie­nungs­hil­fen werden mög­licher­weise nicht auf den neuen Nutzer übertragen."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Wenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Diesen Nutzer als Administrator festlegen?"</string>
-    <string name="user_grant_admin_message" msgid="1673791931033486709">"Im Gegensatz zu anderen Nutzern haben Administratoren besondere Berechtigungen. Ein Administrator kann alle Nutzer verwalten, dieses Gerät aktualisieren oder zurücksetzen, Einstellungen ändern, alle installierten Apps sehen und für andere Administratorberechtigungen gewähren oder aufheben."</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Im Gegensatz zu anderen Nutzern haben Administratoren besondere Berechtigungen. Ein Administrator kann alle Nutzer verwalten, dieses Gerät aktualisieren oder zurücksetzen, Einstellungen ändern, alle installierten Apps sehen und anderen Administrator­­­berech­ti­gungen gewähren oder diese widerrufen."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Als Administrator festlegen"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Nutzer jetzt einrichten?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Die Person muss Zugang zum Gerät haben und bereit sein, ihren Bereich einzurichten."</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Nutzer konnte nicht erstellt werden"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Fehler beim Erstellen eines neuen Gasts"</string>
     <string name="user_nickname" msgid="262624187455825083">"Alias"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"Dein Name und Bild sind für alle Nutzer dieses Geräts sichtbar."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Nutzer hinzufügen"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Gast hinzufügen"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Gast entfernen"</string>
@@ -629,7 +634,7 @@
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Gastmodus beenden?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Hierdurch werden Apps und Daten der aktuellen Gastsitzung gelöscht"</string>
     <string name="grant_admin" msgid="4323199171790522574">"Ja, als Administrator festlegen"</string>
-    <string name="not_grant_admin" msgid="3557849576157702485">"Nein, nicht als Administrator festlegen"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Nein, nicht als Admini­stra­tor festlegen"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Beenden"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Gastaktivität speichern?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Speichere Aktivitäten der aktuellen Sitzung oder lösche alle Apps und Daten"</string>

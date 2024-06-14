@@ -16,19 +16,17 @@
 
 package com.android.mediaframeworktest.functional.mediaplayback;
 
+import android.content.Context;
+import android.test.ActivityInstrumentationTestCase2;
+import android.util.Log;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
+
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
 import com.android.mediaframeworktest.MediaProfileReader;
 import com.android.mediaframeworktest.functional.CodecTest;
-
-import android.content.Context;
-import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
-
-import java.io.File;
 
 /**
  * Junit / Instrumentation test case for the media player api

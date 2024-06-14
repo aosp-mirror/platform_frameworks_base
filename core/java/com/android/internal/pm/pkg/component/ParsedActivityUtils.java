@@ -241,6 +241,10 @@ public class ParsedActivityUtils {
 
             activity.setRequiredDisplayCategory(requiredDisplayCategory);
 
+            activity.setRequireContentUriPermissionFromCaller(sa.getInt(
+                    R.styleable.AndroidManifestActivity_requireContentUriPermissionFromCaller,
+                    ActivityInfo.CONTENT_URI_PERMISSION_NONE));
+
             return parseActivityOrAlias(activity, pkg, tag, parser, res, sa, receiver,
                     false /*isAlias*/, visibleToEphemeral, input,
                     R.styleable.AndroidManifestActivity_parentActivityName,

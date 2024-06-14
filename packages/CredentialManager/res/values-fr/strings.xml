@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Nous nous dirigeons vers un futur sans mots de passe, mais ceux-ci resteront disponibles en plus des clés d\'accès."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Choisissez où enregistrer vos <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Sélectionnez un gestionnaire de mots de passe pour enregistrer vos informations et vous connecter plus rapidement la prochaine fois"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Créer une clé d\'accès pour <xliff:g id="APPNAME">%1$s</xliff:g> ?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Enregistrer le mot de passe pour <xliff:g id="APPNAME">%1$s</xliff:g> ?"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Créer une clé d\'accès pour se connecter à <xliff:g id="APPNAME">%1$s</xliff:g> ?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Enregistrer un mot de passe pour se connecter à <xliff:g id="APPNAME">%1$s</xliff:g> ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Enregistrer les informations de connexion pour <xliff:g id="APPNAME">%1$s</xliff:g> ?"</string>
     <string name="passkey" msgid="632353688396759522">"clé d\'accès"</string>
     <string name="password" msgid="6738570945182936667">"mot de passe"</string>
@@ -74,7 +74,7 @@
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Déverrouiller les options de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Choisir une clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Choisir un mot de passe enregistré pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Choisir des informations de connexion enregistrées pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Choisissez les identifiants à utiliser pour la connexion à <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Choisir des infos de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Choisir une option pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Utiliser ces informations dans <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Depuis un autre appareil"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Utiliser un autre appareil"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Requête annulée par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Options de connexion"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Plus"</string>
 </resources>

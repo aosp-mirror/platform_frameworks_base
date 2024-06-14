@@ -115,6 +115,11 @@ public abstract class ShortcutServiceInternal {
     public abstract boolean hasShortcutHostPermission(int launcherUserId,
             @NonNull String callingPackage, int callingPid, int callingUid);
 
+    /**
+     * Returns whether or not Shortcuts are supported on Launcher Home Screen.
+     */
+    public abstract boolean areShortcutsSupportedOnHomeScreen(@UserIdInt int userId);
+
     public abstract void setShortcutHostPackage(@NonNull String type, @Nullable String packageName,
             int userId);
 

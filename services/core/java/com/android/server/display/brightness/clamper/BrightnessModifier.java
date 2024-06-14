@@ -26,7 +26,7 @@ import java.io.PrintWriter;
 /**
  * Modifies current brightness based on request
  */
-abstract class BrightnessModifier {
+abstract class BrightnessModifier implements BrightnessStateModifier {
 
     private boolean mApplied = false;
 
@@ -37,7 +37,8 @@ abstract class BrightnessModifier {
 
     abstract int getModifier();
 
-    void apply(DisplayManagerInternal.DisplayPowerRequest request,
+    @Override
+    public void apply(DisplayManagerInternal.DisplayPowerRequest request,
             DisplayBrightnessState.Builder stateBuilder) {
         // If low power mode is enabled, scale brightness by screenLowPowerBrightnessFactor
         // as long as it is above the minimum threshold.
@@ -57,8 +58,14 @@ abstract class BrightnessModifier {
         }
     }
 
-    void dump(PrintWriter pw) {
+    @Override
+    public void dump(PrintWriter pw) {
         pw.println("BrightnessModifier:");
         pw.println("  mApplied=" + mApplied);
+    }
+
+    @Override
+    public void stop() {
+        // do nothing
     }
 }

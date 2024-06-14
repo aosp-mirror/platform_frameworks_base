@@ -29,6 +29,31 @@ flag {
     description: "Restrict network access for certain applications in BFGS process state"
     bug: "304347838"
 }
+# Whether to use the new while-in-use / BG-FGS-start logic
+flag {
+     namespace: "backstage_power"
+     name: "new_fgs_restriction_logic"
+     description: "Enable the new FGS restriction logic"
+     bug: "276963716"
+}
+
+flag {
+    name: "service_binding_oom_adj_policy"
+    namespace: "backstage_power"
+    description: "Optimize the service bindings by different policies like skipping oom adjuster"
+    bug: "318717054"
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "avoid_repeated_bcast_re_enqueues"
+    description: "Avoid re-enqueueing a broadcast repeatedly"
+    bug: "319225224"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
 
 flag {
     namespace: "backstage_power"

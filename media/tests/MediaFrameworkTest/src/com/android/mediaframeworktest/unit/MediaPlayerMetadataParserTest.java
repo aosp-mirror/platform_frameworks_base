@@ -18,10 +18,9 @@ package com.android.mediaframeworktest.unit;
 import android.media.Metadata;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
-import java.util.Calendar;
+import androidx.test.filters.SmallTest;
+
 import java.util.Date;
 
 /*

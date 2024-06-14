@@ -16,10 +16,13 @@
 
 package android.app.servertransaction;
 
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.window.flags.Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG;
+
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.hardware.display.DisplayManager;
@@ -28,12 +31,14 @@ import android.hardware.display.IDisplayManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -49,6 +54,10 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @Presubmit
 public class ClientTransactionListenerControllerTest {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+
     @Mock
     private IDisplayManager mIDisplayManager;
     @Mock
@@ -60,12 +69,12 @@ public class ClientTransactionListenerControllerTest {
 
     @Before
     public void setup() {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
         MockitoAnnotations.initMocks(this);
         mDisplayManager = new DisplayManagerGlobal(mIDisplayManager);
         mHandler = getInstrumentation().getContext().getMainThreadHandler();
-        mController = spy(ClientTransactionListenerController.createInstanceForTesting(
-                mDisplayManager));
-        doReturn(true).when(mController).isSyncWindowConfigUpdateFlagEnabled();
+        mController = ClientTransactionListenerController.createInstanceForTesting(mDisplayManager);
     }
 
     @Test

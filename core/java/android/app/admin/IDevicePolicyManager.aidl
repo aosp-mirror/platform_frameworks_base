@@ -32,6 +32,7 @@ import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.PackagePolicy;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.FactoryResetProtectionPolicy;
+import android.app.admin.IAuditLogEventsCallback;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.app.admin.ManagedSubscriptionsPolicy;
@@ -392,7 +393,7 @@ interface IDevicePolicyManager {
     boolean getDoNotAskCredentialsOnBoot();
 
     void notifyPendingSystemUpdate(in SystemUpdateInfo info);
-    SystemUpdateInfo getPendingSystemUpdate(in ComponentName admin);
+    SystemUpdateInfo getPendingSystemUpdate(in ComponentName admin, in String callerPackage);
 
     void setPermissionPolicy(in ComponentName admin, in String callerPackage, int policy);
     int  getPermissionPolicy(in ComponentName admin);
@@ -440,6 +441,10 @@ interface IDevicePolicyManager {
     ParceledListSlice retrievePreRebootSecurityLogs(in ComponentName admin, String packageName);
     long forceNetworkLogs();
     long forceSecurityLogs();
+
+    void setAuditLogEnabled(String callerPackage, boolean enabled);
+    boolean isAuditLogEnabled(String callerPackage);
+    void setAuditLogEventsCallback(String callerPackage, in IAuditLogEventsCallback callback);
 
     boolean isUninstallInQueue(String packageName);
     void uninstallPackageWithActiveAdmins(String packageName);
@@ -576,6 +581,8 @@ interface IDevicePolicyManager {
     void setWifiSsidPolicy(String callerPackageName, in WifiSsidPolicy policy);
     WifiSsidPolicy getWifiSsidPolicy(String callerPackageName);
 
+    boolean isTheftDetectionTriggered(String callerPackageName);
+
     List<UserHandle> listForegroundAffiliatedUsers();
     void setDrawables(in List<DevicePolicyDrawableResource> drawables);
     void resetDrawables(in List<String> drawableIds);
@@ -610,4 +617,12 @@ interface IDevicePolicyManager {
     String getFinancedDeviceKioskRoleHolder(String callerPackageName);
 
     void calculateHasIncompatibleAccounts();
+
+    void setContentProtectionPolicy(in ComponentName who, String callerPackageName, int policy);
+    int getContentProtectionPolicy(in ComponentName who, String callerPackageName);
+
+    int[] getSubscriptionIds(String callerPackageName);
+
+    void setMaxPolicyStorageLimit(String packageName, int storageLimit);
+    int getMaxPolicyStorageLimit(String packageName);
 }

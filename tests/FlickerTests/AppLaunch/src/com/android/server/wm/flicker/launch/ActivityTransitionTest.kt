@@ -17,12 +17,12 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import android.tools.device.traces.parsers.toFlickerComponent
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.parsers.toFlickerComponent
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.TwoActivitiesAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions

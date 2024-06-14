@@ -56,6 +56,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.PrintWriterPrinter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1666,7 +1667,7 @@ public class AudioDeviceBroker {
         return mBtHelper.getLeAudioDeviceGroupId(device);
     }
 
-    /*package*/ List<String> getLeAudioGroupAddresses(int groupId) {
+    /*package*/ List<Pair<String, String>> getLeAudioGroupAddresses(int groupId) {
         return mBtHelper.getLeAudioGroupAddresses(groupId);
     }
 
@@ -1840,21 +1841,21 @@ public class AudioDeviceBroker {
                                         "msg: MSG_L_SET_BT_ACTIVE_DEVICE "
                                             + "received with null profile proxy: "
                                             + btInfo)).printLog(TAG));
-                                return;
-                            }
-                            @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
-                                    mBtHelper.getCodecWithFallback(btInfo.mDevice,
-                                            btInfo.mProfile, btInfo.mIsLeOutput,
-                                            "MSG_L_SET_BT_ACTIVE_DEVICE");
-                            mDeviceInventory.onSetBtActiveDevice(btInfo, codec,
-                                    (btInfo.mProfile
-                                            != BluetoothProfile.LE_AUDIO || btInfo.mIsLeOutput)
-                                            ? mAudioService.getBluetoothContextualVolumeStream()
-                                            : AudioSystem.STREAM_DEFAULT);
-                            if (btInfo.mProfile == BluetoothProfile.LE_AUDIO
-                                    || btInfo.mProfile == BluetoothProfile.HEARING_AID) {
-                                onUpdateCommunicationRouteClient(isBluetoothScoRequested(),
-                                        "setBluetoothActiveDevice");
+                            } else {
+                                @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
+                                        mBtHelper.getCodecWithFallback(btInfo.mDevice,
+                                                btInfo.mProfile, btInfo.mIsLeOutput,
+                                                "MSG_L_SET_BT_ACTIVE_DEVICE");
+                                mDeviceInventory.onSetBtActiveDevice(btInfo, codec,
+                                        (btInfo.mProfile
+                                                != BluetoothProfile.LE_AUDIO || btInfo.mIsLeOutput)
+                                                ? mAudioService.getBluetoothContextualVolumeStream()
+                                                : AudioSystem.STREAM_DEFAULT);
+                                if (btInfo.mProfile == BluetoothProfile.LE_AUDIO
+                                        || btInfo.mProfile == BluetoothProfile.HEARING_AID) {
+                                    onUpdateCommunicationRouteClient(isBluetoothScoRequested(),
+                                            "setBluetoothActiveDevice");
+                                }
                             }
                         }
                     }
@@ -2680,9 +2681,9 @@ public class AudioDeviceBroker {
         }
     }
 
-    List<String> getDeviceAddresses(AudioDeviceAttributes device) {
+    List<String> getDeviceIdentityAddresses(AudioDeviceAttributes device) {
         synchronized (mDeviceStateLock) {
-            return mDeviceInventory.getDeviceAddresses(device);
+            return mDeviceInventory.getDeviceIdentityAddresses(device);
         }
     }
 
@@ -2817,6 +2818,10 @@ public class AudioDeviceBroker {
 
     boolean isBluetoothAudioDeviceCategoryFixed(@NonNull String address) {
         return mDeviceInventory.isBluetoothAudioDeviceCategoryFixed(address);
+    }
+
+    /*package*/ boolean isSADevice(AdiDeviceState deviceState) {
+        return mAudioService.isSADevice(deviceState);
     }
 
     //------------------------------------------------

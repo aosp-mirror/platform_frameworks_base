@@ -101,6 +101,7 @@ public class BiometricPromptLayout extends LinearLayout {
             final View child = getChildAt(i);
 
             if (child.getId() == R.id.space_above_icon
+                    || child.getId() == R.id.space_above_content
                     || child.getId() == R.id.space_below_icon
                     || child.getId() == R.id.button_bar) {
                 child.measure(
@@ -113,6 +114,12 @@ public class BiometricPromptLayout extends LinearLayout {
                         MeasureSpec.makeMeasureSpec(iconView.getLayoutParams().width,
                                 MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(iconView.getLayoutParams().height,
+                                MeasureSpec.EXACTLY));
+            } else if (child.getId() == R.id.logo) {
+                child.measure(
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().width,
+                                MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
                                 MeasureSpec.EXACTLY));
             } else if (child.getId() == R.id.biometric_icon) {
                 child.measure(

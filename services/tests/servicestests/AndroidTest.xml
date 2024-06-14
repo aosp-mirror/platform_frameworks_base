@@ -36,7 +36,6 @@
         <option name="cleanup-apks" value="true" />
         <option name="install-arg" value="-t" />
         <option name="test-file-name" value="FrameworksServicesTests.apk" />
-        <option name="test-file-name" value="JobTestApp.apk" />
         <option name="test-file-name" value="SuspendTestApp.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp1.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp2.apk" />

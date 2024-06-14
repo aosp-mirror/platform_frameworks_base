@@ -26,12 +26,10 @@ import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.fragments.FragmentService
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener
 import com.android.systemui.plugins.qs.QS
@@ -43,6 +41,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -53,7 +52,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.mockito.Mockito.any
@@ -71,15 +69,16 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
-    @Mock lateinit var view: NotificationsQuickSettingsContainer
-    @Mock lateinit var navigationModeController: NavigationModeController
-    @Mock lateinit var overviewProxyService: OverviewProxyService
-    @Mock lateinit var shadeHeaderController: ShadeHeaderController
-    @Mock lateinit var shadeInteractor: ShadeInteractor
-    @Mock lateinit var fragmentService: FragmentService
-    @Mock lateinit var fragmentHostManager: FragmentHostManager
-    @Mock
-    lateinit var notificationStackScrollLayoutController: NotificationStackScrollLayoutController
+    private val view = mock<NotificationsQuickSettingsContainer>()
+    private val navigationModeController = mock<NavigationModeController>()
+    private val overviewProxyService = mock<OverviewProxyService>()
+    private val shadeHeaderController = mock<ShadeHeaderController>()
+    private val shadeInteractor = mock<ShadeInteractor>()
+    private val fragmentService = mock<FragmentService>()
+    private val fragmentHostManager = mock<FragmentHostManager>()
+    private val notificationStackScrollLayoutController =
+        mock<NotificationStackScrollLayoutController>()
+    private val largeScreenHeaderHelper = mock<LargeScreenHeaderHelper>()
 
     @Captor lateinit var navigationModeCaptor: ArgumentCaptor<ModeChangedListener>
     @Captor lateinit var taskbarVisibilityCaptor: ArgumentCaptor<OverviewProxyListener>
@@ -89,7 +88,6 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
     lateinit var underTest: NotificationsQSContainerController
 
-    private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var navigationModeCallback: ModeChangedListener
     private lateinit var taskbarVisibilityCallback: OverviewProxyListener
     private lateinit var windowInsetsCallback: Consumer<WindowInsets>
@@ -101,8 +99,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeSystemClock = FakeSystemClock()
         delayableExecutor = FakeExecutor(fakeSystemClock)
-        mSetFlagsRule.enableFlags(KeyguardShadeMigrationNssl.FLAG_NAME)
-        featureFlags = FakeFeatureFlags().apply { set(Flags.QS_CONTAINER_GRAPH_OPTIMIZER, true) }
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         mContext.ensureTestableResources()
         whenever(view.context).thenReturn(mContext)
         whenever(view.resources).thenReturn(mContext.resources)
@@ -120,9 +117,9 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
                 shadeInteractor,
                 fragmentService,
                 delayableExecutor,
-                featureFlags,
                 notificationStackScrollLayoutController,
-                ResourcesSplitShadeStateController()
+                ResourcesSplitShadeStateController(),
+                largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
             )
 
         overrideResource(R.dimen.split_shade_notifications_scrim_margin_bottom, SCRIM_MARGIN)
@@ -164,10 +161,14 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLargeScreen_updateResources_splitShadeHeightIsSet() {
+    fun testLargeScreen_updateResources_refactorFlagOff_splitShadeHeightIsSet_basedOnResource() {
+        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
+        val helperHeight = 30
+        val resourceHeight = 20
+        whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(helperHeight)
         overrideResource(R.bool.config_use_large_screen_shade_header, true)
         overrideResource(R.dimen.qs_header_height, 10)
-        overrideResource(R.dimen.large_screen_shade_header_height, 20)
+        overrideResource(R.dimen.large_screen_shade_header_height, resourceHeight)
 
         // ensure the estimated height (would be 3 here) wouldn't impact this test case
         overrideResource(R.dimen.large_screen_shade_header_min_height, 1)
@@ -177,7 +178,28 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
         val captor = ArgumentCaptor.forClass(ConstraintSet::class.java)
         verify(view).applyConstraints(capture(captor))
-        assertThat(captor.value.getHeight(R.id.split_shade_status_bar)).isEqualTo(20)
+        assertThat(captor.value.getHeight(R.id.split_shade_status_bar)).isEqualTo(resourceHeight)
+    }
+
+    @Test
+    fun testLargeScreen_updateResources_refactorFlagOn_splitShadeHeightIsSet_basedOnHelper() {
+        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
+        val helperHeight = 30
+        val resourceHeight = 20
+        whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(helperHeight)
+        overrideResource(R.bool.config_use_large_screen_shade_header, true)
+        overrideResource(R.dimen.qs_header_height, 10)
+        overrideResource(R.dimen.large_screen_shade_header_height, resourceHeight)
+
+        // ensure the estimated height (would be 3 here) wouldn't impact this test case
+        overrideResource(R.dimen.large_screen_shade_header_min_height, 1)
+        overrideResource(R.dimen.new_qs_header_non_clickable_element_height, 1)
+
+        underTest.updateResources()
+
+        val captor = ArgumentCaptor.forClass(ConstraintSet::class.java)
+        verify(view).applyConstraints(capture(captor))
+        assertThat(captor.value.getHeight(R.id.split_shade_status_bar)).isEqualTo(helperHeight)
     }
 
     @Test
@@ -402,10 +424,14 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLargeScreenLayout_qsAndNotifsTopMarginIsOfHeaderHeight() {
+    fun testLargeScreenLayout_refactorFlagOff_qsAndNotifsTopMarginIsOfHeaderResourceHeight() {
+        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         setLargeScreen()
-        val largeScreenHeaderHeight = 100
-        overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderHeight)
+        val largeScreenHeaderHelperHeight = 200
+        val largeScreenHeaderResourceHeight = 100
+        whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
+            .thenReturn(largeScreenHeaderHelperHeight)
+        overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderResourceHeight)
 
         // ensure the estimated height (would be 30 here) wouldn't impact this test case
         overrideResource(R.dimen.large_screen_shade_header_min_height, 10)
@@ -414,7 +440,27 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         underTest.updateResources()
 
         assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin)
-            .isEqualTo(largeScreenHeaderHeight)
+            .isEqualTo(largeScreenHeaderResourceHeight)
+    }
+
+    @Test
+    fun testLargeScreenLayout_refactorFlagOn_qsAndNotifsTopMarginIsOfHeaderHelperHeight() {
+        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
+        setLargeScreen()
+        val largeScreenHeaderHelperHeight = 200
+        val largeScreenHeaderResourceHeight = 100
+        whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
+            .thenReturn(largeScreenHeaderHelperHeight)
+        overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderResourceHeight)
+
+        // ensure the estimated height (would be 30 here) wouldn't impact this test case
+        overrideResource(R.dimen.large_screen_shade_header_min_height, 10)
+        overrideResource(R.dimen.new_qs_header_non_clickable_element_height, 10)
+
+        underTest.updateResources()
+
+        assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin)
+            .isEqualTo(largeScreenHeaderHelperHeight)
     }
 
     @Test
@@ -461,9 +507,9 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
                 shadeInteractor,
                 fragmentService,
                 delayableExecutor,
-                featureFlags,
                 notificationStackScrollLayoutController,
-                ResourcesSplitShadeStateController()
+                ResourcesSplitShadeStateController(),
+                largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
             )
         controller.updateConstraints()
 

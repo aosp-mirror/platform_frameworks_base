@@ -39,6 +39,7 @@ import java.util.Arrays;
 /**
  * ModemPowerProfile for handling the modem element in the power_profile.xml
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ModemPowerProfile {
     private static final String TAG = "ModemPowerProfile";
 

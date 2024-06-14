@@ -16,74 +16,86 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardSurfaceBehindRepository
+import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor.Companion.isSurfaceVisible
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
+import com.android.systemui.util.kotlin.toPx
+import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+
+/**
+ * Distance over which the surface behind the keyguard is animated in during a Y-translation
+ * animation.
+ */
+const val SURFACE_TRANSLATION_Y_DISTANCE_DP = 250
 
 @SysUISingleton
 class KeyguardSurfaceBehindInteractor
 @Inject
 constructor(
     private val repository: KeyguardSurfaceBehindRepository,
-    private val fromLockscreenInteractor: FromLockscreenTransitionInteractor,
-    private val fromPrimaryBouncerInteractor: FromPrimaryBouncerTransitionInteractor,
+    context: Context,
     transitionInteractor: KeyguardTransitionInteractor,
+    inWindowLauncherUnlockAnimationInteractor: Lazy<InWindowLauncherUnlockAnimationInteractor>,
+    swipeToDismissInteractor: SwipeToDismissInteractor,
+    notificationLaunchInteractor: NotificationLaunchAnimationInteractor,
 ) {
-
-    @OptIn(ExperimentalCoroutinesApi::class)
+    /**
+     * The view params to use for the surface. These params describe the alpha/translation values to
+     * apply, as well as animation parameters if necessary.
+     */
     val viewParams: Flow<KeyguardSurfaceBehindModel> =
-        transitionInteractor.isInTransitionToAnyState
-            .flatMapLatest { isInTransition ->
-                if (!isInTransition) {
-                    defaultParams
-                } else {
-                    combine(
-                        transitionSpecificViewParams,
-                        defaultParams,
-                    ) { transitionParams, defaultParams ->
-                        transitionParams ?: defaultParams
+        combine(
+                transitionInteractor.startedKeyguardTransitionStep,
+                transitionInteractor.currentKeyguardState,
+                notificationLaunchInteractor.isLaunchAnimationRunning,
+            ) { startedStep, currentState, notifAnimationRunning ->
+                // If we're in transition to GONE, special unlock animation params apply.
+                if (startedStep.to == KeyguardState.GONE && currentState != KeyguardState.GONE) {
+                    if (notifAnimationRunning) {
+                        // If the notification launch animation is running, leave the alpha at 0f.
+                        // The ActivityLaunchAnimator will morph it from the notification at the
+                        // appropriate time.
+                        return@combine KeyguardSurfaceBehindModel(
+                            alpha = 0f,
+                        )
+                    } else if (
+                        inWindowLauncherUnlockAnimationInteractor.get().isLauncherUnderneath()
+                    ) {
+                        // The Launcher icons have their own translation/alpha animations during the
+                        // in-window animation. We'll just make the surface visible and let Launcher
+                        // do its thing.
+                        return@combine KeyguardSurfaceBehindModel(
+                            alpha = 1f,
+                        )
+                    } else {
+                        // Otherwise, animate a surface in via alpha/translation, and apply the
+                        // swipe velocity (if available) to the translation spring.
+                        return@combine KeyguardSurfaceBehindModel(
+                            animateFromAlpha = 0f,
+                            alpha = 1f,
+                            animateFromTranslationY =
+                                SURFACE_TRANSLATION_Y_DISTANCE_DP.toPx(context).toFloat(),
+                            translationY = 0f,
+                            startVelocity = swipeToDismissInteractor.dismissFling.value?.velocity
+                                    ?: 0f,
+                        )
                     }
                 }
+
+                // Default to the visibility of the current state, with no animations.
+                KeyguardSurfaceBehindModel(alpha = if (isSurfaceVisible(currentState)) 1f else 0f)
             }
             .distinctUntilChanged()
 
     val isAnimatingSurface = repository.isAnimatingSurface
-
-    private val defaultParams =
-        transitionInteractor.finishedKeyguardState.map { state ->
-            KeyguardSurfaceBehindModel(
-                alpha =
-                    if (WindowManagerLockscreenVisibilityInteractor.isSurfaceVisible(state)) 1f
-                    else 0f
-            )
-        }
-
-    /**
-     * View params provided by the transition interactor for the most recently STARTED transition.
-     * This is used to run transition-specific animations on the surface.
-     *
-     * If null, there are no transition-specific view params needed for this transition and we will
-     * use a reasonable default.
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val transitionSpecificViewParams: Flow<KeyguardSurfaceBehindModel?> =
-        transitionInteractor.startedKeyguardTransitionStep.flatMapLatest { startedStep ->
-            when (startedStep.from) {
-                KeyguardState.LOCKSCREEN -> fromLockscreenInteractor.surfaceBehindModel
-                KeyguardState.PRIMARY_BOUNCER -> fromPrimaryBouncerInteractor.surfaceBehindModel
-                // Return null for other states, where no transition specific params are needed.
-                else -> flowOf(null)
-            }
-        }
 
     fun setAnimatingSurface(animating: Boolean) {
         repository.setAnimatingSurface(animating)

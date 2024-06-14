@@ -17,6 +17,7 @@ package com.android.server.location.contexthub;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.chre.flags.Flags;
 import android.hardware.contexthub.HostEndpointInfo;
 import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.contexthub.NanSessionRequest;
@@ -88,18 +89,25 @@ public abstract class IContextHubWrapper {
         /**
          * Handles a message from a nanoapp to a ContextHubClient.
          *
-         * @param hostEndpointId     The host endpoint ID of the recipient.
-         * @param message            The message from the nanoapp.
-         * @param nanoappPermissions The list of permissions held by the nanoapp.
-         * @param messagePermissions The list of permissions required to receive the message.
+         * @param hostEndpointId            The host endpoint ID of the recipient.
+         * @param message                   The message from the nanoapp.
+         * @param nanoappPermissions        The list of permissions held by the nanoapp.
+         * @param messagePermissions        The list of permissions required to receive the message.
          */
         void handleNanoappMessage(short hostEndpointId, NanoAppMessage message,
                 List<String> nanoappPermissions, List<String> messagePermissions);
 
         /**
-         * Handles a restart of the service
+         * Handles a restart of the service.
          */
         void handleServiceRestart();
+
+        /**
+         * Handles a message delivery status.
+         *
+         * @param messageDeliveryStatus     The message delivery status to deliver.
+         */
+        void handleMessageDeliveryStatus(MessageDeliveryStatus messageDeliveryStatus);
     }
 
     /**
@@ -308,15 +316,25 @@ public abstract class IContextHubWrapper {
     /**
      * Sends a message to the Context Hub.
      *
-     * @param hostEndpointId The host endpoint ID of the sender.
-     * @param contextHubId   The ID of the Context Hub to send the message to.
-     * @param message        The message to send.
+     * @param hostEndpointId         The host endpoint ID of the sender.
+     * @param contextHubId           The ID of the Context Hub to send the message to.
+     * @param message                The message to send.
      * @return the result of the message sending.
      */
     @ContextHubTransaction.Result
-    public abstract int sendMessageToContextHub(
-            short hostEndpointId, int contextHubId, NanoAppMessage message)
-            throws RemoteException;
+    public abstract int sendMessageToContextHub(short hostEndpointId, int contextHubId,
+            NanoAppMessage message) throws RemoteException;
+
+    /**
+     * Sends a transaction status to the Context Hub.
+     *
+     * @param contextHubId The ID of the context hub to sent the status to.
+     * @param status       The status of the transaction.
+     * @return the result of the message sending.
+     */
+    @ContextHubTransaction.Result
+    public abstract int sendMessageDeliveryStatusToContextHub(
+            int contextHubId, MessageDeliveryStatus status);
 
     /**
      * Loads a nanoapp on the Context Hub.
@@ -443,8 +461,7 @@ public abstract class IContextHubWrapper {
             public void handleContextHubMessage(android.hardware.contexthub.ContextHubMessage msg,
                     String[] msgContentPerms) {
                 mHandler.post(() -> {
-                    mCallback.handleNanoappMessage(
-                            (short) msg.hostEndPoint,
+                    mCallback.handleNanoappMessage((short) msg.hostEndPoint,
                             ContextHubServiceUtil.createNanoAppMessage(msg),
                             new ArrayList<>(Arrays.asList(msg.permissions)),
                             new ArrayList<>(Arrays.asList(msgContentPerms)));
@@ -468,9 +485,17 @@ public abstract class IContextHubWrapper {
                 // TODO(271471342): Implement
             }
 
-            public void handleMessageDeliveryStatus(char hostEndPointId,
+            public void handleMessageDeliveryStatus(
+                    char hostEndpointId,
                     MessageDeliveryStatus messageDeliveryStatus) {
-                // TODO(b/312417087): Implement reliable message support
+                if (Flags.reliableMessageImplementation()) {
+                    mHandler.post(() -> {
+                        mCallback.handleMessageDeliveryStatus(messageDeliveryStatus);
+                    });
+                } else {
+                    Log.w(TAG, "handleMessageDeliveryStatus called when the "
+                            + "reliableMessageImplementation flag is disabled");
+                }
             }
 
             public byte[] getUuid() {
@@ -624,17 +649,35 @@ public abstract class IContextHubWrapper {
         }
 
         @ContextHubTransaction.Result
-        public int sendMessageToContextHub(
-                short hostEndpointId, int contextHubId, NanoAppMessage message)
-                throws RemoteException {
+        public int sendMessageToContextHub(short hostEndpointId, int contextHubId,
+                NanoAppMessage message) throws RemoteException {
             android.hardware.contexthub.IContextHub hub = getHub();
             if (hub == null) {
                 return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
             }
 
             try {
-                hub.sendMessageToHub(contextHubId,
-                        ContextHubServiceUtil.createAidlContextHubMessage(hostEndpointId, message));
+                var msg = ContextHubServiceUtil.createAidlContextHubMessage(
+                        hostEndpointId, message);
+                hub.sendMessageToHub(contextHubId, msg);
+                return ContextHubTransaction.RESULT_SUCCESS;
+            } catch (RemoteException | ServiceSpecificException e) {
+                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            }
+        }
+
+        @ContextHubTransaction.Result
+        public int sendMessageDeliveryStatusToContextHub(int contextHubId,
+                MessageDeliveryStatus status) {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            }
+
+            try {
+                hub.sendMessageDeliveryStatusToHub(contextHubId, status);
                 return ContextHubTransaction.RESULT_SUCCESS;
             } catch (RemoteException | ServiceSpecificException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
@@ -847,8 +890,7 @@ public abstract class IContextHubWrapper {
 
             @Override
             public void handleClientMsg(ContextHubMsg message) {
-                mCallback.handleNanoappMessage(
-                        message.hostEndPoint,
+                mCallback.handleNanoappMessage(message.hostEndPoint,
                         ContextHubServiceUtil.createNanoAppMessage(message),
                         Collections.emptyList() /* nanoappPermissions */,
                         Collections.emptyList() /* messagePermissions */);
@@ -880,8 +922,7 @@ public abstract class IContextHubWrapper {
             @Override
             public void handleClientMsg_1_2(android.hardware.contexthub.V1_2.ContextHubMsg message,
                     ArrayList<String> messagePermissions) {
-                mCallback.handleNanoappMessage(
-                        message.msg_1_0.hostEndPoint,
+                mCallback.handleNanoappMessage(message.msg_1_0.hostEndPoint,
                         ContextHubServiceUtil.createNanoAppMessage(message.msg_1_0),
                         message.permissions, messagePermissions);
             }
@@ -899,13 +940,23 @@ public abstract class IContextHubWrapper {
         }
 
         @ContextHubTransaction.Result
-        public int sendMessageToContextHub(
-                short hostEndpointId, int contextHubId, NanoAppMessage message)
-                throws RemoteException {
+        public int sendMessageToContextHub(short hostEndpointId, int contextHubId,
+                NanoAppMessage message) throws RemoteException {
+            if (message.isReliable()) {
+                Log.e(TAG, "Reliable messages are only supported with the AIDL HAL");
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            }
             ContextHubMsg messageToNanoApp =
                     ContextHubServiceUtil.createHidlContextHubMessage(hostEndpointId, message);
             return ContextHubServiceUtil.toTransactionResult(
                     mHub.sendMessageToHub(contextHubId, messageToNanoApp));
+        }
+
+        @ContextHubTransaction.Result
+        public int sendMessageDeliveryStatusToContextHub(int contextHubId,
+                MessageDeliveryStatus status) {
+            // Only supported on the AIDL implementation.
+            return ContextHubTransaction.RESULT_FAILED_NOT_SUPPORTED;
         }
 
         @ContextHubTransaction.Result

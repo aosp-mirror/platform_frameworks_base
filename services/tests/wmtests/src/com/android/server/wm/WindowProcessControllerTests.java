@@ -38,7 +38,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -306,10 +305,12 @@ public class WindowProcessControllerTests extends WindowTestsBase {
 
     @Test
     public void testCachedStateConfigurationChange() throws RemoteException {
-        doNothing().when(mClientLifecycleManager).scheduleTransactionItemUnlocked(any(), any());
+        doNothing().when(mClientLifecycleManager).scheduleTransactionItemNow(any(), any());
         final IApplicationThread thread = mWpc.getThread();
         final Configuration newConfig = new Configuration(mWpc.getConfiguration());
         newConfig.densityDpi += 100;
+        mWpc.mWindowSession = getTestSession();
+        mWpc.mWindowSession.onWindowAdded(mock(WindowState.class));
         // Non-cached state will send the change directly.
         mWpc.setReportedProcState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
         clearInvocations(mClientLifecycleManager);
@@ -322,13 +323,13 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         newConfig.densityDpi += 100;
         mWpc.onConfigurationChanged(newConfig);
         verify(mClientLifecycleManager, never()).scheduleTransactionItem(eq(thread), any());
-        verify(mClientLifecycleManager, never()).scheduleTransactionItemUnlocked(eq(thread), any());
+        verify(mClientLifecycleManager, never()).scheduleTransactionItemNow(eq(thread), any());
 
         // Cached -> non-cached will send the previous deferred config immediately.
         mWpc.setReportedProcState(ActivityManager.PROCESS_STATE_RECEIVER);
         final ArgumentCaptor<ConfigurationChangeItem> captor =
                 ArgumentCaptor.forClass(ConfigurationChangeItem.class);
-        verify(mClientLifecycleManager).scheduleTransactionItemUnlocked(
+        verify(mClientLifecycleManager).scheduleTransactionItemNow(
                 eq(thread), captor.capture());
         final ClientTransactionHandler client = mock(ClientTransactionHandler.class);
         captor.getValue().preExecute(client);
@@ -432,7 +433,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         mWpc.updateAppSpecificSettingsForAllActivitiesInPackage(DEFAULT_COMPONENT_PACKAGE_NAME,
                 Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"),
                 GRAMMATICAL_GENDER_NOT_SPECIFIED);
-        verify(activity).ensureActivityConfiguration(anyInt(), anyBoolean());
+        verify(activity).ensureActivityConfiguration();
     }
 
     @Test
@@ -443,7 +444,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
                 Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"),
                 GRAMMATICAL_GENDER_NOT_SPECIFIED);
         verify(activity, never()).applyAppSpecificConfig(anyInt(), any(), anyInt());
-        verify(activity, never()).ensureActivityConfiguration(anyInt(), anyBoolean());
+        verify(activity, never()).ensureActivityConfiguration();
     }
 
     @Test

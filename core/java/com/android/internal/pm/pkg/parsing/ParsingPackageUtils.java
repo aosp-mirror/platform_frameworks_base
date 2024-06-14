@@ -46,6 +46,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
@@ -133,6 +134,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.PublicKey;
@@ -162,6 +164,8 @@ public class ParsingPackageUtils {
      * File name in an APK for the Android manifest.
      */
     public static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
+
+    public static final String APP_METADATA_FILE_NAME = "app.metadata";
 
     /**
      * Path prefix for apps on expanded storage
@@ -240,14 +244,6 @@ public class ParsingPackageUtils {
     public static final int PARSE_APK_IN_APEX = 1 << 9;
 
     public static final int PARSE_CHATTY = 1 << 31;
-
-    /** The total maximum number of activities, services, providers and activity-aliases */
-    private static final int MAX_NUM_COMPONENTS = 30000;
-    private static final String MAX_NUM_COMPONENTS_ERR_MSG =
-            "Total number of components has exceeded the maximum number: " + MAX_NUM_COMPONENTS;
-
-    /** The maximum permission name length. */
-    private static final int MAX_PERMISSION_NAME_LENGTH = 512;
 
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
             PARSE_CHATTY,
@@ -646,6 +642,12 @@ public class ParsingPackageUtils {
                 pkg.setSigningDetails(SigningDetails.UNKNOWN);
             }
 
+            if (Flags.aslInApkAppMetadataSource()) {
+                try (InputStream in = assets.open(APP_METADATA_FILE_NAME)) {
+                    pkg.setAppMetadataFileInApk(true);
+                } catch (Exception e) { }
+            }
+
             return input.success(pkg);
         } catch (Exception e) {
             return input.error(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
@@ -696,7 +698,8 @@ public class ParsingPackageUtils {
      */
     private ParseResult<ParsingPackage> parseBaseApk(ParseInput input, String apkPath,
             String codePath, Resources res, XmlResourceParser parser, int flags,
-            boolean shouldSkipComponents) throws XmlPullParserException, IOException {
+            boolean shouldSkipComponents)
+            throws XmlPullParserException, IOException {
         final String splitName;
         final String pkgName;
 
@@ -906,18 +909,9 @@ public class ParsingPackageUtils {
             if (result.isError()) {
                 return input.error(result);
             }
-
-            if (hasTooManyComponents(pkg)) {
-                return input.error(MAX_NUM_COMPONENTS_ERR_MSG);
-            }
         }
 
         return input.success(pkg);
-    }
-
-    private static boolean hasTooManyComponents(ParsingPackage pkg) {
-        return (pkg.getActivities().size() + pkg.getServices().size() + pkg.getProviders().size()
-                + pkg.getReceivers().size()) > MAX_NUM_COMPONENTS;
     }
 
     /**
@@ -971,6 +965,8 @@ public class ParsingPackageUtils {
 
         final boolean updatableSystem = parser.getAttributeBooleanValue(null /*namespace*/,
                 "updatableSystem", true);
+        final String emergencyInstaller = parser.getAttributeValue(null /*namespace*/,
+                "emergencyInstaller");
 
         pkg.setInstallLocation(anInteger(PARSE_DEFAULT_INSTALL_LOCATION,
                         R.styleable.AndroidManifest_installLocation, sa))
@@ -978,7 +974,8 @@ public class ParsingPackageUtils {
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
                 .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0)
-                .setUpdatableSystem(updatableSystem);
+                .setUpdatableSystem(updatableSystem)
+                .setEmergencyInstaller(emergencyInstaller);
 
         boolean foundApp = false;
         final int depth = parser.getDepth();
@@ -1362,11 +1359,6 @@ public class ParsingPackageUtils {
             // that may change.
             String name = sa.getNonResourceString(
                     R.styleable.AndroidManifestUsesPermission_name);
-            if (TextUtils.length(name) > MAX_PERMISSION_NAME_LENGTH) {
-                return input.error(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                        "The name in the <uses-permission> is greater than "
-                                + MAX_PERMISSION_NAME_LENGTH);
-            }
 
             int minSdkVersion =  parseMinOrMaxSdkVersion(sa,
                     R.styleable.AndroidManifestUsesPermission_minSdkVersion,
@@ -2283,9 +2275,6 @@ public class ParsingPackageUtils {
             if (result.isError()) {
                 return input.error(result);
             }
-            if (hasTooManyComponents(pkg)) {
-                return input.error(MAX_NUM_COMPONENTS_ERR_MSG);
-            }
         }
 
         if (TextUtils.isEmpty(pkg.getStaticSharedLibraryName()) && TextUtils.isEmpty(
@@ -2402,8 +2391,10 @@ public class ParsingPackageUtils {
                 .setRestrictedAccountType(string(R.styleable.AndroidManifestApplication_restrictedAccountType, sa))
                 .setZygotePreloadName(string(R.styleable.AndroidManifestApplication_zygotePreloadName, sa))
                 // Non-Config String
-                .setPermission(nonConfigString(0, R.styleable.AndroidManifestApplication_permission, sa));
-        // CHECKSTYLE:on
+                .setPermission(nonConfigString(0, R.styleable.AndroidManifestApplication_permission, sa))
+                .setAllowCrossUidActivitySwitchFromBelow(bool(true, R.styleable.AndroidManifestApplication_allowCrossUidActivitySwitchFromBelow, sa));
+
+       // CHECKSTYLE:on
         //@formatter:on
     }
 

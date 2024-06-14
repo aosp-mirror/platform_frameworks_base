@@ -195,6 +195,24 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="TextAppearance.AuthCredential.ContentViewTitle">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingHorizontal">24dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:gravity">start</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.ContentViewListItem">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingHorizontal">
+            @dimen/biometric_prompt_content_list_item_padding_horizontal
+        </item>
+        <item name="android:textSize">@dimen/biometric_prompt_content_list_item_text_size</item>
+        <item name="android:gravity">start</item>
+    </style>
+
     <style name="TextAppearance.AuthCredential.Error">
         <item name="android:paddingTop">6dp</item>
         <item name="android:paddingHorizontal">24dp</item>
@@ -292,6 +310,11 @@
         <item name="android:paddingLeft">30dp</item>
         <item name="android:paddingRight">30dp</item>
         <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="AuthCredentialContentLayoutStyle">
+        <item name="android:background">@color/biometric_prompt_content_background_color</item>
+        <item name="android:paddingHorizontal">@dimen/biometric_prompt_content_padding_horizontal</item>
     </style>
 
     <style name="DeviceManagementDialogTitle">
@@ -921,13 +944,31 @@
     <style name="Theme.ControlsActivity" parent="@android:style/Theme.DeviceDefault.NoActionBar">
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:windowContentTransitions">false</item>
-        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:statusBarColor">@android:color/black</item>
         <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen -->
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
+    </style>
+
+    <style name="Theme.VolumePanelActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
+
+    <style name="Theme.VolumePanelActivity.Popup" parent="@style/Theme.SystemUI.Dialog">
+        <item name="android:dialogCornerRadius">44dp</item>
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainerHigh
+        </item>
     </style>
 
     <style name="Theme.UserSwitcherFullscreenDialog" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
@@ -1539,5 +1580,9 @@
 
     <style name="Theme.PrivacyDialog" parent="@style/Theme.SystemUI.Dialog">
         <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainer</item>
+    </style>
+
+    <style name="Theme.SystemUI.Dialog.StickyKeys" parent="@style/Theme.SystemUI.Dialog">
+        <item name="android:colorBackground">@color/transparent</item>
     </style>
 </resources>

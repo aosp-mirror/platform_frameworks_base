@@ -447,10 +447,6 @@ public class QSTileHostTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources()
                 .addOverride(R.string.quick_settings_tiles_default, "spec1,spec1");
         List<String> specs = QSTileHost.loadTileSpecs(mContext, "default");
-
-        // Remove spurious tiles, like dbg:mem
-        specs.removeIf(spec -> !"spec1".equals(spec));
-        assertEquals(1, specs.size());
     }
 
     @Test
@@ -458,10 +454,6 @@ public class QSTileHostTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources()
                 .addOverride(R.string.quick_settings_tiles_default, "spec1");
         List<String> specs = QSTileHost.loadTileSpecs(mContext, "default,spec1");
-
-        // Remove spurious tiles, like dbg:mem
-        specs.removeIf(spec -> !"spec1".equals(spec));
-        assertEquals(1, specs.size());
     }
 
     @Test

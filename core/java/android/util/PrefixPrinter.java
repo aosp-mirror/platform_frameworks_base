@@ -22,6 +22,7 @@ package android.util;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PrefixPrinter implements Printer {
     private final Printer mPrinter;
     private final String mPrefix;

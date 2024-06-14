@@ -109,7 +109,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"मिडिया अडियो"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"फोन कलहरू"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फाइल स्थानान्तरण"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"इनपुट उपकरण"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"इनपुट डिभाइस"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इन्टरनेट एक्सेस"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"कन्ट्याक्ट र कल हिस्ट्री एक्सेस गर्ने अनुमति दिइयोस्"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"यो जानकारीको प्रयोग कल आएको जानकारी दिने लगायतका कुराका लागि प्रयोग गरिने छ"</string>
@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"छवि सम्बन्धी"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"हेडफोन"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"इनपुट सम्बन्धी बाह्य यन्त्र"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"श्रवण यन्त्रहरू"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"ब्लुटुथ"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi बन्द।"</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi जडान विच्छेद भयो।"</string>
@@ -335,7 +336,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB मा एपको पुष्टि गरियोस्"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक व्यवहार पत्ता लगाउन ADB/ADT बाट इन्स्टल गरिएका एपको जाँच गरियोस्"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नामकरण नगरिएका ब्लुटुथ डिभाइस (म्याक एड्रेस भएका मात्र) देखाइने छ"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"यसले रिमोट डिभाइसमा अत्याधिक ठूलो वा अनियन्त्रित भोल्युम बज्नेको जस्ता अवस्थामा ब्लुटुथको निरपेक्ष भोल्युम अफ गर्छ।"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"यसले रिमोट डिभाइसमा अत्यधिक ठूलो वा अनियन्त्रित भोल्युम बज्नेको जस्ता अवस्थामा ब्लुटुथको निरपेक्ष भोल्युम अफ गर्छ।"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लुटुथ Gabeldorsche सुविधाको स्ट्याक अन गरियोस्।"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"यसले परिष्कृत जडानको सुविधा सक्षम पार्छ।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानीय टर्मिनल"</string>
@@ -452,9 +453,11 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"प्रोटानेमली (रातो, हरियो)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ट्रिटानोमेली (निलो-पंहेलो)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"कलर करेक्सन"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"तपाईं रङ सच्याउने सुविधाका सहायताले निम्न कार्य गर्न सक्नुहुन्छ:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;अझ सटीक तरिकाले रङहरू हेर्न&lt;/li&gt; &lt;li&gt;&amp;nbsp;फोकस गर्नका लागि रङहरू हटाउन&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"तपाईं कलर करेक्सनका सहायताले निम्न कार्य गर्न सक्नुहुन्छ:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;अझ सटीक तरिकाले रङहरू हेर्न&lt;/li&gt; &lt;li&gt;&amp;nbsp;फोकस गर्नका लागि रङहरू हटाउन&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारा अधिरोहित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - ब्याट्री जोगाउन चार्जिङ होल्ड गरिएको छ"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिङ एक्सेसरी जाँच्नुहोस्"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"तपाईंको प्रयोगको आधारमा लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूरा चार्ज हुन <xliff:g id="TIME">%1$s</xliff:g> लाग्ने छ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूरा चार्ज हुन <xliff:g id="TIME">%2$s</xliff:g> लाग्ने छ"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज गर्ने प्रक्रिया अप्टिमाइज गरिएको छ"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज गर्ने प्रक्रिया अप्टिमाइज गरिएको छ"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज गरिँदै छ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हुँदै छ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"द्रुत गतिमा चार्ज गरिँदै छ"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेस तरिकाले चार्ज गरिँदै छ"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"चार्ज हुँदै छ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज भइरहेको छैन"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट गरिएको छ, चार्ज भइरहेको छैन"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"जोडिएको छ तर चार्ज गरिराखिएको छैन"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"चार्ज भयो"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"पूर्ण रूपमा चार्ज भएको छ"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"चार्जिङ होल्ड गरिएको छ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"प्रशासकद्वारा नियन्त्रित"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"प्रतिबन्धित सेटिङले नियन्त्रण गरेको"</string>
     <string name="disabled" msgid="8017887509554714950">"असक्षम पारियो"</string>
@@ -514,7 +518,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"सिष्टममा भएका भाषा प्रयोग गरियोस्"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>का लागि सेटिङहरू खोल्न विफल भयो।"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"यस इनपुट विधिले तपाईँले टाइप गर्नुहुने सम्पूर्ण पाठ बटु्ल्न सक्छ, व्यक्तिगत डेटा जस्तै पासवर्ड र क्रेडिट कार्ड नम्बर लगायतका। यो <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> अनुप्रयोगबाट आउँदछ। यो इनपुट विधि प्रयोग गर्ने हो?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"टिपोट: पुनःबुट पछि तपाईँले आफ्नो फोनलाई अनलक नगरेसम्म यो एप सुरु हुन सक्दैन"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"नोट: रिबुट गरेपछि तपाईंले आफ्नो फोन अनलक नगरेसम्म यो एप सुरु हुँदैन"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS दर्ताको स्थिति"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"दर्ता गरिएको"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"दर्ता नगरिएको"</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"प्रत्येक पटक सोधियोस्"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"तपाईंले अफ नगरेसम्म"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"अहिले भर्खरै"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"यो फोन"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"यो ट्याब्लेट"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"यो फोन"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"यो ट्याब्लेट"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"डक स्पिकर"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"बाह्य डिभाइस"</string>
@@ -605,7 +609,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"थप्नुहोस्"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"नयाँ प्रयोगकर्ता"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"नयाँ प्रोफाइल"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"प्रयोगकर्ता जानकारी"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"प्रयोगकर्ताको विवरण"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफाइलको जानकारी"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"निषेधयुक्त प्रोफाइल बनाउनु अघि तपाईँको एप र व्यक्तिगत डेटा सुरक्षा गर्नाका लागि तपाईँले स्क्रिन लक सेटअप गर्नु पर्दछ ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"लक सेट गर्नुहोस्"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"नयाँ प्रयोगकर्ता सिर्जना गर्न सकिएन"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"नयाँ अतिथि बनाउन सकिएन"</string>
     <string name="user_nickname" msgid="262624187455825083">"उपनाम"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"यो डिभाइस प्रयोग गर्ने सबै जना मान्छे तपाईंको नाम र फोटो देख्ने छन्।"</string>
     <string name="user_add_user" msgid="7876449291500212468">"प्रयोगकर्ता कनेक्ट गर्नुहोस्"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि कनेक्ट गर्नुहोस्"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"गेस्ट मोडबाट बाहिर निस्कियोस्"</string>

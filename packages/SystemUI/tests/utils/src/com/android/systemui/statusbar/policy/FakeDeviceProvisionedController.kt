@@ -2,30 +2,45 @@ package com.android.systemui.statusbar.policy
 
 class FakeDeviceProvisionedController : DeviceProvisionedController {
     @JvmField var deviceProvisioned = true
+    @JvmField var currentUser = 0
+
+    private val callbacks = mutableSetOf<DeviceProvisionedController.DeviceProvisionedListener>()
+    private val usersSetup = mutableSetOf<Int>()
 
     override fun addCallback(listener: DeviceProvisionedController.DeviceProvisionedListener) {
-        TODO("Not yet implemented")
+        callbacks.add(listener)
     }
 
     override fun removeCallback(listener: DeviceProvisionedController.DeviceProvisionedListener) {
-        TODO("Not yet implemented")
+        callbacks.remove(listener)
     }
 
     override fun isDeviceProvisioned() = deviceProvisioned
 
+    @Deprecated("Deprecated in Java")
     override fun getCurrentUser(): Int {
-        TODO("Not yet implemented")
+        return currentUser
     }
 
     override fun isUserSetup(user: Int): Boolean {
-        TODO("Not yet implemented")
+        return user in usersSetup
     }
 
     override fun isCurrentUserSetup(): Boolean {
-        TODO("Not yet implemented")
+        return currentUser in usersSetup
     }
 
     override fun isFrpActive(): Boolean {
         TODO("Not yet implemented")
+    }
+
+    fun setCurrentUser(userId: Int) {
+        currentUser = userId
+        callbacks.toSet().forEach { it.onUserSwitched() }
+    }
+
+    fun setUserSetup(userId: Int) {
+        usersSetup.add(userId)
+        callbacks.toSet().forEach { it.onUserSetupChanged() }
     }
 }

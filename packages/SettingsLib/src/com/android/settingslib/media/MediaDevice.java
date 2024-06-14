@@ -121,16 +121,13 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     protected final Context mContext;
     protected final MediaRoute2Info mRouteInfo;
     protected final RouteListingPreference.Item mItem;
-    protected final String mPackageName;
 
     MediaDevice(
             Context context,
             MediaRoute2Info info,
-            String packageName,
             RouteListingPreference.Item item) {
         mContext = context;
         mRouteInfo = info;
-        mPackageName = packageName;
         mItem = item;
         setType(info);
     }
@@ -396,12 +393,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             return true;
         }
         return mRouteInfo.getVolumeHandling() == MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
-    }
-
-    /**
-     * Stop transfer MediaDevice
-     */
-    public void disconnect() {
     }
 
     /**

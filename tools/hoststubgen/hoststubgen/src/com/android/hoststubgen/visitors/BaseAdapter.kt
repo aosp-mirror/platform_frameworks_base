@@ -16,6 +16,7 @@
 package com.android.hoststubgen.visitors
 
 import com.android.hoststubgen.HostStubGenErrors
+import com.android.hoststubgen.HostStubGenStats
 import com.android.hoststubgen.LogLevel
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.UnifiedVisitor
@@ -50,6 +51,7 @@ abstract class BaseAdapter (
      */
     data class Options (
             val errors: HostStubGenErrors,
+            val stats: HostStubGenStats?,
             val enablePreTrace: Boolean,
             val enablePostTrace: Boolean,
             val enableNonStubMethodCallDetection: Boolean,
@@ -176,6 +178,7 @@ abstract class BaseAdapter (
         }
         val p = filter.getPolicyForMethod(currentClassName, name, descriptor)
         log.d("visitMethod: %s%s [%x] [%s] Policy: %s", name, descriptor, access, signature, p)
+        options.stats?.onVisitPolicyForMethod(currentClassName, name, descriptor, p, access)
 
         log.withIndent {
             // If it's a substitute-from method, then skip (== remove).

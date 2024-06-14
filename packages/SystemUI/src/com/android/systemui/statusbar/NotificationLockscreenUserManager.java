@@ -44,6 +44,13 @@ public interface NotificationLockscreenUserManager {
 
     boolean isCurrentProfile(int userId);
 
+    /**
+     *
+     * @param userId user Id
+     * @return true if user profile is running.
+     */
+    boolean isProfileAvailable(int userId);
+
     /** Adds a listener to be notified when the current user changes. */
     void addUserChangedListener(UserChangedListener listener);
 

@@ -18,6 +18,7 @@ package com.android.systemui.util.kotlin
 
 import android.view.View
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -73,6 +74,23 @@ fun <T> collectFlow(
 ) {
     view.repeatWhenAttached(coroutineContext) {
         repeatOnLifecycle(state) { flow.collect { consumer.accept(it) } }
+    }
+}
+
+/**
+ * Collect information for the given [flow], calling [consumer] for each emitted event. Defaults to
+ * [LifeCycle.State.CREATED] which is mapped over from the equivalent definition for collecting the
+ * flow on a view.
+ */
+@JvmOverloads
+fun <T> collectFlow(
+    lifecycle: Lifecycle,
+    flow: Flow<T>,
+    consumer: Consumer<T>,
+    state: Lifecycle.State = Lifecycle.State.CREATED,
+) {
+    lifecycle.coroutineScope.launch {
+        lifecycle.repeatOnLifecycle(state) { flow.collect { consumer.accept(it) } }
     }
 }
 

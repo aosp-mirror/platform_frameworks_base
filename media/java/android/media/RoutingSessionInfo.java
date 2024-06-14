@@ -16,18 +16,25 @@
 
 package android.media;
 
+import static com.android.media.flags.Flags.FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES;
+
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,6 +61,33 @@ public final class RoutingSessionInfo implements Parcelable {
 
     private static final String KEY_GROUP_ROUTE = "androidx.mediarouter.media.KEY_GROUP_ROUTE";
     private static final String KEY_VOLUME_HANDLING = "volumeHandling";
+
+    /**
+     * Indicates that the transfer happened by the default logic without explicit system's or user's
+     * request.
+     *
+     * <p>For example, an automatically connected Bluetooth device will have this transfer reason.
+     */
+    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
+    public static final int TRANSFER_REASON_FALLBACK = 0;
+
+    /** Indicates that the transfer happened from within a privileged application. */
+    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
+    public static final int TRANSFER_REASON_SYSTEM_REQUEST = 1;
+
+    /** Indicates that the transfer happened from a non-privileged app. */
+    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
+    public static final int TRANSFER_REASON_APP = 2;
+
+    /**
+     * Indicates the transfer reason.
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
+    @IntDef(value = {TRANSFER_REASON_FALLBACK, TRANSFER_REASON_SYSTEM_REQUEST, TRANSFER_REASON_APP})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TransferReason {}
 
     @NonNull
     final String mId;
@@ -82,6 +116,10 @@ public final class RoutingSessionInfo implements Parcelable {
     final Bundle mControlHints;
     final boolean mIsSystemSession;
 
+    @TransferReason final int mTransferReason;
+
+    @Nullable final UserHandle mTransferInitiatorUserHandle;
+    @Nullable final String mTransferInitiatorPackageName;
 
     RoutingSessionInfo(@NonNull Builder builder) {
         Objects.requireNonNull(builder, "builder must not be null.");
@@ -116,6 +154,9 @@ public final class RoutingSessionInfo implements Parcelable {
                         volumeAdjustmentForRemoteGroupSessions);
 
         mControlHints = updateVolumeHandlingInHints(builder.mControlHints, mVolumeHandling);
+        mTransferReason = builder.mTransferReason;
+        mTransferInitiatorUserHandle = builder.mTransferInitiatorUserHandle;
+        mTransferInitiatorPackageName = builder.mTransferInitiatorPackageName;
     }
 
     RoutingSessionInfo(@NonNull Parcel src) {
@@ -140,6 +181,9 @@ public final class RoutingSessionInfo implements Parcelable {
 
         mControlHints = src.readBundle();
         mIsSystemSession = src.readBoolean();
+        mTransferReason = src.readInt();
+        mTransferInitiatorUserHandle = UserHandle.readFromParcel(src);
+        mTransferInitiatorPackageName = src.readString();
     }
 
     @Nullable
@@ -330,6 +374,27 @@ public final class RoutingSessionInfo implements Parcelable {
         return mIsSystemSession;
     }
 
+    /** Returns the transfer reason for this routing session. */
+    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
+    @TransferReason
+    public int getTransferReason() {
+        return mTransferReason;
+    }
+
+    /** @hide */
+    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
+    @Nullable
+    public UserHandle getTransferInitiatorUserHandle() {
+        return mTransferInitiatorUserHandle;
+    }
+
+    /** @hide */
+    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
+    @Nullable
+    public String getTransferInitiatorPackageName() {
+        return mTransferInitiatorPackageName;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -351,6 +416,9 @@ public final class RoutingSessionInfo implements Parcelable {
         dest.writeInt(mVolume);
         dest.writeBundle(mControlHints);
         dest.writeBoolean(mIsSystemSession);
+        dest.writeInt(mTransferReason);
+        UserHandle.writeToParcel(mTransferInitiatorUserHandle, dest);
+        dest.writeString(mTransferInitiatorPackageName);
     }
 
     /**
@@ -379,6 +447,9 @@ public final class RoutingSessionInfo implements Parcelable {
         pw.println(indent + "mVolume=" + mVolume);
         pw.println(indent + "mControlHints=" + mControlHints);
         pw.println(indent + "mIsSystemSession=" + mIsSystemSession);
+        pw.println(indent + "mTransferReason=" + mTransferReason);
+        pw.println(indent + "mtransferInitiatorUserHandle=" + mTransferInitiatorUserHandle);
+        pw.println(indent + "mtransferInitiatorPackageName=" + mTransferInitiatorPackageName);
     }
 
     @Override
@@ -406,39 +477,69 @@ public final class RoutingSessionInfo implements Parcelable {
                 && Objects.equals(mTransferableRoutes, other.mTransferableRoutes)
                 && (mVolumeHandling == other.mVolumeHandling)
                 && (mVolumeMax == other.mVolumeMax)
-                && (mVolume == other.mVolume);
+                && (mVolume == other.mVolume)
+                && (mTransferReason == other.mTransferReason)
+                && Objects.equals(mTransferInitiatorUserHandle, other.mTransferInitiatorUserHandle)
+                && Objects.equals(
+                mTransferInitiatorPackageName, other.mTransferInitiatorPackageName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mName, mOwnerPackageName, mClientPackageName, mProviderId,
-                mSelectedRoutes, mSelectableRoutes, mDeselectableRoutes, mTransferableRoutes,
-                mVolumeMax, mVolumeHandling, mVolume);
+        return Objects.hash(
+                mId,
+                mName,
+                mOwnerPackageName,
+                mClientPackageName,
+                mProviderId,
+                mSelectedRoutes,
+                mSelectableRoutes,
+                mDeselectableRoutes,
+                mTransferableRoutes,
+                mVolumeMax,
+                mVolumeHandling,
+                mVolume,
+                mTransferReason,
+                mTransferInitiatorUserHandle,
+                mTransferInitiatorPackageName);
     }
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder()
-                .append("RoutingSessionInfo{ ")
-                .append("sessionId=").append(getId())
-                .append(", name=").append(getName())
-                .append(", clientPackageName=").append(getClientPackageName())
-                .append(", selectedRoutes={")
-                .append(String.join(",", getSelectedRoutes()))
-                .append("}")
-                .append(", selectableRoutes={")
-                .append(String.join(",", getSelectableRoutes()))
-                .append("}")
-                .append(", deselectableRoutes={")
-                .append(String.join(",", getDeselectableRoutes()))
-                .append("}")
-                .append(", transferableRoutes={")
-                .append(String.join(",", getTransferableRoutes()))
-                .append("}")
-                .append(", volumeHandling=").append(getVolumeHandling())
-                .append(", volumeMax=").append(getVolumeMax())
-                .append(", volume=").append(getVolume())
-                .append(" }");
+        StringBuilder result =
+                new StringBuilder()
+                        .append("RoutingSessionInfo{ ")
+                        .append("sessionId=")
+                        .append(getId())
+                        .append(", name=")
+                        .append(getName())
+                        .append(", clientPackageName=")
+                        .append(getClientPackageName())
+                        .append(", selectedRoutes={")
+                        .append(String.join(",", getSelectedRoutes()))
+                        .append("}")
+                        .append(", selectableRoutes={")
+                        .append(String.join(",", getSelectableRoutes()))
+                        .append("}")
+                        .append(", deselectableRoutes={")
+                        .append(String.join(",", getDeselectableRoutes()))
+                        .append("}")
+                        .append(", transferableRoutes={")
+                        .append(String.join(",", getTransferableRoutes()))
+                        .append("}")
+                        .append(", volumeHandling=")
+                        .append(getVolumeHandling())
+                        .append(", volumeMax=")
+                        .append(getVolumeMax())
+                        .append(", volume=")
+                        .append(getVolume())
+                        .append(", transferReason=")
+                        .append(getTransferReason())
+                        .append(", transferInitiatorUserHandle=")
+                        .append(getTransferInitiatorUserHandle())
+                        .append(", transferInitiatorPackageName=")
+                        .append(getTransferInitiatorPackageName())
+                        .append(" }");
         return result.toString();
     }
 
@@ -494,6 +595,9 @@ public final class RoutingSessionInfo implements Parcelable {
         @Nullable
         private Bundle mControlHints;
         private boolean mIsSystemSession;
+        @TransferReason private int mTransferReason = TRANSFER_REASON_FALLBACK;
+        @Nullable private UserHandle mTransferInitiatorUserHandle;
+        @Nullable private String mTransferInitiatorPackageName;
 
         /**
          * Constructor for builder to create {@link RoutingSessionInfo}.
@@ -555,6 +659,9 @@ public final class RoutingSessionInfo implements Parcelable {
 
             mControlHints = sessionInfo.mControlHints;
             mIsSystemSession = sessionInfo.mIsSystemSession;
+            mTransferReason = sessionInfo.mTransferReason;
+            mTransferInitiatorUserHandle = sessionInfo.mTransferInitiatorUserHandle;
+            mTransferInitiatorPackageName = sessionInfo.mTransferInitiatorPackageName;
         }
 
         /**
@@ -780,6 +887,35 @@ public final class RoutingSessionInfo implements Parcelable {
         @NonNull
         public Builder setSystemSession(boolean isSystemSession) {
             mIsSystemSession = isSystemSession;
+            return this;
+        }
+
+        /**
+         * Sets transfer reason for the current session.
+         *
+         * <p>By default the transfer reason is set to {@link
+         * RoutingSessionInfo#TRANSFER_REASON_FALLBACK}.
+         */
+        @NonNull
+        @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
+        public Builder setTransferReason(@TransferReason int transferReason) {
+            mTransferReason = transferReason;
+            return this;
+        }
+
+        /**
+         * Sets the user handle and package name of the process that initiated the transfer.
+         *
+         * <p>By default the transfer initiation user handle and package name are set to {@code
+         * null}.
+         */
+        @NonNull
+        @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
+        public Builder setTransferInitiator(
+                @Nullable UserHandle transferInitiatorUserHandle,
+                @Nullable String transferInitiatorPackageName) {
+            mTransferInitiatorUserHandle = transferInitiatorUserHandle;
+            mTransferInitiatorPackageName = transferInitiatorPackageName;
             return this;
         }
 

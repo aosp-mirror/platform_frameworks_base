@@ -126,6 +126,11 @@
     <item msgid="8259411607272330225">"ఆఫ్‌లో ఉంది"</item>
     <item msgid="578444932039713369">"ఆన్‌లో ఉంది"</item>
   </string-array>
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"అందుబాటులో లేదు"</item>
+    <item msgid="9061144428113385092">"ఆఫ్‌లో ఉంది"</item>
+    <item msgid="2984256114867200368">"ఆన్‌లో ఉంది"</item>
+  </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"అందుబాటులో లేదు"</item>
     <item msgid="8707481475312432575">"ఆఫ్‌లో ఉంది"</item>

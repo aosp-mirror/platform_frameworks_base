@@ -30,6 +30,7 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.ExternalDisplayStatsService;
 import com.android.server.display.feature.DisplayManagerFlags;
 
 /**
@@ -45,6 +46,10 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
         /** Get {@link ConnectedDisplayUsbErrorsDetector} or null if not available. */
         @Nullable
         ConnectedDisplayUsbErrorsDetector getUsbErrorsDetector();
+
+        /** Get {@link com.android.server.display.ExternalDisplayStatsService} or null */
+        @Nullable
+        ExternalDisplayStatsService getExternalDisplayStatsService();
     }
 
     private static final String TAG = "DisplayNotificationManager";
@@ -59,7 +64,10 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
     private NotificationManager mNotificationManager;
     private ConnectedDisplayUsbErrorsDetector mConnectedDisplayUsbErrorsDetector;
 
-    public DisplayNotificationManager(final DisplayManagerFlags flags, final Context context) {
+    private final ExternalDisplayStatsService mExternalDisplayStatsService;
+
+    public DisplayNotificationManager(final DisplayManagerFlags flags, final Context context,
+            final ExternalDisplayStatsService statsService) {
         this(flags, context, new Injector() {
             @Nullable
             @Override
@@ -72,6 +80,12 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
             public ConnectedDisplayUsbErrorsDetector getUsbErrorsDetector() {
                 return new ConnectedDisplayUsbErrorsDetector(flags, context);
             }
+
+            @Nullable
+            @Override
+            public ExternalDisplayStatsService getExternalDisplayStatsService() {
+                return statsService;
+            }
         });
     }
 
@@ -81,6 +95,7 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
         mConnectedDisplayErrorHandlingEnabled = flags.isConnectedDisplayErrorHandlingEnabled();
         mContext = context;
         mInjector = injector;
+        mExternalDisplayStatsService = injector.getExternalDisplayStatsService();
     }
 
     /**
@@ -111,6 +126,8 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
             return;
         }
 
+        mExternalDisplayStatsService.onDisplayPortLinkTrainingFailure();
+
         sendErrorNotification(createErrorNotification(
                 R.string.connected_display_unavailable_notification_title,
                 R.string.connected_display_unavailable_notification_content,
@@ -129,6 +146,8 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
             return;
         }
 
+        mExternalDisplayStatsService.onCableNotCapableDisplayPort();
+
         sendErrorNotification(createErrorNotification(
                 R.string.connected_display_unavailable_notification_title,
                 R.string.connected_display_unavailable_notification_content,
@@ -144,6 +163,8 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
                                 + " mConnectedDisplayErrorHandlingEnabled is false");
             return;
         }
+
+        mExternalDisplayStatsService.onHotplugConnectionError();
 
         sendErrorNotification(createErrorNotification(
                 R.string.connected_display_unavailable_notification_title,

@@ -36,3 +36,10 @@ flag {
     description: " Feature flag to support filter based event query API"
     bug: "194321117"
 }
+
+flag {
+    name: "get_app_bytes_by_data_type_api"
+    namespace: "system_performance"
+    description: "Feature flag for collecting app data size by file type API"
+    bug: "294088945"
+}

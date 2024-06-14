@@ -48,12 +48,14 @@ import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.LaunchAdjacentController
+import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createSplitScreenTask
+import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -106,6 +108,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock lateinit var desktopModeWindowDecoration: DesktopModeWindowDecoration
     @Mock lateinit var splitScreenController: SplitScreenController
     @Mock lateinit var recentsTransitionHandler: RecentsTransitionHandler
+    @Mock lateinit var dragAndDropController: DragAndDropController
+    @Mock lateinit var multiInstanceHelper: MultiInstanceHelper
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var controller: DesktopTasksController
@@ -148,6 +152,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             shellTaskOrganizer,
             syncQueue,
             rootTaskDisplayAreaOrganizer,
+            dragAndDropController,
             transitions,
             enterDesktopTransitionHandler,
             exitDesktopTransitionHandler,
@@ -156,6 +161,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             desktopModeTaskRepository,
             launchAdjacentController,
             recentsTransitionHandler,
+            multiInstanceHelper,
             shellExecutor
         )
     }
@@ -303,7 +309,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToDesktop_displayFullscreen_windowingModeSetToFreeform() {
         val task = setUpFullscreenTask()
         task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FULLSCREEN
-        controller.moveToDesktop(desktopModeWindowDecoration, task)
+        controller.moveToDesktop(task)
         val wct = getLatestMoveToDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FREEFORM)
@@ -313,7 +319,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToDesktop_displayFreeform_windowingModeSetToUndefined() {
         val task = setUpFullscreenTask()
         task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FREEFORM
-        controller.moveToDesktop(desktopModeWindowDecoration, task)
+        controller.moveToDesktop(task)
         val wct = getLatestMoveToDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
                 .isEqualTo(WINDOWING_MODE_UNDEFINED)
@@ -321,7 +327,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     fun moveToDesktop_nonExistentTask_doesNothing() {
-        controller.moveToDesktop(desktopModeWindowDecoration, 999)
+        controller.moveToDesktop(999)
         verifyWCTNotExecuted()
     }
 
@@ -332,7 +338,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val fullscreenTask = setUpFullscreenTask()
         markTaskHidden(freeformTask)
 
-        controller.moveToDesktop(desktopModeWindowDecoration, fullscreenTask)
+        controller.moveToDesktop(fullscreenTask)
 
         with(getLatestMoveToDesktopWct()) {
             // Operations should include home task, freeform task
@@ -354,7 +360,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val freeformTaskSecond = setUpFreeformTask(displayId = SECOND_DISPLAY)
         markTaskHidden(freeformTaskSecond)
 
-        controller.moveToDesktop(desktopModeWindowDecoration, fullscreenTaskDefault)
+        controller.moveToDesktop(fullscreenTaskDefault)
 
         with(getLatestMoveToDesktopWct()) {
             // Check that hierarchy operations do not include tasks from second display
@@ -368,24 +374,24 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun moveToDesktop_splitTaskExitsSplit() {
         val task = setUpSplitScreenTask()
-        controller.moveToDesktop(desktopModeWindowDecoration, task)
+        controller.moveToDesktop(task)
         val wct = getLatestMoveToDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FREEFORM)
         verify(splitScreenController).prepareExitSplitScreen(any(), anyInt(),
-            eq(SplitScreenController.EXIT_REASON_ENTER_DESKTOP)
+            eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE)
         )
     }
 
     @Test
     fun moveToDesktop_fullscreenTaskDoesNotExitSplit() {
         val task = setUpFullscreenTask()
-        controller.moveToDesktop(desktopModeWindowDecoration, task)
+        controller.moveToDesktop(task)
         val wct = getLatestMoveToDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FREEFORM)
         verify(splitScreenController, never()).prepareExitSplitScreen(any(), anyInt(),
-            eq(SplitScreenController.EXIT_REASON_ENTER_DESKTOP)
+            eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE)
         )
     }
 
@@ -393,7 +399,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToFullscreen_displayFullscreen_windowingModeSetToUndefined() {
         val task = setUpFreeformTask()
         task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FULLSCREEN
-        controller.moveToFullscreen(task.taskId, desktopModeWindowDecoration)
+        controller.moveToFullscreen(task.taskId)
         val wct = getLatestExitDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_UNDEFINED)
@@ -403,7 +409,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToFullscreen_displayFreeform_windowingModeSetToFullscreen() {
         val task = setUpFreeformTask()
         task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FREEFORM
-        controller.moveToFullscreen(task.taskId, desktopModeWindowDecoration)
+        controller.moveToFullscreen(task.taskId)
         val wct = getLatestExitDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
                 .isEqualTo(WINDOWING_MODE_FULLSCREEN)
@@ -411,7 +417,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     fun moveToFullscreen_nonExistentTask_doesNothing() {
-        controller.moveToFullscreen(999, desktopModeWindowDecoration)
+        controller.moveToFullscreen(999)
         verifyWCTNotExecuted()
     }
 
@@ -420,7 +426,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val taskDefaultDisplay = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val taskSecondDisplay = setUpFreeformTask(displayId = SECOND_DISPLAY)
 
-        controller.moveToFullscreen(taskDefaultDisplay.taskId, desktopModeWindowDecoration)
+        controller.moveToFullscreen(taskDefaultDisplay.taskId)
 
         with(getLatestExitDesktopWct()) {
             assertThat(changes.keys).contains(taskDefaultDisplay.token.asBinder())
@@ -734,6 +740,63 @@ class DesktopTasksControllerTest : ShellTestCase() {
         shellExecutor.flushAll()
         verify(launchAdjacentController).launchAdjacentEnabled = true
     }
+    @Test
+    fun enterDesktop_fullscreenTaskIsMovedToDesktop() {
+        val task1 = setUpFullscreenTask()
+        val task2 = setUpFullscreenTask()
+        val task3 = setUpFullscreenTask()
+
+        task1.isFocused = true
+        task2.isFocused = false
+        task3.isFocused = false
+
+        controller.enterDesktop(DEFAULT_DISPLAY)
+
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.changes[task1.token.asBinder()]?.windowingMode)
+                .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @Test
+    fun enterDesktop_splitScreenTaskIsMovedToDesktop() {
+        val task1 = setUpSplitScreenTask()
+        val task2 = setUpFullscreenTask()
+        val task3 = setUpFullscreenTask()
+        val task4 = setUpSplitScreenTask()
+
+        task1.isFocused = true
+        task2.isFocused = false
+        task3.isFocused = false
+        task4.isFocused = true
+
+        task4.parentTaskId = task1.taskId
+
+        controller.enterDesktop(DEFAULT_DISPLAY)
+
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.changes[task4.token.asBinder()]?.windowingMode)
+                .isEqualTo(WINDOWING_MODE_FREEFORM)
+        verify(splitScreenController).prepareExitSplitScreen(any(), anyInt(),
+            eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE)
+        )
+    }
+
+    @Test
+    fun moveFocusedTaskToFullscreen() {
+        val task1 = setUpFreeformTask()
+        val task2 = setUpFreeformTask()
+        val task3 = setUpFreeformTask()
+
+        task1.isFocused = false
+        task2.isFocused = true
+        task3.isFocused = false
+
+        controller.enterFullscreen(DEFAULT_DISPLAY)
+
+        val wct = getLatestExitDesktopWct()
+        assertThat(wct.changes[task2.token.asBinder()]?.windowingMode)
+                .isEqualTo(WINDOWING_MODE_FULLSCREEN)
+    }
 
     private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createFreeformTask(displayId)
@@ -802,7 +865,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     private fun getLatestMoveToDesktopWct(): WindowContainerTransaction {
         val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         if (ENABLE_SHELL_TRANSITIONS) {
-            verify(enterDesktopTransitionHandler).moveToDesktop(arg.capture(), any())
+            verify(enterDesktopTransitionHandler).moveToDesktop(arg.capture())
         } else {
             verify(shellTaskOrganizer).applyTransaction(arg.capture())
         }

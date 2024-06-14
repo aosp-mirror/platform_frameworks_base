@@ -41,6 +41,7 @@ android_test {
         "frameworks-base-testutils",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
+        "ravenwood-junit",
         "services.core",
         "service-permission.stubs.system_server",
         "servicestests-core-utils",
@@ -67,6 +68,26 @@ android_test {
     },
 }
 
+android_ravenwood_test {
+    name: "FrameworksInputMethodSystemServerTestsRavenwood",
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "framework",
+        "ravenwood-runtime",
+        "ravenwood-utils",
+        "services",
+    ],
+    libs: [
+        "android.test.base",
+        "android.test.runner",
+    ],
+    srcs: [
+        "src/com/android/server/inputmethod/**/ClientControllerTest.java",
+    ],
+    auto_gen_config: true,
+}
+
 android_test {
     name: "FrameworksImeTests",
     defaults: [
@@ -89,6 +110,7 @@ android_test {
         "frameworks-base-testutils",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
+        "ravenwood-junit",
         "services.core",
         "service-permission.stubs.system_server",
         "servicestests-core-utils",

@@ -154,6 +154,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:‏ <xliff:g id="DIALING_NUMBER">{1}</xliff:g> אחרי <xliff:g id="TIME_DELAY">{2}</xliff:g> שניות"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ללא העברה"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ללא העברה"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"אבטחת הרשת הסלולרית"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"בדיקת ההגדרות"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"בוצעה גישה למזהה המכשיר"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"‏רשת בחיבור <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> רשמה את המזהה הייחודי של המכשיר שלך (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> פעמים בתקופה שבין <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ל-<xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"חיבור מוצפן אל <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"התחברת עכשיו לרשת סלולרית מאובטחת יותר."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"חיבור לא מוצפן אל <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"התחברת עכשיו לרשת סלולרית לא מוצפנת. השיחות, ההודעות והנתונים שלך חשופים ליירוט."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"הגדרות אבטחה סלולרית"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"מידע נוסף"</string>
     <string name="fcComplete" msgid="1080909484660507044">"קוד תכונה הושלם."</string>
     <string name="fcError" msgid="5325116502080221346">"בעיה בחיבור או קוד תכונה לא תקין."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"אישור"</string>
@@ -248,10 +258,10 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"הפעלה"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"הפעלה מחדש"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"חירום"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"דיווח על באג"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"דוח איתור באגים"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"סיום הפעלה"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"צילום מסך"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"דוח על באג"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"דיווח על באג"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"הפעולה הזו תאסוף מידע על מצב המכשיר הנוכחי שלך כדי לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת הדיווח על הבאג ועד לשליחת ההודעה בפועל. יש להמתין בסבלנות."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"דוח אינטראקטיבי"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"כדאי להשתמש באפשרות הזו ברוב המקרים. היא מאפשרת לך לעקוב אחר התקדמות הדוח, להזין פרטים נוספים על הבעיה ולצלם את המסך. היא עשויה להשמיט כמה קטעים שנמצאים פחות בשימוש ושיצירת הדיווח עליהם נמשכת זמן רב."</string>
@@ -371,6 +381,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"מאפשרת לאפליקציה להתחייב למודול של השידור הסלולרי כדי להעביר הודעות של שידור סלולרי כשהן מתקבלות. התראות שידור סלולרי נשלחות במקומות מסוימים כדי להזהיר אותך מפני מצבי חירום. אפליקציות זדוניות עשויות להפריע לביצועים או לפעולה של המכשיר כאשר מתקבל שידור חירום סלולרי."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"ניהול שיחות שנערכות"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"לאפליקציה תהיה אפשרות לראות פרטים על שיחות שנערכות במכשיר ולשלוט בשיחות האלה."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"גישה למזהה הסלולרי הידוע האחרון"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"מאפשרת לאפליקציה לגשת למזהה הסלולרי הידוע האחרון שסופק על ידי חברת הטלפוניה."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"קריאת הודעות שידור סלולרי"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"מאפשרת לאפליקציה לקרוא הודעות שידור סלולרי שהתקבלו במכשיר שלך. התראות שידור סלולרי נשלחות במקומות מסוימים כדי להזהיר אותך מפני מצבי חירום. אפליקציות זדוניות עשויות להפריע לביצועים או לפעולה של המכשיר שלך כאשר מתקבל שידור חירום סלולרי."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"קריאת עדכוני מינויים"</string>
@@ -435,6 +447,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"‏ההרשאה הזו מאפשרת לאפליקציה להשתמש בשירותים שפועלים בחזית מסוג \"systemExempted\""</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"‏הפעלת שירות שפועל בחזית מסוג \"fileManagement\""</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"‏ההרשאה הזו מאפשרת לאפליקציה להתבסס על שירותים שפועלים בחזית מסוג \"fileManagement\""</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"‏הפעלת שירות שפועל בחזית מסוג \"mediaProcessing\""</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"‏ההרשאה הזו מאפשרת לאפליקציה להשתמש בשירותים שפועלים בחזית מסוג \"mediaProcessing\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"‏הפעלת שירות שפועל בחזית מסוג \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"‏ההרשאה הזו מאפשרת לאפליקציה להשתמש בשירותים שפועלים בחזית מסוג \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"מדידת נפח האחסון של אפליקציות"</string>
@@ -540,6 +554,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"מאפשרת לאפליקציה להשתמש במשדר האינפרא-אדום של הטלפון."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"הגדרת טפט"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"מאפשרת לאפליקציה להגדיר את טפט המערכת."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"גישה לפרופילים מוסתרים"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"מאפשרת לאפליקציה לגשת לפרופילים מוסתרים."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"התאמת גודל הטפט שלך"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"מאפשרת לאפליקציה להגדיר את סמני הגודל של טפט המערכת."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"הגדרת אזור זמן"</string>
@@ -633,7 +649,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"שימוש בנעילת מסך"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"יש לבטל את נעילת המסך כדי להמשיך"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"צריך ללחוץ לחיצה חזקה על החיישן"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"לא ניתן לזהות את טביעת האצבע. יש לנסות שוב."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"טביעת האצבע לא זוהתה. אפשר לנסות שוב."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"עליך לנקות את חיישן טביעות האצבע ולנסות שוב"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"עליך לנקות את החיישן ולנסות שוב"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"צריך ללחוץ חזק על החיישן"</string>
@@ -651,18 +667,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"טביעת האצבע אומתה"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"זיהוי הפנים בוצע"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"זיהוי הפנים בוצע. יש ללחוץ על אישור"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"החומרה לזיהוי טביעות אצבעות אינה זמינה."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"החומרה לזיהוי טביעות אצבע לא זמינה"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"לא ניתן להגדיר טביעת אצבע"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"הזמן שהוקצב להגדרה של טביעת האצבע פג. יש לנסות שוב."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"פעולת טביעת האצבע בוטלה."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"פעולת טביעת האצבע בוטלה על ידי המשתמש."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"הפעולה של טביעת האצבע בוטלה"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"הפעולה של טביעת האצבע בוטלה על ידי המשתמש"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"בוצעו יותר מדי ניסיונות. יש להשתמש בנעילת המסך במקום זאת."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"בוצעו יותר מדי ניסיונות. יש להשתמש בנעילת המסך במקום זאת."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"לא ניתן לעבד את טביעת האצבע. יש לנסות שוב."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"לא נסרקו טביעות אצבע."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"במכשיר הזה אין חיישן טביעות אצבע."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"החיישן מושבת באופן זמני."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"לא ניתן להשתמש בחיישן טביעות האצבע. צריך ליצור קשר עם ספק תיקונים"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"לא נסרקו טביעות אצבע"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"במכשיר הזה אין חיישן טביעות אצבע"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"החיישן מושבת באופן זמני"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"לא ניתן להשתמש בחיישן טביעות האצבע. צריך ליצור קשר עם ספק תיקונים."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"לחצן ההפעלה נלחץ"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"אצבע <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"שימוש בטביעת אצבע"</string>
@@ -697,7 +713,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"לא רואים את הפנים שלך. יש להחזיק את הטלפון בגובה העיניים."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"יש לסרוק שוב את הפנים."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"לא ניתן לזהות את הפנים. יש לנסות שוב."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"הפנים לא זוהו. אפשר לנסות שוב."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"צריך לשנות מעט את תנוחת הראש"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"צריך להביט ישירות בטלפון"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"צריך להביט ישירות בטלפון"</string>
@@ -808,6 +824,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"האפליקציה תוכל לדגום נתוני חיישנים בתדירות של מעל 200 הרץ"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"עדכון אפליקציה ללא פעולה מצד המשתמש"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"בעלי ההרשאה הזו יוכלו לעדכן אפליקציה שכבר הותקנה ללא פעולה מצד המשתמש"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"עדכון מצבי האימות של מפתחות אנשי קשר בהצפנה מקצה לקצה שבבעלות אפליקציות אחרות"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"מאפשרת לאפליקציה לעדכן את מצבי האימות של מפתחות אנשי קשר בהצפנה מקצה לקצה שבבעלות אפליקציות אחרות"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"הגדרת כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי האימות של מסך הנעילה."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>
@@ -1907,6 +1925,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"סוף השבוע"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"אירוע"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"שינה"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"בניהול של <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"מצב פעיל"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"מצב מושבת"</string>
     <string name="muted_by" msgid="91464083490094950">"חלק מהצלילים מושתקים על ידי <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
@@ -1926,6 +1945,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"מאומת"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"הרחבה"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"כיווץ"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"בוצע כיווץ"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"בוצעה הרחבה"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"החלפת מצב הרחבה"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"‏יציאת USB בציוד היקפי של Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1966,6 +1987,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"להפעיל את האפליקציות לעבודה?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"ביטול ההשהיה"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"שיחת חירום"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"הגדרת נעילת מסך"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"הגדרה של נעילת מסך"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"כדי להשתמש במרחב הפרטי יש להגדיר נעילת מסך במכשיר"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"האפליקציה לא זמינה"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא זמינה בשלב זה."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> לא זמינה"</string>
@@ -2342,8 +2366,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"לא ניתן לשקף למסך"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"צריך להשתמש בכבל שונה ולנסות שוב"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"המכשיר שלך חם מדי. אי אפשר לשקף למסך עד שהמכשיר יתקרר"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"יכול להיות שהכבל לא תומך במסכים"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"‏יכול להיות שכבל ה-USB-C לא יתחבר למסכים כמו שצריך"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"מצב שני מסכים"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"מצב שני מסכים מופעל"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> משתמשת בשני המסכים כדי להציג תוכן"</string>
@@ -2367,4 +2389,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"פרופיל עבודה 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"בדיקה"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"שיתופי"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"חיבור אוטומטי ללוויין"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"‏אפשר לשלוח ולקבל הודעות ללא רשת סלולרית או רשת Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"‏לפתיחת Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"איך זה עובד"</string>
 </resources>

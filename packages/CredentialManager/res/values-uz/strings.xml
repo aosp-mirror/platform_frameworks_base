@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Parolsiz kelajak sari harakatlanar ekanmiz, parollar kalitlar bilan birga ishlatilishda davom etadi."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Bu <xliff:g id="CREATETYPES">%1$s</xliff:g> qayerga saqlanishini tanlang"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Maʼlumotlaringizni saqlash va keyingi safar tez kirish uchun parollar menejerini tanlang"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> uchun kod yaratilsinmi?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> uchun parol saqlansinmi?"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> ilovasiga kirish uchun kirish kaliti yaratilsinmi?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> ilovasiga kirish uchun parol saqlansinmi?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> uchun kirish maʼlumoti saqlansinmi?"</string>
     <string name="passkey" msgid="632353688396759522">"kalit"</string>
     <string name="password" msgid="6738570945182936667">"parol"</string>
@@ -61,7 +61,7 @@
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ta parol"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> ta kalit"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> hisobi maʼlumotlari"</string>
-    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Kod"</string>
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Kirish kaliti"</string>
     <string name="another_device" msgid="5147276802037801217">"Boshqa qurilma"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Boshqa parol menejerlari"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Varaqni yopish"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Boshqa qurilmada"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Boshqa qurilmadan foydalanish"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Soʻrovni <xliff:g id="APP_NAME">%1$s</xliff:g> bekor qilgan"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Kirish variantlari"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Yana"</string>
 </resources>

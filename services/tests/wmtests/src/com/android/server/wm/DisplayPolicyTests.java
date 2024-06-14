@@ -39,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 
 import static org.junit.Assert.assertEquals;
@@ -283,12 +284,12 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
         policy.screenTurnedOff();
         policy.setAwake(false);
-        policy.screenTurnedOn(null /* screenOnListener */);
+        policy.screenTurningOn(null /* screenOnListener */);
         assertTrue(wpc.isShowingUiWhileDozing());
         policy.screenTurnedOff();
         assertFalse(wpc.isShowingUiWhileDozing());
 
-        policy.screenTurnedOn(null /* screenOnListener */);
+        policy.screenTurningOn(null /* screenOnListener */);
         assertTrue(wpc.isShowingUiWhileDozing());
         policy.setAwake(true);
         assertFalse(wpc.isShowingUiWhileDozing());
@@ -388,6 +389,24 @@ public class DisplayPolicyTests extends WindowTestsBase {
         // The current insets are restored from cache directly.
         assertEquals(prevConfigFrame, displayPolicy.getDecorInsetsInfo(info.rotation,
                 info.logicalWidth, info.logicalHeight).mConfigFrame);
+
+        // If screen is not fully turned on, then the cache should be preserved.
+        displayPolicy.screenTurnedOff();
+        final TransitionController transitionController = mDisplayContent.mTransitionController;
+        spyOn(transitionController);
+        doReturn(true).when(transitionController).isCollecting();
+        doReturn(Integer.MAX_VALUE).when(transitionController).getCollectingTransitionId();
+        // Make CachedDecorInsets.canPreserve return false.
+        displayPolicy.physicalDisplayUpdated();
+        assertFalse(displayPolicy.shouldKeepCurrentDecorInsets());
+        displayPolicy.getDecorInsetsInfo(info.rotation, info.logicalWidth, info.logicalHeight)
+                .mConfigFrame.offset(1, 1);
+        // Even if CachedDecorInsets.canPreserve returns false, the cache won't be cleared.
+        displayPolicy.updateDecorInsetsInfo();
+        // Successful to restore from cache.
+        displayPolicy.updateCachedDecorInsets();
+        assertEquals(prevConfigFrame, displayPolicy.getDecorInsetsInfo(info.rotation,
+                info.logicalWidth, info.logicalHeight).mConfigFrame);
     }
 
     @Test
@@ -417,6 +436,8 @@ public class DisplayPolicyTests extends WindowTestsBase {
                     di.logicalWidth, di.logicalHeight).mConfigInsets.top);
         }
 
+        // Flush the pending change (DecorInsets.Info#mNeedUpdate) for the rotation to be tested.
+        displayPolicy.getDecorInsetsInfo(Surface.ROTATION_90, di.logicalHeight, di.logicalWidth);
         // Add a window that provides the same insets in current rotation. But it specifies
         // different insets in other rotations.
         final WindowState bar2 = createWindow(null, navbar.mAttrs.type, "bar2");
@@ -445,6 +466,12 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertFalse(displayPolicy.updateDecorInsetsInfo());
         // The insets in other rotations should be still updated.
         assertEquals(doubleHeightFor90, displayPolicy.getDecorInsetsInfo(Surface.ROTATION_90,
+                di.logicalHeight, di.logicalWidth).mConfigInsets.bottom);
+        // Restore to previous height and the insets can still be updated.
+        bar2.mAttrs.paramsForRotation[Surface.ROTATION_90].providedInsets[0].setInsetsSize(
+                Insets.of(0, 0, 0, NAV_BAR_HEIGHT));
+        assertFalse(displayPolicy.updateDecorInsetsInfo());
+        assertEquals(NAV_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(Surface.ROTATION_90,
                 di.logicalHeight, di.logicalWidth).mConfigInsets.bottom);
 
         navbar.removeIfPossible();

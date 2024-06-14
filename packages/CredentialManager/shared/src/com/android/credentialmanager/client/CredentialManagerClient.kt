@@ -17,8 +17,9 @@
 package com.android.credentialmanager.client
 
 import android.content.Intent
-import android.credentials.ui.BaseDialogResult
-import android.credentials.ui.UserSelectionDialogResult
+import android.credentials.selection.BaseDialogResult
+import android.credentials.selection.UserSelectionDialogResult
+import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.Request
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,10 +31,7 @@ interface CredentialManagerClient {
     fun updateRequest(intent: Intent)
 
     /** Sends an error encountered during the UI. */
-    fun sendError(
-        @BaseDialogResult.ResultCode resultCode: Int,
-        errorMessage: String? = null,
-    )
+    fun sendError(@BaseDialogResult.ResultCode resultCode: Int)
 
     /**
      * Sends a response to the system service. The response
@@ -54,4 +52,20 @@ interface CredentialManagerClient {
      * @throws [IllegalStateException] if [requests] is not [Request.Get].
      */
     fun sendResult(result: UserSelectionDialogResult)
+
+    /**
+     * Sends a response to the system service with a selected [EntryInfo].
+     *
+     * @return if the current [Request.Get] flow can be ended peacefully.
+     * if not, App has to keep reacting to the further update from [requests] until [Request.Cancel]
+     * or [Request.Close] is received.
+     *
+     * @throws [IllegalStateException] if [requests] is not [Request.Get].
+     */
+    fun sendEntrySelectionResult(
+        entryInfo: EntryInfo,
+        resultCode: Int? = null,
+        resultData: Intent? = null,
+        isAutoSelected: Boolean = false,
+    ): Boolean
 }

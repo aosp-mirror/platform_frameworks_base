@@ -50,6 +50,7 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SELinuxUtil;
 
 import dalvik.system.VMRuntime;
@@ -505,16 +506,21 @@ public class AppDataHelper {
         if (packageState == null) {
             throw PackageManagerException.ofInternalError("Package " + packageName + " is unknown",
                     PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_PACKAGE_UNKNOWN);
-        } else if (!TextUtils.equals(volumeUuid, packageState.getVolumeUuid())) {
+        }
+        if (!TextUtils.equals(volumeUuid, packageState.getVolumeUuid())) {
             throw PackageManagerException.ofInternalError(
                     "Package " + packageName + " found on unknown volume " + volumeUuid
                             + "; expected volume " + packageState.getVolumeUuid(),
                     PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_VOLUME_UNKNOWN);
-        } else if (!packageState.getUserStateOrDefault(userId).isInstalled()) {
+        }
+        final PackageUserStateInternal userState = packageState.getUserStateOrDefault(userId);
+        if (!userState.isInstalled() && !userState.dataExists()) {
             throw PackageManagerException.ofInternalError(
-                    "Package " + packageName + " not installed for user " + userId,
+                    "Package " + packageName + " not installed for user " + userId
+                            + " or was deleted without DELETE_KEEP_DATA",
                     PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_NOT_INSTALLED_FOR_USER);
-        } else if (packageState.getPkg() != null
+        }
+        if (packageState.getPkg() != null
                 && !shouldHaveAppStorage(packageState.getPkg())) {
             throw PackageManagerException.ofInternalError(
                     "Package " + packageName + " shouldn't have storage",

@@ -146,10 +146,6 @@ public final class Permission {
         return mPermissionInfo.packageName;
     }
 
-    public boolean isReconciled() {
-        return mReconciled;
-    }
-
     public int getType() {
         return mType;
     }

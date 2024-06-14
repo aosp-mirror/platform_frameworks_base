@@ -221,6 +221,15 @@ constructor(
         )
     }
 
+    fun logSettingsRestoredOnUserSetupComplete(userId: Int) {
+        restoreLogBuffer.log(
+            RESTORE_TAG,
+            LogLevel.DEBUG,
+            { int1 = userId },
+            { "Restored from single intent after user setup complete for user $int1" }
+        )
+    }
+
     fun logSettingsRestored(restoreData: RestoreData) {
         restoreLogBuffer.log(
             RESTORE_TAG,

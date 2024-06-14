@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.media.AudioPlaybackConfiguration;
@@ -72,11 +73,13 @@ public class VirtualAudioControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
-        mVirtualAudioController = new VirtualAudioController(mContext);
+        mVirtualAudioController = new VirtualAudioController(mContext,
+                AttributionSource.myAttributionSource());
         mGenericWindowPolicyController =
                 new GenericWindowPolicyController(
                         FLAG_SECURE,
                         SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        AttributionSource.myAttributionSource(),
                         /* allowedUsers= */ new ArraySet<>(),
                         /* activityLaunchAllowedByDefault= */ true,
                         /* activityPolicyExemptions= */ new ArraySet<>(),

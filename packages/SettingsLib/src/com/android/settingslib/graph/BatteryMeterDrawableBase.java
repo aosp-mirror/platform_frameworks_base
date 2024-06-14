@@ -16,7 +16,6 @@
 
 package com.android.settingslib.graph;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -34,6 +33,8 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
+
+import androidx.annotation.Nullable;
 
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;

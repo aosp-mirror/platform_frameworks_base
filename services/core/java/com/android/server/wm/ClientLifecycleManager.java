@@ -22,8 +22,10 @@ import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Slog;
 
@@ -63,6 +65,10 @@ class ClientLifecycleManager {
         final IApplicationThread client = transaction.getClient();
         try {
             transaction.schedule();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to deliver transaction for " + client
+                            + "\ntransaction=" + transaction);
+            throw e;
         } finally {
             if (!(client instanceof Binder)) {
                 // If client is not an instance of Binder - it's a remote call and at this point it
@@ -74,19 +80,15 @@ class ClientLifecycleManager {
     }
 
     /**
-     * Similar to {@link #scheduleTransactionItem}, but is called without WM lock.
+     * Similar to {@link #scheduleTransactionItem}, but it sends the transaction immediately and
+     * it can be called without WM lock.
      *
      * @see WindowProcessController#setReportedProcState(int)
      */
-    void scheduleTransactionItemUnlocked(@NonNull IApplicationThread client,
+    void scheduleTransactionItemNow(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem) throws RemoteException {
-        // Immediately dispatching to client, and must not access WMS.
         final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-        if (transactionItem.isActivityLifecycleItem()) {
-            clientTransaction.setLifecycleStateRequest((ActivityLifecycleItem) transactionItem);
-        } else {
-            clientTransaction.addCallback(transactionItem);
-        }
+        clientTransaction.addTransactionItem(transactionItem);
         scheduleTransaction(clientTransaction);
     }
 
@@ -105,27 +107,41 @@ class ClientLifecycleManager {
             final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
             clientTransaction.addTransactionItem(transactionItem);
 
-            onClientTransactionItemScheduledLocked(clientTransaction);
+            onClientTransactionItemScheduled(clientTransaction,
+                    false /* shouldDispatchImmediately */);
         } else {
             // TODO(b/260873529): cleanup after launch.
             final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-            if (transactionItem.isActivityLifecycleItem()) {
-                clientTransaction.setLifecycleStateRequest((ActivityLifecycleItem) transactionItem);
-            } else {
-                clientTransaction.addCallback(transactionItem);
-            }
+            clientTransaction.addTransactionItem(transactionItem);
+
             scheduleTransaction(clientTransaction);
         }
     }
 
+    void scheduleTransactionAndLifecycleItems(@NonNull IApplicationThread client,
+            @NonNull ClientTransactionItem transactionItem,
+            @NonNull ActivityLifecycleItem lifecycleItem) throws RemoteException {
+        scheduleTransactionAndLifecycleItems(client, transactionItem, lifecycleItem,
+                false /* shouldDispatchImmediately */);
+    }
+
     /**
      * Schedules a single transaction item with a lifecycle request, delivery to client application.
+     *
+     * @param shouldDispatchImmediately whether or not to dispatch the transaction immediately. This
+     *                                  should only be {@code true} when it is important to know the
+     *                                  result of dispatching immediately. For example, when cold
+     *                                  launches an app, the server needs to know if the transaction
+     *                                  is dispatched successfully, and may restart the process if
+     *                                  not.
+     *
      * @throws RemoteException
      * @see ClientTransactionItem
      */
     void scheduleTransactionAndLifecycleItems(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem,
-            @NonNull ActivityLifecycleItem lifecycleItem) throws RemoteException {
+            @NonNull ActivityLifecycleItem lifecycleItem,
+            boolean shouldDispatchImmediately) throws RemoteException {
         // The behavior is different depending on the flag.
         // When flag is on, we wait until RootWindowContainer#performSurfacePlacementNoTrace to
         // dispatch all pending transactions at once.
@@ -134,30 +150,66 @@ class ClientLifecycleManager {
             clientTransaction.addTransactionItem(transactionItem);
             clientTransaction.addTransactionItem(lifecycleItem);
 
-            onClientTransactionItemScheduledLocked(clientTransaction);
+            onClientTransactionItemScheduled(clientTransaction, shouldDispatchImmediately);
         } else {
             // TODO(b/260873529): cleanup after launch.
             final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-            clientTransaction.addCallback(transactionItem);
-            clientTransaction.setLifecycleStateRequest(lifecycleItem);
+            clientTransaction.addTransactionItem(transactionItem);
+            clientTransaction.addTransactionItem(lifecycleItem);
             scheduleTransaction(clientTransaction);
         }
     }
 
     /** Executes all the pending transactions. */
     void dispatchPendingTransactions() {
+        if (!Flags.bundleClientTransactionFlag() || mPendingTransactions.isEmpty()) {
+            return;
+        }
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "clientTransactionsDispatched");
         final int size = mPendingTransactions.size();
         for (int i = 0; i < size; i++) {
             final ClientTransaction transaction = mPendingTransactions.valueAt(i);
             try {
                 scheduleTransaction(transaction);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to deliver transaction for " + transaction.getClient());
+                Slog.e(TAG, "Failed to deliver pending transaction", e);
+                // TODO(b/323801078): apply cleanup for individual transaction item if needed.
             }
         }
         mPendingTransactions.clear();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
+    /** Executes the pending transaction for the given client process. */
+    void dispatchPendingTransaction(@NonNull IApplicationThread client) {
+        if (!Flags.bundleClientTransactionFlag()) {
+            return;
+        }
+        final ClientTransaction pendingTransaction = mPendingTransactions.remove(client.asBinder());
+        if (pendingTransaction != null) {
+            try {
+                scheduleTransaction(pendingTransaction);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to deliver pending transaction", e);
+                // TODO(b/323801078): apply cleanup for individual transaction item if needed.
+            }
+        }
+    }
+
+    /**
+     * Called to when {@link WindowSurfacePlacer#continueLayout}.
+     * Dispatches all pending transactions unless there is an ongoing/scheduled layout, in which
+     * case the pending transactions will be dispatched in
+     * {@link RootWindowContainer#performSurfacePlacementNoTrace}.
+     */
+    void onLayoutContinued() {
+        if (shouldDispatchPendingTransactionsImmediately()) {
+            // Dispatch the pending transactions immediately if there is no ongoing/scheduled layout
+            dispatchPendingTransactions();
+        }
+    }
+
+    /** Must only be called with WM lock. */
     @NonNull
     private ClientTransaction getOrCreatePendingTransaction(@NonNull IApplicationThread client) {
         final IBinder clientBinder = client.asBinder();
@@ -173,20 +225,42 @@ class ClientLifecycleManager {
     }
 
     /** Must only be called with WM lock. */
-    private void onClientTransactionItemScheduledLocked(
-            @NonNull ClientTransaction clientTransaction) throws RemoteException {
-        // TODO(b/260873529): make sure WindowSurfacePlacer#requestTraversal is called before
-        // ClientTransaction scheduled when needed.
-
-        if (mWms != null && (mWms.mWindowPlacerLocked.isInLayout()
-                || mWms.mWindowPlacerLocked.isTraversalScheduled())) {
-            // The pending transactions will be dispatched when
-            // RootWindowContainer#performSurfacePlacementNoTrace.
-            return;
+    private void onClientTransactionItemScheduled(
+            @NonNull ClientTransaction clientTransaction,
+            boolean shouldDispatchImmediately) throws RemoteException {
+        if (shouldDispatchImmediately || shouldDispatchPendingTransactionsImmediately()) {
+            // Dispatch the pending transaction immediately.
+            mPendingTransactions.remove(clientTransaction.getClient().asBinder());
+            scheduleTransaction(clientTransaction);
         }
+    }
 
-        // Dispatch the pending transaction immediately.
-        mPendingTransactions.remove(clientTransaction.getClient().asBinder());
-        scheduleTransaction(clientTransaction);
+    /** Must only be called with WM lock. */
+    private boolean shouldDispatchPendingTransactionsImmediately() {
+        if (mWms == null) {
+            return true;
+        }
+        // Do not dispatch when
+        // 1. Layout deferred.
+        // 2. Layout requested.
+        // 3. Layout in process.
+        // The pending transactions will be dispatched during layout in
+        // RootWindowContainer#performSurfacePlacementNoTrace.
+        return !mWms.mWindowPlacerLocked.isLayoutDeferred()
+                && !mWms.mWindowPlacerLocked.isTraversalScheduled()
+                && !mWms.mWindowPlacerLocked.isInLayout();
+    }
+
+    /**
+     * Guards the bundleClientTransactionFlag feature with targetSDK on Android 15+.
+     *
+     * Suppressing because it can't guard with @EnabledSince on VANILLA_ICE_CREAM yet since the
+     * version is not published.
+     *
+     * TODO(b/324203798): update in V
+     */
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    static boolean shouldDispatchCompatClientTransactionIndependently(int appTargetSdk) {
+        return appTargetSdk <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
     }
 }

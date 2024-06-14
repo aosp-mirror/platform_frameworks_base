@@ -23,8 +23,8 @@ import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
@@ -51,15 +51,13 @@ object KeyguardIndicationAreaBinder {
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardIndicationAreaViewModel,
-        keyguardRootViewModel: KeyguardRootViewModel,
         indicationController: KeyguardIndicationController,
     ): DisposableHandle {
-        val indicationArea: ViewGroup = view.requireViewById(R.id.keyguard_indication_area)
-        indicationController.setIndicationArea(indicationArea)
+        indicationController.setIndicationArea(view)
 
-        val indicationText: TextView = indicationArea.requireViewById(R.id.keyguard_indication_text)
+        val indicationText: TextView = view.requireViewById(R.id.keyguard_indication_text)
         val indicationTextBottom: TextView =
-            indicationArea.requireViewById(R.id.keyguard_indication_text_bottom)
+            view.requireViewById(R.id.keyguard_indication_text_bottom)
 
         view.clipChildren = false
         view.clipToPadding = false
@@ -69,36 +67,16 @@ object KeyguardIndicationAreaBinder {
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch {
-                        if (keyguardBottomAreaRefactor()) {
-                            keyguardRootViewModel.alpha.collect { alpha ->
-                                indicationArea.apply {
-                                    this.importantForAccessibility =
-                                        if (alpha == 0f) {
-                                            View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                                        } else {
-                                            View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                        }
-                                    this.alpha = alpha
-                                }
-                            }
-                        } else {
-                            viewModel.alpha.collect { alpha ->
-                                indicationArea.apply {
-                                    this.importantForAccessibility =
-                                        if (alpha == 0f) {
-                                            View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                                        } else {
-                                            View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                        }
-                                    this.alpha = alpha
-                                }
-                            }
+                        // Do not independently apply alpha, as [KeyguardRootViewModel] should work
+                        // for this and all its children
+                        if (!(migrateClocksToBlueprint() || keyguardBottomAreaRefactor())) {
+                            viewModel.alpha.collect { alpha -> view.alpha = alpha }
                         }
                     }
 
                     launch {
                         viewModel.indicationAreaTranslationX.collect { translationX ->
-                            indicationArea.translationX = translationX
+                            view.translationX = translationX
                         }
                     }
 
@@ -113,9 +91,7 @@ object KeyguardIndicationAreaBinder {
                                     0
                                 }
                             }
-                            .collect { paddingPx ->
-                                indicationArea.setPadding(paddingPx, 0, paddingPx, 0)
-                            }
+                            .collect { paddingPx -> view.setPadding(paddingPx, 0, paddingPx, 0) }
                     }
 
                     launch {
@@ -124,7 +100,7 @@ object KeyguardIndicationAreaBinder {
                             .flatMapLatest { defaultBurnInOffsetY ->
                                 viewModel.indicationAreaTranslationY(defaultBurnInOffsetY)
                             }
-                            .collect { translationY -> indicationArea.translationY = translationY }
+                            .collect { translationY -> view.translationY = translationY }
                     }
 
                     launch {

@@ -19,6 +19,10 @@ package com.android.systemui.keyguard.data.repository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 
-val Kosmos.deviceEntryFingerprintAuthRepository by Fixture {
+val Kosmos.fakeDeviceEntryFingerprintAuthRepository by Fixture {
     FakeDeviceEntryFingerprintAuthRepository()
+}
+
+val Kosmos.deviceEntryFingerprintAuthRepository by Fixture {
+    fakeDeviceEntryFingerprintAuthRepository
 }

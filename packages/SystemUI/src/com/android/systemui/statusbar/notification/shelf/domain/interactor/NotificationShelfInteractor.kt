@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.shelf.domain.interactor
 
 import android.os.PowerManager
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.statusbar.LockscreenShadeTransitionController

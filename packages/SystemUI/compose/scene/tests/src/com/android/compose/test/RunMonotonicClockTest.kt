@@ -3,7 +3,9 @@ package com.android.compose.test
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.TestMonotonicFrameClock
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 
@@ -12,16 +14,38 @@ import kotlinx.coroutines.withContext
  * function.
  *
  * The [TestCoroutineScheduler] is passed to provide the functionality to wait for idle.
+ *
+ * Note: Please refer to the documentation for [runTest], as this feature utilizes it. This will
+ * provide a comprehensive understanding of all its behaviors.
  */
-@ExperimentalTestApi
+@OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
 fun runMonotonicClockTest(block: suspend MonotonicClockTestScope.() -> Unit) = runTest {
-    // We need a CoroutineScope (like a TestScope) to create a TestMonotonicFrameClock.
-    withContext(TestMonotonicFrameClock(this)) {
-        MonotonicClockTestScope(coroutineScope = this, testScheduler = testScheduler).block()
+    val testScope: TestScope = this
+
+    withContext(TestMonotonicFrameClock(coroutineScope = testScope)) {
+        val testScopeWithMonotonicFrameClock: CoroutineScope = this
+
+        val scope =
+            MonotonicClockTestScope(
+                testScope = testScopeWithMonotonicFrameClock,
+                testScheduler = testScope.testScheduler,
+                backgroundScope = backgroundScope,
+            )
+
+        // Run the test
+        scope.block()
     }
 }
 
+/**
+ * A coroutine scope that for launching test coroutines for Compose.
+ *
+ * @param testScheduler The delay-skipping scheduler used by the test dispatchers running the code
+ *   in this scope (see [TestScope.testScheduler]).
+ * @param backgroundScope A scope for background work (see [TestScope.backgroundScope]).
+ */
 class MonotonicClockTestScope(
-    coroutineScope: CoroutineScope,
-    val testScheduler: TestCoroutineScheduler
-) : CoroutineScope by coroutineScope
+    testScope: CoroutineScope,
+    val testScheduler: TestCoroutineScheduler,
+    val backgroundScope: CoroutineScope,
+) : CoroutineScope by testScope

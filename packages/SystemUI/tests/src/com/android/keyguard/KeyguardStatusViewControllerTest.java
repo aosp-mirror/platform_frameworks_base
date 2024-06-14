@@ -56,7 +56,7 @@ import java.lang.reflect.Field;
 public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControllerBaseTest {
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
     @Test
     public void dozeTimeTick_updatesSlice() {

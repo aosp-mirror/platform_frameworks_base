@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
+import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistry;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
 import com.android.systemui.statusbar.pipeline.wifi.ui.WifiUiAdapter;
@@ -108,7 +109,8 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
                 mock(TunerService.class),
                 mock(DumpManager.class),
                 mock(StatusBarIconList.class),
-                flags
+                flags,
+                mock(BindableIconsRegistry.class)
         );
 
         iconController.addIconGroup(manager);

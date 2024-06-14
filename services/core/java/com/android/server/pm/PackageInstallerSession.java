@@ -22,6 +22,8 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_UPDAT
 import static android.content.pm.DataLoaderType.INCREMENTAL;
 import static android.content.pm.DataLoaderType.STREAMING;
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_OK;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_STATUS_UNSET;
 import static android.content.pm.PackageItemInfo.MAX_SAFE_LABEL_LENGTH;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_SIGNATURE;
@@ -52,6 +54,7 @@ import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
+import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
 import static com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
 
@@ -65,6 +68,7 @@ import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -97,6 +101,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.PreapprovalDetails;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
+import android.content.pm.PackageInstaller.UnarchivalStatus;
 import android.content.pm.PackageInstaller.UserActionReason;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
@@ -108,6 +113,7 @@ import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.pm.verify.domain.DomainSet;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
@@ -236,6 +242,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             "whitelisted-restricted-permission";
     private static final String TAG_AUTO_REVOKE_PERMISSIONS_MODE =
             "auto-revoke-permissions-mode";
+
+    static final String TAG_PRE_VERIFIED_DOMAINS = "preVerifiedDomains";
     private static final String ATTR_SESSION_ID = "sessionId";
     private static final String ATTR_USER_ID = "userId";
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
@@ -293,6 +301,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_CHECKSUM_VALUE = "checksumValue";
     private static final String ATTR_APPLICATION_ENABLED_SETTING_PERSISTENT =
             "applicationEnabledSettingPersistent";
+    private static final String ATTR_DOMAIN = "domain";
 
     private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
     private static final int[] EMPTY_CHILD_SESSION_ARRAY = EmptyArray.INT;
@@ -349,7 +358,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** Default byte size limit for app metadata */
     private static final long DEFAULT_APP_METADATA_BYTE_SIZE_LIMIT = 32000;
 
-    private static final int APP_METADATA_FILE_ACCESS_MODE = 0640;
+    static final int APP_METADATA_FILE_ACCESS_MODE = 0640;
 
     /**
      * Throws IllegalArgumentException if the {@link IntentSender} from an immutable
@@ -359,6 +368,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     private static final long THROW_EXCEPTION_COMMIT_WITH_IMMUTABLE_PENDING_INTENT = 240618202L;
+
+    /**
+     * Configurable maximum number of pre-verified domains allowed to be added to the session.
+     * Flag type: {@code long}
+     * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
+     */
+    private static final String PROPERTY_PRE_VERIFIED_DOMAINS_COUNT_LIMIT =
+            "pre_verified_domains_count_limit";
+    /**
+     * Configurable maximum string length of each pre-verified domain.
+     * Flag type: {@code long}
+     * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
+     */
+    private static final String PROPERTY_PRE_VERIFIED_DOMAIN_LENGTH_LIMIT =
+            "pre_verified_domain_length_limit";
+    /** Default max number of pre-verified domains */
+    private static final long DEFAULT_PRE_VERIFIED_DOMAINS_COUNT_LIMIT = 1000;
+    /** Default max string length of each pre-verified domain */
+    private static final long DEFAULT_PRE_VERIFIED_DOMAIN_LENGTH_LIMIT = 256;
 
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
@@ -500,6 +528,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private int mUserActionRequirement;
+
+    @GuardedBy("mLock")
+    private DomainSet mPreVerifiedDomains;
 
     static class FileEntry {
         private final int mIndex;
@@ -771,6 +802,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final List<String> mResolvedInstructionSets = new ArrayList<>();
     @GuardedBy("mLock")
     private final List<String> mResolvedNativeLibPaths = new ArrayList<>();
+
+    @GuardedBy("mLock")
+    private final Set<IntentSender> mUnarchivalListeners = new ArraySet<>();
+
     @GuardedBy("mLock")
     private File mInheritedFilesBase;
     @GuardedBy("mLock")
@@ -795,6 +830,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     @GuardedBy("mLock")
     private int mValidatedTargetSdk = INVALID_TARGET_SDK_VERSION;
+
+    @UnarchivalStatus
+    private int mUnarchivalStatus = UNARCHIVAL_STATUS_UNSET;
 
     private static final FileFilter sAddedApkFilter = new FileFilter() {
         @Override
@@ -924,6 +962,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 getInstallSource().mInstallerPackageName, mInstallerUid);
     }
 
+    private boolean isEmergencyInstallerEnabled(String packageName, Computer snapshot) {
+        final PackageStateInternal ps = snapshot.getPackageStateInternal(packageName);
+        if (ps == null || ps.getPkg() == null) {
+            return false;
+        }
+        String emergencyInstaller = ps.getPkg().getEmergencyInstaller();
+        if (emergencyInstaller == null || !ArrayUtils.contains(
+                snapshot.getPackagesForUid(mInstallerUid),
+                emergencyInstaller)) {
+            return false;
+        }
+        return (snapshot.checkUidPermission(Manifest.permission.EMERGENCY_INSTALL_PACKAGES,
+                mInstallerUid) == PackageManager.PERMISSION_GRANTED);
+    }
+
     private static final int USER_ACTION_NOT_NEEDED = 0;
     private static final int USER_ACTION_REQUIRED = 1;
     private static final int USER_ACTION_PENDING_APK_PARSING = 2;
@@ -1008,6 +1061,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isUpdateOwner = TextUtils.equals(existingUpdateOwnerPackageName,
                 getInstallerPackageName());
         final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
+        final boolean isEmergencyInstall =
+                isEmergencyInstallerEnabled(packageName, snapshot);
         final boolean isPermissionGranted = isInstallPermissionGranted
                 || (isUpdatePermissionGranted && isUpdate)
                 || (isSelfUpdatePermissionGranted && isSelfUpdate)
@@ -1024,7 +1079,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Device owners and affiliated profile owners are allowed to silently install packages, so
         // the permission check is waived if the installer is the device owner.
         final boolean noUserActionNecessary = isInstallerRoot || isInstallerSystem
-                || isInstallerDeviceOwnerOrAffiliatedProfileOwner();
+                || isInstallerDeviceOwnerOrAffiliatedProfileOwner() || isEmergencyInstall;
 
         if (noUserActionNecessary) {
             return userActionNotTypicallyNeededResponse;
@@ -1077,7 +1132,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             boolean prepared, boolean committed, boolean destroyed, boolean sealed,
             @Nullable int[] childSessionIds, int parentSessionId, boolean isReady,
             boolean isFailed, boolean isApplied, int sessionErrorCode,
-            String sessionErrorMessage) {
+            String sessionErrorMessage, DomainSet preVerifiedDomains) {
         mCallback = callback;
         mContext = context;
         mPm = pm;
@@ -1139,6 +1194,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mSessionErrorMessage =
                 sessionErrorMessage != null ? sessionErrorMessage : "";
         mStagedSession = params.isStaged ? new StagedSession() : null;
+        mPreVerifiedDomains = preVerifiedDomains;
 
         if (isDataLoaderInstallation()) {
             if (isApexSession()) {
@@ -1186,7 +1242,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mStageDirInUse, mDestroyed, mFds.size(), mBridges.size(), mFinalStatus,
                     mFinalMessage, params, mParentSessionId, getChildSessionIdsLocked(),
                     mSessionApplied, mSessionFailed, mSessionReady, mSessionErrorCode,
-                    mSessionErrorMessage, mPreapprovalDetails);
+                    mSessionErrorMessage, mPreapprovalDetails, mPreVerifiedDomains, mPackageName);
         }
     }
 
@@ -1726,8 +1782,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private File getStagedAppMetadataFile() {
-        File file = new File(stageDir, APP_METADATA_FILE_NAME);
-        return file.exists() ? file : null;
+        return new File(stageDir, APP_METADATA_FILE_NAME);
     }
 
     private static boolean isAppMetadata(String name) {
@@ -1743,7 +1798,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         assertCallerIsOwnerOrRoot();
         synchronized (mLock) {
             assertPreparedAndNotCommittedOrDestroyedLocked("getAppMetadataFd");
-            if (getStagedAppMetadataFile() == null) {
+            if (!getStagedAppMetadataFile().exists()) {
                 return null;
             }
             try {
@@ -1757,12 +1812,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public void removeAppMetadata() {
         File file = getStagedAppMetadataFile();
-        if (file != null) {
+        if (file.exists()) {
             file.delete();
         }
     }
 
-    private static long getAppMetadataSizeLimit() {
+    static long getAppMetadataSizeLimit() {
         final long token = Binder.clearCallingIdentity();
         try {
             return DeviceConfig.getLong(NAMESPACE_PACKAGE_MANAGER_SERVICE,
@@ -1821,7 +1876,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 Os.link(path, sourcePath);
                 // Grant READ access for APK to be read successfully
-                Os.chmod(sourcePath, 0644);
+                Os.chmod(sourcePath, DEFAULT_FILE_ACCESS_MODE);
             } catch (ErrnoException e) {
                 e.rethrowAsIOException();
             }
@@ -1890,7 +1945,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             // If file is app metadata then set permission to 0640 to deny user read access since it
             // might contain sensitive information.
-            int mode = name.equals(APP_METADATA_FILE_NAME) ? APP_METADATA_FILE_ACCESS_MODE : 0644;
+            int mode = name.equals(APP_METADATA_FILE_NAME)
+                    ? APP_METADATA_FILE_ACCESS_MODE : DEFAULT_FILE_ACCESS_MODE;
             ParcelFileDescriptor targetPfd = openTargetInternal(target.getAbsolutePath(),
                     O_CREAT | O_WRONLY, mode);
             Os.chmod(target.getAbsolutePath(), mode);
@@ -2074,7 +2130,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         File appMetadataFile = getStagedAppMetadataFile();
-        if (appMetadataFile != null) {
+        if (appMetadataFile.exists()) {
             long sizeLimit = getAppMetadataSizeLimit();
             if (appMetadataFile.length() > sizeLimit) {
                 appMetadataFile.delete();
@@ -3122,7 +3178,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         synchronized (mLock) {
             return new InstallingSession(sessionId, stageDir, localObserver, params, mInstallSource,
-                    user, mSigningDetails, mInstallerUid, mPackageLite, mPm);
+                    user, mSigningDetails, mInstallerUid, mPackageLite, mPreVerifiedDomains, mPm);
         }
     }
 
@@ -3362,7 +3418,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         final List<ApkLite> addedFiles = getAddedApkLitesLocked();
         if (addedFiles.isEmpty()
-                && (removeSplitList.size() == 0 || getStagedAppMetadataFile() != null)) {
+                && (removeSplitList.size() == 0 || getStagedAppMetadataFile().exists())) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     TextUtils.formatSimple("Session: %d. No packages staged in %s", sessionId,
                           stageDir.getAbsolutePath()));
@@ -4235,7 +4291,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IOException("Failed to copy " + fromFile + " to " + tmpFile);
             }
             try {
-                Os.chmod(tmpFile.getAbsolutePath(), 0644);
+                Os.chmod(tmpFile.getAbsolutePath(), DEFAULT_FILE_ACCESS_MODE);
             } catch (ErrnoException e) {
                 throw new IOException("Failed to chmod " + tmpFile);
             }
@@ -5011,6 +5067,82 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return (params.installFlags & PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP) != 0;
     }
 
+    @Override
+    public void setPreVerifiedDomains(@NonNull DomainSet preVerifiedDomains) {
+        // First check permissions
+        final boolean exemptFromPermissionChecks =
+                (mInstallerUid == Process.ROOT_UID) || (mInstallerUid == Process.SHELL_UID);
+        if (!exemptFromPermissionChecks) {
+            final Computer snapshot = mPm.snapshotComputer();
+            if (PackageManager.PERMISSION_GRANTED != snapshot.checkUidPermission(
+                    Manifest.permission.ACCESS_INSTANT_APPS, mInstallerUid)) {
+                throw new SecurityException("You need android.permission.ACCESS_INSTANT_APPS "
+                        + "permission to set pre-verified domains.");
+            }
+            ComponentName instantAppInstallerComponent = snapshot.getInstantAppInstallerComponent();
+            if (instantAppInstallerComponent == null) {
+                // Shouldn't happen
+                throw new IllegalStateException("Instant app installer is not available. "
+                        + "Only the instant app installer can call this API.");
+            }
+            if (!instantAppInstallerComponent.getPackageName().equals(getInstallerPackageName())) {
+                throw new SecurityException("Only the instant app installer can call this API.");
+            }
+        }
+        // Then check size limits
+        final long preVerifiedDomainsCountLimit = getPreVerifiedDomainsCountLimit();
+        if (preVerifiedDomains.getDomains().size() > preVerifiedDomainsCountLimit) {
+            throw new IllegalArgumentException(
+                    "The number of pre-verified domains have exceeded the maximum of "
+                            + preVerifiedDomainsCountLimit);
+        }
+        final long preVerifiedDomainLengthLimit = getPreVerifiedDomainLengthLimit();
+        for (String domain : preVerifiedDomains.getDomains()) {
+            if (domain.length() > preVerifiedDomainLengthLimit) {
+                throw new IllegalArgumentException(
+                        "Pre-verified domain: [" + domain + " ] exceeds maximum length allowed: "
+                                + preVerifiedDomainLengthLimit);
+            }
+        }
+        // Okay to proceed
+        synchronized (mLock) {
+            mPreVerifiedDomains = preVerifiedDomains;
+        }
+    }
+
+    private static long getPreVerifiedDomainsCountLimit() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getLong(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_PRE_VERIFIED_DOMAINS_COUNT_LIMIT,
+                    DEFAULT_PRE_VERIFIED_DOMAINS_COUNT_LIMIT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private static long getPreVerifiedDomainLengthLimit() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getLong(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_PRE_VERIFIED_DOMAIN_LENGTH_LIMIT,
+                    DEFAULT_PRE_VERIFIED_DOMAIN_LENGTH_LIMIT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    @Nullable
+    public DomainSet getPreVerifiedDomains() {
+        assertCallerIsOwnerOrRoot();
+        synchronized (mLock) {
+            assertPreparedAndNotCommittedOrDestroyedLocked("getPreVerifiedDomains");
+            return mPreVerifiedDomains;
+        }
+    }
+
+
     void setSessionReady() {
         synchronized (mLock) {
             // Do not allow destroyed/failed session to change state
@@ -5087,6 +5219,44 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             return mSessionErrorMessage;
         }
+    }
+
+    void registerUnarchivalListener(IntentSender intentSender) {
+        synchronized (mLock) {
+            this.mUnarchivalListeners.add(intentSender);
+        }
+    }
+
+    Set<IntentSender> getUnarchivalListeners() {
+        synchronized (mLock) {
+            return new ArraySet<>(mUnarchivalListeners);
+        }
+    }
+
+    void reportUnarchivalStatus(@UnarchivalStatus int status, int unarchiveId,
+            long requiredStorageBytes, PendingIntent userActionIntent) {
+        if (getUnarchivalStatus() != UNARCHIVAL_STATUS_UNSET) {
+            throw new IllegalStateException(
+                    TextUtils.formatSimple(
+                            "Unarchival status for ID %s has already been set or a session has "
+                                    + "been created for it already by the caller.",
+                            unarchiveId));
+        }
+        mUnarchivalStatus = status;
+
+        // Execute expensive calls outside the sync block.
+        mPm.mHandler.post(
+                () -> mPm.mInstallerService.mPackageArchiver.notifyUnarchivalListener(status,
+                        getInstallerPackageName(), params.appPackageName, requiredStorageBytes,
+                        userActionIntent, getUnarchivalListeners(), userId));
+        if (status != UNARCHIVAL_OK) {
+            Binder.withCleanCallingIdentity(this::abandon);
+        }
+    }
+
+    @UnarchivalStatus
+    int getUnarchivalStatus() {
+        return this.mUnarchivalStatus;
     }
 
     /**
@@ -5199,6 +5369,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("mSessionErrorCode", mSessionErrorCode);
         pw.printPair("mSessionErrorMessage", mSessionErrorMessage);
         pw.printPair("mPreapprovalDetails", mPreapprovalDetails);
+        if (mPreVerifiedDomains != null) {
+            pw.printPair("mPreVerifiedDomains", mPreVerifiedDomains);
+        }
         pw.println();
 
         pw.decreaseIndent();
@@ -5495,7 +5668,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 writeByteArrayAttribute(out, ATTR_SIGNATURE, signature);
                 out.endTag(null, TAG_SESSION_CHECKSUM_SIGNATURE);
             }
-
+            if (mPreVerifiedDomains != null) {
+                for (String domain : mPreVerifiedDomains.getDomains()) {
+                    out.startTag(null, TAG_PRE_VERIFIED_DOMAINS);
+                    writeStringAttribute(out, ATTR_DOMAIN, domain);
+                    out.endTag(null, TAG_PRE_VERIFIED_DOMAINS);
+                }
+            }
         }
 
         out.endTag(null, TAG_SESSION);
@@ -5622,6 +5801,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         List<InstallationFile> files = new ArrayList<>();
         ArrayMap<String, List<Checksum>> checksums = new ArrayMap<>();
         ArrayMap<String, byte[]> signatures = new ArrayMap<>();
+        ArraySet<String> preVerifiedDomainSet = new ArraySet<>();
         int outerDepth = in.getDepth();
         int type;
         while ((type = in.next()) != XmlPullParser.END_DOCUMENT
@@ -5675,6 +5855,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final byte[] signature = readByteArrayAttribute(in, ATTR_SIGNATURE);
                     signatures.put(fileName1, signature);
                     break;
+                case TAG_PRE_VERIFIED_DOMAINS:
+                    preVerifiedDomainSet.add(readStringAttribute(in, ATTR_DOMAIN));
+                    break;
             }
         }
 
@@ -5718,6 +5901,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        DomainSet preVerifiedDomains =
+                preVerifiedDomainSet.isEmpty() ? null : new DomainSet(preVerifiedDomainSet);
+
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
                 installOriginatingPackageName, installerPackageName, installPackageUid,
                 updateOwnerPackageName, installerAttributionTag, params.packageSource);
@@ -5726,6 +5912,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 installerUid, installSource, params, createdMillis, committedMillis, stageDir,
                 stageCid, fileArray, checksumsMap, prepared, committed, destroyed, sealed,
                 childSessionIdsArray, parentSessionId, isReady, isFailed, isApplied,
-                sessionErrorCode, sessionErrorMessage);
+                sessionErrorCode, sessionErrorMessage, preVerifiedDomains);
     }
 }

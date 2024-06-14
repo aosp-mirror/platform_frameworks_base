@@ -49,4 +49,10 @@ public interface PersistentDataBlockManagerInternal {
 
     /** Retrieves the UID that can access the persistent data partition. */
     int getAllowedUid();
+
+    /**
+     * Attempt to deactivate Factory Reset Protection (FRP) without a secret.  Returns true if
+     * successful, false if not.
+     */
+    boolean deactivateFactoryResetProtectionWithoutSecret();
 }

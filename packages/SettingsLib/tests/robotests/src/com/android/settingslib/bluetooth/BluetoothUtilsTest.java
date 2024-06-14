@@ -16,6 +16,9 @@
 package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +26,8 @@ import static org.mockito.Mockito.when;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -48,6 +53,8 @@ public class BluetoothUtilsTest {
     private BluetoothDevice mBluetoothDevice;
     @Mock
     private AudioManager mAudioManager;
+    @Mock
+    private PackageManager mPackageManager;
 
     private Context mContext;
     private static final String STRING_METADATA = "string_metadata";
@@ -58,6 +65,7 @@ public class BluetoothUtilsTest {
     private static final String CONTROL_METADATA =
             "<HEARABLE_CONTROL_SLICE_WITH_WIDTH>" + STRING_METADATA
                     + "</HEARABLE_CONTROL_SLICE_WITH_WIDTH>";
+    private static final String FAKE_EXCLUSIVE_MANAGER_NAME = "com.fake.name";
 
     @Before
     public void setUp() {
@@ -84,6 +92,14 @@ public class BluetoothUtilsTest {
                 mContext, mCachedBluetoothDevice);
 
         verify(mContext).getDrawable(com.android.internal.R.drawable.ic_bt_laptop);
+    }
+
+    @Test
+    public void getBtClassDrawableWithDescription_typeHearingAid_returnHearingAidDrawable() {
+        when(mCachedBluetoothDevice.isHearingAidDevice()).thenReturn(true);
+        BluetoothUtils.getBtClassDrawableWithDescription(mContext, mCachedBluetoothDevice);
+
+        verify(mContext).getDrawable(com.android.internal.R.drawable.ic_bt_hearing_aid);
     }
 
     @Test
@@ -362,5 +378,56 @@ public class BluetoothUtilsTest {
 
         assertThat(BluetoothUtils.isConnectedBluetoothDevice(mCachedBluetoothDevice,
                 mAudioManager)).isEqualTo(false);
+    }
+
+    @Test
+    public void isExclusivelyManagedBluetoothDevice_isNotExclusivelyManaged_returnFalse() {
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
+                null);
+
+        assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
+                mBluetoothDevice)).isEqualTo(false);
+    }
+
+    @Test
+    public void isExclusivelyManagedBluetoothDevice_isNotInAllowList_returnFalse() {
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
+                FAKE_EXCLUSIVE_MANAGER_NAME.getBytes());
+
+        assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
+                mBluetoothDevice)).isEqualTo(false);
+    }
+
+    @Test
+    public void isExclusivelyManagedBluetoothDevice_packageNotInstalled_returnFalse()
+            throws Exception {
+        final String exclusiveManagerName =
+                BluetoothUtils.getExclusiveManagers().stream().findAny().orElse(
+                        FAKE_EXCLUSIVE_MANAGER_NAME);
+
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
+                exclusiveManagerName.getBytes());
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        doThrow(new PackageManager.NameNotFoundException()).when(mPackageManager).getPackageInfo(
+                exclusiveManagerName, 0);
+
+        assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
+                mBluetoothDevice)).isEqualTo(false);
+    }
+
+    @Test
+    public void isExclusivelyManagedBluetoothDevice_isExclusivelyManaged_returnTrue()
+            throws Exception {
+        final String exclusiveManagerName =
+                BluetoothUtils.getExclusiveManagers().stream().findAny().orElse(
+                        FAKE_EXCLUSIVE_MANAGER_NAME);
+
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER)).thenReturn(
+                exclusiveManagerName.getBytes());
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        doReturn(new PackageInfo()).when(mPackageManager).getPackageInfo(exclusiveManagerName, 0);
+
+        assertThat(BluetoothUtils.isExclusivelyManagedBluetoothDevice(mContext,
+                mBluetoothDevice)).isEqualTo(true);
     }
 }

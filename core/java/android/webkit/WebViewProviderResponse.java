@@ -16,17 +16,42 @@
 
 package android.webkit;
 
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /** @hide */
+@FlaggedApi(Flags.FLAG_UPDATE_SERVICE_IPC_WRAPPER)
+@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class WebViewProviderResponse implements Parcelable {
 
-    public WebViewProviderResponse(PackageInfo packageInfo, int status) {
+    @IntDef(
+            prefix = {"STATUS_"},
+            value = {
+                STATUS_SUCCESS,
+                STATUS_FAILED_WAITING_FOR_RELRO,
+                STATUS_FAILED_LISTING_WEBVIEW_PACKAGES,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface WebViewProviderStatus {}
+
+    public static final int STATUS_SUCCESS = WebViewFactory.LIBLOAD_SUCCESS;
+    public static final int STATUS_FAILED_WAITING_FOR_RELRO =
+            WebViewFactory.LIBLOAD_FAILED_WAITING_FOR_RELRO;
+    public static final int STATUS_FAILED_LISTING_WEBVIEW_PACKAGES =
+            WebViewFactory.LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES;
+
+    public WebViewProviderResponse(
+            @Nullable PackageInfo packageInfo, @WebViewProviderStatus int status) {
         this.packageInfo = packageInfo;
         this.status = status;
     }
@@ -54,13 +79,11 @@ public final class WebViewProviderResponse implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeTypedObject(packageInfo, flags);
         out.writeInt(status);
     }
 
-    @UnsupportedAppUsage
-    @Nullable
-    public final PackageInfo packageInfo;
-    public final int status;
+    @UnsupportedAppUsage public final @Nullable PackageInfo packageInfo;
+    public final @WebViewProviderStatus int status;
 }

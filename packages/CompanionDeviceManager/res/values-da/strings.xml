@@ -26,7 +26,7 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"enhed"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Denne app får adgang til disse tilladelser på din <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Giv &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; adgang til disse oplysninger fra din telefon"</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Tjenester, som kan tilsluttes en anden enhed"</string>
+    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Tjenester til flere enheder"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> anmoder om tilladelse på vegne af din <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> til at streame apps mellem dine enheder"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Opkaldshistorik"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Enheder i nærheden"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Skift medieoutput"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Billeder og medier"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Notifikationer"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Notifikationer"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Apps"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Streaming"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Kan foretage og administrere telefonopkald"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Kan læse og redigere opkaldshistorik"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Kan sende og se sms-beskeder"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Kan tilgå dine kontakter"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Kan tilgå din kalender"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Kan optage lyd"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Kan finde, oprette forbindelse til og fastslå den omtrentlige lokation af enheder i nærheden"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Kan læse alle notifikationer, herunder oplysninger som f.eks. kontakter, beskeder og billeder"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Foretage og administrere telefonopkald"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Læse og redigere opkaldshistorik"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Sende og se sms-beskeder"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Få adgang til dine kontakter"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Få adgang til din kalender"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Optage lyd"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Finde, oprette forbindelse til og fastslå den omtrentlige lokation af enheder i nærheden"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Læse alle notifikationer, herunder oplysninger som f.eks. kontakter, beskeder og billeder"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Læse alle notifikationer, herunder oplysninger som f.eks. kontakter, beskeder og billeder&lt;br/&gt;• Sende notifikationer&lt;br/&gt;&lt;br/&gt;Du kan til enhver tid administrere appens mulighed for at læse og sende notifikationer under Indstillinger &gt; Notifikationer."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Stream din telefons apps"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Stream apps og andre systemfunktioner fra din telefon"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Få adgang til en liste over tilgængelige enheder, og vælg, hvilken enhed der skal streame eller caste lyd eller video fra andre apps"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefon"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

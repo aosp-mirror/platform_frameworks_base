@@ -16,10 +16,6 @@
 -->
 
 <resources>
-  <style name="AccessibilityMenuSettings" parent="android:Theme.DeviceDefault.DayNight">
-    <item name="android:windowLightStatusBar">false</item>
-  </style>
-
   <!--Adds the theme to support SnackBar component and user configurable theme. -->
   <style name="ServiceTheme" parent="android:Theme.DeviceDefault.DayNight">
     <item name="android:colorControlNormal">@color/colorControlNormal</item>

@@ -35,6 +35,9 @@ import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.PowerExemptionManager;
 import android.os.UserHandle;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.FeatureFlagUtils;
@@ -47,10 +50,11 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
+import com.android.settingslib.flags.Flags;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
@@ -61,6 +65,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -75,6 +80,9 @@ import java.util.function.Consumer;
 public class MediaOutputDialogTest extends SysuiTestCase {
 
     private static final String TEST_PACKAGE = "test_package";
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     // Mock
     private final MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
@@ -91,7 +99,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private final MediaDevice mMediaDevice = mock(MediaDevice.class);
     private final CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
-    private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final DialogTransitionAnimator mDialogTransitionAnimator = mock(
+            DialogTransitionAnimator.class);
     private final MediaMetadata mMediaMetadata = mock(MediaMetadata.class);
     private final MediaDescription mMediaDescription = mock(MediaDescription.class);
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
@@ -130,7 +139,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
@@ -169,6 +178,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void getStopButtonVisibility_remoteBLEDevice_returnVisible() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -180,6 +190,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void getStopButtonVisibility_remoteNonBLEDevice_returnGone() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -200,6 +211,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void isBroadcastSupported_flagOnAndConnectBleDevice_returnsTrue() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -212,6 +224,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void isBroadcastSupported_flagOnAndNoBleDevice_returnsFalse() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -224,6 +237,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void isBroadcastSupported_notSupportBroadcastAndflagOn_returnsFalse() {
         FeatureFlagUtils.setEnabled(mContext,
                 FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
@@ -232,6 +246,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void isBroadcastSupported_flagOffAndConnectToBleDevice_returnsTrue() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -244,6 +259,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void isBroadcastSupported_flagOffAndNoBleDevice_returnsTrue() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -256,6 +272,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void isBroadcastSupported_noBleDeviceAndEnabledBroadcast_returnsTrue() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -268,6 +285,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void isBroadcastSupported_noBleDeviceAndDisabledBroadcast_returnsFalse() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -280,6 +298,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void getBroadcastIconVisibility_isBroadcasting_returnVisible() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -291,6 +310,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void getBroadcastIconVisibility_noBroadcasting_returnGone() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -302,6 +322,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void getBroadcastIconVisibility_remoteNonLeDevice_returnGone() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -354,6 +375,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     public void getStopButtonText_supportsBroadcast_returnsBroadcastText() {
         String stopText = mContext.getText(R.string.media_output_broadcast).toString();
         MediaDevice mMediaDevice = mock(MediaDevice.class);
@@ -379,7 +401,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         });
 
         verify(mockMediaOutputController).releaseSession();
-        verify(mDialogLaunchAnimator).disableAllCurrentDialogsExitAnimations();
+        verify(mDialogTransitionAnimator).disableAllCurrentDialogsExitAnimations();
     }
 
     @Test
@@ -399,7 +421,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
                 false,
                 mBroadcastSender,
                 controller,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mUiEventLogger,
                 true);
     }

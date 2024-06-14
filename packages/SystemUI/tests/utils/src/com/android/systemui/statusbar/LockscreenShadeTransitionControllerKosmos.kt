@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar
 
-import android.content.testableContext
+import android.content.applicationContext
 import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.classifier.falsingManager
 import com.android.systemui.dump.dumpManager
@@ -24,11 +24,12 @@ import com.android.systemui.keyguard.domain.interactor.naturalScrollingSettingOb
 import com.android.systemui.keyguard.wakefulnessLifecycle
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.media.controls.ui.mediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.mediaHierarchyManager
 import com.android.systemui.plugins.activityStarter
-import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeLockscreenInteractor
 import com.android.systemui.statusbar.notification.stack.ambientState
 import com.android.systemui.statusbar.phone.keyguardBypassController
 import com.android.systemui.statusbar.phone.lsShadeTransitionLogger
@@ -47,7 +48,7 @@ val Kosmos.lockscreenShadeTransitionController by Fixture {
         scrimTransitionController = lockscreenShadeScrimTransitionController,
         keyguardTransitionControllerFactory = lockscreenShadeKeyguardTransitionControllerFactory,
         depthController = notificationShadeDepthController,
-        context = testableContext,
+        context = applicationContext,
         splitShadeOverScrollerFactory = splitShadeLockScreenOverScrollerFactory,
         singleShadeOverScrollerFactory = singleShadeLockScreenOverScrollerFactory,
         activityStarter = activityStarter,
@@ -58,8 +59,9 @@ val Kosmos.lockscreenShadeTransitionController by Fixture {
         qsTransitionControllerFactory = lockscreenShadeQsTransitionControllerFactory,
         shadeRepository = shadeRepository,
         shadeInteractor = shadeInteractor,
-        powerInteractor = powerInteractor,
         splitShadeStateController = splitShadeStateController,
+        shadeLockscreenInteractorLazy = { shadeLockscreenInteractor },
         naturalScrollingSettingObserver = naturalScrollingSettingObserver,
+        lazyQSSceneAdapter = { qsSceneAdapter }
     )
 }

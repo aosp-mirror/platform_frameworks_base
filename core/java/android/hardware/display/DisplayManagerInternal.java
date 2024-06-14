@@ -202,8 +202,11 @@ public abstract class DisplayManagerInternal {
     /**
      * Called by the window manager to perform traversals while holding a
      * surface flinger transaction.
+     * @param t The default transaction.
+     * @param displayTransactions The transactions mapped by display id.
      */
-    public abstract void performTraversal(Transaction t);
+    public abstract void performTraversal(Transaction t,
+            SparseArray<SurfaceControl.Transaction> displayTransactions);
 
     /**
      * Tells the display manager about properties of the display that depend on the windows on it.
@@ -426,6 +429,13 @@ public abstract class DisplayManagerInternal {
      * Get all available DisplayGroupIds.
      */
     public abstract IntArray getDisplayGroupIds();
+
+    /**
+     * Called upon presentation started/ended on the display.
+     * @param displayId the id of the display where presentation started.
+     * @param isShown whether presentation is shown.
+     */
+    public abstract void onPresentation(int displayId, boolean isShown);
 
     /**
      * Describes the requested power state of the display.
@@ -715,6 +725,14 @@ public abstract class DisplayManagerInternal {
         boolean startOffload();
 
         void stopOffload();
+
+        /**
+         * Called when {@link DisplayOffloadSession} tries to block screen turning on.
+         *
+         * @param unblocker a {@link Runnable} executed upon all work required before screen turning
+         *                  on is done.
+         */
+        void onBlockingScreenOn(Runnable unblocker);
     }
 
     /** A session token that associates a internal display with a {@link DisplayOffloader}. */
@@ -733,6 +751,32 @@ public abstract class DisplayManagerInternal {
          *                   the brightness from offload. Other values will be ignored.
          */
         void updateBrightness(float brightness);
+
+        /**
+         * Called while display is turning to state ON to leave a small period for displayoffload
+         * session to finish some work.
+         *
+         * @param unblocker a {@link Runnable} used by displayoffload session to notify
+         *                  {@link DisplayManager} that it can continue turning screen on.
+         */
+        boolean blockScreenOn(Runnable unblocker);
+
+        /**
+         * Get the brightness levels used to determine automatic brightness based on lux levels.
+         * @param mode The auto-brightness mode
+         *             (AutomaticBrightnessController.AutomaticBrightnessMode)
+         * @return The brightness levels for the specified mode. The values are between
+         * {@link PowerManager.BRIGHTNESS_MIN} and {@link PowerManager.BRIGHTNESS_MAX}.
+         */
+        float[] getAutoBrightnessLevels(int mode);
+
+        /**
+         * Get the lux levels used to determine automatic brightness.
+         * @param mode The auto-brightness mode
+         *             (AutomaticBrightnessController.AutomaticBrightnessMode)
+         * @return The lux levels for the specified mode
+         */
+        float[] getAutoBrightnessLuxLevels(int mode);
 
         /** Returns whether displayoffload supports the given display state. */
         static boolean isSupportedOffloadState(int displayState) {

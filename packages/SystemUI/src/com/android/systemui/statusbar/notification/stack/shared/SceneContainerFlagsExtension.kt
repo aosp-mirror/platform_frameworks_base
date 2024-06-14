@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.stack.shared
 
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 
-private const val FLEXI_NOTIFS = false
+private const val FLEXI_NOTIFS = true
 
 /**
  * Returns whether flexiglass is displaying notifications, which is currently an optional piece of

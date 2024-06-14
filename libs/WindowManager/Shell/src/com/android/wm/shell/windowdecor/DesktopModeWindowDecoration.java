@@ -36,8 +36,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.IBinder;
-import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -46,6 +44,7 @@ import android.view.ViewConfiguration;
 import android.widget.ImageButton;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.IconProvider;
@@ -57,12 +56,13 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeAppControlsWindowDecorationViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeFocusedWindowDecorationViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeWindowDecorationViewHolder;
 
-import java.util.HashSet;
-import java.util.Set;
+import kotlin.Unit;
+
 import java.util.function.Supplier;
 
 /**
@@ -82,6 +82,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
     private View.OnLongClickListener mOnCaptionLongClickListener;
+    private View.OnGenericMotionListener mOnCaptionGenericMotionListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
     private DragDetector mDragDetector;
@@ -103,8 +104,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private ExclusionRegionListener mExclusionRegionListener;
 
-    private final Set<IBinder> mTransitionsPausingRelayout = new HashSet<>();
-    private int mRelayoutBlock;
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
 
     DesktopModeWindowDecoration(
@@ -157,10 +156,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     void setCaptionListeners(
             View.OnClickListener onCaptionButtonClickListener,
             View.OnTouchListener onCaptionTouchListener,
-            View.OnLongClickListener onLongClickListener) {
+            View.OnLongClickListener onLongClickListener,
+            View.OnGenericMotionListener onGenericMotionListener) {
         mOnCaptionButtonClickListener = onCaptionButtonClickListener;
         mOnCaptionTouchListener = onCaptionTouchListener;
         mOnCaptionLongClickListener = onLongClickListener;
+        mOnCaptionGenericMotionListener = onGenericMotionListener;
     }
 
     void setExclusionRegionListener(ExclusionRegionListener exclusionRegionListener) {
@@ -178,63 +179,34 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     @Override
     void relayout(ActivityManager.RunningTaskInfo taskInfo) {
-        // TaskListener callbacks and shell transitions aren't synchronized, so starting a shell
-        // transition can trigger an onTaskInfoChanged call that updates the task's SurfaceControl
-        // and interferes with the transition animation that is playing at the same time.
-        if (mRelayoutBlock > 0) {
-            return;
-        }
-
         final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
+        // The crop and position of the task should only be set when a task is fluid resizing. In
+        // all other cases, it is expected that the transition handler positions and crops the task
+        // in order to allow the handler time to animate before the task before the final
+        // position and crop are set.
+        final boolean shouldSetTaskPositionAndCrop = !DesktopModeStatus.isVeiledResizeEnabled()
+                && mTaskDragResizer.isResizingOrAnimating();
         // Use |applyStartTransactionOnDraw| so that the transaction (that applies task crop) is
         // synced with the buffer transaction (that draws the View). Both will be shown on screen
         // at the same, whereas applying them independently causes flickering. See b/270202228.
-        relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */);
+        relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */,
+                shouldSetTaskPositionAndCrop);
     }
 
     void relayout(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw) {
-        final int shadowRadiusID = taskInfo.isFocused
-                ? R.dimen.freeform_decor_shadow_focused_thickness
-                : R.dimen.freeform_decor_shadow_unfocused_thickness;
-        final boolean isFreeform =
-                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
-        final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
-
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
         if (isHandleMenuActive()) {
             mHandleMenu.relayout(startT);
         }
+
+        updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
+                shouldSetTaskPositionAndCrop);
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        final int windowDecorLayoutId = getDesktopModeWindowDecorLayoutId(
-                taskInfo.getWindowingMode());
-        mRelayoutParams.reset();
-        mRelayoutParams.mRunningTaskInfo = taskInfo;
-        mRelayoutParams.mLayoutResId = windowDecorLayoutId;
-        mRelayoutParams.mCaptionHeightId = getCaptionHeightId(taskInfo.getWindowingMode());
-        mRelayoutParams.mShadowRadiusId = shadowRadiusID;
-        mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
-        // The configuration used to lay out the window decoration. The system context's config is
-        // used when the task density has been overridden to a custom density so that the resources
-        // and views of the decoration aren't affected and match the rest of the System UI, if not
-        // then just use the task's configuration. A copy is made instead of using the original
-        // reference so that the configuration isn't mutated on config changes and diff checks can
-        // be made in WindowDecoration#relayout using the pre/post-relayout configuration.
-        // See b/301119301.
-        // TODO(b/301119301): consider moving the config data needed for diffs to relayout params
-        // instead of using a whole Configuration as a parameter.
-        final Configuration windowDecorConfig = new Configuration();
-        windowDecorConfig.setTo(DesktopTasksController.isDesktopDensityOverrideSet()
-                ? mContext.getResources().getConfiguration() // Use system context.
-                : mTaskInfo.configuration); // Use task configuration.
-        mRelayoutParams.mWindowDecorConfig = windowDecorConfig;
-
-        mRelayoutParams.mCornerRadius =
-                (int) ScreenDecorationsUtils.getWindowCornerRadius(mContext);
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
 
@@ -259,9 +231,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                         mOnCaptionTouchListener,
                         mOnCaptionButtonClickListener,
                         mOnCaptionLongClickListener,
+                        mOnCaptionGenericMotionListener,
                         mAppName,
-                        mAppIconBitmap
-                );
+                        mAppIconBitmap,
+                        () -> {
+                            if (!isMaximizeMenuActive()) {
+                                createMaximizeMenu();
+                            }
+                            return Unit.INSTANCE;
+                        });
             } else {
                 throw new IllegalArgumentException("Unexpected layout resource id");
             }
@@ -273,6 +251,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             closeMaximizeMenu();
         }
 
+        final boolean isFreeform =
+                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
+        final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
         if (!isDragResizeable) {
             if (!mTaskInfo.positionInParent.equals(mPositionInParent)) {
                 // We still want to track caption bar's exclusion region on a non-resizeable task.
@@ -323,6 +304,80 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
     }
 
+    @VisibleForTesting
+    static void updateRelayoutParams(
+            RelayoutParams relayoutParams,
+            Context context,
+            ActivityManager.RunningTaskInfo taskInfo,
+            boolean applyStartTransactionOnDraw,
+            boolean shouldSetTaskPositionAndCrop) {
+        final int captionLayoutId = getDesktopModeWindowDecorLayoutId(taskInfo.getWindowingMode());
+        relayoutParams.reset();
+        relayoutParams.mRunningTaskInfo = taskInfo;
+        relayoutParams.mLayoutResId = captionLayoutId;
+        relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
+        relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
+
+        if (captionLayoutId == R.layout.desktop_mode_app_controls_window_decor
+                && TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
+            // App is requesting to customize the caption bar. Allow input to fall through to the
+            // windows below so that the app can respond to input events on their custom content.
+            relayoutParams.mAllowCaptionInputFallthrough = true;
+            // Report occluding elements as bounding rects to the insets system so that apps can
+            // draw in the empty space in the center:
+            //   First, the "app chip" section of the caption bar (+ some extra margins).
+            final RelayoutParams.OccludingCaptionElement appChipElement =
+                    new RelayoutParams.OccludingCaptionElement();
+            appChipElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_start;
+            appChipElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.START;
+            relayoutParams.mOccludingCaptionElements.add(appChipElement);
+            //   Then, the right-aligned section (drag space, maximize and close buttons).
+            final RelayoutParams.OccludingCaptionElement controlsElement =
+                    new RelayoutParams.OccludingCaptionElement();
+            controlsElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_end;
+            controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
+            relayoutParams.mOccludingCaptionElements.add(controlsElement);
+        }
+        if (DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ taskInfo.isFocused)) {
+            relayoutParams.mShadowRadiusId = taskInfo.isFocused
+                    ? R.dimen.freeform_decor_shadow_focused_thickness
+                    : R.dimen.freeform_decor_shadow_unfocused_thickness;
+        }
+        relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
+        relayoutParams.mSetTaskPositionAndCrop = shouldSetTaskPositionAndCrop;
+        // The configuration used to lay out the window decoration. The system context's config is
+        // used when the task density has been overridden to a custom density so that the resources
+        // and views of the decoration aren't affected and match the rest of the System UI, if not
+        // then just use the task's configuration. A copy is made instead of using the original
+        // reference so that the configuration isn't mutated on config changes and diff checks can
+        // be made in WindowDecoration#relayout using the pre/post-relayout configuration.
+        // See b/301119301.
+        // TODO(b/301119301): consider moving the config data needed for diffs to relayout params
+        // instead of using a whole Configuration as a parameter.
+        final Configuration windowDecorConfig = new Configuration();
+        windowDecorConfig.setTo(DesktopTasksController.isDesktopDensityOverrideSet()
+                ? context.getResources().getConfiguration() // Use system context.
+                : taskInfo.configuration); // Use task configuration.
+        relayoutParams.mWindowDecorConfig = windowDecorConfig;
+
+        if (DesktopModeStatus.useRoundedCorners()) {
+            relayoutParams.mCornerRadius =
+                    (int) ScreenDecorationsUtils.getWindowCornerRadius(context);
+        }
+    }
+
+    /**
+     * If task has focused window decor, return the caption id of the fullscreen caption size
+     * resource. Otherwise, return ID_NULL and caption width be set to task width.
+     */
+    private static int getCaptionWidthId(int layoutResId) {
+        if (layoutResId == R.layout.desktop_mode_focused_window_decor) {
+            return R.dimen.desktop_mode_fullscreen_decor_caption_width;
+        }
+        return Resources.ID_NULL;
+    }
+
+
     private PointF calculateMaximizeMenuPosition() {
         final PointF position = new PointF();
         final Resources resources = mContext.getResources();
@@ -364,24 +419,21 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return mHandleMenu != null;
     }
 
+    boolean isHandlingDragResize() {
+        return mDragResizeListener != null && mDragResizeListener.isHandlingDragResize();
+    }
+
     private void loadAppInfo() {
-        String packageName = mTaskInfo.realActivity.getPackageName();
         PackageManager pm = mContext.getApplicationContext().getPackageManager();
-        try {
-            final IconProvider provider = new IconProvider(mContext);
-            mAppIconDrawable = provider.getIcon(pm.getActivityInfo(mTaskInfo.baseActivity,
-                    PackageManager.ComponentInfoFlags.of(0)));
-            final Resources resources = mContext.getResources();
-            final BaseIconFactory factory = new BaseIconFactory(mContext,
-                    resources.getDisplayMetrics().densityDpi,
-                    resources.getDimensionPixelSize(R.dimen.desktop_mode_caption_icon_radius));
-            mAppIconBitmap = factory.createScaledBitmap(mAppIconDrawable, MODE_DEFAULT);
-            final ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName,
-                    PackageManager.ApplicationInfoFlags.of(0));
-            mAppName = pm.getApplicationLabel(applicationInfo);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Package not found: " + packageName, e);
-        }
+        final IconProvider provider = new IconProvider(mContext);
+        mAppIconDrawable = provider.getIcon(mTaskInfo.topActivityInfo);
+        final Resources resources = mContext.getResources();
+        final BaseIconFactory factory = new BaseIconFactory(mContext,
+                resources.getDisplayMetrics().densityDpi,
+                resources.getDimensionPixelSize(R.dimen.desktop_mode_caption_icon_radius));
+        mAppIconBitmap = factory.createScaledBitmap(mAppIconDrawable, MODE_DEFAULT);
+        final ApplicationInfo applicationInfo = mTaskInfo.topActivityInfo.applicationInfo;
+        mAppName = pm.getApplicationLabel(applicationInfo);
     }
 
     private void closeDragResizeListener() {
@@ -443,11 +495,72 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     /**
+     * Determine valid drag area for this task based on elements in the app chip.
+     */
+    @Override
+    Rect calculateValidDragArea() {
+        final int appTextWidth = ((DesktopModeAppControlsWindowDecorationViewHolder)
+                mWindowDecorViewHolder).getAppNameTextWidth();
+        final int leftButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
+                R.dimen.desktop_mode_app_details_width_minus_text) + appTextWidth;
+        final int requiredEmptySpace = loadDimensionPixelSize(mContext.getResources(),
+                R.dimen.freeform_required_visible_empty_space_in_header);
+        final int rightButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
+                R.dimen.desktop_mode_right_edge_buttons_width);
+        final int taskWidth = mTaskInfo.configuration.windowConfiguration.getBounds().width();
+        final DisplayLayout layout = mDisplayController.getDisplayLayout(mTaskInfo.displayId);
+        final int displayWidth = layout.width();
+        final Rect stableBounds = new Rect();
+        layout.getStableBounds(stableBounds);
+        return new Rect(
+                determineMinX(leftButtonsWidth, rightButtonsWidth, requiredEmptySpace,
+                        taskWidth),
+                stableBounds.top,
+                determineMaxX(leftButtonsWidth, rightButtonsWidth, requiredEmptySpace,
+                        taskWidth, displayWidth),
+                determineMaxY(requiredEmptySpace, stableBounds));
+    }
+
+
+    /**
+     * Determine the lowest x coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMinX(int leftButtonsWidth, int rightButtonsWidth, int requiredEmptySpace,
+            int taskWidth) {
+        // Do not let apps with < 48dp empty header space go off the left edge at all.
+        if (leftButtonsWidth + rightButtonsWidth + requiredEmptySpace > taskWidth) {
+            return 0;
+        }
+        return -taskWidth + requiredEmptySpace + rightButtonsWidth;
+    }
+
+    /**
+     * Determine the highest x coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMaxX(int leftButtonsWidth, int rightButtonsWidth, int requiredEmptySpace,
+            int taskWidth, int displayWidth) {
+        // Do not let apps with < 48dp empty header space go off the right edge at all.
+        if (leftButtonsWidth + rightButtonsWidth + requiredEmptySpace > taskWidth) {
+            return displayWidth - taskWidth;
+        }
+        return displayWidth - requiredEmptySpace - leftButtonsWidth;
+    }
+
+    /**
+     * Determine the highest y coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMaxY(int requiredEmptySpace, Rect stableBounds) {
+        return stableBounds.bottom - requiredEmptySpace;
+    }
+
+
+    /**
      * Create and display maximize menu window
      */
     void createMaximizeMenu() {
         mMaximizeMenu = new MaximizeMenu(mSyncQueue, mRootTaskDisplayAreaOrganizer,
-                mDisplayController, mTaskInfo, mOnCaptionButtonClickListener, mContext,
+                mDisplayController, mTaskInfo, mOnCaptionButtonClickListener,
+                mOnCaptionGenericMotionListener, mOnCaptionTouchListener, mContext,
                 calculateMaximizeMenuPosition(), mSurfaceControlTransactionSupplier);
         mMaximizeMenu.show();
     }
@@ -475,7 +588,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .setOnClickListener(mOnCaptionButtonClickListener)
                 .setOnTouchListener(mOnCaptionTouchListener)
                 .setLayoutId(mRelayoutParams.mLayoutResId)
-                .setCaptionPosition(mRelayoutParams.mCaptionX, mRelayoutParams.mCaptionY)
                 .setWindowingButtonsVisible(DesktopModeStatus.isEnabled())
                 .setCaptionHeight(mResult.mCaptionHeight)
                 .build();
@@ -530,8 +642,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     void closeMaximizeMenuIfNeeded(MotionEvent ev) {
         if (!isMaximizeMenuActive()) return;
 
-        final PointF inputPoint = offsetCaptionLocation(ev);
-        if (!mMaximizeMenu.isValidMenuInput(inputPoint)) {
+        if (!mMaximizeMenu.isValidMenuInput(ev)) {
             closeMaximizeMenu();
         }
     }
@@ -552,35 +663,46 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mTaskOrganizer.getRunningTaskInfo(mTaskInfo.taskId);
         if (taskInfo == null) return result;
         final Point positionInParent = taskInfo.positionInParent;
-        result.offset(-mRelayoutParams.mCaptionX, -mRelayoutParams.mCaptionY);
         result.offset(-positionInParent.x, -positionInParent.y);
         return result;
     }
 
     /**
-     * Determine if a passed MotionEvent is in a view in caption
+     * Checks if motion event occurs in the caption handle area of a focused caption (the caption on
+     * a task in fullscreen or in multi-windowing mode). This should be used in cases where
+     * onTouchListener will not work (i.e. when caption is in status bar area).
      *
      * @param ev       the {@link MotionEvent} to check
-     * @param layoutId the id of the view
-     * @return {@code true} if event is inside the specified view, {@code false} if not
+     * @return {@code true} if event is inside caption handle view, {@code false} if not
      */
-    private boolean checkEventInCaptionView(MotionEvent ev, int layoutId) {
-        if (mResult.mRootView == null) return false;
-        final PointF inputPoint = offsetCaptionLocation(ev);
-        final View view = mResult.mRootView.findViewById(layoutId);
-        return view != null && pointInView(view, inputPoint.x, inputPoint.y);
-    }
+    boolean checkTouchEventInFocusedCaptionHandle(MotionEvent ev) {
+        if (isHandleMenuActive() || !(mWindowDecorViewHolder
+                instanceof DesktopModeFocusedWindowDecorationViewHolder)) {
+            return false;
+        }
 
-    boolean checkTouchEventInHandle(MotionEvent ev) {
-        if (isHandleMenuActive()) return false;
-        return checkEventInCaptionView(ev, R.id.caption_handle);
+        return checkTouchEventInCaption(ev);
     }
 
     /**
-     * Returns true if motion event is within the caption's root view's bounds.
+     * Checks if touch event occurs in caption.
+     *
+     * @param ev       the {@link MotionEvent} to check
+     * @return {@code true} if event is inside caption view, {@code false} if not
      */
     boolean checkTouchEventInCaption(MotionEvent ev) {
-        return checkEventInCaptionView(ev, getCaptionViewId());
+        final PointF inputPoint = offsetCaptionLocation(ev);
+        return inputPoint.x >= mResult.mCaptionX
+                && inputPoint.x <= mResult.mCaptionX + mResult.mCaptionWidth
+                && inputPoint.y >= 0
+                && inputPoint.y <= mResult.mCaptionHeight;
+    }
+
+    /**
+     * Checks whether the touch event falls inside the customizable caption region.
+     */
+    boolean checkTouchEventInCustomizableRegion(MotionEvent ev) {
+        return mResult.mCustomizableCaptionRegion.contains((int) ev.getRawX(), (int) ev.getRawY());
     }
 
     /**
@@ -593,24 +715,19 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     void checkClickEvent(MotionEvent ev) {
         if (mResult.mRootView == null) return;
         if (!isHandleMenuActive()) {
+            // Click if point in caption handle view
             final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
             final View handle = caption.findViewById(R.id.caption_handle);
-            clickIfPointInView(new PointF(ev.getX(), ev.getY()), handle);
+            if (checkTouchEventInFocusedCaptionHandle(ev)) {
+                mOnCaptionButtonClickListener.onClick(handle);
+            }
         } else {
             mHandleMenu.checkClickEvent(ev);
             closeHandleMenuIfNeeded(ev);
         }
     }
 
-    private boolean clickIfPointInView(PointF inputPoint, View v) {
-        if (pointInView(v, inputPoint.x, inputPoint.y)) {
-            mOnCaptionButtonClickListener.onClick(v);
-            return true;
-        }
-        return false;
-    }
-
-    boolean pointInView(View v, float x, float y) {
+    private boolean pointInView(View v, float x, float y) {
         return v != null && v.getLeft() <= x && v.getRight() >= x
                 && v.getTop() <= y && v.getBottom() >= y;
     }
@@ -624,7 +741,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         super.close();
     }
 
-    private int getDesktopModeWindowDecorLayoutId(@WindowingMode int windowingMode) {
+    private static int getDesktopModeWindowDecorLayoutId(@WindowingMode int windowingMode) {
         return windowingMode == WINDOWING_MODE_FREEFORM
                 ? R.layout.desktop_mode_app_controls_window_decor
                 : R.layout.desktop_mode_focused_window_decor;
@@ -658,18 +775,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return exclusionRegion;
     }
 
-    /**
-     * If transition exists in mTransitionsPausingRelayout, remove the transition and decrement
-     * mRelayoutBlock
-     */
-    void removeTransitionPausingRelayout(IBinder transition) {
-        if (mTransitionsPausingRelayout.remove(transition)) {
-            mRelayoutBlock--;
-        }
-    }
-
     @Override
     int getCaptionHeightId(@WindowingMode int windowingMode) {
+        return getCaptionHeightIdStatic(windowingMode);
+    }
+
+    private static int getCaptionHeightIdStatic(@WindowingMode int windowingMode) {
         return windowingMode == WINDOWING_MODE_FULLSCREEN
                 ? R.dimen.desktop_mode_fullscreen_decor_caption_height
                 : R.dimen.desktop_mode_freeform_decor_caption_height;
@@ -684,35 +795,26 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return R.id.desktop_mode_caption;
     }
 
-    /**
-     * Add transition to mTransitionsPausingRelayout
-     */
-    void addTransitionPausingRelayout(IBinder transition) {
-        mTransitionsPausingRelayout.add(transition);
+    void setAnimatingTaskResize(boolean animatingTaskResize) {
+        if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_focused_window_decor) return;
+        ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
+                .setAnimatingTaskResize(animatingTaskResize);
     }
 
-    /**
-     * If two transitions merge and the merged transition is in mTransitionsPausingRelayout,
-     * remove the merged transition from the set and add the transition it was merged into.
-     */
-    public void mergeTransitionPausingRelayout(IBinder merged, IBinder playing) {
-        if (mTransitionsPausingRelayout.remove(merged)) {
-            mTransitionsPausingRelayout.add(playing);
-        }
+    void onMaximizeWindowHoverExit() {
+        ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
+                .onMaximizeWindowHoverExit();
     }
 
-    /**
-     * Increase mRelayoutBlock, stopping relayout if mRelayoutBlock is now greater than 0.
-     */
-    public void incrementRelayoutBlock() {
-        mRelayoutBlock++;
+    void onMaximizeWindowHoverEnter() {
+        ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
+                .onMaximizeWindowHoverEnter();
     }
 
     @Override
     public String toString() {
         return "{"
                 + "mPositionInParent=" + mPositionInParent + ", "
-                + "mRelayoutBlock=" + mRelayoutBlock + ", "
                 + "taskId=" + mTaskInfo.taskId + ", "
                 + "windowingMode=" + windowingModeToString(mTaskInfo.getWindowingMode()) + ", "
                 + "isFocused=" + isFocused()

@@ -24,6 +24,7 @@ package android.util;
  *
  * @param <T> The class on which the Property is declared.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class FloatProperty<T> extends Property<T, Float> {
 
     public FloatProperty(String name) {

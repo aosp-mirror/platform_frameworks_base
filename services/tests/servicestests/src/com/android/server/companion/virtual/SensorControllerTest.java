@@ -32,6 +32,7 @@ import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.content.AttributionSource;
 import android.hardware.Sensor;
 import android.os.Binder;
 import android.os.IBinder;
@@ -96,6 +97,7 @@ public class SensorControllerTest {
         Throwable thrown = assertThrows(
                 RuntimeException.class,
                 () -> new SensorController(mVirtualDevice, VIRTUAL_DEVICE_ID,
+                        AttributionSource.myAttributionSource(),
                         mVirtualSensorCallback, List.of(mVirtualSensorConfig)));
 
         assertThat(thrown.getCause().getMessage())
@@ -168,6 +170,7 @@ public class SensorControllerTest {
         doReturn(VIRTUAL_DEVICE_ID).when(mVirtualDevice).getDeviceId();
 
         SensorController sensorController = new SensorController(mVirtualDevice, VIRTUAL_DEVICE_ID,
+                AttributionSource.myAttributionSource(),
                 mVirtualSensorCallback, List.of(mVirtualSensorConfig));
 
         List<VirtualSensor> sensors = sensorController.getSensorList();

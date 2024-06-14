@@ -31,13 +31,16 @@ import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_IMG_LOC
 import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_IMG_SYSTEM;
 import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_LIVE_LOCK;
 import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_LIVE_SYSTEM;
+import static com.android.window.flags.Flags.multiCrop;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -56,10 +59,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.service.wallpaper.WallpaperService;
+import android.util.SparseArray;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
@@ -76,6 +82,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -85,6 +92,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RunWith(AndroidJUnit4.class)
@@ -711,8 +719,13 @@ public class WallpaperBackupAgentTest {
 
     @Test
     public void testOnRestore_throwsException_logsErrors() throws Exception {
-        when(mWallpaperManager.setStream(any(), any(), anyBoolean(), anyInt())).thenThrow(
-                new RuntimeException());
+        if (!multiCrop()) {
+            when(mWallpaperManager.setStream(any(), any(), anyBoolean(), anyInt()))
+                    .thenThrow(new RuntimeException());
+        } else {
+            when(mWallpaperManager.setStreamWithCrops(any(), any(SparseArray.class), anyBoolean(),
+                    anyInt())).thenThrow(new RuntimeException());
+        }
         mockStagedWallpaperFile(SYSTEM_WALLPAPER_STAGE);
         mockStagedWallpaperFile(WALLPAPER_INFO_STAGE);
         mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,
@@ -808,6 +821,68 @@ public class WallpaperBackupAgentTest {
                 WallpaperEventLogger.ERROR_LIVE_PACKAGE_NOT_INSTALLED);
     }
 
+    @Test
+    public void testOnRestore_noCropHints() throws Exception {
+        testParseCropHints(Map.of());
+    }
+
+    @Test
+    public void testOnRestore_singleCropHint() throws Exception {
+        Map<Integer, Rect> testMap = Map.of(WallpaperManager.PORTRAIT, new Rect(1, 2, 3, 4));
+        testParseCropHints(testMap);
+    }
+
+    @Test
+    public void testOnRestore_multipleCropHints() throws Exception {
+        Map<Integer, Rect> testMap = Map.of(
+                WallpaperManager.PORTRAIT, new Rect(1, 2, 3, 4),
+                WallpaperManager.SQUARE_PORTRAIT, new Rect(5, 6, 7, 8),
+                WallpaperManager.SQUARE_LANDSCAPE, new Rect(9, 10, 11, 12));
+        testParseCropHints(testMap);
+    }
+
+    @Test
+    public void test_sourceDimensionsAreLargerThanTarget() {
+        // source device is larger than target, expecting to get false
+        Point sourceDimensions = new Point(2208, 1840);
+        Point targetDimensions = new Point(1080, 2092);
+        boolean isSourceSmaller = mWallpaperBackupAgent
+                .isSourceDeviceSignificantlySmallerThanTarget(sourceDimensions, targetDimensions);
+        assertThat(isSourceSmaller).isEqualTo(false);
+    }
+
+    @Test
+    public void test_sourceDimensionsMuchSmallerThanTarget() {
+        // source device is smaller than target, expecting to get true
+        Point sourceDimensions = new Point(1080, 2092);
+        Point targetDimensions = new Point(2208, 1840);
+        boolean isSourceSmaller = mWallpaperBackupAgent
+                .isSourceDeviceSignificantlySmallerThanTarget(sourceDimensions, targetDimensions);
+        assertThat(isSourceSmaller).isEqualTo(true);
+    }
+
+    private void testParseCropHints(Map<Integer, Rect> testMap) throws Exception {
+        assumeTrue(multiCrop());
+        mockRestoredStaticWallpaperFile(testMap);
+        mockStagedWallpaperFile(SYSTEM_WALLPAPER_STAGE);
+        mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,
+                BackupAnnotations.OperationType.RESTORE);
+
+        mWallpaperBackupAgent.onRestoreFinished();
+
+        ArgumentMatcher<SparseArray<Rect>> matcher = array -> {
+            boolean result = testMap.entrySet().stream().allMatch(entry -> {
+                int key = entry.getKey();
+                return (array.contains(key) && array.get(key).equals(testMap.get(key)));
+            });
+            for (int i = 0; i < array.size(); i++) {
+                if (!testMap.containsKey(array.keyAt(i))) result = false;
+            }
+            return result;
+        };
+        verify(mWallpaperManager).setStreamWithCrops(any(), argThat(matcher), eq(true), anyInt());
+    }
+
     private void mockCurrentWallpaperIds(int systemWallpaperId, int lockWallpaperId) {
         when(mWallpaperManager.getWallpaperId(eq(FLAG_SYSTEM))).thenReturn(systemWallpaperId);
         when(mWallpaperManager.getWallpaperId(eq(FLAG_LOCK))).thenReturn(lockWallpaperId);
@@ -866,6 +941,34 @@ public class WallpaperBackupAgentTest {
         out.startTag(null, "wp");
         out.attribute(null, "component",
                 getFakeWallpaperInfo().getComponent().flattenToShortString());
+        out.endTag(null, "wp");
+        out.endDocument();
+        fstream.flush();
+        FileUtils.sync(fstream);
+        fstream.close();
+    }
+
+    private void mockRestoredStaticWallpaperFile(Map<Integer, Rect> crops) throws Exception {
+        File wallpaperFile = new File(mContext.getFilesDir(), WALLPAPER_INFO_STAGE);
+        wallpaperFile.createNewFile();
+        FileOutputStream fstream = new FileOutputStream(wallpaperFile, false);
+        TypedXmlSerializer out = Xml.resolveSerializer(fstream);
+        out.startDocument(null, true);
+        out.startTag(null, "wp");
+        for (Map.Entry<Integer, Rect> entry: crops.entrySet()) {
+            String orientation = switch (entry.getKey()) {
+                case WallpaperManager.PORTRAIT -> "Portrait";
+                case WallpaperManager.LANDSCAPE -> "Landscape";
+                case WallpaperManager.SQUARE_PORTRAIT -> "SquarePortrait";
+                case WallpaperManager.SQUARE_LANDSCAPE -> "SquareLandscape";
+                default -> throw new IllegalArgumentException("Invalid orientation");
+            };
+            Rect rect = entry.getValue();
+            out.attributeInt(null, "cropLeft" + orientation, rect.left);
+            out.attributeInt(null, "cropTop" + orientation, rect.top);
+            out.attributeInt(null, "cropRight" + orientation, rect.right);
+            out.attributeInt(null, "cropBottom" + orientation, rect.bottom);
+        }
         out.endTag(null, "wp");
         out.endDocument();
         fstream.flush();

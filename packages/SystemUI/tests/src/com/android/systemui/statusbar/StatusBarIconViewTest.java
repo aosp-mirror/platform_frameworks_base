@@ -52,8 +52,9 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
+import com.android.systemui.statusbar.notification.NotificationContentDescription;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -152,7 +153,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         Icon icon = Icon.createWithBitmap(bitmap);
         StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
                 icon, 0, 0, "");
-        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.setNotification(getMockSbn());
         mIconView.getIcon(largeIcon);
         // no crash? good
 
@@ -183,7 +184,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
                 .build();
         // should be ApplicationInfo
         n.extras.putParcelable(Notification.EXTRA_BUILDER_APPLICATION_INFO, new Bundle());
-        StatusBarIconView.contentDescForNotification(mContext, n);
+        NotificationContentDescription.contentDescForNotification(mContext, n);
 
         // no crash, good
     }
@@ -195,7 +196,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         // the icon view layout size would be 60x150
         //   (the height is always 150 due to TEST_STATUS_BAR_HEIGHT)
         setUpIconView(dpIconSize, dpDrawingSize, dpIconSize);
-        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.setNotification(getMockSbn());
         // the raw drawable size is 50x50. When put the drawable into iconView whose
         // layout size is 60x150, the drawable size would not be constrained and thus keep 50x50
         setIconDrawableWithSize(/* width= */ 50, /* height= */ 50);
@@ -214,7 +215,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         // the icon view layout size would be 60x150
         //   (the height is always 150 due to TEST_STATUS_BAR_HEIGHT)
         setUpIconView(dpIconSize, dpDrawingSize, dpIconSize);
-        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.setNotification(getMockSbn());
         // the raw drawable size is 50x100. When put the drawable into iconView whose
         // layout size is 60x150, the drawable size would not be constrained and thus keep 50x100
         setIconDrawableWithSize(/* width= */ 50, /* height= */ 100);
@@ -234,7 +235,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         // the icon view layout size would be 60x150
         //   (the height is always 150 due to TEST_STATUS_BAR_HEIGHT)
         setUpIconView(dpIconSize, dpDrawingSize, dpIconSize);
-        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.setNotification(getMockSbn());
         // the raw drawable size is 100x50. When put the drawable into iconView whose
         // layout size is 60x150, the drawable size would be constrained to 60x30
         setIconDrawableWithSize(/* width= */ 100, /* height= */ 50);
@@ -256,7 +257,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         // the icon view layout size would be 40x150
         //   (the height is always 150 due to TEST_STATUS_BAR_HEIGHT)
         setUpIconView(dpIconSize, dpDrawingSize, spIconSize);
-        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.setNotification(getMockSbn());
         // the raw drawable size is 50x50. When put the drawable into iconView whose
         // layout size is 40x150, the drawable size would be constrained to 40x40
         setIconDrawableWithSize(/* width= */ 50, /* height= */ 50);
@@ -282,7 +283,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         // the icon view layout size would be 40x150
         //   (the height is always 150 due to TEST_STATUS_BAR_HEIGHT)
         setUpIconView(dpIconSize, dpDrawingSize, spIconSize);
-        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.setNotification(getMockSbn());
         // the raw drawable size is 70x70. When put the drawable into iconView whose
         // layout size is 40x150, the drawable size would be constrained to 40x40
         setIconDrawableWithSize(/* width= */ 70, /* height= */ 70);
@@ -309,7 +310,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         // the icon view layout size would be 40x150
         //   (the height is always 150 due to TEST_STATUS_BAR_HEIGHT)
         setUpIconView(dpIconSize, dpDrawingSize, spIconSize);
-        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.setNotification(getMockSbn());
         // the raw drawable size is 50x100. When put the drawable into iconView whose
         // layout size is 40x150, the drawable size would be constrained to 40x80
         setIconDrawableWithSize(/* width= */ 50, /* height= */ 100);
@@ -333,7 +334,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         // the icon view layout size would be 80x150
         //   (the height is always 150 due to TEST_STATUS_BAR_HEIGHT)
         setUpIconView(dpIconSize, dpDrawingSize, spIconSize);
-        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.setNotification(getMockSbn());
         // the raw drawable size is 50x50. When put the drawable into iconView whose
         // layout size is 80x150, the drawable size would not be constrained and thus keep 50x50
         setIconDrawableWithSize(/* width= */ 50, /* height= */ 50);
@@ -356,7 +357,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         // the icon view layout size would be 80x150
         //   (the height is always 150 due to TEST_STATUS_BAR_HEIGHT)
         setUpIconView(dpIconSize, dpDrawingSize, spIconSize);
-        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.setNotification(getMockSbn());
         // the raw drawable size is 50x100. When put the drawable into iconView whose
         // layout size is 80x150, the drawable size would not be constrained and thus keep 50x100
         setIconDrawableWithSize(/* width= */ 50, /* height= */ 100);
@@ -380,7 +381,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         // the icon view layout size would be 80x150
         //   (the height is always 150 due to TEST_STATUS_BAR_HEIGHT)
         setUpIconView(dpIconSize, dpDrawingSize, spIconSize);
-        mIconView.setNotification(mock(StatusBarNotification.class));
+        mIconView.setNotification(getMockSbn());
         // the raw drawable size is 100x50. When put the drawable into iconView whose
         // layout size is 80x150, the drawable size would not be constrained and thus keep 80x40
         setIconDrawableWithSize(/* width= */ 100, /* height= */ 50);
@@ -394,6 +395,12 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         float scaleToFitSpIconSize = (float) spIconSize / dpIconSize;
         assertEquals(scaleToFitDrawingSize * scaleToFitSpIconSize,
                 mIconView.getIconScale(), 0.01f);
+    }
+
+    private static StatusBarNotification getMockSbn() {
+        StatusBarNotification sbn = mock(StatusBarNotification.class);
+        when(sbn.getNotification()).thenReturn(mock(Notification.class));
+        return sbn;
     }
 
     /**
