@@ -45,6 +45,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.icu.text.SimpleDateFormat;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -410,6 +411,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             PluginManager pluginManager,
             @BackPanelUiThread UiThreadContext uiThreadContext,
             @Background Executor backgroundExecutor,
+            @Background Handler bgHandler,
             UserTracker userTracker,
             NavigationModeController navigationModeController,
             BackPanelController.Factory backPanelControllerFactory,
@@ -473,7 +475,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 ViewConfiguration.getLongPressTimeout());
 
         mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(
-                mUiThreadContext.getHandler(), mContext, this::onNavigationSettingsChanged);
+                mUiThreadContext.getHandler(), bgHandler, mContext,
+                this::onNavigationSettingsChanged);
 
         updateCurrentUserResources();
     }
@@ -1316,6 +1319,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         private final PluginManager mPluginManager;
         private final UiThreadContext mUiThreadContext;
         private final Executor mBackgroundExecutor;
+        private final Handler mBgHandler;
         private final UserTracker mUserTracker;
         private final NavigationModeController mNavigationModeController;
         private final BackPanelController.Factory mBackPanelControllerFactory;
@@ -1336,6 +1340,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         PluginManager pluginManager,
                         @BackPanelUiThread UiThreadContext uiThreadContext,
                         @Background Executor backgroundExecutor,
+                        @Background Handler bgHandler,
                         UserTracker userTracker,
                         NavigationModeController navigationModeController,
                         BackPanelController.Factory backPanelControllerFactory,
@@ -1354,6 +1359,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mPluginManager = pluginManager;
             mUiThreadContext = uiThreadContext;
             mBackgroundExecutor = backgroundExecutor;
+            mBgHandler = bgHandler;
             mUserTracker = userTracker;
             mNavigationModeController = navigationModeController;
             mBackPanelControllerFactory = backPanelControllerFactory;
@@ -1378,6 +1384,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                             mPluginManager,
                             mUiThreadContext,
                             mBackgroundExecutor,
+                            mBgHandler,
                             mUserTracker,
                             mNavigationModeController,
                             mBackPanelControllerFactory,
