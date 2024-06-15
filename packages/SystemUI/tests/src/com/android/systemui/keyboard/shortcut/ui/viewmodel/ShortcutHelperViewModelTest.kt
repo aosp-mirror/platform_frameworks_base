@@ -103,6 +103,17 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun shouldShow_falseAfterCloseSystemDialogs() =
+        testScope.runTest {
+            val shouldShow by collectLastValue(viewModel.shouldShow)
+
+            testHelper.showFromActivity()
+            testHelper.hideThroughCloseSystemDialogs()
+
+            assertThat(shouldShow).isFalse()
+        }
+
+    @Test
     fun shouldShow_doesNotEmitDuplicateValues() =
         testScope.runTest {
             val shouldShowValues by collectValues(viewModel.shouldShow)

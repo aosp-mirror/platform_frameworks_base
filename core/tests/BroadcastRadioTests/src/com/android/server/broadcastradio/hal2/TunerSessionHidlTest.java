@@ -45,6 +45,7 @@ import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
 import android.os.Binder;
+import android.os.DeadObjectException;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -364,6 +365,18 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
                     .onCurrentProgramInfoChanged(tuneInfo);
         }
+    }
+
+    @Test
+    public void tune_withDeadTunerCallback_removesDeadSession() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector sel = TestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        doThrow(new DeadObjectException()).when(mAidlTunerCallbackMocks[0])
+                .onCurrentProgramInfoChanged(any());
+
+        mTunerSessions[0].tune(sel);
+
+        verify(mHalTunerSessionMock, CALLBACK_TIMEOUT).close();
     }
 
     @Test

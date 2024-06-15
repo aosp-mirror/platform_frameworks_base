@@ -457,17 +457,10 @@ object BiometricViewBinder {
 
                 // Retry and confirmation when finger on sensor
                 launch {
-                    combine(
-                            viewModel.canTryAgainNow,
-                            viewModel.hasFingerOnSensor,
-                            viewModel.isPendingConfirmation,
-                            ::Triple
-                        )
-                        .collect { (canRetry, fingerAcquired, pendingConfirmation) ->
+                    combine(viewModel.canTryAgainNow, viewModel.hasFingerOnSensor, ::Pair)
+                        .collect { (canRetry, fingerAcquired) ->
                             if (canRetry && fingerAcquired) {
                                 legacyCallback.onButtonTryAgain()
-                            } else if (pendingConfirmation && fingerAcquired) {
-                                viewModel.confirmAuthenticated()
                             }
                         }
                 }
@@ -497,13 +490,21 @@ class Spaghetti(
     @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
     interface Callback {
         fun onAuthenticated()
+
         fun onUserCanceled()
+
         fun onButtonNegative()
+
         fun onButtonTryAgain()
+
         fun onContentViewMoreOptionsButtonPressed()
+
         fun onError()
+
         fun onUseDeviceCredential()
+
         fun onStartDelayedFingerprintSensor()
+
         fun onAuthenticatedAndConfirmed()
     }
 

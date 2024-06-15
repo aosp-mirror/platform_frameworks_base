@@ -103,11 +103,12 @@ val SceneContainerTransitions = transitions {
     overscroll(Scenes.Shade, Orientation.Vertical) {
         translate(
             Notifications.Elements.NotificationScrim,
-            y = { Shade.Dimensions.ScrimOverscrollLimit }
+            y = Shade.Dimensions.ScrimOverscrollLimit
         )
+        translate(Shade.Elements.SplitShadeStartColumn, y = Shade.Dimensions.ScrimOverscrollLimit)
         translate(
-            Shade.Elements.SplitShadeStartColumn,
-            y = { Shade.Dimensions.ScrimOverscrollLimit }
+            Notifications.Elements.NotificationStackPlaceholder,
+            y = Shade.Dimensions.ScrimOverscrollLimit,
         )
     }
     overscroll(Scenes.NotificationsShade, Orientation.Vertical) {

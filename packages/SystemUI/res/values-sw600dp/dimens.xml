@@ -26,6 +26,8 @@
     <dimen name="status_bar_icons_padding_start">3dp</dimen>
     <dimen name="status_bar_icons_padding_bottom">2dp</dimen>
     <dimen name="status_bar_icons_padding_top">2dp</dimen>
+    <dimen name="status_bar_battery_end_padding">4dp</dimen>
+
 
     <dimen name="status_bar_padding_end">0dp</dimen>
 

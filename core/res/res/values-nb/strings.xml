@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-koden er for kort. Den må bestå av minst fire sifre."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Prøv på nytt senere"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visning i fullskjerm"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Sveip ned fra toppen for å avslutte."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Skjønner"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Roter for å få en bedre visning"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Åpne <xliff:g id="NAME">%s</xliff:g> i fullskjerm for å se bedre"</string>

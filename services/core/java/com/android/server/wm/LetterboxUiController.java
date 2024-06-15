@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
 import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
@@ -103,6 +104,7 @@ import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTy
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
+import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -230,6 +232,9 @@ final class LetterboxUiController {
     private boolean mLastShouldShowLetterboxUi;
 
     private boolean mDoubleTapEvent;
+
+    @FreeformCameraCompatMode
+    private int mFreeformCameraCompatMode = CAMERA_COMPAT_FREEFORM_NONE;
 
     LetterboxUiController(WindowManagerService wmService, ActivityRecord activityRecord) {
         mLetterboxConfiguration = wmService.mLetterboxConfiguration;
@@ -556,7 +561,13 @@ final class LetterboxUiController {
         final DisplayContent displayContent = mActivityRecord.mDisplayContent;
         final boolean isIgnoreOrientationRequestEnabled = displayContent != null
                 && displayContent.getIgnoreOrientationRequest();
-        if (shouldApplyUserFullscreenOverride() && isIgnoreOrientationRequestEnabled) {
+        if (shouldApplyUserFullscreenOverride() && isIgnoreOrientationRequestEnabled
+                // Do not override orientation to fullscreen for camera activities.
+                // Fixed-orientation activities are rarely tested in other orientations, and it
+                // often results in sideways or stretched previews. As the camera compat treatment
+                // targets fixed-orientation activities, overriding the orientation disables the
+                // treatment.
+                && !mActivityRecord.isCameraActive()) {
             Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
                     + mActivityRecord + " is overridden to "
                     + screenOrientationToString(SCREEN_ORIENTATION_USER)
@@ -591,7 +602,13 @@ final class LetterboxUiController {
         // mUserAspectRatio is always initialized first in shouldApplyUserFullscreenOverride(),
         // which will always come first before this check as user override > device
         // manufacturer override.
-        if (isSystemOverrideToFullscreenEnabled() && isIgnoreOrientationRequestEnabled) {
+        if (isSystemOverrideToFullscreenEnabled() && isIgnoreOrientationRequestEnabled
+                // Do not override orientation to fullscreen for camera activities.
+                // Fixed-orientation activities are rarely tested in other orientations, and it
+                // often results in sideways or stretched previews. As the camera compat treatment
+                // targets fixed-orientation activities, overriding the orientation disables the
+                // treatment.
+                && !mActivityRecord.isCameraActive()) {
             Slog.v(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
                     + mActivityRecord + " is overridden to "
                     + screenOrientationToString(SCREEN_ORIENTATION_USER));
@@ -709,6 +726,15 @@ final class LetterboxUiController {
         return displayContent.mDisplayRotationCompatPolicy != null
                 && displayContent.mDisplayRotationCompatPolicy
                         .isTreatmentEnabledForActivity(mActivityRecord);
+    }
+
+    @FreeformCameraCompatMode
+    int getFreeformCameraCompatMode() {
+        return mFreeformCameraCompatMode;
+    }
+
+    void setFreeformCameraCompatMode(@FreeformCameraCompatMode int freeformCameraCompatMode) {
+        mFreeformCameraCompatMode = freeformCameraCompatMode;
     }
 
     private boolean isCompatChangeEnabled(long overrideChangeId) {
@@ -871,12 +897,14 @@ final class LetterboxUiController {
     // Check if we are in the given pose and in fullscreen mode.
     // Note that we check the task rather than the parent as with ActivityEmbedding the parent might
     // be a TaskFragment, and its windowing mode is always MULTI_WINDOW, even if the task is
-    // actually fullscreen.
+    // actually fullscreen. If display is still in transition e.g. unfolding, don't return true
+    // for HALF_FOLDED state or app will flicker.
     private boolean isDisplayFullScreenAndInPosture(boolean isTabletop) {
         Task task = mActivityRecord.getTask();
         return mActivityRecord.mDisplayContent != null && task != null
                 && mActivityRecord.mDisplayContent.getDisplayRotation().isDeviceInPosture(
                         DeviceStateController.DeviceState.HALF_FOLDED, isTabletop)
+                && !mActivityRecord.mDisplayContent.inTransition()
                 && task.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
     }
 
@@ -1096,17 +1124,6 @@ final class LetterboxUiController {
     }
 
     boolean shouldApplyUserFullscreenOverride() {
-        // Do not override orientation to fullscreen for camera activities.
-        // Fixed-orientation activities are rarely tested in other orientations, and it often
-        // results in sideways or stretched previews. As the camera compat treatment targets
-        // fixed-orientation activities, overriding the orientation disables the treatment.
-        final DisplayContent displayContent = mActivityRecord.mDisplayContent;
-        if (displayContent != null && displayContent.mDisplayRotationCompatPolicy != null
-                && displayContent.mDisplayRotationCompatPolicy
-                .isCameraActive(mActivityRecord, /* mustBeFullscreen= */ true)) {
-            return false;
-        }
-
         if (isUserFullscreenOverrideEnabled()) {
             mUserAspectRatio = getUserMinAspectRatioOverrideCode();
 
@@ -1124,7 +1141,8 @@ final class LetterboxUiController {
     }
 
     boolean hasFullscreenOverride() {
-        return isSystemOverrideToFullscreenEnabled() || shouldApplyUserFullscreenOverride();
+        // `mUserAspectRatio` is always initialized first in `shouldApplyUserFullscreenOverride()`.
+        return shouldApplyUserFullscreenOverride() || isSystemOverrideToFullscreenEnabled();
     }
 
     float getUserMinAspectRatio() {

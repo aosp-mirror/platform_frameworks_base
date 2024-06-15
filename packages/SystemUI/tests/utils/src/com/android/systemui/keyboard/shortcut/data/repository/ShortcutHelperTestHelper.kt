@@ -32,6 +32,13 @@ class ShortcutHelperTestHelper(
         repo.start()
     }
 
+    fun hideThroughCloseSystemDialogs() {
+        fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+            context,
+            Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        )
+    }
+
     fun hideFromActivity() {
         fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
             context,

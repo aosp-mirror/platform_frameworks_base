@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ပင် နံပါတ် တိုလွန်းသည်။. အနည်းဆုံး ဂဏန်း ၄ လုံး ဖြစ်ရမည်။"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"နောက်မှ ပြန်ကြိုးစားပါ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"မျက်နှာပြင်အပြည့် ကြည့်နေသည်"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"ထွက်ရန် အပေါ်မှ အောက်သို့ ဆွဲချပါ။"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ရပါပြီ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ပိုကောင်းသောမြင်ကွင်းအတွက် လှည့်ပါ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ပိုကောင်းသောမြင်ကွင်းအတွက် ဖန်သားပြင်အပြည့်ဖြင့် <xliff:g id="NAME">%s</xliff:g> ကို ဖွင့်ပါ"</string>

@@ -32,3 +32,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "no_visibility_event_on_display_state_change"
+  namespace: "wear_frameworks"
+  description: "Prevent the system from sending visibility event on display state change."
+  bug: "331725519"
+}

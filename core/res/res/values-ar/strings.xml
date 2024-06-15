@@ -1887,7 +1887,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"رقم التعريف الشخصي أقصر مما يلزم، يجب ألا يقل عن ٤ أرقام. "</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"أعد المحاولة لاحقًا"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"جارٍ العرض بملء الشاشة"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"للخروج، مرر بسرعة من أعلى إلى أسفل."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"حسنًا"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"يمكنك تدوير الجهاز لرؤية شاشة معاينة الكاميرا بشكل أوضح."</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"عليك فتح \"<xliff:g id="NAME">%s</xliff:g>\" في وضع ملء الشاشة لرؤية شاشة معاينة الكاميرا بشكل أوضح."</string>
