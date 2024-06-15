@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"পিনটো অতি চুটি। কমেও ৪টা সংখ্যাৰ হ\'ব লাগিব।"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"পাছত আকৌ চেষ্টা কৰক"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"স্ক্ৰীন পূৰ্ণৰূপত চাই আছে"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"বাহিৰ হ\'বলৈ ওপৰৰপৰা তললৈ ছোৱাইপ কৰক।"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুজি পালোঁ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ভালকৈ চাবলৈ ঘূৰাওক"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ভালকৈ চাবলৈ <xliff:g id="NAME">%s</xliff:g> পূৰ্ণ স্ক্ৰীনত খোলক"</string>

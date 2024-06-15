@@ -413,7 +413,7 @@ internal class ElementNode(
 
         sceneState.clearLastPlacementValues()
         traverseDescendants(ElementTraverseKey) { node ->
-            (node as ElementNode).sceneState.clearLastPlacementValues()
+            (node as ElementNode)._sceneState?.clearLastPlacementValues()
             TraversableNode.Companion.TraverseDescendantsAction.ContinueTraversal
         }
     }

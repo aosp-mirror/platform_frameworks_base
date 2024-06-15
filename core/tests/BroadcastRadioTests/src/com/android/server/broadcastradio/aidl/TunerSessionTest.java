@@ -50,6 +50,7 @@ import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
 import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.Binder;
+import android.os.DeadObjectException;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -308,6 +309,20 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void close_forMultipleTimes() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int errorCode = RadioTuner.ERROR_SERVER_DIED;
+        mTunerSessions[0].close(errorCode);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onError(errorCode);
+
+        mTunerSessions[0].close(errorCode);
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onError(errorCode);
+        expect.withMessage("Close state of broadcast radio service session for multiple times")
+                .that(mTunerSessions[0].isClosed()).isTrue();
+    }
+
+    @Test
     public void closeSessions_withMultipleSessions_withError() throws Exception {
         int numSessions = 3;
         openAidlClients(numSessions);
@@ -363,6 +378,18 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
                     .onCurrentProgramInfoChanged(tuneInfo);
         }
+    }
+
+    @Test
+    public void tune_withDeadTunerCallback_removesDeadSession() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector sel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        doThrow(new DeadObjectException()).when(mAidlTunerCallbackMocks[0])
+                .onCurrentProgramInfoChanged(any());
+
+        mTunerSessions[0].tune(sel);
+
+        verify(mBroadcastRadioMock, CALLBACK_TIMEOUT).unsetTunerCallback();
     }
 
     @Test

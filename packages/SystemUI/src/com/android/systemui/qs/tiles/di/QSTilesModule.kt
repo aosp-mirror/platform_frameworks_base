@@ -22,6 +22,7 @@ import com.android.systemui.qs.external.CustomTileStatePersister
 import com.android.systemui.qs.external.CustomTileStatePersisterImpl
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerImpl
+import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
 import com.android.systemui.qs.tiles.impl.custom.di.CustomTileComponent
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
@@ -50,6 +51,8 @@ interface QSTilesModule {
      * A map of internal QS tile ViewModels. Ensures that this can be injected even if it is empty
      */
     @Multibinds fun tileViewModelMap(): Map<String, QSTileViewModel>
+
+    @Multibinds fun tileAvailabilityInteractors(): Map<String, QSTileAvailabilityInteractor>
 
     @Binds fun bindQSTileConfigProvider(impl: QSTileConfigProviderImpl): QSTileConfigProvider
 

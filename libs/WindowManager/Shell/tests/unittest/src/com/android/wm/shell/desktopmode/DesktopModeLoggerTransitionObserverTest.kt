@@ -22,6 +22,7 @@ import android.content.Context
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
+import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS
 import android.view.WindowManager.TRANSIT_NONE
@@ -182,7 +183,7 @@ class DesktopModeLoggerTransitionObserverTest {
   }
 
   @Test
-  fun transitEnterDesktopFromAppFromOverview_logTaskAddedAndEnterReasonUnknown() {
+  fun transitEnterDesktopFromAppFromOverview_logTaskAddedAndEnterReasonAppFromOverview() {
     val change = createChange(TRANSIT_TO_FRONT, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
     val transitionInfo =
         TransitionInfoBuilder(TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW, 0)
@@ -213,6 +214,168 @@ class DesktopModeLoggerTransitionObserverTest {
     assertThat(sessionId).isNotNull()
     verify(desktopModeEventLogger, times(1))
         .logSessionEnter(eq(sessionId!!), eq(EnterReason.KEYBOARD_SHORTCUT_ENTER))
+    verify(desktopModeEventLogger, times(1)).logTaskAdded(eq(sessionId), any())
+    verifyZeroInteractions(desktopModeEventLogger)
+  }
+
+  @Test
+  fun transitToFront_logTaskAddedAndEnterReasonOverview() {
+    val change = createChange(TRANSIT_TO_FRONT, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    val transitionInfo = TransitionInfoBuilder(TRANSIT_TO_FRONT, 0).addChange(change).build()
+
+    callOnTransitionReady(transitionInfo)
+    val sessionId = transitionObserver.getLoggerSessionId()
+
+    assertThat(sessionId).isNotNull()
+    verify(desktopModeEventLogger, times(1))
+        .logSessionEnter(eq(sessionId!!), eq(EnterReason.OVERVIEW))
+    verify(desktopModeEventLogger, times(1)).logTaskAdded(eq(sessionId), any())
+    verifyZeroInteractions(desktopModeEventLogger)
+  }
+
+  @Test
+  fun transitToFront_previousTransitionExitToOverview_logTaskAddedAndEnterReasonOverview() {
+    // previous exit to overview transition
+    val previousSessionId = 1
+    // add a freeform task
+    transitionObserver.addTaskInfosToCachedMap(createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    transitionObserver.setLoggerSessionId(previousSessionId)
+    val previousChange = createChange(TRANSIT_TO_BACK, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    val previousTransitionInfo =
+        TransitionInfoBuilder(TRANSIT_TO_FRONT, TRANSIT_FLAG_IS_RECENTS)
+            .addChange(previousChange)
+            .build()
+
+    callOnTransitionReady(previousTransitionInfo)
+
+    verify(desktopModeEventLogger, times(1)).logTaskRemoved(eq(previousSessionId), any())
+    verify(desktopModeEventLogger, times(1))
+        .logSessionExit(eq(previousSessionId), eq(ExitReason.RETURN_HOME_OR_OVERVIEW))
+
+    // Enter desktop mode from cancelled recents has no transition. Enter is detected on the
+    // next transition involving freeform windows
+
+    // TRANSIT_TO_FRONT
+    val change = createChange(TRANSIT_TO_FRONT, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    val transitionInfo = TransitionInfoBuilder(TRANSIT_TO_FRONT, 0).addChange(change).build()
+
+    callOnTransitionReady(transitionInfo)
+    val sessionId = transitionObserver.getLoggerSessionId()
+
+    assertThat(sessionId).isNotNull()
+    verify(desktopModeEventLogger, times(1))
+        .logSessionEnter(eq(sessionId!!), eq(EnterReason.OVERVIEW))
+    verify(desktopModeEventLogger, times(1)).logTaskAdded(eq(sessionId), any())
+    verifyZeroInteractions(desktopModeEventLogger)
+  }
+
+  @Test
+  fun transitChange_previousTransitionExitToOverview_logTaskAddedAndEnterReasonOverview() {
+    // previous exit to overview transition
+    val previousSessionId = 1
+    // add a freeform task
+    transitionObserver.addTaskInfosToCachedMap(createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    transitionObserver.setLoggerSessionId(previousSessionId)
+    val previousChange = createChange(TRANSIT_TO_BACK, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    val previousTransitionInfo =
+        TransitionInfoBuilder(TRANSIT_TO_FRONT, TRANSIT_FLAG_IS_RECENTS)
+            .addChange(previousChange)
+            .build()
+
+    callOnTransitionReady(previousTransitionInfo)
+
+    verify(desktopModeEventLogger, times(1)).logTaskRemoved(eq(previousSessionId), any())
+    verify(desktopModeEventLogger, times(1))
+        .logSessionExit(eq(previousSessionId), eq(ExitReason.RETURN_HOME_OR_OVERVIEW))
+
+    // Enter desktop mode from cancelled recents has no transition. Enter is detected on the
+    // next transition involving freeform windows
+
+    // TRANSIT_CHANGE
+    val change = createChange(TRANSIT_TO_FRONT, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    val transitionInfo = TransitionInfoBuilder(TRANSIT_CHANGE, 0).addChange(change).build()
+
+    callOnTransitionReady(transitionInfo)
+    val sessionId = transitionObserver.getLoggerSessionId()
+
+    assertThat(sessionId).isNotNull()
+    verify(desktopModeEventLogger, times(1))
+        .logSessionEnter(eq(sessionId!!), eq(EnterReason.OVERVIEW))
+    verify(desktopModeEventLogger, times(1)).logTaskAdded(eq(sessionId), any())
+    verifyZeroInteractions(desktopModeEventLogger)
+  }
+
+  @Test
+  fun transitOpen_previousTransitionExitToOverview_logTaskAddedAndEnterReasonOverview() {
+    // previous exit to overview transition
+    val previousSessionId = 1
+    // add a freeform task
+    transitionObserver.addTaskInfosToCachedMap(createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    transitionObserver.setLoggerSessionId(previousSessionId)
+    val previousChange = createChange(TRANSIT_TO_BACK, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    val previousTransitionInfo =
+        TransitionInfoBuilder(TRANSIT_TO_FRONT, TRANSIT_FLAG_IS_RECENTS)
+            .addChange(previousChange)
+            .build()
+
+    callOnTransitionReady(previousTransitionInfo)
+
+    verify(desktopModeEventLogger, times(1)).logTaskRemoved(eq(previousSessionId), any())
+    verify(desktopModeEventLogger, times(1))
+        .logSessionExit(eq(previousSessionId), eq(ExitReason.RETURN_HOME_OR_OVERVIEW))
+
+    // Enter desktop mode from cancelled recents has no transition. Enter is detected on the
+    // next transition involving freeform windows
+
+    // TRANSIT_OPEN
+    val change = createChange(TRANSIT_TO_FRONT, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    val transitionInfo = TransitionInfoBuilder(TRANSIT_OPEN, 0).addChange(change).build()
+
+    callOnTransitionReady(transitionInfo)
+    val sessionId = transitionObserver.getLoggerSessionId()
+
+    assertThat(sessionId).isNotNull()
+    verify(desktopModeEventLogger, times(1))
+        .logSessionEnter(eq(sessionId!!), eq(EnterReason.OVERVIEW))
+    verify(desktopModeEventLogger, times(1)).logTaskAdded(eq(sessionId), any())
+    verifyZeroInteractions(desktopModeEventLogger)
+  }
+
+  @Test
+  @Suppress("ktlint:standard:max-line-length")
+  fun transitEnterDesktopFromAppFromOverview_previousTransitionExitToOverview_logTaskAddedAndEnterReasonAppFromOverview() {
+    // Tests for AppFromOverview precedence in compared to cancelled Overview
+
+    // previous exit to overview transition
+    val previousSessionId = 1
+    // add a freeform task
+    transitionObserver.addTaskInfosToCachedMap(createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    transitionObserver.setLoggerSessionId(previousSessionId)
+    val previousChange = createChange(TRANSIT_TO_BACK, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    val previousTransitionInfo =
+      TransitionInfoBuilder(TRANSIT_TO_FRONT, TRANSIT_FLAG_IS_RECENTS)
+              .addChange(previousChange)
+              .build()
+
+    callOnTransitionReady(previousTransitionInfo)
+
+    verify(desktopModeEventLogger, times(1)).logTaskRemoved(eq(previousSessionId), any())
+    verify(desktopModeEventLogger, times(1))
+            .logSessionExit(eq(previousSessionId), eq(ExitReason.RETURN_HOME_OR_OVERVIEW))
+
+    // TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW
+    val change = createChange(TRANSIT_TO_FRONT, createTaskInfo(1, WINDOWING_MODE_FREEFORM))
+    val transitionInfo =
+      TransitionInfoBuilder(TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW, 0)
+              .addChange(change)
+              .build()
+
+    callOnTransitionReady(transitionInfo)
+    val sessionId = transitionObserver.getLoggerSessionId()
+
+    assertThat(sessionId).isNotNull()
+    verify(desktopModeEventLogger, times(1))
+            .logSessionEnter(eq(sessionId!!), eq(EnterReason.APP_FROM_OVERVIEW))
     verify(desktopModeEventLogger, times(1)).logTaskAdded(eq(sessionId), any())
     verifyZeroInteractions(desktopModeEventLogger)
   }

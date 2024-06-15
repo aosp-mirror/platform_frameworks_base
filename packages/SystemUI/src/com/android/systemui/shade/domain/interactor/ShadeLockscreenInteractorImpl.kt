@@ -18,18 +18,22 @@ package com.android.systemui.shade.domain.interactor
 
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ShadeLockscreenInteractorImpl
 @Inject
 constructor(
+    @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val backgroundScope: CoroutineScope,
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
@@ -71,7 +75,7 @@ constructor(
     override fun transitionToExpandedShade(delay: Long) {
         backgroundScope.launch {
             delay(delay)
-            changeToShadeScene()
+            withContext(mainDispatcher) { changeToShadeScene() }
         }
     }
 

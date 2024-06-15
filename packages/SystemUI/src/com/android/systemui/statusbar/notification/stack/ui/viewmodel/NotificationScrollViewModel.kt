@@ -81,7 +81,11 @@ constructor(
                             (transitionState.fromScene in SceneFamilies.NotifShade &&
                                 transitionState.toScene == quickSettingsScene) ||
                                 (transitionState.fromScene in quickSettingsScene &&
-                                    transitionState.toScene in SceneFamilies.NotifShade)
+                                    transitionState.toScene in SceneFamilies.NotifShade) ||
+                                (transitionState.fromScene == Scenes.Lockscreen &&
+                                    transitionState.toScene in SceneFamilies.NotifShade) ||
+                                (transitionState.fromScene in SceneFamilies.NotifShade &&
+                                    transitionState.toScene == Scenes.Lockscreen)
                         ) {
                             1f
                         } else if (

@@ -125,6 +125,26 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Tik om te bekijken"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Fout bij opslaan van schermopname"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Fout bij starten van schermopname"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Problemen opnemen"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Probleemopname verwerken"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Melding over actieve activiteit voor een sessie voor probleemverzameling"</string>
@@ -135,7 +155,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Fout bij opslaan van probleemopname"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Fout bij starten van probleemopname"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Volledig scherm wordt getoond"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"Swipe omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Terug"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Startscherm"</string>
@@ -278,7 +299,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Opgeslagen"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"loskoppelen"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activeren"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Morgen weer automatisch aanzetten"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Functies zoals Quick Share en Vind mijn apparaat gebruiken bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth wordt morgenochtend aangezet"</string>
     <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
@@ -1325,6 +1347,14 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icoon voor samenvouwen"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icoon voor uitvouwen"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"of"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Achtergrondverlichting van toetsenbord"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d van %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Bediening voor in huis"</string>

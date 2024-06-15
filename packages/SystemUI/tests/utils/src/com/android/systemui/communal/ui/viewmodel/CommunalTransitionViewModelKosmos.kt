@@ -25,12 +25,14 @@ import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToDreamingTransit
 import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.communalTransitionViewModel by
     Kosmos.Fixture {
         CommunalTransitionViewModel(
+            applicationScope = applicationCoroutineScope,
             glanceableHubToLockscreenTransitionViewModel =
                 glanceableHubToLockscreenTransitionViewModel,
             lockscreenToGlanceableHubTransitionViewModel =

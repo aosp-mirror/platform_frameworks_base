@@ -515,7 +515,10 @@ final class AutofillManagerServiceImpl
         }
 
         final boolean finished = saveResult.isRemoveSession();
-        if (sVerbose) Slog.v(TAG, "finishSessionLocked(): session finished on save? " + finished);
+        if (sVerbose) {
+            Slog.v(TAG, "finishSessionLocked(): session finished? " + finished
+                    + ", showing save UI? " + saveResult.isLogSaveShown());
+        }
 
         if (finished) {
             session.removeFromServiceLocked();

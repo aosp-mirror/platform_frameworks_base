@@ -16,35 +16,20 @@
 
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
-import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.screenrecord.data.repository.screenRecordRepository
-import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.mediaProjectionChipInteractor
-import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
-import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
-import com.android.systemui.util.time.fakeSystemClock
-
-val Kosmos.screenRecordChipInteractor: ScreenRecordChipInteractor by
-    Kosmos.Fixture {
-        ScreenRecordChipInteractor(
-            scope = applicationCoroutineScope,
-            screenRecordRepository = screenRecordRepository,
-            dialogFactory = mockSystemUIDialogFactory,
-            dialogTransitionAnimator = mockDialogTransitionAnimator,
-            systemClock = fakeSystemClock,
-        )
-    }
-
-val Kosmos.callChipInteractor: FakeCallChipInteractor by Kosmos.Fixture { FakeCallChipInteractor() }
+import com.android.systemui.statusbar.chips.call.ui.viewmodel.callChipViewModel
+import com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.castToOtherDeviceChipViewModel
+import com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.screenRecordChipViewModel
+import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.shareToAppChipViewModel
 
 val Kosmos.ongoingActivityChipsViewModel: OngoingActivityChipsViewModel by
     Kosmos.Fixture {
         OngoingActivityChipsViewModel(
             testScope.backgroundScope,
-            screenRecordChipInteractor = screenRecordChipInteractor,
-            mediaProjectionChipInteractor = mediaProjectionChipInteractor,
-            callChipInteractor = callChipInteractor,
+            screenRecordChipViewModel = screenRecordChipViewModel,
+            shareToAppChipViewModel = shareToAppChipViewModel,
+            castToOtherDeviceChipViewModel = castToOtherDeviceChipViewModel,
+            callChipViewModel = callChipViewModel,
         )
     }

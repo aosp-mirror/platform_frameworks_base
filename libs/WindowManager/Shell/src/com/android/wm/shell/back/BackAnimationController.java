@@ -437,7 +437,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private boolean isAppProgressGenerationAllowed() {
-        return mBackNavigationInfo.getTouchableRegion().equals(mTouchableArea);
+        return mBackNavigationInfo.isAppProgressGenerationAllowed()
+                && mBackNavigationInfo.getTouchableRegion().equals(mTouchableArea);
     }
 
     /**
