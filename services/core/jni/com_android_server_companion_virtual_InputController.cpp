@@ -19,6 +19,7 @@
 #include <android-base/unique_fd.h>
 #include <android/input.h>
 #include <android/keycodes.h>
+#include <android_companion_virtualdevice_flags.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <input/Input.h>
@@ -36,6 +37,8 @@
 using android::base::unique_fd;
 
 namespace android {
+
+namespace vd_flags = android::companion::virtualdevice::flags;
 
 static constexpr jlong INVALID_PTR = 0;
 
@@ -88,6 +91,10 @@ static unique_fd openUinput(const char* readableName, jint vendorId, jint produc
             ioctl(fd, UI_SET_RELBIT, REL_Y);
             ioctl(fd, UI_SET_RELBIT, REL_WHEEL);
             ioctl(fd, UI_SET_RELBIT, REL_HWHEEL);
+            if (vd_flags::high_resolution_scroll()) {
+                ioctl(fd, UI_SET_RELBIT, REL_WHEEL_HI_RES);
+                ioctl(fd, UI_SET_RELBIT, REL_HWHEEL_HI_RES);
+            }
             break;
         case DeviceType::TOUCHSCREEN:
             ioctl(fd, UI_SET_EVBIT, EV_ABS);
