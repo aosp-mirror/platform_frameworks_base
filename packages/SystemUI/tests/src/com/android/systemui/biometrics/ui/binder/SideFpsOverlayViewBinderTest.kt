@@ -126,7 +126,6 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
         `when`(layoutInflater.inflate(R.layout.sidefps_view, null, false)).thenReturn(sideFpsView)
         `when`(sideFpsView.requireViewById<LottieAnimationView>(eq(R.id.sidefps_animation)))
             .thenReturn(mock(LottieAnimationView::class.java))
-        `when`(sideFpsView.context).thenReturn(mContext)
         with(mock(ViewPropertyAnimator::class.java)) {
             `when`(sideFpsView.animate()).thenReturn(this)
             `when`(alpha(Mockito.anyFloat())).thenReturn(this)

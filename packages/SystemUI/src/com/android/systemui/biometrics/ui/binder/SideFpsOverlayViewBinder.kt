@@ -24,6 +24,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityEvent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
@@ -46,11 +47,11 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** Binds the side fingerprint sensor indicator view to [SideFpsOverlayViewModel]. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -126,11 +127,6 @@ constructor(
         }
 
         overlayView = layoutInflater.get().inflate(R.layout.sidefps_view, null, false)
-            .apply {
-                contentDescription = context.resources.getString(
-                        R.string.accessibility_side_fingerprint_indicator_label
-                )
-            }
 
         val overlayViewModel =
             SideFpsOverlayViewModel(
@@ -139,12 +135,10 @@ constructor(
                 displayStateInteractor.get(),
                 sfpsSensorInteractor.get(),
             )
-        overlayView?.let { overlayView ->
-            bind(overlayView, overlayViewModel, windowManager.get())
-            overlayView.visibility = View.INVISIBLE
-            Log.d(TAG, "show(): adding overlayView $overlayView")
-            windowManager.get().addView(overlayView, overlayViewModel.defaultOverlayViewParams)
-        }
+        bind(overlayView!!, overlayViewModel, windowManager.get())
+        overlayView!!.visibility = View.INVISIBLE
+        Log.d(TAG, "show(): adding overlayView $overlayView")
+        windowManager.get().addView(overlayView, overlayViewModel.defaultOverlayViewParams)
     }
 
     /** Hide the side fingerprint sensor indicator */
@@ -184,6 +178,25 @@ constructor(
                         .setInterpolator(Interpolators.ALPHA_IN)
 
                 overlayShowAnimator.start()
+
+                it.setAccessibilityDelegate(
+                    object : View.AccessibilityDelegate() {
+                        override fun dispatchPopulateAccessibilityEvent(
+                            host: View,
+                            event: AccessibilityEvent
+                        ): Boolean {
+                            return if (
+                                event.getEventType() ===
+                                    android.view.accessibility.AccessibilityEvent
+                                        .TYPE_WINDOW_STATE_CHANGED
+                            ) {
+                                true
+                            } else {
+                                super.dispatchPopulateAccessibilityEvent(host, event)
+                            }
+                        }
+                    }
+                )
 
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch {
