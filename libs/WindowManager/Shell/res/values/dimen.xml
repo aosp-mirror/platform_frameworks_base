@@ -482,6 +482,12 @@
 
     <!-- The radius of the layout outline around the maximize menu buttons. -->
     <dimen name="desktop_mode_maximize_menu_buttons_outline_radius">6dp</dimen>
+    <!-- The stroke width of the outline around the maximize menu buttons. -->
+    <dimen name="desktop_mode_maximize_menu_buttons_outline_stroke">1dp</dimen>
+    <!-- The radius of the inner fill of the maximize menu buttons. -->
+    <dimen name="desktop_mode_maximize_menu_buttons_fill_radius">4dp</dimen>
+    <!-- The padding between the outline and fill of the maximize menu buttons. -->
+    <dimen name="desktop_mode_maximize_menu_buttons_fill_padding">4dp</dimen>
 
     <!-- The corner radius of the maximize menu. -->
     <dimen name="desktop_mode_maximize_menu_corner_radius">8dp</dimen>
