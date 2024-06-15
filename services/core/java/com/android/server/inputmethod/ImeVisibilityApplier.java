@@ -17,6 +17,7 @@
 package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.view.inputmethod.ImeTracker;
@@ -63,7 +64,7 @@ interface ImeVisibilityApplier {
      * @param state       The new IME visibility state for the applier to handle
      */
     default void applyImeVisibility(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
-            @ImeVisibilityStateComputer.VisibilityState int state) {}
+            @ImeVisibilityStateComputer.VisibilityState int state, @UserIdInt int userId) {}
 
     /**
      * Updates the IME Z-ordering relative to the given window.

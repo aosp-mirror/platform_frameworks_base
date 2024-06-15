@@ -133,7 +133,9 @@ public class HomeTransitionObserver implements TransitionObserver,
      */
     public void invalidate(Transitions transitions) {
         transitions.unregisterObserver(this);
-        // Unregister the listener to ensure any registered binder death recipients are unlinked
-        mListener.unregister();
+        if (mListener != null) {
+            // Unregister the listener to ensure any registered binder death recipients are unlinked
+            mListener.unregister();
+        }
     }
 }

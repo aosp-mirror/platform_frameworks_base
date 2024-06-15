@@ -44,14 +44,15 @@ public interface BrightnessStateModifier {
     void stop();
 
     /**
-     * Allows modifiers to react to ambient lux changes.
-     * @param ambientLux current debounced lux.
+     *
+     * @return whether the brightness state modifier needs to listen to the ambient lux in order to
+     * calculate its bounds.
      */
-    void onAmbientLuxChange(float ambientLux);
+    boolean shouldListenToLightSensor();
 
     /**
-     * Sets the autobrightness state for clampers that need to be aware of the state.
-     * @param state autobrightness state
+     * Current ambient lux
+     * @param lux - ambient lux
      */
-    void setAutoBrightnessState(int state);
+    void setAmbientLux(float lux);
 }

@@ -823,6 +823,16 @@ public class IntentFilter implements Parcelable {
     }
 
     /**
+     * Returns the number of actions in the filter, or {@code 0} if there are no actions.
+     * <p> This method provides a safe alternative to {@link #countActions()}, which
+     * may throw an exception if there are no actions.
+     * @hide
+     */
+    public final int safeCountActions() {
+        return mActions == null ? 0 : mActions.size();
+    }
+
+    /**
      * Return an action in the filter.
      */
     public final String getAction(int index) {

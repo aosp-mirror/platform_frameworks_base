@@ -208,7 +208,10 @@ constructor(
                 // doing any translation.
                 CommunalScenes.Communal
             }
-            to == KeyguardState.GONE -> CommunalScenes.Blank
+            // Transitioning to Blank scene when entering the edit mode will be handled separately
+            // with custom animations.
+            to == KeyguardState.GONE && !communalInteractor.editModeOpen.value ->
+                CommunalScenes.Blank
             !docked && !KeyguardState.deviceIsAwakeInState(to) -> {
                 // If the user taps the screen and wakes the device within this timeout, we don't
                 // want to dismiss the hub

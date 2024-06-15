@@ -26,6 +26,9 @@ interface MediaProjectionRepository {
     /** Switches the task that should be projected. */
     suspend fun switchProjectedTask(task: RunningTaskInfo)
 
+    /** Stops the currently active projection. */
+    suspend fun stopProjecting()
+
     /** Represents the current [MediaProjectionState]. */
     val mediaProjectionState: Flow<MediaProjectionState>
 }

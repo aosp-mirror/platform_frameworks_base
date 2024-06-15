@@ -31,23 +31,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <FrameLayout
-            android:id="@+id/maximize_menu_maximize_button_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/desktop_mode_maximize_menu_layout_background"
-            android:padding="4dp"
+        <Button
+            android:layout_width="94dp"
+            android:layout_height="60dp"
+            android:id="@+id/maximize_menu_maximize_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:stateListAnimator="@null"
             android:layout_marginRight="8dp"
             android:layout_marginBottom="4dp"
-            android:alpha="0">
-            <Button
-                android:id="@+id/maximize_menu_maximize_button"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="86dp"
-                android:layout_height="@dimen/desktop_mode_maximize_menu_button_height"
-                android:background="@drawable/desktop_mode_maximize_menu_button_background"
-                android:stateListAnimator="@null"/>
-        </FrameLayout>
+            android:alpha="0"/>
 
         <TextView
             android:id="@+id/maximize_menu_maximize_window_text"

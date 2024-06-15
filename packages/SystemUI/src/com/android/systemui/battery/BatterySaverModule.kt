@@ -4,6 +4,7 @@ import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.BatterySaverTile
+import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.battery.domain.interactor.BatterySaverTileDataInteractor
 import com.android.systemui.qs.tiles.impl.battery.domain.interactor.BatterySaverTileUserActionInteractor
@@ -27,6 +28,13 @@ interface BatterySaverModule {
     @IntoMap
     @StringKey(BatterySaverTile.TILE_SPEC)
     fun bindBatterySaverTile(batterySaverTile: BatterySaverTile): QSTileImpl<*>
+
+    @Binds
+    @IntoMap
+    @StringKey(BATTERY_SAVER_TILE_SPEC)
+    fun provideBatterySaverAvailabilityInteractor(
+            impl: BatterySaverTileDataInteractor
+    ): QSTileAvailabilityInteractor
 
     companion object {
         private const val BATTERY_SAVER_TILE_SPEC = "battery"

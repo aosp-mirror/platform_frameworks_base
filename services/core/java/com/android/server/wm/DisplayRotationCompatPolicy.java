@@ -80,8 +80,11 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         mDisplayContent = displayContent;
         mWmService = displayContent.mWmService;
         mCameraStateMonitor = cameraStateMonitor;
-        mCameraStateMonitor.addCameraStateListener(this);
         mActivityRefresher = activityRefresher;
+    }
+
+    void start() {
+        mCameraStateMonitor.addCameraStateListener(this);
         mActivityRefresher.addEvaluator(this);
     }
 
@@ -365,7 +368,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     }
 
     // TODO(b/336474959): Do we need cameraId here?
-    private boolean isActivityForCameraIdRefreshing(String cameraId) {
+    private boolean isActivityForCameraIdRefreshing(@NonNull String cameraId) {
         final ActivityRecord topActivity = mDisplayContent.topRunningActivity(
                 /* considerKeyguardState= */ true);
         if (!isTreatmentEnabledForActivity(topActivity)

@@ -121,9 +121,9 @@ import java.util.Optional;
  */
 @Module(
         includes = {
-            WMShellBaseModule.class,
-            PipModule.class,
-            ShellBackAnimationModule.class,
+                WMShellBaseModule.class,
+                PipModule.class,
+                ShellBackAnimationModule.class,
         })
 public abstract class WMShellModule {
 
@@ -664,7 +664,8 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
-            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional) {
+            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional
+    ) {
         return new Object();
     }
 }

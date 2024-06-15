@@ -445,6 +445,7 @@ class Task extends TaskFragment {
     int mPrevDisplayId = INVALID_DISPLAY;
 
     int mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
+    WindowContainerToken mMultiWindowRestoreParent;
 
     /**
      * Last requested orientation reported to DisplayContent. This is different from {@link
@@ -3514,7 +3515,10 @@ class Task extends TaskFragment {
                 && !appCompatTaskInfo.topActivityInSizeCompat
                 && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings()
                 && !info.isTopActivityTransparent;
-        appCompatTaskInfo.topActivityBoundsLetterboxed = top != null  && top.areBoundsLetterboxed();
+        appCompatTaskInfo.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
+        appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top == null
+                ? CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE
+                : top.mLetterboxUiController.getFreeformCameraCompatMode();
     }
 
     /**
@@ -4634,6 +4638,25 @@ class Task extends TaskFragment {
         return TASK;
     }
 
+    /**
+     * Restores to the windowing mode saved when task requested to enter fullscreen using
+     * {@link Activity#requestFullscreenMode} API if it is valid. The task is also reparented to
+     * the previous parent if parent has changed.
+     */
+    void restoreWindowingMode() {
+        if (mMultiWindowRestoreWindowingMode == INVALID_WINDOWING_MODE) {
+            return;
+        }
+        if (!getParent().mRemoteToken.toWindowContainerToken()
+                .equals(mMultiWindowRestoreParent)) {
+            // Restore previous parent if parent has changed.
+            final Task parent = fromWindowContainerToken(mMultiWindowRestoreParent);
+            reparent(parent, MAX_VALUE);
+        }
+
+        setWindowingMode(mMultiWindowRestoreWindowingMode);
+    }
+
     @Override
     public void setWindowingMode(int windowingMode) {
         // Calling Task#setWindowingMode() for leaf task since this is a specialization of
@@ -4766,6 +4789,12 @@ class Task extends TaskFragment {
                     if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()
                             && lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
                         lastParentBeforePip.prepareSurfaces();
+                        // If the moveToFront is a part of finishing transition, then make sure
+                        // the z-order of tasks are up-to-date.
+                        if (topActivity.mTransitionController.inFinishingTransition(topActivity)) {
+                            Transition.assignLayers(taskDisplayArea,
+                                    taskDisplayArea.getPendingTransaction());
+                        }
                     }
                 }
                 if (isPip2ExperimentEnabled) {

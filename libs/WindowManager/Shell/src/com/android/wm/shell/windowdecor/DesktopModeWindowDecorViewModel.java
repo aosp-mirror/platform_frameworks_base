@@ -103,6 +103,7 @@ import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionReg
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -152,6 +153,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final DisplayInsetsController mDisplayInsetsController;
     private final Region mExclusionRegion = Region.obtain();
     private boolean mInImmersiveMode;
+    private final String mSysUIPackageName;
 
     private final ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
@@ -247,6 +249,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mInputManager = mContext.getSystemService(InputManager.class);
         mWindowDecorByTaskId = windowDecorByTaskId;
+        mSysUIPackageName = mContext.getResources().getString(
+                com.android.internal.R.string.config_systemUi);
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -1035,8 +1039,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && taskInfo.isFocused) {
             return false;
         }
+        // TODO(b/347289970): Consider replacing with API
         if (Flags.enableDesktopWindowingModalsPolicy()
                 && isSingleTopActivityTranslucent(taskInfo)) {
+            return false;
+        }
+        if (isSystemUIApplication(taskInfo)) {
             return false;
         }
         return DesktopModeStatus.canEnterDesktopMode(mContext)
@@ -1107,6 +1115,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private boolean isTaskInSplitScreen(int taskId) {
         return mSplitScreenController != null
                 && mSplitScreenController.isTaskInSplitScreen(taskId);
+    }
+
+    // TODO(b/347289970): Consider replacing with API
+    private boolean isSystemUIApplication(RunningTaskInfo taskInfo) {
+        if (taskInfo.baseActivity != null) {
+            return (Objects.equals(taskInfo.baseActivity.getPackageName(), mSysUIPackageName));
+        }
+        return false;
     }
 
     private void dump(PrintWriter pw, String prefix) {

@@ -74,10 +74,10 @@ constructor(
             ) { attributes, _,
                 ->
                 attributes ?: return@combine SpatialAudioAvailabilityModel.Unavailable
-                if (spatializerInteractor.isHeadTrackingAvailable(attributes)) {
-                    return@combine SpatialAudioAvailabilityModel.HeadTracking
-                }
                 if (spatializerInteractor.isSpatialAudioAvailable(attributes)) {
+                    if (spatializerInteractor.isHeadTrackingAvailable(attributes)) {
+                        return@combine SpatialAudioAvailabilityModel.HeadTracking
+                    }
                     return@combine SpatialAudioAvailabilityModel.SpatialAudio
                 }
                 SpatialAudioAvailabilityModel.Unavailable
@@ -104,10 +104,10 @@ constructor(
                     return@combine SpatialAudioEnabledModel.Disabled
                 }
                 attributes ?: return@combine SpatialAudioEnabledModel.Disabled
-                if (spatializerInteractor.isHeadTrackingEnabled(attributes)) {
-                    return@combine SpatialAudioEnabledModel.HeadTrackingEnabled
-                }
                 if (spatializerInteractor.isSpatialAudioEnabled(attributes)) {
+                    if (spatializerInteractor.isHeadTrackingEnabled(attributes)) {
+                        return@combine SpatialAudioEnabledModel.HeadTrackingEnabled
+                    }
                     return@combine SpatialAudioEnabledModel.SpatialAudioEnabled
                 }
                 SpatialAudioEnabledModel.Disabled

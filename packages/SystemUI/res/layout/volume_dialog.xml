@@ -13,7 +13,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sysui="http://schemas.android.com/apk/res-auto"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/volume_dialog_container"
     android:layout_width="wrap_content"
@@ -94,18 +96,16 @@
                     android:paddingLeft="@dimen/volume_dialog_ringer_rows_padding"
                     android:paddingBottom="@dimen/volume_dialog_ringer_rows_padding"
                     android:paddingRight="@dimen/volume_dialog_ringer_rows_padding">
-
                     <com.android.keyguard.AlphaOptimizedImageButton
                         android:id="@+id/settings"
+                        android:src="@drawable/horizontal_ellipsis"
                         android:layout_width="@dimen/volume_dialog_tap_target_size"
                         android:layout_height="@dimen/volume_dialog_tap_target_size"
                         android:layout_gravity="center"
-                        android:background="@drawable/ripple_drawable_20dp"
                         android:contentDescription="@string/accessibility_volume_settings"
-                        android:scaleType="centerInside"
-                        android:soundEffectsEnabled="false"
-                        android:src="@drawable/horizontal_ellipsis"
-                        android:tint="?androidprv:attr/colorAccent" />
+                        android:background="@drawable/ripple_drawable_20dp"
+                        android:tint="?androidprv:attr/colorAccent"
+                        android:soundEffectsEnabled="false" />
                 </FrameLayout>
             </LinearLayout>
 

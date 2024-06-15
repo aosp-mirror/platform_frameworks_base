@@ -201,6 +201,7 @@ constructor(
     ) {
         if (immediatelyRemove || isReorderingAllowed()) {
             interactor.dismissSmartspaceRecommendation(commonModel.recsLoadingModel.key, 0L)
+            mediaRecs = null
             if (!immediatelyRemove) {
                 // Although it wasn't requested, we were able to process the removal
                 // immediately since reordering is allowed. So, notify hosts to update
