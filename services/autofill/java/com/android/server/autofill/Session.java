@@ -66,6 +66,7 @@ import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATU
 import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_SESSION_DESTROYED;
 import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_SUCCESS;
 import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_TIMEOUT;
+import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_TRANSACTION_TOO_LARGE;
 import static com.android.server.autofill.Helper.containsCharsInOrder;
 import static com.android.server.autofill.Helper.createSanitizers;
 import static com.android.server.autofill.Helper.getNumericValue;
@@ -137,6 +138,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.os.TransactionTooLargeException;
 import android.service.assist.classification.FieldClassificationRequest;
 import android.service.assist.classification.FieldClassificationResponse;
 import android.service.autofill.AutofillFieldClassificationService.Scores;
@@ -211,6 +213,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -2346,20 +2349,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // FillServiceCallbacks
     @Override
     @SuppressWarnings("GuardedBy")
-    public void onFillRequestFailure(int requestId, @Nullable CharSequence message) {
-        onFillRequestFailureOrTimeout(requestId, false, message);
-    }
-
-    // FillServiceCallbacks
-    @Override
-    @SuppressWarnings("GuardedBy")
-    public void onFillRequestTimeout(int requestId) {
-        onFillRequestFailureOrTimeout(requestId, true, null);
-    }
-
-    @SuppressWarnings("GuardedBy")
-    private void onFillRequestFailureOrTimeout(int requestId, boolean timedOut,
-            @Nullable CharSequence message) {
+    public void onFillRequestFailure(int requestId, Throwable t) {
+        CharSequence message = t.getMessage();
+        boolean timedOut = (t instanceof TimeoutException);
         boolean showMessage = !TextUtils.isEmpty(message);
 
         synchronized (mLock) {
@@ -2412,10 +2404,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
 
-            if (timedOut) {
+            if (t instanceof TimeoutException) {
                 mPresentationStatsEventLogger.maybeSetNoPresentationEventReason(
                         NOT_SHOWN_REASON_REQUEST_TIMEOUT);
                 mFillResponseEventLogger.maybeSetResponseStatus(RESPONSE_STATUS_TIMEOUT);
+            } else if (t instanceof TransactionTooLargeException) {
+                mPresentationStatsEventLogger.maybeSetNoPresentationEventReason(
+                        NOT_SHOWN_REASON_REQUEST_FAILED);
+                mFillResponseEventLogger.maybeSetResponseStatus(
+                        RESPONSE_STATUS_TRANSACTION_TOO_LARGE);
             } else {
                 mPresentationStatsEventLogger.maybeSetNoPresentationEventReason(
                         NOT_SHOWN_REASON_REQUEST_FAILED);
