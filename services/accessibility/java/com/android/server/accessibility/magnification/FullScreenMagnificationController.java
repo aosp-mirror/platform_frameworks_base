@@ -18,6 +18,7 @@ package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
+import static android.util.MathUtils.abs;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
@@ -263,27 +264,27 @@ public class FullScreenMagnificationController implements
 
         @GuardedBy("mLock")
         boolean isAtEdge() {
-            return isAtLeftEdge() || isAtRightEdge() || isAtTopEdge() || isAtBottomEdge();
+            return isAtLeftEdge(0f) || isAtRightEdge(0f) || isAtTopEdge(0f) || isAtBottomEdge(0f);
         }
 
         @GuardedBy("mLock")
-        boolean isAtLeftEdge() {
-            return getOffsetX() == getMaxOffsetXLocked();
+        boolean isAtLeftEdge(float slop) {
+            return abs(getOffsetX() - getMaxOffsetXLocked()) <= slop;
         }
 
         @GuardedBy("mLock")
-        boolean isAtRightEdge() {
-            return getOffsetX() == getMinOffsetXLocked();
+        boolean isAtRightEdge(float slop) {
+            return abs(getOffsetX() - getMinOffsetXLocked()) <= slop;
         }
 
         @GuardedBy("mLock")
-        boolean isAtTopEdge() {
-            return getOffsetY() == getMaxOffsetYLocked();
+        boolean isAtTopEdge(float slop) {
+            return abs(getOffsetY() - getMaxOffsetYLocked()) <= slop;
         }
 
         @GuardedBy("mLock")
-        boolean isAtBottomEdge() {
-            return getOffsetY() == getMinOffsetYLocked();
+        boolean isAtBottomEdge(float slop) {
+            return abs(getOffsetY() - getMinOffsetYLocked()) <= slop;
         }
 
         @GuardedBy("mLock")
@@ -1298,7 +1299,7 @@ public class FullScreenMagnificationController implements
      * Returns whether the user is at one of the edges (left, right, top, bottom)
      * of the magnification viewport
      *
-     * @param displayId
+     * @param displayId The logical display id.
      * @return if user is at the edge of the view
      */
     public boolean isAtEdge(int displayId) {
@@ -1314,64 +1315,72 @@ public class FullScreenMagnificationController implements
     /**
      * Returns whether the user is at the left edge of the viewport
      *
-     * @param displayId
-     * @return if user is at left edge of view
+     * @param displayId The logical display id.
+     * @param slop The buffer distance in pixels from the left edge within that will be considered
+     *             to be at the edge.
+     * @return if user is considered at left edge of view
      */
-    public boolean isAtLeftEdge(int displayId) {
+    public boolean isAtLeftEdge(int displayId, float slop) {
         synchronized (mLock) {
             final DisplayMagnification display = mDisplays.get(displayId);
             if (display == null) {
                 return false;
             }
-            return display.isAtLeftEdge();
+            return display.isAtLeftEdge(slop);
         }
     }
 
     /**
      * Returns whether the user is at the right edge of the viewport
      *
-     * @param displayId
-     * @return if user is at right edge of view
+     * @param displayId The logical display id.
+     * @param slop The buffer distance in pixels from the right edge within that will be considered
+     *             to be at the edge.
+     * @return if user is considered at right edge of view
      */
-    public boolean isAtRightEdge(int displayId) {
+    public boolean isAtRightEdge(int displayId, float slop) {
         synchronized (mLock) {
             final DisplayMagnification display = mDisplays.get(displayId);
             if (display == null) {
                 return false;
             }
-            return display.isAtRightEdge();
+            return display.isAtRightEdge(slop);
         }
     }
 
     /**
      * Returns whether the user is at the top edge of the viewport
      *
-     * @param displayId
-     * @return if user is at top edge of view
+     * @param displayId The logical display id.
+     * @param slop The buffer distance in pixels from the top edge within that will be considered
+     *             to be at the edge.
+     * @return if user is considered at top edge of view
      */
-    public boolean isAtTopEdge(int displayId) {
+    public boolean isAtTopEdge(int displayId, float slop) {
         synchronized (mLock) {
             final DisplayMagnification display = mDisplays.get(displayId);
             if (display == null) {
                 return false;
             }
-            return display.isAtTopEdge();
+            return display.isAtTopEdge(slop);
         }
     }
 
     /**
      * Returns whether the user is at the bottom edge of the viewport
      *
-     * @param displayId
-     * @return if user is at bottom edge of view
+     * @param displayId The logical display id.
+     * @param slop The buffer distance in pixels from the bottom edge within that will be considered
+     *             to be at the edge.
+     * @return if user is considered at bottom edge of view
      */
-    public boolean isAtBottomEdge(int displayId) {
+    public boolean isAtBottomEdge(int displayId, float slop) {
         synchronized (mLock) {
             final DisplayMagnification display = mDisplays.get(displayId);
             if (display == null) {
                 return false;
             }
-            return display.isAtBottomEdge();
+            return display.isAtBottomEdge(slop);
         }
     }
 

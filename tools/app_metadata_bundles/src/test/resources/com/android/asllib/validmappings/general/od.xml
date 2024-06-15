@@ -10,7 +10,6 @@
                             <item value="1"/>
                         </int-array>
                         <boolean name="is_sharing_optional" value="false"/>
-                        <boolean name="ephemeral" value="false"/>
                     </pbundle_as_map>
                     <pbundle_as_map name="precise_location">
                         <int-array name="purposes" num="2">
@@ -18,7 +17,6 @@
                             <item value="2"/>
                         </int-array>
                         <boolean name="is_sharing_optional" value="true"/>
-                        <boolean name="ephemeral" value="true"/>
                     </pbundle_as_map>
                 </pbundle_as_map>
             </pbundle_as_map>
@@ -32,7 +30,7 @@
         </pbundle_as_map>
     </pbundle_as_map>
     <pbundle_as_map name="system_app_safety_label">
-        <string name="url" value="www.example.com"/>
+        <boolean name="declaration" value="true"/>
     </pbundle_as_map>
     <pbundle_as_map name="transparency_info">
         <pbundle_as_map name="developer_info">

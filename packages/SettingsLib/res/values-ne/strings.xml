@@ -641,7 +641,7 @@
     <string name="edit_user_info_message" msgid="6677556031419002895">"यो डिभाइस प्रयोग गर्ने सबै जना तपाईंले छनौट गर्ने नाम र फोटो देख्न सक्ने छन्।"</string>
     <string name="user_add_user" msgid="7876449291500212468">"प्रयोगकर्ता कनेक्ट गर्नुहोस्"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि कनेक्ट गर्नुहोस्"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"गेस्ट मोडबाट बाहिर निस्कियोस्"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"अथिति हटाउनुहोस्"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"अतिथि सत्र रिसेट गर्नुहोस्"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"अतिथिका रूपमा ब्राउज गर्ने सेसन रिसेट गर्ने हो?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"यी अतिथि हटाउने हो?"</string>

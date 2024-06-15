@@ -35,6 +35,7 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
+import com.android.systemui.screenrecord.data.repository.ScreenRecordRepository
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -47,6 +48,7 @@ constructor(
     @Application private val context: Context,
     @Main private val mainContext: CoroutineContext,
     @Background private val backgroundContext: CoroutineContext,
+    private val screenRecordRepository: ScreenRecordRepository,
     private val recordingController: RecordingController,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardDismissUtil: KeyguardDismissUtil,
@@ -65,8 +67,7 @@ constructor(
                             Log.d(TAG, "Cancelling countdown")
                             withContext(backgroundContext) { recordingController.cancelCountdown() }
                         }
-                        is ScreenRecordModel.Recording ->
-                            withContext(backgroundContext) { recordingController.stopRecording() }
+                        is ScreenRecordModel.Recording -> screenRecordRepository.stopRecording()
                         is ScreenRecordModel.DoingNothing ->
                             withContext(mainContext) {
                                 showPrompt(action.expandable, user.identifier)
@@ -122,8 +123,7 @@ constructor(
                             controller,
                             animateBackgroundBoundsChange = true,
                         )
-                    }
-                        ?: dialog.show()
+                    } ?: dialog.show()
                 } else {
                     dialog.show()
                 }

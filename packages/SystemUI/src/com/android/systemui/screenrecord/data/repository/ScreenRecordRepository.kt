@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.withContext
 
 /**
  * Repository storing information about the state of screen recording.
@@ -38,6 +39,9 @@ import kotlinx.coroutines.flow.onStart
 interface ScreenRecordRepository {
     /** The current screen recording state. Note that this is a cold flow. */
     val screenRecordState: Flow<ScreenRecordModel>
+
+    /** Stops the recording. */
+    suspend fun stopRecording()
 }
 
 @SysUISingleton
@@ -89,5 +93,9 @@ constructor(
         } else {
             ScreenRecordModel.DoingNothing
         }
+    }
+
+    override suspend fun stopRecording() {
+        withContext(bgCoroutineContext) { recordingController.stopRecording() }
     }
 }

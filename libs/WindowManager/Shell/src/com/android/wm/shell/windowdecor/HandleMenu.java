@@ -24,6 +24,7 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,6 +36,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.view.MotionEvent;
@@ -70,8 +72,14 @@ class HandleMenu {
     private final DesktopModeWindowDecoration mParentDecor;
     @VisibleForTesting
     AdditionalViewContainer mHandleMenuViewContainer;
+    // Position of the handle menu used for laying out the handle view.
     @VisibleForTesting
     final PointF mHandleMenuPosition = new PointF();
+    // With the introduction of {@link AdditionalSystemViewContainer}, {@link mHandleMenuPosition}
+    // may be in a different coordinate space than the input coordinates. Therefore, we still care
+    // about the menu's coordinates relative to the display as a whole, so we need to maintain
+    // those as well.
+    final Point mGlobalMenuPosition = new Point();
     private final boolean mShouldShowWindowingPill;
     private final Bitmap mAppIconBitmap;
     private final CharSequence mAppName;
@@ -244,44 +252,58 @@ class HandleMenu {
     private void updateHandleMenuPillPositions() {
         int menuX;
         final int menuY;
+        final Rect taskBounds = mTaskInfo.getConfiguration().windowConfiguration.getBounds();
+        updateGlobalMenuPosition(taskBounds);
         if (mLayoutResId == R.layout.desktop_mode_app_header) {
             // Align the handle menu to the left side of the caption.
             menuX = mMarginMenuStart;
             menuY = mMarginMenuTop;
         } else {
-            final int handleWidth = loadDimensionPixelSize(mContext.getResources(),
-                    R.dimen.desktop_mode_fullscreen_decor_caption_width);
-            final int handleOffset = (mMenuWidth / 2) - (handleWidth / 2);
-            final int captionX = mParentDecor.getCaptionX();
-            // TODO(b/343561161): This needs to be calculated differently if the task is in
-            //  top/bottom split.
             if (Flags.enableAdditionalWindowsAboveStatusBar()) {
-                final Rect leftOrTopStageBounds = new Rect();
-                if (mSplitScreenController.getSplitPosition(mTaskInfo.taskId)
-                        == SPLIT_POSITION_BOTTOM_OR_RIGHT) {
-                    mSplitScreenController.getStageBounds(leftOrTopStageBounds, new Rect());
-                }
                 // In a focused decor, we use global coordinates for handle menu. Therefore we
                 // need to account for other factors like split stage and menu/handle width to
                 // center the menu.
                 final DisplayLayout layout = mDisplayController
                         .getDisplayLayout(mTaskInfo.displayId);
-                menuX = captionX + handleOffset - (layout.width() / 2);
-                if (mSplitScreenController.getSplitPosition(mTaskInfo.taskId)
-                        == SPLIT_POSITION_BOTTOM_OR_RIGHT && layout.isLandscape()) {
-                    // If this task in the right stage, we need to offset by left stage's width
-                    menuX += leftOrTopStageBounds.width();
-                }
-                menuY = mMarginMenuStart - ((layout.height() - mMenuHeight) / 2);
+                menuX = mGlobalMenuPosition.x + ((mMenuWidth - layout.width()) / 2);
+                menuY = mGlobalMenuPosition.y + ((mMenuHeight - layout.height()) / 2);
             } else {
-                final int captionWidth = mTaskInfo.getConfiguration()
-                        .windowConfiguration.getBounds().width();
-                menuX = (captionWidth / 2) - (mMenuWidth / 2);
+                menuX = (taskBounds.width() / 2) - (mMenuWidth / 2);
                 menuY = mMarginMenuTop;
             }
         }
         // Handle Menu position setup.
         mHandleMenuPosition.set(menuX, menuY);
+    }
+
+    private void updateGlobalMenuPosition(Rect taskBounds) {
+        if (mTaskInfo.isFreeform()) {
+            mGlobalMenuPosition.set(taskBounds.left + mMarginMenuStart,
+                    taskBounds.top + mMarginMenuTop);
+        } else if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+            mGlobalMenuPosition.set(
+                    (taskBounds.width() / 2) - (mMenuWidth / 2) + mMarginMenuStart,
+                    mMarginMenuTop
+            );
+        } else if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW) {
+            final int splitPosition = mSplitScreenController.getSplitPosition(mTaskInfo.taskId);
+            final Rect leftOrTopStageBounds = new Rect();
+            final Rect rightOrBottomStageBounds = new Rect();
+            mSplitScreenController.getStageBounds(leftOrTopStageBounds,
+                    rightOrBottomStageBounds);
+            // TODO(b/343561161): This needs to be calculated differently if the task is in
+            //  top/bottom split.
+            if (splitPosition == SPLIT_POSITION_BOTTOM_OR_RIGHT) {
+                mGlobalMenuPosition.set(leftOrTopStageBounds.width()
+                                + (rightOrBottomStageBounds.width() / 2)
+                                - (mMenuWidth / 2) + mMarginMenuStart,
+                        mMarginMenuTop);
+            } else if (splitPosition == SPLIT_POSITION_TOP_OR_LEFT) {
+                mGlobalMenuPosition.set((leftOrTopStageBounds.width() / 2)
+                                - (mMenuWidth / 2) + mMarginMenuStart,
+                        mMarginMenuTop);
+            }
+        }
     }
 
     /**
@@ -302,6 +324,8 @@ class HandleMenu {
      * @param ev the MotionEvent to compare against.
      */
     void checkMotionEvent(MotionEvent ev) {
+        // If the menu view is above status bar, we can let the views handle input directly.
+        if (isViewAboveStatusBar()) return;
         final View handleMenu = mHandleMenuViewContainer.getView();
         final HandleMenuImageButton collapse = handleMenu.findViewById(R.id.collapse_menu_button);
         final PointF inputPoint = translateInputToLocalSpace(ev);
@@ -312,6 +336,11 @@ class HandleMenu {
         if (action == ACTION_UP && inputInCollapseButton) {
             collapse.performClick();
         }
+    }
+
+    private boolean isViewAboveStatusBar() {
+        return Flags.enableAdditionalWindowsAboveStatusBar()
+                && !mTaskInfo.isFreeform();
     }
 
     // Translate the input point from display coordinates to the same space as the handle menu.
@@ -329,10 +358,33 @@ class HandleMenu {
      */
     boolean isValidMenuInput(PointF inputPoint) {
         if (!viewsLaidOut()) return true;
-        return pointInView(
-                mHandleMenuViewContainer.getView(),
-                inputPoint.x - mHandleMenuPosition.x,
-                inputPoint.y - mHandleMenuPosition.y);
+        if (!isViewAboveStatusBar()) {
+            return pointInView(
+                    mHandleMenuViewContainer.getView(),
+                    inputPoint.x - mHandleMenuPosition.x,
+                    inputPoint.y - mHandleMenuPosition.y);
+        } else {
+            // Handle menu exists in a different coordinate space when added to WindowManager.
+            // Therefore we must compare the provided input coordinates to global menu coordinates.
+            // This includes factoring for split stage as input coordinates are relative to split
+            // stage position, not relative to the display as a whole.
+            PointF inputRelativeToMenu = new PointF(
+                    inputPoint.x - mGlobalMenuPosition.x,
+                    inputPoint.y - mGlobalMenuPosition.y
+            );
+            if (mSplitScreenController.getSplitPosition(mTaskInfo.taskId)
+                    == SPLIT_POSITION_BOTTOM_OR_RIGHT) {
+                // TODO(b/343561161): This also needs to be calculated differently if
+                //  the task is in top/bottom split.
+                Rect leftStageBounds = new Rect();
+                mSplitScreenController.getStageBounds(leftStageBounds, new Rect());
+                inputRelativeToMenu.x += leftStageBounds.width();
+            }
+            return pointInView(
+                    mHandleMenuViewContainer.getView(),
+                    inputRelativeToMenu.x,
+                    inputRelativeToMenu.y);
+        }
     }
 
     private boolean pointInView(View v, float x, float y) {

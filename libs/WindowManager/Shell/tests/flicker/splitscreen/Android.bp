@@ -65,9 +65,11 @@ android_test {
 
 android_test {
     name: "WMShellFlickerTestsSplitScreenGroup2",
+    defaults: ["WMShellFlickerTestsDefault"],
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker.splitscreen",
     instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: [
         ":WMShellFlickerTestsSplitScreenBase-src",
         ":WMShellFlickerTestsSplitScreenGroup2-src",

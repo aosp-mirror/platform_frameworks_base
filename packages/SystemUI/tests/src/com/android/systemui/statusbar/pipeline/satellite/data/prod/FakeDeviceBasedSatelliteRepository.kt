@@ -21,6 +21,8 @@ import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteC
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeDeviceBasedSatelliteRepository() : DeviceBasedSatelliteRepository {
+    override val isSatelliteProvisioned = MutableStateFlow(true)
+
     override val connectionState = MutableStateFlow(Off)
 
     override val signalStrength = MutableStateFlow(0)

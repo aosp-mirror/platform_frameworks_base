@@ -1196,11 +1196,12 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(RecoverySystemService.Lifecycle.class);
         t.traceEnd();
 
+        // Initialize RescueParty.
+        RescueParty.registerHealthObserver(mSystemContext);
         if (!Flags.recoverabilityDetection()) {
             // Now that we have the bare essentials of the OS up and running, take
             // note that we just booted, which might send out a rescue party if
             // we're stuck in a runtime restart loop.
-            RescueParty.registerHealthObserver(mSystemContext);
             PackageWatchdog.getInstance(mSystemContext).noteBoot();
         }
 
@@ -2917,10 +2918,10 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         if (Flags.recoverabilityDetection()) {
-            // Now that we have the essential services needed for rescue party, initialize
-            // RescuParty. note that we just booted, which might send out a rescue party if
-            // we're stuck in a runtime restart loop.
-            RescueParty.registerHealthObserver(mSystemContext);
+            // Now that we have the essential services needed for mitigations, register the boot
+            // with package watchdog.
+            // Note that we just booted, which might send out a rescue party if we're stuck in a
+            // runtime restart loop.
             PackageWatchdog.getInstance(mSystemContext).noteBoot();
         }
 

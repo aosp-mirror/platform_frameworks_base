@@ -23,6 +23,7 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREG
 import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.OP_RECEIVE_SENSITIVE_NOTIFICATIONS;
 import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.app.Flags.lifetimeExtensionRefactor;
 import static android.app.Flags.sortSectionByTime;
@@ -284,6 +285,7 @@ import android.service.notification.NotificationRecordProto;
 import android.service.notification.NotificationServiceDumpProto;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeProto;
 import android.service.notification.ZenPolicy;
@@ -5505,6 +5507,14 @@ public class NotificationManagerService extends SystemService {
 
             return mZenModeHelper.addAutomaticZenRule(rulePkg, automaticZenRule,
                     computeZenOrigin(fromUser), "addAutomaticZenRule", Binder.getCallingUid());
+        }
+
+        @Override
+        public void setManualZenRuleDeviceEffects(ZenDeviceEffects effects) throws RemoteException {
+            checkCallerIsSystem();
+
+            mZenModeHelper.setManualZenRuleDeviceEffects(effects, computeZenOrigin(true),
+                    "Update manual mode non-policy settings", Binder.getCallingUid());
         }
 
         @Override
@@ -11933,7 +11943,10 @@ public class NotificationManagerService extends SystemService {
             long token = Binder.clearCallingIdentity();
             try {
                 if (mPackageManager.checkUidPermission(RECEIVE_SENSITIVE_NOTIFICATIONS, uid)
-                        == PERMISSION_GRANTED || mPackageManagerInternal.isPlatformSigned(pkg)) {
+                        == PERMISSION_GRANTED || mPackageManagerInternal.isPlatformSigned(pkg)
+                        || mAppOps
+                        .noteOpNoThrow(OP_RECEIVE_SENSITIVE_NOTIFICATIONS, uid, pkg, null, null)
+                        == MODE_ALLOWED) {
                     return true;
                 }
 
