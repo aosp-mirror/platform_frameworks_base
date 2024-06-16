@@ -18,7 +18,6 @@ package android.hardware.camera2;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.CaptureResult.Key;
@@ -44,6 +43,9 @@ import com.android.internal.camera.flags.Flags;
  */
 @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
 public final class ExtensionCaptureResult {
+
+    /** To avoid exposing constructor */
+    private ExtensionCaptureResult() {}
 
    /**
      * <p>The padding region for the

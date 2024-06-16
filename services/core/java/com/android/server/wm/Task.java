@@ -3515,7 +3515,10 @@ class Task extends TaskFragment {
                 && !appCompatTaskInfo.topActivityInSizeCompat
                 && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings()
                 && !info.isTopActivityTransparent;
-        appCompatTaskInfo.topActivityBoundsLetterboxed = top != null  && top.areBoundsLetterboxed();
+        appCompatTaskInfo.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
+        appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top == null
+                ? CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE
+                : top.mLetterboxUiController.getFreeformCameraCompatMode();
     }
 
     /**
@@ -4786,6 +4789,12 @@ class Task extends TaskFragment {
                     if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()
                             && lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
                         lastParentBeforePip.prepareSurfaces();
+                        // If the moveToFront is a part of finishing transition, then make sure
+                        // the z-order of tasks are up-to-date.
+                        if (topActivity.mTransitionController.inFinishingTransition(topActivity)) {
+                            Transition.assignLayers(taskDisplayArea,
+                                    taskDisplayArea.getPendingTransaction());
+                        }
                     }
                 }
                 if (isPip2ExperimentEnabled) {

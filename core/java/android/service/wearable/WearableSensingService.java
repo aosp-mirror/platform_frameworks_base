@@ -398,8 +398,8 @@ public abstract class WearableSensingService extends Service {
     /**
      * Called when a data request observer is registered. Each request must not be larger than
      * {@link WearableSensingDataRequest#getMaxRequestSize()}. In addition, at most {@link
-     * WearableSensingDataRequester#getRateLimit()} requests can be sent every rolling {@link
-     * WearableSensingDataRequester#getRateLimitWindowSize()}. Requests that are too large or too
+     * WearableSensingDataRequest#getRateLimit()} requests can be sent every rolling {@link
+     * WearableSensingDataRequest#getRateLimitWindowSize()}. Requests that are too large or too
      * frequent will be dropped by the system. See {@link
      * WearableSensingDataRequester#requestData(WearableSensingDataRequest, Consumer)} for details
      * about the status code returned for each request.
@@ -442,7 +442,7 @@ public abstract class WearableSensingService extends Service {
      * @param packageName The package name of the app that will receive the requests sent to the
      *     dataRequester.
      * @param dataRequester A handle to the observer to be unregistered. It is the exact same
-     *     instance provided in a previous {@link #onDataRequestConsumerRegistered(int, String,
+     *     instance provided in a previous {@link #onDataRequestObserverRegistered(int, String,
      *     WearableSensingDataRequester, Consumer)} invocation.
      * @param statusConsumer the consumer for the status of the data request observer
      *     unregistration. This is different from the status for each data request.
@@ -469,7 +469,7 @@ public abstract class WearableSensingService extends Service {
      * in which case it should return the corresponding status code.
      *
      * <p>The implementation should also store the {@code statusConsumer}. If the wearable stops
-     * listening for hotword for any reason other than {@link #onStopListeningForHotword(Consumer)}
+     * listening for hotword for any reason other than {@link #onStopHotwordRecognition(Consumer)}
      * being invoked, it should send an appropriate status code listed in {@link
      * WearableSensingManager} to {@code statusConsumer}. If the error condition cannot be described
      * by any of those status codes, it should send a {@link WearableSensingManager#STATUS_UNKNOWN}.
@@ -514,11 +514,11 @@ public abstract class WearableSensingService extends Service {
 
     /**
      * Called when hotword audio data sent to the {@code hotwordAudioConsumer} in {@link
-     * #onStartListeningForHotword(Consumer, Consumer)} is accepted by the
+     * #onStartHotwordRecognition(Consumer, Consumer)} is accepted by the
      * {@link android.service.voice.HotwordDetectionService} as valid hotword.
      *
      * <p>After the implementation of this class sends the hotword audio data to the {@code
-     * hotwordAudioConsumer} in {@link #onStartListeningForHotword(Consumer,
+     * hotwordAudioConsumer} in {@link #onStartHotwordRecognition(Consumer,
      * Consumer)}, the system will forward the data into {@link
      * android.service.voice.HotwordDetectionService} (which runs in an isolated process) for
      * second-stage hotword detection. If accepted as valid hotword there, this method will be
@@ -545,7 +545,7 @@ public abstract class WearableSensingService extends Service {
      *
      * <p>This method is expected to be overridden by a derived class. The implementation should
      * stop sending hotword audio data to the {@code hotwordAudioConsumer} in {@link
-     * #onStartListeningForHotword(Consumer, Consumer)}
+     * #onStartHotwordRecognition(Consumer, Consumer)}
      */
     @FlaggedApi(Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
     @BinderThread

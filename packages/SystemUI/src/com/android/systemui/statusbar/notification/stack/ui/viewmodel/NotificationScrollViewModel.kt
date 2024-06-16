@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 @SysUISingleton
@@ -80,7 +81,11 @@ constructor(
                             (transitionState.fromScene in SceneFamilies.NotifShade &&
                                 transitionState.toScene == quickSettingsScene) ||
                                 (transitionState.fromScene in quickSettingsScene &&
-                                    transitionState.toScene in SceneFamilies.NotifShade)
+                                    transitionState.toScene in SceneFamilies.NotifShade) ||
+                                (transitionState.fromScene == Scenes.Lockscreen &&
+                                    transitionState.toScene in SceneFamilies.NotifShade) ||
+                                (transitionState.fromScene in SceneFamilies.NotifShade &&
+                                    transitionState.toScene == Scenes.Lockscreen)
                         ) {
                             1f
                         } else if (
@@ -146,6 +151,7 @@ constructor(
 
     /** Receives the amount (px) that the stack should scroll due to internal expansion. */
     val syntheticScrollConsumer: (Float) -> Unit = stackAppearanceInteractor::setSyntheticScroll
+
     /**
      * Receives whether the current touch gesture is overscroll as it has already been consumed by
      * the stack.
@@ -154,10 +160,9 @@ constructor(
         stackAppearanceInteractor::setCurrentGestureOverscroll
 
     /** Whether the notification stack is scrollable or not. */
-    val isScrollable: Flow<Boolean> =
-        sceneInteractor
-            .isCurrentSceneInFamily(SceneFamilies.NotifShade)
-            .dumpWhileCollecting("isScrollable")
+    val isScrollable: Flow<Boolean> = sceneInteractor.currentScene.map {
+        sceneInteractor.isSceneInFamily(it, SceneFamilies.NotifShade) || it == Scenes.Lockscreen
+    }.dumpWhileCollecting("isScrollable")
 
     /** Whether the notification stack is displayed in doze mode. */
     val isDozing: Flow<Boolean> by lazy {

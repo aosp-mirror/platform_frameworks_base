@@ -24,6 +24,7 @@ import static com.android.systemui.Flags.edgebackGestureHandlerGetRunningTasksBa
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED;
 
 import static java.util.stream.Collectors.joining;
 
@@ -44,6 +45,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.icu.text.SimpleDateFormat;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -409,6 +411,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             PluginManager pluginManager,
             @BackPanelUiThread UiThreadContext uiThreadContext,
             @Background Executor backgroundExecutor,
+            @Background Handler bgHandler,
             UserTracker userTracker,
             NavigationModeController navigationModeController,
             BackPanelController.Factory backPanelControllerFactory,
@@ -472,7 +475,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 ViewConfiguration.getLongPressTimeout());
 
         mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(
-                mUiThreadContext.getHandler(), mContext, this::onNavigationSettingsChanged);
+                mUiThreadContext.getHandler(), bgHandler, mContext,
+                this::onNavigationSettingsChanged);
 
         updateCurrentUserResources();
     }
@@ -1021,8 +1025,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             if (mIsTrackpadThreeFingerSwipe) {
                 // Trackpad back gestures don't have zones, so we don't need to check if the down
                 // event is within insets.
-                mAllowGesture = isBackAllowedCommon && isValidTrackpadBackGesture(
-                        true /* isTrackpadEvent */);
+                boolean trackpadGesturesEnabled =
+                        (mSysUiFlags & SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED) == 0;
+                mAllowGesture = isBackAllowedCommon && trackpadGesturesEnabled
+                        && isValidTrackpadBackGesture(true /* isTrackpadEvent */);
             } else {
                 mAllowGesture = isBackAllowedCommon && !mUsingThreeButtonNav && isWithinInsets
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY())
@@ -1313,6 +1319,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         private final PluginManager mPluginManager;
         private final UiThreadContext mUiThreadContext;
         private final Executor mBackgroundExecutor;
+        private final Handler mBgHandler;
         private final UserTracker mUserTracker;
         private final NavigationModeController mNavigationModeController;
         private final BackPanelController.Factory mBackPanelControllerFactory;
@@ -1333,6 +1340,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         PluginManager pluginManager,
                         @BackPanelUiThread UiThreadContext uiThreadContext,
                         @Background Executor backgroundExecutor,
+                        @Background Handler bgHandler,
                         UserTracker userTracker,
                         NavigationModeController navigationModeController,
                         BackPanelController.Factory backPanelControllerFactory,
@@ -1351,6 +1359,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mPluginManager = pluginManager;
             mUiThreadContext = uiThreadContext;
             mBackgroundExecutor = backgroundExecutor;
+            mBgHandler = bgHandler;
             mUserTracker = userTracker;
             mNavigationModeController = navigationModeController;
             mBackPanelControllerFactory = backPanelControllerFactory;
@@ -1375,6 +1384,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                             mPluginManager,
                             mUiThreadContext,
                             mBackgroundExecutor,
+                            mBgHandler,
                             mUserTracker,
                             mNavigationModeController,
                             mBackPanelControllerFactory,

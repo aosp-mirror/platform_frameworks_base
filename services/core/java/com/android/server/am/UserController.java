@@ -384,9 +384,11 @@ class UserController implements Handler.Callback {
      * postponed until total number of unlocked users in the system reaches mMaxRunningUsers.
      * Once total number of unlocked users reach mMaxRunningUsers, least recently used user
      * will be locked.
+     *
+     * <p> Note: Even if this is false for the device as a whole, it is possible some users may
+     * individually allow delayed locking, as specified by
+     * {@link UserProperties#getAllowStoppingUserWithDelayedLocking()}.
      */
-    // TODO(b/302662311): Add javadoc changes corresponding to the user property that allows
-    // delayed locking behavior once the private space flag is finalized.
     @GuardedBy("mLock")
     private boolean mDelayUserDataLocking;
 

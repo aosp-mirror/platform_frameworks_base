@@ -142,6 +142,7 @@ public class SettingsToPropertiesMapper {
         "arc_next",
         "art_mainline",
         "art_performance",
+        "attack_tools",
         "avic",
         "biometrics",
         "biometrics_framework",

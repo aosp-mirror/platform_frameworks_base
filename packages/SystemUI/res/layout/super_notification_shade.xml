@@ -62,7 +62,9 @@
     <com.android.systemui.keyguard.ui.view.KeyguardRootView
         android:id="@id/keyguard_root_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        />
 
     <!-- Shared container for the notification stack. Can be positioned by either
          the keyguard_root_view or notification_panel -->
