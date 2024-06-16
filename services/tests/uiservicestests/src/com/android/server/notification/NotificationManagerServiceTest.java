@@ -208,6 +208,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -12069,6 +12070,127 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(mBinderService.getNotificationChannelsBypassingDnd(mPkg, mUid).getList())
                 .isEmpty();
         verify(mPreferencesHelper, never()).getNotificationChannelsBypassingDnd(mPkg, mUid);
+    }
+
+    @Test
+    public void testGetPackagesBypassingDnd_empty() throws RemoteException {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        List<String> result = mBinderService.getPackagesBypassingDnd(mUserId, true);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void testGetPackagesBypassingDnd_excludeConversationChannels() throws RemoteException {
+        mService.setPreferencesHelper(mPreferencesHelper);
+
+        // Set packages
+        PackageInfo pkg0 = new PackageInfo();
+        pkg0.packageName = "pkg0";
+        pkg0.applicationInfo = new ApplicationInfo();
+        pkg0.applicationInfo.uid = mUid;
+        PackageInfo pkg1 = new PackageInfo();
+        pkg1.packageName = "pkg1";
+        pkg1.applicationInfo = new ApplicationInfo();
+        pkg1.applicationInfo.uid = mUid;
+        PackageInfo pkg2 = new PackageInfo();
+        pkg2.packageName = "pkg2";
+        pkg2.applicationInfo = new ApplicationInfo();
+        pkg2.applicationInfo.uid = mUid;
+
+        when(mPackageManagerClient.getInstalledPackagesAsUser(0, mUserId))
+                .thenReturn(List.of(pkg0, pkg1, pkg2));
+
+        // Conversation channels
+        NotificationChannel nc0 = new NotificationChannel("id0", "id0",
+                NotificationManager.IMPORTANCE_HIGH);
+        nc0.setConversationId("parentChannel", "conversationId");
+
+        // Demoted conversation channel
+        NotificationChannel nc1 = new NotificationChannel("id1", "id1",
+                NotificationManager.IMPORTANCE_HIGH);
+        nc1.setConversationId("parentChannel", "conversationId");
+        nc1.setDemoted(true);
+
+        // Non-conversation channels
+        NotificationChannel nc2 = new NotificationChannel("id2", "id2",
+                NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel nc3 = new NotificationChannel("id3", "id3",
+                NotificationManager.IMPORTANCE_HIGH);
+
+        ParceledListSlice<NotificationChannel> pls0 =
+                new ParceledListSlice(ImmutableList.of(nc0));
+        ParceledListSlice<NotificationChannel> pls1 =
+                new ParceledListSlice(ImmutableList.of(nc1));
+        ParceledListSlice<NotificationChannel> pls2 =
+                new ParceledListSlice(ImmutableList.of(nc2, nc3));
+
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg0", mUid))
+                .thenReturn(pls0);
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg1", mUid))
+                .thenReturn(pls1);
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg2", mUid))
+                .thenReturn(pls2);
+
+        List<String> result = mBinderService.getPackagesBypassingDnd(mUserId, false);
+
+        assertThat(result).containsExactly("pkg1", "pkg2");
+    }
+
+    @Test
+    public void testGetPackagesBypassingDnd_includeConversationChannels() throws RemoteException {
+        mService.setPreferencesHelper(mPreferencesHelper);
+
+        // Set packages
+        PackageInfo pkg0 = new PackageInfo();
+        pkg0.packageName = "pkg0";
+        pkg0.applicationInfo = new ApplicationInfo();
+        pkg0.applicationInfo.uid = mUid;
+        PackageInfo pkg1 = new PackageInfo();
+        pkg1.packageName = "pkg1";
+        pkg1.applicationInfo = new ApplicationInfo();
+        pkg1.applicationInfo.uid = mUid;
+        PackageInfo pkg2 = new PackageInfo();
+        pkg2.packageName = "pkg2";
+        pkg2.applicationInfo = new ApplicationInfo();
+        pkg2.applicationInfo.uid = mUid;
+
+        when(mPackageManagerClient.getInstalledPackagesAsUser(0, mUserId))
+                .thenReturn(List.of(pkg0, pkg1, pkg2));
+
+        // Conversation channels
+        NotificationChannel nc0 = new NotificationChannel("id0", "id0",
+                NotificationManager.IMPORTANCE_HIGH);
+        nc0.setConversationId("parentChannel", "conversationId");
+
+        // Demoted conversation channel
+        NotificationChannel nc1 = new NotificationChannel("id1", "id1",
+                NotificationManager.IMPORTANCE_HIGH);
+        nc1.setConversationId("parentChannel", "conversationId");
+        nc1.setDemoted(true);
+
+        // Non-conversation channels
+        NotificationChannel nc2 = new NotificationChannel("id2", "id2",
+                NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel nc3 = new NotificationChannel("id3", "id3",
+                NotificationManager.IMPORTANCE_HIGH);
+
+        ParceledListSlice<NotificationChannel> pls0 =
+                new ParceledListSlice(ImmutableList.of(nc0));
+        ParceledListSlice<NotificationChannel> pls1 =
+                new ParceledListSlice(ImmutableList.of(nc1));
+        ParceledListSlice<NotificationChannel> pls2 =
+                new ParceledListSlice(ImmutableList.of(nc2, nc3));
+
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg0", mUid))
+                .thenReturn(pls0);
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg1", mUid))
+                .thenReturn(pls1);
+        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg2", mUid))
+                .thenReturn(pls2);
+
+        List<String> result = mBinderService.getPackagesBypassingDnd(mUserId, true);
+
+        assertThat(result).containsExactly("pkg0", "pkg1", "pkg2");
     }
 
     @Test
