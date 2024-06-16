@@ -364,6 +364,16 @@ public class LogModule {
         return factory.create("MediaCarouselCtlrLog", 20);
     }
 
+    /**
+     * Provides a buffer for media loading changes
+     */
+    @Provides
+    @SysUISingleton
+    @MediaLoadingLog
+    public static LogBuffer providesMediaLoadingLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaLoadingLog", 20);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
