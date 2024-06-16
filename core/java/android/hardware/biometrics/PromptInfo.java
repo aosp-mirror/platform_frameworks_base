@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class PromptInfo implements Parcelable {
 
-    @DrawableRes private int mLogoRes = -1;
+    @DrawableRes private int mLogoRes;
     @Nullable private Bitmap mLogoBitmap;
     @Nullable private String mLogoDescription;
     @NonNull private CharSequence mTitle;
@@ -187,7 +187,7 @@ public class PromptInfo implements Parcelable {
      * this permission.
      */
     public boolean requiresAdvancedPermission() {
-        if (mLogoRes != -1) {
+        if (mLogoRes != 0) {
             return true;
         } else if (mLogoBitmap != null) {
             return true;
@@ -221,7 +221,7 @@ public class PromptInfo implements Parcelable {
     /**
      * Sets logo res and bitmap
      *
-     * @param logoRes    The logo res set by the app; Or -1 if the app sets bitmap directly.
+     * @param logoRes    The logo res set by the app; Or 0 if the app sets bitmap directly.
      * @param logoBitmap The bitmap from logoRes if the app sets logoRes; Or the bitmap set by the
      *                   app directly.
      */
@@ -351,7 +351,7 @@ public class PromptInfo implements Parcelable {
     public Bitmap getLogoBitmap() {
         // If mLogoRes has been set, return null since mLogoBitmap is from the res, but not from
         // the app directly.
-        return mLogoRes == -1 ? mLogoBitmap : null;
+        return mLogoRes == 0 ? mLogoBitmap : null;
     }
 
     public String getLogoDescription() {

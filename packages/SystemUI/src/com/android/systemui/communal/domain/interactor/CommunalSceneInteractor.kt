@@ -22,14 +22,17 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.communal.data.repository.CommunalSceneRepository
 import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -57,10 +60,31 @@ constructor(
         communalSceneRepository.snapToScene(newScene, delayMillis)
     }
 
+    /** Immediately snaps to the new scene when activity is started. */
+    fun snapToSceneForActivityStart(newScene: SceneKey, delayMillis: Long = 0) {
+        // skip if we're starting edit mode activity, as it will be handled later by changeScene
+        // with transition key [CommunalTransitionKeys.ToEditMode].
+        if (_editModeState.value == EditModeState.STARTING) {
+            return
+        }
+        snapToScene(newScene, delayMillis)
+    }
+
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through [changeScene].
      */
     val currentScene: Flow<SceneKey> = communalSceneRepository.currentScene
+
+    private val _editModeState = MutableStateFlow<EditModeState?>(null)
+    /**
+     * Current state for glanceable hub edit mode, used to chain the animations when transitioning
+     * between communal scene and the edit mode activity.
+     */
+    val editModeState = _editModeState.asStateFlow()
+
+    fun setEditModeState(value: EditModeState?) {
+        _editModeState.value = value
+    }
 
     /** Transition state of the hub mode. */
     val transitionState: StateFlow<ObservableTransitionState> =

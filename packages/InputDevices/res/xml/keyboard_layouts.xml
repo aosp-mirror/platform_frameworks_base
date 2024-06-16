@@ -336,14 +336,28 @@
     <keyboard-layout
         android:name="keyboard_layout_serbian_latin"
         android:label="@string/keyboard_layout_serbian_latin"
-        android:keyboardLayout="@raw/keyboard_layout_serbian_latin"
+        android:keyboardLayout="@raw/keyboard_layout_serbian_and_montenegrin_latin"
         android:keyboardLocale="sr-Latn-RS"
         android:keyboardLayoutType="qwertz" />
 
     <keyboard-layout
         android:name="keyboard_layout_montenegrin_latin"
         android:label="@string/keyboard_layout_montenegrin_latin"
-        android:keyboardLayout="@raw/keyboard_layout_serbian_latin"
+        android:keyboardLayout="@raw/keyboard_layout_serbian_and_montenegrin_latin"
         android:keyboardLocale="cnr-Latn-ME"
         android:keyboardLayoutType="qwertz" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_serbian_cyrillic"
+        android:label="@string/keyboard_layout_serbian_cyrillic"
+        android:keyboardLayout="@raw/keyboard_layout_serbian_and_montenegrin_cyrillic"
+        android:keyboardLocale="sr-Cyrl-RS"
+        android:keyboardLayoutType="extended" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_montenegrin_cyrillic"
+        android:label="@string/keyboard_layout_montenegrin_cyrillic"
+        android:keyboardLayout="@raw/keyboard_layout_serbian_and_montenegrin_cyrillic"
+        android:keyboardLocale="cnr-Cyrl-ME"
+        android:keyboardLayoutType="extended" />
 </keyboard-layouts>

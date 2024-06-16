@@ -42,6 +42,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -840,6 +841,30 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             runCurrent()
             assertThat(bounds).isEqualTo(NotificationContainerBounds(top = top, bottom = bottom))
         }
+
+    @Test
+    @DisableSceneContainer
+    fun updateBounds_fromGone_withoutTransitions() =
+            testScope.runTest {
+                // Start step is already at 1.0
+                val runningStep = TransitionStep(GONE, AOD, 1.0f, TransitionState.RUNNING)
+                val finishStep = TransitionStep(GONE, AOD, 1.0f, TransitionState.FINISHED)
+
+                val bounds by collectLastValue(underTest.bounds)
+                val top = 123f
+                val bottom = 456f
+
+                kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(runningStep)
+                runCurrent()
+                kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(finishStep)
+                runCurrent()
+                keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
+                runCurrent()
+
+                assertThat(bounds).isEqualTo(
+                        NotificationContainerBounds(top = top, bottom = bottom)
+                )
+            }
 
     @Test
     fun alphaOnFullQsExpansion() =

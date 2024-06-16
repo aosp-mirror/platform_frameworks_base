@@ -6969,8 +6969,16 @@
          Note that, indefinitely repeating vibrations are not allowed as shutdown vibrations. -->
     <string name="config_defaultShutdownVibrationFile" />
 
-    <!-- Whether single finger panning is enabled when magnification is on -->
+    <!-- Whether single finger panning is enabled by default when magnification is on -->
     <bool name="config_enable_a11y_magnification_single_panning">false</bool>
+
+    <!-- Whether the overscroll handler is enabled when fullscreen magnification is on. When true,
+         the magnification will change the scale if the user pans the magnifier horizontally past
+         the edge of the screen, or delegate the touch events to the app if the user pans vertically
+         past the edge. When false, the magnification will delegate the touch events to the app only
+         when the users uses single finger to pan the magnifier past the edge of the screen,
+         otherwise there are no extra actions. -->
+    <bool name="config_enable_a11y_fullscreen_magnification_overscroll_handler">false</bool>
 
     <!-- The file path in which custom vibrations are provided for haptic feedbacks.
          If the device does not specify any such file path here, if the file path specified here

@@ -79,6 +79,15 @@ public class RemoteComposeDocument {
     }
 
     /**
+     * The delay in milliseconds to next repaint -1 = not needed 0 = asap
+     *
+     * @return delay in milliseconds to next repaint or -1
+     */
+    public int needsRepaint() {
+        return mDocument.needsRepaint();
+    }
+
+    /**
      * Returns true if the document can be displayed given this version of the player
      *
      * @param majorVersion the max major version supported by the player
@@ -89,5 +98,10 @@ public class RemoteComposeDocument {
         return mDocument.canBeDisplayed(majorVersion, minorVersion, capabilities);
     }
 
+    @Override
+    public String toString() {
+        return "Document{\n"
+                + mDocument + '}';
+    }
 }
 

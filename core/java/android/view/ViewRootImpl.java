@@ -25,6 +25,7 @@ import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_LOCATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED;
 import static android.view.flags.Flags.sensitiveContentPrematureProtectionRemovedFix;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsSource.ID_IME;
@@ -177,6 +178,7 @@ import android.graphics.Region;
 import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.hardware.SyncFence;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.display.DisplayManagerGlobal;
@@ -219,6 +221,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.InputDevice.InputSourceClass;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl.Transaction;
+import android.view.SurfaceControl.TransactionStats;
 import android.view.View.AttachInfo;
 import android.view.View.FocusDirection;
 import android.view.View.MeasureSpec;
@@ -269,6 +272,7 @@ import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneFallbackEventHandler;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.BaseSurfaceHolder;
@@ -293,6 +297,7 @@ import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -1189,6 +1194,13 @@ public final class ViewRootImpl implements ViewParent,
     private String mFpsTraceName;
     private String mLargestViewTraceName;
 
+    private final boolean mAppStartInfoTimestampsFlagValue;
+    @GuardedBy("this")
+    private boolean mAppStartTimestampsSent = false;
+    private boolean mAppStartTrackingStarted = false;
+    private long mRenderThreadDrawStartTimeNs = -1;
+    private long mFirstFramePresentedTimeNs = -1;
+
     private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
     private static boolean sToolkitFrameRateFunctionEnablingReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
@@ -1306,6 +1318,8 @@ public final class ViewRootImpl implements ViewParent,
         } else {
             mSensitiveContentProtectionService = null;
         }
+
+        mAppStartInfoTimestampsFlagValue = android.app.Flags.appStartInfoTimestamps();
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1563,6 +1577,9 @@ public final class ViewRootImpl implements ViewParent,
                     if (pendingInsetsController != null) {
                         pendingInsetsController.replayAndAttach(mInsetsController);
                     }
+                }
+                if (mView instanceof DecorView) {
+                    mWindowAttributes.privateFlags |= PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED;
                 }
 
                 try {
@@ -2578,6 +2595,12 @@ public final class ViewRootImpl implements ViewParent,
                     notifySurfaceDestroyed();
                 }
                 destroySurface();
+
+                // Reset so they can be sent again for warm starts.
+                mAppStartTimestampsSent = false;
+                mAppStartTrackingStarted = false;
+                mRenderThreadDrawStartTimeNs = -1;
+                mFirstFramePresentedTimeNs = -1;
             }
         }
     }
@@ -4376,11 +4399,74 @@ public final class ViewRootImpl implements ViewParent,
                 reportDrawFinished(t, seqId);
             }
         });
+
+        // Only trigger once per {@link ViewRootImpl} instance, so don't add listener if
+        // {link mTransactionCompletedTimeNs} has already been set.
+        if (mAppStartInfoTimestampsFlagValue && !mAppStartTrackingStarted) {
+            mAppStartTrackingStarted = true;
+            Transaction transaction = new Transaction();
+            transaction.addTransactionCompletedListener(mExecutor,
+                    new Consumer<TransactionStats>() {
+                        @Override
+                        public void accept(TransactionStats transactionStats) {
+                            SyncFence presentFence = transactionStats.getPresentFence();
+                            if (presentFence.awaitForever()) {
+                                if (mFirstFramePresentedTimeNs == -1) {
+                                    // Only trigger once per {@link ViewRootImpl} instance.
+                                    mFirstFramePresentedTimeNs = presentFence.getSignalTime();
+                                    maybeSendAppStartTimes();
+                                }
+                            }
+                            presentFence.close();
+                        }
+                    });
+            applyTransactionOnDraw(transaction);
+        }
+
         if (DEBUG_BLAST) {
             Log.d(mTag, "Setup new sync=" + mWmsRequestSyncGroup.getName());
         }
 
         mWmsRequestSyncGroup.add(this, null /* runnable */);
+    }
+
+    private void maybeSendAppStartTimes() {
+        synchronized (this) {
+            if (mAppStartTimestampsSent) {
+                // Don't send timestamps more than once.
+                return;
+            }
+
+            // If we already have {@link mRenderThreadDrawStartTimeNs} then pass it through, if not
+            // post to main thread and check if we have it there.
+            if (mRenderThreadDrawStartTimeNs != -1) {
+                sendAppStartTimesLocked();
+            } else {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (ViewRootImpl.this) {
+                            if (mRenderThreadDrawStartTimeNs == -1) {
+                                return;
+                            }
+                            sendAppStartTimesLocked();
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    @GuardedBy("this")
+    private void sendAppStartTimesLocked() {
+        try {
+            ActivityManager.getService().reportStartInfoViewTimestamps(
+                    mRenderThreadDrawStartTimeNs, mFirstFramePresentedTimeNs);
+            mAppStartTimestampsSent = true;
+        } catch (RemoteException e) {
+            // Ignore, timestamps may be lost.
+            if (DBG) Log.d(TAG, "Exception attempting to report start timestamps.", e);
+        }
     }
 
     /**
@@ -5569,7 +5655,13 @@ public final class ViewRootImpl implements ViewParent,
                     registerCallbackForPendingTransactions();
                 }
 
+                long timeNs = SystemClock.uptimeNanos();
                 mAttachInfo.mThreadedRenderer.draw(mView, mAttachInfo, this);
+
+                // Only trigger once per {@link ViewRootImpl} instance.
+                if (mAppStartInfoTimestampsFlagValue && mRenderThreadDrawStartTimeNs == -1) {
+                    mRenderThreadDrawStartTimeNs = timeNs;
+                }
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
                 // wrong (an invalidate posted right before we destroyed the hardware surface

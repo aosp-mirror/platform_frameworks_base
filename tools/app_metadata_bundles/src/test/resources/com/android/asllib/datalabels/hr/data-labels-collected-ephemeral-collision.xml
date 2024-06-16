@@ -1,0 +1,14 @@
+<data-labels>
+    <data-collected dataType="photo_video_data_type_photos"
+        isCollectionOptional="true"
+        purposes="app_functionality" />
+    <data-collected-ephemeral dataType="location_data_type_approx_location"
+        isCollectionOptional="false"
+        purposes="app_functionality" />
+    <data-collected dataType="location_data_type_approx_location"
+        isCollectionOptional="true"
+        purposes="app_functionality" />
+    <data-collected-ephemeral dataType="contacts_data_type_contacts"
+        isCollectionOptional="true"
+        purposes="app_functionality" />
+</data-labels>

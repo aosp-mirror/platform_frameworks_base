@@ -21,7 +21,8 @@ import kotlin.math.sign
 
 class Autopilot(val ship: Spacecraft, val universe: Universe) : Entity {
     val BRAKING_TIME = 5f
-    val SIGHTSEEING_TIME = 10f
+    val SIGHTSEEING_TIME = 15f
+    val LAUNCH_THRUST_TIME = 5f
     val STRATEGY_MIN_TIME = 0.5f
 
     var enabled = false
@@ -73,7 +74,7 @@ class Autopilot(val ship: Spacecraft, val universe: Universe) : Entity {
 
                 strategy = "LAUNCHING"
                 debug = ""
-                nextStrategyTime = sim.now + 2f
+                nextStrategyTime = sim.now + LAUNCH_THRUST_TIME
             }
         } else {
             // select new target

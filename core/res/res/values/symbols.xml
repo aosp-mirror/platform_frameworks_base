@@ -1619,6 +1619,7 @@
   <java-symbol type="layout" name="restrictions_pin_challenge" />
   <java-symbol type="layout" name="restrictions_pin_setup" />
   <java-symbol type="layout" name="immersive_mode_cling" />
+  <java-symbol type="id" name="immersive_cling_icon" />
   <java-symbol type="layout" name="user_switching_dialog" />
   <java-symbol type="layout" name="common_tab_settings" />
   <java-symbol type="layout" name="resolver_list_per_profile" />
@@ -5426,6 +5427,8 @@
   <java-symbol type="string" name="lockscreen_too_many_failed_attempts_countdown" />
 
   <java-symbol type="bool" name="config_enable_a11y_magnification_single_panning" />
+  <java-symbol type="bool" name="config_enable_a11y_fullscreen_magnification_overscroll_handler" />
+  <java-symbol type="dimen" name="accessibility_fullscreen_magnification_gesture_edge_slop" />
 
   <java-symbol type="string" name="config_hapticFeedbackCustomizationFile" />
 
@@ -5511,4 +5514,16 @@
   <java-symbol type="string" name="face_dangling_notification_msg" />
   <java-symbol type="string" name="biometric_dangling_notification_action_set_up" />
   <java-symbol type="string" name="biometric_dangling_notification_action_not_now" />
+
+  <!-- Priority Modes icons -->
+  <java-symbol type="drawable" name="ic_zen_mode_type_bedtime" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_driving" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_immersive" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_managed" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_other" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_schedule_calendar" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_schedule_time" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_theater" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_unknown" />
+
 </resources>

@@ -39,6 +39,8 @@ import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.TraversableNode
+import androidx.compose.ui.node.traverseDescendants
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
@@ -165,7 +167,7 @@ internal class ElementNode(
     private var currentTransitions: List<TransitionState.Transition>,
     private var scene: Scene,
     private var key: ElementKey,
-) : Modifier.Node(), DrawModifierNode, ApproachLayoutModifierNode {
+) : Modifier.Node(), DrawModifierNode, ApproachLayoutModifierNode, TraversableNode {
     private var _element: Element? = null
     private val element: Element
         get() = _element!!
@@ -173,6 +175,8 @@ internal class ElementNode(
     private var _sceneState: Element.SceneState? = null
     private val sceneState: Element.SceneState
         get() = _sceneState!!
+
+    override val traverseKey: Any = ElementTraverseKey
 
     override fun onAttach() {
         super.onAttach()
@@ -289,18 +293,15 @@ internal class ElementNode(
         val isOtherSceneOverscrolling = overscrollScene != null && overscrollScene != scene.key
         val isNotPartOfAnyOngoingTransitions = transitions.isNotEmpty() && transition == null
         if (isNotPartOfAnyOngoingTransitions || isOtherSceneOverscrolling) {
-            sceneState.lastOffset = Offset.Unspecified
-            sceneState.lastScale = Scale.Unspecified
-            sceneState.lastAlpha = Element.AlphaUnspecified
+            recursivelyClearPlacementValues()
+            sceneState.lastSize = Element.SizeUnspecified
 
             val placeable = measurable.measure(constraints)
-            sceneState.lastSize = placeable.size()
-
             return layout(placeable.width, placeable.height) { /* Do not place */ }
         }
 
         val placeable =
-            measure(layoutImpl, scene, element, transition, sceneState, measurable, constraints)
+            measure(layoutImpl, element, transition, sceneState, measurable, constraints)
         sceneState.lastSize = placeable.size()
         return layout(placeable.width, placeable.height) { place(transition, placeable) }
     }
@@ -315,13 +316,10 @@ internal class ElementNode(
             // scene when idle.
             val coords =
                 coordinates ?: error("Element ${element.key} does not have any coordinates")
-            val targetOffsetInScene = lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
 
             // No need to place the element in this scene if we don't want to draw it anyways.
             if (!shouldPlaceElement(layoutImpl, scene.key, element, transition)) {
-                sceneState.lastOffset = Offset.Unspecified
-                sceneState.lastScale = Scale.Unspecified
-                sceneState.lastAlpha = Element.AlphaUnspecified
+                recursivelyClearPlacementValues()
                 return
             }
 
@@ -329,12 +327,11 @@ internal class ElementNode(
             val targetOffset =
                 computeValue(
                     layoutImpl,
-                    scene,
+                    sceneState,
                     element,
                     transition,
                     sceneValue = { it.targetOffset },
                     transformation = { it.offset },
-                    idleValue = targetOffsetInScene,
                     currentValue = { currentOffset },
                     isSpecified = { it != Offset.Unspecified },
                     ::lerp,
@@ -395,10 +392,29 @@ internal class ElementNode(
                         return@placeWithLayer
                     }
 
-                    alpha = elementAlpha(layoutImpl, scene, element, transition, sceneState)
+                    alpha = elementAlpha(layoutImpl, element, transition, sceneState)
                     compositingStrategy = CompositingStrategy.ModulateAlpha
                 }
             }
+        }
+    }
+
+    /**
+     * Recursively clear the last placement values on this node and all descendants ElementNodes.
+     * This should be called when this node is not placed anymore, so that we correctly clear values
+     * for the descendants for which approachMeasure() won't be called.
+     */
+    private fun recursivelyClearPlacementValues() {
+        fun Element.SceneState.clearLastPlacementValues() {
+            lastOffset = Offset.Unspecified
+            lastScale = Scale.Unspecified
+            lastAlpha = Element.AlphaUnspecified
+        }
+
+        sceneState.clearLastPlacementValues()
+        traverseDescendants(ElementTraverseKey) { node ->
+            (node as ElementNode)._sceneState?.clearLastPlacementValues()
+            TraversableNode.Companion.TraverseDescendantsAction.ContinueTraversal
         }
     }
 
@@ -406,7 +422,7 @@ internal class ElementNode(
         element.wasDrawnInAnyScene = true
 
         val transition = elementTransition(layoutImpl, element, currentTransitions)
-        val drawScale = getDrawScale(layoutImpl, scene, element, transition, sceneState)
+        val drawScale = getDrawScale(layoutImpl, element, transition, sceneState)
         if (drawScale == Scale.Default) {
             drawContent()
         } else {
@@ -421,6 +437,8 @@ internal class ElementNode(
     }
 
     companion object {
+        private val ElementTraverseKey = Any()
+
         private fun maybePruneMaps(
             layoutImpl: SceneTransitionLayoutImpl,
             element: Element,
@@ -494,22 +512,23 @@ private fun prepareInterruption(
     // Remove the interruption values to all scenes but the scene(s) where the element will be
     // placed, to make sure that interruption deltas are computed only right after this interruption
     // is prepared.
-    fun maybeCleanPlacementValuesBeforeInterruption(sceneState: Element.SceneState) {
+    fun cleanInterruptionValues(sceneState: Element.SceneState) {
+        sceneState.sizeInterruptionDelta = IntSize.Zero
+        sceneState.offsetInterruptionDelta = Offset.Zero
+        sceneState.alphaInterruptionDelta = 0f
+        sceneState.scaleInterruptionDelta = Scale.Zero
+
         if (!shouldPlaceElement(layoutImpl, sceneState.scene, element, transition)) {
             sceneState.offsetBeforeInterruption = Offset.Unspecified
             sceneState.alphaBeforeInterruption = Element.AlphaUnspecified
             sceneState.scaleBeforeInterruption = Scale.Unspecified
-
-            sceneState.offsetInterruptionDelta = Offset.Zero
-            sceneState.alphaInterruptionDelta = 0f
-            sceneState.scaleInterruptionDelta = Scale.Zero
         }
     }
 
-    previousFromState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
-    previousToState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
-    fromState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
-    toState?.let { maybeCleanPlacementValuesBeforeInterruption(it) }
+    previousFromState?.let { cleanInterruptionValues(it) }
+    previousToState?.let { cleanInterruptionValues(it) }
+    fromState?.let { cleanInterruptionValues(it) }
+    toState?.let { cleanInterruptionValues(it) }
 }
 
 /**
@@ -780,7 +799,6 @@ private fun isElementOpaque(
  */
 private fun elementAlpha(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
     element: Element,
     transition: TransitionState.Transition?,
     sceneState: Element.SceneState,
@@ -788,12 +806,11 @@ private fun elementAlpha(
     val alpha =
         computeValue(
                 layoutImpl,
-                scene,
+                sceneState,
                 element,
                 transition,
                 sceneValue = { 1f },
                 transformation = { it.alpha },
-                idleValue = 1f,
                 currentValue = { 1f },
                 isSpecified = { true },
                 ::lerp,
@@ -841,9 +858,8 @@ private fun interruptedAlpha(
     )
 }
 
-private fun ApproachMeasureScope.measure(
+private fun measure(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
     element: Element,
     transition: TransitionState.Transition?,
     sceneState: Element.SceneState,
@@ -858,12 +874,11 @@ private fun ApproachMeasureScope.measure(
     val targetSize =
         computeValue(
             layoutImpl,
-            scene,
+            sceneState,
             element,
             transition,
             sceneValue = { it.targetSize },
             transformation = { it.size },
-            idleValue = lookaheadSize,
             currentValue = { measurable.measure(constraints).also { maybePlaceable = it }.size() },
             isSpecified = { it != Element.SizeUnspecified },
             ::lerp,
@@ -909,7 +924,6 @@ private fun Placeable.size(): IntSize = IntSize(width, height)
 
 private fun ContentDrawScope.getDrawScale(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
     element: Element,
     transition: TransitionState.Transition?,
     sceneState: Element.SceneState,
@@ -917,12 +931,11 @@ private fun ContentDrawScope.getDrawScale(
     val scale =
         computeValue(
             layoutImpl,
-            scene,
+            sceneState,
             element,
             transition,
             sceneValue = { Scale.Default },
             transformation = { it.drawScale },
-            idleValue = Scale.Default,
             currentValue = { Scale.Default },
             isSpecified = { true },
             ::lerp,
@@ -989,11 +1002,12 @@ private fun ContentDrawScope.getDrawScale(
  * Measurable.
  *
  * @param layoutImpl the [SceneTransitionLayoutImpl] associated to [element].
- * @param scene the scene containing [element].
+ * @param currentSceneState the scene state of the scene for which we are computing the value. Note
+ *   that during interruptions, this could be the state of a scene that is neither
+ *   [transition.toScene] nor [transition.fromScene].
  * @param element the element being animated.
  * @param sceneValue the value being animated.
  * @param transformation the transformation associated to the value being animated.
- * @param idleValue the value when idle, i.e. when there is no transition happening.
  * @param currentValue the value that would be used if it is not transformed. Note that this is
  *   different than [idleValue] even if the value is not transformed directly because it could be
  *   impacted by the transformations on other elements, like a parent that is being translated or
@@ -1003,12 +1017,11 @@ private fun ContentDrawScope.getDrawScale(
  */
 private inline fun <T> computeValue(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
+    currentSceneState: Element.SceneState,
     element: Element,
     transition: TransitionState.Transition?,
     sceneValue: (Element.SceneState) -> T,
     transformation: (ElementTransformations) -> PropertyTransformation<T>?,
-    idleValue: T,
     currentValue: () -> T,
     isSpecified: (T) -> Boolean,
     lerp: (T, T, Float) -> T,
@@ -1030,19 +1043,22 @@ private inline fun <T> computeValue(
     if (fromState == null && toState == null) {
         // TODO(b/311600838): Throw an exception instead once layers of disposed elements are not
         // run anymore.
-        return idleValue
+        return sceneValue(currentSceneState)
     }
 
+    val currentScene = currentSceneState.scene
     if (transition is TransitionState.HasOverscrollProperties) {
         val overscroll = transition.currentOverscrollSpec
-        if (overscroll?.scene == scene.key) {
-            val elementSpec = overscroll.transformationSpec.transformations(element.key, scene.key)
+        if (overscroll?.scene == currentScene) {
+            val elementSpec =
+                overscroll.transformationSpec.transformations(element.key, currentScene)
             val propertySpec = transformation(elementSpec) ?: return currentValue()
-            val overscrollState = checkNotNull(if (scene.key == toScene) toState else fromState)
+            val overscrollState = checkNotNull(if (currentScene == toScene) toState else fromState)
+            val idleValue = sceneValue(overscrollState)
             val targetValue =
                 propertySpec.transform(
                     layoutImpl,
-                    scene,
+                    currentScene,
                     element,
                     overscrollState,
                     transition,
@@ -1086,24 +1102,30 @@ private inline fun <T> computeValue(
         return if (start == end) start else lerp(start, end, transition.progress)
     }
 
-    val transformation =
-        transformation(transition.transformationSpec.transformations(element.key, scene.key))
-            // If there is no transformation explicitly associated to this element value, let's use
-            // the value given by the system (like the current position and size given by the layout
-            // pass).
-            ?: return currentValue()
-
     // Get the transformed value, i.e. the target value at the beginning (for entering elements) or
     // end (for leaving elements) of the transition.
     val sceneState =
         checkNotNull(
             when {
-                isSharedElement && scene.key == fromScene -> fromState
+                isSharedElement && currentScene == fromScene -> fromState
                 isSharedElement -> toState
                 else -> fromState ?: toState
             }
         )
 
+    // The scene for which we compute the transformation. Note that this is not necessarily
+    // [currentScene] because [currentScene] could be a different scene than the transition
+    // fromScene or toScene during interruptions.
+    val scene = sceneState.scene
+
+    val transformation =
+        transformation(transition.transformationSpec.transformations(element.key, scene))
+            // If there is no transformation explicitly associated to this element value, let's use
+            // the value given by the system (like the current position and size given by the layout
+            // pass).
+            ?: return currentValue()
+
+    val idleValue = sceneValue(sceneState)
     val targetValue =
         transformation.transform(
             layoutImpl,
@@ -1125,7 +1147,7 @@ private inline fun <T> computeValue(
     val rangeProgress = transformation.range?.progress(progress) ?: progress
 
     // Interpolate between the value at rest and the value before entering/after leaving.
-    val isEntering = scene.key == toScene
+    val isEntering = scene == toScene
     return if (isEntering) {
         lerp(targetValue, idleValue, rangeProgress)
     } else {

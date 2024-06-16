@@ -25,6 +25,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -56,6 +57,62 @@ class DeviceEntryForegroundViewModelTest : SysuiTestCase() {
 
             assertThat(viewModel?.useAodVariant).isEqualTo(true)
             assertThat(viewModel?.tint).isEqualTo(Color.WHITE)
+        }
+
+    @Test
+    fun startsDozing_doNotShowAodVariant() =
+        testScope.runTest {
+            val viewModel by collectLastValue(underTest.viewModel)
+
+            givenUdfpsEnrolledAndEnabled()
+            kosmos.run {
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.DOZING,
+                    testScope = testScope,
+                    throughTransitionState = TransitionState.STARTED,
+                )
+            }
+
+            assertThat(viewModel?.useAodVariant).isEqualTo(false)
+        }
+
+    @Test
+    fun finishedDozing_showAodVariant() =
+        testScope.runTest {
+            val viewModel by collectLastValue(underTest.viewModel)
+
+            givenUdfpsEnrolledAndEnabled()
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.AOD,
+                testScope = testScope,
+                throughTransitionState = TransitionState.FINISHED,
+            )
+
+            assertThat(viewModel?.useAodVariant).isEqualTo(true)
+        }
+
+    @Test
+    fun startTransitionToLockscreenFromDozing_doNotShowAodVariant() =
+        testScope.runTest {
+            val viewModel by collectLastValue(underTest.viewModel)
+
+            givenUdfpsEnrolledAndEnabled()
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DOZING,
+                testScope = testScope,
+                throughTransitionState = TransitionState.FINISHED,
+            )
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.DOZING,
+                to = KeyguardState.LOCKSCREEN,
+                testScope = testScope,
+                throughTransitionState = TransitionState.RUNNING,
+            )
+
+            assertThat(viewModel?.useAodVariant).isEqualTo(false)
         }
 
     private fun givenUdfpsEnrolledAndEnabled() {

@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
+import android.os.SystemProperties;
 import android.util.SparseIntArray;
 
 import androidx.annotation.NonNull;
@@ -42,6 +43,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
 import com.android.settingslib.media.flags.Flags;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /** A util class to get the appropriate icon for different device types. */
@@ -50,18 +52,23 @@ public class DeviceIconUtil {
     private static final SparseIntArray AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE = new SparseIntArray();
 
     private final boolean mIsTv;
+    private final boolean mIsTablet;
     private final Context mContext;
     public DeviceIconUtil(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
         mIsTv =
                 mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)
                         && Flags.enableTvMediaOutputDialog();
+        mIsTablet =
+                Arrays.asList(SystemProperties.get("ro.build.characteristics").split(","))
+                        .contains("tablet");
     }
 
     @VisibleForTesting
     /* package */ DeviceIconUtil(boolean isTv) {
         mContext = null;
         mIsTv = isTv;
+        mIsTablet = false;
     }
 
     /** Returns a drawable for an icon representing the given audioDeviceType. */
@@ -80,12 +87,17 @@ public class DeviceIconUtil {
     /** Returns a drawable res ID for an icon representing the given mediaRouteType. */
     @DrawableRes
     public int getIconResIdFromMediaRouteType(@MediaRoute2Info.Type int type) {
-        return mIsTv ? getIconResourceIdForTv(type) : getIconResourceIdForPhone(type);
+        return mIsTv
+                ? getIconResourceIdForTv(type)
+                : getIconResourceIdForPhoneOrTablet(type, mIsTablet);
     }
 
     @SuppressLint("SwitchIntDef")
     @DrawableRes
-    private static int getIconResourceIdForPhone(@MediaRoute2Info.Type int type) {
+    private static int getIconResourceIdForPhoneOrTablet(
+            @MediaRoute2Info.Type int type, boolean isTablet) {
+        int defaultResId = isTablet ? R.drawable.ic_media_tablet : R.drawable.ic_smartphone;
+
         return switch (type) {
             case MediaRoute2Info.TYPE_USB_DEVICE,
                             MediaRoute2Info.TYPE_USB_HEADSET,
@@ -98,7 +110,7 @@ public class DeviceIconUtil {
                             MediaRoute2Info.TYPE_HDMI_ARC,
                             MediaRoute2Info.TYPE_HDMI_EARC ->
                     R.drawable.ic_external_display;
-            default -> R.drawable.ic_smartphone; // Includes TYPE_BUILTIN_SPEAKER.
+            default -> defaultResId; // Includes TYPE_BUILTIN_SPEAKER.
         };
     }
 

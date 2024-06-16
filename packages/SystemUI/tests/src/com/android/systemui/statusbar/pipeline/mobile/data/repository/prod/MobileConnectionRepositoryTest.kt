@@ -25,6 +25,7 @@ import android.platform.test.annotations.EnableFlags
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WLAN
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
+import android.telephony.CarrierConfigManager.KEY_SHOW_5G_SLICE_ICON_BOOL
 import android.telephony.NetworkRegistrationInfo
 import android.telephony.NetworkRegistrationInfo.DOMAIN_PS
 import android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_DENIED
@@ -1041,6 +1042,24 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             )
 
             assertThat(latest).isEqualTo(false)
+        }
+
+    @Test
+    fun allowNetworkSliceIndicator_exposesCarrierConfigValue() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.allowNetworkSliceIndicator)
+
+            systemUiCarrierConfig.processNewCarrierConfig(
+                configWithOverride(KEY_SHOW_5G_SLICE_ICON_BOOL, true)
+            )
+
+            assertThat(latest).isTrue()
+
+            systemUiCarrierConfig.processNewCarrierConfig(
+                configWithOverride(KEY_SHOW_5G_SLICE_ICON_BOOL, false)
+            )
+
+            assertThat(latest).isFalse()
         }
 
     @Test

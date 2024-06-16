@@ -24,3 +24,12 @@ flag {
     description: "Return null when decode from URI fails in Icon.loadDrawable()"
     bug: "335878768"
 }
+
+flag {
+  name: "ok_lab_colorspace"
+  is_exported: true
+  is_fixed_read_only: true
+  namespace: "core_graphics"
+  description: "Add OkLab ColorSpace support"
+  bug: "344038816"
+}
