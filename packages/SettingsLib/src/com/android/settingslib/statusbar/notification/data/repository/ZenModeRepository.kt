@@ -21,7 +21,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import com.android.settingslib.statusbar.notification.data.model.ZenMode
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -37,21 +36,20 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Provides state of volume policy and restrictions imposed by notifications. */
-interface NotificationsSoundPolicyRepository {
-
-    /** @see NotificationManager.getNotificationPolicy */
-    val notificationPolicy: StateFlow<NotificationManager.Policy?>
+interface ZenModeRepository {
+    /** @see NotificationManager.getConsolidatedNotificationPolicy */
+    val consolidatedNotificationPolicy: StateFlow<NotificationManager.Policy?>
 
     /** @see NotificationManager.getZenMode */
-    val zenMode: StateFlow<ZenMode?>
+    val globalZenMode: StateFlow<Int?>
 }
 
-class NotificationsSoundPolicyRepositoryImpl(
+class ZenModeRepositoryImpl(
     private val context: Context,
     private val notificationManager: NotificationManager,
-    scope: CoroutineScope,
-    backgroundCoroutineContext: CoroutineContext,
-) : NotificationsSoundPolicyRepository {
+    val scope: CoroutineScope,
+    val backgroundCoroutineContext: CoroutineContext,
+) : ZenModeRepository {
 
     private val notificationBroadcasts =
         callbackFlow {
@@ -67,8 +65,7 @@ class NotificationsSoundPolicyRepositoryImpl(
                     IntentFilter().apply {
                         addAction(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED)
                         addAction(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED)
-                    }
-                )
+                    })
 
                 awaitClose { context.unregisterReceiver(receiver) }
             }
@@ -77,19 +74,23 @@ class NotificationsSoundPolicyRepositoryImpl(
                 scope = scope,
             )
 
-    override val notificationPolicy: StateFlow<NotificationManager.Policy?> =
-        notificationBroadcasts
-            .filter { NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED == it }
-            .map { notificationManager.consolidatedNotificationPolicy }
-            .onStart { emit(notificationManager.consolidatedNotificationPolicy) }
-            .flowOn(backgroundCoroutineContext)
-            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
+    override val consolidatedNotificationPolicy: StateFlow<NotificationManager.Policy?> =
+        // TODO(b/347707024): This should use ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED
+        // instead.
+        flowFromBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED) {
+            notificationManager.consolidatedNotificationPolicy
+        }
 
-    override val zenMode: StateFlow<ZenMode?> =
+    override val globalZenMode: StateFlow<Int?> =
+        flowFromBroadcast(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED) {
+            notificationManager.zenMode
+        }
+
+    private fun <T> flowFromBroadcast(intentAction: String, mapper: () -> T) =
         notificationBroadcasts
-            .filter { NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED == it }
-            .map { ZenMode(notificationManager.zenMode) }
-            .onStart { emit(ZenMode(notificationManager.zenMode)) }
+            .filter { intentAction == it }
+            .map { mapper() }
+            .onStart { emit(mapper()) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 }

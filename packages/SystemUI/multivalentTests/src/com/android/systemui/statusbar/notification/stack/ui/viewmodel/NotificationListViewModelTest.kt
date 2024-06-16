@@ -23,6 +23,7 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import androidx.test.filters.SmallTest
+import com.android.settingslib.statusbar.notification.data.repository.updateNotificationPolicy
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
@@ -56,7 +57,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
@@ -97,7 +97,9 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        // "Why is this not lazily initialised above?" you may ask. There's a simple answer: likely
+        // due to some timing issue with how the flags are getting initialised for parameterization,
+        // some tests start failing when this isn't initialised this way. You can just leave it be.
         underTest = kosmos.notificationListViewModel
     }
 
@@ -258,8 +260,10 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
         testScope.runTest {
             val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
 
-            zenModeRepository.setSuppressedVisualEffects(Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST)
-            zenModeRepository.zenMode.value = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+            zenModeRepository.updateNotificationPolicy(
+                suppressedVisualEffects = Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST
+            )
+            zenModeRepository.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
             runCurrent()
 
             assertThat(hidden).isTrue()
@@ -270,8 +274,10 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
         testScope.runTest {
             val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
 
-            zenModeRepository.setSuppressedVisualEffects(Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST)
-            zenModeRepository.zenMode.value = Settings.Global.ZEN_MODE_OFF
+            zenModeRepository.updateNotificationPolicy(
+                suppressedVisualEffects = Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST
+            )
+            zenModeRepository.updateZenMode(Settings.Global.ZEN_MODE_OFF)
             runCurrent()
 
             assertThat(hidden).isFalse()
@@ -528,9 +534,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
                     FakeHeadsUpRowRepository(key = "1"),
                     FakeHeadsUpRowRepository(key = "2"),
                 )
-            headsUpRepository.setNotifications(
-                rows,
-            )
+            headsUpRepository.setNotifications(rows)
             runCurrent()
 
             // THEN the list is empty
@@ -566,7 +570,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
 
             headsUpRepository.setNotifications(
                 FakeHeadsUpRowRepository(key = "0", isPinned = true),
-                FakeHeadsUpRowRepository(key = "1")
+                FakeHeadsUpRowRepository(key = "1"),
             )
             runCurrent()
 

@@ -23,7 +23,6 @@ import android.content.Intent
 import android.provider.Settings.Global
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.statusbar.notification.data.model.ZenMode
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -45,13 +44,18 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class NotificationsSoundPolicyRepositoryTest {
+class ZenModeRepositoryTest {
 
-    @Mock private lateinit var context: Context
-    @Mock private lateinit var notificationManager: NotificationManager
-    @Captor private lateinit var receiverCaptor: ArgumentCaptor<BroadcastReceiver>
+    @Mock
+    private lateinit var context: Context
 
-    private lateinit var underTest: NotificationsSoundPolicyRepository
+    @Mock
+    private lateinit var notificationManager: NotificationManager
+
+    @Captor
+    private lateinit var receiverCaptor: ArgumentCaptor<BroadcastReceiver>
+
+    private lateinit var underTest: ZenModeRepository
 
     private val testScope: TestScope = TestScope()
 
@@ -60,7 +64,7 @@ class NotificationsSoundPolicyRepositoryTest {
         MockitoAnnotations.initMocks(this)
 
         underTest =
-            NotificationsSoundPolicyRepositoryImpl(
+            ZenModeRepositoryImpl(
                 context,
                 notificationManager,
                 testScope.backgroundScope,
@@ -69,29 +73,30 @@ class NotificationsSoundPolicyRepositoryTest {
     }
 
     @Test
-    fun policyChanges_repositoryEmits() {
+    fun consolidatedPolicyChanges_repositoryEmits() {
         testScope.runTest {
             val values = mutableListOf<NotificationManager.Policy?>()
-            `when`(notificationManager.notificationPolicy).thenReturn(testPolicy1)
-            underTest.notificationPolicy.onEach { values.add(it) }.launchIn(backgroundScope)
+            `when`(notificationManager.consolidatedNotificationPolicy).thenReturn(testPolicy1)
+            underTest.consolidatedNotificationPolicy.onEach { values.add(it) }
+                    .launchIn(backgroundScope)
             runCurrent()
 
-            `when`(notificationManager.notificationPolicy).thenReturn(testPolicy2)
+            `when`(notificationManager.consolidatedNotificationPolicy).thenReturn(testPolicy2)
             triggerIntent(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED)
             runCurrent()
 
             assertThat(values)
-                .containsExactlyElementsIn(listOf(null, testPolicy1, testPolicy2))
-                .inOrder()
+                    .containsExactlyElementsIn(listOf(null, testPolicy1, testPolicy2))
+                    .inOrder()
         }
     }
 
     @Test
     fun zenModeChanges_repositoryEmits() {
         testScope.runTest {
-            val values = mutableListOf<ZenMode?>()
+            val values = mutableListOf<Int?>()
             `when`(notificationManager.zenMode).thenReturn(Global.ZEN_MODE_OFF)
-            underTest.zenMode.onEach { values.add(it) }.launchIn(backgroundScope)
+            underTest.globalZenMode.onEach { values.add(it) }.launchIn(backgroundScope)
             runCurrent()
 
             `when`(notificationManager.zenMode).thenReturn(Global.ZEN_MODE_ALARMS)
@@ -99,10 +104,10 @@ class NotificationsSoundPolicyRepositoryTest {
             runCurrent()
 
             assertThat(values)
-                .containsExactlyElementsIn(
-                    listOf(null, ZenMode(Global.ZEN_MODE_OFF), ZenMode(Global.ZEN_MODE_ALARMS))
-                )
-                .inOrder()
+                    .containsExactlyElementsIn(
+                        listOf(null, Global.ZEN_MODE_OFF, Global.ZEN_MODE_ALARMS)
+                    )
+                    .inOrder()
         }
     }
 
