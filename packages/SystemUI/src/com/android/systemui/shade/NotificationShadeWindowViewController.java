@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
+import com.android.keyguard.KeyguardUnfoldTransition;
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
@@ -72,6 +73,7 @@ import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.util.time.SystemClock;
 
@@ -174,6 +176,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             DozeScrimController dozeScrimController,
             NotificationShadeWindowController controller,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider,
+            Optional<SysUIUnfoldComponent> unfoldComponent,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             NotificationInsetsController notificationInsetsController,
             AmbientState ambientState,
@@ -233,6 +236,14 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 mView,
                 notificationLaunchAnimationInteractor.isLaunchAnimationRunning(),
                 this::setExpandAnimationRunning);
+
+        var keyguardUnfoldTransition = unfoldComponent.map(
+                SysUIUnfoldComponent::getKeyguardUnfoldTransition);
+        var notificationPanelUnfoldAnimationController = unfoldComponent.map(
+                SysUIUnfoldComponent::getNotificationPanelUnfoldAnimationController);
+
+        keyguardUnfoldTransition.ifPresent(KeyguardUnfoldTransition::setup);
+        notificationPanelUnfoldAnimationController.ifPresent(u -> u.setup(mView));
 
         mClock = clock;
         if (featureFlagsClassic.isEnabled(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION)) {

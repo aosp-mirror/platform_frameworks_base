@@ -1104,21 +1104,34 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     ActivityRecord getTopNonFinishingActivity() {
-        return getTopNonFinishingActivity(true /* includeOverlays */);
+        return getTopNonFinishingActivity(
+                true /* includeOverlays */, true /* includeLaunchedFromBubble */);
     }
 
     /**
      * Returns the top-most non-finishing activity, even if the activity is NOT ok to show to
      * the current user.
      * @param includeOverlays whether the task overlay activity should be included.
+     * @param includeLaunchedFromBubble whether activities that were launched from a bubble should
+     *                                  be included.
      * @see #topRunningActivity(boolean)
      */
-    ActivityRecord getTopNonFinishingActivity(boolean includeOverlays) {
-        // Split into 2 to avoid object creation due to variable capture.
+    ActivityRecord getTopNonFinishingActivity(boolean includeOverlays,
+            boolean includeLaunchedFromBubble) {
+        // Split to avoid object creation due to variable capture.
         if (includeOverlays) {
-            return getActivity((r) -> !r.finishing);
+            if (includeLaunchedFromBubble) {
+                return getActivity(r -> !r.finishing);
+            } else {
+                return getActivity(r -> !r.finishing && !r.getLaunchedFromBubble());
+            }
         }
-        return getActivity((r) -> !r.finishing && !r.isTaskOverlay());
+        if (includeLaunchedFromBubble) {
+            return getActivity(r -> !r.finishing && !r.isTaskOverlay());
+        } else {
+            return getActivity(
+                    r -> !r.finishing && !r.isTaskOverlay() && !r.getLaunchedFromBubble());
+        }
     }
 
     ActivityRecord topRunningActivity() {

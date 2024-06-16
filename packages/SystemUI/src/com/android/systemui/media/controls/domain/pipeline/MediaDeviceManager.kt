@@ -358,7 +358,12 @@ constructor(
                             // LocalMediaManager. Override with routing session name if available to
                             // show dynamic group name.
                             connectedDevice?.copy(name = it.name ?: connectedDevice.name)
-                        }
+                        } ?: MediaDeviceData(
+                            enabled = false,
+                            icon = context.getDrawable(R.drawable.ic_media_home_devices),
+                            name = context.getString(R.string.media_seamless_other_device),
+                            showBroadcastButton = false
+                        )
                 } else {
                     // Prefer SASS if available when playback is local.
                     activeDevice = getSassDevice() ?: connectedDevice

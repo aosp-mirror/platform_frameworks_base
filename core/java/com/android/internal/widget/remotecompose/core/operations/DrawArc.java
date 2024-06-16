@@ -15,107 +15,36 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
-import com.android.internal.widget.remotecompose.core.PaintOperation;
-import com.android.internal.widget.remotecompose.core.WireBuffer;
 
-import java.util.List;
+public class DrawArc extends DrawBase6 {
+    public static final Companion COMPANION =
+            new Companion(Operations.DRAW_ARC) {
+                @Override
+                public Operation construct(float v1,
+                                           float v2,
+                                           float v3,
+                                           float v4,
+                                           float v5,
+                                           float v6) {
+                    return new DrawArc(v1, v2, v3, v4, v5, v6);
+                }
+            };
 
-public class DrawArc extends PaintOperation {
-    public static final Companion COMPANION = new Companion();
-    float mLeft;
-    float mTop;
-    float mRight;
-    float mBottom;
-    float mStartAngle;
-    float mSweepAngle;
-
-    public DrawArc(
-            float left,
-            float top,
-            float right,
-            float bottom,
-            float startAngle,
-            float sweepAngle) {
-        mLeft = left;
-        mTop = top;
-        mRight = right;
-        mBottom = bottom;
-        mStartAngle = startAngle;
-        mSweepAngle = sweepAngle;
-    }
-
-    @Override
-    public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mLeft,
-                mTop,
-                mRight,
-                mBottom,
-                mStartAngle,
-                mSweepAngle);
-    }
-
-    @Override
-    public String toString() {
-        return "DrawArc " + mLeft + " " + mTop
-                + " " + mRight + " " + mBottom + " "
-                + "- " + mStartAngle + " " + mSweepAngle + ";";
-    }
-
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            float sLeft = buffer.readFloat();
-            float srcTop = buffer.readFloat();
-            float srcRight = buffer.readFloat();
-            float srcBottom = buffer.readFloat();
-            float mStartAngle = buffer.readFloat();
-            float mSweepAngle = buffer.readFloat();
-            DrawArc op = new DrawArc(sLeft, srcTop, srcRight, srcBottom,
-                    mStartAngle, mSweepAngle);
-            operations.add(op);
-        }
-
-        @Override
-        public String name() {
-            return "DrawArc";
-        }
-
-        @Override
-        public int id() {
-            return Operations.DRAW_ARC;
-        }
-
-        public void apply(WireBuffer buffer,
-                          float left,
-                          float top,
-                          float right,
-                          float bottom,
-                          float startAngle,
-                          float sweepAngle) {
-            buffer.start(Operations.DRAW_ARC);
-            buffer.writeFloat(left);
-            buffer.writeFloat(top);
-            buffer.writeFloat(right);
-            buffer.writeFloat(bottom);
-            buffer.writeFloat(startAngle);
-            buffer.writeFloat(sweepAngle);
-        }
+    public DrawArc(float v1,
+                   float v2,
+                   float v3,
+                   float v4,
+                   float v5,
+                   float v6) {
+        super(v1, v2, v3, v4, v5, v6);
+        mName = "DrawArc";
     }
 
     @Override
     public void paint(PaintContext context) {
-        context.drawArc(mLeft,
-                mTop,
-                mRight,
-                mBottom,
-                mStartAngle,
-                mSweepAngle);
+        context.drawArc(mV1, mV2, mV3, mV4, mV5, mV6);
     }
 }

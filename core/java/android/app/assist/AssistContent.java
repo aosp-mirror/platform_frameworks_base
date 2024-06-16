@@ -34,12 +34,22 @@ public class AssistContent implements Parcelable {
     }
 
     /**
+     * Create an AssistContent with extras initialized.
+     *
      * @hide
+     */
+    public AssistContent(@android.annotation.NonNull Bundle extras) {
+        mExtras = extras;
+    }
+
+    /**
      * Called by {@link android.app.ActivityThread} to set the default Intent based on
      * {@link android.app.Activity#getIntent Activity.getIntent}.
      *
      * <p>Automatically populates {@link #mUri} if that Intent is an {@link Intent#ACTION_VIEW}
      * of a web (http or https scheme) URI.</p>
+     *
+     * @hide
      */
     public void setDefaultIntent(Intent intent) {
         mIntent = intent;

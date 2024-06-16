@@ -228,6 +228,7 @@ constructor(
         associatedView: View?,
         animationController: ActivityTransitionAnimator.Controller?,
         showOverLockscreen: Boolean,
+        skipLockscreenChecks: Boolean,
         fillInIntent: Intent?,
         extraOptions: Bundle?,
     ) {
@@ -246,10 +247,10 @@ constructor(
         val actuallyShowOverLockscreen =
             showOverLockscreen &&
                 intent.isActivity &&
-                activityIntentHelper.wouldPendingShowOverLockscreen(
+                    (skipLockscreenChecks || activityIntentHelper.wouldPendingShowOverLockscreen(
                     intent,
                     lockScreenUserManager.currentUserId
-                )
+                    ))
 
         val animate =
             !willLaunchResolverActivity &&
@@ -469,7 +470,7 @@ constructor(
                         shadeControllerLazy.get().collapseShadeForActivityStart()
                     }
                     if (communalHub()) {
-                        communalSceneInteractor.snapToScene(CommunalScenes.Blank)
+                        communalSceneInteractor.snapToSceneForActivityStart(CommunalScenes.Blank)
                     }
                     return deferred
                 }
@@ -556,7 +557,7 @@ constructor(
                 override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                     super.onTransitionAnimationStart(isExpandingFullyAbove)
                     if (communalHub()) {
-                        communalSceneInteractor.snapToScene(
+                        communalSceneInteractor.snapToSceneForActivityStart(
                             CommunalScenes.Blank,
                             ActivityTransitionAnimator.TIMINGS.totalDuration
                         )

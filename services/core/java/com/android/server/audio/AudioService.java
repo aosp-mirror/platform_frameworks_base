@@ -13911,9 +13911,8 @@ public class AudioService extends IAudioService.Stub
         final int stream = AudioAttributes.toLegacyStreamType(aa);
         final boolean mutingFromVolume = getStreamVolume(stream) == 0;
         if (mutingFromVolume) {
-            if (DEBUG_VOL) {
-                Slog.d(TAG, "notification should not play due to muted stream " + stream);
-            }
+            Slog.i(TAG, "shouldNotificationSoundPlay false: muted stream:" + stream
+                    + " attr:" + aa);
             return false;
         }
 
@@ -13926,10 +13925,8 @@ public class AudioService extends IAudioService.Stub
         // is the owner of GAIN_TRANSIENT_EXCLUSIVE focus also recording?
         final boolean mutingFromFocusAndRecording = mRecordMonitor.isRecordingActiveForUid(uid);
         if (mutingFromFocusAndRecording) {
-            if (DEBUG_VOL) {
-                Slog.d(TAG, "notification should not play due to exclusive focus owner recording "
-                        + " uid:" + uid);
-            }
+            Slog.i(TAG, "shouldNotificationSoundPlay false: exclusive focus owner recording "
+                        + " uid:" + uid + " attr:" + aa);
             return false;
         }
         return true;
