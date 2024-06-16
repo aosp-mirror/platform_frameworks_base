@@ -92,6 +92,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -445,21 +446,61 @@ public class FaceAuthenticationClientTest {
         );
     }
 
+    @Test
+    public void testResetLockoutOnAuthSuccess_nonBiometricPrompt() throws RemoteException {
+        FaceAuthenticationClient client = createClient(false);
+        client.start(mCallback);
+        client.onAuthenticated(new Face("friendly", 1 /* faceId */,
+                2 /* deviceId */), true /* authenticated */, createHardwareAuthToken());
+
+        verify(mBiometricManager).resetLockoutTimeBound(eq(mToken), eq(mContext.getOpPackageName()),
+                anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testNoResetLockoutOnAuthFailure_nonBiometricPrompt() throws RemoteException {
+        FaceAuthenticationClient client = createClient(false);
+        client.start(mCallback);
+        client.onAuthenticated(new Face("friendly", 1 /* faceId */,
+                2 /* deviceId */), false /* authenticated */, createHardwareAuthToken());
+
+        verify(mBiometricManager, never()).resetLockoutTimeBound(eq(mToken),
+                eq(mContext.getOpPackageName()), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testNoResetLockoutOnAuthSuccess_BiometricPrompt() throws RemoteException {
+        FaceAuthenticationClient client = createClient(true);
+        client.start(mCallback);
+        client.onAuthenticated(new Face("friendly", 1 /* faceId */,
+                2 /* deviceId */), true /* authenticated */, createHardwareAuthToken());
+
+        verify(mBiometricManager, never()).resetLockoutTimeBound(eq(mToken),
+                eq(mContext.getOpPackageName()), anyInt(), anyInt(), any());
+    }
+
     private FaceAuthenticationClient createClient() throws RemoteException {
         return createClient(2 /* version */, mClientMonitorCallbackConverter,
-                false /* allowBackgroundAuthentication */,
+                false /* allowBackgroundAuthentication */, true /* isBiometricPrompt */,
+                null /* lockoutTracker */);
+    }
+
+    private FaceAuthenticationClient createClient(boolean isBiometricPrompt)
+            throws RemoteException {
+        return createClient(2 /* version */, mClientMonitorCallbackConverter,
+                true /* allowBackgroundAuthentication */, isBiometricPrompt,
                 null /* lockoutTracker */);
     }
 
     private FaceAuthenticationClient createClientWithNullListener() throws RemoteException {
         return createClient(2 /* version */, null /* listener */,
-                true /* allowBackgroundAuthentication */,
+                false /* allowBackgroundAuthentication */, true /* isBiometricPrompt */,
                 null /* lockoutTracker */);
     }
 
     private FaceAuthenticationClient createClient(int version) throws RemoteException {
         return createClient(version, mClientMonitorCallbackConverter,
-                false /* allowBackgroundAuthentication */,
+                false /* allowBackgroundAuthentication */, true /* isBiometricPrompt */,
                 null /* lockoutTracker */);
     }
 
@@ -468,12 +509,14 @@ public class FaceAuthenticationClientTest {
         return createClient(0 /* version */,
                 mClientMonitorCallbackConverter,
                 true /* allowBackgroundAuthentication */,
+                true /* isBiometricPrompt */,
                 lockoutTracker);
     }
 
     private FaceAuthenticationClient createClient(int version,
             ClientMonitorCallbackConverter listener,
             boolean allowBackgroundAuthentication,
+            boolean isBiometricPrompt,
             LockoutTracker lockoutTracker) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
@@ -488,7 +531,7 @@ public class FaceAuthenticationClientTest {
                 .build();
         return new FaceAuthenticationClient(mContext, () -> aidl, mToken,
                 2 /* requestId */, listener, OP_ID,
-                false /* restricted */, options, 4 /* cookie */,
+                false /* restricted */, options, isBiometricPrompt ? 4 : 0 /* cookie */,
                 false /* requireConfirmation */,
                 mBiometricLogger, mBiometricContext, true /* isStrongBiometric */,
                 mUsageStats, lockoutTracker, allowBackgroundAuthentication,
@@ -499,5 +542,9 @@ public class FaceAuthenticationClientTest {
                 return mActivityTaskManager;
             }
         };
+    }
+
+    private ArrayList<Byte> createHardwareAuthToken() {
+        return new ArrayList<>(Collections.nCopies(69, Byte.valueOf("0")));
     }
 }

@@ -158,4 +158,10 @@
 
     <!-- Montenegrin (Latin) keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_montenegrin_latin">Montenegrin (Latin)</string>
+
+    <!-- Serbian (Cyrillic) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_serbian_cyrillic">Serbian (Cyrillic)</string>
+
+    <!-- Montenegrin (Cyrillic) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_montenegrin_cyrillic">Montenegrin (Cyrillic)</string>
 </resources>

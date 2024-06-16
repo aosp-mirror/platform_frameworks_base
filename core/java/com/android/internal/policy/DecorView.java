@@ -1227,7 +1227,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     requestApplyInsets();
                 }
             }
-            if (insets != null) {
+            if (insets != null && (consumedLeft > 0
+                    || consumedTop > 0
+                    || consumedRight > 0
+                    || consumedBottom > 0)) {
                 insets = insets.inset(consumedLeft, consumedTop, consumedRight, consumedBottom);
             }
         }

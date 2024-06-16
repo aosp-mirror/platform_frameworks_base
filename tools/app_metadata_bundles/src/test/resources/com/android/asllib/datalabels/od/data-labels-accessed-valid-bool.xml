@@ -5,7 +5,6 @@
                 <int-array name="purposes" num="1">
                     <item value="1"/>
                 </int-array>
-                <boolean name="ephemeral" value="false"/>
             </pbundle_as_map>
         </pbundle_as_map>
     </pbundle_as_map>

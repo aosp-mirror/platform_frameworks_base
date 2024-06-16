@@ -40,6 +40,7 @@ class ActivityStarterInternalImpl @Inject constructor() : ActivityStarterInterna
         associatedView: View?,
         animationController: ActivityTransitionAnimator.Controller?,
         showOverLockscreen: Boolean,
+        skipLockscreenChecks: Boolean,
         fillInIntent: Intent?,
         extraOptions: Bundle?
     ) {

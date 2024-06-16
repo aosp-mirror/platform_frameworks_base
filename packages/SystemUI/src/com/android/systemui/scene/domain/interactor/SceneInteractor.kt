@@ -330,8 +330,15 @@ constructor(
      * otherwise returns a singleton [Flow] containing [sceneKey].
      */
     fun resolveSceneFamily(sceneKey: SceneKey): Flow<SceneKey> = flow {
-        emitAll(sceneFamilyResolvers.get()[sceneKey]?.resolvedScene ?: flowOf(sceneKey))
+        emitAll(resolveSceneFamilyOrNull(sceneKey) ?: flowOf(sceneKey))
     }
+
+    /**
+     * Returns the [concrete scene][Scenes] for [sceneKey] if it is a [scene family][SceneFamilies],
+     * otherwise returns `null`.
+     */
+    fun resolveSceneFamilyOrNull(sceneKey: SceneKey): StateFlow<SceneKey>? =
+        sceneFamilyResolvers.get()[sceneKey]?.resolvedScene
 
     private fun isVisibleInternal(
         raw: Boolean = repository.isVisible.value,

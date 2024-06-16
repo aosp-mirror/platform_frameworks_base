@@ -63,34 +63,15 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
 
         underTest.onInteraction(view, testIntent, testResponse)
 
+        // Verify that we pass in a non-null animation controller
         verify(activityStarter)
             .startPendingIntentMaybeDismissingKeyguard(
-                eq(testIntent),
-                eq(false),
-                isNull(),
-                notNull(),
-                refEq(fillInIntent),
-                refEq(activityOptions.toBundle()),
-            )
-    }
-
-    @Test
-    fun launchAnimatorIsUsedForSmartspaceView() {
-        val parent = FrameLayout(context)
-        val view = SmartspaceAppWidgetHostView(context)
-        parent.addView(view)
-        val (fillInIntent, activityOptions) = testResponse.getLaunchOptions(view)
-
-        underTest.onInteraction(view, testIntent, testResponse)
-
-        verify(activityStarter)
-            .startPendingIntentMaybeDismissingKeyguard(
-                eq(testIntent),
-                eq(false),
-                isNull(),
-                notNull(),
-                refEq(fillInIntent),
-                refEq(activityOptions.toBundle()),
+                /* intent = */ eq(testIntent),
+                /* dismissShade = */ eq(false),
+                /* intentSentUiThreadCallback = */ isNull(),
+                /* animationController = */ notNull(),
+                /* fillInIntent = */ refEq(fillInIntent),
+                /* extraOptions = */ refEq(activityOptions.toBundle()),
             )
     }
 
@@ -103,14 +84,15 @@ class WidgetInteractionHandlerTest : SysuiTestCase() {
 
         underTest.onInteraction(view, testIntent, testResponse)
 
+        // Verify null is used as the animation controller
         verify(activityStarter)
             .startPendingIntentMaybeDismissingKeyguard(
-                eq(testIntent),
-                eq(false),
-                isNull(),
-                isNull(),
-                refEq(fillInIntent),
-                refEq(activityOptions.toBundle()),
+                /* intent = */ eq(testIntent),
+                /* dismissShade = */ eq(false),
+                /* intentSentUiThreadCallback = */ isNull(),
+                /* animationController = */ isNull(),
+                /* fillInIntent = */ refEq(fillInIntent),
+                /* extraOptions = */ refEq(activityOptions.toBundle()),
             )
     }
 }

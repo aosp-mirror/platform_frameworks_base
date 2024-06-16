@@ -37,6 +37,7 @@ import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.app.CameraCompatTaskInfo.cameraCompatControlStateToString;
 import static android.app.WaitResult.INVALID_DELAY;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
@@ -46,6 +47,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -156,6 +158,7 @@ import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANG
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
@@ -853,7 +856,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // in apps that don't handle all possible configurations and changes between them correctly.
     @CameraCompatControlState
     private int mCameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
-
 
     // The callback that allows to ask the calling View to apply the treatment for stretched
     // issues affecting camera viewfinders when the user clicks on the camera compat control.
@@ -2982,7 +2984,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void removeStartingWindowAnimation(boolean prepareAnimation) {
         mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_IDLE;
-        if (task != null) {
+        if (mStartingData != null && task != null) {
             task.mSharedStartingData = null;
         }
         if (mStartingWindow == null) {
@@ -4033,6 +4035,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (next == null) {
             mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */, mDisplayContent,
                     true /* deferResume */);
+            if (mDisplayContent.topRunningActivity() == null) {
+                // The transition is ready on a display with no running activities.
+                mTransitionController.setReady(mDisplayContent);
+            }
         }
         if (activityRemoved) {
             mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -6028,14 +6034,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                             true /* activityChange */, true /* updateOomAdj */,
                             true /* addPendingTopUid */);
                 }
-                final ContentCaptureManagerInternal contentCaptureService =
-                        LocalServices.getService(ContentCaptureManagerInternal.class);
-                if (contentCaptureService != null) {
-                    contentCaptureService.notifyActivityEvent(mUserId, mActivityComponent,
-                            ActivityEvent.TYPE_ACTIVITY_STARTED,
-                            new ActivityId(getTask() != null ? getTask().mTaskId : INVALID_TASK_ID,
-                                    shareableActivityToken));
-                }
+                mAtmService.mH.post(this::notifyActivityStartedToContentCaptureService);
                 break;
             case PAUSED:
                 mAtmService.updateBatteryStats(this, false);
@@ -6064,6 +6063,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                             false /* addPendingTopUid */);
                 }
                 break;
+        }
+    }
+
+    private void notifyActivityStartedToContentCaptureService() {
+        final ContentCaptureManagerInternal contentCaptureService =
+                LocalServices.getService(ContentCaptureManagerInternal.class);
+        if (contentCaptureService != null) {
+            // For ACTIVITY_STARTED content capture is directly invoked to avoid persisting
+            // to UsageStats.
+            contentCaptureService.notifyActivityEvent(mUserId, mActivityComponent,
+                    ActivityEvent.TYPE_ACTIVITY_STARTED,
+                    new ActivityId(getTask() != null ? getTask().mTaskId : INVALID_TASK_ID,
+                            shareableActivityToken));
+
+            contentCaptureService.sendActivityStartAssistData(mUserId,
+                                shareableActivityToken, intent);
         }
     }
 
@@ -6548,10 +6563,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Schedule an idle timeout in case the app doesn't do it for us.
         mTaskSupervisor.scheduleIdleTimeout(this);
 
-        mTaskSupervisor.mStoppingActivities.remove(this);
-        if (getDisplayArea().allResumedActivitiesComplete()) {
-            mRootWindowContainer.executeAppTransitionForAllDisplay();
-        }
+        mTaskSupervisor.reportResumedActivityLocked(this);
 
         resumeKeyDispatchingLocked();
         final Task rootTask = getRootTask();
@@ -8545,11 +8557,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // and back which can cause visible issues (see b/184078928).
         final int parentWindowingMode =
                 newParentConfiguration.windowConfiguration.getWindowingMode();
+        final boolean isInCameraCompatFreeform = parentWindowingMode == WINDOWING_MODE_FREEFORM
+                && mLetterboxUiController.getFreeformCameraCompatMode()
+                        != CAMERA_COMPAT_FREEFORM_NONE;
 
         // Bubble activities should always fill their parent and should not be letterboxed.
         final boolean isFixedOrientationLetterboxAllowed = !getLaunchedFromBubble()
                 && (parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN
+                        || isInCameraCompatFreeform
                         // When starting to switch between PiP and fullscreen, the task is pinned
                         // and the activity is fullscreen. But only allow to apply letterbox if the
                         // activity is exiting PiP because an entered PiP should fill the task.
@@ -8685,7 +8701,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             rotation = mDisplayContent.getRotation();
         }
         if (!mOptOutEdgeToEdge && (!mResolveConfigHint.mUseOverrideInsetsForConfig
-                || getCompatDisplayInsets() != null || isFloating(parentWindowingMode)
+                || getCompatDisplayInsets() != null
+                || (isFloating(parentWindowingMode)
+                        // Check the requested windowing mode of activity as well in case it is
+                        // switching between PiP and fullscreen.
+                        && (inOutConfig.windowConfiguration.getWindowingMode()
+                                == WINDOWING_MODE_UNDEFINED
+                                || isFloating(inOutConfig.windowConfiguration.getWindowingMode())))
                 || rotation == ROTATION_UNDEFINED)) {
             // If the insets configuration decoupled logic is not enabled for the app, or the app
             // already has a compat override, or the context doesn't contain enough info to

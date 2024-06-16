@@ -32,6 +32,7 @@ import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SH
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.util.EventLog;
@@ -137,15 +138,17 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
     @GuardedBy("ImfLock.class")
     @Override
     public void applyImeVisibility(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
-            @ImeVisibilityStateComputer.VisibilityState int state) {
+            @ImeVisibilityStateComputer.VisibilityState int state, @UserIdInt int userId) {
         applyImeVisibility(windowToken, statsToken, state,
-                SoftInputShowHideReason.NOT_SET /* ignore reason */);
+                SoftInputShowHideReason.NOT_SET /* ignore reason */, userId);
     }
 
     @GuardedBy("ImfLock.class")
     void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
             @ImeVisibilityStateComputer.VisibilityState int state,
-            @SoftInputShowHideReason int reason) {
+            @SoftInputShowHideReason int reason, @UserIdInt int userId) {
+        final var bindingController = mService.getInputMethodBindingController(userId);
+        final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
         switch (state) {
             case STATE_SHOW_IME:
                 if (!Flags.refactorInsetsController()) {
@@ -165,8 +168,7 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                         // NOT_FOCUSABLE, ALT_FOCUSABLE_IM flags set and can the IME target.
                         // Send it to window manager to hide IME from the actual IME control target
                         // of the target display.
-                        mWindowManagerInternal.hideIme(windowToken,
-                                mService.getDisplayIdToShowImeLocked(), statsToken);
+                        mWindowManagerInternal.hideIme(windowToken, displayIdToShowIme, statsToken);
                     } else {
                         ImeTracker.forLogging().onFailed(statsToken,
                                 ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
@@ -201,10 +203,10 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                 }
                 break;
             case STATE_SHOW_IME_SNAPSHOT:
-                showImeScreenshot(windowToken, mService.getDisplayIdToShowImeLocked());
+                showImeScreenshot(windowToken, displayIdToShowIme);
                 break;
             case STATE_REMOVE_IME_SNAPSHOT:
-                removeImeScreenshot(mService.getDisplayIdToShowImeLocked());
+                removeImeScreenshot(displayIdToShowIme);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid IME visibility state: " + state);

@@ -333,27 +333,16 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isDreamingFromKeyguardUpdateMonitor() =
-        TestScope(mainDispatcher).runTest {
-            whenever(keyguardUpdateMonitor.isDreaming()).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isDreaming.onEach { latest = it }.launchIn(this)
+    fun isDreaming() =
+        testScope.runTest {
+            val isDreaming by collectLastValue(underTest.isDreaming)
+            assertThat(isDreaming).isFalse()
 
-            runCurrent()
-            assertThat(latest).isFalse()
+            underTest.setDreaming(true)
+            assertThat(isDreaming).isTrue()
 
-            val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
-            verify(keyguardUpdateMonitor).registerCallback(captor.capture())
-
-            captor.value.onDreamingStateChanged(true)
-            runCurrent()
-            assertThat(latest).isTrue()
-
-            captor.value.onDreamingStateChanged(false)
-            runCurrent()
-            assertThat(latest).isFalse()
-
-            job.cancel()
+            underTest.setDreaming(false)
+            assertThat(isDreaming).isFalse()
         }
 
     @Test

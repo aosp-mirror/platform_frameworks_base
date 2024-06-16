@@ -57,7 +57,7 @@ constructor(
                     .toViewModel(
                         isChecked = isEnabled is SpatialAudioEnabledModel.SpatialAudioEnabled,
                         isHeadTrackingAvailable =
-                            isAvailable is SpatialAudioAvailabilityModel.SpatialAudio,
+                            isAvailable is SpatialAudioAvailabilityModel.HeadTracking,
                     )
                     .copy(label = context.getString(R.string.volume_panel_spatial_audio_title))
             }
@@ -69,7 +69,7 @@ constructor(
                 // head tracking availability means there are three possible states for the spatial
                 // audio: disabled, enabled regular, enabled with head tracking.
                 // Show popup in this case instead of a togglealbe button.
-                it is SpatialAudioAvailabilityModel.SpatialAudio
+                it is SpatialAudioAvailabilityModel.HeadTracking
             }
             .stateIn(scope, SharingStarted.Eagerly, false)
 

@@ -86,9 +86,9 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.volume.domain.interactor.VolumeDialogInteractor;
 import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
-import com.android.systemui.volume.ui.binder.VolumeDialogMenuIconBinder;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import dagger.Lazy;
@@ -150,9 +150,9 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Mock
     private VolumeNavigator mVolumeNavigator;
     @Mock
-    private VolumeDialogMenuIconBinder mVolumeDialogMenuIconBinder;
-    @Mock
     private VolumePanelFlag mVolumePanelFlag;
+    @Mock
+    private VolumeDialogInteractor mVolumeDialogInteractor;
 
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
             new CsdWarningDialog.Factory() {
@@ -217,8 +217,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mDumpManager,
                 mLazySecureSettings,
                 mVibratorHelper,
-                mVolumeDialogMenuIconBinder,
-                new FakeSystemClock());
+                new FakeSystemClock(),
+                mVolumeDialogInteractor);
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
@@ -776,6 +776,15 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         boolean foundDnDIcon = findDndIconAmongVolumeRows();
         assertFalse(foundDnDIcon);
+    }
+
+    @Test
+    public void testInteractor_onShow() {
+        mDialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processAllMessages();
+
+        verify(mVolumeDialogInteractor).onDialogShown();
+        verify(mVolumeDialogInteractor).onDialogDismissed(); // dismiss by timeout
     }
 
     /**

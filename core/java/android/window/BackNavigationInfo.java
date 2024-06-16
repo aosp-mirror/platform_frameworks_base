@@ -117,6 +117,8 @@ public final class BackNavigationInfo implements Parcelable {
     @NonNull
     private final Rect mTouchableRegion;
 
+    private final boolean mAppProgressGenerationAllowed;
+
     /**
      * Create a new {@link BackNavigationInfo} instance.
      *
@@ -132,7 +134,8 @@ public final class BackNavigationInfo implements Parcelable {
             boolean isAnimationCallback,
             @Nullable CustomAnimationInfo customAnimationInfo,
             int letterboxColor,
-            @Nullable Rect touchableRegion) {
+            @Nullable Rect touchableRegion,
+            boolean appProgressGenerationAllowed) {
         mType = type;
         mOnBackNavigationDone = onBackNavigationDone;
         mOnBackInvokedCallback = onBackInvokedCallback;
@@ -141,6 +144,7 @@ public final class BackNavigationInfo implements Parcelable {
         mCustomAnimationInfo = customAnimationInfo;
         mLetterboxColor = letterboxColor;
         mTouchableRegion = new Rect(touchableRegion);
+        mAppProgressGenerationAllowed = appProgressGenerationAllowed;
     }
 
     private BackNavigationInfo(@NonNull Parcel in) {
@@ -152,6 +156,7 @@ public final class BackNavigationInfo implements Parcelable {
         mCustomAnimationInfo = in.readTypedObject(CustomAnimationInfo.CREATOR);
         mLetterboxColor = in.readInt();
         mTouchableRegion = in.readTypedObject(Rect.CREATOR);
+        mAppProgressGenerationAllowed = in.readBoolean();
     }
 
     /** @hide */
@@ -165,6 +170,7 @@ public final class BackNavigationInfo implements Parcelable {
         dest.writeTypedObject(mCustomAnimationInfo, flags);
         dest.writeInt(mLetterboxColor);
         dest.writeTypedObject(mTouchableRegion, flags);
+        dest.writeBoolean(mAppProgressGenerationAllowed);
     }
 
     /**
@@ -221,6 +227,14 @@ public final class BackNavigationInfo implements Parcelable {
     @NonNull
     public Rect getTouchableRegion() {
         return mTouchableRegion;
+    }
+
+    /**
+     * @return The client side view is able to intercept back progress event.
+     * @hide
+     */
+    public boolean isAppProgressGenerationAllowed() {
+        return mAppProgressGenerationAllowed;
     }
 
     /**
@@ -420,6 +434,7 @@ public final class BackNavigationInfo implements Parcelable {
 
         private int mLetterboxColor = Color.TRANSPARENT;
         private Rect mTouchableRegion;
+        private boolean mAppProgressGenerationAllowed;
 
         /**
          * @see BackNavigationInfo#getType()
@@ -502,6 +517,15 @@ public final class BackNavigationInfo implements Parcelable {
             mTouchableRegion = new Rect(rect);
             return this;
         }
+
+        /**
+         * @param allowed Whether client side view able to intercept back progress event.
+         */
+        public Builder setAppProgressAllowed(boolean allowed) {
+            mAppProgressGenerationAllowed = allowed;
+            return this;
+        }
+
         /**
          * Builds and returns an instance of {@link BackNavigationInfo}
          */
@@ -512,7 +536,8 @@ public final class BackNavigationInfo implements Parcelable {
                     mAnimationCallback,
                     mCustomAnimationInfo,
                     mLetterboxColor,
-                    mTouchableRegion);
+                    mTouchableRegion,
+                    mAppProgressGenerationAllowed);
         }
     }
 }

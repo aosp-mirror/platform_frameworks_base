@@ -63,10 +63,10 @@ constructor(
     private fun setupAccessibilityDelegate() {
         accessibilityDelegate =
             object : AccessibilityDelegate() {
-                private val accessibilityAuthenticateHint =
+                private val accessibilityBouncerHint =
                     AccessibilityNodeInfo.AccessibilityAction(
                         AccessibilityNodeInfoCompat.ACTION_CLICK,
-                        resources.getString(R.string.accessibility_authenticate_hint)
+                        resources.getString(R.string.accessibility_bouncer)
                     )
                 private val accessibilityEnterHint =
                     AccessibilityNodeInfo.AccessibilityAction(
@@ -79,8 +79,8 @@ constructor(
                 ) {
                     super.onInitializeAccessibilityNodeInfo(v, info)
                     when (accessibilityHintType) {
-                        AccessibilityHintType.AUTHENTICATE ->
-                            info.addAction(accessibilityAuthenticateHint)
+                        AccessibilityHintType.BOUNCER ->
+                            info.addAction(accessibilityBouncerHint)
                         AccessibilityHintType.ENTER -> info.addAction(accessibilityEnterHint)
                         AccessibilityHintType.NONE -> return
                     }
@@ -274,7 +274,7 @@ constructor(
 
     enum class AccessibilityHintType {
         NONE,
-        AUTHENTICATE,
+        BOUNCER,
         ENTER,
     }
 }

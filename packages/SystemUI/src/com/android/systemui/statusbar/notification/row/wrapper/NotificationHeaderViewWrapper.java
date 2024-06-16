@@ -358,11 +358,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
      * @param whenMillis
      */
     public void setNotificationWhen(long whenMillis) {
-        if (mNotificationHeader == null) {
-            return;
-        }
-
-        final View timeView = mNotificationHeader.findViewById(com.android.internal.R.id.time);
+        final View timeView = mView.findViewById(com.android.internal.R.id.time);
 
         if (timeView instanceof DateTimeView) {
             ((DateTimeView) timeView).setTime(whenMillis);

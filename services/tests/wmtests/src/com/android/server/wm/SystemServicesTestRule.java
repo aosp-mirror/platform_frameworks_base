@@ -445,6 +445,9 @@ public class SystemServicesTestRule implements TestRule {
                 if (dc.mDisplayRotationCompatPolicy != null) {
                     dc.mDisplayRotationCompatPolicy.dispose();
                 }
+                if (dc.mCameraCompatFreeformPolicy != null) {
+                    dc.mCameraCompatFreeformPolicy.dispose();
+                }
                 if (dc.mCameraStateMonitor != null) {
                     dc.mCameraStateMonitor.dispose();
                 }

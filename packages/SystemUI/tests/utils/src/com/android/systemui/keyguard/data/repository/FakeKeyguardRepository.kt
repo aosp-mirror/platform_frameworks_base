@@ -80,7 +80,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     override val isAodAvailable: StateFlow<Boolean> = _isAodAvailable
 
     private val _isDreaming = MutableStateFlow(false)
-    override val isDreaming: Flow<Boolean> = _isDreaming
+    override val isDreaming: MutableStateFlow<Boolean> = _isDreaming
 
     private val _isDreamingWithOverlay = MutableStateFlow(false)
     override val isDreamingWithOverlay: Flow<Boolean> = _isDreamingWithOverlay
@@ -204,7 +204,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _isAodAvailable.value = value
     }
 
-    fun setDreaming(isDreaming: Boolean) {
+    override fun setDreaming(isDreaming: Boolean) {
         _isDreaming.value = isDreaming
     }
 

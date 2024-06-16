@@ -27,6 +27,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -191,6 +192,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
     fun dismissAlpha() =
         testScope.runTest {
             val dismissAlpha by collectLastValue(underTest.dismissAlpha)
+            assertThat(dismissAlpha).isEqualTo(1f)
 
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.AOD,
@@ -202,9 +204,9 @@ class KeyguardInteractorTest : SysuiTestCase() {
             // User begins to swipe up
             shadeRepository.setLegacyShadeExpansion(0.99f)
 
-            // When not dismissable, no alpha value (null) should emit
+            // When not dismissable, the last alpha value should still be present
             repository.setKeyguardDismissible(false)
-            assertThat(dismissAlpha).isNull()
+            assertThat(dismissAlpha).isEqualTo(1f)
 
             repository.setKeyguardDismissible(true)
             shadeRepository.setLegacyShadeExpansion(0.98f)
@@ -212,9 +214,11 @@ class KeyguardInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun dismissAlpha_whenShadeIsExpandedEmitsNull() =
+    fun dismissAlpha_whenShadeResetsEmitsOne() =
         testScope.runTest {
-            val dismissAlpha by collectLastValue(underTest.dismissAlpha)
+            val dismissAlpha by collectValues(underTest.dismissAlpha)
+            assertThat(dismissAlpha[0]).isEqualTo(1f)
+            assertThat(dismissAlpha.size).isEqualTo(1)
 
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.AOD,
@@ -222,14 +226,50 @@ class KeyguardInteractorTest : SysuiTestCase() {
                 testScope,
             )
 
-            repository.setStatusBarState(StatusBarState.SHADE_LOCKED)
-            shadeRepository.setQsExpansion(1f)
+            // User begins to swipe up
+            repository.setStatusBarState(StatusBarState.KEYGUARD)
+            repository.setKeyguardDismissible(true)
+            shadeRepository.setLegacyShadeExpansion(0.98f)
 
-            repository.setKeyguardDismissible(false)
-            assertThat(dismissAlpha).isNull()
+            assertThat(dismissAlpha[1]).isGreaterThan(0.5f)
+            assertThat(dismissAlpha[1]).isLessThan(1f)
+            assertThat(dismissAlpha.size).isEqualTo(2)
+
+            // Now reset the shade
+            shadeRepository.setLegacyShadeExpansion(1f)
+            assertThat(dismissAlpha[2]).isEqualTo(1f)
+            assertThat(dismissAlpha.size).isEqualTo(3)
+        }
+
+    @Test
+    fun dismissAlpha_doesNotEmitWhileTransitioning() =
+        testScope.runTest {
+            val dismissAlpha by collectLastValue(underTest.dismissAlpha)
+            assertThat(dismissAlpha).isEqualTo(1f)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    TransitionStep(
+                        from = KeyguardState.AOD,
+                        to = KeyguardState.GONE,
+                        value = 0f,
+                        transitionState = TransitionState.STARTED,
+                    ),
+                    TransitionStep(
+                        from = KeyguardState.AOD,
+                        to = KeyguardState.GONE,
+                        value = 0.1f,
+                        transitionState = TransitionState.RUNNING,
+                    ),
+                ),
+                testScope,
+            )
 
             repository.setKeyguardDismissible(true)
-            assertThat(dismissAlpha).isNull()
+            shadeRepository.setLegacyShadeExpansion(0.98f)
+
+            // Should still be one
+            assertThat(dismissAlpha).isEqualTo(1f)
         }
 
     @Test
