@@ -155,8 +155,13 @@ public class Cuj {
      */
     public static final int CUJ_FOLD_ANIM = 105;
 
+    /**
+     * Track window re-sizing interaction in desktop mode.
+     */
+    public static final int CUJ_DESKTOP_MODE_RESIZE_WINDOW = 106;
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_FOLD_ANIM;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_RESIZE_WINDOW;
 
     /** @hide */
     @IntDef({
@@ -253,7 +258,8 @@ public class Cuj {
             CUJ_LAUNCHER_PRIVATE_SPACE_LOCK,
             CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK,
             CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW,
-            CUJ_FOLD_ANIM
+            CUJ_FOLD_ANIM,
+            CUJ_DESKTOP_MODE_RESIZE_WINDOW
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -361,6 +367,7 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_PRIVATE_SPACE_UNLOCK;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_MAXIMIZE_WINDOW;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_FOLD_ANIM] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__FOLD_ANIM;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_RESIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_RESIZE_WINDOW;
     }
 
     private Cuj() {
@@ -567,6 +574,8 @@ public class Cuj {
                 return "DESKTOP_MODE_MAXIMIZE_WINDOW";
             case CUJ_FOLD_ANIM:
                 return "FOLD_ANIM";
+            case CUJ_DESKTOP_MODE_RESIZE_WINDOW:
+                return "DESKTOP_MODE_RESIZE_WINDOW";
         }
         return "UNKNOWN";
     }
