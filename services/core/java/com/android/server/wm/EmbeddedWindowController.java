@@ -68,12 +68,14 @@ class EmbeddedWindowController {
             mWindows.put(inputToken, window);
             final IBinder inputTransferToken = window.getInputTransferToken();
             mWindowsByInputTransferToken.put(inputTransferToken, window);
-            mWindowsByWindowToken.put(window.getWindowToken(), window);
+            final IBinder windowToken = window.getWindowToken();
+            mWindowsByWindowToken.put(windowToken, window);
             updateProcessController(window);
             window.mClient.linkToDeath(()-> {
                 synchronized (mGlobalLock) {
                     mWindows.remove(inputToken);
                     mWindowsByInputTransferToken.remove(inputTransferToken);
+                    mWindowsByWindowToken.remove(windowToken);
                 }
             }, 0);
         } catch (RemoteException e) {
