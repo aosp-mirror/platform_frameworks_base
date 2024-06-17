@@ -116,7 +116,7 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_singleTaskState_normalPackage_isShown() =
+    fun chip_singleTaskState_normalPackage_isShownAsTimer() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
@@ -126,20 +126,20 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
                     createTask(taskId = 1),
                 )
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon
             assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_present_to_all)
         }
 
     @Test
-    fun chip_entireScreenState_normalPackage_isShown() =
+    fun chip_entireScreenState_normalPackage_isShownAsTimer() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
 
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon
             assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_present_to_all)
         }
@@ -165,7 +165,7 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).startTimeMs).isEqualTo(1234)
+            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(1234)
 
             mediaProjectionRepo.mediaProjectionState.value = MediaProjectionState.NotProjecting
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
@@ -178,7 +178,7 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
                 )
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            assertThat((latest as OngoingActivityChipModel.Shown).startTimeMs).isEqualTo(5678)
+            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(5678)
         }
 
     @Test
@@ -189,8 +189,9 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            assertThat(clickListener).isNotNull()
 
-            clickListener.onClick(chipView)
+            clickListener!!.onClick(chipView)
             verify(kosmos.mockDialogTransitionAnimator)
                 .showFromView(
                     eq(mockShareDialog),
@@ -211,8 +212,9 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
                 )
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            assertThat(clickListener).isNotNull()
 
-            clickListener.onClick(chipView)
+            clickListener!!.onClick(chipView)
             verify(kosmos.mockDialogTransitionAnimator)
                 .showFromView(
                     eq(mockShareDialog),

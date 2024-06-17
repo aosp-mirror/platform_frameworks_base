@@ -76,7 +76,7 @@ constructor(
     private fun createShareToAppChip(
         state: ProjectionChipModel.Projecting,
     ): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown(
+        return OngoingActivityChipModel.Shown.Timer(
             // TODO(b/332662551): Use the right content description.
             icon = Icon.Resource(SHARE_TO_APP_ICON, contentDescription = null),
             colors = ColorsModel.Red,

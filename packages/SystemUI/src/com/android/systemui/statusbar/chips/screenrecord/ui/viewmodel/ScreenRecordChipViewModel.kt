@@ -23,6 +23,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel.Starting.Companion.toCountdownSeconds
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
 import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
@@ -55,10 +56,14 @@ constructor(
             .map { state ->
                 when (state) {
                     is ScreenRecordChipModel.DoingNothing -> OngoingActivityChipModel.Hidden
-                    // TODO(b/332662551): Implement the 3-2-1 countdown chip.
-                    is ScreenRecordChipModel.Starting -> OngoingActivityChipModel.Hidden
+                    is ScreenRecordChipModel.Starting -> {
+                        OngoingActivityChipModel.Shown.Countdown(
+                            colors = ColorsModel.Red,
+                            secondsUntilStarted = state.millisUntilStarted.toCountdownSeconds(),
+                        )
+                    }
                     is ScreenRecordChipModel.Recording -> {
-                        OngoingActivityChipModel.Shown(
+                        OngoingActivityChipModel.Shown.Timer(
                             // TODO(b/332662551): Also provide a content description.
                             icon = Icon.Resource(ICON, contentDescription = null),
                             colors = ColorsModel.Red,

@@ -57,6 +57,7 @@ import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
@@ -797,7 +798,8 @@ public class PhoneStatusBarPolicy
     @Override
     public void onCountdown(long millisUntilFinished) {
         if (DEBUG) Log.d(TAG, "screenrecord: countdown " + millisUntilFinished);
-        int countdown = (int) Math.floorDiv(millisUntilFinished + 500, 1000);
+        int countdown =
+                (int) ScreenRecordModel.Starting.Companion.toCountdownSeconds(millisUntilFinished);
         int resourceId = R.drawable.stat_sys_screen_record;
         String description = Integer.toString(countdown);
         switch (countdown) {

@@ -80,7 +80,7 @@ constructor(
     private fun createCastToOtherDeviceChip(
         state: ProjectionChipModel.Projecting,
     ): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown(
+        return OngoingActivityChipModel.Shown.Timer(
             icon =
                 Icon.Resource(
                     CAST_TO_OTHER_DEVICE_ICON,
