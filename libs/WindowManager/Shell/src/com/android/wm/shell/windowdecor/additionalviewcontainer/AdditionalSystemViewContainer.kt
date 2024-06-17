@@ -30,18 +30,22 @@ import android.view.WindowManager
  */
 class AdditionalSystemViewContainer(
     private val context: Context,
-    layoutId: Int,
     taskId: Int,
     x: Int,
     y: Int,
     width: Int,
-    height: Int
+    height: Int,
+    layoutId: Int? = null
 ) : AdditionalViewContainer() {
     override val view: View
     val windowManager: WindowManager? = context.getSystemService(WindowManager::class.java)
 
     init {
-        view = LayoutInflater.from(context).inflate(layoutId, null)
+        if (layoutId != null) {
+            view = LayoutInflater.from(context).inflate(layoutId, null)
+        } else {
+            view = View(context)
+        }
         val lp = WindowManager.LayoutParams(
             width, height, x, y,
             WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
