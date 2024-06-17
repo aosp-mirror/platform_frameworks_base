@@ -84,6 +84,10 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bong bóng"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Quản lý"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Đã đóng bong bóng."</string>
+    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
+    <skip />
+    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
+    <skip />
     <string name="restart_button_description" msgid="4564728020654658478">"Nhấn nút khởi động lại ứng dụng này để xem dễ hơn"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Thay đổi tỷ lệ khung hình của ứng dụng này thông qua phần Cài đặt"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Thay đổi tỷ lệ khung hình"</string>
