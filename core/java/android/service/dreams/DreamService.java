@@ -1389,8 +1389,7 @@ public class DreamService extends Service implements Window.Callback {
                         convertToComponentName(
                                 rawMetadata.getString(
                                         com.android.internal.R.styleable.Dream_settingsActivity),
-                                serviceInfo,
-                                packageManager),
+                                serviceInfo),
                         rawMetadata.getDrawable(
                                 com.android.internal.R.styleable.Dream_previewImage),
                         rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
@@ -1405,38 +1404,26 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     @Nullable
-    private static ComponentName convertToComponentName(
-            @Nullable String flattenedString,
-            ServiceInfo serviceInfo,
-            PackageManager packageManager) {
+    private static ComponentName convertToComponentName(@Nullable String flattenedString,
+            ServiceInfo serviceInfo) {
         if (flattenedString == null) {
             return null;
         }
 
-        final ComponentName cn =
-                flattenedString.contains("/")
-                        ? ComponentName.unflattenFromString(flattenedString)
-                        : new ComponentName(serviceInfo.packageName, flattenedString);
-
-        if (cn == null) {
-            return null;
+        if (!flattenedString.contains("/")) {
+            return new ComponentName(serviceInfo.packageName, flattenedString);
         }
 
         // Ensure that the component is from the same package as the dream service. If not,
         // treat the component as invalid and return null instead.
+        final ComponentName cn = ComponentName.unflattenFromString(flattenedString);
+        if (cn == null) return null;
         if (!cn.getPackageName().equals(serviceInfo.packageName)) {
             Log.w(TAG,
                     "Inconsistent package name in component: " + cn.getPackageName()
                             + ", should be: " + serviceInfo.packageName);
             return null;
         }
-
-        // Ensure that the activity exists. If not, treat the component as invalid and return null.
-        if (new Intent().setComponent(cn).resolveActivityInfo(packageManager, 0) == null) {
-            Log.w(TAG, "Dream settings activity not found: " + cn);
-            return null;
-        }
-
         return cn;
     }
 
