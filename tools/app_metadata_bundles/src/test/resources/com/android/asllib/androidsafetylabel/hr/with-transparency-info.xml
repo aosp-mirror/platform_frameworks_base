@@ -1,4 +1,15 @@
 <app-metadata-bundles version="123456">
-<transparency-info>
-</transparency-info>
+    <transparency-info>
+        <app-info
+            apsCompliant="false"
+            privacyPolicy="www.example.com">
+            <first-party-endpoints>
+                <item>url1</item>
+            </first-party-endpoints>
+            <service-provider-endpoints>
+                <item>url55</item>
+                <item>url56</item>
+            </service-provider-endpoints>
+        </app-info>
+    </transparency-info>
 </app-metadata-bundles>
