@@ -159,7 +159,7 @@ public final class VirtualDeviceParams implements Parcelable {
      * @hide
      */
     @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_SENSORS, POLICY_TYPE_AUDIO,
-            POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY})
+            POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY, POLICY_TYPE_CAMERA})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface PolicyType {}
@@ -245,6 +245,23 @@ public final class VirtualDeviceParams implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_CROSS_DEVICE_CLIPBOARD)
     public static final int POLICY_TYPE_CLIPBOARD = 4;
+
+    /**
+     * Tells the camera framework how to handle camera requests for the front and back cameras from
+     * contexts associated with this virtual device.
+     *
+     * <ul>
+     *     <li>{@link #DEVICE_POLICY_DEFAULT}: Returns the front and back cameras of the default
+     *     device.
+     *     <li>{@link #DEVICE_POLICY_CUSTOM}: Returns the front and back cameras cameras of the
+     *     virtual device. Note that if the virtual device did not create any virtual cameras,
+     *     then no front and back cameras will be available.
+     * </ul>
+     *
+     * @see Context#getDeviceId
+     */
+    @FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
+    public static final int POLICY_TYPE_CAMERA = 5;
 
     private final int mLockState;
     @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
@@ -1151,6 +1168,10 @@ public final class VirtualDeviceParams implements Parcelable {
 
             if (!Flags.crossDeviceClipboard()) {
                 mDevicePolicies.delete(POLICY_TYPE_CLIPBOARD);
+            }
+
+            if (!Flags.virtualCamera()) {
+                mDevicePolicies.delete(POLICY_TYPE_CAMERA);
             }
 
             if ((mAudioPlaybackSessionId != AUDIO_SESSION_ID_GENERATE

@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * MessagingLayouts where groups need to be able to snap it's height to.
  */
 @RemoteViews.RemoteView
-public class RemeasuringLinearLayout extends LinearLayout {
+public class RemeasuringLinearLayout extends NotificationOptimizedLinearLayout {
 
     private ArrayList<View> mMatchParentViews = new ArrayList<>();
 
@@ -79,7 +79,7 @@ public class RemeasuringLinearLayout extends LinearLayout {
             int exactHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
             for (View child : mMatchParentViews) {
                 child.measure(getChildMeasureSpec(
-                        widthMeasureSpec, getPaddingStart() + getPaddingEnd(),
+                                widthMeasureSpec, getPaddingStart() + getPaddingEnd(),
                         child.getLayoutParams().width),
                         exactHeightSpec);
             }
@@ -87,4 +87,5 @@ public class RemeasuringLinearLayout extends LinearLayout {
         mMatchParentViews.clear();
         setMeasuredDimension(getMeasuredWidth(), height);
     }
+
 }

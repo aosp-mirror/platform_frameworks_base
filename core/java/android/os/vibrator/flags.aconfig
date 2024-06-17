@@ -17,20 +17,6 @@ flag {
 
 flag {
     namespace: "haptics"
-    name: "haptics_customization_ringtone_v2_enabled"
-    description: "Enables the usage of the new RingtoneV2 class"
-    bug: "241918098"
-}
-
-flag {
-    namespace: "haptics"
-    name: "enable_vibration_serialization_apis"
-    description: "Enables the APIs for vibration serialization/deserialization."
-    bug: "245129509"
-}
-
-flag {
-    namespace: "haptics"
     name: "haptic_feedback_vibration_oem_customization_enabled"
     description: "Enables OEMs/devices to customize vibrations for haptic feedback"
     # Make read only. This is because the flag is used only once, and this could happen before

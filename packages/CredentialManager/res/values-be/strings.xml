@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Хоць мы ўжо рухаемся ў бок будучыні без выкарыстання пароляў, яны па-ранейшаму застануцца даступнымі нароўні з ключамі доступу."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Выберыце, куды захаваць <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Выберыце менеджар пароляў, каб захаваць свае даныя і забяспечыць хуткі ўваход у наступныя разы"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Стварыце ключ доступу да праграмы \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Захаваць пароль для праграмы \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Стварыць ключ доступу для ўваходу ў праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Захаваць пароль для ўваходу ў праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Захаваць інфармацыю пра спосаб уваходу ў праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
     <string name="passkey" msgid="632353688396759522">"ключ доступу"</string>
     <string name="password" msgid="6738570945182936667">"пароль"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"З іншай прылады"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Скарыстаць іншую прыладу"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Запыт скасаваны праграмай \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Спосабы ўваходу"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Яшчэ"</string>
 </resources>

@@ -63,6 +63,7 @@ public class DozeDockHandlerTest extends SysuiTestCase {
         mDockHandler = new DozeDockHandler(mConfig, mDockManagerFake, mUserTracker);
         mDockHandler.setDozeMachine(mMachine);
 
+        when(mMachine.isExecutingTransition()).thenReturn(false);
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
         when(mMachine.getState()).thenReturn(State.DOZE_AOD);
         doReturn(true).when(mConfig).alwaysOnEnabled(anyInt());
@@ -143,6 +144,15 @@ public class DozeDockHandlerTest extends SysuiTestCase {
     @Test
     public void onEvent_hideWhilePulsing_wontRequestStateChange() {
         when(mMachine.getState()).thenReturn(State.DOZE_PULSING);
+
+        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED_HIDE);
+
+        verify(mMachine, never()).requestState(any(State.class));
+    }
+
+    @Test
+    public void onEvent_dockedWhileTransitioning_wontRequestStateChange() {
+        when(mMachine.isExecutingTransition()).thenReturn(true);
 
         mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED_HIDE);
 

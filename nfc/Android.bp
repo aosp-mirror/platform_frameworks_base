@@ -1,4 +1,5 @@
 package {
+    default_team: "trendy_team_fwk_nfc",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -40,6 +41,7 @@ java_sdk_library {
     ],
     static_libs: [
         "android.nfc.flags-aconfig-java",
+        "android.permission.flags-aconfig-java",
     ],
     srcs: [
         ":framework-nfc-updatable-sources",
@@ -67,8 +69,12 @@ java_sdk_library {
     ],
     jarjar_rules: ":nfc-jarjar-rules",
     lint: {
-        strict_updatability_linting: true,
+        baseline_filename: "lint-baseline.xml",
     },
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.nfcservices",
+    ],
     aconfig_declarations: [
         "android.nfc.flags-aconfig",
     ],

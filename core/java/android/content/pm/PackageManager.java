@@ -16,6 +16,10 @@
 
 package android.content.pm;
 
+import static android.media.audio.Flags.FLAG_FEATURE_SPATIAL_AUDIO_HEADTRACKING_LOW_LATENCY;
+
+import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
@@ -55,7 +59,6 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.dex.ArtManager;
-import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -91,6 +94,10 @@ import android.util.AndroidException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.PackageInfoCommonUtils;
+import com.android.internal.pm.parsing.PackageParser2;
+import com.android.internal.pm.parsing.PackageParserException;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DataClass;
 
@@ -123,6 +130,7 @@ import java.util.function.Function;
  * <a href="/training/basics/intents/package-visibility">manage package visibility</a>.
  * </p>
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public abstract class PackageManager {
     private static final String TAG = "PackageManager";
 
@@ -817,6 +825,8 @@ public abstract class PackageManager {
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
             MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS,
+            MATCH_DIRECT_BOOT_AWARE,
+            MATCH_DIRECT_BOOT_UNAWARE,
             GET_ATTRIBUTIONS_LONG,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -2544,6 +2554,15 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST = -130;
 
     /**
+     * Installation failed return code: if the system failed to install the package that
+     * {@link android.R.attr#multiArch} is true in its manifest because its packaged
+     * native code did not match all of the natively ABIs supported by the system.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_MULTI_ARCH_NOT_MATCH_ALL_NATIVE_ABIS = -131;
+
+    /**
      * App minimum aspect ratio set by the user which will override app-defined aspect ratio.
      *
      * @hide
@@ -2556,6 +2575,7 @@ public abstract class PackageManager {
             USER_MIN_ASPECT_RATIO_16_9,
             USER_MIN_ASPECT_RATIO_3_2,
             USER_MIN_ASPECT_RATIO_FULLSCREEN,
+            USER_MIN_ASPECT_RATIO_APP_DEFAULT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserMinAspectRatio {}
@@ -2609,6 +2629,16 @@ public abstract class PackageManager {
      */
     public static final int USER_MIN_ASPECT_RATIO_FULLSCREEN = 6;
 
+    /**
+     * Aspect ratio override code: user sets to app's default aspect ratio.
+     * This resets both the user-forced aspect ratio, and the device manufacturer
+     * per-app override {@link ActivityInfo#OVERRIDE_ANY_ORIENTATION_TO_USER}.
+     * It is different from {@link #USER_MIN_ASPECT_RATIO_UNSET} as the latter may
+     * apply the device manufacturer per-app orientation override if any,
+     * @hide
+     */
+    public static final int USER_MIN_ASPECT_RATIO_APP_DEFAULT = 7;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
@@ -2616,7 +2646,6 @@ public abstract class PackageManager {
             DELETE_SYSTEM_APP,
             DELETE_DONT_KILL_APP,
             DELETE_CHATTY,
-            DELETE_SHOW_DIALOG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeleteFlags {}
@@ -2667,12 +2696,6 @@ public abstract class PackageManager {
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public static final int DELETE_ARCHIVE = 0x00000010;
-
-    /**
-     * Show a confirmation dialog to the user when app is being deleted.
-     */
-    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
-    public static final int DELETE_SHOW_DIALOG = 0x00000020;
 
     /**
      * Flag parameter for {@link #deletePackage} to indicate that package deletion
@@ -2980,6 +3003,46 @@ public abstract class PackageManager {
     @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK = 4;
 
+
+    /**
+     * Indicates that the app metadata does not exist or its source is unknown.
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @SystemApi
+    public static final int APP_METADATA_SOURCE_UNKNOWN = 0;
+    /**
+     * Indicates that the app metadata is provided by the APK itself.
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @SystemApi
+    public static final int APP_METADATA_SOURCE_APK = 1;
+    /**
+     * Indicates that the app metadata is provided by the installer that installed the app.
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @SystemApi
+    public static final int APP_METADATA_SOURCE_INSTALLER = 2;
+    /**
+     * Indicates that the app metadata is provided as part of the system image.
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @SystemApi
+    public static final int APP_METADATA_SOURCE_SYSTEM_IMAGE = 3;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "APP_METADATA_SOURCE_" }, value = {
+            APP_METADATA_SOURCE_UNKNOWN,
+            APP_METADATA_SOURCE_APK,
+            APP_METADATA_SOURCE_INSTALLER,
+            APP_METADATA_SOURCE_SYSTEM_IMAGE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AppMetadataSource {}
+
     /**
      * Can be used as the {@code millisecondsToDelay} argument for
      * {@link PackageManager#extendVerificationTimeout}. This is the
@@ -3011,6 +3074,17 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_AUDIO_PRO = "android.hardware.audio.pro";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}
+     * which indicates whether head tracking for spatial audio operates with low-latency,
+     * as defined by the CDD criteria for the feature.
+     *
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    @FlaggedApi(FLAG_FEATURE_SPATIAL_AUDIO_HEADTRACKING_LOW_LATENCY)
+    public static final String FEATURE_AUDIO_SPATIAL_HEADTRACKING_LOW_LATENCY =
+            "android.hardware.audio.spatial.headtracking.low_latency";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -3343,6 +3417,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports NFC charging.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_NFC_CHARGING)
+    public static final String FEATURE_NFC_CHARGING = "android.hardware.nfc.charging";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The Beam API is enabled on the device.
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -3352,7 +3434,7 @@ public abstract class PackageManager {
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports any
      * one of the {@link #FEATURE_NFC}, {@link #FEATURE_NFC_HOST_CARD_EMULATION},
-     * or {@link #FEATURE_NFC_HOST_CARD_EMULATION_NFCF} features.
+     * {@link #FEATURE_NFC_HOST_CARD_EMULATION_NFCF}, or {@link #FEATURE_NFC_CHARGING} features.
      *
      * @hide
      */
@@ -4130,15 +4212,6 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device supports multiple concurrent IME sessions.
-     */
-    @FlaggedApi("android.view.inputmethod.concurrent_input_methods")
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_CONCURRENT_INPUT_METHODS =
-            "android.software.concurrent_input_methods";
-
-    /**
-     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports device policy enforcement via device admins.
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -4760,6 +4833,16 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_ROTARY_ENCODER_LOW_RES =
             "android.hardware.rotaryencoder.lowres";
+
+  /**
+   * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+   * support for contextual search helper.
+   *
+   * @hide
+   */
+  @SdkConstant(SdkConstantType.FEATURE)
+  public static final String FEATURE_CONTEXTUAL_SEARCH_HELPER =
+      "android.software.contextualsearch";
 
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
@@ -5492,6 +5575,7 @@ public abstract class PackageManager {
      * application info.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static class Flags {
         final long mValue;
         protected Flags(long value) {
@@ -5506,6 +5590,7 @@ public abstract class PackageManager {
      * Specific flags used for retrieving package info. Example:
      * {@code PackageManager.getPackageInfo(packageName, PackageInfoFlags.of(0)}
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class PackageInfoFlags extends Flags {
         private PackageInfoFlags(@PackageInfoFlagsBits long value) {
             super(value);
@@ -5519,6 +5604,7 @@ public abstract class PackageManager {
     /**
      * Specific flags used for retrieving application info.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class ApplicationInfoFlags extends Flags {
         private ApplicationInfoFlags(@ApplicationInfoFlagsBits long value) {
             super(value);
@@ -5532,6 +5618,7 @@ public abstract class PackageManager {
     /**
      * Specific flags used for retrieving component info.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class ComponentInfoFlags extends Flags {
         private ComponentInfoFlags(@ComponentInfoFlagsBits long value) {
             super(value);
@@ -5545,6 +5632,7 @@ public abstract class PackageManager {
     /**
      * Specific flags used for retrieving resolve info.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class ResolveInfoFlags extends Flags {
         private ResolveInfoFlags(@ResolveInfoFlagsBits long value) {
             super(value);
@@ -6292,6 +6380,29 @@ public abstract class PackageManager {
     public PersistableBundle getAppMetadata(@NonNull String packageName)
             throws NameNotFoundException {
         throw new UnsupportedOperationException("getAppMetadata not implemented in subclass");
+    }
+
+
+    /**
+     * Returns the source of the app metadata that is currently associated with the given package.
+     * The value can be {@link #APP_METADATA_SOURCE_UNKNOWN}, {@link #APP_METADATA_SOURCE_APK},
+     * {@link #APP_METADATA_SOURCE_INSTALLER} or {@link #APP_METADATA_SOURCE_SYSTEM_IMAGE}.
+     *
+     * Note: an app can have the app metadata included in the APK, but if the installer also
+     * provides an app metadata during the installation, the one provided by the installer will
+     * take precedence.
+     *
+     * @param packageName The package name for which to get the app metadata source.
+     * @throws NameNotFoundException if no such package is available to the caller.
+     * @throws SecurityException if the caller doesn't have the required permission.
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GET_APP_METADATA)
+    public @AppMetadataSource int getAppMetadataSource(@NonNull String packageName)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException("getAppMetadataSource not implemented in subclass");
     }
 
     /**
@@ -8666,28 +8777,56 @@ public abstract class PackageManager {
     @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath,
             @NonNull PackageInfoFlags flags) {
-        long flagsBits = flags.getValue();
-        final PackageParser parser = new PackageParser();
-        parser.setCallback(new PackageParser.CallbackImpl(this));
         final File apkFile = new File(archiveFilePath);
-        try {
-            if ((flagsBits & (MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE)) != 0) {
-                // Caller expressed an explicit opinion about what encryption
-                // aware/unaware components they want to see, so fall through and
-                // give them what they want
-            } else {
-                // Caller expressed no opinion, so match everything
-                flagsBits |= MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
-            }
 
-            PackageParser.Package pkg = parser.parsePackage(apkFile, 0, false);
-            if ((flagsBits & GET_SIGNATURES) != 0 || (flagsBits & GET_SIGNING_CERTIFICATES) != 0) {
-                PackageParser.collectCertificates(pkg, false /* skipVerify */);
-            }
-            return PackageParser.generatePackageInfo(pkg, null, (int) flagsBits, 0, 0, null,
-                    FrameworkPackageUserState.DEFAULT);
-        } catch (PackageParser.PackageParserException e) {
-            Log.w(TAG, "Failure to parse package archive", e);
+        @PackageInfoFlagsBits long flagsBits = flags.getValue();
+        if ((flagsBits & (MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE)) != 0) {
+            // Caller expressed an explicit opinion about what encryption
+            // aware/unaware components they want to see, so fall through and
+            // give them what they want
+        } else {
+            // Caller expressed no opinion, so match everything
+            flagsBits |= MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
+        }
+
+        int parserFlags = 0;
+        if ((flagsBits & (GET_SIGNATURES | GET_SIGNING_CERTIFICATES)) != 0) {
+            parserFlags |= PARSE_COLLECT_CERTIFICATES;
+        }
+
+        final PackageParser2 parser2 = new PackageParser2(/*separateProcesses*/ null,
+                /*displayMetrics*/ null,/*cacher*/ null,
+                new PackageParser2.Callback() {
+                    @Override
+                    public boolean hasFeature(String feature) {
+                        return PackageManager.this.hasSystemFeature(feature);
+                    }
+
+                    @NonNull
+                    @Override
+                    public Set<String> getHiddenApiWhitelistedApps() {
+                        return Collections.emptySet();
+                    }
+
+                    @NonNull
+                    @Override
+                    public Set<String> getInstallConstraintsAllowlist() {
+                        return Collections.emptySet();
+                    }
+
+                    @Override
+                    public boolean isChangeEnabled(long changeId,
+                            @androidx.annotation.NonNull ApplicationInfo appInfo) {
+                        return false;
+                    }
+                });
+
+        try {
+            ParsedPackage pp = parser2.parsePackage(apkFile, parserFlags, false);
+
+            return PackageInfoCommonUtils.generate(pp, flagsBits, UserHandle.myUserId());
+        } catch (PackageParserException e) {
+            Log.w(TAG, "Failure to parse package archive apkFile= " +apkFile);
             return null;
         }
     }
@@ -10333,6 +10472,8 @@ public abstract class PackageManager {
             case INSTALL_FAILED_SESSION_INVALID: return "INSTALL_FAILED_SESSION_INVALID";
             case INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST:
                 return "INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST";
+            case INSTALL_FAILED_MULTI_ARCH_NOT_MATCH_ALL_NATIVE_ABIS:
+                return "INSTALL_FAILED_MULTI_ARCH_NOT_MATCH_ALL_NATIVE_ABIS";
             default: return Integer.toString(status);
         }
     }
@@ -11027,7 +11168,7 @@ public abstract class PackageManager {
     }
 
     /**
-     * Returns the property defined in the given package's &lt;appliction&gt; tag.
+     * Returns the property defined in the given package's &lt;application&gt; tag.
      *
      * @throws NameNotFoundException if either the given package is not installed or if the
      * given property is not defined within the &lt;application&gt; tag.
@@ -11537,14 +11678,14 @@ public abstract class PackageManager {
     }
 
     /**
-     * Retrieve AndroidManifest.xml information for the given application apk path.
+     * Retrieve AndroidManifest.xml information for the given application apk file.
      *
      * <p>Example:
      *
      * <pre><code>
      * Bundle result;
      * try {
-     *     result = getContext().getPackageManager().parseAndroidManifest(apkFilePath,
+     *     result = getContext().getPackageManager().parseAndroidManifest(apkFile,
      *             xmlResourceParser -> {
      *                 Bundle bundle = new Bundle();
      *                 // Search the start tag
@@ -11573,9 +11714,10 @@ public abstract class PackageManager {
      *
      * Note: When the parserFunction is invoked, the client can read the AndroidManifest.xml
      * information by the XmlResourceParser object. After leaving the parserFunction, the
-     * XmlResourceParser object will be closed.
+     * XmlResourceParser object will be closed. The caller should also handle the exception for
+     * calling this method.
      *
-     * @param apkFilePath The path of an application apk file.
+     * @param apkFile The file of an application apk.
      * @param parserFunction The parserFunction will be invoked with the XmlResourceParser object
      *        after getting the AndroidManifest.xml of an application package.
      *
@@ -11586,7 +11728,7 @@ public abstract class PackageManager {
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_GET_PACKAGE_INFO)
     @WorkerThread
-    public <T> T parseAndroidManifest(@NonNull String apkFilePath,
+    public <T> T parseAndroidManifest(@NonNull File apkFile,
             @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
         throw new UnsupportedOperationException(
                 "parseAndroidManifest not implemented in subclass");

@@ -18,11 +18,14 @@ package android.app;
 
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
+import static android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 
+import static com.android.window.flags.Flags.FLAG_MULTI_CROP;
 import static com.android.window.flags.Flags.multiCrop;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -58,6 +61,7 @@ import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -77,21 +81,23 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.R;
+import com.android.internal.annotations.Keep;
 
 import libcore.io.IoUtils;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -104,6 +110,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -255,6 +262,13 @@ public class WallpaperManager {
     public static final String COMMAND_GOING_TO_SLEEP = "android.wallpaper.goingtosleep";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: reported when a physical display switch event
+     * happens, e.g. fold and unfold.
+     * @hide
+     */
+    public static final String COMMAND_DISPLAY_SWITCH = "android.wallpaper.displayswitch";
+
+    /**
      * Command for {@link #sendWallpaperCommand}: reported when the wallpaper that was already
      * set is re-applied by the user.
      * @hide
@@ -288,6 +302,79 @@ public class WallpaperManager {
      */
     public static final String EXTRA_FROM_FOREGROUND_APP =
             "android.service.wallpaper.extra.FROM_FOREGROUND_APP";
+
+    /**
+     * The different screen orientations. {@link #getOrientation} provides their exact definition.
+     * This is only used internally by the framework and the WallpaperBackupAgent.
+     * @hide
+     */
+    @IntDef(value = {
+            ORIENTATION_UNKNOWN,
+            PORTRAIT,
+            LANDSCAPE,
+            SQUARE_PORTRAIT,
+            SQUARE_LANDSCAPE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScreenOrientation {}
+
+    /**
+     * @hide
+     */
+    public static final int ORIENTATION_UNKNOWN = -1;
+
+    /**
+     * Portrait orientation of most screens
+     * @hide
+     */
+    public static final int PORTRAIT = 0;
+
+    /**
+     * Landscape orientation of most screens
+     * @hide
+     */
+    public static final int LANDSCAPE = 1;
+
+    /**
+     * Portrait orientation with similar width and height (e.g. the inner screen of a foldable)
+     * @hide
+     */
+    public static final int SQUARE_PORTRAIT = 2;
+
+    /**
+     * Landscape orientation with similar width and height (e.g. the inner screen of a foldable)
+     * @hide
+     */
+    public static final int SQUARE_LANDSCAPE = 3;
+
+    /**
+     * Converts a (width, height) screen size to a {@link ScreenOrientation}.
+     * @param screenSize the dimensions of a screen
+     * @return the corresponding {@link ScreenOrientation}.
+     * @hide
+     */
+    public static @ScreenOrientation int getOrientation(Point screenSize) {
+        float ratio = ((float) screenSize.x) / screenSize.y;
+        // ratios between 3/4 and 4/3 are considered square
+        return ratio >= 4 / 3f ? LANDSCAPE
+                : ratio > 1f ? SQUARE_LANDSCAPE
+                : ratio > 3 / 4f ? SQUARE_PORTRAIT
+                : PORTRAIT;
+    }
+
+    /**
+     * Get the 90° rotation of a given orientation
+     * @hide
+     */
+    public static @ScreenOrientation int getRotatedOrientation(@ScreenOrientation int orientation) {
+        switch (orientation) {
+            case PORTRAIT: return LANDSCAPE;
+            case LANDSCAPE: return PORTRAIT;
+            case SQUARE_PORTRAIT: return SQUARE_LANDSCAPE;
+            case SQUARE_LANDSCAPE: return SQUARE_PORTRAIT;
+            default: return ORIENTATION_UNKNOWN;
+        }
+    }
 
     // flags for which kind of wallpaper to act on
 
@@ -614,11 +701,14 @@ public class WallpaperManager {
                 ColorManagementProxy cmProxy) {
             if (mService != null) {
                 try {
+                    Trace.beginSection("WPMS.isWallpaperSupported");
                     if (!mService.isWallpaperSupported(context.getOpPackageName())) {
                         return null;
                     }
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
+                } finally {
+                    Trace.endSection();
                 }
             }
             synchronized (this) {
@@ -629,6 +719,7 @@ public class WallpaperManager {
                 mCachedWallpaper = null;
                 Bitmap currentWallpaper = null;
                 try {
+                    Trace.beginSection("WPMS.getCurrentWallpaperLocked");
                     currentWallpaper = getCurrentWallpaperLocked(
                             context, which, userId, hardware, cmProxy);
                 } catch (OutOfMemoryError e) {
@@ -654,6 +745,8 @@ public class WallpaperManager {
                         // Post-O apps really most sincerely need the permission.
                         throw e;
                     }
+                } finally {
+                    Trace.endSection();
                 }
                 if (currentWallpaper != null) {
                     mCachedWallpaper = new CachedWallpaper(currentWallpaper, userId, which);
@@ -732,30 +825,27 @@ public class WallpaperManager {
 
             try {
                 Bundle params = new Bundle();
+                Trace.beginSection("WPMS.getWallpaperWithFeature_" + which);
                 ParcelFileDescriptor pfd = mService.getWallpaperWithFeature(
                         context.getOpPackageName(), context.getAttributionTag(), this, which,
                         params, userId, /* getCropped = */ true);
+                Trace.endSection();
 
-                if (pfd != null) {
-                    try (BufferedInputStream bis = new BufferedInputStream(
-                            new ParcelFileDescriptor.AutoCloseInputStream(pfd))) {
-                        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        int data;
-                        while ((data = bis.read()) != -1) {
-                            baos.write(data);
+                if (pfd == null) {
+                    return null;
+                }
+                try (InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
+                    ImageDecoder.Source src = ImageDecoder.createSource(context.getResources(), is);
+                    return ImageDecoder.decodeBitmap(src, ((decoder, info, source) -> {
+                        // Mutable and hardware config can't be set at the same time.
+                        decoder.setMutableRequired(!hardware);
+                        // Let's do color management
+                        if (cmProxy != null) {
+                            cmProxy.doColorManagement(decoder, info);
                         }
-                        ImageDecoder.Source src = ImageDecoder.createSource(baos.toByteArray());
-                        return ImageDecoder.decodeBitmap(src, ((decoder, info, source) -> {
-                            // Mutable and hardware config can't be set at the same time.
-                            decoder.setMutableRequired(!hardware);
-                            // Let's do color management
-                            if (cmProxy != null) {
-                                cmProxy.doColorManagement(decoder, info);
-                            }
-                        }));
-                    } catch (OutOfMemoryError | IOException e) {
-                        Log.w(TAG, "Can't decode file", e);
-                    }
+                    }));
+                } catch (OutOfMemoryError | IOException e) {
+                    Log.w(TAG, "Can't decode file", e);
                 }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -764,13 +854,18 @@ public class WallpaperManager {
         }
 
         private Bitmap getDefaultWallpaper(Context context, @SetWallpaperFlags int which) {
+            Trace.beginSection("WPMS.getDefaultWallpaper_" + which);
             Bitmap defaultWallpaper = mDefaultWallpaper;
             if (defaultWallpaper == null || defaultWallpaper.isRecycled()) {
                 defaultWallpaper = null;
+                Trace.beginSection("WPMS.openDefaultWallpaper");
                 try (InputStream is = openDefaultWallpaper(context, which)) {
+                    Trace.endSection();
                     if (is != null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
+                        Trace.beginSection("WPMS.decodeStream");
                         defaultWallpaper = BitmapFactory.decodeStream(is, null, options);
+                        Trace.endSection();
                     }
                 } catch (OutOfMemoryError | IOException e) {
                     Log.w(TAG, "Can't decode stream", e);
@@ -779,6 +874,7 @@ public class WallpaperManager {
             synchronized (this) {
                 mDefaultWallpaper = defaultWallpaper;
             }
+            Trace.endSection();
             return defaultWallpaper;
         }
 
@@ -858,15 +954,8 @@ public class WallpaperManager {
      * @hide
      */
     public static boolean isMultiCropEnabled() {
-        if (sGlobals == null) {
-            sIsMultiCropEnabled = multiCrop();
-        }
         if (sIsMultiCropEnabled == null) {
-            try {
-                sIsMultiCropEnabled = sGlobals.mService.isMultiCropEnabled();
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
+            sIsMultiCropEnabled = multiCrop();
         }
         return sIsMultiCropEnabled;
     }
@@ -892,12 +981,12 @@ public class WallpaperManager {
     /**
      * <strong> Important note: </strong>
      * <ul>
-     *     <li>Up to version S, this method requires the
+     *     <li>Up to Android 12, this method requires the
      *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     <li>Starting in Android 13, directly accessing the wallpaper is not possible anymore,
      *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
+     *     (some versions of Android 13 may throw a {@code SecurityException}).</li>
+     *     <li>From Android 14, this method should not be used
      *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
@@ -1176,12 +1265,12 @@ public class WallpaperManager {
     /**
      * <strong> Important note: </strong>
      * <ul>
-     *     <li>Up to version S, this method requires the
+     *     <li>Up to Android 12, this method requires the
      *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     <li>Starting in Android 13, directly accessing the wallpaper is not possible anymore,
      *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
+     *     (some versions of Android 13 may throw a {@code SecurityException}).</li>
+     *     <li>From Android 14, this method should not be used
      *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
@@ -1229,12 +1318,12 @@ public class WallpaperManager {
     /**
      * <strong> Important note: </strong>
      * <ul>
-     *     <li>Up to version S, this method requires the
+     *     <li>Up to Android 12, this method requires the
      *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     <li>Starting in Android 13, directly accessing the wallpaper is not possible anymore,
      *     instead the default wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
+     *     (some versions of Android 13 may throw a {@code SecurityException}).</li>
+     *     <li>From Android 14, this method should not be used
      *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
@@ -1493,14 +1582,107 @@ public class WallpaperManager {
     }
 
     /**
+     * For the current user, given a list of display sizes, return a list of rectangles representing
+     * the area of the current wallpaper that would be shown for each of these sizes.
+     *
+     * @param displaySizes the display sizes.
+     * @param which wallpaper type. Must be either {@link #FLAG_SYSTEM} or {@link #FLAG_LOCK}.
+     * @param originalBitmap If true, return areas relative to the original bitmap.
+     *                   If false, return areas relative to the cropped bitmap.
+     * @return A List of Rect where the Rect is within the cropped/original bitmap, and corresponds
+     *          to what is displayed. The Rect may have a larger width/height ratio than the screen
+     *          due to parallax. Return {@code null} if the wallpaper is not an ImageWallpaper.
+     *          Also return {@code null} when called with which={@link #FLAG_LOCK} if there is a
+     *          shared home + lock wallpaper.
+     * @hide
+     */
+    @FlaggedApi(FLAG_MULTI_CROP)
+    @RequiresPermission(READ_WALLPAPER_INTERNAL)
+    @Nullable
+    public List<Rect> getBitmapCrops(@NonNull List<Point> displaySizes,
+            @SetWallpaperFlags int which, boolean originalBitmap) {
+        checkExactlyOneWallpaperFlagSet(which);
+        try {
+            return sGlobals.mService.getBitmapCrops(displaySizes, which, originalBitmap,
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * For preview purposes.
+     * Return how a bitmap of a given size would be cropped for a given list of display sizes, if
+     * it was set as wallpaper via {@link #setBitmapWithCrops(Bitmap, Map, boolean, int)} or
+     * {@link #setStreamWithCrops(InputStream, Map, boolean, int)}.
+     *
+     * @return A List of Rect where the Rect is within the bitmap, and corresponds to what is
+     *          displayed for each display size. The Rect may have a larger width/height ratio than
+     *          the display due to parallax.
+     * @hide
+     */
+    @FlaggedApi(FLAG_MULTI_CROP)
+    @Nullable
+    public List<Rect> getBitmapCrops(@NonNull Point bitmapSize, @NonNull List<Point> displaySizes,
+            @Nullable Map<Point, Rect> cropHints) {
+        try {
+            if (cropHints == null) cropHints = Map.of();
+            Set<Map.Entry<Point, Rect>> entries = cropHints.entrySet();
+            int[] screenOrientations = entries.stream().mapToInt(entry ->
+                    getOrientation(entry.getKey())).toArray();
+            List<Rect> crops = entries.stream().map(Map.Entry::getValue).toList();
+            return sGlobals.mService.getFutureBitmapCrops(bitmapSize, displaySizes,
+                    screenOrientations, crops);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * For preview purposes.
+     * Compute the wallpaper colors of the given bitmap, if it was set as wallpaper via
+     * {@link #setBitmapWithCrops(Bitmap, Map, boolean, int)} or
+     * {@link #setStreamWithCrops(InputStream, Map, boolean, int)}.
+     *  Return {@code null} if an error occurred and the colors could not be computed.
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_MULTI_CROP)
+    @RequiresPermission(SET_WALLPAPER_DIM_AMOUNT)
+    @Nullable
+    public WallpaperColors getWallpaperColors(@NonNull Bitmap bitmap,
+            @Nullable Map<Point, Rect> cropHints) {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        try {
+            if (cropHints == null) cropHints = Map.of();
+            Set<Map.Entry<Point, Rect>> entries = cropHints.entrySet();
+            int[] screenOrientations = entries.stream().mapToInt(entry ->
+                    getOrientation(entry.getKey())).toArray();
+            List<Rect> crops = entries.stream().map(Map.Entry::getValue).toList();
+            Point bitmapSize = new Point(bitmap.getWidth(), bitmap.getHeight());
+            Rect crop = sGlobals.mService.getBitmapCrop(bitmapSize, screenOrientations, crops);
+            float dimAmount = getWallpaperDimAmount();
+            Bitmap croppedBitmap = Bitmap.createBitmap(
+                    bitmap, crop.left, crop.top, crop.width(), crop.height());
+            WallpaperColors result = WallpaperColors.fromBitmap(croppedBitmap, dimAmount);
+            return result;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * <strong> Important note: </strong>
      * <ul>
-     *     <li>Up to version S, this method requires the
+     *     <li>Up to Android 12, this method requires the
      *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     <li>Starting in Android 13, directly accessing the wallpaper is not possible anymore,
      *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
+     *     (some versions of Android 13 may throw a {@code SecurityException}).</li>
+     *     <li>From Android 14, this method should not be used
      *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
@@ -1718,15 +1900,22 @@ public class WallpaperManager {
 
     /**
      * Returns the information about the home screen wallpaper if its current wallpaper is a live
-     * wallpaper component. Otherwise, if the wallpaper is a static image, this returns null.
+     * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, or if the
+     * caller doesn't have the appropriate permissions, this returns {@code null}.
      *
      * <p>
-     * In order to use this, apps should declare a {@code <queries>} tag with the action
-     * {@code "android.service.wallpaper.WallpaperService"}. Otherwise,
-     * this method will return {@code null} if the caller doesn't otherwise have
+     * For devices running Android 13 or earlier, this method requires the
+     * {@link android.Manifest.permission#QUERY_ALL_PACKAGES} permission.
+     * </p>
+     *
+     * <p>
+     * For devices running Android 14 or later, in order to use this, apps should declare a
+     * {@code <queries>} tag with the action {@code "android.service.wallpaper.WallpaperService"}.
+     * Otherwise, this method will return {@code null} if the caller doesn't otherwise have
      * <a href="{@docRoot}training/package-visibility">visibility</a> of the wallpaper package.
      * </p>
      */
+    @RequiresPermission(value = "QUERY_ALL_PACKAGES", conditional = true)
     public WallpaperInfo getWallpaperInfo() {
         return getWallpaperInfoForUser(mContext.getUserId());
     }
@@ -1743,19 +1932,14 @@ public class WallpaperManager {
     }
 
     /**
-     * Returns the information about the home screen wallpaper if its current wallpaper is a live
-     * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, or if the
+     * Returns the information about the designated wallpaper if its current wallpaper is a live
+     * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, or if
      * the caller doesn't have the appropriate permissions, this returns {@code null}.
      *
      * <p>
-     * Before Android U, this method requires the
-     * {@link android.Manifest.permission#QUERY_ALL_PACKAGES} permission.
-     * </p>
-     *
-     * <p>
-     * Starting from Android U, In order to use this, apps should declare a {@code <queries>} tag
-     * with the action {@code "android.service.wallpaper.WallpaperService"}. Otherwise,
-     * this method will return {@code null} if the caller doesn't otherwise have
+     * In order to use this, apps should declare a {@code <queries>} tag with the action
+     * {@code "android.service.wallpaper.WallpaperService"}. Otherwise, this method will return
+     * {@code null} if the caller doesn't otherwise have
      * <a href="{@docRoot}training/package-visibility">visibility</a> of the wallpaper package.
      * </p>
      *
@@ -1771,7 +1955,7 @@ public class WallpaperManager {
     /**
      * Returns the information about the designated wallpaper if its current wallpaper is a live
      * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, or if the
-     * the caller doesn't have the appropriate permissions, this returns {@code null}.
+     * caller doesn't have the appropriate permissions, this returns {@code null}.
      *
      * <p>
      * In order to use this, apps should declare a {@code <queries>} tag
@@ -1962,7 +2146,7 @@ public class WallpaperManager {
             /* Set the wallpaper to the default values */
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(
                     "res:" + resources.getResourceName(resid),
-                    mContext.getOpPackageName(), null, false, result, which, completion,
+                    mContext.getOpPackageName(), null, null, false, result, which, completion,
                     mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
@@ -2080,6 +2264,11 @@ public class WallpaperManager {
     public int setBitmap(Bitmap fullImage, Rect visibleCropHint,
             boolean allowBackup, @SetWallpaperFlags int which, int userId)
             throws IOException {
+        if (multiCrop()) {
+            SparseArray<Rect> cropMap = new SparseArray<>();
+            if (visibleCropHint != null) cropMap.put(ORIENTATION_UNKNOWN, visibleCropHint);
+            return setBitmapWithCrops(fullImage, cropMap, allowBackup, which, userId);
+        }
         validateRect(visibleCropHint);
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
@@ -2087,9 +2276,69 @@ public class WallpaperManager {
         }
         final Bundle result = new Bundle();
         final WallpaperSetCompletion completion = new WallpaperSetCompletion();
+        final List<Rect> crops = visibleCropHint == null ? null : List.of(visibleCropHint);
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
-                    mContext.getOpPackageName(), visibleCropHint, allowBackup,
+                    mContext.getOpPackageName(), null, crops, allowBackup, result, which,
+                    completion, userId);
+            if (fd != null) {
+                FileOutputStream fos = null;
+                try {
+                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                    fullImage.compress(Bitmap.CompressFormat.PNG, 90, fos);
+                    fos.close();
+                    completion.waitForCompletion();
+                } finally {
+                    IoUtils.closeQuietly(fos);
+                }
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
+    }
+
+    /**
+     * Version of setBitmap that defines how the wallpaper will be positioned for different
+     * display sizes.
+     * Requires permission {@link android.Manifest.permission#SET_WALLPAPER}.
+     * @param cropHints map from screen dimensions to a sub-region of the image to display for those
+     *                  dimensions. The {@code Rect} sub-region may have a larger width/height ratio
+     *                  than the screen dimensions to apply a horizontal parallax effect. If the
+     *                  map is empty or some entries are missing, the system will apply a default
+     *                  strategy to position the wallpaper for any unspecified screen dimensions.
+     * @hide
+     */
+    @FlaggedApi(FLAG_MULTI_CROP)
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
+    public int setBitmapWithCrops(@Nullable Bitmap fullImage, @NonNull Map<Point, Rect> cropHints,
+            boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
+        SparseArray<Rect> crops = new SparseArray<>();
+        cropHints.forEach((k, v) -> crops.put(getOrientation(k), v));
+        return setBitmapWithCrops(fullImage, crops, allowBackup, which, mContext.getUserId());
+    }
+
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
+    private int setBitmapWithCrops(@Nullable Bitmap fullImage, @NonNull SparseArray<Rect> cropHints,
+            boolean allowBackup, @SetWallpaperFlags int which, int userId) throws IOException {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        int size = cropHints.size();
+        int[] screenOrientations = new int[size];
+        List<Rect> crops = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            screenOrientations[i] = cropHints.keyAt(i);
+            Rect cropHint = cropHints.valueAt(i);
+            validateRect(cropHint);
+            crops.add(cropHint);
+        }
+        final Bundle result = new Bundle();
+        final WallpaperSetCompletion completion = new WallpaperSetCompletion();
+        try {
+            ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
+                    mContext.getOpPackageName(), screenOrientations, crops, allowBackup,
                     result, which, completion, userId);
             if (fd != null) {
                 FileOutputStream fos = null;
@@ -2205,6 +2454,11 @@ public class WallpaperManager {
     public int setStream(InputStream bitmapData, Rect visibleCropHint,
             boolean allowBackup, @SetWallpaperFlags int which)
                     throws IOException {
+        if (multiCrop()) {
+            SparseArray<Rect> cropMap = new SparseArray<>();
+            if (visibleCropHint != null) cropMap.put(ORIENTATION_UNKNOWN, visibleCropHint);
+            return setStreamWithCrops(bitmapData, cropMap, allowBackup, which);
+        }
         validateRect(visibleCropHint);
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
@@ -2212,10 +2466,11 @@ public class WallpaperManager {
         }
         final Bundle result = new Bundle();
         final WallpaperSetCompletion completion = new WallpaperSetCompletion();
+        final List<Rect> crops = visibleCropHint == null ? null : List.of(visibleCropHint);
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
-                    mContext.getOpPackageName(), visibleCropHint, allowBackup,
-                    result, which, completion, mContext.getUserId());
+                    mContext.getOpPackageName(), null, crops, allowBackup, result, which,
+                    completion, mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
                 try {
@@ -2231,6 +2486,75 @@ public class WallpaperManager {
             throw e.rethrowFromSystemServer();
         }
 
+        return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
+    }
+
+    /**
+     * Version of setStream that defines how the wallpaper will be positioned for different
+     * display sizes.
+     * Requires permission {@link android.Manifest.permission#SET_WALLPAPER}.
+     * @param cropHints map from screen dimensions to a sub-region of the image to display for those
+     *                  dimensions. The {@code Rect} sub-region may have a larger width/height ratio
+     *                  than the screen dimensions to apply a horizontal parallax effect. If the
+     *                  map is empty or some entries are missing, the system will apply a default
+     *                  strategy to position the wallpaper for any unspecified screen dimensions.
+     * @hide
+     */
+    @FlaggedApi(FLAG_MULTI_CROP)
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
+    public int setStreamWithCrops(InputStream bitmapData, @NonNull Map<Point, Rect> cropHints,
+            boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
+        SparseArray<Rect> crops = new SparseArray<>();
+        cropHints.forEach((k, v) -> crops.put(getOrientation(k), v));
+        return setStreamWithCrops(bitmapData, crops, allowBackup, which);
+    }
+
+    /**
+     * Similar to {@link #setStreamWithCrops(InputStream, Map, boolean, int)}, but using
+     * {@link ScreenOrientation} as keys of the cropHints map. Used for backup & restore, since
+     * WallpaperBackupAgent stores orientations rather than the exact display size.
+     * Requires permission {@link android.Manifest.permission#SET_WALLPAPER}.
+     * @param cropHints map from {@link ScreenOrientation} to a sub-region of the image to display
+     *                  for that screen orientation.
+     * @hide
+     */
+    @FlaggedApi(FLAG_MULTI_CROP)
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
+    public int setStreamWithCrops(InputStream bitmapData, @NonNull SparseArray<Rect> cropHints,
+            boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        int size = cropHints.size();
+        int[] screenOrientations = new int[size];
+        List<Rect> crops = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            screenOrientations[i] = cropHints.keyAt(i);
+            Rect cropHint = cropHints.valueAt(i);
+            validateRect(cropHint);
+            crops.add(cropHint);
+        }
+        final Bundle result = new Bundle();
+        final WallpaperSetCompletion completion = new WallpaperSetCompletion();
+        try {
+            ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
+                    mContext.getOpPackageName(), screenOrientations, crops, allowBackup,
+                    result, which, completion, mContext.getUserId());
+            if (fd != null) {
+                FileOutputStream fos = null;
+                try {
+                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                    copyStreamToWallpaperFile(bitmapData, fos);
+                    fos.close();
+                    completion.waitForCompletion();
+                } finally {
+                    IoUtils.closeQuietly(fos);
+                }
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
         return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
     }
 
@@ -2490,7 +2814,7 @@ public class WallpaperManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)
+    @RequiresPermission(SET_WALLPAPER_DIM_AMOUNT)
     public void setWallpaperDimAmount(@FloatRange (from = 0f, to = 1f) float dimAmount) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
@@ -2510,7 +2834,7 @@ public class WallpaperManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)
+    @RequiresPermission(SET_WALLPAPER_DIM_AMOUNT)
     public @FloatRange (from = 0f, to = 1f) float getWallpaperDimAmount() {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
@@ -2682,6 +3006,7 @@ public class WallpaperManager {
      *
      * @hide
      */
+    @Keep
     @TestApi
     public void setWallpaperZoomOut(@NonNull IBinder windowToken, float zoom) {
         if (zoom < 0 || zoom > 1f) {

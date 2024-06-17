@@ -16,11 +16,13 @@
 
 package android.net.wifi.nl80211;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiAnnotations.ChannelWidth;
 import android.net.wifi.WifiAnnotations.WifiStandard;
+import android.net.wifi.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -48,6 +50,7 @@ public final class DeviceWiphyCapabilities implements Parcelable {
     private boolean mChannelWidth320MhzSupported;
     private int mMaxNumberTxSpatialStreams;
     private int mMaxNumberRxSpatialStreams;
+    private int mMaxNumberAkms;
 
 
     /** public constructor */
@@ -61,6 +64,7 @@ public final class DeviceWiphyCapabilities implements Parcelable {
         mChannelWidth320MhzSupported = false;
         mMaxNumberTxSpatialStreams = 1;
         mMaxNumberRxSpatialStreams = 1;
+        mMaxNumberAkms = 1;
     }
 
     /**
@@ -199,6 +203,25 @@ public final class DeviceWiphyCapabilities implements Parcelable {
     }
 
     /**
+     * Get the maximum number of AKM suites supported in the connection request to the driver.
+     *
+     * @return maximum number of AKMs
+     */
+    @FlaggedApi(Flags.FLAG_GET_DEVICE_CROSS_AKM_ROAMING_SUPPORT)
+    public int getMaxNumberAkms() {
+        return mMaxNumberAkms;
+    }
+
+    /**
+     * Set the maximum number of AKM suites supported in the connection request to the driver.
+     *
+     * @hide
+     */
+    public void setMaxNumberAkms(int akms) {
+        mMaxNumberAkms = akms;
+    }
+
+    /**
      * Set maximum number of receive spatial streams
      *
      * @param streams number of streams
@@ -226,7 +249,8 @@ public final class DeviceWiphyCapabilities implements Parcelable {
                 && mChannelWidth80p80MhzSupported == capa.mChannelWidth80p80MhzSupported
                 && mChannelWidth320MhzSupported == capa.mChannelWidth320MhzSupported
                 && mMaxNumberTxSpatialStreams == capa.mMaxNumberTxSpatialStreams
-                && mMaxNumberRxSpatialStreams == capa.mMaxNumberRxSpatialStreams;
+                && mMaxNumberRxSpatialStreams == capa.mMaxNumberRxSpatialStreams
+                && mMaxNumberAkms == capa.mMaxNumberAkms;
     }
 
     /** override hash code */
@@ -235,7 +259,7 @@ public final class DeviceWiphyCapabilities implements Parcelable {
         return Objects.hash(m80211nSupported, m80211acSupported, m80211axSupported,
                 m80211beSupported, mChannelWidth160MhzSupported, mChannelWidth80p80MhzSupported,
                 mChannelWidth320MhzSupported, mMaxNumberTxSpatialStreams,
-                mMaxNumberRxSpatialStreams);
+                mMaxNumberRxSpatialStreams, mMaxNumberAkms);
     }
 
     /** implement Parcelable interface */
@@ -259,6 +283,7 @@ public final class DeviceWiphyCapabilities implements Parcelable {
         out.writeBoolean(mChannelWidth320MhzSupported);
         out.writeInt(mMaxNumberTxSpatialStreams);
         out.writeInt(mMaxNumberRxSpatialStreams);
+        out.writeInt(mMaxNumberAkms);
     }
 
     @Override
@@ -276,6 +301,7 @@ public final class DeviceWiphyCapabilities implements Parcelable {
                 .append(mChannelWidth320MhzSupported ? "Yes" : "No");
         sb.append("mMaxNumberTxSpatialStreams: ").append(mMaxNumberTxSpatialStreams);
         sb.append("mMaxNumberRxSpatialStreams: ").append(mMaxNumberRxSpatialStreams);
+        sb.append("mMaxNumberAkms: ").append(mMaxNumberAkms);
 
         return sb.toString();
     }
@@ -298,6 +324,7 @@ public final class DeviceWiphyCapabilities implements Parcelable {
             capabilities.mChannelWidth320MhzSupported = in.readBoolean();
             capabilities.mMaxNumberTxSpatialStreams = in.readInt();
             capabilities.mMaxNumberRxSpatialStreams = in.readInt();
+            capabilities.mMaxNumberAkms = in.readInt();
             return capabilities;
         }
 

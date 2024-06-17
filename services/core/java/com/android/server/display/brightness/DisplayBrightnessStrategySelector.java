@@ -71,6 +71,8 @@ public class DisplayBrightnessStrategySelector {
     @Nullable
     private final OffloadBrightnessStrategy mOffloadBrightnessStrategy;
 
+    private final DisplayBrightnessStrategy[] mDisplayBrightnessStrategies;
+
     // We take note of the old brightness strategy so that we can know when the strategy changes.
     private String mOldBrightnessStrategyName;
 
@@ -98,6 +100,10 @@ public class DisplayBrightnessStrategySelector {
         } else {
             mOffloadBrightnessStrategy = null;
         }
+        mDisplayBrightnessStrategies = new DisplayBrightnessStrategy[]{mInvalidBrightnessStrategy,
+                mScreenOffBrightnessStrategy, mDozeBrightnessStrategy, mFollowerBrightnessStrategy,
+                mBoostBrightnessStrategy, mOverrideBrightnessStrategy, mTemporaryBrightnessStrategy,
+                mOffloadBrightnessStrategy};
         mAllowAutoBrightnessWhileDozingConfig = context.getResources().getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
         mOldBrightnessStrategyName = mInvalidBrightnessStrategy.getName();
@@ -179,9 +185,10 @@ public class DisplayBrightnessStrategySelector {
                 "  mAllowAutoBrightnessWhileDozingConfig= "
                         + mAllowAutoBrightnessWhileDozingConfig);
         IndentingPrintWriter ipw = new IndentingPrintWriter(writer, " ");
-        mTemporaryBrightnessStrategy.dump(ipw);
-        if (mOffloadBrightnessStrategy != null) {
-            mOffloadBrightnessStrategy.dump(ipw);
+        for (DisplayBrightnessStrategy displayBrightnessStrategy: mDisplayBrightnessStrategies) {
+            if (displayBrightnessStrategy != null) {
+                displayBrightnessStrategy.dump(ipw);
+            }
         }
     }
 
@@ -193,12 +200,9 @@ public class DisplayBrightnessStrategySelector {
         // We are not checking the targetDisplayState, but rather relying on the policy because
         // a user can define a different display state(displayPowerRequest.dozeScreenState) too
         // in the request with the Doze policy
-        if (displayPowerRequest.policy == DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE) {
-            if (!mAllowAutoBrightnessWhileDozingConfig) {
-                return true;
-            }
-        }
-        return false;
+        return displayPowerRequest.policy == DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE
+                && !mAllowAutoBrightnessWhileDozingConfig
+                && BrightnessUtils.isValidBrightnessValue(displayPowerRequest.dozeScreenBrightness);
     }
 
     @VisibleForTesting

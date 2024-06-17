@@ -22,6 +22,7 @@ import static com.android.internal.util.DumpUtils.dumpSparseArray;
 import static com.android.server.wm.utils.RegionUtils.forEachRect;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -658,6 +659,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         private final Region mTouchableRegionInScreen = new Region();
         private final Region mTouchableRegionInWindow = new Region();
         private WindowInfo mWindowInfo;
+        private Rect mSystemBarInsetFrame = null;
 
 
         /**
@@ -719,6 +721,16 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                     spec.offsetY = sTempFloats[Matrix.MTRANS_Y];
                 } else {
                     Slog.w(TAG, "can't find spec");
+                }
+            }
+
+            // Compute system bar insets frame if needed.
+            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11y()
+                    && windowState != null && instance.isUntouchableNavigationBar()) {
+                final InsetsSourceProvider provider =
+                        windowState.getControllableInsetProvider();
+                if (provider != null) {
+                    instance.mSystemBarInsetFrame = provider.getSource().getFrame();
                 }
             }
             return instance;
@@ -813,6 +825,15 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
          */
         public boolean isPIPMenu() {
             return mIsPIPMenu;
+        }
+
+        /**
+         * @return the system inset frame size if the window is untouchable navigation bar.
+         *  Returns null otherwise.
+         */
+        @Nullable
+        public Rect getSystemBarInsetsFrame() {
+            return mSystemBarInsetFrame;
         }
 
         private static void getTouchableRegionInWindow(boolean shouldMagnify, Region inRegion,

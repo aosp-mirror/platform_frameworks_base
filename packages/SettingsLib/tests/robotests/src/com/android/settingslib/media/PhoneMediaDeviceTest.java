@@ -24,6 +24,7 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static com.android.settingslib.media.PhoneMediaDevice.PHONE_ID;
 import static com.android.settingslib.media.PhoneMediaDevice.USB_HEADSET_ID;
 import static com.android.settingslib.media.PhoneMediaDevice.WIRED_HEADSET_ID;
+import static com.android.settingslib.media.PhoneMediaDevice.getMediaTransferThisDeviceName;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -31,10 +32,15 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.media.MediaRoute2Info;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 
+import com.android.media.flags.Flags;
 import com.android.settingslib.R;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -44,6 +50,8 @@ import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class PhoneMediaDeviceTest {
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private MediaRoute2Info mInfo;
@@ -107,11 +115,21 @@ public class PhoneMediaDeviceTest {
         when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
 
         assertThat(mPhoneMediaDevice.getName())
-                .isEqualTo(mContext.getString(R.string.media_transfer_this_device_name));
+                .isEqualTo(getMediaTransferThisDeviceName(mContext));
     }
 
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
     @Test
-    public void getId_returnCorrectId() {
+    public void getId_whenAdvancedWiredRoutingEnabled_returnCorrectId() {
+        String fakeId = "foo";
+        when(mInfo.getId()).thenReturn(fakeId);
+
+        assertThat(mPhoneMediaDevice.getId()).isEqualTo(fakeId);
+    }
+
+    @DisableFlags(Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
+    @Test
+    public void getId_whenAdvancedWiredRoutingDisabled_returnCorrectId() {
         when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
 
         assertThat(mPhoneMediaDevice.getId())

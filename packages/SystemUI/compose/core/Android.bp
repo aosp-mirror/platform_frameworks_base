@@ -31,7 +31,7 @@ android_library {
     ],
 
     static_libs: [
-        "SystemUIAnimationLib",
+        "PlatformAnimationLib",
 
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",

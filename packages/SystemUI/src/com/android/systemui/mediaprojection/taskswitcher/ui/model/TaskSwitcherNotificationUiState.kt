@@ -16,7 +16,7 @@
 
 package com.android.systemui.mediaprojection.taskswitcher.ui.model
 
-import android.app.TaskInfo
+import android.app.ActivityManager.RunningTaskInfo
 
 /** Represents the UI state for the task switcher notification. */
 sealed interface TaskSwitcherNotificationUiState {
@@ -24,7 +24,7 @@ sealed interface TaskSwitcherNotificationUiState {
     object NotShowing : TaskSwitcherNotificationUiState
     /** The notification should be shown. */
     data class Showing(
-        val projectedTask: TaskInfo,
-        val foregroundTask: TaskInfo,
+        val projectedTask: RunningTaskInfo,
+        val foregroundTask: RunningTaskInfo,
     ) : TaskSwitcherNotificationUiState
 }

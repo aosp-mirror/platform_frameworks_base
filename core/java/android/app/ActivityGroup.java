@@ -111,7 +111,7 @@ public class ActivityGroup extends Activity {
 
     @Override
     void dispatchActivityResult(String who, int requestCode, int resultCode,
-            Intent data, String reason) {
+            Intent data, ComponentCaller caller, String reason) {
         if (who != null) {
             Activity act = mLocalActivityManager.getActivity(who);
             /*
@@ -125,7 +125,7 @@ public class ActivityGroup extends Activity {
                 return;
             }
         }
-        super.dispatchActivityResult(who, requestCode, resultCode, data, reason);
+        super.dispatchActivityResult(who, requestCode, resultCode, data, caller, reason);
     }
 }
 

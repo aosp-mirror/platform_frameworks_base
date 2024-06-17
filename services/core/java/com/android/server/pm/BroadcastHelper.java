@@ -45,6 +45,8 @@ import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
+import android.multiuser.Flags;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -262,6 +264,7 @@ public final class BroadcastHelper {
             // Deliver LOCKED_BOOT_COMPLETED first
             Intent lockedBcIntent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
                     .setPackage(packageName);
+            lockedBcIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             if (includeStopped) {
                 lockedBcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             }
@@ -275,6 +278,7 @@ public final class BroadcastHelper {
             // Deliver BOOT_COMPLETED only if user is unlocked
             if (mUmInternal.isUserUnlockingOrUnlocked(userId)) {
                 Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED).setPackage(packageName);
+                bcIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 if (includeStopped) {
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 }
@@ -359,14 +363,13 @@ public final class BroadcastHelper {
         final UserInfo parent = ums.getProfileParent(userId);
         final int launcherUserId = (parent != null) ? parent.id : userId;
         final ComponentName launcherComponent = snapshot.getDefaultHomeActivity(launcherUserId);
-        if (launcherComponent != null) {
+        if (launcherComponent != null && canLauncherAccessProfile(launcherComponent, userId)) {
             Intent launcherIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
                     .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
                     .putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
                     .setPackage(launcherComponent.getPackageName());
             mContext.sendBroadcastAsUser(launcherIntent, UserHandle.of(launcherUserId));
         }
-        // TODO(b/122900055) Change/Remove this and replace with new permission role.
         if (appPredictionServicePackage != null) {
             Intent predictorIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
                     .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
@@ -374,6 +377,36 @@ public final class BroadcastHelper {
                     .setPackage(appPredictionServicePackage);
             mContext.sendBroadcastAsUser(predictorIntent, UserHandle.of(launcherUserId));
         }
+    }
+
+    /**
+     * A Profile is accessible to launcher in question if:
+     * - It's not hidden for API visibility.
+     * - Hidden, but launcher application has either
+     *      {@link Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL} or
+     *      {@link Manifest.permission.ACCESS_HIDDEN_PROFILES}
+     *   granted.
+     */
+    boolean canLauncherAccessProfile(ComponentName launcherComponent, int userId) {
+        if (android.os.Flags.allowPrivateProfile()
+                && Flags.enablePermissionToAccessHiddenProfiles()) {
+            if (mUmInternal.getUserProperties(userId).getProfileApiVisibility()
+                    != UserProperties.PROFILE_API_VISIBILITY_HIDDEN) {
+                return true;
+            }
+            if (mContext.getPackageManager().checkPermission(
+                            Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL,
+                            launcherComponent.getPackageName())
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+            // TODO(b/122900055) Change/Remove this and replace with new permission role.
+            return mContext.getPackageManager().checkPermission(
+                            Manifest.permission.ACCESS_HIDDEN_PROFILES,
+                            launcherComponent.getPackageName())
+                        == PackageManager.PERMISSION_GRANTED;
+        }
+        return true;
     }
 
     void sendPreferredActivityChangedBroadcast(int userId) {
@@ -827,7 +860,8 @@ public final class BroadcastHelper {
             // action. When the targetPkg is set, it sends the broadcast to specific app, e.g.
             // installer app or null for registered apps. The callback only need to send back to the
             // registered apps so we check the null condition here.
-            notifyPackageMonitor(action, pkg, extras, userIds, instantUserIds, broadcastAllowList);
+            notifyPackageMonitor(action, pkg, extras, userIds, instantUserIds, broadcastAllowList,
+                    null /* filterExtras */);
         }
     }
 
@@ -975,14 +1009,16 @@ public final class BroadcastHelper {
         final Bundle options = new BroadcastOptions()
                 .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                 .toBundle();
+        BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver =
+                (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
+                        snapshot, callingUid, intentExtras);
         mHandler.post(() -> sendPackageBroadcast(intent, null /* pkg */,
                 extras, flags, null /* targetPkg */, null /* finishedReceiver */,
                 new int[]{userId}, null /* instantUserIds */, null /* broadcastAllowList */,
-                (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
-                        snapshot, callingUid, intentExtras),
+                filterExtrasForReceiver,
                 options));
         notifyPackageMonitor(intent, null /* pkg */, extras, new int[]{userId},
-                null /* instantUserIds */, null /* broadcastAllowList */);
+                null /* instantUserIds */, null /* broadcastAllowList */, filterExtrasForReceiver);
     }
 
     void sendMyPackageSuspendedOrUnsuspended(@NonNull Computer snapshot,
@@ -1068,9 +1104,10 @@ public final class BroadcastHelper {
                                       @Nullable Bundle extras,
                                       @NonNull int[] userIds,
                                       @NonNull int[] instantUserIds,
-                                      @Nullable SparseArray<int[]> broadcastAllowList) {
+                                      @Nullable SparseArray<int[]> broadcastAllowList,
+                                      @Nullable BiFunction<Integer, Bundle, Bundle> filterExtras) {
         mPackageMonitorCallbackHelper.notifyPackageMonitor(action, pkg, extras, userIds,
-                instantUserIds, broadcastAllowList, mHandler);
+                instantUserIds, broadcastAllowList, mHandler, filterExtras);
     }
 
     private void notifyResourcesChanged(boolean mediaStatus,

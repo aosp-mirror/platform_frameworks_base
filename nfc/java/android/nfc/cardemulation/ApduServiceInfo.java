@@ -44,6 +44,8 @@ import android.util.Log;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -52,6 +54,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -102,6 +105,9 @@ public final class ApduServiceInfo implements Parcelable {
      */
     private final HashMap<String, AidGroup> mDynamicAidGroups;
 
+
+    private final Map<String, Boolean> mAutoTransact;
+
     /**
      * Whether this service should only be started when the device is unlocked.
      */
@@ -131,6 +137,11 @@ public final class ApduServiceInfo implements Parcelable {
      * State of the service for CATEGORY_OTHER selection
      */
     private boolean mCategoryOtherServiceEnabled;
+
+    /**
+     * Whether the NFC stack should default to Observe Mode when this preferred service.
+     */
+    private boolean mShouldDefaultToObserveMode;
 
     /**
      * @hide
@@ -165,10 +176,25 @@ public final class ApduServiceInfo implements Parcelable {
             List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, boolean requiresScreenOn, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost, boolean isEnabled) {
+        this(info, onHost, description, staticAidGroups, dynamicAidGroups,
+                requiresUnlock, requiresScreenOn, bannerResource, uid,
+                settingsActivityName, offHost, staticOffHost, isEnabled,
+                new HashMap<String, Boolean>());
+    }
+
+    /**
+     * @hide
+     */
+    public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
+            List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
+            boolean requiresUnlock, boolean requiresScreenOn, int bannerResource, int uid,
+            String settingsActivityName, String offHost, String staticOffHost, boolean isEnabled,
+            HashMap<String, Boolean> autoTransact) {
         this.mService = info;
         this.mDescription = description;
         this.mStaticAidGroups = new HashMap<String, AidGroup>();
         this.mDynamicAidGroups = new HashMap<String, AidGroup>();
+        this.mAutoTransact = autoTransact;
         this.mOffHostName = offHost;
         this.mStaticOffHostName = staticOffHost;
         this.mOnHost = onHost;
@@ -184,7 +210,6 @@ public final class ApduServiceInfo implements Parcelable {
         this.mUid = uid;
         this.mSettingsActivityName = settingsActivityName;
         this.mCategoryOtherServiceEnabled = isEnabled;
-
     }
 
     /**
@@ -250,6 +275,9 @@ public final class ApduServiceInfo implements Parcelable {
                         com.android.internal.R.styleable.HostApduService_settingsActivity);
                 mOffHostName = null;
                 mStaticOffHostName = mOffHostName;
+                mShouldDefaultToObserveMode = sa.getBoolean(
+                        R.styleable.HostApduService_shouldDefaultToObserveMode,
+                        false);
                 sa.recycle();
             } else {
                 TypedArray sa = res.obtainAttributes(attrs,
@@ -269,6 +297,9 @@ public final class ApduServiceInfo implements Parcelable {
                         com.android.internal.R.styleable.HostApduService_settingsActivity);
                 mOffHostName = sa.getString(
                         com.android.internal.R.styleable.OffHostApduService_secureElementName);
+                mShouldDefaultToObserveMode = sa.getBoolean(
+                        R.styleable.HostApduService_shouldDefaultToObserveMode,
+                        false);
                 if (mOffHostName != null) {
                     if (mOffHostName.equals("eSE")) {
                         mOffHostName = "eSE1";
@@ -282,6 +313,7 @@ public final class ApduServiceInfo implements Parcelable {
 
             mStaticAidGroups = new HashMap<String, AidGroup>();
             mDynamicAidGroups = new HashMap<String, AidGroup>();
+            mAutoTransact = new HashMap<String, Boolean>();
             mOnHost = onHost;
 
             final int depth = parser.getDepth();
@@ -364,6 +396,18 @@ public final class ApduServiceInfo implements Parcelable {
                         Log.e(TAG, "Ignoring invalid or duplicate aid: " + aid);
                     }
                     a.recycle();
+                } else if (eventType == XmlPullParser.START_TAG
+                        && "polling-loop-filter".equals(tagName) && currentGroup == null) {
+                    final TypedArray a = res.obtainAttributes(attrs,
+                            com.android.internal.R.styleable.PollingLoopFilter);
+                    String plf =
+                            a.getString(com.android.internal.R.styleable.PollingLoopFilter_name)
+                            .toUpperCase(Locale.ROOT);
+                    boolean autoTransact = a.getBoolean(
+                            com.android.internal.R.styleable.PollingLoopFilter_autoTransact,
+                            false);
+                    mAutoTransact.put(plf, autoTransact);
+                    a.recycle();
                 }
             }
         } catch (NameNotFoundException e) {
@@ -417,6 +461,27 @@ public final class ApduServiceInfo implements Parcelable {
             aids.addAll(group.getAids());
         }
         return aids;
+    }
+
+    /**
+     * Returns the current polling loop filters for this service.
+     * @return List of polling loop filters.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    @NonNull
+    public List<String> getPollingLoopFilters() {
+        return new ArrayList<>(mAutoTransact.keySet());
+    }
+
+    /**
+     * Returns whether this service would like to automatically transact for a given plf.
+     *
+     * @param plf the polling loop filter to query.
+     * @return {@code true} indicating to auto transact, {@code false} indicating to not.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public boolean getShouldAutoTransact(@NonNull String plf) {
+        return mAutoTransact.getOrDefault(plf.toUpperCase(Locale.ROOT), false);
     }
 
     /**
@@ -568,6 +633,25 @@ public final class ApduServiceInfo implements Parcelable {
     }
 
     /**
+     * Returns whether the NFC stack should default to observe mode when this service is preferred.
+     * @return whether the NFC stack should default to observe mode when this service is preferred
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
+    public boolean shouldDefaultToObserveMode() {
+        return mShouldDefaultToObserveMode;
+    }
+
+    /**
+     * Sets whether the NFC stack should default to observe mode when this service is preferred.
+     * @param shouldDefaultToObserveMode whether the NFC stack should default to observe mode when
+     *                                  this service is preferred
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
+    public void setShouldDefaultToObserveMode(boolean shouldDefaultToObserveMode) {
+        mShouldDefaultToObserveMode = shouldDefaultToObserveMode;
+    }
+
+    /**
      * Returns description of service.
      * @return user readable description of service
      */
@@ -593,6 +677,29 @@ public final class ApduServiceInfo implements Parcelable {
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public void setDynamicAidGroup(@NonNull AidGroup aidGroup) {
         mDynamicAidGroups.put(aidGroup.getCategory(), aidGroup);
+    }
+
+    /**
+     * Add a Polling Loop Filter. Custom NFC polling frames that match this filter will be
+     * delivered to {@link HostApduService#processPollingFrames(List)}. Adding a key with this
+     * multiple times will cause the value to be overwritten each time.
+     * @param pollingLoopFilter the polling loop filter to add, must be a  valide hexadecimal string
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public void addPollingLoopFilter(@NonNull String pollingLoopFilter,
+            boolean autoTransact) {
+        mAutoTransact.put(pollingLoopFilter, autoTransact);
+
+    }
+
+    /**
+     * Remove a Polling Loop Filter. Custom NFC polling frames that match this filter will no
+     * longer be delivered to {@link HostApduService#processPollingFrames(List)}.
+     * @param pollingLoopFilter this polling loop filter to add.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public void removePollingLoopFilter(@NonNull String pollingLoopFilter) {
+        mAutoTransact.remove(pollingLoopFilter.toUpperCase(Locale.ROOT));
     }
 
     /**
@@ -747,6 +854,8 @@ public final class ApduServiceInfo implements Parcelable {
         dest.writeString(mSettingsActivityName);
 
         dest.writeInt(mCategoryOtherServiceEnabled ? 1 : 0);
+        dest.writeInt(mAutoTransact.size());
+        dest.writeMap(mAutoTransact);
     };
 
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
@@ -775,10 +884,15 @@ public final class ApduServiceInfo implements Parcelable {
                     int uid = source.readInt();
                     String settingsActivityName = source.readString();
                     boolean isEnabled = source.readInt() != 0;
+                    int autoTransactSize = source.readInt();
+                    HashMap<String, Boolean> autoTransact =
+                            new HashMap<String, Boolean>(autoTransactSize);
+                    source.readMap(autoTransact, getClass().getClassLoader(),
+                            String.class, Boolean.class);
                     return new ApduServiceInfo(info, onHost, description, staticAidGroups,
                             dynamicAidGroups, requiresUnlock, requiresScreenOn, bannerResource, uid,
                             settingsActivityName, offHostName, staticOffHostName,
-                            isEnabled);
+                            isEnabled, autoTransact);
                 }
 
                 @Override

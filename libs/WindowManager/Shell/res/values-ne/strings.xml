@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"बन्द गर्नुहोस्"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"विस्तृत गर्नुहोस्"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"सेटिङहरू"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"स्प्लिट स्क्रिन मोड प्रयोग गर्नुहोस्"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"मेनु"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"\"picture-in-picture\" मेनु"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> Picture-in-picture मा छ"</string>
@@ -36,7 +35,7 @@
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"यो एप स्प्लिट स्क्रिन मोडमा प्रयोग गर्न मिल्दैन"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"यो एप एउटा विन्डोमा मात्र खोल्न मिल्छ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"यो एपले सहायक प्रदर्शनमा काम नगर्नसक्छ।"</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"अनुप्रयोगले सहायक प्रदर्शनहरूमा लञ्च सुविधालाई समर्थन गर्दैन।"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"एपले सहायक प्रदर्शनहरूमा लञ्च सुविधालाई समर्थन गर्दैन।"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"स्प्लिट स्क्रिन डिभाइडर"</string>
     <string name="divider_title" msgid="1963391955593749442">"स्प्लिट स्क्रिन डिभाइडर"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"बायाँ भाग फुल स्क्रिन"</string>

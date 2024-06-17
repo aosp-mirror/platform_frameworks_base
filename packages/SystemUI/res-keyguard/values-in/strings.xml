@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya dengan cepat"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya dengan lambat"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pengisian daya dioptimalkan untuk melindungi baterai"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Masalah dengan aksesori pengisian daya"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pengisian daya dihentikan sementara untuk melindungi baterai"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Periksa aksesori pengisi daya"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Jaringan terkunci"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Tidak ada SIM"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM tidak dapat digunakan."</string>
@@ -108,9 +108,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Pola diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Sandi diperlukan setelah perangkat dimulai ulang"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Untuk keamanan tambahan, gunakan pola"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Untuk keamanan tambahan, gunakan PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Untuk keamanan tambahan, gunakan sandi"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Agar lebih aman, gunakan pola"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Agar lebih aman, gunakan PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Agar lebih aman, gunakan sandi"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Perangkat dikunci oleh admin"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Perangkat dikunci secara manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tidak dikenali"</string>

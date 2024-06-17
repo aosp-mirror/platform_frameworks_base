@@ -24,7 +24,6 @@ import static com.android.server.power.stats.BatteryStatsImpl.TimeBase;
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.os.Parcel;
@@ -159,7 +158,7 @@ public class LongSamplingCounterArrayTest {
         // Test with detachIfReset=false
         mCounterArray.reset(false /* detachIfReset */);
         assertArrayEquals(ZEROES, mCounterArray.mCounts);
-        verifyZeroInteractions(mTimeBase);
+        verifyNoMoreInteractions(mTimeBase);
 
         updateCounts(COUNTS);
         // Test with detachIfReset=true

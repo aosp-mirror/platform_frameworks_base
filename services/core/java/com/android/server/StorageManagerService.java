@@ -48,6 +48,7 @@ import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -1075,6 +1076,7 @@ class StorageManagerService extends IStorageManager.Stub
             final UserManager userManager = mContext.getSystemService(UserManager.class);
             final List<UserInfo> users = userManager.getUsers();
 
+            extendWatchdogTimeout("#onReset might be slow");
             mStorageSessionController.onReset(mVold, () -> {
                 mHandler.removeCallbacksAndMessages(null);
             });
@@ -3593,6 +3595,13 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         return mInternalStorageSize;
+    }
+
+    @EnforcePermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Override
+    public int getInternalStorageRemainingLifetime() throws RemoteException {
+        super.getInternalStorageRemainingLifetime_enforcePermission();
+        return mVold.getStorageRemainingLifetime();
     }
 
     /**

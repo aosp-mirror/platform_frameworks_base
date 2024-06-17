@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalInt;
+import java.util.function.IntConsumer;
 
 // TODO(b/210039666): See if we can make this class thread-safe.
 final class HandwritingModeController {
@@ -82,16 +83,19 @@ final class HandwritingModeController {
     private @Nullable String mDelegatePackageName;
     private @Nullable String mDelegatorPackageName;
     private boolean mDelegatorFromDefaultHomePackage;
+    private boolean mDelegationConnectionlessFlow;
     private Runnable mDelegationIdleTimeoutRunnable;
     private Handler mDelegationIdleTimeoutHandler;
-
+    private IntConsumer mPointerToolTypeConsumer;
+    private final Runnable mDiscardDelegationTextRunnable;
     private HandwritingEventReceiverSurface mHandwritingSurface;
 
     private int mCurrentRequestId;
 
     @AnyThread
     HandwritingModeController(Context context, Looper uiThreadLooper,
-            Runnable inkWindowInitRunnable) {
+            Runnable inkWindowInitRunnable, IntConsumer toolTypeConsumer,
+            Runnable discardDelegationTextRunnable) {
         mContext = context;
         mLooper = uiThreadLooper;
         mCurrentDisplayId = Display.INVALID_DISPLAY;
@@ -100,6 +104,8 @@ final class HandwritingModeController {
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mCurrentRequestId = 0;
         mInkWindowInitRunnable = inkWindowInitRunnable;
+        mPointerToolTypeConsumer = toolTypeConsumer;
+        mDiscardDelegationTextRunnable = discardDelegationTextRunnable;
     }
 
     /**
@@ -161,7 +167,8 @@ final class HandwritingModeController {
      * @see InputMethodManager#prepareStylusHandwritingDelegation(View, String)
      */
     void prepareStylusHandwritingDelegation(
-            int userId, @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
+            int userId, @NonNull String delegatePackageName, @NonNull String delegatorPackageName,
+            boolean connectionless) {
         mDelegatePackageName = delegatePackageName;
         mDelegatorPackageName = delegatorPackageName;
         mDelegatorFromDefaultHomePackage = false;
@@ -175,10 +182,13 @@ final class HandwritingModeController {
                         delegatorPackageName.equals(defaultHomeActivity.getPackageName());
             }
         }
-        if (mHandwritingBuffer == null) {
-            mHandwritingBuffer = new ArrayList<>(getHandwritingBufferSize());
-        } else {
-            mHandwritingBuffer.ensureCapacity(getHandwritingBufferSize());
+        mDelegationConnectionlessFlow = connectionless;
+        if (!connectionless) {
+            if (mHandwritingBuffer == null) {
+                mHandwritingBuffer = new ArrayList<>(getHandwritingBufferSize());
+            } else {
+                mHandwritingBuffer.ensureCapacity(getHandwritingBufferSize());
+            }
         }
         scheduleHandwritingDelegationTimeout();
     }
@@ -193,6 +203,10 @@ final class HandwritingModeController {
 
     boolean isDelegatorFromDefaultHomePackage() {
         return mDelegatorFromDefaultHomePackage;
+    }
+
+    boolean isDelegationUsingConnectionlessFlow() {
+        return mDelegationConnectionlessFlow;
     }
 
     private void scheduleHandwritingDelegationTimeout() {
@@ -236,6 +250,10 @@ final class HandwritingModeController {
         mDelegatorPackageName = null;
         mDelegatePackageName = null;
         mDelegatorFromDefaultHomePackage = false;
+        if (mDelegationConnectionlessFlow) {
+            mDelegationConnectionlessFlow = false;
+            mDiscardDelegationTextRunnable.run();
+        }
     }
 
     /**
@@ -340,7 +358,9 @@ final class HandwritingModeController {
             }
         }
 
-        clearPendingHandwritingDelegation();
+        if (!mDelegationConnectionlessFlow) {
+            clearPendingHandwritingDelegation();
+        }
         mRecordingGesture = false;
     }
 
@@ -355,6 +375,11 @@ final class HandwritingModeController {
             return false;
         }
         final MotionEvent event = (MotionEvent) ev;
+        if (mPointerToolTypeConsumer != null && event.getAction() == MotionEvent.ACTION_DOWN) {
+            int toolType = event.getToolType(event.getActionIndex());
+            // notify IME of change in tool type.
+            mPointerToolTypeConsumer.accept(toolType);
+        }
         if (!event.isStylusPointer()) {
             return false;
         }
@@ -383,7 +408,8 @@ final class HandwritingModeController {
 
         // If handwriting delegation is ongoing, don't clear the buffer so that multiple strokes
         // can be buffered across windows.
-        if (TextUtils.isEmpty(mDelegatePackageName)
+        // (This isn't needed for the connectionless delegation flow.)
+        if ((TextUtils.isEmpty(mDelegatePackageName) || mDelegationConnectionlessFlow)
                 && (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL)) {
             mRecordingGesture = false;
             mHandwritingBuffer.clear();

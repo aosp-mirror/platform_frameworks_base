@@ -231,6 +231,16 @@ static struct {
 
 static struct {
     jclass clazz;
+    jmethodID accept;
+} gConsumerClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gTransactionStatsClassInfo;
+
+static struct {
+    jclass clazz;
     jmethodID ctor;
     jfieldID format;
     jfieldID alphaInterpretation;
@@ -308,6 +318,54 @@ public:
 
 private:
     jobject mTransactionCommittedListenerObject;
+    JavaVM* mVm;
+
+    JNIEnv* getenv() {
+        JNIEnv* env;
+        mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+        return env;
+    }
+};
+
+class TransactionCompletedListenerWrapper {
+public:
+    explicit TransactionCompletedListenerWrapper(JNIEnv* env, jobject object) {
+        env->GetJavaVM(&mVm);
+        mTransactionCompletedListenerObject = env->NewGlobalRef(object);
+        LOG_ALWAYS_FATAL_IF(!mTransactionCompletedListenerObject, "Failed to make global ref");
+    }
+
+    ~TransactionCompletedListenerWrapper() {
+        getenv()->DeleteGlobalRef(mTransactionCompletedListenerObject);
+    }
+
+    void callback(nsecs_t latchTime, const sp<Fence>& presentFence,
+                  const std::vector<SurfaceControlStats>& /*stats*/) {
+        JNIEnv* env = getenv();
+        // Adding a strong reference for java SyncFence
+        if (presentFence) {
+            presentFence->incStrong(0);
+        }
+
+        jobject stats =
+                env->NewObject(gTransactionStatsClassInfo.clazz, gTransactionStatsClassInfo.ctor,
+                               latchTime, presentFence.get());
+        env->CallVoidMethod(mTransactionCompletedListenerObject, gConsumerClassInfo.accept, stats);
+        env->DeleteLocalRef(stats);
+        DieIfException(env, "Uncaught exception in TransactionCompletedListener.");
+    }
+
+    static void transactionCallbackThunk(void* context, nsecs_t latchTime,
+                                         const sp<Fence>& presentFence,
+                                         const std::vector<SurfaceControlStats>& stats) {
+        TransactionCompletedListenerWrapper* listener =
+                reinterpret_cast<TransactionCompletedListenerWrapper*>(context);
+        listener->callback(latchTime, presentFence, stats);
+        delete listener;
+    }
+
+private:
+    jobject mTransactionCompletedListenerObject;
     JavaVM* mVm;
 
     JNIEnv* getenv() {
@@ -656,6 +714,13 @@ static void nativeSetExtendedRangeBrightness(JNIEnv* env, jclass clazz, jlong tr
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
     transaction->setExtendedRangeBrightness(ctrl, currentBufferRatio, desiredRatio);
+}
+
+static void nativeSetDesiredHdrHeadroom(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                        jlong nativeObject, float desiredRatio) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setDesiredHdrHeadroom(ctrl, desiredRatio);
 }
 
 static void nativeSetCachingHint(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1879,8 +1944,14 @@ static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transac
 
     FrameTimelineInfo ftInfo;
     ftInfo.vsyncId = frameTimelineVsyncId;
-    ftInfo.inputEventId = android::os::IInputConstants::INVALID_INPUT_EVENT_ID;
     transaction->setFrameTimelineInfo(ftInfo);
+}
+
+static void nativeSetDesiredPresentTimeNanos(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                             jlong desiredPresentTimeNanos) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    transaction->setDesiredPresentTime(desiredPresentTimeNanos);
 }
 
 static void nativeAddTransactionCommittedListener(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1890,6 +1961,17 @@ static void nativeAddTransactionCommittedListener(JNIEnv* env, jclass clazz, jlo
     void* context =
             new TransactionCommittedListenerWrapper(env, transactionCommittedListenerObject);
     transaction->addTransactionCommittedCallback(TransactionCommittedListenerWrapper::
+                                                         transactionCallbackThunk,
+                                                 context);
+}
+
+static void nativeAddTransactionCompletedListener(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                                  jobject transactionCompletedListenerObject) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    void* context =
+            new TransactionCompletedListenerWrapper(env, transactionCompletedListenerObject);
+    transaction->addTransactionCompletedCallback(TransactionCompletedListenerWrapper::
                                                          transactionCallbackThunk,
                                                  context);
 }
@@ -2265,7 +2347,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDataSpace },
     {"nativeSetExtendedRangeBrightness", "(JJFF)V",
             (void*)nativeSetExtendedRangeBrightness },
-            {"nativeSetCachingHint", "(JJI)V",
+    {"nativeSetDesiredHdrHeadroom", "(JJF)V",
+            (void*)nativeSetDesiredHdrHeadroom },
+    {"nativeSetCachingHint", "(JJI)V",
             (void*)nativeSetCachingHint },
     {"nativeAddWindowInfosReportedListener", "(JLjava/lang/Runnable;)V",
             (void*)nativeAddWindowInfosReportedListener },
@@ -2318,6 +2402,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSurfaceFlushJankData },
     {"nativeAddTransactionCommittedListener", "(JLandroid/view/SurfaceControl$TransactionCommittedListener;)V",
             (void*) nativeAddTransactionCommittedListener },
+    {"nativeAddTransactionCompletedListener", "(JLjava/util/function/Consumer;)V",
+            (void*) nativeAddTransactionCompletedListener },
     {"nativeSetTrustedPresentationCallback", "(JJJLandroid/view/SurfaceControl$TrustedPresentationThresholds;)V",
             (void*) nativeSetTrustedPresentationCallback },
     {"nativeClearTrustedPresentationCallback", "(JJ)V",
@@ -2337,6 +2423,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"getNativeTrustedPresentationCallbackFinalizer", "()J", (void*)getNativeTrustedPresentationCallbackFinalizer },
     {"nativeGetStalledTransactionInfo", "(I)Landroid/gui/StalledTransactionInfo;",
             (void*) nativeGetStalledTransactionInfo },
+    {"nativeSetDesiredPresentTimeNanos", "(JJ)V",
+            (void*) nativeSetDesiredPresentTimeNanos },
         // clang-format on
 };
 
@@ -2539,6 +2627,16 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gTransactionCommittedListenerClassInfo.onTransactionCommitted =
             GetMethodIDOrDie(env, transactionCommittedListenerClazz, "onTransactionCommitted",
                              "()V");
+    jclass consumerClazz = FindClassOrDie(env, "java/util/function/Consumer");
+    gConsumerClassInfo.clazz = MakeGlobalRefOrDie(env, consumerClazz);
+    gConsumerClassInfo.accept =
+            GetMethodIDOrDie(env, consumerClazz, "accept", "(Ljava/lang/Object;)V");
+
+    jclass transactionStatsClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$TransactionStats");
+    gTransactionStatsClassInfo.clazz = MakeGlobalRefOrDie(env, transactionStatsClazz);
+    gTransactionStatsClassInfo.ctor =
+            GetMethodIDOrDie(env, gTransactionStatsClassInfo.clazz, "<init>", "(JJ)V");
 
     jclass displayDecorationSupportClazz =
             FindClassOrDie(env, "android/hardware/graphics/common/DisplayDecorationSupport");

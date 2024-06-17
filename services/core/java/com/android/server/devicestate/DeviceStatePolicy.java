@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.text.TextUtils;
+import android.util.Dumpable;
 
 import com.android.server.policy.DeviceStatePolicyImpl;
 
@@ -29,7 +30,7 @@ import com.android.server.policy.DeviceStatePolicyImpl;
  *
  * @see DeviceStateManagerService
  */
-public abstract class DeviceStatePolicy {
+public abstract class DeviceStatePolicy implements Dumpable {
     protected final Context mContext;
 
     protected DeviceStatePolicy(@NonNull Context context) {

@@ -34,10 +34,18 @@ object SettingsDimension {
         end = itemPaddingEnd,
         bottom = itemPaddingVertical,
     )
+    val textFieldPadding = PaddingValues(
+        start = itemPaddingStart,
+        end = itemPaddingEnd,
+    )
+    val menuFieldPadding = PaddingValues(
+        start = itemPaddingStart,
+        end = itemPaddingEnd,
+        bottom = itemPaddingVertical,
+    )
     val itemPaddingAround = 8.dp
     val itemDividerHeight = 32.dp
 
-    val iconSmall = 16.dp
     val iconLarge = 48.dp
 
     /** The size when app icon is displayed in list. */

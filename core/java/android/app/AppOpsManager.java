@@ -16,6 +16,9 @@
 
 package android.app;
 
+
+import static android.location.flags.Flags.FLAG_LOCATION_BYPASS;
+import static android.media.audio.Flags.foregroundAudioControl;
 import static android.permission.flags.Flags.FLAG_OP_ENABLE_MOBILE_DATA_BY_USER;
 import static android.view.contentprotection.flags.Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED;
 import static android.view.contentprotection.flags.Flags.FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED;
@@ -36,6 +39,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.usage.UsageStatsManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -68,9 +72,13 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.PermissionGroupUsage;
+import android.permission.PermissionUsageHelper;
+import android.permission.flags.Flags;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.Pools;
@@ -92,7 +100,6 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Parcelling;
 import com.android.internal.util.Preconditions;
-import com.android.media.flags.Flags;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -221,6 +228,7 @@ public class AppOpsManager {
     private static Boolean sFullLog = null;
 
     final Context mContext;
+    private PermissionUsageHelper mUsageHelper;
 
     @UnsupportedAppUsage
     final IAppOpsService mService;
@@ -1532,16 +1540,54 @@ public class AppOpsManager {
     public static final int OP_RESERVED_FOR_TESTING = AppProtoEnums.APP_OP_RESERVED_FOR_TESTING;
 
     /**
-     * Rapid clearing of notifications by a notification listener, see b/289080543 for details
+     * Rapid clearing of notifications by a notification listener
      *
      * @hide
      */
+    // See b/289080543 for more details
     public static final int OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER =
             AppProtoEnums.APP_OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER;
 
+    /**
+     * See {@link #OPSTR_READ_SYSTEM_GRAMMATICAL_GENDER}.
+     * @hide
+     */
+    public static final int OP_READ_SYSTEM_GRAMMATICAL_GENDER =
+            AppProtoEnums.APP_OP_READ_SYSTEM_GRAMMATICAL_GENDER;
+
+    /**
+     * Allows an app with a major use case of backing-up or syncing content to run longer jobs.
+     *
+     * @hide
+     */
+    public static final int OP_RUN_BACKUP_JOBS = AppProtoEnums.APP_OP_RUN_BACKUP_JOBS;
+
+    /**
+     * Whether the app has enabled to receive the icon overlay for fetching archived apps.
+     *
+     * @hide
+     */
+    public static final int OP_ARCHIVE_ICON_OVERLAY = AppProtoEnums.APP_OP_ARCHIVE_ICON_OVERLAY;
+
+    /**
+     * Whether the app has enabled compatibility support for unarchival.
+     *
+     * @hide
+     */
+    public static final int OP_UNARCHIVAL_CONFIRMATION =
+            AppProtoEnums.APP_OP_UNARCHIVAL_CONFIRMATION;
+
+    /**
+     * Allows an app to access location without the traditional location permissions and while the
+     * user location setting is off, but only during pre-defined emergency sessions.
+     *
+     * @hide
+     */
+    public static final int OP_EMERGENCY_LOCATION = AppProtoEnums.APP_OP_EMERGENCY_LOCATION;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 143;
+    public static final int _NUM_OP = 148;
 
     /**
      * All app ops represented as strings.
@@ -1691,6 +1737,10 @@ public class AppOpsManager {
             OPSTR_ENABLE_MOBILE_DATA_BY_USER,
             OPSTR_RESERVED_FOR_TESTING,
             OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER,
+            OPSTR_RUN_BACKUP_JOBS,
+            OPSTR_ARCHIVE_ICON_OVERLAY,
+            OPSTR_UNARCHIVAL_CONFIRMATION,
+            OPSTR_EMERGENCY_LOCATION,
     })
     public @interface AppOpString {}
 
@@ -2027,8 +2077,23 @@ public class AppOpsManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL)
+    @FlaggedApi(com.android.media.flags.Flags
+            .FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL)
     public static final String OPSTR_MEDIA_ROUTING_CONTROL = "android:media_routing_control";
+
+    /**
+     * Whether the app has enabled to receive the icon overlay for fetching archived apps.
+     *
+     * @hide
+     */
+    public static final String OPSTR_ARCHIVE_ICON_OVERLAY = "android:archive_icon_overlay";
+
+    /**
+     * Whether the app has enabled compatibility support for unarchival.
+     *
+     * @hide
+     */
+    public static final String OPSTR_UNARCHIVAL_CONFIRMATION = "android:unarchival_support";
 
     /**
      * AppOp granted to apps that we are started via {@code am instrument -e --no-isolated-storage}
@@ -2179,6 +2244,8 @@ public class AppOpsManager {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
+    @SystemApi
     public static final String OPSTR_ACCESS_RESTRICTED_SETTINGS =
             "android:access_restricted_settings";
 
@@ -2363,14 +2430,40 @@ public class AppOpsManager {
             "android:reserved_for_testing";
 
     /**
-     * Rapid clearing of notifications by a notification listener, see b/289080543 for details
+     * Rapid clearing of notifications by a notification listener
      *
      * @hide
      */
+    // See b/289080543 for more details
     @SystemApi
     @FlaggedApi(FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED)
     public static final String OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER =
             "android:rapid_clear_notifications_by_listener";
+
+    /**
+     * Allows an application to read the system grammatical gender.
+     *
+     * @hide
+     */
+    public static final String OPSTR_READ_SYSTEM_GRAMMATICAL_GENDER =
+            "android:read_system_grammatical_gender";
+
+    /**
+     * Allows an app whose primary use case is to backup or sync content to run longer jobs.
+     *
+     * @hide
+     */
+    public static final String OPSTR_RUN_BACKUP_JOBS = "android:run_backup_jobs";
+
+    /**
+     * Allows an app to access location without the traditional location permissions and while the
+     * user location setting is off, but only during pre-defined emergency sessions.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_LOCATION_BYPASS)
+    public static final String OPSTR_EMERGENCY_LOCATION = "android:emergency_location";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -2483,6 +2576,10 @@ public class AppOpsManager {
             OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
             OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OP_MEDIA_ROUTING_CONTROL,
+            OP_READ_SYSTEM_GRAMMATICAL_GENDER,
+            OP_RUN_BACKUP_JOBS,
+            OP_ARCHIVE_ICON_OVERLAY,
+            OP_UNARCHIVAL_CONFIRMATION,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2935,6 +3032,22 @@ public class AppOpsManager {
                 OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER,
                 "RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER")
                 .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_SYSTEM_GRAMMATICAL_GENDER,
+                OPSTR_READ_SYSTEM_GRAMMATICAL_GENDER, "READ_SYSTEM_GRAMMATICAL_GENDER")
+                // will make it an app-op permission in the future.
+                // .setPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
+                .build(),
+        new AppOpInfo.Builder(OP_RUN_BACKUP_JOBS, OPSTR_RUN_BACKUP_JOBS, "RUN_BACKUP_JOBS")
+                .setPermission(Manifest.permission.RUN_BACKUP_JOBS).build(),
+        new AppOpInfo.Builder(OP_ARCHIVE_ICON_OVERLAY, OPSTR_ARCHIVE_ICON_OVERLAY,
+                "ARCHIVE_ICON_OVERLAY")
+                .setDefaultMode(MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_UNARCHIVAL_CONFIRMATION, OPSTR_UNARCHIVAL_CONFIRMATION,
+                "UNARCHIVAL_CONFIRMATION")
+                .setDefaultMode(MODE_ALLOWED).build(),
+        // TODO(b/301150056): STOPSHIP determine how this appop should work with the permission
+        new AppOpInfo.Builder(OP_EMERGENCY_LOCATION, OPSTR_EMERGENCY_LOCATION, "EMERGENCY_LOCATION")
+                .setPermission(Manifest.permission.LOCATION_BYPASS).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
@@ -3069,7 +3182,7 @@ public class AppOpsManager {
 
     /**
      * Retrieve the permission associated with an operation, or null if there is not one.
-     *
+
      * @param op The operation name.
      *
      * @hide
@@ -3122,6 +3235,10 @@ public class AppOpsManager {
      * @hide
      */
     public static @Mode int opToDefaultMode(int op) {
+        if (op == OP_TAKE_AUDIO_FOCUS && foregroundAudioControl()) {
+            // when removing the flag, change the entry in sAppOpInfos for OP_TAKE_AUDIO_FOCUS
+            return AppOpsManager.MODE_FOREGROUND;
+        }
         return sAppOpInfos[op].defaultMode;
     }
 
@@ -3316,7 +3433,8 @@ public class AppOpsManager {
             }
         }
 
-        public static final @android.annotation.NonNull Creator<PackageOps> CREATOR = new Creator<PackageOps>() {
+        public static final @android.annotation.NonNull Creator<PackageOps> CREATOR =
+                new Creator<PackageOps>() {
             @Override public PackageOps createFromParcel(Parcel source) {
                 return new PackageOps(source);
             }
@@ -7263,6 +7381,12 @@ public class AppOpsManager {
 
          * The default impl is to fallback onto {@link #onOpChanged(String, String)
          *
+         * <p> Implement this method and not
+         * {@link #onOpChanged(String, String, int, String)} if
+         * callbacks are
+         * required only on op state changes for the default device
+         * {@link VirtualDeviceManager#PERSISTENT_DEVICE_ID_DEFAULT}.
+         *
          * @param op The Op that changed.
          * @param packageName Package of the app whose Op changed.
          * @param userId User Space of the app whose Op changed.
@@ -7270,6 +7394,31 @@ public class AppOpsManager {
          */
         default void onOpChanged(@NonNull String op, @NonNull String packageName,  int userId) {
             onOpChanged(op, packageName);
+        }
+
+        /**
+         * Similar to {@link #onOpChanged(String, String, int)} but includes the device for which
+         * the op mode has changed.
+         *
+         * <p> Implement this method if callbacks are required on all devices.
+         * If not implemented explicitly, the default implementation will notify for op changes
+         * on the default device {@link VirtualDeviceManager#PERSISTENT_DEVICE_ID_DEFAULT} only.
+         *
+         * <p> If implemented, {@link #onOpChanged(String, String, int)}
+         * will not be called automatically.
+         *
+         * @param op The Op that changed.
+         * @param packageName Package of the app whose Op changed.
+         * @param userId User id of the app whose Op changed.
+         * @param persistentDeviceId persistent device id whose Op changed.
+         */
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        default void onOpChanged(@NonNull String op, @NonNull String packageName, int userId,
+                @NonNull String persistentDeviceId) {
+            if (Objects.equals(persistentDeviceId,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT)) {
+                onOpChanged(op, packageName, userId);
+            }
         }
     }
 
@@ -7290,6 +7439,12 @@ public class AppOpsManager {
         /**
          * Called when the active state of an app-op changes.
          *
+         * <p> Implement this method and not
+         * {@link #onOpActiveChanged(String, int, String, String, int, boolean, int, int)} if
+         * callbacks are
+         * required only on op state changes for the default device
+         * {@link Context#DEVICE_ID_DEFAULT}.
+         *
          * @param op The operation that changed.
          * @param uid The UID performing the operation.
          * @param packageName The package performing the operation.
@@ -7305,6 +7460,37 @@ public class AppOpsManager {
                 int attributionFlags, int attributionChainId) {
             onOpActiveChanged(op, uid, packageName, active);
         }
+
+        /**
+         * Similar to {@link #onOpActiveChanged(String, int, String, String, boolean, int, int)},
+         * but also includes the virtual device id of the op is now active or inactive.
+         *
+         * <p> Implement this method if callbacks are required on all devices.
+         * If not implemented explicitly, the default implementation will notify for op state
+         * changes on the default device {@link Context#DEVICE_ID_DEFAULT} only.
+         *
+         * <p> If implemented,
+         * {@link #onOpActiveChanged(String, int, String, String, boolean, int, int)}
+         * will not be called automatically.
+         *
+         * @param op The operation that changed.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param attributionTag The operation's attribution tag.
+         * @param virtualDeviceId the virtual device id whose operation has changed
+         * @param active Whether the operation became active or inactive.
+         * @param attributionFlags the attribution flags for this operation.
+         * @param attributionChainId the unique id of the attribution chain this op is a part of.
+         */
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        default void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
+                @Nullable String attributionTag, int virtualDeviceId, boolean active,
+                @AttributionFlags int attributionFlags, int attributionChainId) {
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                onOpActiveChanged(op, uid, packageName, attributionTag, active, attributionFlags,
+                        attributionChainId);
+            }
+        }
     }
 
     /**
@@ -7317,6 +7503,10 @@ public class AppOpsManager {
         /**
          * Called when an app-op is noted.
          *
+         * <p> Implement this method and not
+         * {@link #onOpNoted(String, int, String, String, int, int, int)} if callbacks are
+         * required only on op notes for the default device {@link Context#DEVICE_ID_DEFAULT}.
+         *
          * @param op The operation that was noted.
          * @param uid The UID performing the operation.
          * @param packageName The package performing the operation.
@@ -7326,6 +7516,34 @@ public class AppOpsManager {
          */
         void onOpNoted(@NonNull String op, int uid, @NonNull String packageName,
                 @Nullable String attributionTag, @OpFlags int flags, @Mode int result);
+
+        /**
+         * Similar to {@link #onOpNoted(String, int, String, String, int, int, int)},
+         * but also includes the virtual device id of the op is now active or inactive.
+         *
+         * <p> Implement this method if callbacks are required for op notes on all devices.
+         * If not implemented explicitly, the default implementation will notify for the
+         * default device {@link Context#DEVICE_ID_DEFAULT} only.
+         *
+         * <p> If implemented, {@link #onOpNoted(String, int, String, String, int, int)}
+         * will not be called automatically.
+         *
+         * @param op The operation that was noted.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param attributionTag The attribution tag performing the operation.
+         * @param virtualDeviceId the device that noted the operation
+         * @param flags The flags of this op
+         * @param result The result of the note.
+         */
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        default void onOpNoted(@NonNull String op, int uid, @NonNull String packageName,
+                @Nullable String attributionTag, int virtualDeviceId, @OpFlags int flags,
+                @Mode int result) {
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                onOpNoted(op, uid, packageName, attributionTag, flags, result);
+            }
+        }
     }
 
     /**
@@ -7364,6 +7582,9 @@ public class AppOpsManager {
     public static class OnOpChangedInternalListener implements OnOpChangedListener {
         public void onOpChanged(String op, String packageName) { }
         public void onOpChanged(int op, String packageName) { }
+        public void onOpChanged(int op, String packageName, String persistentDeviceId) {
+            onOpChanged(op, packageName);
+        }
     }
 
     /**
@@ -7374,6 +7595,8 @@ public class AppOpsManager {
     public interface OnOpActiveChangedInternalListener extends OnOpActiveChangedListener {
         default void onOpActiveChanged(String op, int uid, String packageName, boolean active) { }
         default void onOpActiveChanged(int op, int uid, String packageName, boolean active) { }
+        default void onOpActiveChanged(int op, int uid, String packageName, int virtualDeviceId,
+                boolean active) { }
     }
 
     /**
@@ -7427,6 +7650,12 @@ public class AppOpsManager {
         /**
          * Called when an op was started.
          *
+         * <p> Implement this method and not
+         * {@link #onOpStarted(int, int, String, String, int, int, int, int, int, int)} if
+         * callbacks are
+         * required only on op starts for the default device
+         * {@link Context#DEVICE_ID_DEFAULT}.
+         *
          * Note: This is only for op starts. It is not called when an op is noted or stopped.
          * By default, unless this method is overridden, no code will be executed for resume
          * events.
@@ -7445,6 +7674,37 @@ public class AppOpsManager {
                 @AttributionFlags int attributionFlags, int attributionChainId) {
             if (startType != START_TYPE_RESUMED) {
                 onOpStarted(op, uid, packageName, attributionTag, flags, result);
+            }
+        }
+
+        /**
+         * Similar to {@link #onOpStarted(int, int, String, String, int, int)},
+         * but also includes the virtual device id that started the op.
+         *
+         * <p> Implement this method if callbacks are required on all devices.
+         * If not implemented explicitly, the default implementation will notify for op starts on
+         * the default device {@link Context#DEVICE_ID_DEFAULT} only.
+         *
+         * <p> If implemented, {@link #onOpStarted(int, int, String, String, int, int)}
+         * will not be called automatically.
+         *
+         * @param op The op code.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param attributionTag The attribution tag performing the operation.
+         * @param virtualDeviceId the device that started the operation
+         * @param flags The flags of this op.
+         * @param result The result of the start.
+         * @param startType The start type of this start event. Either failed, resumed, or started.
+         * @param attributionFlags The location of this started op in an attribution chain.
+         */
+        default void onOpStarted(int op, int uid, @NonNull String packageName,
+             @Nullable String attributionTag, int virtualDeviceId, @OpFlags int flags,
+             @Mode int result, @StartedType int startType,
+             @AttributionFlags int attributionFlags, int attributionChainId) {
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                onOpStarted(op, uid, packageName, attributionTag, flags, result, startType,
+                        attributionFlags, attributionChainId);
             }
         }
     }
@@ -7510,6 +7770,44 @@ public class AppOpsManager {
     }
 
     /**
+     * Retrieve current operation state for all applications for a device.
+     *
+     * The mode of the ops returned are set for the package but may not reflect their effective
+     * state due to UID policy or because it's controlled by a different global op.
+     *
+     * Use {@link #unsafeCheckOp(String, int, String)}} or
+     * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
+     *
+     * @param ops The set of operations you are interested in, or null if you want all of them.
+     * @param persistentDeviceId The device that the ops are attributed to.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
+    public @NonNull List<AppOpsManager.PackageOps> getPackagesForOps(@Nullable String[] ops,
+            @NonNull String persistentDeviceId) {
+        final int[] opCodes;
+        if (ops != null) {
+            final int opCount = ops.length;
+            opCodes = new int[opCount];
+            for (int i = 0; i < opCount; i++) {
+                opCodes[i] = sOpStrToOp.get(ops[i]);
+            }
+        } else {
+            opCodes = null;
+        }
+        final List<AppOpsManager.PackageOps> result;
+        try {
+            result = mService.getPackagesForOpsForDevice(opCodes, persistentDeviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return (result != null) ? result : Collections.emptyList();
+    }
+
+    /**
      * Retrieve current operation state for all applications.
      *
      * The mode of the ops returned are set for the package but may not reflect their effective
@@ -7525,7 +7823,8 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops) {
         try {
-            return mService.getPackagesForOps(ops);
+            return mService.getPackagesForOpsForDevice(ops,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -7705,6 +8004,14 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(int code, int uid, @Mode int mode) {
         try {
+            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
+            if (code == OP_BLUETOOTH_CONNECT) {
+                Log.i(DEBUG_LOGGING_TAG,
+                        "setUidMode called for OP_BLUETOOTH_CONNECT with mode: " + mode
+                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
+                                + " trace: "
+                                + Arrays.toString(Thread.currentThread().getStackTrace()));
+            }
             mService.setUidMode(code, uid, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -7725,6 +8032,15 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(@NonNull String appOp, int uid, @Mode int mode) {
         try {
+            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
+            if (appOp.equals(OPSTR_BLUETOOTH_CONNECT)) {
+                Log.i(DEBUG_LOGGING_TAG,
+                        "setUidMode called for OPSTR_BLUETOOTH_CONNECT with mode: " + mode
+                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
+                                + " trace: "
+                                + Arrays.toString(Thread.currentThread().getStackTrace()));
+            }
+
             mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -7765,6 +8081,14 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(int code, int uid, String packageName, @Mode int mode) {
         try {
+            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
+            if (code == OP_BLUETOOTH_CONNECT) {
+                Log.i(DEBUG_LOGGING_TAG,
+                        "setMode called for OPSTR_BLUETOOTH_CONNECT with mode: " + mode
+                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
+                                + " trace: "
+                                + Arrays.toString(Thread.currentThread().getStackTrace()));
+            }
             mService.setMode(code, uid, packageName, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -7787,6 +8111,14 @@ public class AppOpsManager {
     public void setMode(@NonNull String op, int uid, @Nullable String packageName,
             @Mode int mode) {
         try {
+            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
+            if (op.equals(OPSTR_BLUETOOTH_CONNECT)) {
+                Log.i(DEBUG_LOGGING_TAG,
+                        "setMode called for OPSTR_BLUETOOTH_CONNECT with mode: " + mode
+                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
+                                + " trace: "
+                                + Arrays.toString(Thread.currentThread().getStackTrace()));
+            }
             mService.setMode(strOpToOp(op), uid, packageName, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -7938,14 +8270,26 @@ public class AppOpsManager {
             IAppOpsCallback cb = mModeWatchers.get(callback);
             if (cb == null) {
                 cb = new IAppOpsCallback.Stub() {
-                    public void opChanged(int op, int uid, String packageName) {
-                        if (callback instanceof OnOpChangedInternalListener) {
-                            ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName);
-                        }
-                        if (sAppOpInfos[op].name != null) {
-
-                            callback.onOpChanged(sAppOpInfos[op].name, packageName,
-                                    UserHandle.getUserId(uid));
+                    public void opChanged(int op, int uid, String packageName,
+                            String persistentDeviceId) {
+                        if (Flags.deviceAwarePermissionApisEnabled()) {
+                            if (callback instanceof OnOpChangedInternalListener) {
+                                ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName,
+                                        persistentDeviceId);
+                            }
+                            if (sAppOpInfos[op].name != null) {
+                                callback.onOpChanged(sAppOpInfos[op].name, packageName,
+                                        UserHandle.getUserId(uid), persistentDeviceId);
+                            }
+                        } else {
+                            if (callback instanceof OnOpChangedInternalListener) {
+                                ((OnOpChangedInternalListener) callback).onOpChanged(op,
+                                        packageName);
+                            }
+                            if (sAppOpInfos[op].name != null) {
+                                callback.onOpChanged(sAppOpInfos[op].name, packageName,
+                                        UserHandle.getUserId(uid));
+                            }
                         }
                     }
                 };
@@ -8026,16 +8370,29 @@ public class AppOpsManager {
             cb = new IAppOpsActiveCallback.Stub() {
                 @Override
                 public void opActiveChanged(int op, int uid, String packageName,
-                        String attributionTag, boolean active, @AttributionFlags
-                        int attributionFlags, int attributionChainId) {
+                        String attributionTag, int virtualDeviceId, boolean active,
+                        @AttributionFlags int attributionFlags, int attributionChainId) {
                     executor.execute(() -> {
-                        if (callback instanceof OnOpActiveChangedInternalListener) {
-                            ((OnOpActiveChangedInternalListener) callback).onOpActiveChanged(op,
-                                    uid, packageName, active);
-                        }
-                        if (sAppOpInfos[op].name != null) {
-                            callback.onOpActiveChanged(sAppOpInfos[op].name, uid, packageName,
-                                    attributionTag, active, attributionFlags, attributionChainId);
+                        if (Flags.deviceAwarePermissionApisEnabled()) {
+                            if (callback instanceof OnOpActiveChangedInternalListener) {
+                                ((OnOpActiveChangedInternalListener) callback).onOpActiveChanged(op,
+                                        uid, packageName, virtualDeviceId, active);
+                            }
+                            if (sAppOpInfos[op].name != null) {
+                                callback.onOpActiveChanged(sAppOpInfos[op].name, uid, packageName,
+                                        attributionTag, virtualDeviceId, active, attributionFlags,
+                                        attributionChainId);
+                            }
+                        } else {
+                            if (callback instanceof OnOpActiveChangedInternalListener) {
+                                ((OnOpActiveChangedInternalListener) callback).onOpActiveChanged(op,
+                                        uid, packageName, active);
+                            }
+                            if (sAppOpInfos[op].name != null) {
+                                callback.onOpActiveChanged(sAppOpInfos[op].name, uid, packageName,
+                                        attributionTag, active, attributionFlags,
+                                        attributionChainId);
+                            }
                         }
                     });
                 }
@@ -8104,10 +8461,10 @@ public class AppOpsManager {
              cb = new IAppOpsStartedCallback.Stub() {
                  @Override
                  public void opStarted(int op, int uid, String packageName, String attributionTag,
-                         int flags, int mode, int startType, int attributionFlags,
-                         int attributionChainId) {
-                     callback.onOpStarted(op, uid, packageName, attributionTag, flags, mode,
-                             startType, attributionFlags, attributionChainId);
+                         int virtualDeviceId, int flags, int mode, int startType,
+                         int attributionFlags, int attributionChainId) {
+                     callback.onOpStarted(op, uid, packageName, attributionTag, virtualDeviceId,
+                             flags, mode, startType, attributionFlags, attributionChainId);
                  }
              };
              mStartedWatchers.put(callback, cb);
@@ -8275,14 +8632,18 @@ public class AppOpsManager {
             cb = new IAppOpsNotedCallback.Stub() {
                 @Override
                 public void opNoted(int op, int uid, String packageName, String attributionTag,
-                        int flags, int mode) {
+                        int virtualDeviceId, int flags, int mode) {
                     final long identity = Binder.clearCallingIdentity();
                     try {
                         executor.execute(() -> {
                             if (sAppOpInfos[op].name != null) {
-                                listener.onOpNoted(sAppOpInfos[op].name, uid, packageName,
-                                        attributionTag,
-                                        flags, mode);
+                                if (Flags.deviceAwarePermissionApisEnabled()) {
+                                    listener.onOpNoted(sAppOpInfos[op].name, uid, packageName,
+                                            attributionTag, virtualDeviceId, flags, mode);
+                                } else {
+                                    listener.onOpNoted(sAppOpInfos[op].name, uid, packageName,
+                                            attributionTag, flags, mode);
+                                }
                             }
                         });
                     } finally {
@@ -8589,6 +8950,8 @@ public class AppOpsManager {
      *
      * @hide
      */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
     public int noteOpNoThrow(int op, @NonNull AttributionSource attributionSource,
             @Nullable String message) {
         return noteOpNoThrow(op, attributionSource.getUid(), attributionSource.getPackageName(),
@@ -9653,6 +10016,30 @@ public class AppOpsManager {
         }
 
         appOpsNotedForAttribution.set(op);
+    }
+
+    /**
+     * Get recent op usage data for CAMERA, MICROPHONE and LOCATION from all connected devices
+     * to power privacy indicator.
+     *
+     * @param includeMicrophoneUsage whether to retrieve microphone usage
+     * @return A list of permission groups currently or recently used by all apps by all users in
+     * the current profile group.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
+    public List<PermissionGroupUsage> getPermissionGroupUsageForPrivacyIndicator(
+            boolean includeMicrophoneUsage) {
+        // Lazily initialize the usage helper
+        if (mUsageHelper == null) {
+            mUsageHelper = new PermissionUsageHelper(mContext);
+        }
+
+        return mUsageHelper.getOpUsageDataForAllDevices(includeMicrophoneUsage);
     }
 
     /** @hide */

@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Бид нууц үггүй ирээдүй рүү урагшлахын хэрээр нууц үг нь нэвтрэх түлхүүрийн хамтаар боломжтой хэвээр байх болно."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g>-г хаана хадгалахаа сонгоно уу"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Мэдээллээ хадгалж, дараагийн удаа илүү хурдан нэвтрэхийн тулд нууц үгний менежерийг сонгоно уу"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g>-д passkey үүсгэх үү?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g>-н нууц үгийг хадгалах уу?"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g>-д нэвтрэхийн тулд нэвтрэх түлхүүр үүсгэх үү?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g>-д нэвтрэхийн тулд нууц үгийг хадгалах уу?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g>-н нэвтрэх мэдээллийг хадгалах уу?"</string>
     <string name="passkey" msgid="632353688396759522">"passkey"</string>
     <string name="password" msgid="6738570945182936667">"нууц үг"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Өөр төхөөрөмжөөс"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Өөр төхөөрөмж ашиглах"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Хүсэлтийг <xliff:g id="APP_NAME">%1$s</xliff:g> цуцалсан"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Нэвтрэх сонголтууд"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Бусад"</string>
 </resources>

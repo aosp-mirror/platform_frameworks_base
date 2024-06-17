@@ -21,6 +21,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.framework.BrowseActivity
@@ -88,6 +90,7 @@ object SppHome : SettingsPageProvider {
         val owner = this.createSettingsPage()
         return listOf(
             SppLayer1.buildInject().setLink(fromPage = owner).build(),
+            SppDialog.buildInject().setLink(fromPage = owner).build(),
         )
     }
 }
@@ -160,6 +163,21 @@ object SppLayer2 : SettingsPageProvider {
     }
 }
 
+object SppDialog : SettingsPageProvider {
+    override val name = "SppDialog"
+    override val navType = SettingsPageProvider.NavType.Dialog
+
+    const val CONTENT = "SppDialog Content"
+
+    @Composable
+    override fun Page(arguments: Bundle?) {
+        Text(CONTENT)
+    }
+
+    fun buildInject() = SettingsEntryBuilder.createInject(this.createSettingsPage())
+        .setMacro { SimplePreferenceMacro(title = name, clickRoute = name) }
+}
+
 object SppForSearch : SettingsPageProvider {
     override val name = "SppForSearch"
 
@@ -223,6 +241,7 @@ class SpaEnvironmentForTest(
                         navArgument("rt_param") { type = NavType.StringType },
                     )
                 },
+                SppDialog,
             ),
             rootPages
         )

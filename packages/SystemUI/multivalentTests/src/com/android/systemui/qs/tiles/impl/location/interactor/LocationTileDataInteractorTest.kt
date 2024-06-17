@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.impl.location.interactor
 
 import android.os.UserHandle
+import android.platform.test.annotations.EnabledOnRavenwood
 import android.testing.LeakCheck
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -38,6 +39,7 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class LocationTileDataInteractorTest : SysuiTestCase() {
     private lateinit var controller: FakeLocationController

@@ -30,13 +30,11 @@ import android.os.UserHandle
 import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
 import android.testing.AndroidTestingRunner
-import android.view.View
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
-import com.android.systemui.animation.LaunchableView
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.logging.PrivacyLogger
@@ -99,7 +97,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
     @Captor private lateinit var activityStartedCaptor: ArgumentCaptor<ActivityStarter.Callback>
     @Captor private lateinit var intentCaptor: ArgumentCaptor<Intent>
     @Mock private lateinit var uiEventLogger: UiEventLogger
-    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
 
     private val backgroundExecutor = FakeExecutor(FakeSystemClock())
     private val uiExecutor = FakeExecutor(FakeSystemClock())
@@ -147,7 +145,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
                 keyguardStateController,
                 appOpsController,
                 uiEventLogger,
-                dialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 dialogProvider
             )
     }
@@ -199,17 +197,14 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        verify(dialogLaunchAnimator, never()).show(any(), any(), anyBoolean())
+        verify(mDialogTransitionAnimator, never()).show(any(), any(), anyBoolean())
         verify(dialog).show()
     }
 
     @Test
     fun testShowDialogShowsDialogWithView() {
         val parent = LinearLayout(context)
-        val view =
-            object : View(context), LaunchableView {
-                override fun setShouldBlockVisibilityChanges(block: Boolean) {}
-            }
+        val view = OngoingPrivacyChip(context)
         parent.addView(view)
         val usage = createMockPermGroupUsage()
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
@@ -217,7 +212,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
         controller.showDialog(context, view)
         exhaustExecutors()
 
-        verify(dialogLaunchAnimator).show(eq(dialog), any(), anyBoolean())
+        verify(mDialogTransitionAnimator).show(eq(dialog), any(), anyBoolean())
         verify(dialog, never()).show()
     }
 

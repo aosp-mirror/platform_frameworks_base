@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
+import androidx.annotation.GravityInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -32,9 +33,8 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.model.SysUiState
 
 /**
@@ -53,21 +53,20 @@ class ComponentSystemUIDialog(
     context: Context,
     theme: Int,
     dismissOnDeviceLock: Boolean,
-    featureFlags: FeatureFlags,
     dialogManager: SystemUIDialogManager,
     sysUiState: SysUiState,
     broadcastDispatcher: BroadcastDispatcher,
-    dialogLaunchAnimator: DialogLaunchAnimator,
+    dialogTransitionAnimator: DialogTransitionAnimator,
+    @GravityInt private val dialogGravity: Int?,
 ) :
     SystemUIDialog(
         context,
         theme,
         dismissOnDeviceLock,
-        featureFlags,
         dialogManager,
         sysUiState,
         broadcastDispatcher,
-        dialogLaunchAnimator
+        dialogTransitionAnimator
     ),
     LifecycleOwner,
     SavedStateRegistryOwner,
@@ -93,6 +92,7 @@ class ComponentSystemUIDialog(
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        dialogGravity?.let { window?.setGravity(it) }
         onBackPressedDispatcher.setOnBackInvokedDispatcher(onBackInvokedDispatcher)
         savedStateRegistryController.performRestore(savedInstanceState)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)

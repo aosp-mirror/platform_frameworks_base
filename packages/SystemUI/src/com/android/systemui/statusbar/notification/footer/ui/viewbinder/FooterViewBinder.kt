@@ -25,49 +25,136 @@ import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 /** Binds a [FooterView] to its [view model][FooterViewModel]. */
 object FooterViewBinder {
-    fun bind(
+    fun bindWhileAttached(
         footer: FooterView,
         viewModel: FooterViewModel,
         clearAllNotifications: View.OnClickListener,
+        launchNotificationSettings: View.OnClickListener,
+        launchNotificationHistory: View.OnClickListener,
     ): DisposableHandle {
+        return footer.repeatWhenAttached {
+            lifecycleScope.launch {
+                bind(
+                    footer,
+                    viewModel,
+                    clearAllNotifications,
+                    launchNotificationSettings,
+                    launchNotificationHistory
+                )
+            }
+        }
+    }
+
+    suspend fun bind(
+        footer: FooterView,
+        viewModel: FooterViewModel,
+        clearAllNotifications: View.OnClickListener,
+        launchNotificationSettings: View.OnClickListener,
+        launchNotificationHistory: View.OnClickListener
+    ) = coroutineScope {
+        launch {
+            bindClearAllButton(
+                footer,
+                viewModel,
+                clearAllNotifications,
+            )
+        }
+        launch {
+            bindManageOrHistoryButton(
+                footer,
+                viewModel,
+                launchNotificationSettings,
+                launchNotificationHistory
+            )
+        }
+        launch { bindMessage(footer, viewModel) }
+    }
+
+    private suspend fun bindClearAllButton(
+        footer: FooterView,
+        viewModel: FooterViewModel,
+        clearAllNotifications: View.OnClickListener,
+    ) = coroutineScope {
+        footer.setClearAllButtonClickListener(clearAllNotifications)
+
+        launch {
+            viewModel.clearAllButton.labelId.collect { textId ->
+                footer.setClearAllButtonText(textId)
+            }
+        }
+
+        launch {
+            viewModel.clearAllButton.accessibilityDescriptionId.collect { textId ->
+                footer.setClearAllButtonDescription(textId)
+            }
+        }
+
+        launch {
+            viewModel.clearAllButton.isVisible.collect { isVisible ->
+                if (isVisible.isAnimating) {
+                    footer.setClearAllButtonVisible(
+                        isVisible.value,
+                        /* animate = */ true,
+                    ) { _ ->
+                        isVisible.stopAnimating()
+                    }
+                } else {
+                    footer.setClearAllButtonVisible(
+                        isVisible.value,
+                        /* animate = */ false,
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun bindManageOrHistoryButton(
+        footer: FooterView,
+        viewModel: FooterViewModel,
+        launchNotificationSettings: View.OnClickListener,
+        launchNotificationHistory: View.OnClickListener,
+    ) = coroutineScope {
+        launch {
+            viewModel.manageButtonShouldLaunchHistory.collect { shouldLaunchHistory ->
+                if (shouldLaunchHistory) {
+                    footer.setManageButtonClickListener(launchNotificationHistory)
+                } else {
+                    footer.setManageButtonClickListener(launchNotificationSettings)
+                }
+            }
+        }
+
+        launch {
+            viewModel.manageOrHistoryButton.labelId.collect { textId ->
+                footer.setManageOrHistoryButtonText(textId)
+            }
+        }
+
+        launch {
+            viewModel.manageOrHistoryButton.accessibilityDescriptionId.collect { textId ->
+                footer.setManageOrHistoryButtonDescription(textId)
+            }
+        }
+
+        // NOTE: The manage/history button is always visible as long as the footer is visible, no
+        //  need to update the visibility here.
+    }
+
+    private suspend fun bindMessage(
+        footer: FooterView,
+        viewModel: FooterViewModel,
+    ) = coroutineScope {
         // Bind the resource IDs
         footer.setMessageString(viewModel.message.messageId)
         footer.setMessageIcon(viewModel.message.iconId)
-        footer.setClearAllButtonText(viewModel.clearAllButton.labelId)
-        footer.setClearAllButtonDescription(viewModel.clearAllButton.accessibilityDescriptionId)
 
-        // Bind the click listeners
-        footer.setClearAllButtonClickListener(clearAllNotifications)
-
-        // Listen for visibility changes when the view is attached.
-        return footer.repeatWhenAttached {
-            lifecycleScope.launch {
-                viewModel.clearAllButton.isVisible.collect { isVisible ->
-                    if (isVisible.isAnimating) {
-                        footer.setClearAllButtonVisible(
-                            isVisible.value,
-                            /* animate = */ true,
-                        ) { _ ->
-                            isVisible.stopAnimating()
-                        }
-                    } else {
-                        footer.setClearAllButtonVisible(
-                            isVisible.value,
-                            /* animate = */ false,
-                        )
-                    }
-                }
-            }
-
-            lifecycleScope.launch {
-                viewModel.message.isVisible.collect { visible ->
-                    footer.setFooterLabelVisible(visible)
-                }
-            }
+        launch {
+            viewModel.message.isVisible.collect { visible -> footer.setFooterLabelVisible(visible) }
         }
     }
 }

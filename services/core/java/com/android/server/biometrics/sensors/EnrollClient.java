@@ -45,6 +45,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
 
     private long mEnrollmentStartTimeMs;
     private final boolean mHasEnrollmentsBeforeStarting;
+    private final int mEnrollReason;
 
     /**
      * @return true if the user has already enrolled the maximum number of templates.
@@ -55,13 +56,15 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
             int timeoutSec, int sensorId, boolean shouldVibrate,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            int enrollReason) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 shouldVibrate, logger, biometricContext);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;
         mHasEnrollmentsBeforeStarting = hasEnrollments();
+        mEnrollReason = enrollReason;
     }
 
     @Override
@@ -82,9 +85,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
 
         final ClientMonitorCallbackConverter listener = getListener();
         try {
-            if (listener != null) {
-                listener.onEnrollResult(identifier, remaining);
-            }
+            listener.onEnrollResult(identifier, remaining);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
@@ -93,7 +94,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
             mBiometricUtils.addBiometricForUser(getContext(), getTargetUserId(), identifier);
             getLogger().logOnEnrolled(getTargetUserId(),
                     System.currentTimeMillis() - mEnrollmentStartTimeMs,
-                    true /* enrollSuccessful */);
+                    true /* enrollSuccessful */, mEnrollReason);
             mCallback.onClientFinished(this, true /* success */);
         }
         notifyUserActivity();
@@ -121,7 +122,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
     public void onError(int error, int vendorCode) {
         getLogger().logOnEnrolled(getTargetUserId(),
                 System.currentTimeMillis() - mEnrollmentStartTimeMs,
-                false /* enrollSuccessful */);
+                false /* enrollSuccessful */, mEnrollReason);
         super.onError(error, vendorCode);
     }
 

@@ -25,11 +25,11 @@ import com.android.systemui.dagger.qualifiers.DisplayId
  * ```
  * sysuiState.updateFlags(
  *     displayId,
- *     SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to (sceneKey != SceneKey.Gone),
- *     SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED to (sceneKey == SceneKey.Shade),
- *     SYSUI_STATE_QUICK_SETTINGS_EXPANDED to (sceneKey == SceneKey.QuickSettings),
- *     SYSUI_STATE_BOUNCER_SHOWING to (sceneKey == SceneKey.Bouncer),
- *     SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING to (sceneKey == SceneKey.Lockscreen),
+ *     SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to (sceneKey != Scenes.Gone),
+ *     SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED to (sceneKey == Scenes.Shade),
+ *     SYSUI_STATE_QUICK_SETTINGS_EXPANDED to (sceneKey == Scenes.QuickSettings),
+ *     SYSUI_STATE_BOUNCER_SHOWING to (sceneKey == Scenes.Bouncer),
+ *     SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING to (sceneKey == Scenes.Lockscreen),
  * )
  * ```
  *

@@ -48,14 +48,13 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
     private static final int GRAVITY_RIGHT = 0x2;
     private static final int GRAVITY_TOP = 0x4;
     private static final int GRAVITY_BOTTOM = 0x8;
-    private static final int GRAVITY_CENTER =
-            GRAVITY_LEFT | GRAVITY_RIGHT | GRAVITY_TOP | GRAVITY_BOTTOM;
-    private static final int GRAVITY_CENTER_HORIZONTAL = GRAVITY_LEFT | GRAVITY_RIGHT;
+    private static final int TEXT_PADDING_IN_DP = 1;
     private static final int KEY_PADDING_IN_DP = 3;
     private static final int KEYBOARD_PADDING_IN_DP = 10;
     private static final int KEY_RADIUS_IN_DP = 5;
     private static final int KEYBOARD_RADIUS_IN_DP = 10;
-    private static final int GLYPH_TEXT_SIZE_IN_SP = 10;
+    private static final int MIN_GLYPH_TEXT_SIZE_IN_SP = 10;
+    private static final int MAX_GLYPH_TEXT_SIZE_IN_SP = 20;
 
     private final List<KeyDrawable> mKeyDrawables = new ArrayList<>();
 
@@ -107,6 +106,8 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
         }
         int rowCount = keys.length;
         float keyHeight = (float) (height - rowCount * 2 * keyPadding) / rowCount;
+        // Based on key height calculate the max text size that can fit for typing keys
+        mResourceProvider.calculateBestTextSizeForKey(keyHeight);
         float isoEnterKeyLeft = 0;
         float isoEnterKeyTop = 0;
         float isoEnterWidthUnit = 0;
@@ -136,16 +137,19 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
                 }
                 if (PhysicalKeyLayout.isSpecialKey(row[j])) {
                     mKeyDrawables.add(new TypingKey(null, keyRect, keyRadius,
+                            mResourceProvider.getTextPadding(),
                             mResourceProvider.getSpecialKeyPaint(),
                             mResourceProvider.getSpecialKeyPaint(),
                             mResourceProvider.getSpecialKeyPaint()));
                 } else if (PhysicalKeyLayout.isKeyPositionUnsure(row[j])) {
                     mKeyDrawables.add(new UnsureTypingKey(row[j].glyph(), keyRect,
-                            keyRadius, mResourceProvider.getTypingKeyPaint(),
+                            keyRadius, mResourceProvider.getTextPadding(),
+                            mResourceProvider.getTypingKeyPaint(),
                             mResourceProvider.getPrimaryGlyphPaint(),
                             mResourceProvider.getSecondaryGlyphPaint()));
                 } else {
                     mKeyDrawables.add(new TypingKey(row[j].glyph(), keyRect, keyRadius,
+                            mResourceProvider.getTextPadding(),
                             mResourceProvider.getTypingKeyPaint(),
                             mResourceProvider.getPrimaryGlyphPaint(),
                             mResourceProvider.getSecondaryGlyphPaint()));
@@ -192,15 +196,18 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
 
         private final RectF mKeyRect;
         private final float mKeyRadius;
+        private final float mTextPadding;
         private final Paint mKeyPaint;
         private final Paint mBaseTextPaint;
         private final Paint mModifierTextPaint;
         private final List<GlyphDrawable> mGlyphDrawables = new ArrayList<>();
 
         private TypingKey(@Nullable PhysicalKeyLayout.KeyGlyph glyphData, RectF keyRect,
-                float keyRadius, Paint keyPaint, Paint baseTextPaint, Paint modifierTextPaint) {
+                float keyRadius, float textPadding, Paint keyPaint, Paint baseTextPaint,
+                Paint modifierTextPaint) {
             mKeyRect = keyRect;
             mKeyRadius = keyRadius;
+            mTextPadding = textPadding;
             mKeyPaint = keyPaint;
             mBaseTextPaint = baseTextPaint;
             mModifierTextPaint = modifierTextPaint;
@@ -219,26 +226,19 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
             if (!glyphData.hasBaseText()) {
                 return;
             }
-            if (glyphData.hasValidShiftText() && glyphData.hasValidAltGrText()) {
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getBaseText(), new RectF(),
-                        GRAVITY_BOTTOM | GRAVITY_LEFT, mBaseTextPaint));
+            mGlyphDrawables.add(new GlyphDrawable(glyphData.getBaseText(), new RectF(),
+                    GRAVITY_BOTTOM | GRAVITY_LEFT, mBaseTextPaint));
+            if (glyphData.hasValidShiftText()) {
                 mGlyphDrawables.add(new GlyphDrawable(glyphData.getShiftText(), new RectF(),
                         GRAVITY_TOP | GRAVITY_LEFT, mModifierTextPaint));
+            }
+            if (glyphData.hasValidAltGrText()) {
                 mGlyphDrawables.add(new GlyphDrawable(glyphData.getAltGrText(), new RectF(),
                         GRAVITY_BOTTOM | GRAVITY_RIGHT, mModifierTextPaint));
-            } else if (glyphData.hasValidShiftText()) {
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getBaseText(), new RectF(),
-                        GRAVITY_BOTTOM | GRAVITY_CENTER_HORIZONTAL, mBaseTextPaint));
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getShiftText(), new RectF(),
-                        GRAVITY_TOP | GRAVITY_CENTER_HORIZONTAL, mModifierTextPaint));
-            } else if (glyphData.hasValidAltGrText()) {
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getBaseText(), new RectF(),
-                        GRAVITY_BOTTOM | GRAVITY_LEFT, mBaseTextPaint));
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getAltGrText(), new RectF(),
-                        GRAVITY_BOTTOM | GRAVITY_RIGHT, mModifierTextPaint));
-            } else {
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getBaseText(), new RectF(),
-                        GRAVITY_CENTER, mBaseTextPaint));
+            }
+            if (glyphData.hasValidAltGrShiftText()) {
+                mGlyphDrawables.add(new GlyphDrawable(glyphData.getAltGrShiftText(), new RectF(),
+                        GRAVITY_TOP | GRAVITY_RIGHT, mModifierTextPaint));
             }
         }
 
@@ -250,15 +250,19 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
                 float centerY = keyHeight / 2;
                 if ((glyph.gravity & GRAVITY_LEFT) != 0) {
                     centerX -= keyWidth / 4;
+                    centerX += mTextPadding / 2;
                 }
                 if ((glyph.gravity & GRAVITY_RIGHT) != 0) {
                     centerX += keyWidth / 4;
+                    centerX -= mTextPadding / 2;
                 }
                 if ((glyph.gravity & GRAVITY_TOP) != 0) {
                     centerY -= keyHeight / 4;
+                    centerY += mTextPadding / 2;
                 }
                 if ((glyph.gravity & GRAVITY_BOTTOM) != 0) {
                     centerY += keyHeight / 4;
+                    centerY -= mTextPadding / 2;
                 }
                 Rect textBounds = new Rect();
                 glyph.paint.getTextBounds(glyph.text, 0, glyph.text.length(), textBounds);
@@ -289,9 +293,9 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
     private static class UnsureTypingKey extends TypingKey {
 
         private UnsureTypingKey(@Nullable PhysicalKeyLayout.KeyGlyph glyphData,
-                RectF keyRect, float keyRadius, Paint keyPaint, Paint baseTextPaint,
-                Paint modifierTextPaint) {
-            super(glyphData, keyRect, keyRadius, createGreyedOutPaint(keyPaint),
+                RectF keyRect, float keyRadius, float textPadding, Paint keyPaint,
+                Paint baseTextPaint, Paint modifierTextPaint) {
+            super(glyphData, keyRect, keyRadius, textPadding, createGreyedOutPaint(keyPaint),
                     createGreyedOutPaint(baseTextPaint), createGreyedOutPaint(modifierTextPaint));
         }
     }
@@ -406,8 +410,11 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
         private final Paint mSecondaryGlyphPaint;
         private final int mKeyPadding;
         private final int mKeyboardPadding;
+        private final float mTextPadding;
         private final float mKeyRadius;
         private final float mBackgroundRadius;
+        private final float mSpToPxMultiplier;
+        private final Paint.FontMetrics mFontMetrics;
 
         private ResourceProvider(Context context) {
             mKeyPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
@@ -418,8 +425,10 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
                     KEY_RADIUS_IN_DP, context.getResources().getDisplayMetrics());
             mBackgroundRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                     KEYBOARD_RADIUS_IN_DP, context.getResources().getDisplayMetrics());
-            int textSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-                    GLYPH_TEXT_SIZE_IN_SP, context.getResources().getDisplayMetrics());
+            mSpToPxMultiplier = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 1,
+                    context.getResources().getDisplayMetrics());
+            mTextPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    TEXT_PADDING_IN_DP, context.getResources().getDisplayMetrics());
             boolean isDark = (context.getResources().getConfiguration().uiMode
                     & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
             int typingKeyColor = context.getColor(
@@ -434,13 +443,35 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
             int backgroundColor = context.getColor(
                     isDark ? android.R.color.system_surface_container_dark
                             : android.R.color.system_surface_container_light);
-            mPrimaryGlyphPaint = createTextPaint(primaryGlyphColor, textSize,
+            mPrimaryGlyphPaint = createTextPaint(primaryGlyphColor,
+                    MIN_GLYPH_TEXT_SIZE_IN_SP * mSpToPxMultiplier,
                     Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
-            mSecondaryGlyphPaint = createTextPaint(secondaryGlyphColor, textSize,
+            mSecondaryGlyphPaint = createTextPaint(secondaryGlyphColor,
+                    MIN_GLYPH_TEXT_SIZE_IN_SP * mSpToPxMultiplier,
                     Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
+            mFontMetrics = mPrimaryGlyphPaint.getFontMetrics();
             mTypingKeyPaint = createFillPaint(typingKeyColor);
             mSpecialKeyPaint = createFillPaint(specialKeyColor);
             mBackgroundPaint = createFillPaint(backgroundColor);
+        }
+
+        private void calculateBestTextSizeForKey(float keyHeight) {
+            int textSize = (int) (mSpToPxMultiplier * MIN_GLYPH_TEXT_SIZE_IN_SP) + 1;
+            while (textSize < mSpToPxMultiplier * MAX_GLYPH_TEXT_SIZE_IN_SP) {
+                updateTextSize(textSize);
+                if (mFontMetrics.bottom - mFontMetrics.top + 3 * mTextPadding > keyHeight / 2) {
+                    textSize--;
+                    break;
+                }
+                textSize++;
+            }
+            updateTextSize(textSize);
+        }
+
+        private void updateTextSize(float textSize) {
+            mPrimaryGlyphPaint.setTextSize(textSize);
+            mSecondaryGlyphPaint.setTextSize(textSize);
+            mPrimaryGlyphPaint.getFontMetrics(mFontMetrics);
         }
 
         private Paint getBackgroundPaint() {
@@ -471,6 +502,10 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
             return mKeyboardPadding;
         }
 
+        private float getTextPadding() {
+            return mTextPadding;
+        }
+
         private float getKeyRadius() {
             return mKeyRadius;
         }
@@ -480,7 +515,8 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
         }
     }
 
-    private static Paint createTextPaint(@ColorInt int textColor, int textSize, Typeface typeface) {
+    private static Paint createTextPaint(@ColorInt int textColor, float textSize,
+            Typeface typeface) {
         Paint paint = new Paint();
         paint.setColor(textColor);
         paint.setStyle(Paint.Style.FILL);

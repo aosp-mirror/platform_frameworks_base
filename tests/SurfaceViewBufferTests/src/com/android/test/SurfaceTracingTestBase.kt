@@ -21,9 +21,9 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.util.Log
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import android.tools.common.traces.surfaceflinger.LayersTrace
-import android.tools.device.traces.monitors.withSFTracing
-import android.tools.device.traces.monitors.PerfettoTraceMonitor
+import android.tools.traces.surfaceflinger.LayersTrace
+import android.tools.traces.monitors.withSFTracing
+import android.tools.traces.monitors.PerfettoTraceMonitor
 import junit.framework.Assert
 import org.junit.After
 import org.junit.Before

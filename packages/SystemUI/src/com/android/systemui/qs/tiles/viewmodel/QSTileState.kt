@@ -32,7 +32,7 @@ import kotlin.reflect.KClass
  * // TODO(b/http://b/299909989): Clean up legacy mappings after the transition
  */
 data class QSTileState(
-    val icon: () -> Icon,
+    val icon: () -> Icon?,
     val label: CharSequence,
     val activationState: ActivationState,
     val secondaryLabel: CharSequence?,
@@ -60,7 +60,7 @@ data class QSTileState(
             )
         }
 
-        fun build(icon: () -> Icon, label: CharSequence, build: Builder.() -> Unit): QSTileState =
+        fun build(icon: () -> Icon?, label: CharSequence, build: Builder.() -> Unit): QSTileState =
             Builder(icon, label).apply(build).build()
     }
 
@@ -108,7 +108,7 @@ data class QSTileState(
     }
 
     class Builder(
-        var icon: () -> Icon,
+        var icon: () -> Icon?,
         var label: CharSequence,
     ) {
         var activationState: ActivationState = ActivationState.INACTIVE

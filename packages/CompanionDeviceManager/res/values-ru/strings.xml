@@ -26,7 +26,7 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"устройстве"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Это приложение получит указанные разрешения на <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Разрешите приложению &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; получать эту информацию с вашего телефона"</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Сервисы стриминга приложений"</string>
+    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Сервисы для нескольких устройств"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" запрашивает разрешение от имени вашего устройства <xliff:g id="DISPLAY_NAME">%2$s</xliff:g>, чтобы транслировать приложения между устройствами."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Микрофон"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Список вызовов"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Устройства поблизости"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Смена источника вывода медиа"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Фотографии и медиафайлы"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Уведомления"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Уведомления"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Приложения"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Потоковая передача"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Приложение сможет совершать вызовы и управлять ими."</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Приложение сможет читать список вызовов и создавать записи в этом списке."</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Приложение сможет отправлять и просматривать SMS."</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Приложение сможет получать доступ к вашему списку контактов."</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Приложение сможет получать доступ к вашему календарю."</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Может записывать аудио"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Приложение сможет находить устройства поблизости, подключаться к ним и определять их относительное местоположение."</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Чтение всех уведомлений, в том числе сведений о контактах, сообщениях и фотографиях."</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Совершение телефонных звонков и управление ими"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Просмотр списка телефонных вызовов и создание записей в нем"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Отправка и просмотр SMS-сообщений"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Доступ к контактам"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Доступ к календарю"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Запись аудио"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Поиск устройств поблизости, подключение к ним и определение их относительного местоположения"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Чтение всех уведомлений, в том числе сведений о контактах, сообщениях и фотографиях"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Чтение всех уведомлений, в том числе сведений о контактах, сообщениях и фотографиях&lt;br/&gt;• Отправка уведомлений&lt;br/&gt;&lt;br/&gt;В разделе \"Настройки &gt; Уведомления\" вы можете в любое время разрешить или запретить этому приложению читать и отправлять уведомления."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Трансляция приложений с телефона."</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Трансляция приложений и системных функций с телефона"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Просмотр списка доступных устройств и управление тем, на котором будет транслироваться аудио и видео из других приложений"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"телефоне"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"планшете"</string>
 </resources>

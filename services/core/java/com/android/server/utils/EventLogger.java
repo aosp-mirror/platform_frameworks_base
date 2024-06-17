@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Log;
+import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -84,6 +85,17 @@ public class EventLogger {
         enqueue(event.printLog(logType, tag));
     }
 
+    /**
+     * Add a string-based event to the system log, and print it to the log with a specific severity.
+     * @param msg the message to appear in the log
+     * @param logType the log severity (verbose/info/warning/error)
+     * @param tag the tag under which the log entry will appear
+     */
+    public synchronized void enqueueAndSlog(String msg, @Event.LogType int logType, String tag) {
+        final Event event = new StringEvent(msg);
+        enqueue(event.printSlog(logType, tag));
+    }
+
     /** Dumps events into the given {@link DumpSink}. */
     public synchronized void dump(DumpSink dumpSink) {
         dumpSink.sink(mTag, new ArrayList<>(mEvents));
@@ -138,7 +150,7 @@ public class EventLogger {
         /**
          * Causes the string message for the event to appear in the logcat.
          * Here is an example of how to create a new event (a StringEvent), adding it to the logger
-         * (an instance of AudioEventLogger) while also making it show in the logcat:
+         * (an instance of EventLogger) while also making it show in the logcat:
          * <pre>
          *     myLogger.log(
          *         (new StringEvent("something for logcat and logger")).printLog(MyClass.TAG) );
@@ -167,9 +179,9 @@ public class EventLogger {
 
         /**
          * Same as {@link #printLog(String)} with a log type
-         * @param type one of {@link #ALOGI}, {@link #ALOGE}, {@link #ALOGV}
-         * @param tag
-         * @return
+         * @param type one of {@link #ALOGI}, {@link #ALOGE}, {@link #ALOGV}, {@link #ALOGW}
+         * @param tag the tag the log entry will be printed under
+         * @return the event itself
          */
         public Event printLog(@LogType int type, String tag) {
             switch (type) {
@@ -185,6 +197,32 @@ public class EventLogger {
                 case ALOGV:
                 default:
                     Log.v(tag, eventToString());
+                    break;
+            }
+            return this;
+        }
+
+        /**
+         * Causes the string message for the event to appear in the system log.
+         * @param type one of {@link #ALOGI}, {@link #ALOGE}, {@link #ALOGV}, {@link #ALOGW}
+         * @param tag the tag the log entry will be printed under
+         * @return the event itself
+         * @see #printLog(int, String)
+         */
+        public Event printSlog(@LogType int type, String tag) {
+            switch (type) {
+                case ALOGI:
+                    Slog.i(tag, eventToString());
+                    break;
+                case ALOGE:
+                    Slog.e(tag, eventToString());
+                    break;
+                case ALOGW:
+                    Slog.w(tag, eventToString());
+                    break;
+                case ALOGV:
+                default:
+                    Slog.v(tag, eventToString());
                     break;
             }
             return this;

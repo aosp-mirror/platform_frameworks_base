@@ -74,6 +74,8 @@ public class SecureSettings {
         Settings.Secure.TTS_DEFAULT_LOCALE,
         Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
         Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS,
+        Settings.Secure.ACCESSIBILITY_SLOW_KEYS,
+        Settings.Secure.ACCESSIBILITY_STICKY_KEYS,
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
         Settings.Secure.WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
@@ -224,6 +226,8 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED,
+        Settings.Secure.ACCESSIBILITY_PINCH_TO_ZOOM_ANYWHERE_ENABLED,
+        Settings.Secure.ACCESSIBILITY_SINGLE_FINGER_PANNING_ENABLED,
         Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
         Settings.Secure.NOTIFICATION_BUBBLES,
         Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
@@ -240,13 +244,16 @@ public class SecureSettings {
         Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_IMPROVE_COMPATIBILITY,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_FALLBACK_ACTIVE_DEVICE_ADDRESS,
         Settings.Secure.CUSTOM_BUGREPORT_HANDLER_APP,
         Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER,
+        Settings.Secure.CONTEXTUAL_SCREEN_TIMEOUT_ENABLED,
         Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
         Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
         Settings.Secure.HEARING_AID_CALL_ROUTING,
         Settings.Secure.HEARING_AID_MEDIA_ROUTING,
-        Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+        Settings.Secure.HEARING_AID_NOTIFICATION_ROUTING,
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
         Settings.Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED,
         Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,
@@ -257,6 +264,9 @@ public class SecureSettings {
         Settings.Secure.CREDENTIAL_SERVICE,
         Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
         Settings.Secure.EVEN_DIMMER_ACTIVATED,
-        Settings.Secure.EVEN_DIMMER_MIN_NITS
+        Settings.Secure.EVEN_DIMMER_MIN_NITS,
+        Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+        Settings.Secure.CAMERA_EXTENSIONS_FALLBACK,
+        Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED
     };
 }

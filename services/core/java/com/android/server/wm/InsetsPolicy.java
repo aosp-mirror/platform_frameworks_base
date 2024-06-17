@@ -728,7 +728,7 @@ class InsetsPolicy {
         }
 
         @Override
-        public void notifyInsetsControlChanged() {
+        public void notifyInsetsControlChanged(int displayId) {
             mHandler.post(this);
         }
 

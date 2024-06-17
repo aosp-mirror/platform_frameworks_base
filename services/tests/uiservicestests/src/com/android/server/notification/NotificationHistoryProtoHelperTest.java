@@ -20,10 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.NotificationHistory;
 import android.app.NotificationHistory.HistoricalNotification;
 import android.graphics.drawable.Icon;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.text.TextUtils;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;

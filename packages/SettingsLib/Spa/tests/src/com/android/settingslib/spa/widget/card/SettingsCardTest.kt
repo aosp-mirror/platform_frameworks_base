@@ -36,8 +36,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class SettingsCardTest {
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -76,9 +75,7 @@ class SettingsCardTest {
                 CardModel(
                     title = "",
                     text = "",
-                    buttons = listOf(
-                        CardButton(text = TEXT) {}
-                    ),
+                    buttons = listOf(CardButton(text = TEXT) {}),
                 )
             )
         }
@@ -94,9 +91,7 @@ class SettingsCardTest {
                 CardModel(
                     title = "",
                     text = "",
-                    buttons = listOf(
-                        CardButton(text = TEXT) { buttonClicked = true }
-                    ),
+                    buttons = listOf(CardButton(text = TEXT) { buttonClicked = true }),
                 )
             )
         }
@@ -104,6 +99,25 @@ class SettingsCardTest {
         composeTestRule.onNodeWithText(TEXT).performClick()
 
         assertThat(buttonClicked).isTrue()
+    }
+
+    @Test
+    fun settingsCard_buttonHaveContentDescription() {
+        composeTestRule.setContent {
+            SettingsCard(
+                CardModel(
+                    title = "",
+                    text = "",
+                    buttons = listOf(CardButton(
+                        text = TEXT,
+                        contentDescription = CONTENT_DESCRIPTION,
+                        ) {}
+                    ),
+                )
+            )
+        }
+
+        composeTestRule.onNodeWithContentDescription(CONTENT_DESCRIPTION).assertIsDisplayed()
     }
 
     @Test
@@ -127,8 +141,26 @@ class SettingsCardTest {
         composeTestRule.onNodeWithText(TEXT).isNotDisplayed()
     }
 
+    @Test
+    fun settingsCard_clickable() {
+        var clicked by mutableStateOf(false)
+        composeTestRule.setContent {
+            SettingsCard(
+                CardModel(
+                    title = TITLE,
+                    text = "",
+                ) { clicked = true }
+            )
+        }
+
+        composeTestRule.onNodeWithText(TITLE).performClick()
+
+        assertThat(clicked).isTrue()
+    }
+
     private companion object {
         const val TITLE = "Title"
         const val TEXT = "Text"
+        const val CONTENT_DESCRIPTION = "content-description"
     }
 }

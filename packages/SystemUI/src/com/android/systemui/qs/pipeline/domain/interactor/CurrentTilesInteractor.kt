@@ -35,6 +35,7 @@ import com.android.systemui.qs.external.TileLifecycleManager
 import com.android.systemui.qs.external.TileServiceKey
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepository
+import com.android.systemui.qs.pipeline.data.repository.MinimumTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.domain.model.TileModel
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
@@ -131,6 +132,7 @@ constructor(
     private val tileSpecRepository: TileSpecRepository,
     private val installedTilesComponentRepository: InstalledTilesComponentRepository,
     private val userRepository: UserRepository,
+    private val minimumTilesRepository: MinimumTilesRepository,
     private val customTileStatePersister: CustomTileStatePersister,
     private val newQSTileFactory: Lazy<NewQSTileFactory>,
     private val tileFactory: QSFactory,
@@ -255,17 +257,23 @@ constructor(
                         val resolvedSpecs = newTileMap.keys.toList()
                         specsToTiles.clear()
                         specsToTiles.putAll(newTileMap)
-                        _currentSpecsAndTiles.value =
+                        val newResolvedTiles =
                             newTileMap
                                 .filter { it.value is TileOrNotInstalled.Tile }
                                 .map {
                                     TileModel(it.key, (it.value as TileOrNotInstalled.Tile).tile)
                                 }
+
+                        _currentSpecsAndTiles.value = newResolvedTiles
                         logger.logTilesNotInstalled(
                             newTileMap.filter { it.value is TileOrNotInstalled.NotInstalled }.keys,
                             newUser
                         )
-                        if (resolvedSpecs != newTileList) {
+                        if (newResolvedTiles.size < minimumTilesRepository.minNumberOfTiles) {
+                            // We ended up with not enough tiles (some may be not installed).
+                            // Prepend the default set of tiles
+                            launch { tileSpecRepository.prependDefault(currentUser.value) }
+                        } else if (resolvedSpecs != newTileList) {
                             // There were some tiles that couldn't be created. Change the value in
                             // the
                             // repository
@@ -319,7 +327,7 @@ constructor(
 
     override fun dumpProto(systemUIProtoDump: SystemUIProtoDump, args: Array<String>) {
         val data =
-            currentTiles.value.map { it.tile.state }.mapNotNull { it.toProto() }.toTypedArray()
+            currentTiles.value.map { it.tile.state }.mapNotNull { it?.toProto() }.toTypedArray()
         systemUIProtoDump.tiles = data
     }
 

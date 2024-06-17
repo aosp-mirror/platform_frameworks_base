@@ -110,6 +110,7 @@ void ProfileData::mergeWith(const ProfileData& other) {
 }
 
 void ProfileData::dump(int fd) const {
+#ifdef __ANDROID__
     dprintf(fd, "\nStats since: %" PRIu64 "ns", mStatStartTime);
     dprintf(fd, "\nTotal frames rendered: %u", mTotalFrameCount);
     dprintf(fd, "\nJanky frames: %u (%.2f%%)", mJankFrameCount,
@@ -138,6 +139,7 @@ void ProfileData::dump(int fd) const {
         dprintf(fd, " %ums=%u", entry.renderTimeMs, entry.frameCount);
     });
     dprintf(fd, "\n");
+#endif
 }
 
 uint32_t ProfileData::findPercentile(int percentile) const {

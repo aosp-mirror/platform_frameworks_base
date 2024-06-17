@@ -24,20 +24,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
+import com.android.compose.theme.LocalAndroidColorScheme
 
 @Composable
 fun CredentialListSectionHeader(text: String, isFirstSection: Boolean) {
     InternalSectionHeader(
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+        color = LocalAndroidColorScheme.current.onSurfaceVariant,
         applyTopPadding = !isFirstSection
     )
 }
 
 @Composable
 fun MoreAboutPasskeySectionHeader(text: String) {
-    InternalSectionHeader(text, LocalAndroidColorScheme.current.colorOnSurface)
+    InternalSectionHeader(text, LocalAndroidColorScheme.current.onSurface)
 }
 
 @Composable

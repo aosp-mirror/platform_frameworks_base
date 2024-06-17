@@ -19,27 +19,25 @@ package com.android.systemui.communal.smartspace
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
-import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
-import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.UI_SURFACE_GLANCEABLE_HUB
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
-import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_PRECONDITION
-import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_TARGET_FILTER
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.GLANCEABLE_HUB_SMARTSPACE_DATA_PLUGIN
+import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.LOCKSCREEN_SMARTSPACE_PRECONDITION
+import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.LOCKSCREEN_SMARTSPACE_TARGET_FILTER
 import com.android.systemui.util.concurrency.Execution
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Named
 
-/** Controller for managing the smartspace view on the dream */
+/** Controller for managing the smartspace view on the glanceable hub */
 @SysUISingleton
 class CommunalSmartspaceController
 @Inject
@@ -48,8 +46,8 @@ constructor(
     private val smartspaceManager: SmartspaceManager?,
     private val execution: Execution,
     @Main private val uiExecutor: Executor,
-    @Named(DREAM_SMARTSPACE_PRECONDITION) private val precondition: SmartspacePrecondition,
-    @Named(DREAM_SMARTSPACE_TARGET_FILTER)
+    @Named(LOCKSCREEN_SMARTSPACE_PRECONDITION) private val precondition: SmartspacePrecondition,
+    @Named(LOCKSCREEN_SMARTSPACE_TARGET_FILTER)
     private val optionalTargetFilter: Optional<SmartspaceTargetFilter>,
     @Named(GLANCEABLE_HUB_SMARTSPACE_DATA_PLUGIN) optionalPlugin: Optional<BcSmartspaceDataPlugin>,
 ) {
@@ -63,11 +61,6 @@ constructor(
 
     // A shadow copy of listeners is maintained to track whether the session should remain open.
     private var listeners = mutableSetOf<SmartspaceTargetListener>()
-
-    private var unfilteredListeners = mutableSetOf<SmartspaceTargetListener>()
-
-    // Smartspace can be used on multiple displays, such as when the user casts their screen
-    private var smartspaceViews = mutableSetOf<SmartspaceView>()
 
     var preconditionListener =
         object : SmartspacePrecondition.Listener {
@@ -101,9 +94,7 @@ constructor(
         }
 
     private fun hasActiveSessionListeners(): Boolean {
-        return smartspaceViews.isNotEmpty() ||
-            listeners.isNotEmpty() ||
-            unfilteredListeners.isNotEmpty()
+        return listeners.isNotEmpty()
     }
 
     private fun connectSession() {
@@ -125,7 +116,7 @@ constructor(
             smartspaceManager.createSmartspaceSession(
                 SmartspaceConfig.Builder(context, UI_SURFACE_GLANCEABLE_HUB).build()
             )
-        Log.d(TAG, "Starting smartspace session for dream")
+        Log.d(TAG, "Starting smartspace session for communal")
         newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession
 
@@ -153,7 +144,7 @@ constructor(
 
         plugin?.registerSmartspaceEventNotifier(null)
         plugin?.onTargetsAvailable(emptyList())
-        Log.d(TAG, "Ending smartspace session for dream")
+        Log.d(TAG, "Ending smartspace session for communal")
     }
 
     fun addListener(listener: SmartspaceTargetListener) {
@@ -187,9 +178,5 @@ constructor(
 
     private fun reloadSmartspace() {
         session?.requestSmartspaceUpdate()
-    }
-
-    private fun onTargetsAvailableUnfiltered(targets: List<SmartspaceTarget>) {
-        unfilteredListeners.forEach { it.onSmartspaceTargetsUpdated(targets) }
     }
 }

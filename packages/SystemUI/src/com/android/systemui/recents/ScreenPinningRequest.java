@@ -54,25 +54,29 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.CoreStartable;
-import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.leak.RotationUtils;
+
+import dagger.Lazy;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
-
 @SysUISingleton
-public class ScreenPinningRequest implements View.OnClickListener,
-        NavigationModeController.ModeChangedListener, CoreStartable {
+public class ScreenPinningRequest implements
+        View.OnClickListener,
+        NavigationModeController.ModeChangedListener,
+        CoreStartable,
+        ConfigurationController.ConfigurationListener {
     private static final String TAG = "ScreenPinningRequest";
 
     private final Context mContext;
@@ -149,7 +153,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         if (mRequestWindow != null) {
             mRequestWindow.onConfigurationChanged();
         }

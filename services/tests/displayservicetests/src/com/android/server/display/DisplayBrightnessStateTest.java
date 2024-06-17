@@ -96,6 +96,8 @@ public class DisplayBrightnessStateTest {
                 .append(displayBrightnessState.isSlowChange())
                 .append("\n    maxBrightness:")
                 .append(displayBrightnessState.getMaxBrightness())
+                .append("\n    minBrightness:")
+                .append(displayBrightnessState.getMinBrightness())
                 .append("\n    customAnimationRate:")
                 .append(displayBrightnessState.getCustomAnimationRate())
                 .append("\n    shouldUpdateScreenBrightnessSetting:")

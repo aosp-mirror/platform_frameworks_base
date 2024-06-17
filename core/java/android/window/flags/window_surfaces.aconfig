@@ -21,21 +21,6 @@ flag {
 
 flag {
     namespace: "window_surfaces"
-    name: "get_host_token_api"
-    description: "Feature flag to associate the host and embedded windows"
-    is_fixed_read_only: true
-    bug: "304508760"
-}
-
-flag {
-    namespace: "window_surfaces"
-    name: "transfer_gesture_to_embedded"
-    description: "Enable public API for Window Surfaces"
-    bug: "287076178"
-}
-
-flag {
-    namespace: "window_surfaces"
     name: "delete_capture_display"
     description: "Delete uses of ScreenCapture#captureDisplay"
     is_fixed_read_only: true
@@ -64,4 +49,47 @@ flag {
     description: "Enable trustedPresentationListener on windows public API"
     is_fixed_read_only: true
     bug: "278027319"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "sdk_desired_present_time"
+    description: "Feature flag for the new SDK API to set desired present time"
+    is_fixed_read_only: true
+    bug: "295038072"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "surface_control_input_receiver"
+    description: "Enable public API to register an InputReceiver for a SurfaceControl"
+    is_fixed_read_only: true
+    bug: "278757236"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "screen_recording_callbacks"
+    description: "Enable screen recording callbacks public API"
+    is_fixed_read_only: true
+    bug: "304574518"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "sync_screen_capture"
+    description: "Create a screen capture API that blocks in SurfaceFlinger"
+    is_fixed_read_only: true
+    bug: "321263247"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "enable_buffer_transform_hint_from_display"
+    description: "Always use display info to determine VRI's buffer transform hint"
+    is_fixed_read_only: true
+    bug: "301238858"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

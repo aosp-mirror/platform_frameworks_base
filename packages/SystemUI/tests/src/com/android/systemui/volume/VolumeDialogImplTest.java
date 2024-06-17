@@ -32,6 +32,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assume.assumeNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -57,6 +58,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 
 import androidx.test.core.view.MotionEventBuilder;
 import androidx.test.filters.SmallTest;
@@ -68,10 +70,10 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
@@ -79,6 +81,9 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
+import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import dagger.Lazy;
 
@@ -107,6 +112,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     View mDrawerVibrate;
     View mDrawerMute;
     View mDrawerNormal;
+    ViewGroup mDialogRowsView;
     CaptionsToggleImageButton mODICaptionsIcon;
 
     private TestableLooper mTestableLooper;
@@ -126,10 +132,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Mock
     MediaOutputDialogFactory mMediaOutputDialogFactory;
     @Mock
-    VolumePanelFactory mVolumePanelFactory;
-    @Mock
-    ActivityStarter mActivityStarter;
-    @Mock
     InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     private DumpManager mDumpManager;
@@ -138,6 +140,10 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     DevicePostureController mPostureController;
     @Mock
     private Lazy<SecureSettings> mLazySecureSettings;
+    @Mock
+    private VolumePanelNavigationInteractor mVolumePanelNavigationInteractor;
+    @Mock
+    private VolumeNavigator mVolumeNavigator;
 
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
             new CsdWarningDialog.Factory() {
@@ -146,12 +152,14 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             return mCsdWarningDialog;
         }
     };
+    @Mock
+    private VibratorHelper mVibratorHelper;
 
     private int mLongestHideShowAnimationDuration = 250;
     private FakeSettings mSecureSettings;
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
    @Before
     public void setup() throws Exception {
@@ -180,6 +188,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         when(mLazySecureSettings.get()).thenReturn(mSecureSettings);
 
+        when(mVibratorHelper.getPrimitiveDurations(anyInt())).thenReturn(new int[]{0});
+
         mDialog = new VolumeDialogImpl(
                 getContext(),
                 mVolumeDialogController,
@@ -187,15 +197,17 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mDeviceProvisionedController,
                 mConfigurationController,
                 mMediaOutputDialogFactory,
-                mVolumePanelFactory,
-                mActivityStarter,
                 mInteractionJankMonitor,
+                mVolumePanelNavigationInteractor,
+                mVolumeNavigator,
                 false,
                 mCsdWarningDialogFactory,
                 mPostureController,
                 mTestableLooper.getLooper(),
                 mDumpManager,
-                mLazySecureSettings);
+                mLazySecureSettings,
+                mVibratorHelper,
+                new FakeSystemClock());
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
@@ -211,6 +223,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             mDrawerNormal = mDrawerContainer.findViewById(R.id.volume_drawer_normal);
         }
         mODICaptionsIcon = mDialog.getDialogView().findViewById(R.id.odi_captions_icon);
+
+        mDialogRowsView = mDialog.getDialogView().findViewById(R.id.volume_dialog_rows);
 
         Prefs.putInt(mContext,
                 Prefs.Key.SEEN_RINGER_GUIDANCE_COUNT,
@@ -661,6 +675,45 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void volumeSliderTracksTouch_logsStartAndStopTrackingUiEvents() {
+        UiEventLoggerFake logger = new UiEventLoggerFake();
+        Events.sUiEventLogger = logger;
+
+        mDialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processAllMessages();
+
+        MotionEvent down = MotionEventBuilder.newBuilder()
+                .setAction(MotionEvent.ACTION_DOWN).build();
+        MotionEvent up = MotionEventBuilder.newBuilder().setAction(MotionEvent.ACTION_UP).build();
+
+        SeekBar slider =
+                mDialogRowsView.getChildAt(0).findViewById(R.id.volume_row_slider);
+        slider.onTouchEvent(down);
+        slider.onTouchEvent(up);
+        mTestableLooper.moveTimeForward(300);
+        mTestableLooper.processAllMessages();
+
+        boolean foundStartTrackingTouch = false;
+        boolean foundStopTrackingTouch = false;
+        for (UiEventLoggerFake.FakeUiEvent event : logger.getLogs()) {
+            if (event.eventId
+                    == Events.VolumeDialogEvent.VOLUME_DIALOG_SLIDER_STARTED_TRACKING_TOUCH.getId()
+            ) {
+                foundStartTrackingTouch = true;
+            }
+            if (event.eventId
+                    == Events.VolumeDialogEvent.VOLUME_DIALOG_SLIDER_STOPPED_TRACKING_TOUCH.getId()
+            ) {
+                foundStopTrackingTouch = true;
+            }
+        }
+        Assert.assertTrue("Did not log the event of start tracking touch.",
+                foundStartTrackingTouch);
+        Assert.assertTrue("Did not log the event of stop tracking touch.",
+                foundStopTrackingTouch);
+    }
+
+    @Test
     public void turnOnDnD_volumeSliderIconChangesToDnd() {
         State state = createShellState();
         state.zenMode = Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
@@ -746,8 +799,9 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         Log.d(TAG, "teardown: entered");
         setOrientation(mOriginalOrientation);
         Log.d(TAG, "teardown: after setOrientation");
-        mAnimatorTestRule.advanceTimeBy(mLongestHideShowAnimationDuration);
-        Log.d(TAG, "teardown: after advanceTimeBy");
+        // Unclear why we used to do this, and it seems to be a source of flakes
+        // mAnimatorTestRule.advanceTimeBy(mLongestHideShowAnimationDuration);
+        Log.d(TAG, "teardown: skipped advanceTimeBy");
         mTestableLooper.moveTimeForward(mLongestHideShowAnimationDuration);
         Log.d(TAG, "teardown: after moveTimeForward");
         mTestableLooper.processAllMessages();

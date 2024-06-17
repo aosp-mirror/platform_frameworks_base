@@ -16,7 +16,41 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
+import android.content.applicationContext
+import com.android.keyguard.keyguardSecurityModel
+import com.android.keyguard.keyguardUpdateMonitor
+import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
+import com.android.systemui.bouncer.ui.BouncerView
+import com.android.systemui.classifier.falsingCollector
+import com.android.systemui.concurrency.fakeExecutor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
+import com.android.systemui.keyguard.DismissCallbackRegistry
+import com.android.systemui.keyguard.data.repository.trustRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.statusbar.policy.KeyguardStateControllerImpl
+import com.android.systemui.user.domain.interactor.selectedUserInteractor
+import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.mockito.mock
 
-var Kosmos.primaryBouncerInteractor by Kosmos.Fixture { mock<PrimaryBouncerInteractor>() }
+var Kosmos.mockPrimaryBouncerInteractor by Kosmos.Fixture { mock<PrimaryBouncerInteractor>() }
+
+val Kosmos.primaryBouncerInteractor by
+    Kosmos.Fixture {
+        PrimaryBouncerInteractor(
+            repository = keyguardBouncerRepository,
+            primaryBouncerView = mock<BouncerView>(),
+            mainHandler = mockExecutorHandler(executor = fakeExecutor),
+            keyguardStateController = mock<KeyguardStateControllerImpl>(),
+            keyguardSecurityModel = keyguardSecurityModel,
+            primaryBouncerCallbackInteractor = mock<PrimaryBouncerCallbackInteractor>(),
+            falsingCollector = falsingCollector,
+            dismissCallbackRegistry = mock<DismissCallbackRegistry>(),
+            context = applicationContext,
+            keyguardUpdateMonitor = keyguardUpdateMonitor,
+            trustRepository = trustRepository,
+            applicationScope = applicationCoroutineScope,
+            selectedUserInteractor = selectedUserInteractor,
+            deviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor,
+        )
+    }

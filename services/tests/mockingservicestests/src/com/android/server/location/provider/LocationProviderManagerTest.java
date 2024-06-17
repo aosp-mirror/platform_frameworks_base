@@ -67,6 +67,7 @@ import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
+import android.location.flags.Flags;
 import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
@@ -78,8 +79,10 @@ import android.os.PackageTagsList;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.WorkSource;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.Log;
@@ -97,6 +100,7 @@ import com.android.server.location.injector.TestInjector;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -139,6 +143,9 @@ public class LocationProviderManagerTest {
             "mypackage", "attribution", "listener");
     private static final WorkSource WORK_SOURCE = new WorkSource(IDENTITY.getUid());
     private static final String MISSING_PERMISSION = "missing_permission";
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private Random mRandom;
 
@@ -1345,6 +1352,24 @@ public class LocationProviderManagerTest {
     public void testIsVisibleToCaller_noPermissions() {
         createManager("any_name", Collections.singletonList(MISSING_PERMISSION));
         assertThat(mManager.isVisibleToCaller()).isFalse();
+    }
+
+    @Test
+    public void testValidateLocation_futureLocation() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_LOCATION_VALIDATION);
+        Location location = createLocation(NAME, mRandom);
+        mProvider.setProviderLocation(location);
+
+        assertThat(mPassive.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(location);
+
+        Location futureLocation = createLocation(NAME, mRandom);
+        futureLocation.setElapsedRealtimeNanos(
+                SystemClock.elapsedRealtimeNanos() + TimeUnit.SECONDS.toNanos(2));
+        mProvider.setProviderLocation(futureLocation);
+
+        assertThat(mPassive.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
+                PERMISSION_FINE)).isEqualTo(location);
     }
 
     @MediumTest

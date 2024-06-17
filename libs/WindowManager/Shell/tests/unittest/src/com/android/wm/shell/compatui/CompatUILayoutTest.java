@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager;
 import android.app.AppCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
+import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -83,6 +84,7 @@ public class CompatUILayoutTest extends ShellTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        doReturn(100).when(mCompatUIConfiguration).getHideSizeCompatRestartButtonTolerance();
         mTaskInfo = createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN);
         mWindowManager = new CompatUIWindowManager(mContext, mTaskInfo, mSyncTransactionQueue,
                 mCallback, mTaskListener, new DisplayLayout(), new CompatUIHintsState(),
@@ -221,6 +223,9 @@ public class CompatUILayoutTest extends ShellTestCase {
         taskInfo.taskId = TASK_ID;
         taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
         taskInfo.appCompatTaskInfo.cameraCompatControlState = cameraCompatControlState;
+        taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = 1000;
+        taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = 1000;
+        taskInfo.configuration.windowConfiguration.setBounds(new Rect(0, 0, 2000, 2000));
         return taskInfo;
     }
 }

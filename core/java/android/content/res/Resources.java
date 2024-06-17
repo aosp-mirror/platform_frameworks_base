@@ -29,6 +29,7 @@ import android.annotation.ColorRes;
 import android.annotation.DimenRes;
 import android.annotation.Discouraged;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.FontRes;
 import android.annotation.FractionRes;
 import android.annotation.IntegerRes;
@@ -46,6 +47,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.content.pm.ApplicationInfo;
 import android.content.res.loader.ResourcesLoader;
 import android.graphics.Movie;
 import android.graphics.Typeface;
@@ -87,7 +89,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -186,7 +187,7 @@ public class Resources {
     private int mBaseApkAssetsSize;
 
     /** @hide */
-    private static Set<Resources> sResourcesHistory = Collections.synchronizedSet(
+    private static final Set<Resources> sResourcesHistory = Collections.synchronizedSet(
             Collections.newSetFromMap(
                     new WeakHashMap<>()));
 
@@ -2806,7 +2807,12 @@ public class Resources {
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "class=" + getClass());
         pw.println(prefix + "resourcesImpl");
-        mResourcesImpl.dump(pw, prefix + "  ");
+        final var impl = mResourcesImpl;
+        if (impl != null) {
+            impl.dump(pw, prefix + "  ");
+        } else {
+            pw.println(prefix + "  " + "null");
+        }
     }
 
     /** @hide */
@@ -2814,15 +2820,40 @@ public class Resources {
         pw.println(prefix + "history");
         // Putting into a map keyed on the apk assets to deduplicate resources that are different
         // objects but ultimately represent the same assets
-        Map<List<ApkAssets>, Resources> history = new ArrayMap<>();
+        ArrayMap<List<ApkAssets>, Resources> history = new ArrayMap<>();
         sResourcesHistory.forEach(
-                r -> history.put(Arrays.asList(r.mResourcesImpl.mAssets.getApkAssets()), r));
+                r -> {
+                    if (r != null) {
+                        final var impl = r.mResourcesImpl;
+                        if (impl != null) {
+                            history.put(Arrays.asList(impl.mAssets.getApkAssets()), r);
+                        } else {
+                            history.put(null, r);
+                        }
+                    }
+                });
         int i = 0;
         for (Resources r : history.values()) {
-            if (r != null) {
-                pw.println(prefix + i++);
-                r.dump(pw, prefix + "  ");
-            }
+            pw.println(prefix + i++);
+            r.dump(pw, prefix + "  ");
         }
+    }
+
+    /**
+     * Register the resources paths of a package (e.g. a shared library). This will collect the
+     * package resources' paths from its ApplicationInfo and add them to all existing and future
+     * contexts while the application is running.
+     * A second call with the same uniqueId is a no-op.
+     * The paths are not persisted during application restarts. The application is responsible for
+     * calling the API again if this happens.
+     *
+     * @param uniqueId The unique id for the ApplicationInfo object, to detect and ignore repeated
+     *                 API calls.
+     * @param appInfo The ApplicationInfo that contains resources paths of the package.
+     */
+    @FlaggedApi(android.content.res.Flags.FLAG_REGISTER_RESOURCE_PATHS)
+    public static void registerResourcePaths(@NonNull String uniqueId,
+            @NonNull ApplicationInfo appInfo) {
+        throw new UnsupportedOperationException("The implementation has not been done yet.");
     }
 }

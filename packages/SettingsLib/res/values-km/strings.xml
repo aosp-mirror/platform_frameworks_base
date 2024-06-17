@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"កំពុងបង្ហាញ"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"កាស"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"ធាតុបញ្ចូលបន្ថែម"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"ប៊្លូធូស"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"បានបិទ Wifi"</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"បានផ្តាច់ Wifi"</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"ការ​កែតម្រូវ​ពណ៌អាចមានប្រយោជន៍ នៅពេលអ្នកចង់៖&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;មើលពណ៌កាន់តែត្រឹមត្រូវ&lt;/li&gt; &lt;li&gt;&amp;nbsp;លុបពណ៌ចេញ ដើម្បីជួយឱ្យអ្នកផ្ដោតអារម្មណ៍&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - កំពុងផ្អាកការសាកថ្ម ដើម្បីការពារថ្ម"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - ពិនិត្យមើលគ្រឿងសាកថ្ម"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត ផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> ទៀតទើបពេញ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - នៅសល់ <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើបពេញ"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - បានបង្កើនប្រសិទ្ធភាពនៃការសាក"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - បានបង្កើនប្រសិទ្ធភាពនៃការសាក"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - កំពុងសាកថ្ម"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"មិន​ស្គាល់"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"កំពុងសាក​ថ្ម"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"កំពុងសាកថ្មយ៉ាងឆាប់រហ័ស"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"កំពុង​សាកថ្ម​ឥតខ្សែ"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"កំពុងសាកថ្ម"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"មិនកំពុង​សាក​ថ្ម"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"បានភ្ជាប់ មិនកំពុង​សាកថ្ម"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"បានភ្ជាប់ តែមិនកំពុងសាកថ្មទេ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"បាន​សាក​ថ្មពេញ"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"បានសាក​ថ្មពេញ"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"កំពុងផ្អាកការសាកថ្ម"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"គ្រប់គ្រងដោយអ្នកគ្រប់គ្រង"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"គ្រប់គ្រងដោយការកំណត់ដែលបានរឹតបន្តឹង"</string>
     <string name="disabled" msgid="8017887509554714950">"បិទ"</string>
@@ -547,11 +551,11 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"សួរគ្រប់ពេល"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"រហូតទាល់តែ​អ្នកបិទ"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"អម្បាញ់មិញ"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ទូរសព្ទនេះ"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ថេប្លេតនេះ"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ទូរសព្ទនេះ"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ថេប្លេតនេះ"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ឧបករណ៍បំពងសំឡេងដែលមានជើងភ្ជាប់"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ឧបាល័រជើងទម្រ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ឧបករណ៍ខាងក្រៅ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"​ឧបករណ៍ដែលបាន​ភ្ជាប់"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ទូរសព្ទនេះ"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"មិន​អាច​បង្កើត​អ្នកប្រើប្រាស់ថ្មី​បានទេ"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"មិនអាចបង្កើតភ្ញៀវថ្មីបានទេ"</string>
     <string name="user_nickname" msgid="262624187455825083">"ឈ្មោះ​ហៅក្រៅ"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"គ្រប់គ្នាដែលប្រើឧបករណ៍នេះនឹងអាចមើលឃើញឈ្មោះ និងរូបភាពរបស់អ្នក។"</string>
     <string name="user_add_user" msgid="7876449291500212468">"បញ្ចូល​អ្នក​ប្រើប្រាស់"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"បញ្ចូល​ភ្ញៀវ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ដកភ្ញៀវចេញ"</string>

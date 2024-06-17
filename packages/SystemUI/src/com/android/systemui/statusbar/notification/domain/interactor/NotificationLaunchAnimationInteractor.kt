@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.util.Log
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository
 import javax.inject.Inject
@@ -33,14 +33,14 @@ constructor(private val repository: NotificationLaunchAnimationRepository) {
      * Emits true if an animation that expands a notification object into an opening window is
      * running and false otherwise.
      *
-     * See [com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController].
+     * See [com.android.systemui.statusbar.notification.NotificationTransitionAnimatorController].
      */
     val isLaunchAnimationRunning: StateFlow<Boolean>
         get() = repository.isLaunchAnimationRunning
 
     /** Sets whether the notification expansion launch animation is currently running. */
     fun setIsLaunchAnimationRunning(running: Boolean) {
-        if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+        if (ActivityTransitionAnimator.DEBUG_TRANSITION_ANIMATION) {
             Log.d(TAG, "setIsLaunchAnimationRunning(running=$running)")
         }
         repository.isLaunchAnimationRunning.value = running

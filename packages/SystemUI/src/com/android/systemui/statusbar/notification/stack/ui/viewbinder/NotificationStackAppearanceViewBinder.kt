@@ -20,16 +20,20 @@ import android.content.Context
 import android.util.TypedValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.launch
 
 /** Binds the shared notification container to its view-model. */
 object NotificationStackAppearanceViewBinder {
+    const val SCRIM_CORNER_RADIUS = 32f
 
     @JvmStatic
     fun bind(
@@ -38,29 +42,39 @@ object NotificationStackAppearanceViewBinder {
         viewModel: NotificationStackAppearanceViewModel,
         ambientState: AmbientState,
         controller: NotificationStackScrollLayoutController,
-    ) {
-        view.repeatWhenAttached {
+        @Main mainImmediateDispatcher: CoroutineDispatcher,
+    ): DisposableHandle {
+        return view.repeatWhenAttached(mainImmediateDispatcher) {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
                     viewModel.stackBounds.collect { bounds ->
-                        controller.updateTopPadding(
-                            bounds.top,
-                            controller.isAddOrRemoveAnimationPending
-                        )
                         controller.setRoundedClippingBounds(
-                            it.left,
-                            it.top,
-                            it.right,
-                            it.bottom,
-                            viewModel.cornerRadiusDp.value.dpToPx(context),
-                            viewModel.cornerRadiusDp.value.dpToPx(context),
+                            bounds.left.roundToInt(),
+                            bounds.top.roundToInt(),
+                            bounds.right.roundToInt(),
+                            bounds.bottom.roundToInt(),
+                            SCRIM_CORNER_RADIUS.dpToPx(context),
+                            0,
                         )
                     }
                 }
+
+                launch {
+                    viewModel.contentTop.collect {
+                        controller.updateTopPadding(it, controller.isAddOrRemoveAnimationPending)
+                    }
+                }
+
                 launch {
                     viewModel.expandFraction.collect { expandFraction ->
                         ambientState.expansionFraction = expandFraction
                         controller.expandedHeight = expandFraction * controller.view.height
+                        controller.setMaxAlphaForExpansion(
+                            ((expandFraction - 0.5f) / 0.5f).coerceAtLeast(0f)
+                        )
+                        if (expandFraction == 0f || expandFraction == 1f) {
+                            controller.onExpansionStopped()
+                        }
                     }
                 }
             }

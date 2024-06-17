@@ -53,9 +53,12 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import javax.xml.parsers.SAXParserFactory;
+
 /**
  * XML utility methods.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Xml {
     private Xml() {}
 
@@ -73,8 +76,33 @@ public class Xml {
      *
      * @hide
      */
-    public static final boolean ENABLE_BINARY_DEFAULT = SystemProperties
-            .getBoolean("persist.sys.binary_xml", true);
+    public static final boolean ENABLE_BINARY_DEFAULT = shouldEnableBinaryDefault();
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean shouldEnableBinaryDefault() {
+        return SystemProperties.getBoolean("persist.sys.binary_xml", true);
+    }
+
+    private static boolean shouldEnableBinaryDefault$ravenwood() {
+        return true;
+    }
+
+    /**
+     * Feature flag: when set, {@link #resolvePullParser(InputStream)}} will attempt to sniff
+     * using {@code pread} optimization.
+     *
+     * @hide
+     */
+    public static final boolean ENABLE_RESOLVE_OPTIMIZATIONS = shouldEnableResolveOptimizations();
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean shouldEnableResolveOptimizations() {
+        return true;
+    }
+
+    private static boolean shouldEnableResolveOptimizations$ravenwood() {
+        return false;
+    }
 
     /**
      * Parses the given xml string and fires events on the given SAX handler.
@@ -82,7 +110,7 @@ public class Xml {
     public static void parse(String xml, ContentHandler contentHandler)
             throws SAXException {
         try {
-            XMLReader reader = XmlObjectFactory.newXMLReader();
+            XMLReader reader = newXMLReader();
             reader.setContentHandler(contentHandler);
             reader.parse(new InputSource(new StringReader(xml)));
         } catch (IOException e) {
@@ -96,7 +124,7 @@ public class Xml {
      */
     public static void parse(Reader in, ContentHandler contentHandler)
             throws IOException, SAXException {
-        XMLReader reader = XmlObjectFactory.newXMLReader();
+        XMLReader reader = newXMLReader();
         reader.setContentHandler(contentHandler);
         reader.parse(new InputSource(in));
     }
@@ -107,7 +135,7 @@ public class Xml {
      */
     public static void parse(InputStream in, Encoding encoding,
             ContentHandler contentHandler) throws IOException, SAXException {
-        XMLReader reader = XmlObjectFactory.newXMLReader();
+        XMLReader reader = newXMLReader();
         reader.setContentHandler(contentHandler);
         InputSource source = new InputSource(in);
         source.setEncoding(encoding.expatName);
@@ -120,19 +148,26 @@ public class Xml {
     @android.ravenwood.annotation.RavenwoodReplace
     public static XmlPullParser newPullParser() {
         try {
-            XmlPullParser parser = XmlObjectFactory.newXmlPullParser();
+            XmlPullParser parser = newXmlPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, true);
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
             return parser;
         } catch (XmlPullParserException e) {
-            throw new AssertionError();
+            throw new AssertionError(e);
         }
     }
 
     /** @hide */
     public static XmlPullParser newPullParser$ravenwood() {
-        // TODO: remove once we're linking against libcore
-        return new BinaryXmlPullParser();
+        try {
+            // Prebuilt kxml2-android does not support FEATURE_PROCESS_DOCDECL, so omit here;
+            // it's quite rare and all tests are passing
+            XmlPullParser parser = newXmlPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+            return parser;
+        } catch (XmlPullParserException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -145,15 +180,8 @@ public class Xml {
      * @hide
      */
     @SuppressWarnings("AndroidFrameworkEfficientXml")
-    @android.ravenwood.annotation.RavenwoodReplace
     public static @NonNull TypedXmlPullParser newFastPullParser() {
         return XmlUtils.makeTyped(newPullParser());
-    }
-
-    /** @hide */
-    public static TypedXmlPullParser newFastPullParser$ravenwood() {
-        // TODO: remove once we're linking against libcore
-        return new BinaryXmlPullParser();
     }
 
     /**
@@ -189,11 +217,10 @@ public class Xml {
      *
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodReplace
     public static @NonNull TypedXmlPullParser resolvePullParser(@NonNull InputStream in)
             throws IOException {
         final byte[] magic = new byte[4];
-        if (in instanceof FileInputStream) {
+        if (ENABLE_RESOLVE_OPTIMIZATIONS && in instanceof FileInputStream) {
             try {
                 Os.pread(((FileInputStream) in).getFD(), magic, 0, magic.length, 0);
             } catch (ErrnoException e) {
@@ -222,31 +249,11 @@ public class Xml {
         return xml;
     }
 
-    /** @hide */
-    public static @NonNull TypedXmlPullParser resolvePullParser$ravenwood(@NonNull InputStream in)
-            throws IOException {
-        // TODO: remove once we're linking against libcore
-        final TypedXmlPullParser xml = new BinaryXmlPullParser();
-        try {
-            xml.setInput(in, StandardCharsets.UTF_8.name());
-        } catch (XmlPullParserException e) {
-            throw new IOException(e);
-        }
-        return xml;
-    }
-
     /**
      * Creates a new xml serializer.
      */
-    @android.ravenwood.annotation.RavenwoodReplace
     public static XmlSerializer newSerializer() {
-        return XmlObjectFactory.newXmlSerializer();
-    }
-
-    /** @hide */
-    public static XmlSerializer newSerializer$ravenwood() {
-        // TODO: remove once we're linking against libcore
-        return new BinaryXmlSerializer();
+        return newXmlSerializer();
     }
 
     /**
@@ -259,15 +266,8 @@ public class Xml {
      * @hide
      */
     @SuppressWarnings("AndroidFrameworkEfficientXml")
-    @android.ravenwood.annotation.RavenwoodReplace
     public static @NonNull TypedXmlSerializer newFastSerializer() {
         return XmlUtils.makeTyped(new FastXmlSerializer());
-    }
-
-    /** @hide */
-    public static @NonNull TypedXmlSerializer newFastSerializer$ravenwood() {
-        // TODO: remove once we're linking against libcore
-        return new BinaryXmlSerializer();
     }
 
     /**
@@ -334,7 +334,6 @@ public class Xml {
      *
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodKeep
     public static void copy(@NonNull XmlPullParser in, @NonNull XmlSerializer out)
             throws XmlPullParserException, IOException {
         // Some parsers may have already consumed the event that starts the
@@ -394,7 +393,6 @@ public class Xml {
      * unsupported, which can confuse serializers. This method normalizes empty
      * strings to be {@code null}.
      */
-    @android.ravenwood.annotation.RavenwoodKeep
     private static @Nullable String normalizeNamespace(@Nullable String namespace) {
         if (namespace == null || namespace.isEmpty()) {
             return null;
@@ -456,5 +454,46 @@ public class Xml {
         return (parser instanceof AttributeSet)
                 ? (AttributeSet) parser
                 : new XmlPullAttributes(parser);
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static @NonNull XmlSerializer newXmlSerializer() {
+        return XmlObjectFactory.newXmlSerializer();
+    }
+
+    private static @NonNull XmlSerializer newXmlSerializer$ravenwood() {
+        try {
+            return XmlPullParserFactory.newInstance().newSerializer();
+        } catch (XmlPullParserException e) {
+            throw new UnsupportedOperationException(e);
+        }
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static @NonNull XmlPullParser newXmlPullParser() {
+        return XmlObjectFactory.newXmlPullParser();
+    }
+
+    private static @NonNull XmlPullParser newXmlPullParser$ravenwood() {
+        try {
+            return XmlPullParserFactory.newInstance().newPullParser();
+        } catch (XmlPullParserException e) {
+            throw new UnsupportedOperationException(e);
+        }
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static @NonNull XMLReader newXMLReader() {
+        return XmlObjectFactory.newXMLReader();
+    }
+
+    private static @NonNull XMLReader newXMLReader$ravenwood() {
+        try {
+            final SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            return factory.newSAXParser().getXMLReader();
+        } catch (Exception e) {
+            throw new UnsupportedOperationException(e);
+        }
     }
 }

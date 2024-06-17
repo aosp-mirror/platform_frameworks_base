@@ -27,7 +27,9 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioSystem;
+import android.os.Binder;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -52,6 +54,8 @@ public class AudioMix implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mMixType = MIX_TYPE_INVALID;
 
+    private final IBinder mToken;
+
     // written by AudioPolicy
     int mMixState = MIX_STATE_DISABLED;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -68,7 +72,7 @@ public class AudioMix implements Parcelable {
      */
     private AudioMix(@NonNull AudioMixingRule rule, @NonNull AudioFormat format,
             int routeFlags, int callbackFlags,
-            int deviceType, @Nullable String deviceAddress) {
+            int deviceType, @Nullable String deviceAddress, IBinder token) {
         mRule = Objects.requireNonNull(rule);
         mFormat = Objects.requireNonNull(format);
         mRouteFlags = routeFlags;
@@ -76,6 +80,7 @@ public class AudioMix implements Parcelable {
         mCallbackFlags = callbackFlags;
         mDeviceSystemType = deviceType;
         mDeviceAddress = (deviceAddress == null) ? new String("") : deviceAddress;
+        mToken = token;
     }
 
     // CALLBACK_FLAG_* values: keep in sync with AudioMix::kCbFlag* values defined
@@ -270,15 +275,22 @@ public class AudioMix implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
 
         final AudioMix that = (AudioMix) o;
+        boolean tokenMatch = android.media.audiopolicy.Flags.audioMixOwnership()
+                ? Objects.equals(this.mToken, that.mToken)
+                : true;
         return Objects.equals(this.mRouteFlags, that.mRouteFlags)
             && Objects.equals(this.mRule, that.mRule)
             && Objects.equals(this.mMixType, that.mMixType)
-            && Objects.equals(this.mFormat, that.mFormat);
+            && Objects.equals(this.mFormat, that.mFormat)
+            && tokenMatch;
     }
 
     /** @hide */
     @Override
     public int hashCode() {
+        if (android.media.audiopolicy.Flags.audioMixOwnership()) {
+            return Objects.hash(mRouteFlags, mRule, mMixType, mFormat, mToken);
+        }
         return Objects.hash(mRouteFlags, mRule, mMixType, mFormat);
     }
 
@@ -298,6 +310,7 @@ public class AudioMix implements Parcelable {
         dest.writeString8(mDeviceAddress);
         mFormat.writeToParcel(dest, flags);
         mRule.writeToParcel(dest, flags);
+        dest.writeStrongBinder(mToken);
     }
 
     public static final @NonNull Parcelable.Creator<AudioMix> CREATOR = new Parcelable.Creator<>() {
@@ -317,6 +330,7 @@ public class AudioMix implements Parcelable {
             mixBuilder.setDevice(p.readInt(), p.readString8());
             mixBuilder.setFormat(AudioFormat.CREATOR.createFromParcel(p));
             mixBuilder.setMixingRule(AudioMixingRule.CREATOR.createFromParcel(p));
+            mixBuilder.setToken(p.readStrongBinder());
             return mixBuilder.build();
         }
 
@@ -339,6 +353,7 @@ public class AudioMix implements Parcelable {
         private AudioFormat mFormat = null;
         private int mRouteFlags = 0;
         private int mCallbackFlags = 0;
+        private IBinder mToken = null;
         // an AudioSystem.DEVICE_* value, not AudioDeviceInfo.TYPE_*
         private int mDeviceSystemType = AudioSystem.DEVICE_NONE;
         private String mDeviceAddress = null;
@@ -375,6 +390,15 @@ public class AudioMix implements Parcelable {
                 throw new IllegalArgumentException("Illegal null AudioMixingRule argument");
             }
             mRule = rule;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Only used by AudioMix internally.
+         */
+        Builder setToken(IBinder token) {
+            mToken = token;
             return this;
         }
 
@@ -540,8 +564,13 @@ public class AudioMix implements Parcelable {
                     throw new IllegalArgumentException(error);
                 }
             }
+
+            if (mToken == null) {
+                mToken = new Binder();
+            }
+
             return new AudioMix(mRule, mFormat, mRouteFlags, mCallbackFlags, mDeviceSystemType,
-                    mDeviceAddress);
+                    mDeviceAddress, mToken);
         }
 
         private int getLoopbackDeviceSystemTypeForAudioMixingRule(AudioMixingRule rule) {

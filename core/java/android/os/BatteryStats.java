@@ -31,12 +31,14 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.GnssSignalQuality;
+import android.net.NetworkCapabilities;
 import android.os.BatteryStatsManager.WifiState;
 import android.os.BatteryStatsManager.WifiSupplState;
 import android.server.ServerProtoEnums;
 import android.service.batterystats.BatteryStatsServiceDumpHistoryProto;
 import android.service.batterystats.BatteryStatsServiceDumpProto;
 import android.telephony.CellSignalStrength;
+import android.telephony.ModemActivityInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
@@ -56,7 +58,9 @@ import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.CpuScalingPolicies;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerStats;
+import com.android.net.module.util.NetworkCapabilitiesUtils;
 
 import com.google.android.collect.Lists;
 
@@ -82,6 +86,7 @@ import java.util.Map;
  * except where indicated otherwise.
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class BatteryStats {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -462,6 +467,7 @@ public abstract class BatteryStats {
     /**
      * State for keeping track of long counting information.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static abstract class LongCounter {
 
         /**
@@ -1893,7 +1899,7 @@ public abstract class BatteryStats {
         public short batteryTemperature;
         // Battery voltage in millivolts (mV).
         @UnsupportedAppUsage
-        public char batteryVoltage;
+        public short batteryVoltage;
 
         // The charge of the battery in micro-Ampere-hours.
         public int batteryChargeUah;
@@ -2155,7 +2161,7 @@ public abstract class BatteryStats {
             batteryPlugType = (byte)((bat>>24)&0xf);
             int bat2 = src.readInt();
             batteryTemperature = (short)(bat2&0xffff);
-            batteryVoltage = (char)((bat2>>16)&0xffff);
+            batteryVoltage = (short) ((bat2 >> 16) & 0xffff);
             batteryChargeUah = src.readInt();
             modemRailChargeMah = src.readDouble();
             wifiRailChargeMah = src.readDouble();
@@ -2723,12 +2729,6 @@ public abstract class BatteryStats {
      */
     public abstract int getMobileRadioActiveUnknownCount(int which);
 
-    public static final int DATA_CONNECTION_OUT_OF_SERVICE = 0;
-    public static final int DATA_CONNECTION_EMERGENCY_SERVICE =
-            TelephonyManager.getAllNetworkTypes().length + 1;
-    public static final int DATA_CONNECTION_OTHER = DATA_CONNECTION_EMERGENCY_SERVICE + 1;
-
-
     static final String[] DATA_CONNECTION_NAMES = {
         "oos", "gprs", "edge", "umts", "cdma", "evdo_0", "evdo_A",
         "1xrtt", "hsdpa", "hsupa", "hspa", "iden", "evdo_b", "lte",
@@ -2736,8 +2736,29 @@ public abstract class BatteryStats {
         "emngcy", "other"
     };
 
+    public static final int NUM_ALL_NETWORK_TYPES = getAllNetworkTypesCount();
+    public static final int DATA_CONNECTION_OUT_OF_SERVICE = 0;
+    public static final int DATA_CONNECTION_EMERGENCY_SERVICE = NUM_ALL_NETWORK_TYPES + 1;
+    public static final int DATA_CONNECTION_OTHER = NUM_ALL_NETWORK_TYPES + 2;
+
     @UnsupportedAppUsage
-    public static final int NUM_DATA_CONNECTION_TYPES = DATA_CONNECTION_OTHER + 1;
+    public static final int NUM_DATA_CONNECTION_TYPES = NUM_ALL_NETWORK_TYPES + 3;
+
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    public static int getAllNetworkTypesCount() {
+        int count = TelephonyManager.getAllNetworkTypes().length;
+        if (DATA_CONNECTION_NAMES.length != count + 3) {        // oos, emngcy, other
+            throw new IllegalStateException(
+                    "DATA_CONNECTION_NAMES length does not match network type count. "
+                    + "Expected: " + (count + 3) + ", actual:" + DATA_CONNECTION_NAMES.length);
+        }
+        return count;
+    }
+
+    public static int getAllNetworkTypesCount$ravenwood() {
+        return DATA_CONNECTION_NAMES.length - 3;  // oos, emngcy, other
+    }
 
     /**
      * Returns the time in microseconds that the phone has been running with
@@ -7484,7 +7505,8 @@ public abstract class BatteryStats {
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory(0, 0)) {
+        try (BatteryStatsHistoryIterator iterator =
+                     iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED)) {
             HistoryItem rec;
             while ((rec = iterator.next()) != null) {
                 try {
@@ -8409,7 +8431,8 @@ public abstract class BatteryStats {
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory(0, 0)) {
+        try (BatteryStatsHistoryIterator iterator =
+                     iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED)) {
             HistoryItem rec;
             while ((rec = iterator.next()) != null) {
                 lastTime = rec.time;
@@ -9011,5 +9034,72 @@ public abstract class BatteryStats {
         uidMobileRadioStats.sort(
                 (lhs, rhs) -> Double.compare(rhs.millisecondsPerPacket, lhs.millisecondsPerPacket));
         return uidMobileRadioStats;
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    @VisibleForTesting
+    protected static boolean isLowRamDevice() {
+        return ActivityManager.isLowRamDeviceStatic();
+    }
+
+    protected static boolean isLowRamDevice$ravenwood() {
+        return false;
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    @VisibleForTesting
+    protected static int getCellSignalStrengthLevelCount() {
+        return CellSignalStrength.getNumSignalStrengthLevels();
+    }
+
+    protected static int getCellSignalStrengthLevelCount$ravenwood() {
+        return 5;
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    @VisibleForTesting
+    protected static int getModemTxPowerLevelCount() {
+        return ModemActivityInfo.getNumTxPowerLevels();
+    }
+
+    protected static int getModemTxPowerLevelCount$ravenwood() {
+        return 5;
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    @VisibleForTesting
+    protected static boolean isKernelStatsAvailable() {
+        return true;
+    }
+
+    protected static boolean isKernelStatsAvailable$ravenwood() {
+        return false;
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    protected static int getDisplayTransport(int[] transports) {
+        return NetworkCapabilitiesUtils.getDisplayTransport(transports);
+    }
+
+    // See NetworkCapabilitiesUtils
+    private static final int[] DISPLAY_TRANSPORT_PRIORITIES = new int[] {
+            NetworkCapabilities.TRANSPORT_VPN,
+            NetworkCapabilities.TRANSPORT_CELLULAR,
+            NetworkCapabilities.TRANSPORT_WIFI_AWARE,
+            NetworkCapabilities.TRANSPORT_BLUETOOTH,
+            NetworkCapabilities.TRANSPORT_WIFI,
+            NetworkCapabilities.TRANSPORT_ETHERNET,
+            NetworkCapabilities.TRANSPORT_USB
+    };
+
+    protected static int getDisplayTransport$ravenwood(int[] transports) {
+        for (int transport : DISPLAY_TRANSPORT_PRIORITIES) {
+            for (int t : transports) {
+                if (t == transport) {
+                    return transport;
+                }
+            }
+        }
+        return transports[0];
     }
 }

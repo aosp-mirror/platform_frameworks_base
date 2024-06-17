@@ -99,7 +99,7 @@ public class ZenModeEventLoggerFake extends ZenModeEventLogger {
     public boolean getFromSystemOrSystemUi(int i) throws IllegalArgumentException {
         // While this isn't a logged output value, it's still helpful to check in tests.
         checkInRange(i);
-        return mChanges.get(i).mFromSystemOrSystemUi;
+        return mChanges.get(i).isFromSystemOrSystemUi();
     }
 
     public boolean getIsUserAction(int i) throws IllegalArgumentException {
@@ -118,15 +118,23 @@ public class ZenModeEventLoggerFake extends ZenModeEventLogger {
     public DNDPolicyProto getPolicyProto(int i) throws IllegalArgumentException {
         checkInRange(i);
         byte[] policyBytes = mChanges.get(i).getDNDPolicyProto();
+        if (policyBytes == null) {
+            return null;
+        }
         try {
             return DNDPolicyProto.parseFrom(policyBytes);
         } catch (InvalidProtocolBufferException e) {
-            return null; // couldn't turn it into proto
+            throw new RuntimeException("Couldn't parse DNDPolicyProto!", e);
         }
     }
 
     public boolean getAreChannelsBypassing(int i) throws IllegalArgumentException {
         checkInRange(i);
         return mChanges.get(i).getAreChannelsBypassing();
+    }
+
+    public int[] getActiveRuleTypes(int i) throws IllegalArgumentException {
+        checkInRange(i);
+        return mChanges.get(i).getActiveRuleTypes();
     }
 }

@@ -43,12 +43,14 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
+import com.android.server.backup.Flags;
 
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -1283,6 +1285,14 @@ public abstract class BackupAgent extends ContextWrapper {
                 // And bring live SharedPreferences instances up to date
                 reloadSharedPreferences();
 
+                // It's possible that onRestoreFile was overridden and that the agent did not
+                // consume all the data for this file from the pipe. We need to clear the pipe,
+                // otherwise the framework can get stuck trying to write to a full pipe or
+                // onRestoreFile could be called with the previous file's data left in the pipe.
+                if (Flags.enableClearPipeAfterRestoreFile()) {
+                    clearUnconsumedDataFromPipe(data, size);
+                }
+
                 Binder.restoreCallingIdentity(ident);
                 try {
                     callbackBinder.opCompleteForUser(getBackupUserId(), token, 0);
@@ -1293,6 +1303,16 @@ public abstract class BackupAgent extends ContextWrapper {
                 if (Binder.getCallingPid() != Process.myPid()) {
                     IoUtils.closeQuietly(data);
                 }
+            }
+        }
+
+        private static void clearUnconsumedDataFromPipe(ParcelFileDescriptor data, long size) {
+            try (FileInputStream in = new FileInputStream(data.getFileDescriptor())) {
+                if (in.available() > 0) {
+                    in.skip(size);
+                }
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to clear unconsumed data from pipe.", e);
             }
         }
 

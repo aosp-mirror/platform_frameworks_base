@@ -95,8 +95,10 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
+        ":android.frameworks.location.altitude-V2-java-source",
         ":android.hardware.biometrics.common-V4-java-source",
         ":android.hardware.biometrics.fingerprint-V3-java-source",
+        ":android.hardware.biometrics.face-V4-java-source",
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
         ":android.hardware.keymaster-V4-java-source",
@@ -174,9 +176,6 @@ java_library {
         // and remove this line.
         "//frameworks/base/tools/hoststubgen:__subpackages__",
     ],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 // AIDL files under these paths are mixture of public and private ones.
@@ -210,6 +209,9 @@ java_defaults {
 // framework_srcs. These have no or very limited dependency to the framework.
 java_library {
     name: "framework-internal-utils",
+    defaults: [
+        "android.hardware.power-java_static",
+    ],
     static_libs: [
         "apex_aidl_interface-java",
         "packagemanager_aidl-java",
@@ -265,9 +267,6 @@ java_library {
     ],
     sdk_version: "core_platform",
     installable: false,
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 // NOTE: This filegroup is exposed for vendor libraries to depend on and is referenced in
@@ -422,6 +421,7 @@ java_defaults {
         "audiopolicy-aidl-java",
         "sounddose-aidl-java",
         "modules-utils-expresslog",
+        "perfetto_trace_javastream_protos_jarjar",
     ],
 }
 
@@ -434,9 +434,6 @@ java_library {
     ],
     sdk_version: "core_platform",
     installable: false,
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 // Separated so framework-minus-apex-defaults can be used without the libs dependency
@@ -480,11 +477,6 @@ java_library {
     ],
     compile_dex: false,
     headers_only: true,
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
-    // For jarjar repackaging
-    jarjar_prefix: "com.android.internal.hidden_from_bootclasspath",
 }
 
 java_library {
@@ -515,6 +507,7 @@ java_library {
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+    jarjar_prefix: "com.android.internal.hidden_from_bootclasspath",
 }
 
 java_library {
@@ -529,7 +522,7 @@ java_library {
     },
     lint: {
         enabled: false,
-        baseline_filename: "lint-baseline.xml",
+
     },
 }
 
@@ -554,9 +547,6 @@ java_library {
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 java_library {
@@ -572,9 +562,6 @@ java_library {
         "calendar-provider-compat-config",
         "contacts-provider-platform-compat-config",
     ],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 platform_compat_config {
@@ -629,9 +616,6 @@ java_library {
         "rappor",
     ],
     dxflags: ["--core-library"],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 // utility classes statically linked into framework-wifi and dynamically linked
@@ -675,6 +659,16 @@ filegroup {
         "**/package.html",
     ],
     visibility: ["//frameworks/base/api"],
+}
+
+java_library {
+    name: "perfetto_trace_javastream_protos_jarjar",
+    srcs: [
+        ":perfetto_trace_javastream_protos",
+    ],
+    jarjar_rules: ":framework-jarjar-rules",
+    sdk_version: "core_platform",
+    installable: false,
 }
 
 build = [

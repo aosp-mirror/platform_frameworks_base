@@ -16,11 +16,27 @@
 
 package com.android.systemui.accessibility.utils;
 
-import android.os.SystemClock;
+import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import android.content.ComponentName;
+import android.os.SystemClock;
+import android.os.UserHandle;
+import android.provider.Settings;
+
+import com.android.systemui.util.settings.SecureSettings;
+
+import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.BooleanSupplier;
 
 public class TestUtils {
+    private static final ComponentName TEST_COMPONENT_A = new ComponentName("pkg", "A");
+    private static final ComponentName TEST_COMPONENT_B = new ComponentName("pkg", "B");
+    public static final String[] TEST_BUTTON_TARGETS = {
+            TEST_COMPONENT_A.flattenToString(), TEST_COMPONENT_B.flattenToString()};
     public static long DEFAULT_CONDITION_DURATION = 5_000;
 
     /**
@@ -54,5 +70,29 @@ public class TestUtils {
             sleepMs *= 2;
             SystemClock.sleep(sleepMs);
         }
+    }
+
+    /**
+     * Returns a mock secure settings configured to return information needed for tests.
+     * Currently, this only includes button targets.
+     */
+    public static SecureSettings mockSecureSettings() {
+        SecureSettings secureSettings = mock(SecureSettings.class);
+
+        final String targets = getShortcutTargets(
+                Set.of(TEST_COMPONENT_A, TEST_COMPONENT_B));
+        when(secureSettings.getStringForUser(
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                UserHandle.USER_CURRENT)).thenReturn(targets);
+
+        return secureSettings;
+    }
+
+    private static String getShortcutTargets(Set<ComponentName> components) {
+        final StringJoiner stringJoiner = new StringJoiner(String.valueOf(SERVICES_SEPARATOR));
+        for (ComponentName target : components) {
+            stringJoiner.add(target.flattenToString());
+        }
+        return stringJoiner.toString();
     }
 }

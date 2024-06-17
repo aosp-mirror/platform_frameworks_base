@@ -30,9 +30,9 @@ import android.util.Log;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.controls.models.player.MediaData;
-import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData;
-import com.android.systemui.media.controls.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.shared.model.MediaData;
+import com.android.systemui.media.controls.shared.model.SmartspaceMediaData;
 import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;

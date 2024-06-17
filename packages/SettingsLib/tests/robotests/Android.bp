@@ -50,7 +50,7 @@ android_robolectric_test {
         "androidx.test.core",
         "androidx.core_core",
         "flag-junit",
-        "settingslib_flags_lib",
+        "settingslib_media_flags_lib",
         "testng", // TODO: remove once JUnit on Android provides assertThrows
     ],
     java_resource_dirs: ["config"],

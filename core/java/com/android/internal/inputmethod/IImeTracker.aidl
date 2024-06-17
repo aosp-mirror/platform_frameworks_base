@@ -25,26 +25,19 @@ import android.view.inputmethod.ImeTracker;
 interface IImeTracker {
 
     /**
-     * Called when an IME show request is created.
+     * Called when an IME request is started.
      *
      * @param tag the logging tag.
-     * @param uid the uid of the client that requested the IME.
-     * @param origin the origin of the IME show request.
-     * @param reason the reason why the IME show request was created.
-     * @return A new IME tracking token.
-     */
-    ImeTracker.Token onRequestShow(String tag, int uid, int origin, int reason);
-
-    /**
-     * Called when an IME hide request is created.
+     * @param uid the uid of the client that started the request.
+     * @param type the type of the request.
+     * @param origin the origin of the request.
+     * @param fromUser whether this request was created directly from user interaction.
+     * @param reason the reason for starting the request.
      *
-     * @param tag the logging tag.
-     * @param uid the uid of the client that requested the IME.
-     * @param origin the origin of the IME hide request.
-     * @param reason the reason why the IME hide request was created.
-     * @return A new IME tracking token.
+     * @return An IME request tracking token.
      */
-    ImeTracker.Token onRequestHide(String tag, int uid, int origin, int reason);
+    ImeTracker.Token onStart(String tag, int uid, int type, int origin, int reason,
+        boolean fromUser);
 
     /**
      * Called when the IME request progresses to a further phase.

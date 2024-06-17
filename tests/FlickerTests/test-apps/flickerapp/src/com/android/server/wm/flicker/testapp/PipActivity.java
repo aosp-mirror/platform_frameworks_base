@@ -37,6 +37,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
@@ -45,6 +46,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Rational;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
@@ -245,6 +247,29 @@ public class PipActivity extends Activity {
                 mPipParamsBuilder.setAutoEnterEnabled(true);
                 setPictureInPictureParams(mPipParamsBuilder.build());
                 break;
+        }
+    }
+
+    /**
+     * Adds a temporary view used for testing sourceRectHint.
+     *
+     */
+    public void setSourceRectHint(View v) {
+        View rectView = findViewById(R.id.source_rect);
+        if (rectView != null) {
+            rectView.setVisibility(View.VISIBLE);
+            rectView.getViewTreeObserver().addOnGlobalLayoutListener(
+                    new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            Rect boundingRect = new Rect();
+                            rectView.getGlobalVisibleRect(boundingRect);
+                            mPipParamsBuilder.setSourceRectHint(boundingRect);
+                            setPictureInPictureParams(mPipParamsBuilder.build());
+                            rectView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        }
+                    });
+            rectView.invalidate(); // changing the visibility, invalidating to redraw the view
         }
     }
 

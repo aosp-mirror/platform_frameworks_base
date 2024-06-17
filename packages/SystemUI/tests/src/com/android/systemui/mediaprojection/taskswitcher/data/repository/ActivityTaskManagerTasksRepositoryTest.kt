@@ -49,6 +49,19 @@ class ActivityTaskManagerTasksRepositoryTest : SysuiTestCase() {
         )
 
     @Test
+    fun launchRecentTask_taskIsMovedToForeground() =
+        testScope.runTest {
+            val currentForegroundTask by collectLastValue(repo.foregroundTask)
+            val newForegroundTask = createTask(taskId = 1)
+            val backgroundTask = createTask(taskId = 2)
+            fakeActivityTaskManager.addRunningTasks(backgroundTask, newForegroundTask)
+
+            repo.launchRecentTask(newForegroundTask)
+
+            assertThat(currentForegroundTask).isEqualTo(newForegroundTask)
+        }
+
+    @Test
     fun findRunningTaskFromWindowContainerToken_noMatch_returnsNull() {
         fakeActivityTaskManager.addRunningTasks(createTask(taskId = 1), createTask(taskId = 2))
 

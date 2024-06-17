@@ -35,14 +35,21 @@ class FakeQSTileIntentUserInputHandler : QSTileIntentUserInputHandler {
         mutableInputs.add(Input.Intent(view, intent))
     }
 
-    override fun handle(view: View?, pendingIntent: PendingIntent) {
-        mutableInputs.add(Input.PendingIntent(view, pendingIntent))
+    override fun handle(
+        view: View?,
+        pendingIntent: PendingIntent,
+        requestLaunchingDefaultActivity: Boolean
+    ) {
+        mutableInputs.add(Input.PendingIntent(view, pendingIntent, requestLaunchingDefaultActivity))
     }
 
     sealed interface Input {
         data class Intent(val view: View?, val intent: android.content.Intent) : Input
-        data class PendingIntent(val view: View?, val pendingIntent: android.app.PendingIntent) :
-            Input
+        data class PendingIntent(
+            val view: View?,
+            val pendingIntent: android.app.PendingIntent,
+            val requestLaunchingDefaultActivity: Boolean
+        ) : Input
     }
 }
 

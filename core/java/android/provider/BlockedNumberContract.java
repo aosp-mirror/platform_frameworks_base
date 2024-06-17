@@ -15,12 +15,20 @@
  */
 package android.provider;
 
+import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telecom.Log;
+import android.telecom.TelecomManager;
+
+import com.android.server.telecom.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -214,6 +222,333 @@ public class BlockedNumberContract {
          * <p>TYPE: String</p>
          */
         public static final String COLUMN_E164_NUMBER = "e164_number";
+
+        /**
+         * A protected broadcast intent action for letting components with
+         * {@link android.Manifest.permission#READ_BLOCKED_NUMBERS} know that the block suppression
+         * status as returned by {@link #getBlockSuppressionStatus(Context)} has been updated.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static final String ACTION_BLOCK_SUPPRESSION_STATE_CHANGED =
+                "android.provider.action.BLOCK_SUPPRESSION_STATE_CHANGED";
+
+        /**
+         * Preference key of block numbers not in contacts setting.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static final String ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED =
+                "block_numbers_not_in_contacts_setting";
+
+        /**
+         * Preference key of block private number calls setting.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static final String ENHANCED_SETTING_KEY_BLOCK_PRIVATE =
+                "block_private_number_calls_setting";
+
+        /**
+         * Preference key of block payphone calls setting.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static final String ENHANCED_SETTING_KEY_BLOCK_PAYPHONE =
+                "block_payphone_calls_setting";
+
+        /**
+         * Preference key of block unknown calls setting.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static final String ENHANCED_SETTING_KEY_BLOCK_UNKNOWN =
+                "block_unknown_calls_setting";
+
+        /**
+         * Preference key for whether should show an emergency call notification.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static final String ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION =
+                "show_emergency_call_notification";
+
+        /**
+         * Preference key of block unavailable calls setting.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static final String ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE =
+                "block_unavailable_calls_setting";
+
+        /**
+         * Notifies the provider that emergency services were contacted by the user.
+         * <p> This results in {@link #shouldSystemBlockNumber} returning {@code false} independent
+         * of the contents of the provider for a duration defined by
+         * {@link android.telephony.CarrierConfigManager#KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT}
+         * the provider unless {@link #endBlockSuppression(Context)} is called.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(allOf = {
+                android.Manifest.permission.READ_BLOCKED_NUMBERS,
+                android.Manifest.permission.WRITE_BLOCKED_NUMBERS
+        })
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static void notifyEmergencyContact(@NonNull Context context) {
+            verifyBlockedNumbersPermission(context);
+            try {
+                Log.i(LOG_TAG, "notifyEmergencyContact; caller=%s", context.getOpPackageName());
+                context.getContentResolver().call(
+                        AUTHORITY_URI, SystemContract.METHOD_NOTIFY_EMERGENCY_CONTACT, null, null);
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
+                // either of these happen.
+                Log.w(null, "notifyEmergencyContact: provider not ready.");
+            }
+        }
+
+        /**
+         * Notifies the provider to disable suppressing blocking. If emergency services were not
+         * contacted recently at all, calling this method is a no-op.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(allOf = {
+                android.Manifest.permission.READ_BLOCKED_NUMBERS,
+                android.Manifest.permission.WRITE_BLOCKED_NUMBERS
+        })
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static void endBlockSuppression(@NonNull Context context) {
+            verifyBlockedNumbersPermission(context);
+            String caller = context.getOpPackageName();
+            Log.i(LOG_TAG, "endBlockSuppression: caller=%s", caller);
+            context.getContentResolver().call(
+                    AUTHORITY_URI, SystemContract.METHOD_END_BLOCK_SUPPRESSION, null, null);
+        }
+
+        /**
+         * Returns {@code true} if {@code phoneNumber} is blocked taking
+         * {@link #notifyEmergencyContact(Context)} into consideration. If emergency services
+         * have not been contacted recently and enhanced call blocking not been enabled, this
+         * method is equivalent to {@link #isBlocked(Context, String)}.
+         *
+         * @param context the context of the caller.
+         * @param phoneNumber the number to check.
+         * @param numberPresentation the presentation code associated with the call.
+         * @param isNumberInContacts indicates if the provided number exists as a contact.
+         * @return result code indicating if the number should be blocked, and if so why.
+         *         Valid values are: {@link #STATUS_NOT_BLOCKED}, {@link #STATUS_BLOCKED_IN_LIST},
+         *         {@link #STATUS_BLOCKED_NOT_IN_CONTACTS}, {@link #STATUS_BLOCKED_PAYPHONE},
+         *         {@link #STATUS_BLOCKED_RESTRICTED}, {@link #STATUS_BLOCKED_UNKNOWN_NUMBER}.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(allOf = {
+                android.Manifest.permission.READ_BLOCKED_NUMBERS,
+                android.Manifest.permission.WRITE_BLOCKED_NUMBERS
+        })
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static int shouldSystemBlockNumber(@NonNull Context context,
+                @NonNull String phoneNumber, @TelecomManager.Presentation int numberPresentation,
+                boolean isNumberInContacts) {
+            verifyBlockedNumbersPermission(context);
+            try {
+                String caller = context.getOpPackageName();
+                Bundle extras = new Bundle();
+                extras.putInt(BlockedNumberContract.EXTRA_CALL_PRESENTATION, numberPresentation);
+                extras.putBoolean(BlockedNumberContract.EXTRA_CONTACT_EXIST, isNumberInContacts);
+                final Bundle res = context.getContentResolver().call(AUTHORITY_URI,
+                        SystemContract.METHOD_SHOULD_SYSTEM_BLOCK_NUMBER, phoneNumber, extras);
+                int blockResult = res != null ? res.getInt(RES_BLOCK_STATUS, STATUS_NOT_BLOCKED) :
+                        BlockedNumberContract.STATUS_NOT_BLOCKED;
+                Log.d(LOG_TAG, "shouldSystemBlockNumber: number=%s, caller=%s, result=%s",
+                        Log.piiHandle(phoneNumber), caller,
+                        SystemContract.blockStatusToString(blockResult));
+                return blockResult;
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
+                // either of these happen.
+                Log.w(null, "shouldSystemBlockNumber: provider not ready.");
+                return BlockedNumberContract.STATUS_NOT_BLOCKED;
+            }
+        }
+
+        /**
+         * Returns the current status of block suppression.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(allOf = {
+                android.Manifest.permission.READ_BLOCKED_NUMBERS,
+                android.Manifest.permission.WRITE_BLOCKED_NUMBERS
+        })
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static @NonNull BlockSuppressionStatus getBlockSuppressionStatus(
+                @NonNull Context context) {
+            verifyBlockedNumbersPermission(context);
+            final Bundle res = context.getContentResolver().call(
+                    AUTHORITY_URI, SystemContract.METHOD_GET_BLOCK_SUPPRESSION_STATUS, null, null);
+            BlockSuppressionStatus blockSuppressionStatus = new BlockSuppressionStatus(
+                    res.getBoolean(SystemContract.RES_IS_BLOCKING_SUPPRESSED, false),
+                    res.getLong(SystemContract.RES_BLOCKING_SUPPRESSED_UNTIL_TIMESTAMP, 0));
+            Log.d(LOG_TAG, "getBlockSuppressionStatus: caller=%s, status=%s",
+                    context.getOpPackageName(), blockSuppressionStatus);
+            return blockSuppressionStatus;
+        }
+
+        /**
+         * Check whether should show the emergency call notification.
+         *
+         * @param context the context of the caller.
+         * @return {@code true} if should show emergency call notification. {@code false} otherwise.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(allOf = {
+                android.Manifest.permission.READ_BLOCKED_NUMBERS,
+                android.Manifest.permission.WRITE_BLOCKED_NUMBERS
+        })
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static boolean shouldShowEmergencyCallNotification(@NonNull Context context) {
+            verifyBlockedNumbersPermission(context);
+            try {
+                final Bundle res = context.getContentResolver().call(AUTHORITY_URI,
+                        SystemContract.METHOD_SHOULD_SHOW_EMERGENCY_CALL_NOTIFICATION, null, null);
+                return res != null && res.getBoolean(RES_SHOW_EMERGENCY_CALL_NOTIFICATION, false);
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
+                // either of these happen.
+                Log.w(null, "shouldShowEmergencyCallNotification: provider not ready.");
+                return false;
+            }
+        }
+
+        /**
+         * Check whether the enhanced block setting is enabled.
+         *
+         * @param context the context of the caller.
+         * @param key the key of the setting to check, can be
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED}
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_BLOCK_PRIVATE}
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_BLOCK_PAYPHONE}
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_BLOCK_UNKNOWN}
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE}
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION}
+         * @return {@code true} if the setting is enabled. {@code false} otherwise.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(allOf = {
+                android.Manifest.permission.READ_BLOCKED_NUMBERS,
+                android.Manifest.permission.WRITE_BLOCKED_NUMBERS
+        })
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static boolean getBlockedNumberSetting(
+                @NonNull Context context, @NonNull String key) {
+            verifyBlockedNumbersPermission(context);
+            Bundle extras = new Bundle();
+            extras.putString(EXTRA_ENHANCED_SETTING_KEY, key);
+            try {
+                final Bundle res = context.getContentResolver().call(AUTHORITY_URI,
+                        SystemContract.METHOD_GET_ENHANCED_BLOCK_SETTING, null, extras);
+                return res != null && res.getBoolean(RES_ENHANCED_SETTING_IS_ENABLED, false);
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
+                // either of these happen.
+                Log.w(null, "getEnhancedBlockSetting: provider not ready.");
+                return false;
+            }
+        }
+
+        /**
+         * Set the enhanced block setting enabled status.
+         *
+         * @param context the context of the caller.
+         * @param key the key of the setting to set, can be
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED}
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_BLOCK_PRIVATE}
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_BLOCK_PAYPHONE}
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_BLOCK_UNKNOWN}
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE}
+         *        {@link SystemContract#ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION}
+         * @param value the enabled statue of the setting to set.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(allOf = {
+                android.Manifest.permission.READ_BLOCKED_NUMBERS,
+                android.Manifest.permission.WRITE_BLOCKED_NUMBERS
+        })
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static void setBlockedNumberSetting(@NonNull Context context,
+                @NonNull String key, boolean value) {
+            verifyBlockedNumbersPermission(context);
+            Bundle extras = new Bundle();
+            extras.putString(EXTRA_ENHANCED_SETTING_KEY, key);
+            extras.putBoolean(EXTRA_ENHANCED_SETTING_VALUE, value);
+            context.getContentResolver().call(AUTHORITY_URI,
+                    SystemContract.METHOD_SET_ENHANCED_BLOCK_SETTING, null, extras);
+        }
+
+        /**
+         * Represents the current status of
+         * {@link #shouldSystemBlockNumber(Context, String, int, boolean)}. If emergency services
+         * have been contacted recently, {@link #mIsSuppressed} is {@code true}, and blocking
+         * is disabled until the timestamp {@link #mUntilTimestampMillis}.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+        public static final class BlockSuppressionStatus {
+            private boolean mIsSuppressed;
+
+            /**
+             * Timestamp in milliseconds from epoch.
+             */
+            private long mUntilTimestampMillis;
+
+            public BlockSuppressionStatus(boolean isSuppressed, long untilTimestampMillis) {
+                this.mIsSuppressed = isSuppressed;
+                this.mUntilTimestampMillis = untilTimestampMillis;
+            }
+
+            @Override
+            public String toString() {
+                return "[BlockSuppressionStatus; isSuppressed=" + mIsSuppressed + ", until="
+                        + mUntilTimestampMillis + "]";
+            }
+
+            public boolean getIsSuppressed() {
+                return mIsSuppressed;
+            }
+
+            public long getUntilTimestampMillis() {
+                return mUntilTimestampMillis;
+            }
+        }
+
+        /**
+         * Verifies that the caller holds both the
+         * {@link android.Manifest.permission#READ_BLOCKED_NUMBERS} permission and the
+         * {@link android.Manifest.permission#WRITE_BLOCKED_NUMBERS} permission.
+         *
+         * @param context
+         * @throws SecurityException if the caller is missing the necessary permissions
+         */
+        private static void verifyBlockedNumbersPermission(Context context) {
+            context.enforceCallingOrSelfPermission(Manifest.permission.READ_BLOCKED_NUMBERS,
+                    "Caller does not have the android.permission.READ_BLOCKED_NUMBERS permission");
+            context.enforceCallingOrSelfPermission(Manifest.permission.WRITE_BLOCKED_NUMBERS,
+                    "Caller does not have the android.permission.WRITE_BLOCKED_NUMBERS permission");
+        }
     }
 
     /** @hide */
@@ -558,7 +893,7 @@ public class BlockedNumberContract {
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_PAYPHONE}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNKNOWN}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE}
-         *        {@link #ENHANCED_SETTING_KEY_EMERGENCY_CALL_NOTIFICATION_SHOWING}
+         *        {@link #ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION}
          * @return {@code true} if the setting is enabled. {@code false} otherwise.
          */
         public static boolean getEnhancedBlockSetting(Context context, String key) {
@@ -586,7 +921,7 @@ public class BlockedNumberContract {
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_PAYPHONE}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNKNOWN}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE}
-         *        {@link #ENHANCED_SETTING_KEY_EMERGENCY_CALL_NOTIFICATION_SHOWING}
+         *        {@link #ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION}
          * @param value the enabled statue of the setting to set.
          */
         public static void setEnhancedBlockSetting(Context context, String key, boolean value) {

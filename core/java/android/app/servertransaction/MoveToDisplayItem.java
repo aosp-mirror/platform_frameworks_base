@@ -22,11 +22,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
+import android.window.ActivityWindowInfo;
 
 import java.util.Objects;
 
@@ -38,6 +40,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
 
     private int mTargetDisplayId;
     private Configuration mConfiguration;
+    private ActivityWindowInfo mActivityWindowInfo;
 
     @Override
     public void preExecute(@NonNull ClientTransactionHandler client) {
@@ -51,8 +54,15 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
             @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityMovedToDisplay");
-        client.handleActivityConfigurationChanged(r, mConfiguration, mTargetDisplayId);
+        client.handleActivityConfigurationChanged(r, mConfiguration, mTargetDisplayId,
+                mActivityWindowInfo);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    @Nullable
+    @Override
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
+        return client.getActivity(getActivityToken());
     }
 
     // ObjectPoolItem implementation
@@ -62,7 +72,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
     /** Obtain an instance initialized with provided params. */
     @NonNull
     public static MoveToDisplayItem obtain(@NonNull IBinder activityToken, int targetDisplayId,
-            @NonNull Configuration configuration) {
+            @NonNull Configuration configuration, @NonNull ActivityWindowInfo activityWindowInfo) {
         MoveToDisplayItem instance = ObjectPool.obtain(MoveToDisplayItem.class);
         if (instance == null) {
             instance = new MoveToDisplayItem();
@@ -70,6 +80,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         instance.setActivityToken(activityToken);
         instance.mTargetDisplayId = targetDisplayId;
         instance.mConfiguration = new Configuration(configuration);
+        instance.mActivityWindowInfo = new ActivityWindowInfo(activityWindowInfo);
 
         return instance;
     }
@@ -79,6 +90,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         super.recycle();
         mTargetDisplayId = 0;
         mConfiguration = null;
+        mActivityWindowInfo = null;
         ObjectPool.recycle(this);
     }
 
@@ -90,6 +102,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         super.writeToParcel(dest, flags);
         dest.writeInt(mTargetDisplayId);
         dest.writeTypedObject(mConfiguration, flags);
+        dest.writeTypedObject(mActivityWindowInfo, flags);
     }
 
     /** Read from Parcel. */
@@ -97,6 +110,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         super(in);
         mTargetDisplayId = in.readInt();
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
+        mActivityWindowInfo = in.readTypedObject(ActivityWindowInfo.CREATOR);
     }
 
     public static final @NonNull Creator<MoveToDisplayItem> CREATOR = new Creator<>() {
@@ -119,7 +133,8 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         }
         final MoveToDisplayItem other = (MoveToDisplayItem) o;
         return mTargetDisplayId == other.mTargetDisplayId
-                && Objects.equals(mConfiguration, other.mConfiguration);
+                && Objects.equals(mConfiguration, other.mConfiguration)
+                && Objects.equals(mActivityWindowInfo, other.mActivityWindowInfo);
     }
 
     @Override
@@ -128,6 +143,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         result = 31 * result + super.hashCode();
         result = 31 * result + mTargetDisplayId;
         result = 31 * result + mConfiguration.hashCode();
+        result = 31 * result + Objects.hashCode(mActivityWindowInfo);
         return result;
     }
 
@@ -135,6 +151,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
     public String toString() {
         return "MoveToDisplayItem{" + super.toString()
                 + ",targetDisplayId=" + mTargetDisplayId
-                + ",configuration=" + mConfiguration + "}";
+                + ",configuration=" + mConfiguration
+                + ",activityWindowInfo=" + mActivityWindowInfo + "}";
     }
 }

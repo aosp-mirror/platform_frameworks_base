@@ -18,7 +18,5 @@ package com.android.systemui.statusbar.notification.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-var Kosmos.notificationsKeyguardViewStateRepository: NotificationsKeyguardViewStateRepository by
-    Kosmos.Fixture { fakeNotificationsKeyguardViewStateRepository }
-val Kosmos.fakeNotificationsKeyguardViewStateRepository by
-    Kosmos.Fixture { FakeNotificationsKeyguardViewStateRepository() }
+val Kosmos.notificationsKeyguardViewStateRepository: NotificationsKeyguardViewStateRepository by
+    Kosmos.Fixture { NotificationsKeyguardViewStateRepository() }

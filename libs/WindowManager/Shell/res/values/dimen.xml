@@ -67,10 +67,6 @@
     <dimen name="pip_resize_handle_margin">4dp</dimen>
     <dimen name="pip_resize_handle_padding">0dp</dimen>
 
-    <!-- PIP Split icon size and margin. -->
-    <dimen name="pip_split_icon_size">24dp</dimen>
-    <dimen name="pip_split_icon_margin">12dp</dimen>
-
     <!-- PIP stash offset size, which is the width of visible PIP region when stashed. -->
     <dimen name="pip_stash_offset">32dp</dimen>
 
@@ -104,6 +100,10 @@
 
     <dimen name="split_divider_bar_width">10dp</dimen>
     <dimen name="split_divider_corner_size">42dp</dimen>
+
+    <!-- The distance from the edge of the screen to invoke splitscreen when the user is dragging
+         an intent that can be launched into split. -->
+    <dimen name="drag_launchable_intent_edge_margin">48dp</dimen>
 
     <!-- One-Handed Mode -->
     <!-- Threshold for dragging distance to enable one-handed mode -->
@@ -248,6 +248,8 @@
     <dimen name="bubble_popup_padding">24dp</dimen>
     <!-- The size of the caption bar inset at the top of bubble bar expanded view. -->
     <dimen name="bubble_bar_expanded_view_caption_height">32dp</dimen>
+    <!-- The width of the caption bar at the top of bubble bar expanded view. -->
+    <dimen name="bubble_bar_expanded_view_caption_width">128dp</dimen>
     <!-- The height of the dots shown for the caption menu in the bubble bar expanded view.. -->
     <dimen name="bubble_bar_expanded_view_caption_dot_size">4dp</dimen>
     <!-- The spacing between the dots for the caption menu in the bubble bar expanded view.. -->
@@ -266,6 +268,10 @@
     <dimen name="bubble_bar_manage_menu_item_height">52dp</dimen>
     <!-- Size of the icons in the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_item_icon_size">20dp</dimen>
+    <!-- Corner radius for expanded view when bubble bar is used -->
+    <dimen name="bubble_bar_expanded_view_corner_radius">16dp</dimen>
+    <!-- Corner radius for expanded view while it is being dragged -->
+    <dimen name="bubble_bar_expanded_view_corner_radius_dragged">28dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
     <dimen name="compat_button_margin">24dp</dimen>
@@ -413,6 +419,38 @@
     <!-- Height of desktop mode caption for fullscreen tasks. -->
     <dimen name="desktop_mode_fullscreen_decor_caption_height">36dp</dimen>
 
+    <!-- Width of desktop mode caption for fullscreen tasks. -->
+    <dimen name="desktop_mode_fullscreen_decor_caption_width">128dp</dimen>
+
+    <!-- Required empty space to be visible for partially offscreen tasks. -->
+    <dimen name="freeform_required_visible_empty_space_in_header">48dp</dimen>
+
+    <!-- Required empty space to be visible for partially offscreen tasks on a smaller screen. -->
+    <dimen name="small_screen_required_visible_empty_space_in_header">12dp</dimen>
+
+    <!-- 32dp width back button + 10dp margin -->
+    <dimen name="caption_left_buttons_width">32dp</dimen>
+
+    <!-- (32 dp buttons + 10dp margins) * 3 buttons-->
+    <dimen name="caption_right_buttons_width">126dp</dimen>
+
+    <!-- 2 buttons * 44dp button size + 16dp total margins. -->
+    <dimen name="desktop_mode_right_edge_buttons_width">104dp</dimen>
+
+    <!-- 22dp padding + 24dp app icon + 16dp expand button.
+         Text varies in size, we will calculate that width separately. -->
+    <dimen name="desktop_mode_app_details_width_minus_text">62dp</dimen>
+
+    <!-- When custom headers are requested, this is the width of the left-aligned region that is
+         taken up by caption elements and extra margins. The customizable region starts at the
+         end of this area. -->
+    <dimen name="desktop_mode_customizable_caption_margin_start">84dp</dimen>
+
+    <!-- When custom headers are requested, this is the width of the right-aligned region that is
+         taken up by caption elements and extra margins. The customizable region ends at the
+         start of this area. -->
+    <dimen name="desktop_mode_customizable_caption_margin_end">152dp</dimen>
+
     <!-- The width of the maximize menu in desktop mode. -->
     <dimen name="desktop_mode_maximize_menu_width">287dp</dimen>
 
@@ -459,7 +497,7 @@
     <dimen name="desktop_mode_handle_menu_corner_radius">26dp</dimen>
 
     <!-- The radius of the caption menu icon. -->
-    <dimen name="desktop_mode_caption_icon_radius">28dp</dimen>
+    <dimen name="desktop_mode_caption_icon_radius">24dp</dimen>
 
     <!-- The radius of the caption menu shadow. -->
     <dimen name="desktop_mode_handle_menu_shadow_radius">2dp</dimen>
@@ -475,6 +513,17 @@
     <!-- The height of the area at the top of the screen where a freeform task will transition to
     fullscreen if dragged until the top bound of the task is within the area. -->
     <dimen name="desktop_mode_transition_area_height">16dp</dimen>
+
+    <!-- The width of the area where a desktop task will transition to fullscreen. -->
+    <dimen name="desktop_mode_fullscreen_from_desktop_width">80dp</dimen>
+
+    <!-- The height of the area where a desktop task will transition to fullscreen. -->
+    <dimen name="desktop_mode_fullscreen_from_desktop_height">40dp</dimen>
+
+    <!-- The height on the screen where drag to the left or right edge will result in a
+    desktop task snapping to split size. The empty space between this and the top is to allow
+    for corner drags without transition. -->
+    <dimen name="desktop_mode_split_from_desktop_height">100dp</dimen>
 
     <!-- The acceptable area ratio of fg icon area/bg icon area, i.e. (72 x 72) / (108 x 108) -->
     <item type="dimen" format="float" name="splash_icon_enlarge_foreground_threshold">0.44</item>

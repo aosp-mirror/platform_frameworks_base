@@ -18,7 +18,6 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -28,7 +27,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 val Kosmos.alternateBouncerViewModel by Fixture {
     AlternateBouncerViewModel(
         statusBarKeyguardViewManager = statusBarKeyguardViewManager,
-        transitionInteractor = keyguardTransitionInteractor,
         animationFlow = keyguardTransitionAnimationFlow,
     )
 }

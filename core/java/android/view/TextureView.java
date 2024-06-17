@@ -16,7 +16,8 @@
 
 package android.view;
 
-import android.annotation.FloatRange;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -196,9 +197,6 @@ public class TextureView extends View {
 
     private Canvas mCanvas;
     private int mSaveCount;
-
-    @FloatRange(from = 0.0) float mFrameRate;
-    @Surface.FrameRateCompatibility int mFrameRateCompatibility;
 
     private final Object[] mNativeWindowLock = new Object[0];
     // Set by native code, do not write!
@@ -473,13 +471,13 @@ public class TextureView extends View {
             mLayer.setSurfaceTexture(mSurface);
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
             mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
-            if (Flags.toolkitSetFrameRate()) {
+            if (Flags.toolkitSetFrameRateReadOnly()) {
                 mSurface.setOnSetFrameRateListener(
                         (surfaceTexture, frameRate, compatibility, strategy) -> {
                             if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                                 Trace.instant(Trace.TRACE_TAG_VIEW, "setFrameRate: " + frameRate);
                             }
-                            mFrameRate = frameRate;
+                            setRequestedFrameRate(frameRate);
                             mFrameRateCompatibility = compatibility;
                         }, mAttachInfo.mHandler);
             }
@@ -885,6 +883,17 @@ public class TextureView extends View {
      */
     public void setSurfaceTextureListener(@Nullable SurfaceTextureListener listener) {
         mListener = listener;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected int calculateFrameRateCategory(float sizePercentage) {
+        if (mMinusTwoFrameIntervalMillis > 15 && mMinusOneFrameIntervalMillis > 15) {
+            return FRAME_RATE_CATEGORY_NORMAL;
+        }
+        return super.calculateFrameRateCategory(sizePercentage);
     }
 
     @UnsupportedAppUsage

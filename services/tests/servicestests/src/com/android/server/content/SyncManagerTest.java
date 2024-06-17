@@ -36,9 +36,9 @@ import android.content.pm.UserProperties;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.provider.ContactsContract;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 

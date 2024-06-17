@@ -17,15 +17,20 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.app.UiModeManager.MODE_NIGHT_YES;
+
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.mock;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.app.UiModeManager;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.platform.test.annotations.EnableFlags;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
@@ -36,6 +41,8 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Flags;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.SysuiTestableContext;
+import com.android.systemui.accessibility.utils.TestUtils;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
@@ -65,17 +72,24 @@ public class MenuViewTest extends SysuiTestCase {
     @Mock
     private AccessibilityManager mAccessibilityManager;
 
+    private SysuiTestableContext mSpyContext;
+
     @Before
     public void setUp() throws Exception {
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mNightMode = mUiModeManager.getNightMode();
         mUiModeManager.setNightMode(MODE_NIGHT_YES);
+
+        mSpyContext = spy(mContext);
+        doNothing().when(mSpyContext).startActivity(any());
+        final SecureSettings secureSettings = TestUtils.mockSecureSettings();
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
-                mock(SecureSettings.class));
+                secureSettings);
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
-        mStubMenuViewAppearance = new MenuViewAppearance(mContext, stubWindowManager);
-        mMenuView = spy(new MenuView(mContext, stubMenuViewModel, mStubMenuViewAppearance));
-        mLastPosition = Prefs.getString(mContext,
+        mStubMenuViewAppearance = new MenuViewAppearance(mSpyContext, stubWindowManager);
+        mMenuView = spy(new MenuView(mSpyContext, stubMenuViewModel, mStubMenuViewAppearance,
+                secureSettings));
+        mLastPosition = Prefs.getString(mSpyContext,
                 Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION, /* defaultValue= */ null);
     }
 
@@ -152,6 +166,23 @@ public class MenuViewTest extends SysuiTestCase {
         final RadiiAnimator radiiAnimator = getRadiiAnimator();
         mMenuView.onDraggingStart();
         assertThat(radiiAnimator.isStarted()).isTrue();
+    }
+
+    @Test
+    public void getIntentForEditScreen_validate() {
+        Intent intent = mMenuView.getIntentForEditScreen();
+        String[] targets = intent.getBundleExtra(
+                ":settings:show_fragment_args").getStringArray("targets");
+
+        assertThat(intent.getAction()).isEqualTo(Settings.ACTION_ACCESSIBILITY_SHORTCUT_SETTINGS);
+        assertThat(targets).asList().containsExactlyElementsIn(TestUtils.TEST_BUTTON_TARGETS);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
+    public void gotoEditScreen_sendsIntent() {
+        mMenuView.gotoEditScreen();
+        verify(mSpyContext).startActivity(any());
     }
 
     private InstantInsetLayerDrawable getMenuViewInsetLayer() {

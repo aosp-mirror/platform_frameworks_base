@@ -95,6 +95,34 @@ interface IUiModeManager {
     int getNightModeCustomType();
 
     /**
+     * Overlays current Night Mode value.
+     * {@code attentionModeThemeOverlayType}.
+     *
+     * @param attentionModeThemeOverlayType
+     * @hide
+     */
+    @EnforcePermission("MODIFY_DAY_NIGHT_MODE")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)")
+    void setAttentionModeThemeOverlay(int attentionModeThemeOverlayType);
+
+
+    /**
+     * Returns current Attention Mode overlay type.
+     * <p>
+     * returns
+     *  <ul>
+     *    <li>{@link #MODE_ATTENTION_OFF}</li>
+     *    <li>{@link #MODE_ATTENTION_NIGHT}</li>
+     *    <li>{@link #MODE_ATTENTION_DAY}</li>
+     *  </ul>
+     * </p>
+     * @hide
+     */
+    @EnforcePermission("MODIFY_DAY_NIGHT_MODE")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)")
+    int getAttentionModeThemeOverlay();
+
+    /**
      * Sets the dark mode for the given application. This setting is persisted and will override the
      * system configuration for this application.
      *   1 - notnight mode

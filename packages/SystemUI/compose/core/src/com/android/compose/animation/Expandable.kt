@@ -75,7 +75,7 @@ import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import com.android.systemui.animation.Expandable
-import com.android.systemui.animation.LaunchAnimator
+import com.android.systemui.animation.TransitionAnimator
 import kotlin.math.max
 import kotlin.math.min
 
@@ -97,12 +97,12 @@ import kotlin.math.min
  *
  *      // For activities:
  *      onClick = { expandable ->
- *          activityStarter.startActivity(intent, expandable.activityLaunchController())
+ *          activityStarter.startActivity(intent, expandable.activityTransitionController())
  *      },
  *
  *      // For dialogs:
  *      onClick = { expandable ->
- *          dialogLaunchAnimator.show(dialog, controller.dialogLaunchController())
+ *          dialogTransitionAnimator.show(dialog, controller.dialogTransitionController())
  *      },
  *    ) {
  *      ...
@@ -301,7 +301,7 @@ fun Expandable(
 private fun AnimatedContentInOverlay(
     color: Color,
     sizeInOriginalLayout: Size,
-    animatorState: State<LaunchAnimator.State?>,
+    animatorState: State<TransitionAnimator.State?>,
     overlay: ViewGroupOverlay,
     controller: ExpandableControllerImpl,
     content: @Composable (Expandable) -> Unit,
@@ -407,7 +407,7 @@ private fun AnimatedContentInOverlay(
 
 internal fun measureAndLayoutComposeViewInOverlay(
     view: View,
-    state: LaunchAnimator.State,
+    state: TransitionAnimator.State,
 ) {
     val exactWidth = state.width
     val exactHeight = state.height
@@ -449,7 +449,7 @@ private fun Modifier.border(controller: ExpandableControllerImpl): Modifier {
 }
 
 private fun ContentDrawScope.drawBackground(
-    animatorState: LaunchAnimator.State,
+    animatorState: TransitionAnimator.State,
     color: Color,
     border: BorderStroke?,
 ) {

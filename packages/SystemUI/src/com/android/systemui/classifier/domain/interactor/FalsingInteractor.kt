@@ -17,23 +17,27 @@
 package com.android.systemui.classifier.domain.interactor
 
 import android.view.MotionEvent
+import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.plugins.FalsingManager
 import javax.inject.Inject
 
 /**
- * Exposes the subset of the [FalsingCollector] API that's required by external callers.
+ * Exposes the subset of the [FalsingCollector] and [FalsingManager] APIs that's required by
+ * external callers.
  *
- * E.g. methods of [FalsingCollector] that are not exposed by this class don't need to be invoked by
- * external callers as they're already called by the scene framework.
+ * E.g. methods of the above APIs that are not exposed by this class either don't need to be invoked
+ * by external callers (as they're already called by the scene framework) or haven't been added yet.
  */
 @SysUISingleton
 class FalsingInteractor
 @Inject
 constructor(
     @FalsingCollectorActual private val collector: FalsingCollector,
+    private val manager: FalsingManager,
 ) {
     /**
      * Notifies of a [MotionEvent] that passed through the UI.
@@ -62,4 +66,9 @@ constructor(
     fun updateFalseConfidence(
         result: FalsingClassifier.Result,
     ) = collector.updateFalseConfidence(result)
+
+    /** Returns `true` if the gesture should be rejected. */
+    fun isFalseTouch(
+        @Classifier.InteractionType interactionType: Int,
+    ): Boolean = manager.isFalseTouch(interactionType)
 }

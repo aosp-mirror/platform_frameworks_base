@@ -86,8 +86,8 @@
     <!-- Power Menu Lite -->
     <!-- These values are for small screen landscape. For larger landscape screens, they are
          overlaid -->
-    <dimen name="global_actions_button_size">72dp</dimen>
-    <dimen name="global_actions_button_padding">26dp</dimen>
+    <dimen name="global_actions_button_size">64dp</dimen>
+    <dimen name="global_actions_button_padding">20dp</dimen>
 
     <!-- scroll view the size of 2 channel rows -->
     <dimen name="notification_blocker_channel_list_height">128dp</dimen>

@@ -16,7 +16,8 @@
 
 package com.android.server.notification;
 
-import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_NIGHT;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
 import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_APP;
 import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_USER;
 
@@ -28,9 +29,11 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
@@ -102,8 +105,10 @@ public class DefaultDeviceEffectsApplierTest {
         mContext.addMockSystemService(ColorDisplayManager.class, mColorDisplayManager);
         mContext.addMockSystemService(UiModeManager.class, mUiModeManager);
         mContext.addMockSystemService(WallpaperManager.class, mWallpaperManager);
+        when(mWallpaperManager.isWallpaperSupported()).thenReturn(true);
 
         mApplier = new DefaultDeviceEffectsApplier(mContext);
+        verify(mWallpaperManager).isWallpaperSupported();
     }
 
     @Test
@@ -121,28 +126,49 @@ public class DefaultDeviceEffectsApplierTest {
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(true));
         verify(mColorDisplayManager).setSaturationLevel(eq(0));
         verify(mWallpaperManager).setWallpaperDimAmount(eq(0.6f));
-        verify(mUiModeManager).setNightModeActivatedForCustomMode(
-                eq(MODE_NIGHT_CUSTOM_TYPE_BEDTIME), eq(true));
+        verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_NIGHT));
     }
 
     @Test
-    public void apply_removesPreviouslyAppliedEffects() {
+    public void apply_removesEffects() {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
         ZenDeviceEffects previousEffects = new ZenDeviceEffects.Builder()
                 .setShouldSuppressAmbientDisplay(true)
                 .setShouldDimWallpaper(true)
+                .setShouldDisplayGrayscale(true)
+                .setShouldUseNightMode(true)
                 .build();
         mApplier.apply(previousEffects, UPDATE_ORIGIN_USER);
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(true));
+        verify(mColorDisplayManager).setSaturationLevel(eq(0));
         verify(mWallpaperManager).setWallpaperDimAmount(eq(0.6f));
+        verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_NIGHT));
 
         ZenDeviceEffects noEffects = new ZenDeviceEffects.Builder().build();
         mApplier.apply(noEffects, UPDATE_ORIGIN_USER);
 
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(false));
+        verify(mColorDisplayManager).setSaturationLevel(eq(100));
         verify(mWallpaperManager).setWallpaperDimAmount(eq(0.0f));
-        verifyZeroInteractions(mColorDisplayManager, mUiModeManager);
+        verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_OFF));
+    }
+
+    @Test
+    public void apply_removesOnlyPreviouslyAppliedEffects() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+
+        ZenDeviceEffects previousEffects = new ZenDeviceEffects.Builder()
+                .setShouldSuppressAmbientDisplay(true)
+                .build();
+        mApplier.apply(previousEffects, UPDATE_ORIGIN_USER);
+        verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(true));
+
+        ZenDeviceEffects noEffects = new ZenDeviceEffects.Builder().build();
+        mApplier.apply(noEffects, UPDATE_ORIGIN_USER);
+
+        verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(false));
+        verifyZeroInteractions(mColorDisplayManager, mWallpaperManager, mUiModeManager);
     }
 
     @Test
@@ -150,6 +176,7 @@ public class DefaultDeviceEffectsApplierTest {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
         mContext.addMockSystemService(ColorDisplayManager.class, null);
         mContext.addMockSystemService(WallpaperManager.class, null);
+        mApplier = new DefaultDeviceEffectsApplier(mContext);
 
         ZenDeviceEffects effects = new ZenDeviceEffects.Builder()
                 .setShouldSuppressAmbientDisplay(true)
@@ -161,6 +188,26 @@ public class DefaultDeviceEffectsApplierTest {
 
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(true));
         // (And no crash from missing services).
+    }
+
+    @Test
+    public void apply_disabledWallpaperService_dimWallpaperNotApplied() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        WallpaperManager disabledWallpaperService = mock(WallpaperManager.class);
+        when(mWallpaperManager.isWallpaperSupported()).thenReturn(false);
+        mContext.addMockSystemService(WallpaperManager.class, disabledWallpaperService);
+        mApplier = new DefaultDeviceEffectsApplier(mContext);
+        verify(mWallpaperManager).isWallpaperSupported();
+
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder()
+                .setShouldSuppressAmbientDisplay(true)
+                .setShouldDimWallpaper(true)
+                .setShouldDisplayGrayscale(true)
+                .setShouldUseNightMode(true)
+                .build();
+        mApplier.apply(effects, UPDATE_ORIGIN_USER);
+
+        verifyNoMoreInteractions(mWallpaperManager);
     }
 
     @Test
@@ -177,7 +224,7 @@ public class DefaultDeviceEffectsApplierTest {
         verify(mWallpaperManager).setWallpaperDimAmount(eq(0.6f));
 
         verify(mPowerManager, never()).suppressAmbientDisplay(anyString(), anyBoolean());
-        verify(mUiModeManager, never()).setNightModeActivatedForCustomMode(anyInt(), anyBoolean());
+        verify(mUiModeManager, never()).setAttentionModeThemeOverlay(anyInt());
     }
 
     @Test
@@ -223,8 +270,7 @@ public class DefaultDeviceEffectsApplierTest {
         screenOffReceiver.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
 
         // So the effect is applied, and we stopped listening for this event.
-        verify(mUiModeManager).setNightModeActivatedForCustomMode(
-                eq(MODE_NIGHT_CUSTOM_TYPE_BEDTIME), eq(true));
+        verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_NIGHT));
         verify(mContext).unregisterReceiver(eq(screenOffReceiver));
     }
 
@@ -239,14 +285,13 @@ public class DefaultDeviceEffectsApplierTest {
                 origin.value());
 
         // Effect was applied, and no broadcast receiver was registered.
-        verify(mUiModeManager).setNightModeActivatedForCustomMode(
-                eq(MODE_NIGHT_CUSTOM_TYPE_BEDTIME), eq(true));
+        verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_NIGHT));
         verify(mContext, never()).registerReceiver(any(), any(), anyInt());
     }
 
     @Test
-    @TestParameters({"{origin: ORIGIN_USER}", "{origin: ORIGIN_INIT}", "{origin: ORIGIN_INIT_USER}",
-            "{origin: ORIGIN_SYSTEM_OR_SYSTEMUI}"})
+    @TestParameters({"{origin: ORIGIN_USER}", "{origin: ORIGIN_INIT}",
+            "{origin: ORIGIN_INIT_USER}"})
     public void apply_nightModeWithScreenOn_appliedImmediatelyBasedOnOrigin(ChangeOrigin origin) {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
@@ -256,14 +301,13 @@ public class DefaultDeviceEffectsApplierTest {
                 origin.value());
 
         // Effect was applied, and no broadcast receiver was registered.
-        verify(mUiModeManager).setNightModeActivatedForCustomMode(
-                eq(MODE_NIGHT_CUSTOM_TYPE_BEDTIME), eq(true));
+        verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_NIGHT));
         verify(mContext, never()).registerReceiver(any(), any(), anyInt());
     }
 
     @Test
     @TestParameters({"{origin: ORIGIN_APP}", "{origin: ORIGIN_RESTORE_BACKUP}",
-            "{origin: ORIGIN_UNKNOWN}"})
+            "{origin: ORIGIN_SYSTEM_OR_SYSTEMUI}", "{origin: ORIGIN_UNKNOWN}"})
     public void apply_nightModeWithScreenOn_willBeAppliedLaterBasedOnOrigin(ChangeOrigin origin) {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 

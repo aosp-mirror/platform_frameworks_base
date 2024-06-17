@@ -174,6 +174,23 @@ public class StatusBarNotification implements Parcelable {
         return sbnKey;
     }
 
+    /**
+     * @return Whether the Entry is a group child by the app or system
+     * @hide
+     */
+    public boolean isAppOrSystemGroupChild() {
+        return isGroup() && !getNotification().isGroupSummary();
+    }
+
+
+    /**
+     * @return Whether the Entry is a group summary by the app or system
+     * @hide
+     */
+    public boolean isAppOrSystemGroupSummary() {
+        return isGroup() && getNotification().isGroupSummary();
+    }
+
     private String groupKey() {
         if (overrideGroupKey != null) {
             return user.getIdentifier() + "|" + pkg + "|" + "g:" + overrideGroupKey;
@@ -272,8 +289,10 @@ public class StatusBarNotification implements Parcelable {
     /**
      * @param notification Some kind of clone of this.notification.
      * @return A shallow copy of self, with notification in place of this.notification.
+     *
+     * @hide
      */
-    StatusBarNotification cloneShallow(Notification notification) {
+    public StatusBarNotification cloneShallow(Notification notification) {
         StatusBarNotification result = new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
                 notification, this.user, this.overrideGroupKey, this.postTime);

@@ -40,9 +40,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChild
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.Dp
@@ -65,7 +63,7 @@ class SceneTransitionLayoutTest {
     }
 
     private var currentScene by mutableStateOf(TestScenes.SceneA)
-    private val layoutState = SceneTransitionLayoutState(currentScene)
+    private lateinit var layoutState: SceneTransitionLayoutState
 
     // We use createAndroidComposeRule() here and not createComposeRule() because we need an
     // activity for testBack().
@@ -74,10 +72,14 @@ class SceneTransitionLayoutTest {
     /** The content under test. */
     @Composable
     private fun TestContent() {
+        layoutState =
+            updateSceneTransitionLayoutState(
+                currentScene,
+                { currentScene = it },
+                EmptyTestTransitions
+            )
+
         SceneTransitionLayout(
-            currentScene,
-            { currentScene = it },
-            EmptyTestTransitions,
             state = layoutState,
             modifier = Modifier.size(LayoutSize),
         ) {
@@ -115,25 +117,21 @@ class SceneTransitionLayoutTest {
 
     @Composable
     private fun SceneScope.SharedFoo(size: Dp, childOffset: Dp, modifier: Modifier = Modifier) {
-        Box(
-            modifier
-                .size(size)
-                .background(Color.Red)
-                .element(TestElements.Foo)
-                .testTag(TestElements.Foo.debugName)
-        ) {
+        Element(TestElements.Foo, modifier.size(size).background(Color.Red)) {
             // Offset the single child of Foo by some animated shared offset.
-            val offset by animateSharedDpAsState(childOffset, TestValues.Value1, TestElements.Foo)
+            val offset by animateElementDpAsState(childOffset, TestValues.Value1)
 
-            Box(
-                Modifier.offset {
-                        val pxOffset = offset.roundToPx()
-                        IntOffset(pxOffset, pxOffset)
-                    }
-                    .size(30.dp)
-                    .background(Color.Blue)
-                    .testTag(TestElements.Bar.debugName)
-            )
+            content {
+                Box(
+                    Modifier.offset {
+                            val pxOffset = offset.roundToPx()
+                            IntOffset(pxOffset, pxOffset)
+                        }
+                        .size(30.dp)
+                        .background(Color.Blue)
+                        .testTag(TestElements.Bar.debugName)
+                )
+            }
         }
     }
 
@@ -251,9 +249,9 @@ class SceneTransitionLayoutTest {
         // Advance to the middle of the animation.
         rule.mainClock.advanceTimeBy(TestTransitionDuration / 2)
 
-        // We need to use onAllNodesWithTag().onFirst() here given that shared elements are
-        // composed and laid out in both scenes (but drawn only in one).
-        sharedFoo = rule.onAllNodesWithTag(TestElements.Foo.testTag).onFirst()
+        // Foo is shared between Scene A and Scene B, and is therefore placed/drawn in Scene B given
+        // that B has a higher zIndex than A.
+        sharedFoo = rule.onNode(isElement(TestElements.Foo, TestScenes.SceneB))
 
         // In scene B, foo is at the top start (x = 0, y = 0) of the layout and has a size of
         // 100.dp. We pause at the middle of the transition, so it should now be 75.dp given that we
@@ -287,7 +285,7 @@ class SceneTransitionLayoutTest {
         val expectedLeft = 0.dp
         val expectedSize = 100.dp + (150.dp - 100.dp) * interpolatedProgress
 
-        sharedFoo = rule.onAllNodesWithTag(TestElements.Foo.testTag).onFirst()
+        sharedFoo = rule.onNode(isElement(TestElements.Foo, TestScenes.SceneC))
         assertThat((layoutState.transitionState as TransitionState.Transition).progress)
             .isEqualTo(interpolatedProgress)
         sharedFoo.assertWidthIsEqualTo(expectedSize)

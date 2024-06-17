@@ -63,7 +63,10 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
         @InflationFlag int inflationFlags = params.getContentViews();
         @InflationFlag int invalidatedFlags = params.getDirtyContentViews();
 
+        // Rebind the content views which are needed now, and the corresponding old views are
+        // invalidated
         @InflationFlag int contentToBind = invalidatedFlags & inflationFlags;
+        // Unbind the content views that are not needed
         @InflationFlag int contentToUnbind = inflationFlags ^ FLAG_CONTENT_VIEW_ALL;
 
         // Bind/unbind with parameters

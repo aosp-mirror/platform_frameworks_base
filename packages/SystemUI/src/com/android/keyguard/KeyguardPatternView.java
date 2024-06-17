@@ -281,7 +281,10 @@ public class KeyguardPatternView extends KeyguardInputView
             setAlpha(1f);
             mAppearAnimationUtils.startAnimation2d(
                     mLockPatternView.getCellStates(),
-                    () -> enableClipping(true),
+                    () -> {
+                        enableClipping(true);
+                        mLockPatternView.invalidate();
+                    },
                     KeyguardPatternView.this);
         });
         if (!TextUtils.isEmpty(mSecurityMessageDisplay.getText())) {

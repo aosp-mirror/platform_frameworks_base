@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<com.android.systemui.media.controls.ui.IlluminationDrawable
+<com.android.systemui.media.controls.ui.drawable.IlluminationDrawable
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     systemui:highlight="15"
     systemui:cornerRadius="@dimen/notification_corner_radius" />

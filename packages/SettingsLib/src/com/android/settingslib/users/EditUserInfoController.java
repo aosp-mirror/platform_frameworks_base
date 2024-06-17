@@ -234,6 +234,6 @@ public class EditUserInfoController {
     EditUserPhotoController createEditUserPhotoController(Activity activity,
             ActivityStarter activityStarter, ImageView userPhotoView) {
         return new EditUserPhotoController(activity, activityStarter, userPhotoView,
-                mSavedPhoto, mSavedDrawable, mFileAuthority);
+                mSavedPhoto, mSavedDrawable, mFileAuthority, false);
     }
 }

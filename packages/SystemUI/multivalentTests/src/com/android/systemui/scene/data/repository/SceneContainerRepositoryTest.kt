@@ -20,13 +20,15 @@ package com.android.systemui.scene.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,49 +39,50 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class SceneContainerRepositoryTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
+    private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
+    private val testScope = kosmos.testScope
 
     @Test
     fun allSceneKeys() {
-        val underTest = utils.fakeSceneContainerRepository()
+        val underTest = kosmos.sceneContainerRepository
         assertThat(underTest.allSceneKeys())
             .isEqualTo(
                 listOf(
-                    SceneKey.QuickSettings,
-                    SceneKey.Shade,
-                    SceneKey.Lockscreen,
-                    SceneKey.Bouncer,
-                    SceneKey.Gone,
-                    SceneKey.Communal,
+                    Scenes.QuickSettings,
+                    Scenes.Shade,
+                    Scenes.Lockscreen,
+                    Scenes.Bouncer,
+                    Scenes.Gone,
+                    Scenes.Communal,
                 )
             )
     }
 
     @Test
-    fun desiredScene() =
+    fun currentScene() =
         testScope.runTest {
-            val underTest = utils.fakeSceneContainerRepository()
-            val currentScene by collectLastValue(underTest.desiredScene)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+            val underTest = kosmos.sceneContainerRepository
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
-            underTest.setDesiredScene(SceneModel(SceneKey.Shade))
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
+            underTest.changeScene(Scenes.Shade)
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
         }
 
     @Test(expected = IllegalStateException::class)
-    fun setDesiredScene_noSuchSceneInContainer_throws() {
-        utils.kosmos.sceneKeys = listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
-        val underTest = utils.fakeSceneContainerRepository(utils.fakeSceneContainerConfig())
-        underTest.setDesiredScene(SceneModel(SceneKey.Shade))
+    fun changeScene_noSuchSceneInContainer_throws() {
+        kosmos.sceneKeys = listOf(Scenes.QuickSettings, Scenes.Lockscreen)
+        val underTest = kosmos.sceneContainerRepository
+        underTest.changeScene(Scenes.Shade)
     }
 
     @Test
     fun isVisible() =
         testScope.runTest {
-            val underTest = utils.fakeSceneContainerRepository()
+            val underTest = kosmos.sceneContainerRepository
             val isVisible by collectLastValue(underTest.isVisible)
             assertThat(isVisible).isTrue()
 
@@ -93,22 +96,22 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
     @Test
     fun transitionState_defaultsToIdle() =
         testScope.runTest {
-            val underTest = utils.fakeSceneContainerRepository()
+            val underTest = kosmos.sceneContainerRepository
             val transitionState by collectLastValue(underTest.transitionState)
 
             assertThat(transitionState)
                 .isEqualTo(
-                    ObservableTransitionState.Idle(utils.fakeSceneContainerConfig().initialSceneKey)
+                    ObservableTransitionState.Idle(kosmos.sceneContainerConfig.initialSceneKey)
                 )
         }
 
     @Test
     fun transitionState_reflectsUpdates() =
         testScope.runTest {
-            val underTest = utils.fakeSceneContainerRepository()
+            val underTest = kosmos.sceneContainerRepository
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(SceneKey.Lockscreen)
+                    ObservableTransitionState.Idle(Scenes.Lockscreen)
                 )
             underTest.setTransitionState(transitionState)
             val reflectedTransitionState by collectLastValue(underTest.transitionState)
@@ -117,8 +120,8 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
             val progress = MutableStateFlow(1f)
             transitionState.value =
                 ObservableTransitionState.Transition(
-                    fromScene = SceneKey.Lockscreen,
-                    toScene = SceneKey.Shade,
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Shade,
                     progress = progress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),
@@ -134,7 +137,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
             underTest.setTransitionState(null)
             assertThat(reflectedTransitionState)
                 .isEqualTo(
-                    ObservableTransitionState.Idle(utils.fakeSceneContainerConfig().initialSceneKey)
+                    ObservableTransitionState.Idle(kosmos.sceneContainerConfig.initialSceneKey)
                 )
         }
 }

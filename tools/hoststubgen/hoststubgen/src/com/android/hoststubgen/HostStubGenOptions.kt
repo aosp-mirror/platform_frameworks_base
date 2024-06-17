@@ -108,6 +108,8 @@ class HostStubGenOptions(
         var enablePostTrace: SetOnce<Boolean> = SetOnce(false),
 
         var enableNonStubMethodCallDetection: SetOnce<Boolean> = SetOnce(false),
+
+        var statsFile: SetOnce<String?> = SetOnce(null),
 ) {
     companion object {
 
@@ -252,6 +254,8 @@ class HostStubGenOptions(
                         "--verbose-log" -> setLogFile(LogLevel.Verbose, nextArg())
                         "--debug-log" -> setLogFile(LogLevel.Debug, nextArg())
 
+                        "--stats-file" -> ret.statsFile.setNextStringArg()
+
                         else -> throw ArgumentsException("Unknown option: $arg")
                     }
                 } catch (e: SetOnce.SetMoreThanOnceException) {
@@ -387,6 +391,7 @@ class HostStubGenOptions(
               enablePreTrace=$enablePreTrace,
               enablePostTrace=$enablePostTrace,
               enableNonStubMethodCallDetection=$enableNonStubMethodCallDetection,
+              statsFile=$statsFile,
             }
             """.trimIndent()
     }

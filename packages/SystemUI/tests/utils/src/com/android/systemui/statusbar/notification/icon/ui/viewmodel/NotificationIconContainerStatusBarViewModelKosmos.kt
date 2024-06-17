@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 import android.content.res.mainResources
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.headsUpNotificationIconInteractor
 import com.android.systemui.statusbar.notification.icon.domain.interactor.statusBarNotificationIconsInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.darkIconInteractor
@@ -28,11 +28,11 @@ import com.android.systemui.statusbar.phone.domain.interactor.darkIconInteractor
 val Kosmos.notificationIconContainerStatusBarViewModel by
     Kosmos.Fixture {
         NotificationIconContainerStatusBarViewModel(
+            bgContext = testDispatcher,
             darkIconInteractor = darkIconInteractor,
             iconsInteractor = statusBarNotificationIconsInteractor,
             headsUpIconInteractor = headsUpNotificationIconInteractor,
             keyguardInteractor = keyguardInteractor,
-            notificationsInteractor = activeNotificationsInteractor,
             resources = mainResources,
             shadeInteractor = shadeInteractor,
         )

@@ -44,6 +44,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.media.flags.Flags;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -98,8 +99,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     @Override
-    public void requestCreateSession(long requestId, String packageName, String routeId,
-            Bundle sessionHints) {
+    public void requestCreateSession(
+            long requestId,
+            String packageName,
+            String routeId,
+            Bundle sessionHints,
+            @RoutingSessionInfo.TransferReason int transferReason,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName) {
         if (mConnectionReady) {
             mActiveConnection.requestCreateSession(requestId, packageName, routeId, sessionHints);
             updateBinding();
@@ -141,7 +148,13 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     @Override
-    public void transferToRoute(long requestId, String sessionId, String routeId) {
+    public void transferToRoute(
+            long requestId,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName,
+            String sessionId,
+            String routeId,
+            @RoutingSessionInfo.TransferReason int transferReason) {
         if (mConnectionReady) {
             mActiveConnection.transferToRoute(requestId, sessionId, routeId);
         }
@@ -181,13 +194,19 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
                 && mComponentName.getClassName().equals(className);
     }
 
-    public void start() {
+    public void start(boolean rebindIfDisconnected) {
         if (!mRunning) {
             if (DEBUG) {
                 Slog.d(TAG, this + ": Starting");
             }
             mRunning = true;
-            updateBinding();
+            if (!Flags.enablePreventionOfKeepAliveRouteProviders()) {
+                updateBinding();
+            }
+        }
+        if (rebindIfDisconnected && mActiveConnection == null && shouldBind()) {
+            unbind();
+            bind();
         }
     }
 
@@ -201,15 +220,6 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         }
     }
 
-    public void rebindIfDisconnected() {
-        //TODO: When we are connecting to the service, calling this will unbind and bind again.
-        // We'd better not unbind if we are connecting.
-        if (mActiveConnection == null && shouldBind()) {
-            unbind();
-            bind();
-        }
-    }
-
     private void updateBinding() {
         if (shouldBind()) {
             bind();
@@ -219,18 +229,21 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     private boolean shouldBind() {
-        if (mRunning) {
-            boolean shouldBind =
-                    mLastDiscoveryPreference != null
-                            && !mLastDiscoveryPreference.getPreferredFeatures().isEmpty();
-            if (mIsSelfScanOnlyProvider) {
-                shouldBind &= mLastDiscoveryPreferenceIncludesThisPackage;
-            }
-            shouldBind |= mIsManagerScanning;
-            shouldBind |= !getSessionInfos().isEmpty();
-            return shouldBind;
+        if (!mRunning) {
+            return false;
         }
-        return false;
+        if (!getSessionInfos().isEmpty() || mIsManagerScanning) {
+            // We bind if any manager is scanning (regardless of whether an app is scanning) to give
+            // the opportunity for providers to publish routing sessions that were established
+            // directly between the app and the provider (typically via AndroidX MediaRouter). See
+            // b/176774510#comment20 for more information.
+            return true;
+        }
+        boolean anAppIsScanning =
+                mLastDiscoveryPreference != null
+                        && !mLastDiscoveryPreference.getPreferredFeatures().isEmpty();
+        return anAppIsScanning
+                && (mLastDiscoveryPreferenceIncludesThisPackage || !mIsSelfScanOnlyProvider);
     }
 
     private void bind() {
@@ -303,11 +316,19 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
     @Override
     public void onBindingDied(ComponentName name) {
-        if (DEBUG) {
-            Slog.d(TAG, this + ": Service binding died");
-        }
         unbind();
-        if (shouldBind()) {
+        if (Flags.enablePreventionOfKeepAliveRouteProviders()) {
+            Slog.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Route provider service (%s) binding died, but we did not rebind.",
+                            name.toString()));
+        } else if (shouldBind()) {
+            Slog.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Rebound to provider service (%s) after binding died.",
+                            name.toString()));
             bind();
         }
     }
@@ -646,6 +667,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
                 if (route.isSystemRoute()) {
                     throw new SecurityException(
                             "Only the system is allowed to publish system routes. "
+                                    + "Disallowed route: "
+                                    + route);
+                }
+
+                if (route.getSuitabilityStatus()
+                        == MediaRoute2Info.SUITABILITY_STATUS_NOT_SUITABLE_FOR_TRANSFER) {
+                    throw new SecurityException(
+                            "Only the system is allowed to set not suitable for transfer status. "
                                     + "Disallowed route: "
                                     + route);
                 }

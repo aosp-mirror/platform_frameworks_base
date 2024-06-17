@@ -28,8 +28,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.model.SysUiStateTest
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.BubbleEducationController
-import com.android.wm.shell.bubbles.PREF_MANAGED_EDUCATION
-import com.android.wm.shell.bubbles.PREF_STACK_EDUCATION
+import com.android.wm.shell.bubbles.ManageEducationView.Companion.PREF_MANAGED_EDUCATION
+import com.android.wm.shell.bubbles.StackEducationView.Companion.PREF_STACK_EDUCATION
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import org.junit.Assert.assertEquals

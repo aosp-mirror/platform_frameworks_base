@@ -26,6 +26,7 @@ import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.PowerOff
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.WarningAmber
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -78,25 +79,22 @@ object CardPageProvider : SettingsPageProvider {
                 imageVector = Icons.Outlined.WarningAmber,
                 buttons = listOf(
                     CardButton(text = "Action") {},
-                    CardButton(text = "Action", isMain = true) {},
-                )
+                ),
+                tintColor = MaterialTheme.colorScheme.error,
+                containerColor = MaterialTheme.colorScheme.errorContainer,
             )
         )
     }
 
     @Composable
     private fun SettingsCardWithoutIcon() {
-        var isVisible by rememberSaveable { mutableStateOf(true) }
+        val sampleTitle = stringResource(R.string.sample_title)
+        var title by remember { mutableStateOf(sampleTitle) }
         SettingsCard(
             CardModel(
-                title = stringResource(R.string.sample_title),
+                title = title,
                 text = stringResource(R.string.sample_text),
-                isVisible = { isVisible },
-                onDismiss = { isVisible = false },
-                buttons = listOf(
-                    CardButton(text = "Action") {},
-                ),
-            )
+            ) { title = "Clicked" }
         )
     }
 
@@ -104,6 +102,7 @@ object CardPageProvider : SettingsPageProvider {
     fun SampleSettingsCollapsibleCard() {
         val context = LocalContext.current
         var isVisible0 by rememberSaveable { mutableStateOf(true) }
+        var isVisible1 by rememberSaveable { mutableStateOf(true) }
         val cards = remember {
             mutableStateListOf(
                 CardModel(
@@ -114,16 +113,17 @@ object CardPageProvider : SettingsPageProvider {
                     onDismiss = { isVisible0 = false },
                     buttons = listOf(
                         CardButton(text = "Action") {},
-                    )
+                    ),
                 ),
                 CardModel(
                     title = context.getString(R.string.sample_title),
                     text = context.getString(R.string.sample_text),
                     imageVector = Icons.Outlined.Shield,
+                    isVisible = { isVisible1 },
+                    onDismiss = { isVisible1 = false },
                     buttons = listOf(
                         CardButton(text = "Action") {},
-                        CardButton(text = "Main action", isMain = true) {},
-                    )
+                    ),
                 )
             )
         }

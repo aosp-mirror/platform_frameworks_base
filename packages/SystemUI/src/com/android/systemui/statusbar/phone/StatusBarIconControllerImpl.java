@@ -38,8 +38,11 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
+import com.android.systemui.statusbar.phone.StatusBarIconHolder.BindableIconHolder;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
+import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistry;
+import com.android.systemui.statusbar.pipeline.icons.shared.model.BindableIcon;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
@@ -83,7 +86,8 @@ public class StatusBarIconControllerImpl implements Tunable,
             TunerService tunerService,
             DumpManager dumpManager,
             StatusBarIconList statusBarIconList,
-            StatusBarPipelineFlags statusBarPipelineFlags
+            StatusBarPipelineFlags statusBarPipelineFlags,
+            BindableIconsRegistry modernIconsRegistry
     ) {
         mStatusBarIconList = statusBarIconList;
         mContext = context;
@@ -94,6 +98,28 @@ public class StatusBarIconControllerImpl implements Tunable,
         tunerService.addTunable(this, ICON_HIDE_LIST);
         demoModeController.addCallback(this);
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
+
+        addModernBindableIcons(modernIconsRegistry);
+    }
+
+    /**
+     * BindableIcons will always produce ModernStatusBarViews, which will be initialized and bound
+     * upon being added to any icon group. Because their view policy does not require subsequent
+     * calls to setIcon(), we can simply register them all statically here and not have to build
+     * CoreStartables for each modern icon.
+     *
+     * @param registry a statically defined provider of the modern icons
+     */
+    private void addModernBindableIcons(BindableIconsRegistry registry) {
+        List<BindableIcon> icons = registry.getBindableIcons();
+
+        // Initialization point for the bindable (modern) icons. These icons get their own slot
+        // allocated immediately, and are required to control their own display properties
+        for (BindableIcon i : icons) {
+            if (i.getShouldBindIcon()) {
+                addBindableIcon(i);
+            }
+        }
     }
 
     /** */
@@ -180,6 +206,17 @@ public class StatusBarIconControllerImpl implements Tunable,
         boolean hidden = mIconHideList.contains(slot);
 
         mIconGroups.forEach(l -> l.onIconAdded(viewIndex, slot, hidden, holder));
+    }
+
+    void addBindableIcon(BindableIcon icon) {
+        StatusBarIconHolder existingHolder = mStatusBarIconList.getIconHolder(icon.getSlot(), 0);
+        // Expected to be null
+        if (existingHolder == null) {
+            BindableIconHolder bindableIcon = new BindableIconHolder(icon.getInitializer());
+            setIcon(icon.getSlot(), bindableIcon);
+        } else {
+            Log.e(TAG, "addBindableIcon called, but icon has already been added. Ignoring");
+        }
     }
 
     /** */

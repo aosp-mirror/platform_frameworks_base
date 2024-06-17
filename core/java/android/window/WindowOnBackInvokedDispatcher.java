@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 /**
  * Provides window based implementation of {@link OnBackInvokedDispatcher}.
@@ -173,6 +174,21 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
     }
 
+    /**
+     * Indicates if the dispatcher is actively dispatching to a callback.
+     */
+    public boolean isDispatching() {
+        return mIsDispatching;
+    }
+
+    private void onStartDispatching() {
+        mIsDispatching = true;
+    }
+
+    private void onStopDispatching() {
+        mIsDispatching = false;
+    }
+
     private void sendCancelledIfInProgress(@NonNull OnBackInvokedCallback callback) {
         boolean isInProgress = mProgressAnimator.isBackAnimationInProgress();
         if (isInProgress && callback instanceof OnBackAnimationCallback) {
@@ -230,7 +246,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                                     .ImeOnBackInvokedCallback
                                 ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
                                         callback).getIOnBackInvokedCallback()
-                                : new OnBackInvokedCallbackWrapper(callback);
+                                : new OnBackInvokedCallbackWrapper(
+                                        callback,
+                                        mProgressAnimator,
+                                        this);
                 callbackInfo = new OnBackInvokedCallbackInfo(
                         iCallback,
                         priority,
@@ -256,7 +275,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     }
 
     @NonNull
-    private static final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
+    private final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
+    private boolean mIsDispatching = false;
 
     /**
      * The {@link Context} in ViewRootImp and Activity could be different, this will make sure it
@@ -271,7 +291,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * Returns false if the legacy back behavior should be used.
      */
     public boolean isOnBackInvokedCallbackEnabled() {
-        return Checker.isOnBackInvokedCallbackEnabled(mChecker.getContext());
+        return isOnBackInvokedCallbackEnabled(mChecker.getContext());
     }
 
     /**
@@ -316,25 +336,46 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             }
         }
         final CallbackRef mCallbackRef;
+        /**
+         * The dispatcher this callback is registered with.
+         * This can be null for callbacks on {@link ImeOnBackInvokedDispatcher} because they are
+         * forwarded and registered on the app's {@link WindowOnBackInvokedDispatcher}. */
+        @Nullable
+        private final WindowOnBackInvokedDispatcher mDispatcher;
+        @NonNull
+        private final BackProgressAnimator mProgressAnimator;
 
-        OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
+        OnBackInvokedCallbackWrapper(
+                @NonNull OnBackInvokedCallback callback,
+                @NonNull BackProgressAnimator progressAnimator,
+                WindowOnBackInvokedDispatcher dispatcher) {
             mCallbackRef = new CallbackRef(callback, true /* useWeakRef */);
+            mProgressAnimator = progressAnimator;
+            mDispatcher = dispatcher;
         }
 
-        OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback, boolean useWeakRef) {
+        OnBackInvokedCallbackWrapper(
+                @NonNull OnBackInvokedCallback callback,
+                @NonNull BackProgressAnimator progressAnimator,
+                boolean useWeakRef) {
             mCallbackRef = new CallbackRef(callback, useWeakRef);
+            mProgressAnimator = progressAnimator;
+            mDispatcher = null;
         }
 
         @Override
         public void onBackStarted(BackMotionEvent backEvent) {
             Handler.getMain().post(() -> {
+                if (mDispatcher != null) {
+                    mDispatcher.onStartDispatching();
+                }
                 final OnBackAnimationCallback callback = getBackAnimationCallback();
                 if (callback != null) {
-                    mProgressAnimator.onBackStarted(backEvent, event ->
-                            callback.onBackProgressed(event));
+                    mProgressAnimator.reset();
                     callback.onBackStarted(new BackEvent(
                             backEvent.getTouchX(), backEvent.getTouchY(),
                             backEvent.getProgress(), backEvent.getSwipeEdge()));
+                    mProgressAnimator.onBackStarted(backEvent, callback::onBackProgressed);
                 }
             });
         }
@@ -352,6 +393,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         @Override
         public void onBackCancelled() {
             Handler.getMain().post(() -> {
+                if (mDispatcher != null) {
+                    mDispatcher.onStopDispatching();
+                }
                 mProgressAnimator.onBackCancelled(() -> {
                     final OnBackAnimationCallback callback = getBackAnimationCallback();
                     if (callback != null) {
@@ -364,6 +408,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         @Override
         public void onBackInvoked() throws RemoteException {
             Handler.getMain().post(() -> {
+                if (mDispatcher != null) {
+                    mDispatcher.onStopDispatching();
+                }
                 boolean isInProgress = mProgressAnimator.isBackAnimationInProgress();
                 mProgressAnimator.reset();
                 final OnBackInvokedCallback callback = mCallbackRef.get();
@@ -394,7 +441,17 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * {@link OnBackInvokedCallback}.
      */
     public static boolean isOnBackInvokedCallbackEnabled(@NonNull Context context) {
-        return Checker.isOnBackInvokedCallbackEnabled(context);
+        final Context originalContext = context;
+        while ((context instanceof ContextWrapper) && !(context instanceof Activity)) {
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        final ActivityInfo activityInfo = (context instanceof Activity)
+                ? ((Activity) context).getActivityInfo() : null;
+        final ApplicationInfo applicationInfo = context.getApplicationInfo();
+
+        return WindowOnBackInvokedDispatcher
+                .isOnBackInvokedCallbackEnabled(activityInfo, applicationInfo,
+                        () -> originalContext);
     }
 
     @Override
@@ -426,7 +483,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
          */
         public boolean checkApplicationCallbackRegistration(int priority,
                 OnBackInvokedCallback callback) {
-            if (!isOnBackInvokedCallbackEnabled(getContext())
+            if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(getContext())
                     && !(callback instanceof CompatOnBackInvokedCallback)) {
                 Log.w(TAG,
                         "OnBackInvokedCallback is not enabled for the application."
@@ -445,97 +502,76 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         private Context getContext() {
             return mContext.get();
         }
+    }
 
-        private static boolean isOnBackInvokedCallbackEnabled(@Nullable Context context) {
-            // new back is enabled if the feature flag is enabled AND the app does not explicitly
-            // request legacy back.
-            boolean featureFlagEnabled = ENABLE_PREDICTIVE_BACK;
-            if (!featureFlagEnabled) {
-                return false;
+    /**
+     * @hide
+     */
+    public static boolean isOnBackInvokedCallbackEnabled(@Nullable ActivityInfo activityInfo,
+            @NonNull ApplicationInfo applicationInfo,
+            @NonNull Supplier<Context> contextSupplier) {
+        // new back is enabled if the feature flag is enabled AND the app does not explicitly
+        // request legacy back.
+        if (!ENABLE_PREDICTIVE_BACK) {
+            return false;
+        }
+
+        if (ALWAYS_ENFORCE_PREDICTIVE_BACK) {
+            return true;
+        }
+
+        boolean requestsPredictiveBack;
+        // Activity
+        if (activityInfo != null && activityInfo.hasOnBackInvokedCallbackEnabled()) {
+            requestsPredictiveBack = activityInfo.isOnBackInvokedCallbackEnabled();
+            if (DEBUG) {
+                Log.d(TAG, TextUtils.formatSimple(
+                        "Activity: %s isPredictiveBackEnabled=%s",
+                        activityInfo.getComponentName(),
+                        requestsPredictiveBack));
             }
-
-            if (ALWAYS_ENFORCE_PREDICTIVE_BACK) {
-                return true;
-            }
-
-            // If the context is null, return false to use legacy back.
-            if (context == null) {
-                Log.w(TAG, "OnBackInvokedCallback is not enabled because context is null.");
-                return false;
-            }
-
-            boolean requestsPredictiveBack = false;
-
-            // Check if the context is from an activity.
-            Context originalContext = context;
-            while ((context instanceof ContextWrapper) && !(context instanceof Activity)) {
-                context = ((ContextWrapper) context).getBaseContext();
-            }
-
-            boolean shouldCheckActivity = false;
-
-            if (context instanceof Activity) {
-                final Activity activity = (Activity) context;
-
-                final ActivityInfo activityInfo = activity.getActivityInfo();
-                if (activityInfo != null) {
-                    if (activityInfo.hasOnBackInvokedCallbackEnabled()) {
-                        shouldCheckActivity = true;
-                        requestsPredictiveBack = activityInfo.isOnBackInvokedCallbackEnabled();
-
-                        if (DEBUG) {
-                            Log.d(TAG, TextUtils.formatSimple(
-                                    "Activity: %s isPredictiveBackEnabled=%s",
-                                    activity.getComponentName(),
-                                    requestsPredictiveBack));
-                        }
-                    }
-                } else {
-                    Log.w(TAG, "The ActivityInfo is null, so we cannot verify if this Activity"
-                            + " has the 'android:enableOnBackInvokedCallback' attribute."
-                            + " The application attribute will be used as a fallback.");
-                }
-            }
-
-            if (!shouldCheckActivity) {
-                final ApplicationInfo applicationInfo = context.getApplicationInfo();
-                requestsPredictiveBack = applicationInfo.isOnBackInvokedCallbackEnabled();
-
-                if (DEBUG) {
-                    Log.d(TAG, TextUtils.formatSimple("App: %s requestsPredictiveBack=%s",
-                            applicationInfo.packageName,
-                            requestsPredictiveBack));
-                }
-
-                if (PREDICTIVE_BACK_FALLBACK_WINDOW_ATTRIBUTE && !requestsPredictiveBack) {
-                    // Compatibility check for legacy window style flag used by Wear OS.
-                    // Note on compatibility behavior:
-                    // 1. windowSwipeToDismiss should be respected for all apps not opted in.
-                    // 2. windowSwipeToDismiss should be true for all apps not opted in, which
-                    //    enables the PB animation for them.
-                    // 3. windowSwipeToDismiss=false should be respected for apps not opted in,
-                    //    which disables PB & onBackPressed caused by BackAnimController's
-                    //    setTrigger(true)
-                    // Use the original context to resolve the styled attribute so that they stay
-                    // true to the window.
-                    TypedArray windowAttr =
-                            originalContext.obtainStyledAttributes(
-                                    new int[] {android.R.attr.windowSwipeToDismiss});
-                    boolean windowSwipeToDismiss = true;
-                    if (windowAttr.getIndexCount() > 0) {
-                        windowSwipeToDismiss = windowAttr.getBoolean(0, true);
-                    }
-                    windowAttr.recycle();
-
-                    if (DEBUG) {
-                        Log.i(TAG, "falling back to windowSwipeToDismiss: " + windowSwipeToDismiss);
-                    }
-
-                    requestsPredictiveBack = windowSwipeToDismiss;
-                }
-            }
-
             return requestsPredictiveBack;
         }
+
+        // Application
+        requestsPredictiveBack = applicationInfo.isOnBackInvokedCallbackEnabled();
+        if (DEBUG) {
+            Log.d(TAG, TextUtils.formatSimple("App: %s requestsPredictiveBack=%s",
+                    applicationInfo.packageName,
+                    requestsPredictiveBack));
+        }
+        if (requestsPredictiveBack) {
+            return true;
+        }
+
+        if (PREDICTIVE_BACK_FALLBACK_WINDOW_ATTRIBUTE) {
+            // Compatibility check for legacy window style flag used by Wear OS.
+            // Note on compatibility behavior:
+            // 1. windowSwipeToDismiss should be respected for all apps not opted in.
+            // 2. windowSwipeToDismiss should be true for all apps not opted in, which
+            //    enables the PB animation for them.
+            // 3. windowSwipeToDismiss=false should be respected for apps not opted in,
+            //    which disables PB & onBackPressed caused by BackAnimController's
+            //    setTrigger(true)
+            // Use the original context to resolve the styled attribute so that they stay
+            // true to the window.
+            final Context context = contextSupplier.get();
+            boolean windowSwipeToDismiss = true;
+            if (context != null) {
+                final TypedArray array = context.obtainStyledAttributes(
+                            new int[]{android.R.attr.windowSwipeToDismiss});
+                if (array.getIndexCount() > 0) {
+                    windowSwipeToDismiss = array.getBoolean(0, true);
+                }
+                array.recycle();
+            }
+
+            if (DEBUG) {
+                Log.i(TAG, "falling back to windowSwipeToDismiss: " + windowSwipeToDismiss);
+            }
+
+            requestsPredictiveBack = windowSwipeToDismiss;
+        }
+        return requestsPredictiveBack;
     }
 }

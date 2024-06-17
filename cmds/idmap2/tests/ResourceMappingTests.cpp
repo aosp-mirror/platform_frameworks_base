@@ -217,7 +217,7 @@ TEST(ResourceMappingTests, FabricatedOverlay) {
                   .Build();
 
   ASSERT_TRUE(frro);
-  TemporaryFile tf;
+  TempFrroFile tf;
   std::ofstream out(tf.path);
   ASSERT_TRUE((*frro).ToBinaryStream(out));
   out.close();

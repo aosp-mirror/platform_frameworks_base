@@ -26,6 +26,7 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.customization.R
+import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.shared.clocks.DefaultClockController.Companion.DOZE_COLOR
 import com.android.systemui.util.mockito.any
@@ -48,6 +49,9 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+
+private fun DefaultClockProvider.createClock(id: ClockId): DefaultClockController =
+    createClock(ClockSettings(id, null)) as DefaultClockController
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest

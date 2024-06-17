@@ -20,7 +20,9 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -57,6 +59,7 @@ constructor(
     lockscreenToGoneTransitionViewModel: LockscreenToGoneTransitionViewModel,
     lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
     lockscreenToPrimaryBouncerTransitionViewModel: LockscreenToPrimaryBouncerTransitionViewModel,
+    transitionInteractor: KeyguardTransitionInteractor,
 ) {
 
     data class PreviewMode(
@@ -70,6 +73,24 @@ constructor(
      * experience.
      */
     private val previewMode = MutableStateFlow(PreviewMode())
+
+    private val showingLockscreen: Flow<Boolean> =
+        transitionInteractor.finishedKeyguardState.map { keyguardState ->
+            keyguardState == KeyguardState.LOCKSCREEN
+        }
+
+    /** The only time the expansion is important is while lockscreen is actively displayed */
+    private val shadeExpansionAlpha =
+        combine(
+            showingLockscreen,
+            shadeInteractor.anyExpansion,
+        ) { showingLockscreen, expansion ->
+            if (showingLockscreen) {
+                1 - expansion
+            } else {
+                0f
+            }
+        }
 
     /**
      * ID of the slot that's currently selected in the preview that renders exclusively in the
@@ -101,7 +122,7 @@ constructor(
             lockscreenToGoneTransitionViewModel.shortcutsAlpha,
             lockscreenToOccludedTransitionViewModel.shortcutsAlpha,
             lockscreenToPrimaryBouncerTransitionViewModel.shortcutsAlpha,
-            shadeInteractor.qsExpansion.map { 1 - it },
+            shadeExpansionAlpha,
         )
 
     /** The source of truth of alpha for all of the quick affordances on lockscreen */

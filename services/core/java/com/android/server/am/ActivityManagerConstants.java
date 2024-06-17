@@ -16,6 +16,12 @@
 
 package com.android.server.am;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 
@@ -73,6 +79,9 @@ final class ActivityManagerConstants extends ContentObserver {
             = "fgservice_screen_on_before_time";
     private static final String KEY_FGSERVICE_SCREEN_ON_AFTER_TIME
             = "fgservice_screen_on_after_time";
+
+    private static final String KEY_FGS_BOOT_COMPLETED_ALLOWLIST = "fgs_boot_completed_allowlist";
+
     private static final String KEY_CONTENT_PROVIDER_RETAIN_TIME = "content_provider_retain_time";
     private static final String KEY_GC_TIMEOUT = "gc_timeout";
     private static final String KEY_GC_MIN_INTERVAL = "gc_min_interval";
@@ -166,6 +175,15 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME = 5*1000;
+
+    private static final int DEFAULT_FGS_BOOT_COMPLETED_ALLOWLIST =
+            FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                | FOREGROUND_SERVICE_TYPE_HEALTH
+                | FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING
+                | FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED
+                | FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                | FOREGROUND_SERVICE_TYPE_LOCATION;
+
     private static final long DEFAULT_CONTENT_PROVIDER_RETAIN_TIME = 20*1000;
     private static final long DEFAULT_GC_TIMEOUT = 5*1000;
     private static final long DEFAULT_GC_MIN_INTERVAL = 60*1000;
@@ -446,6 +464,9 @@ final class ActivityManagerConstants extends ContentObserver {
     // on until we will stop reporting it.
     public long FGSERVICE_SCREEN_ON_AFTER_TIME = DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME;
 
+    // Allow-list for FGS types that are allowed to start from BOOT_COMPLETED.
+    public int FGS_BOOT_COMPLETED_ALLOWLIST = DEFAULT_FGS_BOOT_COMPLETED_ALLOWLIST;
+
     // How long we will retain processes hosting content providers in the "last activity"
     // state before allowing them to drop down to the regular cached LRU list.  This is
     // to avoid thrashing of provider processes under low memory situations.
@@ -628,6 +649,10 @@ final class ActivityManagerConstants extends ContentObserver {
     // Whether to display a notification when a service is restricted from startForeground due to
     // foreground service background start restriction.
     volatile boolean mFgsStartRestrictionNotificationEnabled = false;
+
+    // Indicates whether PSS profiling in AppProfiler is force-enabled, even if RSS is used by
+    // default. Controlled by Settings.Global.FORCE_ENABLE_PSS_PROFILING
+    volatile boolean mForceEnablePssProfiling = false;
 
     /**
      * Indicates whether the foreground service background start restriction is enabled for
@@ -958,6 +983,9 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final Uri ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI =
             Settings.Global.getUriFor(Settings.Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS);
 
+    private static final Uri FORCE_ENABLE_PSS_PROFILING_URI =
+            Settings.Global.getUriFor(Settings.Global.FORCE_ENABLE_PSS_PROFILING);
+
     /**
      * The threshold to decide if a given association should be dumped into metrics.
      */
@@ -1024,6 +1052,27 @@ final class ActivityManagerConstants extends ContentObserver {
     public volatile long mShortFgsProcStateExtraWaitDuration =
             DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION;
 
+    /** Timeout for a mediaProcessing FGS, in milliseconds. */
+    private static final String KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION =
+            "media_processing_fgs_timeout_duration";
+
+    /** @see #KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION */
+    static final long DEFAULT_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION = 6 * 60 * 60_000; // 6 hours
+
+    /** @see #KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION */
+    public volatile long mMediaProcessingFgsTimeoutDuration =
+            DEFAULT_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION;
+
+    /** Timeout for a dataSync FGS, in milliseconds. */
+    private static final String KEY_DATA_SYNC_FGS_TIMEOUT_DURATION =
+            "data_sync_fgs_timeout_duration";
+
+    /** @see #KEY_DATA_SYNC_FGS_TIMEOUT_DURATION */
+    static final long DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION = 6 * 60 * 60_000; // 6 hours
+
+    /** @see #KEY_DATA_SYNC_FGS_TIMEOUT_DURATION */
+    public volatile long mDataSyncFgsTimeoutDuration = DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION;
+
     /**
      * If enabled, when starting an application, the system will wait for a
      * {@link ActivityManagerService#finishAttachApplication} from the app before scheduling
@@ -1053,6 +1102,20 @@ final class ActivityManagerConstants extends ContentObserver {
     /** @see #KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION */
     public volatile long mShortFgsAnrExtraWaitDuration =
             DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION;
+
+    /**
+     * If a service of a timeout-enforced type doesn't finish within this duration after its
+     * timeout, then we'll declare an ANR.
+     * i.e. if the time limit for a type is 1 hour, and this extra duration is 10 seconds, then
+     * the app will be ANR'ed 1 hour and 10 seconds after it started.
+     */
+    private static final String KEY_FGS_ANR_EXTRA_WAIT_DURATION = "fgs_anr_extra_wait_duration";
+
+    /** @see #KEY_FGS_ANR_EXTRA_WAIT_DURATION */
+    static final long DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION = 10_000;
+
+    /** @see #KEY_FGS_ANR_EXTRA_WAIT_DURATION */
+    public volatile long mFgsAnrExtraWaitDuration = DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION;
 
     /** @see #KEY_USE_TIERED_CACHED_ADJ */
     public boolean USE_TIERED_CACHED_ADJ = DEFAULT_USE_TIERED_CACHED_ADJ;
@@ -1236,8 +1299,17 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION:
                                 updateShortFgsProcStateExtraWaitDuration();
                                 break;
+                            case KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION:
+                                updateMediaProcessingFgsTimeoutDuration();
+                                break;
+                            case KEY_DATA_SYNC_FGS_TIMEOUT_DURATION:
+                                updateDataSyncFgsTimeoutDuration();
+                                break;
                             case KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION:
                                 updateShortFgsAnrExtraWaitDuration();
+                                break;
+                            case KEY_FGS_ANR_EXTRA_WAIT_DURATION:
+                                updateFgsAnrExtraWaitDuration();
                                 break;
                             case KEY_PROACTIVE_KILLS_ENABLED:
                                 updateProactiveKillsEnabled();
@@ -1368,6 +1440,7 @@ final class ActivityManagerConstants extends ContentObserver {
             mResolver.registerContentObserver(ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI,
                     false, this);
         }
+        mResolver.registerContentObserver(FORCE_ENABLE_PSS_PROFILING_URI, false, this);
         updateConstants();
         if (mSystemServerAutomaticHeapDumpEnabled) {
             updateEnableAutomaticSystemServerHeapDumps();
@@ -1383,6 +1456,7 @@ final class ActivityManagerConstants extends ContentObserver {
         // The following read from Settings.
         updateActivityStartsLoggingEnabled();
         updateForegroundServiceStartsLoggingEnabled();
+        updateForceEnablePssProfiling();
         // Read DropboxRateLimiter params from flags.
         mService.initDropboxRateLimiter();
     }
@@ -1424,6 +1498,8 @@ final class ActivityManagerConstants extends ContentObserver {
             updateForegroundServiceStartsLoggingEnabled();
         } else if (ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI.equals(uri)) {
             updateEnableAutomaticSystemServerHeapDumps();
+        } else if (FORCE_ENABLE_PSS_PROFILING_URI.equals(uri)) {
+            updateForceEnablePssProfiling();
         }
     }
 
@@ -1450,6 +1526,8 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME);
             FGSERVICE_SCREEN_ON_AFTER_TIME = mParser.getLong(KEY_FGSERVICE_SCREEN_ON_AFTER_TIME,
                     DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME);
+            FGS_BOOT_COMPLETED_ALLOWLIST = mParser.getInt(KEY_FGS_BOOT_COMPLETED_ALLOWLIST,
+                    DEFAULT_FGS_BOOT_COMPLETED_ALLOWLIST);
             CONTENT_PROVIDER_RETAIN_TIME = mParser.getLong(KEY_CONTENT_PROVIDER_RETAIN_TIME,
                     DEFAULT_CONTENT_PROVIDER_RETAIN_TIME);
             GC_TIMEOUT = mParser.getLong(KEY_GC_TIMEOUT,
@@ -1534,6 +1612,11 @@ final class ActivityManagerConstants extends ContentObserver {
     private void updateActivityStartsLoggingEnabled() {
         mFlagActivityStartsLoggingEnabled = Settings.Global.getInt(mResolver,
                 Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED, 1) == 1;
+    }
+
+    private void updateForceEnablePssProfiling() {
+        mForceEnablePssProfiling = Settings.Global.getInt(mResolver,
+                Settings.Global.FORCE_ENABLE_PSS_PROFILING, 0) == 1;
     }
 
     private void updateBackgroundActivityStarts() {
@@ -2025,6 +2108,27 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
     }
 
+    private void updateMediaProcessingFgsTimeoutDuration() {
+        mMediaProcessingFgsTimeoutDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION,
+                DEFAULT_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION);
+    }
+
+    private void updateDataSyncFgsTimeoutDuration() {
+        mDataSyncFgsTimeoutDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DATA_SYNC_FGS_TIMEOUT_DURATION,
+                DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION);
+    }
+
+    private void updateFgsAnrExtraWaitDuration() {
+        mFgsAnrExtraWaitDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_ANR_EXTRA_WAIT_DURATION,
+                DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION);
+    }
+
     private void updateEnableWaitForFinishAttachApplication() {
         mEnableWaitForFinishAttachApplication = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -2091,6 +2195,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(FGSERVICE_SCREEN_ON_BEFORE_TIME);
         pw.print("  "); pw.print(KEY_FGSERVICE_SCREEN_ON_AFTER_TIME); pw.print("=");
         pw.println(FGSERVICE_SCREEN_ON_AFTER_TIME);
+        pw.print("  "); pw.print(KEY_FGS_BOOT_COMPLETED_ALLOWLIST); pw.print("=");
+        pw.println(FGS_BOOT_COMPLETED_ALLOWLIST);
         pw.print("  "); pw.print(KEY_CONTENT_PROVIDER_RETAIN_TIME); pw.print("=");
         pw.println(CONTENT_PROVIDER_RETAIN_TIME);
         pw.print("  "); pw.print(KEY_GC_TIMEOUT); pw.print("=");
@@ -2253,6 +2359,13 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mShortFgsProcStateExtraWaitDuration);
         pw.print("  "); pw.print(KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
         pw.print("="); pw.println(mShortFgsAnrExtraWaitDuration);
+
+        pw.print("  "); pw.print(KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION);
+        pw.print("="); pw.println(mMediaProcessingFgsTimeoutDuration);
+        pw.print("  "); pw.print(KEY_DATA_SYNC_FGS_TIMEOUT_DURATION);
+        pw.print("="); pw.println(mDataSyncFgsTimeoutDuration);
+        pw.print("  "); pw.print(KEY_FGS_ANR_EXTRA_WAIT_DURATION);
+        pw.print("="); pw.println(mFgsAnrExtraWaitDuration);
 
         pw.print("  "); pw.print(KEY_USE_TIERED_CACHED_ADJ);
         pw.print("="); pw.println(USE_TIERED_CACHED_ADJ);

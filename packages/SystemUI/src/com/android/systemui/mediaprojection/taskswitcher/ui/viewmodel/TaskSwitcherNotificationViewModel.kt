@@ -16,15 +16,24 @@
 
 package com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel
 
+import android.app.ActivityManager.RunningTaskInfo
 import android.util.Log
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.mediaprojection.taskswitcher.domain.interactor.TaskSwitchInteractor
 import com.android.systemui.mediaprojection.taskswitcher.domain.model.TaskSwitchState
 import com.android.systemui.mediaprojection.taskswitcher.ui.model.TaskSwitcherNotificationUiState
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
-class TaskSwitcherNotificationViewModel @Inject constructor(interactor: TaskSwitchInteractor) {
+class TaskSwitcherNotificationViewModel
+@Inject
+constructor(
+    private val interactor: TaskSwitchInteractor,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
+) {
 
     val uiState: Flow<TaskSwitcherNotificationUiState> =
         interactor.taskSwitchChanges.map { taskSwitchChange ->
@@ -42,6 +51,13 @@ class TaskSwitcherNotificationViewModel @Inject constructor(interactor: TaskSwit
                 }
             }
         }
+
+    suspend fun onSwitchTaskClicked(task: RunningTaskInfo) {
+        interactor.switchProjectedTask(task)
+    }
+
+    suspend fun onGoBackToTaskClicked(task: RunningTaskInfo) =
+        withContext(backgroundDispatcher) { interactor.goBackToTask(task) }
 
     companion object {
         private const val TAG = "TaskSwitchNotifVM"

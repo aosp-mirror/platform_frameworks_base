@@ -152,6 +152,11 @@ class BroadcastProcessQueue {
     private int mActiveIndex;
 
     /**
+     * True if the broadcast actively being dispatched to this process was re-enqueued previously.
+     */
+    private boolean mActiveReEnqueued;
+
+    /**
      * Count of {@link #mActive} broadcasts that have been dispatched since this
      * queue was last idle.
      */
@@ -317,6 +322,7 @@ class BroadcastProcessQueue {
         final SomeArgs broadcastArgs = SomeArgs.obtain();
         broadcastArgs.arg1 = record;
         broadcastArgs.argi1 = recordIndex;
+        broadcastArgs.argi2 = 1;
         getQueueForBroadcast(record).addFirst(broadcastArgs);
         onBroadcastEnqueued(record, recordIndex);
     }
@@ -358,8 +364,7 @@ class BroadcastProcessQueue {
             // If we come across the record that's being enqueued in the queue, then that means
             // we already enqueued it for a receiver in this process and trying to insert a new
             // one past this could create priority inversion in the queue, so bail out.
-            if (record == testRecord && record.blockedUntilBeyondCount[recordIndex]
-                    > testRecord.blockedUntilBeyondCount[testRecordIndex]) {
+            if (record == testRecord) {
                 break;
             }
             if ((record.callingUid == testRecord.callingUid)
@@ -615,6 +620,7 @@ class BroadcastProcessQueue {
         final SomeArgs next = removeNextBroadcast();
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
+        mActiveReEnqueued = (next.argi2 == 1);
         mActiveCountSinceIdle++;
         mActiveAssumedDeliveryCountSinceIdle +=
                 (mActive.isAssumedDelivered(mActiveIndex) ? 1 : 0);
@@ -630,10 +636,19 @@ class BroadcastProcessQueue {
     public void makeActiveIdle() {
         mActive = null;
         mActiveIndex = 0;
+        mActiveReEnqueued = false;
         mActiveCountSinceIdle = 0;
         mActiveAssumedDeliveryCountSinceIdle = 0;
         mActiveViaColdStart = false;
         invalidateRunnableAt();
+    }
+
+    public boolean wasActiveBroadcastReEnqueued() {
+        // If the flag is not enabled, treat as if the broadcast was never re-enqueued.
+        if (!Flags.avoidRepeatedBcastReEnqueues()) {
+            return false;
+        }
+        return mActiveReEnqueued;
     }
 
     /**
@@ -1481,6 +1496,9 @@ class BroadcastProcessQueue {
         }
         if (runningOomAdjusted) {
             pw.print("runningOomAdjusted:"); pw.println(runningOomAdjusted);
+        }
+        if (mActiveReEnqueued) {
+            pw.print("activeReEnqueued:"); pw.println(mActiveReEnqueued);
         }
     }
 

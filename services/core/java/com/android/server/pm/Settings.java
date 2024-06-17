@@ -41,6 +41,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -63,6 +64,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PatternMatcher;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.SELinux;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -90,7 +92,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.pkg.component.ParsedComponent;
 import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.internal.pm.pkg.component.ParsedPermission;
@@ -516,15 +517,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     @Watched(manual = true)
     private final AppIdSettingMap mAppIds;
 
-    // For reading/writing settings file.
-    @Watched
-    private final WatchedArrayList<Signature> mPastSignatures;
-    private final SnapshotCache<WatchedArrayList<Signature>> mPastSignaturesSnapshot;
-
-    @Watched
-    private final WatchedArrayMap<Long, Integer> mKeySetRefs;
-    private final SnapshotCache<WatchedArrayMap<Long, Integer>> mKeySetRefsSnapshot;
-
     // Packages that have been renamed since they were first installed.
     // Keys are the new names of the packages, values are the original
     // names.  The packages appear everywhere else under their original
@@ -612,8 +604,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         mNextAppLinkGeneration.registerObserver(mObserver);
         mPendingDefaultBrowser.registerObserver(mObserver);
         mPendingPackages.registerObserver(mObserver);
-        mPastSignatures.registerObserver(mObserver);
-        mKeySetRefs.registerObserver(mObserver);
     }
 
     // CONSTRUCTOR
@@ -640,12 +630,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         mCrossProfileIntentResolversSnapshot = new SnapshotCache.Auto<>(
                 mCrossProfileIntentResolvers, mCrossProfileIntentResolvers,
                 "Settings.mCrossProfileIntentResolvers");
-        mPastSignatures = new WatchedArrayList<>();
-        mPastSignaturesSnapshot = new SnapshotCache.Auto<>(mPastSignatures, mPastSignatures,
-                "Settings.mPastSignatures");
-        mKeySetRefs = new WatchedArrayMap<>();
-        mKeySetRefsSnapshot = new SnapshotCache.Auto<>(mKeySetRefs, mKeySetRefs,
-                "Settings.mKeySetRefs");
         mPendingPackages = new WatchedArrayList<>();
         mPendingPackagesSnapshot = new SnapshotCache.Auto<>(mPendingPackages, mPendingPackages,
                 "Settings.mPendingPackages");
@@ -701,12 +685,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         mCrossProfileIntentResolversSnapshot = new SnapshotCache.Auto<>(
                 mCrossProfileIntentResolvers, mCrossProfileIntentResolvers,
                 "Settings.mCrossProfileIntentResolvers");
-        mPastSignatures = new WatchedArrayList<>();
-        mPastSignaturesSnapshot = new SnapshotCache.Auto<>(mPastSignatures, mPastSignatures,
-                "Settings.mPastSignatures");
-        mKeySetRefs = new WatchedArrayMap<>();
-        mKeySetRefsSnapshot = new SnapshotCache.Auto<>(mKeySetRefs, mKeySetRefs,
-                "Settings.mKeySetRefs");
         mPendingPackages = new WatchedArrayList<>();
         mPendingPackagesSnapshot = new SnapshotCache.Auto<>(mPendingPackages, mPendingPackages,
                 "Settings.mPendingPackages");
@@ -797,11 +775,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
         mSharedUsers.snapshot(r.mSharedUsers);
         mAppIds = r.mAppIds.snapshot();
-
-        mPastSignatures = r.mPastSignaturesSnapshot.snapshot();
-        mPastSignaturesSnapshot = new SnapshotCache.Sealed<>();
-        mKeySetRefs = r.mKeySetRefsSnapshot.snapshot();
-        mKeySetRefsSnapshot = new SnapshotCache.Sealed<>();
 
         mRenamedPackages.snapshot(r.mRenamedPackages);
         mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
@@ -951,6 +924,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             ret.setUsesStaticLibrariesVersions(p.getUsesStaticLibrariesVersions());
             ret.setMimeGroups(p.getMimeGroups());
             ret.setAppMetadataFilePath(p.getAppMetadataFilePath());
+            ret.setAppMetadataSource(p.getAppMetadataSource());
             ret.getPkgState().setUpdatedSystemApp(false);
             ret.setTargetSdkVersion(p.getTargetSdkVersion());
             ret.setRestrictUpdateHash(p.getRestrictUpdateHash());
@@ -1228,9 +1202,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             @Nullable boolean[] usesSdkLibrariesOptional,
             @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions,
             @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId,
-            int targetSdkVersion, byte[] restrictUpdatedHash)
+            int targetSdkVersion, byte[] restrictUpdatedHash, boolean isDontKill)
                     throws PackageManagerException {
         final String pkgName = pkgSetting.getPackageName();
+        final File oldCodePath = pkgSetting.getPath();
         if (sharedUser != null) {
             if (!Objects.equals(existingSharedUserSetting, sharedUser)) {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -1247,7 +1222,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pkgSetting.setSharedUserAppId(INVALID_UID);
         }
 
-        if (!pkgSetting.getPath().equals(codePath)) {
+        if (!oldCodePath.equals(codePath)) {
             final boolean isSystem = pkgSetting.isSystem();
             Slog.i(PackageManagerService.TAG,
                     "Update" + (isSystem ? " system" : "")
@@ -1275,6 +1250,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 pkgSetting.setLegacyNativeLibraryPath(legacyNativeLibraryPath);
             }
             pkgSetting.setPath(codePath);
+            if (isDontKill && Flags.improveInstallDontKill()) {
+                // We retain old code paths for DONT_KILL installs. Keep a record of old paths until
+                // they are removed.
+                pkgSetting.addOldPath(oldCodePath);
+            }
         }
 
         pkgSetting.setPrimaryCpuAbi(primaryCpuAbi)
@@ -1452,22 +1432,28 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         return false;
     }
 
-    int removePackageLPw(String name) {
+
+    /**
+     * Remove package from mPackages and its corresponding AppId.
+     *
+     * @return True if the AppId has been removed.
+     * False if the app doesn't exist, or if the app has a shared UID and there are other apps that
+     * still use the same shared UID even after the target app is removed.
+     */
+    boolean removePackageAndAppIdLPw(String name) {
         final PackageSetting p = mPackages.remove(name);
         if (p != null) {
             removeInstallerPackageStatus(name);
             SharedUserSetting sharedUserSetting = getSharedUserSettingLPr(p);
             if (sharedUserSetting != null) {
                 sharedUserSetting.removePackage(p);
-                if (checkAndPruneSharedUserLPw(sharedUserSetting, false)) {
-                    return sharedUserSetting.mAppId;
-                }
+                return checkAndPruneSharedUserLPw(sharedUserSetting, false);
             } else {
                 removeAppIdLPw(p.getAppId());
-                return p.getAppId();
+                return true;
             }
         }
-        return -1;
+        return false;
     }
 
     /**
@@ -2570,7 +2556,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     outPs.getUsesSdkLibraries(), libName));
             outPs.setUsesSdkLibrariesVersionsMajor(ArrayUtils.appendLong(
                     outPs.getUsesSdkLibrariesVersionsMajor(), libVersion));
-            outPs.setUsesSdkLibrariesOptional(PackageImpl.appendBoolean(
+            outPs.setUsesSdkLibrariesOptional(ArrayUtils.appendBoolean(
                     outPs.getUsesSdkLibrariesOptional(), optional));
         }
 
@@ -2743,7 +2729,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         // right time.
         invalidatePackageCache();
 
-        mPastSignatures.clear();
+        ArrayList<Signature> writtenSignatures = new ArrayList<>();
 
         try (ResilientAtomicFile atomicFile = getSettingsFile()) {
             FileOutputStream str = null;
@@ -2791,7 +2777,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         // load
                         continue;
                     }
-                    writePackageLPr(serializer, pkg);
+                    writePackageLPr(serializer, writtenSignatures, pkg);
                 }
 
                 for (final PackageSetting pkg : mDisabledSysPackages.values()) {
@@ -2807,7 +2793,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     serializer.startTag(null, "shared-user");
                     serializer.attribute(null, ATTR_NAME, usr.name);
                     serializer.attributeInt(null, "userId", usr.mAppId);
-                    usr.signatures.writeXml(serializer, "sigs", mPastSignatures.untrackedStorage());
+                    usr.signatures.writeXml(serializer, "sigs", writtenSignatures);
                     serializer.endTag(null, "shared-user");
                 }
 
@@ -2847,6 +2833,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 }
             }
         }
+
         //Debug.stopMethodTracing();
     }
 
@@ -3137,6 +3124,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     pkg.getAppMetadataFilePath());
         }
 
+        serializer.attributeInt(null, "appMetadataSource",
+                pkg.getAppMetadataSource());
+
         writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
                 pkg.getUsesSdkLibrariesVersionsMajor(), pkg.getUsesSdkLibrariesOptional());
 
@@ -3147,7 +3137,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         serializer.endTag(null, "updated-package");
     }
 
-    void writePackageLPr(TypedXmlSerializer serializer, final PackageSetting pkg)
+    void writePackageLPr(TypedXmlSerializer serializer, ArrayList<Signature> writtenSignatures,
+            PackageSetting pkg)
             throws java.io.IOException {
         serializer.startTag(null, "package");
         serializer.attribute(null, ATTR_NAME, pkg.getPackageName());
@@ -3183,6 +3174,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pkg.isScannedAsStoppedSystemApp());
         if (!pkg.hasSharedUser()) {
             serializer.attributeInt(null, "userId", pkg.getAppId());
+
+            serializer.attributeBoolean(null, "isSdkLibrary",
+                    pkg.getAndroidPackage() != null && pkg.getAndroidPackage().isSdkLibrary());
         } else {
             serializer.attributeInt(null, "sharedUserId", pkg.getAppId());
         }
@@ -3237,6 +3231,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         if (pkg.getAppMetadataFilePath() != null) {
             serializer.attribute(null, "appMetadataFilePath", pkg.getAppMetadataFilePath());
         }
+        serializer.attributeInt(null, "appMetadataSource",
+                pkg.getAppMetadataSource());
+
 
         writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
                 pkg.getUsesSdkLibrariesVersionsMajor(), pkg.getUsesSdkLibrariesOptional());
@@ -3244,11 +3241,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         writeUsesStaticLibLPw(serializer, pkg.getUsesStaticLibraries(),
                 pkg.getUsesStaticLibrariesVersions());
 
-        pkg.getSignatures().writeXml(serializer, "sigs", mPastSignatures.untrackedStorage());
+        pkg.getSignatures().writeXml(serializer, "sigs", writtenSignatures);
 
         if (installSource.mInitiatingPackageSignatures != null) {
             installSource.mInitiatingPackageSignatures.writeXml(
-                    serializer, "install-initiator-sigs", mPastSignatures.untrackedStorage());
+                    serializer, "install-initiator-sigs", writtenSignatures);
         }
 
         writeSigningKeySetLPr(serializer, pkg.getKeySetData());
@@ -3290,10 +3287,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     boolean readSettingsLPw(@NonNull Computer computer, @NonNull List<UserInfo> users,
             ArrayMap<String, Long> originalFirstInstallTimes) {
         mPendingPackages.clear();
-        mPastSignatures.clear();
-        mKeySetRefs.clear();
         mInstallerPackages.clear();
         originalFirstInstallTimes.clear();
+
+        ArrayMap<Long, Integer> keySetRefs = new ArrayMap<>();
+        ArrayList<Signature> readSignatures = new ArrayList<>();
 
         try (ResilientAtomicFile atomicFile = getSettingsFile()) {
             FileInputStream str = null;
@@ -3331,13 +3329,14 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
                     String tagName = parser.getName();
                     if (tagName.equals("package")) {
-                        readPackageLPw(parser, users, originalFirstInstallTimes);
+                        readPackageLPw(parser, readSignatures, keySetRefs, users,
+                                originalFirstInstallTimes);
                     } else if (tagName.equals("permissions")) {
                         mPermissions.readPermissions(parser);
                     } else if (tagName.equals("permission-trees")) {
                         mPermissions.readPermissionTrees(parser);
                     } else if (tagName.equals("shared-user")) {
-                        readSharedUserLPw(parser, users);
+                        readSharedUserLPw(parser, readSignatures, users);
                     } else if (tagName.equals("preferred-packages")) {
                         // no longer used.
                     } else if (tagName.equals("preferred-activities")) {
@@ -3392,8 +3391,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
                         // No longer used.
                     } else if (tagName.equals("keyset-settings")) {
-                        mKeySetManagerService.readKeySetsLPw(parser,
-                                mKeySetRefs.untrackedStorage());
+                        mKeySetManagerService.readKeySetsLPw(parser, keySetRefs);
                     } else if (TAG_VERSION.equals(tagName)) {
                         final String volumeUuid = XmlUtils.readStringAttribute(parser,
                                 ATTR_VOLUME_UUID);
@@ -3417,7 +3415,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 }
 
                 str.close();
-            } catch (IOException | XmlPullParserException | IllegalArgumentException e) {
+            } catch (IOException | XmlPullParserException | ArrayIndexOutOfBoundsException e) {
                 // Remove corrupted file and retry.
                 atomicFile.failRead(str, e);
 
@@ -3947,6 +3945,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
 
         ps.setAppMetadataFilePath(parser.getAttributeValue(null, "appMetadataFilePath"));
+        ps.setAppMetadataSource(parser.getAttributeInt(null,
+                "appMetadataSource", PackageManager.APP_METADATA_SOURCE_UNKNOWN));
 
         int outerDepth = parser.getDepth();
         int type;
@@ -3987,7 +3987,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final int PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE = 1 << 28;
     private static final int PRE_M_APP_INFO_FLAG_PRIVILEGED = 1 << 30;
 
-    private void readPackageLPw(TypedXmlPullParser parser, List<UserInfo> users,
+    private void readPackageLPw(TypedXmlPullParser parser, ArrayList<Signature> readSignatures,
+            ArrayMap<Long, Integer> keySetRefs,  List<UserInfo> users,
             ArrayMap<String, Long> originalFirstInstallTimes)
             throws XmlPullParserException, IOException {
         String name = null;
@@ -4025,13 +4026,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         long loadingCompletedTime = 0;
         UUID domainSetId;
         String appMetadataFilePath = null;
+        int appMetadataSource = PackageManager.APP_METADATA_SOURCE_UNKNOWN;
         int targetSdkVersion = 0;
         byte[] restrictUpdateHash = null;
         boolean isScannedAsStoppedSystemApp = false;
+        boolean isSdkLibrary = false;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
             appId = parseAppId(parser);
+            isSdkLibrary = parser.getAttributeBoolean(null, "isSdkLibrary", false);
             sharedUserAppId = parseSharedUserAppId(parser);
             codePathStr = parser.getAttributeValue(null, "codePath");
 
@@ -4068,6 +4072,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             categoryHint = parser.getAttributeInt(null, "categoryHint",
                     ApplicationInfo.CATEGORY_UNDEFINED);
             appMetadataFilePath = parser.getAttributeValue(null, "appMetadataFilePath");
+            appMetadataSource = parser.getAttributeInt(null, "appMetadataSource",
+                    PackageManager.APP_METADATA_SOURCE_UNKNOWN);
+
             isScannedAsStoppedSystemApp = parser.getAttributeBoolean(null,
                 "scannedAsStoppedSystemApp", false);
 
@@ -4146,7 +4153,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Error in package manager settings: <package> has no codePath at "
                                 + parser.getPositionDescription());
-            } else if (appId > 0) {
+            } else if (appId > 0 || (appId == Process.INVALID_UID && isSdkLibrary
+                    && Flags.disallowSdkLibsToBeApps())) {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
                         appId, pkgFlags, pkgPrivateFlags, domainSetId);
                 if (PackageManagerService.DEBUG_SETTINGS)
@@ -4215,6 +4223,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setLoadingProgress(loadingProgress)
                     .setLoadingCompletedTime(loadingCompletedTime)
                     .setAppMetadataFilePath(appMetadataFilePath)
+                    .setAppMetadataSource(appMetadataSource)
                     .setTargetSdkVersion(targetSdkVersion)
                     .setRestrictUpdateHash(restrictUpdateHash)
                     .setScannedAsStoppedSystemApp(isScannedAsStoppedSystemApp);
@@ -4259,8 +4268,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 } else if (tagName.equals(TAG_ENABLED_COMPONENTS)) {
                     readEnabledComponentsLPw(packageSetting, parser, 0);
                 } else if (tagName.equals("sigs")) {
-                    packageSetting.getSignatures()
-                            .readXml(parser,mPastSignatures.untrackedStorage());
+                    packageSetting.getSignatures().readXml(parser, readSignatures);
                 } else if (tagName.equals(TAG_PERMISSIONS)) {
                     final LegacyPermissionState legacyState;
                     if (packageSetting.hasSharedUser()) {
@@ -4277,11 +4285,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     }
                 } else if (tagName.equals("proper-signing-keyset")) {
                     long id = parser.getAttributeLong(null, "identifier");
-                    Integer refCt = mKeySetRefs.get(id);
+                    Integer refCt = keySetRefs.get(id);
                     if (refCt != null) {
-                        mKeySetRefs.put(id, refCt + 1);
+                        keySetRefs.put(id, refCt + 1);
                     } else {
-                        mKeySetRefs.put(id, 1);
+                        keySetRefs.put(id, 1);
                     }
                     packageSetting.getKeySetData().setProperSigningKeySet(id);
                 } else if (tagName.equals("signing-keyset")) {
@@ -4292,16 +4300,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 } else if (tagName.equals("defined-keyset")) {
                     long id = parser.getAttributeLong(null, "identifier");
                     String alias = parser.getAttributeValue(null, "alias");
-                    Integer refCt = mKeySetRefs.get(id);
+                    Integer refCt = keySetRefs.get(id);
                     if (refCt != null) {
-                        mKeySetRefs.put(id, refCt + 1);
+                        keySetRefs.put(id, refCt + 1);
                     } else {
-                        mKeySetRefs.put(id, 1);
+                        keySetRefs.put(id, 1);
                     }
                     packageSetting.getKeySetData().addDefinedKeySet(id, alias);
                 } else if (tagName.equals("install-initiator-sigs")) {
                     final PackageSignatures signatures = new PackageSignatures();
-                    signatures.readXml(parser, mPastSignatures.untrackedStorage());
+                    signatures.readXml(parser, readSignatures);
                     packageSetting.setInstallSource(
                             packageSetting.getInstallSource()
                                     .setInitiatingPackageSignatures(signatures));
@@ -4474,7 +4482,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
     }
 
-    private void readSharedUserLPw(TypedXmlPullParser parser, List<UserInfo> users)
+    private void readSharedUserLPw(TypedXmlPullParser parser, ArrayList<Signature> readSignatures,
+            List<UserInfo> users)
             throws XmlPullParserException, IOException {
         String name = null;
         int pkgFlags = 0;
@@ -4516,7 +4525,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
                 String tagName = parser.getName();
                 if (tagName.equals("sigs")) {
-                    su.signatures.readXml(parser, mPastSignatures.untrackedStorage());
+                    su.signatures.readXml(parser, readSignatures);
                 } else if (tagName.equals("perms")) {
                     readInstallPermissionsLPr(parser, su.getLegacyPermissionState(), users);
                 } else {
@@ -4538,6 +4547,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         t.traceBegin("createNewUser-" + userHandle);
         Installer.Batch batch = new Installer.Batch();
         final boolean skipPackageAllowList = userTypeInstallablePackages == null;
+        // Use the same timestamp for all system apps that are to be installed on the new user
+        final long currentTimeMillis = System.currentTimeMillis();
         synchronized (mLock) {
             final int size = mPackages.size();
             for (int i = 0; i < size; i++) {
@@ -4553,6 +4564,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 ps.getPackageName()));
                 // Only system apps are initially installed.
                 ps.setInstalled(shouldReallyInstall, userHandle);
+                if (Flags.fixSystemAppsFirstInstallTime() && shouldReallyInstall) {
+                    ps.setFirstInstallTime(currentTimeMillis, userHandle);
+                }
 
                 // Non-Apex system apps, that are not included in the allowlist in
                 // initialNonStoppedSystemPackages, should be marked as stopped by default.
@@ -4879,7 +4893,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
     @NeverCompile // Avoid size overhead of debugging code.
     void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag,
-            ArraySet<String> permissionNames, PackageSetting ps,
+            ArraySet<String> permissionNames, @NonNull PackageSetting ps,
             LegacyPermissionState permissionsState, SimpleDateFormat sdf, Date date,
             List<UserInfo> users, boolean dumpAll, boolean dumpAllComponents) {
         AndroidPackage pkg = ps.getPkg();
@@ -4965,6 +4979,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
         pw.print(prefix); pw.print("  pkg="); pw.println(pkg);
         pw.print(prefix); pw.print("  codePath="); pw.println(ps.getPathString());
+        if (ps.getOldPaths() != null && ps.getOldPaths().size() > 0) {
+            for (File oldPath : ps.getOldPaths()) {
+                pw.print(prefix); pw.println("    oldCodePath=" + oldPath.getAbsolutePath());
+            }
+        }
         if (permissionNames == null) {
             pw.print(prefix); pw.print("  resourcePath="); pw.println(ps.getPathString());
             pw.print(prefix); pw.print("  legacyNativeLibraryDir=");
@@ -5002,6 +5021,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         pw.println();
         if (pkg != null) {
             pw.print(prefix); pw.print("  versionName="); pw.println(pkg.getVersionName());
+            pw.print(prefix); pw.print("  hiddenApiEnforcementPolicy="); pw.println(
+                    ps.getHiddenApiEnforcementPolicy());
             pw.print(prefix); pw.print("  usesNonSdkApi="); pw.println(pkg.isNonSdkApiRequested());
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, pkg); pw.println();
             final int apkSigningVersion = pkg.getSigningDetails().getSignatureSchemeVersion();
@@ -5013,9 +5034,17 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 pw.print(prefix); pw.print("  privateFlags="); printFlags(pw,
                         privateFlags, PRIVATE_FLAG_DUMP_SPEC); pw.println();
             }
+            if (ps.isPendingRestore()) {
+                pw.print(prefix); pw.print("  pendingRestore=true");
+                pw.println();
+            }
             if (!pkg.isUpdatableSystem()) {
                 pw.print(prefix); pw.print("  updatableSystem=false");
                 pw.println();
+            }
+            if (pkg.getEmergencyInstaller() != null) {
+                pw.print(prefix); pw.print("  emergencyInstaller=");
+                pw.println(pkg.getEmergencyInstaller());
             }
             if (pkg.hasPreserveLegacyExternalStorage()) {
                 pw.print(prefix); pw.print("  hasPreserveLegacyExternalStorage=true");
@@ -5210,6 +5239,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
         pw.print(prefix); pw.print("  appMetadataFilePath=");
         pw.println(ps.getAppMetadataFilePath());
+        pw.print(prefix); pw.print("  appMetadataSource=");
+        pw.println(ps.getAppMetadataSource());
         if (ps.getVolumeUuid() != null) {
             pw.print(prefix); pw.print("  volumeUuid=");
                     pw.println(ps.getVolumeUuid());
@@ -5223,6 +5254,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         pw.print(prefix); pw.print("  privatePkgFlags="); printFlags(pw, ps.getPrivateFlags(),
                 PRIVATE_FLAG_DUMP_SPEC);
         pw.println();
+        if (ps.isPendingRestore()) {
+            pw.print(prefix); pw.println("  pendingRestore=true");
+        }
         pw.print(prefix); pw.print("  apexModuleName="); pw.println(ps.getApexModuleName());
 
         if (pkg != null && pkg.getOverlayTarget() != null) {
@@ -5320,9 +5354,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pw.println(sdf.format(date));
 
             if (pus.getArchiveState() != null) {
+                final ArchiveState archiveState = pus.getArchiveState();
                 pw.print("      archiveTime=");
-                date.setTime(pus.getArchiveState().getArchiveTimeMillis());
+                date.setTime(archiveState.getArchiveTimeMillis());
                 pw.println(sdf.format(date));
+                pw.print("      unarchiveInstallerTitle=");
+                pw.println(archiveState.getInstallerTitle());
+                for (ArchiveState.ArchiveActivityInfo activity : archiveState.getActivityInfos()) {
+                    pw.print("        archiveActivityInfo=");
+                    pw.println(activity.toString());
+                }
             }
 
             pw.print("      uninstallReason=");
@@ -5436,10 +5477,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         pw.print(prefix); pw.print("      "); pw.println(cmp.valueAt(i));
                     }
                 }
-            }
-            ArchiveState archiveState = userState.getArchiveState();
-            if (archiveState != null) {
-                pw.print(archiveState.toString());
             }
         }
     }

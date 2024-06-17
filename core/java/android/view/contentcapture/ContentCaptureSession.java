@@ -27,9 +27,13 @@ import android.annotation.Nullable;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
+import android.content.ComponentName;
 import android.graphics.Insets;
+import android.graphics.Rect;
+import android.os.IBinder;
 import android.util.DebugUtils;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
@@ -37,6 +41,7 @@ import android.view.contentcapture.ViewNode.ViewStructureImpl;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
@@ -58,6 +63,18 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     // TODO(b/158778794): to make the session ids truly globally unique across
     //  processes, we may need to explore other options.
     private static final SecureRandom ID_GENERATOR = new SecureRandom();
+
+    /**
+     * Name of the {@link IResultReceiver} extra used to pass the binder interface to the service.
+     * @hide
+     */
+    public static final String EXTRA_BINDER = "binder";
+
+    /**
+     * Name of the {@link IResultReceiver} extra used to pass the content capture enabled state.
+     * @hide
+     */
+    public static final String EXTRA_ENABLED_STATE = "enabled";
 
     /**
      * Initial state, when there is no session.
@@ -262,7 +279,19 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     /** @hide */
     @NonNull
-    abstract MainContentCaptureSession getMainCaptureSession();
+    abstract ContentCaptureSession getMainCaptureSession();
+
+    abstract void start(@NonNull IBinder token, @NonNull IBinder shareableActivityToken,
+            @NonNull ComponentName component, int flags);
+
+    abstract boolean isDisabled();
+
+    /**
+     * Sets the disabled state of content capture.
+     *
+     * @return whether disabled state was changed.
+     */
+    abstract boolean setDisabled(boolean disabled);
 
     /**
      * Gets the id used to identify this session.
@@ -400,10 +429,11 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             throw new IllegalArgumentException("Invalid node class: " + node.getClass());
         }
 
-        internalNotifyViewAppeared((ViewStructureImpl) node);
+        internalNotifyViewAppeared(mId, (ViewStructureImpl) node);
     }
 
-    abstract void internalNotifyViewAppeared(@NonNull ViewNode.ViewStructureImpl node);
+    abstract void internalNotifyViewAppeared(
+            int sessionId, @NonNull ViewNode.ViewStructureImpl node);
 
     /**
      * Notifies the Content Capture Service that a node has been removed from the view structure.
@@ -420,10 +450,10 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         Objects.requireNonNull(id);
         if (!isContentCaptureEnabled()) return;
 
-        internalNotifyViewDisappeared(id);
+        internalNotifyViewDisappeared(mId, id);
     }
 
-    abstract void internalNotifyViewDisappeared(@NonNull AutofillId id);
+    abstract void internalNotifyViewDisappeared(int sessionId, @NonNull AutofillId id);
 
     /**
      * Notifies the Content Capture Service that a list of nodes has appeared in the view structure.
@@ -445,12 +475,12 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             }
         }
 
-        internalNotifyViewTreeEvent(/* started= */ true);
+        internalNotifyViewTreeEvent(mId, /* started= */ true);
         for (int i = 0; i < appearedNodes.size(); i++) {
             ViewStructure v = appearedNodes.get(i);
-            internalNotifyViewAppeared((ViewStructureImpl) v);
+            internalNotifyViewAppeared(mId, (ViewStructureImpl) v);
         }
-        internalNotifyViewTreeEvent(/* started= */ false);
+        internalNotifyViewTreeEvent(mId, /* started= */ false);
     }
 
     /**
@@ -476,15 +506,15 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         if (!isContentCaptureEnabled()) return;
 
         if (CompatChanges.isChangeEnabled(NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS)) {
-            internalNotifyViewTreeEvent(/* started= */ true);
+            internalNotifyViewTreeEvent(mId, /* started= */ true);
         }
         // TODO(b/123036895): use a internalNotifyViewsDisappeared that optimizes how the event is
         // parcelized
         for (long id : virtualIds) {
-            internalNotifyViewDisappeared(new AutofillId(hostId, id, mId));
+            internalNotifyViewDisappeared(mId, new AutofillId(hostId, id, mId));
         }
         if (CompatChanges.isChangeEnabled(NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS)) {
-            internalNotifyViewTreeEvent(/* started= */ false);
+            internalNotifyViewTreeEvent(mId, /* started= */ false);
         }
     }
 
@@ -499,10 +529,10 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
         if (!isContentCaptureEnabled()) return;
 
-        internalNotifyViewTextChanged(id, text);
+        internalNotifyViewTextChanged(mId, id, text);
     }
 
-    abstract void internalNotifyViewTextChanged(@NonNull AutofillId id,
+    abstract void internalNotifyViewTextChanged(int sessionId, @NonNull AutofillId id,
             @Nullable CharSequence text);
 
     /**
@@ -513,13 +543,18 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
         if (!isContentCaptureEnabled()) return;
 
-        internalNotifyViewInsetsChanged(viewInsets);
+        internalNotifyViewInsetsChanged(mId, viewInsets);
     }
 
-    abstract void internalNotifyViewInsetsChanged(@NonNull Insets viewInsets);
+    abstract void internalNotifyViewInsetsChanged(int sessionId, @NonNull Insets viewInsets);
 
     /** @hide */
-    public abstract void internalNotifyViewTreeEvent(boolean started);
+    public void notifyViewTreeEvent(boolean started) {
+        internalNotifyViewTreeEvent(mId, started);
+    }
+
+    /** @hide */
+    abstract void internalNotifyViewTreeEvent(int sessionId, boolean started);
 
     /**
      * Notifies the Content Capture Service that a session has resumed.
@@ -542,6 +577,21 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     }
 
     abstract void internalNotifySessionPaused();
+
+    abstract void internalNotifyChildSessionStarted(int parentSessionId, int childSessionId,
+            @NonNull ContentCaptureContext clientContext);
+
+    abstract void internalNotifyChildSessionFinished(int parentSessionId, int childSessionId);
+
+    abstract void internalNotifyContextUpdated(
+            int sessionId, @Nullable ContentCaptureContext context);
+
+    /** @hide */
+    public abstract void notifyWindowBoundsChanged(int sessionId, @NonNull Rect bounds);
+
+    /** @hide */
+    public abstract void notifyContentCaptureEvents(
+            @NonNull SparseArray<ArrayList<Object>> contentCaptureEvents);
 
     /**
      * Creates a {@link ViewStructure} for a "standard" view.

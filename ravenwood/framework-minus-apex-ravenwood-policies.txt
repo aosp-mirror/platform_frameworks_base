@@ -6,117 +6,32 @@ class :aidl stubclass
 # Keep all feature flag implementations
 class :feature_flags stubclass
 
-# Collections
-class android.util.ArrayMap stubclass
-class android.util.ArraySet stubclass
-class android.util.LongSparseArray stubclass
-class android.util.SparseArrayMap stubclass
-class android.util.SparseArray stubclass
-class android.util.SparseBooleanArray stubclass
-class android.util.SparseIntArray stubclass
-class android.util.SparseLongArray stubclass
-class android.util.ContainerHelpers stubclass
-class android.util.EmptyArray stubclass
-class android.util.MapCollections stubclass
+# Keep all sysprops generated code implementations
+class :sysprops stubclass
 
-# Logging
-class android.util.Log stubclass
-class android.util.Log !com.android.hoststubgen.nativesubstitution.Log_host
-class android.util.LogPrinter stubclass
-class android.util.LocalLog stubclass
-
-# String Manipulation
-class android.util.Printer stubclass
-class android.util.PrintStreamPrinter stubclass
-class android.util.PrintWriterPrinter stubclass
-class android.util.StringBuilderPrinter stubclass
-class android.util.IndentingPrintWriter stubclass
-
-# Properties
-class android.util.Property stubclass
-class android.util.FloatProperty stubclass
-class android.util.IntProperty stubclass
-class android.util.NoSuchPropertyException stubclass
-class android.util.ReflectiveProperty stubclass
-
-# Exceptions
-class android.util.AndroidException stubclass
-class android.util.AndroidRuntimeException stubclass
-
-# JSON
-class android.util.JsonReader stubclass
-class android.util.JsonWriter stubclass
-class android.util.MalformedJsonException stubclass
-
-# Base64
-class android.util.Base64 stubclass
-class android.util.Base64DataException stubclass
-class android.util.Base64InputStream stubclass
-class android.util.Base64OutputStream stubclass
-
-# Data Holders
-class android.util.MutableFloat stubclass
-class android.util.MutableShort stubclass
-class android.util.MutableBoolean stubclass
-class android.util.MutableByte stubclass
-class android.util.MutableChar stubclass
-class android.util.MutableDouble stubclass
-class android.util.Pair stubclass
-class android.util.Range stubclass
-class android.util.Rational stubclass
-class android.util.Size stubclass
-class android.util.SizeF stubclass
-
-# Proto
-class android.util.proto.EncodedBuffer stubclass
-class android.util.proto.ProtoInputStream stubclass
-class android.util.proto.ProtoOutputStream stubclass
-class android.util.proto.ProtoParseException stubclass
-class android.util.proto.ProtoStream stubclass
-class android.util.proto.ProtoUtils stubclass
-class android.util.proto.WireTypeMismatchException stubclass
-
-# Misc
-class android.util.BackupUtils stubclass
-class android.util.Dumpable stubclass
-class android.util.DebugUtils stubclass
-class android.util.MathUtils stubclass
-class android.util.Patterns stubclass
-class android.util.UtilConfig stubclass
-
-# Internals
+# Exported to Mainline modules; cannot use annotations
+class com.android.internal.util.FastXmlSerializer stubclass
 class com.android.internal.util.FileRotator stubclass
 class com.android.internal.util.HexDump stubclass
+class com.android.internal.util.IndentingPrintWriter stubclass
+class com.android.internal.util.LocalLog stubclass
 class com.android.internal.util.MessageUtils stubclass
-class com.android.internal.util.Preconditions stubclass
 class com.android.internal.util.TokenBucket stubclass
-
-# Parcel
-class android.os.ParcelFormatException stubclass
-class android.os.BadParcelableException stubclass
-class android.os.BadTypeParcelableException stubclass
-
-# Binder
-class android.os.DeadObjectException stubclass
-class android.os.DeadSystemException stubclass
-class android.os.RemoteException stubclass
-class android.os.TransactionTooLargeException stubclass
-
-# Containers
-class android.os.BaseBundle stubclass
-class android.os.Bundle stubclass
-class android.os.PersistableBundle stubclass
-
-# Misc
 class android.os.HandlerExecutor stubclass
-class android.os.PatternMatcher stubclass
-class android.os.ParcelUuid stubclass
+class android.util.BackupUtils stubclass
+class android.util.IndentingPrintWriter stubclass
+class android.util.LocalLog stubclass
+class android.util.Pair stubclass
+class android.util.Rational stubclass
 
-# XML
-class com.android.internal.util.XmlPullParserWrapper stubclass
-class com.android.internal.util.XmlSerializerWrapper stubclass
-class com.android.internal.util.XmlUtils stubclass
+# From modules-utils; cannot use annotations
+class com.android.internal.util.Preconditions stubclass
+class com.android.internal.logging.InstanceId stubclass
+class com.android.internal.logging.InstanceIdSequence stubclass
+class com.android.internal.logging.UiEvent stubclass
+class com.android.internal.logging.UiEventLogger stubclass
 
+# From modules-utils; cannot use annotations
 class com.android.modules.utils.BinaryXmlPullParser stubclass
 class com.android.modules.utils.BinaryXmlSerializer stubclass
 class com.android.modules.utils.FastDataInput stubclass
@@ -129,8 +44,16 @@ class com.android.modules.utils.TypedXmlSerializer stubclass
 class android.net.Uri stubclass
 class android.net.UriCodec stubclass
 
+# Telephony
+class android.telephony.PinResult stubclass
+
 # Just enough to support mocking, no further functionality
+class android.content.BroadcastReceiver stub
+    method <init> ()V stub
 class android.content.Context stub
     method <init> ()V stub
+    method getSystemService (Ljava/lang/Class;)Ljava/lang/Object; stub
 class android.content.pm.PackageManager stub
+    method <init> ()V stub
+class android.text.ClipboardManager stub
     method <init> ()V stub

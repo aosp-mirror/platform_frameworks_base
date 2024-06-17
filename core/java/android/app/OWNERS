@@ -65,6 +65,7 @@ per-file DreamManager.java = file:/core/java/android/service/dreams/OWNERS
 
 # GrammaticalInflectionManager
 per-file *GrammaticalInflection* = file:/services/core/java/com/android/server/grammaticalinflection/OWNERS
+per-file grammatical_inflection_manager.aconfig = file:/services/core/java/com/android/server/grammaticalinflection/OWNERS
 
 # KeyguardManager
 per-file KeyguardManager.java = file:/services/core/java/com/android/server/locksettings/OWNERS
@@ -117,6 +118,12 @@ per-file *Task* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file Window* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file ConfigurationController.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *ScreenCapture* = file:/services/core/java/com/android/server/wm/OWNERS
+
+# Multitasking
+per-file multitasking.aconfig = file:/services/core/java/com/android/server/wm/OWNERS
+per-file multitasking.aconfig = file:/libs/WindowManager/Shell/OWNERS
+per-file PictureInPicture* = file:/services/core/java/com/android/server/wm/OWNERS
+per-file PictureInPicture* = file:/libs/WindowManager/Shell/OWNERS
 
 # Zygote
 per-file *Zygote* = file:/ZYGOTE_OWNERS

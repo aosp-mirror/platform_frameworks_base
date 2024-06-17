@@ -16,6 +16,7 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -31,6 +32,7 @@ import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.RemoteCallbackListExt;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.util.ArrayUtils;
@@ -56,7 +58,6 @@ import java.util.function.Supplier;
 public class ImsRegistrationImplBase {
 
     private static final String LOG_TAG = "ImsRegistrationImplBase";
-
     /**
      * @hide
      */
@@ -233,6 +234,31 @@ public class ImsRegistrationImplBase {
         }
 
         @Override
+        public void addEmergencyRegistrationCallback(IImsRegistrationCallback c)
+                throws RemoteException {
+            AtomicReference<RemoteException> exceptionRef = new AtomicReference<>();
+            executeMethodAsync(() -> {
+                try {
+                    ImsRegistrationImplBase.this.addEmergencyRegistrationCallback(c);
+                } catch (RemoteException e) {
+                    exceptionRef.set(e);
+                }
+            }, "addEmergencyRegistrationCallback");
+
+            if (exceptionRef.get() != null) {
+                throw exceptionRef.get();
+            }
+        }
+
+        @Override
+        public void removeEmergencyRegistrationCallback(IImsRegistrationCallback c)
+                throws RemoteException {
+            executeMethodAsync(() ->
+                    ImsRegistrationImplBase.this.removeEmergencyRegistrationCallback(c),
+                    "removeEmergencyRegistrationCallback");
+        }
+
+        @Override
         public void removeRegistrationCallback(IImsRegistrationCallback c) throws RemoteException {
             executeMethodAsync(() -> ImsRegistrationImplBase.this.removeRegistrationCallback(c),
                     "removeRegistrationCallback");
@@ -302,16 +328,23 @@ public class ImsRegistrationImplBase {
 
     private final RemoteCallbackListExt<IImsRegistrationCallback> mCallbacks =
             new RemoteCallbackListExt<>();
+    private final RemoteCallbackListExt<IImsRegistrationCallback> mEmergencyCallbacks =
+            new RemoteCallbackListExt<>();
     private final Object mLock = new Object();
     // Locked on mLock
     private ImsRegistrationAttributes mRegistrationAttributes;
+    private ImsRegistrationAttributes mEmergencyRegistrationAttributes;
     // Locked on mLock
     private int mRegistrationState = REGISTRATION_STATE_UNKNOWN;
+    private int mEmergencyRegistrationState = REGISTRATION_STATE_UNKNOWN;
     // Locked on mLock, create unspecified disconnect cause.
     private ImsReasonInfo mLastDisconnectCause = new ImsReasonInfo();
+    private ImsReasonInfo mEmergencyLastDisconnectCause = new ImsReasonInfo();
     // Locked on mLock
     private int mLastDisconnectSuggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
+    private int mEmergencyLastDisconnectSuggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
     private int mLastDisconnectRadioTech = REGISTRATION_TECH_NONE;
+    private int mEmergencyLastDisconnectRadioTech = REGISTRATION_TECH_NONE;
 
     // We hold onto the uris each time they change so that we can send it to a callback when its
     // first added.
@@ -331,7 +364,7 @@ public class ImsRegistrationImplBase {
         // do not want to risk introducing a deadlock by using the same mCallbacks Object to
         // synchronize on outgoing and incoming operations.
         mCallbacks.register(c);
-        updateNewCallbackWithState(c);
+        updateNewCallbackWithState(c, false);
     }
 
     private void removeRegistrationCallback(IImsRegistrationCallback c) {
@@ -340,6 +373,16 @@ public class ImsRegistrationImplBase {
         // do not want to risk introducing a deadlock by using the same mCallbacks Object to
         // synchronize on outgoing and incoming operations.
         mCallbacks.unregister(c);
+    }
+
+    private void addEmergencyRegistrationCallback(IImsRegistrationCallback c)
+            throws RemoteException {
+        mEmergencyCallbacks.register(c);
+        updateNewCallbackWithState(c, true);
+    }
+
+    private void removeEmergencyRegistrationCallback(IImsRegistrationCallback c) {
+        mEmergencyCallbacks.unregister(c);
     }
 
     /**
@@ -428,14 +471,19 @@ public class ImsRegistrationImplBase {
      */
     @SystemApi
     public final void onRegistered(@NonNull ImsRegistrationAttributes attributes) {
-        updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERED);
+        boolean isEmergency = isEmergency(attributes);
+        if (isEmergency) {
+            updateToEmergencyState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERED);
+        } else {
+            updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERED);
+        }
         broadcastToCallbacksLocked((c) -> {
             try {
                 c.onRegistered(attributes);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + "onRegistered(int, Set) - Skipping callback.");
             }
-        });
+        }, isEmergency);
     }
 
     /**
@@ -457,14 +505,19 @@ public class ImsRegistrationImplBase {
      */
     @SystemApi
     public final void onRegistering(@NonNull ImsRegistrationAttributes attributes) {
-        updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERING);
+        boolean isEmergency = isEmergency(attributes);
+        if (isEmergency) {
+            updateToEmergencyState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERING);
+        } else {
+            updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERING);
+        }
         broadcastToCallbacksLocked((c) -> {
             try {
                 c.onRegistering(attributes);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + "onRegistering(int, Set) - Skipping callback.");
             }
-        });
+        }, isEmergency);
     }
 
     /**
@@ -513,16 +566,57 @@ public class ImsRegistrationImplBase {
     public final void onDeregistered(@Nullable ImsReasonInfo info,
             @RegistrationManager.SuggestedAction int suggestedAction,
             @ImsRegistrationTech int imsRadioTech) {
-        updateToDisconnectedState(info, suggestedAction, imsRadioTech);
+        // Impl to keep backwards compatibility with old implementations
+        ImsRegistrationAttributes attributes = mRegistrationAttributes != null
+                ? new ImsRegistrationAttributes(imsRadioTech,
+                        mRegistrationAttributes.getTransportType(),
+                        mRegistrationAttributes.getAttributeFlags(),
+                        mRegistrationAttributes.getFeatureTags()) :
+                new ImsRegistrationAttributes.Builder(imsRadioTech).build();
+        onDeregistered(info, suggestedAction, attributes);
+    }
+
+    /**
+     * Notify the framework that the device is disconnected from the IMS network.
+     * <p>
+     * Note: Prior to calling {@link #onDeregistered(ImsReasonInfo,int)}, you should ensure that any
+     * changes to {@link android.telephony.ims.feature.ImsFeature} capability availability is sent
+     * to the framework.  For example,
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO}
+     * and
+     * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE}
+     * may be set to unavailable to ensure the framework knows these services are no longer
+     * available due to de-registration.  If you do not report capability changes impacted by
+     * de-registration, the framework will not know which features are no longer available as a
+     * result.
+     *
+     * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+     * @param suggestedAction the expected behavior of radio protocol stack.
+     * @param attributes The attributes associated with the IMS registration
+     * @hide This API is not part of the Android public SDK API
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_EMERGENCY_REGISTRATION_STATE)
+    public final void onDeregistered(@Nullable ImsReasonInfo info,
+                                     @RegistrationManager.SuggestedAction int suggestedAction,
+                                     @NonNull ImsRegistrationAttributes attributes) {
+        boolean isEmergency = isEmergency(attributes);
+        int imsRadioTech = attributes.getRegistrationTechnology();
+        if (isEmergency) {
+            updateToDisconnectedEmergencyState(info, suggestedAction, imsRadioTech);
+        } else {
+            updateToDisconnectedState(info, suggestedAction, imsRadioTech);
+        }
         // ImsReasonInfo should never be null.
         final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
+
         broadcastToCallbacksLocked((c) -> {
             try {
                 c.onDeregistered(reasonInfo, suggestedAction, imsRadioTech);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + "onDeregistered() - Skipping callback.");
             }
-        });
+        }, isEmergency);
     }
 
     /**
@@ -568,6 +662,7 @@ public class ImsRegistrationImplBase {
      *
      * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
      * @param suggestedAction the expected behavior of radio protocol stack.
+     * @param imsRadioTech the network type on which IMS registration has failed.
      * @param details the {@link SipDetails} related to disconnected Ims registration
      * @hide This API is not part of the Android public SDK API
      */
@@ -584,7 +679,7 @@ public class ImsRegistrationImplBase {
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + "onDeregistered() - Skipping callback.");
             }
-        });
+        }, false);
     }
 
     /**
@@ -599,14 +694,38 @@ public class ImsRegistrationImplBase {
     @SystemApi
     public final void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
             ImsReasonInfo info) {
+        ImsRegistrationAttributes attributes = mRegistrationAttributes != null
+                ? new ImsRegistrationAttributes(imsRadioTech,
+                        mRegistrationAttributes.getTransportType(),
+                        mRegistrationAttributes.getAttributeFlags(),
+                        mRegistrationAttributes.getFeatureTags()) :
+                new ImsRegistrationAttributes.Builder(imsRadioTech).build();
+        onTechnologyChangeFailed(info, attributes);
+    }
+
+    /**
+     * Notify the framework that the handover from the current radio technology to the technology
+     * defined in {@code imsRadioTech} has failed.
+     * {@link #REGISTRATION_TECH_LTE}, {@link #REGISTRATION_TECH_IWLAN} and
+     * {@link #REGISTRATION_TECH_CROSS_SIM}.
+     * @param info The {@link ImsReasonInfo} for the failure to change technology.
+     * @param attributes The attributes associated with the IMS registration
+     * @hide This API is not part of the Android public SDK API
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_EMERGENCY_REGISTRATION_STATE)
+    public final void onTechnologyChangeFailed(@Nullable ImsReasonInfo info,
+                                               @NonNull ImsRegistrationAttributes attributes) {
+        boolean isEmergency = isEmergency(attributes);
+        int imsRadioTech = attributes.getRegistrationTechnology();
         final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
-        broadcastToCallbacksLocked((c) -> {
+        broadcastToCallbacksLocked(c -> {
             try {
                 c.onTechnologyChangeFailed(imsRadioTech, reasonInfo);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, e + "onTechnologyChangeFailed() - Skipping callback.");
             }
-        });
+        }, isEmergency);
     }
 
     /**
@@ -623,19 +742,35 @@ public class ImsRegistrationImplBase {
             mUris = ArrayUtils.cloneOrNull(uris);
             mUrisSet = true;
         }
-        broadcastToCallbacksLocked((c) -> onSubscriberAssociatedUriChanged(c, uris));
+        broadcastToCallbacksLocked((c) -> onSubscriberAssociatedUriChanged(c, uris), false);
+    }
+
+    private boolean isEmergency(ImsRegistrationAttributes attributes) {
+        if (attributes == null) {
+            return false;
+        } else {
+            return (attributes.getAttributeFlags()
+                    & ImsRegistrationAttributes.ATTR_REGISTRATION_TYPE_EMERGENCY) != 0;
+        }
     }
 
     /**
-     * Broadcast the specified operation in a synchronized manner so that multiple threads do not
+     * Broadcast the specified operation in ta synchronized manner so that multiple threads do not
      * try to call broadcast at the same time, which will generate an error.
      * @param c The Consumer lambda method containing the callback to call.
      */
-    private void broadcastToCallbacksLocked(Consumer<IImsRegistrationCallback> c) {
+    private void broadcastToCallbacksLocked(Consumer<IImsRegistrationCallback> c,
+                                            boolean isEmergency) {
         // One broadcast can happen at a time, so synchronize threads so only one
         // beginBroadcast/endBroadcast happens at a time.
-        synchronized (mCallbacks) {
-            mCallbacks.broadcastAction(c);
+        if (isEmergency) {
+            synchronized (mEmergencyCallbacks) {
+                mEmergencyCallbacks.broadcastAction(c);
+            }
+        } else {
+            synchronized (mCallbacks) {
+                mCallbacks.broadcastAction(c);
+            }
         }
     }
 
@@ -654,6 +789,16 @@ public class ImsRegistrationImplBase {
             mLastDisconnectCause = null;
             mLastDisconnectSuggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
             mLastDisconnectRadioTech = REGISTRATION_TECH_NONE;
+        }
+    }
+
+    private void updateToEmergencyState(ImsRegistrationAttributes attributes, int newState) {
+        synchronized (mLock) {
+            mEmergencyRegistrationAttributes = attributes;
+            mEmergencyRegistrationState = newState;
+            mEmergencyLastDisconnectCause = null;
+            mEmergencyLastDisconnectSuggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
+            mEmergencyLastDisconnectRadioTech = REGISTRATION_TECH_NONE;
         }
     }
 
@@ -678,11 +823,33 @@ public class ImsRegistrationImplBase {
         }
     }
 
+    private void updateToDisconnectedEmergencyState(ImsReasonInfo info,
+                 @RegistrationManager.SuggestedAction int suggestedAction,
+                 @ImsRegistrationTech int imsRadioTech) {
+        synchronized (mLock) {
+            //We don't want to send this info over if we are disconnected
+            mUrisSet = false;
+            mUris = null;
+
+            updateToEmergencyState(new ImsRegistrationAttributes.Builder(REGISTRATION_TECH_NONE)
+                            .build(),
+                    RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED);
+            if (info != null) {
+                mEmergencyLastDisconnectCause = info;
+                mEmergencyLastDisconnectSuggestedAction = suggestedAction;
+                mEmergencyLastDisconnectRadioTech = imsRadioTech;
+            } else {
+                Log.w(LOG_TAG, "updateToDisconnectedState: no ImsReasonInfo provided.");
+                mEmergencyLastDisconnectCause = new ImsReasonInfo();
+            }
+        }
+    }
+
     /**
      * @param c the newly registered callback that will be updated with the current registration
      *         state.
      */
-    private void updateNewCallbackWithState(IImsRegistrationCallback c)
+    private void updateNewCallbackWithState(IImsRegistrationCallback c, boolean isEmergencyCallback)
             throws RemoteException {
         int state;
         ImsRegistrationAttributes attributes;
@@ -692,11 +859,15 @@ public class ImsRegistrationImplBase {
         boolean urisSet;
         Uri[] uris;
         synchronized (mLock) {
-            state = mRegistrationState;
-            attributes = mRegistrationAttributes;
-            disconnectInfo = mLastDisconnectCause;
-            suggestedAction = mLastDisconnectSuggestedAction;
-            imsDisconnectRadioTech = mLastDisconnectRadioTech;
+            state = isEmergencyCallback ? mEmergencyRegistrationState : mRegistrationState;
+            attributes = isEmergencyCallback ? mEmergencyRegistrationAttributes :
+                    mRegistrationAttributes;
+            disconnectInfo = isEmergencyCallback ? mEmergencyLastDisconnectCause :
+                    mLastDisconnectCause;
+            suggestedAction = isEmergencyCallback ? mEmergencyLastDisconnectSuggestedAction :
+                    mLastDisconnectSuggestedAction;
+            imsDisconnectRadioTech = isEmergencyCallback ? mEmergencyLastDisconnectRadioTech :
+                    mLastDisconnectRadioTech;
             urisSet = mUrisSet;
             uris = mUris;
         }

@@ -65,11 +65,14 @@ import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_S
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.hardware.usb.flags.Flags;
 import android.hardware.usb.UsbOperationInternal;
 import android.hardware.usb.V1_0.Constants;
 import android.os.Binder;
@@ -372,6 +375,19 @@ public final class UsbPort {
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     public @Nullable UsbPortStatus getStatus() {
         return mUsbManager.getPortStatus(this);
+    }
+
+    /**
+     * Returns whether this USB port supports mode change
+     *
+     * @return true if mode change is supported.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    @FlaggedApi(Flags.FLAG_ENABLE_IS_MODE_CHANGE_SUPPORTED_API)
+    public boolean isModeChangeSupported() {
+        return mUsbManager.isModeChangeSupported(this);
     }
 
     /**

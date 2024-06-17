@@ -1314,7 +1314,6 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
      */
     protected void disableDevice(
             boolean initiatedByCec, final PendingActionClearedCallback originalCallback) {
-        removeAction(AbsoluteVolumeAudioStatusAction.class);
         removeAction(SetAudioVolumeLevelDiscoveryAction.class);
         removeAction(ActiveSourceAction.class);
         removeAction(ResendCecCommandAction.class);

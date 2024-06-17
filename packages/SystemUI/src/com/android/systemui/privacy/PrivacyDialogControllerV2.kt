@@ -26,11 +26,11 @@ import android.content.pm.PackageManager
 import android.os.UserHandle
 import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
-import android.view.View
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
+import androidx.core.view.isVisible
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -74,7 +74,7 @@ class PrivacyDialogControllerV2(
     private val keyguardStateController: KeyguardStateController,
     private val appOpsController: AppOpsController,
     private val uiEventLogger: UiEventLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val dialogProvider: DialogProvider
 ) {
 
@@ -91,7 +91,7 @@ class PrivacyDialogControllerV2(
         keyguardStateController: KeyguardStateController,
         appOpsController: AppOpsController,
         uiEventLogger: UiEventLogger,
-        dialogLaunchAnimator: DialogLaunchAnimator
+        dialogTransitionAnimator: DialogTransitionAnimator
     ) : this(
         permissionManager,
         packageManager,
@@ -104,7 +104,7 @@ class PrivacyDialogControllerV2(
         keyguardStateController,
         appOpsController,
         uiEventLogger,
-        dialogLaunchAnimator,
+        dialogTransitionAnimator,
         defaultDialogProvider
     )
 
@@ -214,7 +214,7 @@ class PrivacyDialogControllerV2(
      * @param context A context to use to create the dialog.
      * @see filterAndSelect
      */
-    fun showDialog(context: Context, view: View? = null) {
+    fun showDialog(context: Context, privacyChip: OngoingPrivacyChip? = null) {
         dismissDialog()
         backgroundExecutor.execute {
             val usage = permGroupUsage()
@@ -277,12 +277,12 @@ class PrivacyDialogControllerV2(
                         )
                     d.setShowForAllUsers(true)
                     d.addOnDismissListener(onDialogDismissed)
-                    if (view != null) {
-                        val controller = getPrivacyDialogController(view)
+                    if (privacyChip != null) {
+                        val controller = getPrivacyDialogController(privacyChip)
                         if (controller == null) {
                             d.show()
                         } else {
-                            dialogLaunchAnimator.show(d, controller)
+                            dialogTransitionAnimator.show(d, controller)
                         }
                     } else {
                         d.show()
@@ -296,10 +296,14 @@ class PrivacyDialogControllerV2(
         }
     }
 
-    private fun getPrivacyDialogController(source: View): DialogLaunchAnimator.Controller? {
-        val delegate = DialogLaunchAnimator.Controller.fromView(source) ?: return null
-        return object : DialogLaunchAnimator.Controller by delegate {
-            override fun shouldAnimateExit() = false
+    private fun getPrivacyDialogController(
+        source: OngoingPrivacyChip
+    ): DialogTransitionAnimator.Controller? {
+        val delegate =
+            DialogTransitionAnimator.Controller.fromView(source.launchableContentView)
+                ?: return null
+        return object : DialogTransitionAnimator.Controller by delegate {
+            override fun shouldAnimateExit() = source.isVisible
         }
     }
 

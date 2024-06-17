@@ -16,8 +16,11 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +35,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeWithVelocity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
@@ -58,46 +62,55 @@ class SwipeToSceneTest {
             get() = Offset(0f, (LayoutHeight / 2).toPx())
     }
 
-    private var currentScene by mutableStateOf(TestScenes.SceneA)
-    private val layoutState = SceneTransitionLayoutState(currentScene)
-
     @get:Rule val rule = createComposeRule()
+
+    private fun layoutState(
+        initialScene: SceneKey = TestScenes.SceneA,
+        transitions: SceneTransitions = EmptyTestTransitions,
+    ) = MutableSceneTransitionLayoutState(initialScene, transitions)
 
     /** The content under test. */
     @Composable
-    private fun TestContent() {
+    private fun TestContent(
+        layoutState: SceneTransitionLayoutState,
+        swipesEnabled: () -> Boolean = { true },
+    ) {
         SceneTransitionLayout(
-            currentScene,
-            { currentScene = it },
-            EmptyTestTransitions,
             state = layoutState,
             modifier = Modifier.size(LayoutWidth, LayoutHeight).testTag(TestElements.Foo.debugName),
         ) {
             scene(
                 TestScenes.SceneA,
                 userActions =
-                    mapOf(
-                        Swipe.Left to TestScenes.SceneB,
-                        Swipe.Down to TestScenes.SceneC,
-                    ),
+                    if (swipesEnabled())
+                        mapOf(
+                            Swipe.Left to TestScenes.SceneB,
+                            Swipe.Down to TestScenes.SceneC,
+                            Swipe.Up to TestScenes.SceneB,
+                        )
+                    else emptyMap(),
             ) {
                 Box(Modifier.fillMaxSize())
             }
             scene(
                 TestScenes.SceneB,
-                userActions = mapOf(Swipe.Right to TestScenes.SceneA),
+                userActions =
+                    if (swipesEnabled()) mapOf(Swipe.Right to TestScenes.SceneA) else emptyMap(),
             ) {
                 Box(Modifier.fillMaxSize())
             }
             scene(
                 TestScenes.SceneC,
                 userActions =
-                    mapOf(
-                        Swipe.Down to TestScenes.SceneA,
-                        Swipe(SwipeDirection.Down, pointerCount = 2) to TestScenes.SceneB,
-                        Swipe(SwipeDirection.Right, fromEdge = Edge.Left) to TestScenes.SceneB,
-                        Swipe(SwipeDirection.Down, fromEdge = Edge.Top) to TestScenes.SceneB,
-                    ),
+                    if (swipesEnabled())
+                        mapOf(
+                            Swipe.Down to TestScenes.SceneA,
+                            Swipe(SwipeDirection.Down, pointerCount = 2) to TestScenes.SceneB,
+                            Swipe(SwipeDirection.Right, fromSource = Edge.Left) to
+                                TestScenes.SceneB,
+                            Swipe(SwipeDirection.Down, fromSource = Edge.Top) to TestScenes.SceneB,
+                        )
+                    else emptyMap(),
             ) {
                 Box(Modifier.fillMaxSize())
             }
@@ -109,9 +122,11 @@ class SwipeToSceneTest {
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
+
+        val layoutState = layoutState()
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
-            TestContent()
+            TestContent(layoutState)
         }
 
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
@@ -195,9 +210,10 @@ class SwipeToSceneTest {
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
+        val layoutState = layoutState()
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
-            TestContent()
+            TestContent(layoutState)
         }
 
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
@@ -260,14 +276,14 @@ class SwipeToSceneTest {
     @Test
     fun multiPointerSwipe() {
         // Start at scene C.
-        currentScene = TestScenes.SceneC
+        val layoutState = layoutState(TestScenes.SceneC)
 
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
-            TestContent()
+            TestContent(layoutState)
         }
 
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
@@ -299,14 +315,14 @@ class SwipeToSceneTest {
     @Test
     fun defaultEdgeSwipe() {
         // Start at scene C.
-        currentScene = TestScenes.SceneC
+        val layoutState = layoutState(TestScenes.SceneC)
 
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
-            TestContent()
+            TestContent(layoutState)
         }
 
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
@@ -351,5 +367,251 @@ class SwipeToSceneTest {
         rule.waitForIdle()
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
         assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneC)
+    }
+
+    @Test
+    fun swipeDistance() {
+        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
+        // detected as a drag event.
+        var touchSlop = 0f
+
+        val verticalSwipeDistance = 50.dp
+        val layoutState =
+            layoutState(
+                transitions =
+                    transitions {
+                        from(TestScenes.SceneA, to = TestScenes.SceneB) {
+                            distance = FixedDistance(verticalSwipeDistance)
+                        }
+                    }
+            )
+        assertThat(verticalSwipeDistance).isNotEqualTo(LayoutHeight)
+
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+
+            SceneTransitionLayout(
+                state = layoutState,
+                modifier = Modifier.size(LayoutWidth, LayoutHeight)
+            ) {
+                scene(
+                    TestScenes.SceneA,
+                    userActions = mapOf(Swipe.Down to TestScenes.SceneB),
+                ) {
+                    Spacer(Modifier.fillMaxSize())
+                }
+                scene(TestScenes.SceneB) { Spacer(Modifier.fillMaxSize()) }
+            }
+        }
+
+        assertThat(layoutState.currentTransition).isNull()
+
+        // Swipe by half of verticalSwipeDistance.
+        rule.onRoot().performTouchInput {
+            down(middleTop)
+            moveBy(Offset(0f, touchSlop + (verticalSwipeDistance / 2).toPx()), delayMillis = 1_000)
+        }
+
+        // We should be at 50%
+        val transition = layoutState.currentTransition
+        assertThat(transition).isNotNull()
+        assertThat(transition!!.progress).isEqualTo(0.5f)
+    }
+
+    @Test
+    fun swipeByTouchSlop() {
+        val layoutState = layoutState()
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            TestContent(layoutState)
+        }
+
+        // Swipe down by exactly touchSlop, so that the drag overSlop is 0f.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, touchSlop), delayMillis = 1_000)
+        }
+
+        // We should still correctly compute that we are swiping down to scene C.
+        var transition = layoutState.currentTransition
+        assertThat(transition).isNotNull()
+        assertThat(transition?.toScene).isEqualTo(TestScenes.SceneC)
+
+        // Release the finger, animating back to scene A.
+        rule.onRoot().performTouchInput { up() }
+        rule.waitForIdle()
+        assertThat(layoutState.currentTransition).isNull()
+        assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneA)
+
+        // Swipe up by exactly touchSlop, so that the drag overSlop is 0f.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, -touchSlop), delayMillis = 1_000)
+        }
+
+        // We should still correctly compute that we are swiping up to scene B.
+        transition = layoutState.currentTransition
+        assertThat(transition).isNotNull()
+        assertThat(transition?.toScene).isEqualTo(TestScenes.SceneB)
+
+        // Release the finger, animating back to scene A.
+        rule.onRoot().performTouchInput { up() }
+        rule.waitForIdle()
+        assertThat(layoutState.currentTransition).isNull()
+        assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneA)
+
+        // Swipe left by exactly touchSlop, so that the drag overSlop is 0f.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(-touchSlop, 0f), delayMillis = 1_000)
+        }
+
+        // We should still correctly compute that we are swiping down to scene B.
+        transition = layoutState.currentTransition
+        assertThat(transition).isNotNull()
+        assertThat(transition?.toScene).isEqualTo(TestScenes.SceneB)
+    }
+
+    @Test
+    fun swipeEnabledLater() {
+        val layoutState = MutableSceneTransitionLayoutState(TestScenes.SceneA)
+        var swipesEnabled by mutableStateOf(false)
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            TestContent(layoutState, swipesEnabled = { swipesEnabled })
+        }
+
+        // Drag down from the middle. This should not do anything, because swipes are disabled.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, touchSlop), delayMillis = 1_000)
+        }
+        assertThat(layoutState.currentTransition).isNull()
+
+        // Release finger.
+        rule.onRoot().performTouchInput { up() }
+
+        // Enable swipes.
+        swipesEnabled = true
+        rule.waitForIdle()
+
+        // Drag down from the middle. Now it should start a transition.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, touchSlop), delayMillis = 1_000)
+        }
+        assertThat(layoutState.currentTransition).isNotNull()
+    }
+
+    @Test
+    fun transitionKey() {
+        val transitionkey = TransitionKey(debugName = "foo")
+        val state =
+            MutableSceneTransitionLayoutState(
+                TestScenes.SceneA,
+                transitions {
+                    from(TestScenes.SceneA, to = TestScenes.SceneB) { fade(TestElements.Foo) }
+                    from(TestScenes.SceneA, to = TestScenes.SceneB, key = transitionkey) {
+                        fade(TestElements.Foo)
+                        fade(TestElements.Bar)
+                    }
+                }
+            )
+                as MutableSceneTransitionLayoutStateImpl
+
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(state, Modifier.size(LayoutWidth, LayoutHeight)) {
+                scene(
+                    TestScenes.SceneA,
+                    userActions =
+                        mapOf(
+                            Swipe.Down to TestScenes.SceneB,
+                            Swipe.Up to
+                                UserActionResult(TestScenes.SceneB, transitionKey = transitionkey)
+                        )
+                ) {
+                    Box(Modifier.fillMaxSize())
+                }
+                scene(TestScenes.SceneB) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        // Swipe down for the default transition from A to B.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, touchSlop), delayMillis = 1_000)
+        }
+
+        assertThat(state.isTransitioning(from = TestScenes.SceneA, to = TestScenes.SceneB)).isTrue()
+        assertThat(state.transformationSpec.transformations).hasSize(1)
+
+        // Move the pointer up to swipe to scene B using the new transition.
+        rule.onRoot().performTouchInput { moveBy(Offset(0f, -1.dp.toPx()), delayMillis = 1_000) }
+        assertThat(state.isTransitioning(from = TestScenes.SceneA, to = TestScenes.SceneB)).isTrue()
+        assertThat(state.transformationSpec.transformations).hasSize(2)
+    }
+
+    @Test
+    fun dynamicSwipeDistance() {
+        val swipeDistance =
+            object : UserActionDistance {
+                override fun UserActionDistanceScope.absoluteDistance(
+                    fromSceneSize: IntSize,
+                    orientation: Orientation,
+                ): Float {
+                    // Foo is going to have a vertical offset of 50dp. Let's make the swipe distance
+                    // the difference between the bottom of the scene and the bottom of the element,
+                    // so that we use the offset and size of the element as well as the size of the
+                    // scene.
+                    val fooSize = TestElements.Foo.targetSize(TestScenes.SceneB) ?: return 0f
+                    val fooOffset = TestElements.Foo.targetOffset(TestScenes.SceneB) ?: return 0f
+                    val sceneSize = TestScenes.SceneB.targetSize() ?: return 0f
+                    return sceneSize.height - fooOffset.y - fooSize.height
+                }
+            }
+
+        val state =
+            MutableSceneTransitionLayoutState(
+                TestScenes.SceneA,
+                transitions {
+                    from(TestScenes.SceneA, to = TestScenes.SceneB) { distance = swipeDistance }
+                }
+            )
+
+        val layoutSize = 200.dp
+        val fooYOffset = 50.dp
+        val fooSize = 25.dp
+
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+
+            SceneTransitionLayout(state, Modifier.size(layoutSize)) {
+                scene(TestScenes.SceneA, userActions = mapOf(Swipe.Up to TestScenes.SceneB)) {
+                    Box(Modifier.fillMaxSize())
+                }
+                scene(TestScenes.SceneB) {
+                    Box(Modifier.fillMaxSize()) {
+                        Box(Modifier.offset(y = fooYOffset).element(TestElements.Foo).size(fooSize))
+                    }
+                }
+            }
+        }
+
+        // Swipe up by half the expected distance to get to 50% progress.
+        val expectedDistance = layoutSize - fooYOffset - fooSize
+        rule.onRoot().performTouchInput {
+            val middle = (layoutSize / 2).toPx()
+            down(Offset(middle, middle))
+            moveBy(Offset(0f, -touchSlop - (expectedDistance / 2f).toPx()), delayMillis = 1_000)
+        }
+
+        rule.waitForIdle()
+        assertThat(state.isTransitioning(from = TestScenes.SceneA, to = TestScenes.SceneB)).isTrue()
+        assertThat(state.currentTransition!!.progress).isWithin(0.01f).of(0.5f)
     }
 }

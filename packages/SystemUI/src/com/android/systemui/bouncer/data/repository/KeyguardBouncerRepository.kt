@@ -20,6 +20,7 @@ import android.os.Build
 import android.util.Log
 import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
+import com.android.systemui.bouncer.shared.model.BouncerDismissActionModel
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -90,6 +91,9 @@ interface KeyguardBouncerRepository {
     val alternateBouncerUIAvailable: StateFlow<Boolean>
     val sideFpsShowing: StateFlow<Boolean>
 
+    /** Action that should be run right after the bouncer is dismissed. */
+    var bouncerDismissActionModel: BouncerDismissActionModel?
+
     var lastAlternateBouncerVisibleTime: Long
 
     fun setPrimaryScrimmed(isScrimmed: Boolean)
@@ -134,6 +138,8 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @BouncerTableLog private val buffer: TableLogBuffer,
 ) : KeyguardBouncerRepository {
+    override var bouncerDismissActionModel: BouncerDismissActionModel? = null
+
     /** Values associated with the PrimaryBouncer (pin/pattern/password) input. */
     private val _primaryBouncerShow = MutableStateFlow(false)
     override val primaryBouncerShow = _primaryBouncerShow.asStateFlow()

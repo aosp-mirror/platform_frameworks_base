@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -108,6 +109,12 @@ public class InsetsFrameProvider implements Parcelable {
      * Be cautious, this will not be in effect for the window types whose insets size is overridden.
      */
     private Insets mMinimalInsetsSizeInDisplayCutoutSafe = null;
+
+    /**
+     * Indicates the bounding rectangles within the provided insets frame, in relative coordinates
+     * to the source frame.
+     */
+    private Rect[] mBoundingRects = null;
 
     /**
      * Creates an InsetsFrameProvider which describes what frame an insets source should have.
@@ -205,6 +212,22 @@ public class InsetsFrameProvider implements Parcelable {
         return mMinimalInsetsSizeInDisplayCutoutSafe;
     }
 
+    /**
+     * Sets the bounding rectangles within and relative to the source frame.
+     */
+    public InsetsFrameProvider setBoundingRects(@Nullable Rect[] boundingRects) {
+        mBoundingRects = boundingRects == null ? null : boundingRects.clone();
+        return this;
+    }
+
+    /**
+     * Returns the arbitrary bounding rects, or null if none were set.
+     */
+    @Nullable
+    public Rect[] getBoundingRects() {
+        return mBoundingRects;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -230,6 +253,9 @@ public class InsetsFrameProvider implements Parcelable {
         if (mMinimalInsetsSizeInDisplayCutoutSafe != null) {
             sb.append(", mMinimalInsetsSizeInDisplayCutoutSafe=")
                     .append(mMinimalInsetsSizeInDisplayCutoutSafe);
+        }
+        if (mBoundingRects != null) {
+            sb.append(", mBoundingRects=").append(Arrays.toString(mBoundingRects));
         }
         sb.append("}");
         return sb.toString();
@@ -257,6 +283,7 @@ public class InsetsFrameProvider implements Parcelable {
         mInsetsSizeOverrides = in.createTypedArray(InsetsSizeOverride.CREATOR);
         mArbitraryRectangle = in.readTypedObject(Rect.CREATOR);
         mMinimalInsetsSizeInDisplayCutoutSafe = in.readTypedObject(Insets.CREATOR);
+        mBoundingRects = in.createTypedArray(Rect.CREATOR);
     }
 
     @Override
@@ -268,6 +295,7 @@ public class InsetsFrameProvider implements Parcelable {
         out.writeTypedArray(mInsetsSizeOverrides, flags);
         out.writeTypedObject(mArbitraryRectangle, flags);
         out.writeTypedObject(mMinimalInsetsSizeInDisplayCutoutSafe, flags);
+        out.writeTypedArray(mBoundingRects, flags);
     }
 
     public boolean idEquals(InsetsFrameProvider o) {
@@ -288,14 +316,15 @@ public class InsetsFrameProvider implements Parcelable {
                 && Arrays.equals(mInsetsSizeOverrides, other.mInsetsSizeOverrides)
                 && Objects.equals(mArbitraryRectangle, other.mArbitraryRectangle)
                 && Objects.equals(mMinimalInsetsSizeInDisplayCutoutSafe,
-                        other.mMinimalInsetsSizeInDisplayCutoutSafe);
+                        other.mMinimalInsetsSizeInDisplayCutoutSafe)
+                && Arrays.equals(mBoundingRects, other.mBoundingRects);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mId, mSource, mFlags, mInsetsSize,
                 Arrays.hashCode(mInsetsSizeOverrides), mArbitraryRectangle,
-                mMinimalInsetsSizeInDisplayCutoutSafe);
+                mMinimalInsetsSizeInDisplayCutoutSafe, Arrays.hashCode(mBoundingRects));
     }
 
     public static final @NonNull Parcelable.Creator<InsetsFrameProvider> CREATOR =

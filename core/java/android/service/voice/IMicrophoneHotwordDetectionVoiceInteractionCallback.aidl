@@ -20,7 +20,6 @@ import android.media.AudioFormat;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordRejectedResult;
-import android.service.voice.HotwordTrainingData;
 
 /**
  * Callback for returning the detected result from the HotwordDetectionService.
@@ -48,10 +47,4 @@ oneway interface IMicrophoneHotwordDetectionVoiceInteractionCallback {
      */
     void onRejected(
         in HotwordRejectedResult hotwordRejectedResult);
-
-    /**
-     * Called by {@link HotwordDetectionService} to egress training data to the
-     * {@link HotwordDetector}.
-     */
-     void onTrainingData(in HotwordTrainingData data);
 }

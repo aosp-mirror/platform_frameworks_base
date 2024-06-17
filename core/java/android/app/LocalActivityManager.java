@@ -179,7 +179,7 @@ public class LocalActivityManager {
             }
 
             mActivityThread.handleStartActivity(clientRecord, pendingActions,
-                    null /* activityOptions */);
+                    null /* sceneTransitionInfo */);
             r.curState = STARTED;
             
             if (desiredState == RESUMED) {

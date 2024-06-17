@@ -5400,13 +5400,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         public static final AccessibilityAction ACTION_PREVIOUS_HTML_ELEMENT =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT);
 
+        // TODO(316638728): restore ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT in javadoc
         /**
          * Action to scroll the node content forward.
          *
-         * <p>
-         *     <strong>Arguments:</strong>
-         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
-         * </p>
          * <p>The UI element that implements this should send a
          * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event. Depending on the orientation,
          * this element should also add the relevant directional scroll actions of
@@ -5447,12 +5444,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         public static final AccessibilityAction ACTION_SCROLL_FORWARD =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
 
+        // TODO(316638728): restore ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT in javadoc
         /**
          * Action to scroll the node content backward.
-         * <p>
-         *     <strong>Arguments:</strong>
-         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
-         * </p>
+         *
          * <p>The UI element that implements this should send a
          * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event. Depending on the orientation,
          * this element should also add the relevant directional scroll actions of
@@ -5647,48 +5642,40 @@ public class AccessibilityNodeInfo implements Parcelable {
         @NonNull public static final AccessibilityAction ACTION_SCROLL_IN_DIRECTION =
                 new AccessibilityAction(R.id.accessibilityActionScrollInDirection);
 
+        // TODO(316638728): restore ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT in javadoc
         /**
          * Action to scroll the node content up.
-         * <p>
-         *     <strong>Arguments:</strong>
-         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
-         * </p>
+         *
          * <p>The UI element that implements this should send a
          * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_SCROLL_UP =
                 new AccessibilityAction(R.id.accessibilityActionScrollUp);
 
+        // TODO(316638728): restore ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT in javadoc
         /**
          * Action to scroll the node content left.
-         * <p>
-         *     <strong>Arguments:</strong>
-         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
-         * </p>
+         *
          * <p>The UI element that implements this should send a
          * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_SCROLL_LEFT =
                 new AccessibilityAction(R.id.accessibilityActionScrollLeft);
 
+        // TODO(316638728): restore ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT in javadoc
         /**
          * Action to scroll the node content down.
-         * <p>
-         *     <strong>Arguments:</strong>
-         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
-         * </p>
+         *
          * <p>The UI element that implements this should send a
          * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_SCROLL_DOWN =
                 new AccessibilityAction(R.id.accessibilityActionScrollDown);
 
+        // TODO(316638728): restore ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT in javadoc
         /**
          * Action to scroll the node content right.
-         * <p>
-         *     <strong>Arguments:</strong>
-         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
-         * </p>
+         *
          * <p>The UI element that implements this should send a
          * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */

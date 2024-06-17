@@ -16,6 +16,7 @@
 
 package com.android.systemui.util.kotlin
 
+import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -28,8 +29,23 @@ class Utils {
         fun <A, B, C, D> toQuad(a: A, bcd: Triple<B, C, D>) =
             Quad(a, bcd.first, bcd.second, bcd.third)
 
+        fun <A, B, C, D, E> toQuint(a: A, b: B, c: C, d: D, e: E) = Quint(a, b, c, d, e)
         fun <A, B, C, D, E> toQuint(a: A, bcde: Quad<B, C, D, E>) =
             Quint(a, bcde.first, bcde.second, bcde.third, bcde.fourth)
+
+        fun <A, B, C, D, E, F> toSextuple(a: A, bcdef: Quint<B, C, D, E, F>) =
+            Sextuple(a, bcdef.first, bcdef.second, bcdef.third, bcdef.fourth, bcdef.fifth)
+
+        fun <A, B, C, D, E, F, G> toSeptuple(a: A, bcdefg: Sextuple<B, C, D, E, F, G>) =
+            Septuple(
+                a,
+                bcdefg.first,
+                bcdefg.second,
+                bcdefg.third,
+                bcdefg.fourth,
+                bcdefg.fifth,
+                bcdefg.sixth
+            )
 
         /**
          * Samples the provided flows, emitting a tuple of the original flow's value as well as each
@@ -69,6 +85,40 @@ class Utils {
         ): Flow<Quint<A, B, C, D, E>> {
             return this.sample(combine(b, c, d, e, ::Quad), ::toQuint)
         }
+
+        /**
+         * Samples the provided flows, emitting a tuple of the original flow's value as well as each
+         * of the combined flows' values.
+         *
+         * Flow<A>.sample(Flow<B>, Flow<C>, Flow<D>, Flow<E>, Flow<F>) -> (A, B, C, D, E, F)
+         */
+        fun <A, B, C, D, E, F> Flow<A>.sample(
+            b: Flow<B>,
+            c: Flow<C>,
+            d: Flow<D>,
+            e: Flow<E>,
+            f: Flow<F>,
+        ): Flow<Sextuple<A, B, C, D, E, F>> {
+            return this.sample(combine(b, c, d, e, f, ::Quint), ::toSextuple)
+        }
+
+        /**
+         * Samples the provided flows, emitting a tuple of the original flow's value as well as each
+         * of the combined flows' values.
+         *
+         * Flow<A>.sample(Flow<B>, Flow<C>, Flow<D>, Flow<E>, Flow<F>, Flow<G>) -> (A, B, C, D, E,
+         * F, G)
+         */
+        fun <A, B, C, D, E, F, G> Flow<A>.sample(
+            b: Flow<B>,
+            c: Flow<C>,
+            d: Flow<D>,
+            e: Flow<E>,
+            f: Flow<F>,
+            g: Flow<G>,
+        ): Flow<Septuple<A, B, C, D, E, F, G>> {
+            return this.sample(combine(b, c, d, e, f, g, ::Sextuple), ::toSeptuple)
+        }
     }
 }
 
@@ -81,3 +131,30 @@ data class Quint<A, B, C, D, E>(
     val fourth: D,
     val fifth: E
 )
+
+data class Sextuple<A, B, C, D, E, F>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D,
+    val fifth: E,
+    val sixth: F,
+)
+
+data class Septuple<A, B, C, D, E, F, G>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D,
+    val fifth: E,
+    val sixth: F,
+    val seventh: G,
+)
+
+fun Int.toPx(context: Context): Int {
+    return (this * context.resources.displayMetrics.density).toInt()
+}
+
+fun Int.toDp(context: Context): Int {
+    return (this / context.resources.displayMetrics.density).toInt()
+}

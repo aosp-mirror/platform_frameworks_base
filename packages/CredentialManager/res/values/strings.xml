@@ -63,9 +63,9 @@
   <!-- This appears as the description body of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
   <string name="choose_provider_body">Select a password manager to save your info and sign in faster next time</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is passkey. [CHAR LIMIT=200] -->
-  <string name="choose_create_option_passkey_title">Create passkey for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
+  <string name="choose_create_option_passkey_title">Create passkey to sign in to <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is password. [CHAR LIMIT=200] -->
-  <string name="choose_create_option_password_title">Save password for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
+  <string name="choose_create_option_password_title">Save password to sign in to <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is others. [CHAR LIMIT=200] -->
   <string name="choose_create_option_sign_in_title">Save sign-in info for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
   <!-- Types which are inserted as a placeholder as credentialTypes for other strings. [CHAR LIMIT=200] -->
@@ -168,4 +168,9 @@
   <string name="get_dialog_option_headline_use_a_different_device">Use a different device</string>
   <!-- Text shown on a snackbar when the app cancelled the UI. [CHAR LIMIT=120] -->
   <string name="request_cancelled_by">Request cancelled by <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+
+  <!-- Strings for dropdown presentation. -->
+  <!-- Text shown in the dropdown presentation to select more sign in options. [CHAR LIMIT=120] -->
+  <string name="dropdown_presentation_more_sign_in_options_text">Sign-in options</string>
+  <string name="more_options_content_description">More</string>
 </resources>

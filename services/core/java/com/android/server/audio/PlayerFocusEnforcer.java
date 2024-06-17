@@ -79,4 +79,11 @@ public interface PlayerFocusEnforcer {
      * @return delay in milliseconds
      */
     long getFadeInDelayForOffendersMillis(@NonNull AudioAttributes aa);
+
+    /**
+     * Check if the fade should be enforced
+     *
+     * @return {@code true} if fade should be enforced, {@code false} otherwise
+     */
+    boolean shouldEnforceFade();
 }

@@ -17,7 +17,7 @@
 package com.android.systemui.media.controls
 
 import com.android.internal.logging.InstanceId
-import com.android.systemui.media.controls.models.player.MediaData
+import com.android.systemui.media.controls.shared.model.MediaData
 
 class MediaTestUtils {
     companion object {

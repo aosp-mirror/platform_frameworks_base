@@ -23,11 +23,11 @@ import android.view.Gravity.END
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import com.android.settingslib.Utils
 import com.android.systemui.res.R
-import com.android.systemui.animation.view.LaunchableFrameLayout
 import com.android.systemui.statusbar.events.BackgroundAnimatableView
 
 class OngoingPrivacyChip @JvmOverloads constructor(
@@ -35,7 +35,7 @@ class OngoingPrivacyChip @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttrs: Int = 0,
     defStyleRes: Int = 0
-) : LaunchableFrameLayout(context, attrs, defStyleAttrs, defStyleRes), BackgroundAnimatableView {
+) : FrameLayout(context, attrs, defStyleAttrs, defStyleRes), BackgroundAnimatableView {
 
     private var configuration: Configuration
     private var iconMargin = 0
@@ -43,6 +43,8 @@ class OngoingPrivacyChip @JvmOverloads constructor(
     private var iconColor = 0
 
     private val iconsContainer: LinearLayout
+    val launchableContentView
+        get() = iconsContainer
 
     var privacyList = emptyList<PrivacyItem>()
         set(value) {

@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
+import android.content.pm.Flags;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1971,6 +1972,42 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     }
 
     /**
+     * Encodes a value it wasn't already encoded.
+     *
+     * @param value string to encode
+     * @param allow characters to allow
+     * @return encoded value
+     * @hide
+     */
+    public static String encodeIfNotEncoded(@Nullable String value, @Nullable String allow) {
+        if (value == null) return null;
+        if (!Flags.encodeAppIntent() || isEncoded(value, allow)) return value;
+        return encode(value, allow);
+    }
+
+    /**
+     * Returns true if the given string is already encoded to safe characters.
+     *
+     * @param value string to check
+     * @param allow characters to allow
+     * @return true if the string is already encoded or false if it should be encoded
+     */
+    private static boolean isEncoded(@Nullable String value, @Nullable String allow) {
+        if (value == null) return true;
+        for (int index = 0; index < value.length(); index++) {
+            char c = value.charAt(index);
+
+            // Allow % because that's the prefix for an encoded character. This method will fail
+            // for decoded strings whose onlyinvalid character is %, but it's assumed that % alone
+            // cannot cause malicious behavior in the framework.
+            if (!isAllowed(c, allow) && c != '%') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Decodes '%'-escaped octets in the given string using the UTF-8 scheme.
      * Replaces invalid octets with the unicode replacement character
      * ("\\uFFFD").
@@ -1985,6 +2022,18 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         }
         return UriCodec.decode(
                 s, false /* convertPlus */, StandardCharsets.UTF_8, false /* throwOnFailure */);
+    }
+
+    /**
+     * Decodes a string if it was encoded, indicated by containing a %.
+     * @param value encoded string to decode
+     * @return decoded value
+     * @hide
+     */
+    public static String decodeIfNeeded(@Nullable String value) {
+        if (value == null) return null;
+        if (Flags.encodeAppIntent() && value.contains("%")) return decode(value);
+        return value;
     }
 
     /**

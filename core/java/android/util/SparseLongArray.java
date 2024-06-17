@@ -40,6 +40,7 @@ import com.android.internal.util.GrowingArrayUtils;
  * keys in ascending order, or the values corresponding to the keys in ascending
  * order in the case of <code>valueAt(int)</code>.</p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SparseLongArray implements Cloneable {
     private int[] mKeys;
     private long[] mValues;

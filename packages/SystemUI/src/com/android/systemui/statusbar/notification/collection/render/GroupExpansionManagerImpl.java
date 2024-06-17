@@ -16,13 +16,13 @@
 
 package com.android.systemui.statusbar.notification.collection.render;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -42,6 +42,8 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpable {
+    private static final String TAG = "GroupExpansionaManagerImpl";
+
     private final DumpManager mDumpManager;
     private final GroupMembershipManager mGroupMembershipManager;
     private final Set<OnGroupExpansionChangeListener> mOnGroupChangeListeners = new HashSet<>();
@@ -53,14 +55,11 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
      */
     private final Set<NotificationEntry> mExpandedGroups = new HashSet<>();
 
-    private final FeatureFlags mFeatureFlags;
-
     @Inject
     public GroupExpansionManagerImpl(DumpManager dumpManager,
-            GroupMembershipManager groupMembershipManager, FeatureFlags featureFlags) {
+            GroupMembershipManager groupMembershipManager) {
         mDumpManager = dumpManager;
         mGroupMembershipManager = groupMembershipManager;
-        mFeatureFlags = featureFlags;
     }
 
     /**
@@ -86,10 +85,8 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
     };
 
     public void attach(NotifPipeline pipeline) {
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)) {
-            mDumpManager.registerDumpable(this);
-            pipeline.addOnBeforeRenderListListener(mNotifTracker);
-        }
+        mDumpManager.registerDumpable(this);
+        pipeline.addOnBeforeRenderListListener(mNotifTracker);
     }
 
     @Override
@@ -105,10 +102,9 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
     @Override
     public void setGroupExpanded(NotificationEntry entry, boolean expanded) {
         NotificationEntry groupSummary = mGroupMembershipManager.getGroupSummary(entry);
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)
-                && entry.getParent() == null) {
+        if (entry.getParent() == null) {
             if (expanded) {
-                throw new IllegalArgumentException("Cannot expand group that is not attached");
+                Log.wtf(TAG, "Cannot expand group that is not attached");
             } else {
                 // The entry is no longer attached, but we still want to make sure we don't have
                 // a stale expansion state.
@@ -124,7 +120,7 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
         }
 
         // Only notify listeners if something changed.
-        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE) || changed) {
+        if (changed) {
             sendOnGroupExpandedChange(entry, expanded);
         }
     }

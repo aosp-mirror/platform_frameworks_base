@@ -337,7 +337,9 @@ public class SafeActivityOptions {
         if (aInfo != null && overrideTaskTransition) {
             final int startTasksFromRecentsPerm = ActivityTaskManagerService.checkPermission(
                     START_TASKS_FROM_RECENTS, callingPid, callingUid);
-            if (startTasksFromRecentsPerm != PERMISSION_GRANTED) {
+            // Allow if calling uid is from assistant, or start task from recents
+            if (startTasksFromRecentsPerm != PERMISSION_GRANTED
+                    && !isAssistant(supervisor.mService, callingUid)) {
                 final String msg = "Permission Denial: starting " + getIntentString(intent)
                         + " from " + callerApp + " (pid=" + callingPid
                         + ", uid=" + callingUid + ") with overrideTaskTransition=true";

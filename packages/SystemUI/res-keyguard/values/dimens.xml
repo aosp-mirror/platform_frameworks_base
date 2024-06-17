@@ -25,6 +25,18 @@
     <!-- Maximum width of the sliding KeyguardSecurityContainer -->
     <dimen name="keyguard_security_width">420dp</dimen>
 
+    <!-- Width for the keyguard pin input field -->
+    <dimen name="keyguard_pin_field_width">292dp</dimen>
+
+    <!-- height for the keyguard pin input field -->
+    <dimen name="keyguard_pin_field_height">56dp</dimen>
+
+    <!-- height for the keyguard password input field -->
+    <dimen name="keyguard_password_field_height">56dp</dimen>
+
+    <!-- width for the keyguard password input field -->
+    <dimen name="keyguard_password_field_width">276dp</dimen>
+
     <!-- Height of the sliding KeyguardSecurityContainer
          (includes 2x keyguard_security_view_top_margin) -->
     <dimen name="keyguard_security_height">420dp</dimen>
@@ -157,11 +169,10 @@
     <dimen name="weather_clock_smartspace_translateX">0dp</dimen>
     <dimen name="weather_clock_smartspace_translateY">0dp</dimen>
 
-    <!-- Additional length to add to the SFPS sensor length we get from framework so that the length
-     of the progress bar matches the length of the power button  -->
-    <dimen name="sfps_progress_bar_length_extra_padding">12dp</dimen>
     <!-- Thickness of the progress bar we show for the SFPS based authentication. -->
     <dimen name="sfps_progress_bar_thickness">6dp</dimen>
     <!-- Padding from the edge of the screen for the progress bar -->
     <dimen name="sfps_progress_bar_padding_from_edge">7dp</dimen>
+
+    <dimen name="keyguard_presentation_width">410dp</dimen>
 </resources>

@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.Notification;
@@ -26,27 +27,34 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.Process;
-import android.os.SystemProperties;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.View;
 
-import com.android.systemui.res.R;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.process.ProcessWrapper;
+import com.android.systemui.res.R;
+import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.NotificationChannels;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.TreeMap;
 
 import javax.inject.Provider;
@@ -70,6 +78,7 @@ public class SystemUIApplication extends Application implements
     private SystemUIAppComponentFactoryBase.ContextAvailableCallback mContextAvailableCallback;
     private SysUIComponent mSysUIComponent;
     private SystemUIInitializer mInitializer;
+    private ProcessWrapper mProcessWrapper;
 
     public SystemUIApplication() {
         super();
@@ -78,10 +87,17 @@ public class SystemUIApplication extends Application implements
         ProtoLog.REQUIRE_PROTOLOGTOOL = false;
     }
 
+    @VisibleForTesting
+    @Override
+    public void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+    }
+
     protected GlobalRootComponent getRootComponent() {
         return mInitializer.getRootComponent();
     }
 
+    @SuppressLint("RegisterReceiverViaContext")
     @Override
     public void onCreate() {
         super.onCreate();
@@ -96,9 +112,12 @@ public class SystemUIApplication extends Application implements
         mBootCompleteCache = mSysUIComponent.provideBootCacheImpl();
         log.traceEnd();
 
+        GlobalRootComponent rootComponent = mInitializer.getRootComponent();
+
         // Enable Looper trace points.
         // This allows us to see Handler callbacks on traces.
-        Looper.getMainLooper().setTraceTag(Trace.TRACE_TAG_APP);
+        rootComponent.getMainLooper().setTraceTag(Trace.TRACE_TAG_APP);
+        mProcessWrapper = rootComponent.getProcessWrapper();
 
         // Set the application theme that is inherited by all services. Note that setting the
         // application theme in the manifest does only work for activities. Keep this in sync with
@@ -106,15 +125,17 @@ public class SystemUIApplication extends Application implements
         setTheme(R.style.Theme_SystemUI);
 
         View.setTraceLayoutSteps(
-                SystemProperties.getBoolean("persist.debug.trace_layouts", false));
+                rootComponent.getSystemPropertiesHelper()
+                        .getBoolean("persist.debug.trace_layouts", false));
         View.setTracedRequestLayoutClassClass(
-                SystemProperties.get("persist.debug.trace_request_layout_class", null));
+                rootComponent.getSystemPropertiesHelper()
+                        .get("persist.debug.trace_request_layout_class", null));
 
         if (Flags.enableLayoutTracing()) {
             View.setTraceLayoutSteps(true);
         }
 
-        if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
+        if (mProcessWrapper.isSystemUser()) {
             IntentFilter bootCompletedFilter = new
                     IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED);
             bootCompletedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
@@ -175,13 +196,17 @@ public class SystemUIApplication extends Application implements
     }
 
     /**
-     * Makes sure that all the SystemUI services are running. If they are already running, this is a
-     * no-op. This is needed to conditinally start all the services, as we only need to have it in
+     * Makes sure that all the CoreStartables are running. If they are already running, this is a
+     * no-op. This is needed to conditionally start all the services, as we only need to have it in
      * the main process.
      * <p>This method must only be called from the main thread.</p>
      */
 
-    public void startServicesIfNeeded() {
+    public void startSystemUserServicesIfNeeded() {
+        if (!mProcessWrapper.isSystemUser()) {
+            Log.wtf(TAG, "Tried starting SystemUser services on non-SystemUser");
+            return;  // Per-user startables are handled in #startSystemUserServicesIfNeeded.
+        }
         final String vendorComponent = mInitializer.getVendorComponent(getResources());
 
         // Sort the startables so that we get a deterministic ordering.
@@ -201,6 +226,9 @@ public class SystemUIApplication extends Application implements
      * <p>This method must only be called from the main thread.</p>
      */
     void startSecondaryUserServicesIfNeeded() {
+        if (mProcessWrapper.isSystemUser()) {
+            return;  // Per-user startables are handled in #startSystemUserServicesIfNeeded.
+        }
         // Sort the startables so that we get a deterministic ordering.
         Map<Class<?>, Provider<CoreStartable>> sortedStartables = new TreeMap<>(
                 Comparator.comparing(Class::getName));
@@ -221,7 +249,8 @@ public class SystemUIApplication extends Application implements
         if (!mBootCompleteCache.isBootComplete()) {
             // check to see if maybe it was already completed long before we began
             // see ActivityManagerService.finishBooting()
-            if ("1".equals(SystemProperties.get("sys.boot_completed"))) {
+            if ("1".equals(getRootComponent().getSystemPropertiesHelper()
+                    .get("sys.boot_completed"))) {
                 mBootCompleteCache.setBootComplete();
                 if (DEBUG) {
                     Log.v(TAG, "BOOT_COMPLETED was already sent");
@@ -237,17 +266,78 @@ public class SystemUIApplication extends Application implements
                 Trace.TRACE_TAG_APP);
         log.traceBegin(metricsPrefix);
 
-        int i = 0;
-        for (Map.Entry<Class<?>, Provider<CoreStartable>> entry : startables.entrySet()) {
-            String clsName = entry.getKey().getName();
-            int j = i;  // Copied to make lambda happy.
-            timeInitialization(
-                    clsName,
-                    () -> mServices[j] = startStartable(clsName, entry.getValue()),
-                    log,
-                    metricsPrefix);
-            i++;
+        HashSet<Class<?>> startedStartables = new HashSet<>();
+
+        // Perform a form of topological sort:
+        // 1) Iterate through a queue of all non-started startables
+        //   If the startable has all of its dependencies met
+        //     - start it
+        //   Else
+        //     - enqueue it for the next iteration
+        // 2) If anything was started and the "next" queue is not empty, loop back to 1
+        // 3) If we're done looping and there are any non-started startables left, throw an error.
+        //
+        // This "sort" is not very optimized. We assume that most CoreStartables don't have many
+        // dependencies - zero in fact. We assume two or three iterations of this loop will be
+        // enough. If that ever changes, it may be worth revisiting.
+
+        log.traceBegin("Topologically start Core Startables");
+        boolean startedAny = false;
+        ArrayDeque<Map.Entry<Class<?>, Provider<CoreStartable>>> queue;
+        ArrayDeque<Map.Entry<Class<?>, Provider<CoreStartable>>> nextQueue =
+                new ArrayDeque<>(startables.entrySet());
+        int numIterations = 0;
+
+        int serviceIndex = 0;
+
+        do {
+            queue = nextQueue;
+            nextQueue = new ArrayDeque<>(startables.size());
+
+            while (!queue.isEmpty()) {
+                Map.Entry<Class<?>, Provider<CoreStartable>> entry = queue.removeFirst();
+
+                Class<?> cls = entry.getKey();
+                Dependencies dep = cls.getAnnotation(Dependencies.class);
+                Class<? extends CoreStartable>[] deps = (dep == null ? null : dep.value());
+                if (deps == null || startedStartables.containsAll(Arrays.asList(deps))) {
+                    String clsName = cls.getName();
+                    int i = serviceIndex;  // Copied to make lambda happy.
+                    timeInitialization(
+                            clsName,
+                            () -> mServices[i] = startStartable(clsName, entry.getValue()),
+                            log,
+                            metricsPrefix);
+                    startedStartables.add(cls);
+                    startedAny = true;
+                    serviceIndex++;
+                } else {
+                    nextQueue.add(entry);
+                }
+            }
+            numIterations++;
+        } while (startedAny && !nextQueue.isEmpty()); // if none were started, stop.
+
+        if (!nextQueue.isEmpty()) { // If some startables were left over, throw an error.
+            while (!nextQueue.isEmpty()) {
+                Map.Entry<Class<?>, Provider<CoreStartable>> entry = nextQueue.removeFirst();
+                Class<?> cls = entry.getKey();
+                Dependencies dep = cls.getAnnotation(Dependencies.class);
+                Class<? extends CoreStartable>[] deps = (dep == null ? null : dep.value());
+                StringJoiner stringJoiner = new StringJoiner(", ");
+                for (int i = 0; deps != null && i < deps.length; i++) {
+                    if (!startedStartables.contains(deps[i])) {
+                        stringJoiner.add(deps[i].getName());
+                    }
+                }
+                Log.e(TAG, "Failed to start " + cls.getName()
+                        + ". Missing dependencies: [" + stringJoiner + "]");
+            }
+
+            throw new RuntimeException("Failed to start all CoreStartables. Check logcat!");
         }
+        Log.i(TAG, "Topological CoreStartables completed in " + numIterations + " iterations");
+        log.traceEnd();
 
         if (vendorComponent != null) {
             timeInitialization(
@@ -258,8 +348,8 @@ public class SystemUIApplication extends Application implements
                     metricsPrefix);
         }
 
-        for (i = 0; i < mServices.length; i++) {
-            final CoreStartable service = mServices[i];
+        for (serviceIndex = 0; serviceIndex < mServices.length; serviceIndex++) {
+            final CoreStartable service = mServices[serviceIndex];
             if (mBootCompleteCache.isBootComplete()) {
                 notifyBootCompleted(service);
             }
@@ -308,10 +398,14 @@ public class SystemUIApplication extends Application implements
                     Trace.TRACE_TAG_APP, clsName + ".newInstance()");
         }
         try {
-            startable = (CoreStartable) Class.forName(clsName).newInstance();
+            startable = (CoreStartable) Class.forName(clsName)
+                    .getDeclaredConstructor()
+                    .newInstance();
         } catch (ClassNotFoundException
-                | IllegalAccessException
-                | InstantiationException ex) {
+                 | IllegalAccessException
+                 | InstantiationException
+                 | NoSuchMethodException
+                 | InvocationTargetException ex) {
             throw new RuntimeException(ex);
         } finally {
             Trace.endSection();
@@ -344,7 +438,7 @@ public class SystemUIApplication extends Application implements
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         if (mServicesStarted) {
             ConfigurationController configController = mSysUIComponent.getConfigurationController();
             if (Trace.isEnabled()) {
@@ -354,19 +448,6 @@ public class SystemUIApplication extends Application implements
             }
             configController.onConfigurationChanged(newConfig);
             Trace.endSection();
-            int len = mServices.length;
-            for (int i = 0; i < len; i++) {
-                if (mServices[i] != null) {
-                    if (Trace.isEnabled()) {
-                        Trace.traceBegin(
-                                Trace.TRACE_TAG_APP,
-                                mServices[i].getClass().getSimpleName()
-                                        + ".onConfigurationChanged()");
-                    }
-                    mServices[i].onConfigurationChanged(newConfig);
-                    Trace.endSection();
-                }
-            }
         }
     }
 
@@ -376,7 +457,7 @@ public class SystemUIApplication extends Application implements
 
     @Override
     public void setContextAvailableCallback(
-            SystemUIAppComponentFactoryBase.ContextAvailableCallback callback) {
+            @NonNull SystemUIAppComponentFactoryBase.ContextAvailableCallback callback) {
         mContextAvailableCallback = callback;
     }
 

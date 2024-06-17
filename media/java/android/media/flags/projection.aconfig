@@ -1,0 +1,12 @@
+package: "com.android.media.projection.flags"
+container: "system"
+
+# Project link: https://gantry.corp.google.com/projects/android_platform_window_surfaces/changes
+
+flag {
+    name: "limit_manage_media_projection"
+    namespace: "lse_desktop_experience"
+    description: "Limit signature permission manage_media_projection to the SystemUI role"
+    bug: "323008518"
+    is_fixed_read_only: true
+}

@@ -29,6 +29,7 @@ import com.android.settingslib.spaprivileged.model.enterprise.BaseUserRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.tests.testutils.FakeBlockedByAdmin
+import com.android.settingslib.spaprivileged.tests.testutils.FakeBlockedByEcm
 import com.android.settingslib.spaprivileged.tests.testutils.FakeRestrictionsProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -41,6 +42,7 @@ class RestrictedMenuItemTest {
     val composeTestRule = createComposeRule()
 
     private val fakeBlockedByAdmin = FakeBlockedByAdmin()
+    private val fakeBlockedByEcm = FakeBlockedByEcm()
 
     private val fakeRestrictionsProvider = FakeRestrictionsProvider()
 
@@ -126,6 +128,28 @@ class RestrictedMenuItemTest {
         composeTestRule.onRoot().performClick()
 
         assertThat(fakeBlockedByAdmin.sendShowAdminSupportDetailsIntentIsCalled).isTrue()
+        assertThat(menuItemOnClickIsCalled).isFalse()
+    }
+
+    @Test
+    fun whenBlockedByEcm_disabled() {
+        val restrictions = Restrictions(userId = USER_ID, keys = listOf(RESTRICTION_KEY))
+        fakeRestrictionsProvider.restrictedMode = fakeBlockedByEcm
+
+        setContent(restrictions)
+
+        composeTestRule.onNodeWithText(TEXT).assertIsDisplayed().assertIsEnabled()
+    }
+
+    @Test
+    fun whenBlockedByEcm_onClick_showEcmDetails() {
+        val restrictions = Restrictions(userId = USER_ID, keys = listOf(RESTRICTION_KEY))
+        fakeRestrictionsProvider.restrictedMode = fakeBlockedByEcm
+
+        setContent(restrictions)
+        composeTestRule.onRoot().performClick()
+
+        assertThat(fakeBlockedByEcm.showRestrictedSettingsDetailsIsCalled).isTrue()
         assertThat(menuItemOnClickIsCalled).isFalse()
     }
 

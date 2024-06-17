@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Кубатталууда"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Тез кубатталууда"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Жай кубатталууда"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батареяны коргоо үчүн кубаттоо процесси оптималдаштырылды"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Кубаттоочу шайманда көйгөй бар"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батареяны коргоо үчүн кубаттоо тындырылды"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Кубаттоо шайманын текшериңиз"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Тармак кулпуланган"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM карта жок"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Жараксыз SIM карта."</string>
@@ -49,7 +49,7 @@
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"eSIM-картаны өчүрүү"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"eSIM-картаны өчүрүүгө болбойт"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Катадан улам eSIM-картаны өчүрүүгө болбойт."</string>
-    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Киргизүү"</string>
+    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Графикалык ачкыч туура эмес"</string>
     <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Графклк ачкч тура эмс. Кайтлап крүңз."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Сырсөз туура эмес"</string>

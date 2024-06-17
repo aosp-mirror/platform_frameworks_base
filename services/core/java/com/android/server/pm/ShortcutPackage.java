@@ -33,6 +33,7 @@ import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaRequest;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -47,6 +48,7 @@ import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.PersistableBundle;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -192,6 +194,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     private long mLastKnownForegroundElapsedTime;
 
     @GuardedBy("mLock")
+    private long mLastReportedTime;
+
+    @GuardedBy("mLock")
     private boolean mIsAppSearchSchemaUpToDate;
 
     private ShortcutPackage(ShortcutUser shortcutUser,
@@ -235,7 +240,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     @Override
     protected boolean canRestoreAnyVersion() {
-        return false;
+        return true;
     }
 
     @Override
@@ -1671,6 +1676,26 @@ class ShortcutPackage extends ShortcutPackageItem {
             return false;
         });
         return condition[0];
+    }
+
+    void reportShortcutUsed(@NonNull final UsageStatsManagerInternal usageStatsManagerInternal,
+            @NonNull final String shortcutId) {
+        synchronized (mLock) {
+            final long currentTS = SystemClock.elapsedRealtime();
+            final ShortcutService s = mShortcutUser.mService;
+            if (currentTS - mLastReportedTime > s.mSaveDelayMillis) {
+                mLastReportedTime = currentTS;
+            } else {
+                return;
+            }
+            final long token = s.injectClearCallingIdentity();
+            try {
+                usageStatsManagerInternal.reportShortcutUsage(getPackageName(), shortcutId,
+                        getPackageUserId());
+            } finally {
+                s.injectRestoreCallingIdentity(token);
+            }
+        }
     }
 
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix, DumpFilter filter) {

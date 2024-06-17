@@ -313,7 +313,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     public void enroll(int userId, byte[] hardwareAuthToken, CancellationSignal cancel,
             EnrollmentCallback callback, int[] disabledFeatures) {
         enroll(userId, hardwareAuthToken, cancel, callback, disabledFeatures,
-                null /* previewSurface */, false /* debugConsent */);
+                null /* previewSurface */, false /* debugConsent */,
+                (new FaceEnrollOptions.Builder()).build());
+
     }
 
     /**
@@ -338,7 +340,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void enroll(int userId, byte[] hardwareAuthToken, CancellationSignal cancel,
             EnrollmentCallback callback, int[] disabledFeatures, @Nullable Surface previewSurface,
-            boolean debugConsent) {
+            boolean debugConsent, FaceEnrollOptions options) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
@@ -369,7 +371,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 Trace.beginSection("FaceManager#enroll");
                 final long enrollId = mService.enroll(userId, mToken, hardwareAuthToken,
                         mServiceReceiver, mContext.getOpPackageName(), disabledFeatures,
-                        previewSurface, debugConsent);
+                        previewSurface, debugConsent, options);
                 if (cancel != null) {
                     cancel.setOnCancelListener(new OnEnrollCancelListener(enrollId));
                 }

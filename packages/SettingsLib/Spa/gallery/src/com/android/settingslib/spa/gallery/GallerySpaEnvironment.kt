@@ -24,10 +24,11 @@ import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.card.CardPageProvider
 import com.android.settingslib.spa.gallery.chart.ChartPageProvider
-import com.android.settingslib.spa.gallery.dialog.AlertDialogPageProvider
+import com.android.settingslib.spa.gallery.dialog.DialogMainPageProvider
+import com.android.settingslib.spa.gallery.dialog.NavDialogProvider
 import com.android.settingslib.spa.gallery.editor.EditorMainPageProvider
-import com.android.settingslib.spa.gallery.editor.SettingsExposedDropdownMenuBoxPageProvider
-import com.android.settingslib.spa.gallery.editor.SettingsExposedDropdownMenuCheckBoxProvider
+import com.android.settingslib.spa.gallery.editor.SettingsDropdownBoxPageProvider
+import com.android.settingslib.spa.gallery.editor.SettingsDropdownCheckBoxProvider
 import com.android.settingslib.spa.gallery.home.HomePageProvider
 import com.android.settingslib.spa.gallery.itemList.ItemListPageProvider
 import com.android.settingslib.spa.gallery.itemList.ItemOperatePageProvider
@@ -91,14 +92,15 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 ProgressBarPageProvider,
                 LoadingBarPageProvider,
                 ChartPageProvider,
-                AlertDialogPageProvider,
+                DialogMainPageProvider,
+                NavDialogProvider,
                 ItemListPageProvider,
                 ItemOperatePageProvider,
                 OperateListPageProvider,
                 EditorMainPageProvider,
                 SettingsOutlinedTextFieldPageProvider,
-                SettingsExposedDropdownMenuBoxPageProvider,
-                SettingsExposedDropdownMenuCheckBoxProvider,
+                SettingsDropdownBoxPageProvider,
+                SettingsDropdownCheckBoxProvider,
                 SettingsTextFieldPasswordPageProvider,
                 SearchScaffoldPageProvider,
                 SuwScaffoldPageProvider,

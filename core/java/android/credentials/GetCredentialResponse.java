@@ -21,6 +21,8 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.credentials.CredentialProviderService;
+import android.view.autofill.AutofillId;
 
 import com.android.internal.util.AnnotationValidations;
 
@@ -34,6 +36,7 @@ public final class GetCredentialResponse implements Parcelable {
      */
     @NonNull
     private final Credential mCredential;
+
 
     /**
      * Returns the credential that can be used to authenticate the user, or {@code null} if no
@@ -57,6 +60,15 @@ public final class GetCredentialResponse implements Parcelable {
     @Override
     public String toString() {
         return "GetCredentialResponse {" + "credential=" + mCredential + "}";
+    }
+
+    /**
+     * @hide
+     */
+    public AutofillId getAutofillId() {
+        return mCredential.getData().getParcelable(
+                CredentialProviderService.EXTRA_AUTOFILL_ID,
+                AutofillId.class);
     }
 
     /**

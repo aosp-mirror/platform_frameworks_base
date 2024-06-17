@@ -1,0 +1,8 @@
+aconfig_declarations {
+    name: "power_flags",
+    package: "com.android.server.power.feature.flags",
+    container: "system",
+    srcs: [
+        "*.aconfig",
+    ],
+}

@@ -60,6 +60,7 @@ public class Events {
     public static final int EVENT_DISMISS_USB_OVERHEAT_ALARM = 20; // (reason|int) (keyguard|bool)
     public static final int EVENT_ODI_CAPTIONS_CLICK = 21;
     public static final int EVENT_ODI_CAPTIONS_TOOLTIP_CLICK = 22;
+    public static final int EVENT_SLIDER_TOUCH_TRACKING = 23; // (tracking|bool)
 
     private static final String[] EVENT_TAGS = {
             "show_dialog",
@@ -84,7 +85,8 @@ public class Events {
             "show_usb_overheat_alarm",
             "dismiss_usb_overheat_alarm",
             "odi_captions_click",
-            "odi_captions_tooltip_click"
+            "odi_captions_tooltip_click",
+            "slider_touch_tracking"
     };
 
     public static final int DISMISS_REASON_UNKNOWN = 0;
@@ -234,6 +236,10 @@ public class Events {
         VOLUME_DIALOG_SLIDER(150),
         @UiEvent(doc = "The audio stream was set to silent via slider")
         VOLUME_DIALOG_SLIDER_TO_ZERO(151),
+        @UiEvent(doc = "The right-most slider started tracking touch")
+        VOLUME_DIALOG_SLIDER_STARTED_TRACKING_TOUCH(1620),
+        @UiEvent(doc = "The right-most slider stopped tracking touch")
+        VOLUME_DIALOG_SLIDER_STOPPED_TRACKING_TOUCH(1621),
         @UiEvent(doc = "ODI captions was clicked")
         VOLUME_DIALOG_ODI_CAPTIONS_CLICKED(1503),
         @UiEvent(doc = "ODI captions tooltip dismiss was clicked")
@@ -491,6 +497,15 @@ public class Events {
                             .append(" keyguard=").append(keyguard);
                 }
                 break;
+            case EVENT_SLIDER_TOUCH_TRACKING:
+                final boolean startedTracking = (boolean) list[0];
+                final VolumeDialogEvent event;
+                if (startedTracking) {
+                    event = VolumeDialogEvent.VOLUME_DIALOG_SLIDER_STARTED_TRACKING_TOUCH;
+                } else {
+                    event = VolumeDialogEvent.VOLUME_DIALOG_SLIDER_STOPPED_TRACKING_TOUCH;
+                }
+                sUiEventLogger.log(event);
             default:
                 sb.append(Arrays.asList(list));
                 break;

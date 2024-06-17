@@ -65,4 +65,11 @@ class SeekableSliderEventProducer : SliderEventProducer, OnSeekBarChangeListener
             SliderEvent(SliderEventType.STOPPED_TRACKING_TOUCH, previousEvent.currentProgress)
         }
     }
+
+    /** The arrow navigation that was operating the slider has stopped. */
+    fun onArrowUp() {
+        _currentEvent.update { previousEvent ->
+            SliderEvent(SliderEventType.ARROW_UP, previousEvent.currentProgress)
+        }
+    }
 }

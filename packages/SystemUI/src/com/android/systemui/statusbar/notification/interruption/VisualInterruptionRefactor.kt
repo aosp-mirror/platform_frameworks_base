@@ -17,11 +17,16 @@
 package com.android.systemui.statusbar.notification.interruption
 
 import com.android.systemui.Flags
+import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading or using the visual interruptions refactor flag state. */
 object VisualInterruptionRefactor {
     const val FLAG_NAME = Flags.FLAG_VISUAL_INTERRUPTIONS_REFACTOR
+
+    /** A token used for dependency declaration */
+    val token: FlagToken
+        get() = FlagToken(FLAG_NAME, isEnabled)
 
     /** Whether the refactor is enabled */
     @JvmStatic

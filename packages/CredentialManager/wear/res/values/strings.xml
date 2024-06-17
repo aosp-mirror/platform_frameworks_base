@@ -21,11 +21,31 @@
   <!-- Title of a screen prompting if the user would like to use their saved passkey.
   [CHAR LIMIT=80] -->
   <string name="use_passkey_title">Use passkey?</string>
-  <!-- Title of a screen prompting if the user would like to use their saved password.
+  <!-- Title of a screen prompting if the user would like to use their saved passkey.
+[CHAR LIMIT=80] -->
+  <string name="use_sign_in_with_provider_title">Use your sign in for %1$s</string>
+  <!-- Title of a screen prompting if the user would like to sign in with provider
   [CHAR LIMIT=80] -->
   <string name="use_password_title">Use password?</string>
-  <!-- Content description for the cancel button of a screen. [CHAR LIMIT=NONE] -->
-  <string name="dialog_cancel_button_cd">Cancel</string>
-  <!-- Content description for the OK button of a screen. [CHAR LIMIT=NONE] -->
-  <string name="dialog_ok_button_cd">OK</string>
+  <!-- Text on this dismiss button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_dismiss_button">Dismiss</string>
+  <!-- Text on the continue button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_continue_button">Continue</string>
+  <!-- Text on the sign in options button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_sign_in_options_button">Sign-in Options</string>
+  <!-- Title for multiple credentials folded screen. [CHAR LIMIT=NONE] -->
+  <string name="sign_in_options_title">Sign-in Options</string>
+  <!-- Title for multiple credentials screen. [CHAR LIMIT=NONE] -->
+  <string name="choose_sign_in_title">Choose a sign in</string>
+  <!-- Title for multiple credentials screen with only passkeys. [CHAR LIMIT=NONE] -->
+  <string name="choose_passkey_title">Choose passkey</string>
+  <!-- Title for multiple credentials screen with only passwords. [CHAR LIMIT=NONE] -->
+  <string name="choose_password_title">Choose password</string>
+  <!-- Text on the sign in on phone button [CHAR LIMIT=NONE] -->
+  <string name="sign_in_on_phone_button">Sign in on phone</string>
+  <!-- Text on the locked provider button when unlocked[CHAR LIMIT=NONE] -->
+  <string name="locked_credential_entry_label_subtext_no_sign_in">No sign-in info</string>
+  <!-- Text on the locked provider button when locked[CHAR LIMIT=NONE] -->
+  <string name="locked_credential_entry_label_subtext_tap_to_unlock">Tap to unlock</string>
+
 </resources>

@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"输入您的 PIN 码"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"输入 PIN 码"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"绘制您的图案"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"绘制解锁图案"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"绘制图案"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"输入您的密码"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"输入密码"</string>
@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在充电"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在快速充电"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在慢速充电"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 为保护电池，充电方式已优化"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充电配件有问题"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 为保护电池，充电已暂停"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 请检查充电配件"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"网络已锁定"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"没有 SIM 卡"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM 卡无法使用。"</string>
@@ -108,7 +108,7 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"设备重启后，必须绘制图案才能解锁"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"设备重启后，必须输入 PIN 码才能解锁"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"设备重启后，必须输入密码才能解锁"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"为增强安全性，请改用图案"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"为增强安全性，请改用解锁图案"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"为增强安全性，请改用 PIN 码"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"为增强安全性，请改用密码"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"管理员已锁定设备"</string>

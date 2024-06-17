@@ -16,9 +16,9 @@
 
 package android.os.vibrator.persistence;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.os.CombinedVibration;
 import android.os.VibrationEffect;
@@ -43,8 +43,8 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-@FlaggedApi(android.os.vibrator.Flags.FLAG_ENABLE_VIBRATION_SERIALIZATION_APIS)
 @TestApi
+@SuppressLint("UnflaggedApi") // @TestApi without associated feature.
 public final class VibrationXmlSerializer {
 
     /**

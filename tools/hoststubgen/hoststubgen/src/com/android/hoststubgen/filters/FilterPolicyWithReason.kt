@@ -63,4 +63,15 @@ data class FilterPolicyWithReason (
     override fun toString(): String {
         return "[$policy - reason: $reason]"
     }
+
+    /** Returns whether this policy should be ignored for stats. */
+    val isIgnoredForStats: Boolean
+        get() {
+            return reason.contains("anonymous-inner-class")
+                    || reason.contains("is-annotation")
+                    || reason.contains("is-enum")
+                    || reason.contains("is-synthetic-method")
+                    || reason.contains("special-class")
+                    || reason.contains("substitute-to")
+        }
 }

@@ -26,6 +26,13 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
+    <!-- Placeholder for the communal UI that will be replaced if the feature is enabled. -->
+    <View
+        android:id="@+id/communal_ui_stub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
     <com.android.systemui.scrim.ScrimView
         android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
@@ -61,12 +68,6 @@
          the keyguard_root_view or notification_panel -->
     <com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
         android:id="@+id/shared_notification_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <!-- Placeholder for the communal UI that will be replaced if the feature is enabled. -->
-    <ViewStub
-        android:id="@+id/communal_ui_stub"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -115,6 +116,10 @@
         android:layout_height="match_parent"
         android:inflatedId="@+id/multi_shade"
         android:layout="@layout/multi_shade" />
+
+    <include layout="@layout/alternate_bouncer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <com.android.systemui.biometrics.AuthRippleView
         android:id="@+id/auth_ripple"

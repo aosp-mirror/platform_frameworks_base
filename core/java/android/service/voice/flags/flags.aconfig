@@ -14,3 +14,31 @@ flag {
     description: "This flag allows hotword detection service to egress reason code for hotword bump."
     bug: "290951024"
 }
+
+flag {
+    name: "allow_foreground_activities_in_on_show"
+    namespace: "machine_learning"
+    description: "This flag allows providing foreground app component along with onShow args."
+    bug: "319409708"
+}
+
+flag {
+    name: "allow_various_attention_types"
+    namespace: "visual_query"
+    description: "This flag allows visual query detection service to set different attention types."
+    bug: "318617199"
+}
+
+flag {
+    name: "allow_complex_results_egress_from_vqds"
+    namespace: "visual_query"
+    description: "This flag allows visual query detection service egress detailed results. "
+    bug: "318617199"
+}
+
+flag {
+    name: "allow_speaker_id_egress"
+    namespace: "machine_learning"
+    description: "This flag allows hotword detection service and visual query detection service to egress current speaker profile id."
+    bug: "318617199"
+}

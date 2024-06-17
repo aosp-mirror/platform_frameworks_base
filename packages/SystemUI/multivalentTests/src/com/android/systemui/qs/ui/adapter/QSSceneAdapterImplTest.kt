@@ -16,12 +16,16 @@
 
 package com.android.systemui.qs.ui.adapter
 
+import android.content.res.Configuration
 import android.os.Bundle
+import android.view.Surface
 import android.view.View
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSComponent
@@ -34,6 +38,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import java.util.Locale
 import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -81,11 +86,17 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
                     .also { components.add(it) }
             }
         }
+    private val configuration = Configuration(context.resources.configuration)
+
+    private val fakeConfigurationRepository =
+        FakeConfigurationRepository().apply { onConfigurationChange(configuration) }
+    private val configurationInteractor = ConfigurationInteractor(fakeConfigurationRepository)
 
     private val mockAsyncLayoutInflater =
         mock<AsyncLayoutInflater>() {
             whenever(inflate(anyInt(), nullable(), any())).then { invocation ->
                 val mockView = mock<View>()
+                whenever(mockView.context).thenReturn(context)
                 invocation
                     .getArgument<AsyncLayoutInflater.OnInflateFinishedListener>(2)
                     .onInflateFinished(
@@ -102,6 +113,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             qsImplProvider,
             testDispatcher,
             testScope.backgroundScope,
+            configurationInteractor,
             { mockAsyncLayoutInflater },
         )
 
@@ -247,6 +259,37 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun state_unsquishing() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+            val squishiness = 0.342f
+
+            underTest.inflate(context)
+            runCurrent()
+            clearInvocations(qsImpl!!)
+
+            underTest.setState(QSSceneAdapter.State.Unsquishing(squishiness))
+            with(qsImpl!!) {
+                verify(this).setQsVisible(true)
+                verify(this)
+                    .setQsExpansion(
+                        /* expansion= */ 0f,
+                        /* panelExpansionFraction= */ 1f,
+                        /* proposedTranslation= */ 0f,
+                        /* squishinessFraction= */ squishiness,
+                    )
+                verify(this).setListening(true)
+                verify(this).setExpanded(true)
+                verify(this)
+                    .setTransitionToFullShadeProgress(
+                        /* isTransitioningToFullShade= */ false,
+                        /* qsTransitionFraction= */ 1f,
+                        /* qsSquishinessFraction = */ squishiness,
+                    )
+            }
+        }
+
+    @Test
     fun customizing_QS() =
         testScope.runTest {
             val customizing by collectLastValue(underTest.isCustomizing)
@@ -297,6 +340,9 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
     @Test
     fun reinflation_previousStateDestroyed() =
         testScope.runTest {
+            // Run all flows... In particular, initial configuration propagation that could cause
+            // QSImpl to re-inflate.
+            runCurrent()
             val qsImpl by collectLastValue(underTest.qsImpl)
 
             underTest.inflate(context)
@@ -321,5 +367,134 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
                     qsSceneComponentFactory.components[1],
                     bundleArgCaptor.value,
                 )
+        }
+
+    @Test
+    fun changeInLocale_reinflation() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            val oldQsImpl = qsImpl!!
+
+            val newLocale =
+                if (configuration.locales[0] == Locale("en-US")) {
+                    Locale("es-UY")
+                } else {
+                    Locale("en-US")
+                }
+            configuration.setLocale(newLocale)
+            fakeConfigurationRepository.onConfigurationChange(configuration)
+            runCurrent()
+
+            assertThat(oldQsImpl).isNotSameInstanceAs(qsImpl!!)
+        }
+
+    @Test
+    fun changeInFontSize_reinflation() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            val oldQsImpl = qsImpl!!
+
+            configuration.fontScale *= 2
+            fakeConfigurationRepository.onConfigurationChange(configuration)
+            runCurrent()
+
+            assertThat(oldQsImpl).isNotSameInstanceAs(qsImpl!!)
+        }
+
+    @Test
+    fun changeInAssetPath_reinflation() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            val oldQsImpl = qsImpl!!
+
+            configuration.assetsSeq += 1
+            fakeConfigurationRepository.onConfigurationChange(configuration)
+            runCurrent()
+
+            assertThat(oldQsImpl).isNotSameInstanceAs(qsImpl!!)
+        }
+
+    @Test
+    fun otherChangesInConfiguration_noReinflation_configurationChangeDispatched() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            val oldQsImpl = qsImpl!!
+            configuration.densityDpi *= 2
+            configuration.windowConfiguration.maxBounds.scale(2f)
+            configuration.windowConfiguration.rotation = Surface.ROTATION_270
+            fakeConfigurationRepository.onConfigurationChange(configuration)
+            runCurrent()
+
+            assertThat(oldQsImpl).isSameInstanceAs(qsImpl!!)
+            verify(qsImpl!!).onConfigurationChanged(configuration)
+            verify(qsImpl!!.view).dispatchConfigurationChanged(configuration)
+        }
+
+    @Test
+    fun dispatchNavBarSize_beforeInflation() =
+        testScope.runTest {
+            runCurrent()
+            val navBarHeight = 171
+
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.applyBottomNavBarPadding(navBarHeight)
+            underTest.inflate(context)
+            runCurrent()
+
+            verify(qsImpl!!).applyBottomNavBarToCustomizerPadding(navBarHeight)
+        }
+
+    @Test
+    fun dispatchNavBarSize_afterInflation() =
+        testScope.runTest {
+            runCurrent()
+            val navBarHeight = 171
+
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            underTest.applyBottomNavBarPadding(navBarHeight)
+            runCurrent()
+
+            verify(qsImpl!!).applyBottomNavBarToCustomizerPadding(navBarHeight)
+        }
+
+    @Test
+    fun dispatchNavBarSize_reinflation() =
+        testScope.runTest {
+            runCurrent()
+            val navBarHeight = 171
+
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            underTest.applyBottomNavBarPadding(navBarHeight)
+            runCurrent()
+
+            underTest.inflate(context)
+            runCurrent()
+
+            verify(qsImpl!!).applyBottomNavBarToCustomizerPadding(navBarHeight)
         }
 }

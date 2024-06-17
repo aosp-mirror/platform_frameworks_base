@@ -16,25 +16,29 @@
 
 package android.database;
 
-import android.test.PerformanceTestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
+import android.database.sqlite.SQLiteException;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 
-public class CursorWindowTest extends TestCase implements PerformanceTestCase {
-    public boolean isPerformanceOnly() {
-        return false;
-    }
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class CursorWindowTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
-    // These test can only be run once.
-    public int startPerformance(Intermediates intermediates) {
-        return 1;
-    }
-
-    @SmallTest
+    @Test
     public void testConstructor_WithName() {
         CursorWindow window = new CursorWindow("MyWindow");
         assertEquals("MyWindow", window.getName());
@@ -42,7 +46,7 @@ public class CursorWindowTest extends TestCase implements PerformanceTestCase {
         window.close();
     }
 
-    @SmallTest
+    @Test
     public void testConstructorWithEmptyName() {
         CursorWindow window = new CursorWindow("");
         assertEquals("<unnamed>", window.getName());
@@ -50,7 +54,7 @@ public class CursorWindowTest extends TestCase implements PerformanceTestCase {
         window.close();
     }
 
-    @SmallTest
+    @Test
     public void testConstructorWithNullName() {
         CursorWindow window = new CursorWindow(null);
         assertEquals("<unnamed>", window.getName());
@@ -58,7 +62,7 @@ public class CursorWindowTest extends TestCase implements PerformanceTestCase {
         window.close();
     }
 
-    @SmallTest
+    @Test
     public void testDeprecatedConstructor() {
         @SuppressWarnings("deprecation")
         CursorWindow window = new CursorWindow(true /*this argument is ignored*/);
@@ -67,7 +71,7 @@ public class CursorWindowTest extends TestCase implements PerformanceTestCase {
         window.close();
     }
 
-    @SmallTest
+    @Test
     public void testValues() {
         CursorWindow window = new CursorWindow("MyWindow");
         doTestValues(window);
@@ -77,17 +81,25 @@ public class CursorWindowTest extends TestCase implements PerformanceTestCase {
     private void doTestValues(CursorWindow window) {
         assertTrue(window.setNumColumns(7));
         assertTrue(window.allocRow());
+        assertEquals(window.getType(0, 0), Cursor.FIELD_TYPE_NULL);
+
         double db1 = 1.26;
         assertTrue(window.putDouble(db1, 0, 0));
+        assertEquals(window.getType(0, 0), Cursor.FIELD_TYPE_FLOAT);
         double db2 = window.getDouble(0, 0);
-        assertEquals(db1, db2);
+        assertEquals(db1, db2, 0.01);
+        assertEquals(1, window.getInt(0, 0));
+        assertEquals("1.26", window.getString(0, 0));
+        assertThrows(SQLiteException.class, () -> window.getBlob(0, 0));
 
         long int1 = Long.MAX_VALUE;
         assertTrue(window.putLong(int1, 0, 1));
+        assertEquals(window.getType(0, 1), Cursor.FIELD_TYPE_INTEGER);
         long int2 = window.getLong(0, 1);
         assertEquals(int1, int2);
 
         assertTrue(window.putString("1198032740000", 0, 3));
+        assertEquals(window.getType(0, 3), Cursor.FIELD_TYPE_STRING);
         assertEquals("1198032740000", window.getString(0, 3));
         assertEquals(1198032740000L, window.getLong(0, 3));
 
@@ -97,13 +109,14 @@ public class CursorWindowTest extends TestCase implements PerformanceTestCase {
         
         assertTrue(window.putString(Double.toString(42.0), 0, 4));
         assertEquals(Double.toString(42.0), window.getString(0, 4));
-        assertEquals(42.0, window.getDouble(0, 4));
+        assertEquals(42.0, window.getDouble(0, 4), 0.01);
         
         // put blob
         byte[] blob = new byte[1000];
         byte value = 99;
         Arrays.fill(blob, value);
         assertTrue(window.putBlob(blob, 0, 6));
+        assertEquals(window.getType(0, 6), Cursor.FIELD_TYPE_BLOB);
         assertTrue(Arrays.equals(blob, window.getBlob(0, 6)));
     }
 }

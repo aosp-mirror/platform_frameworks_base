@@ -23,19 +23,20 @@ import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_EXPAND_COLLAPSE;
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_FULLSCREEN;
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_MOVE;
 
-import static java.util.Collections.EMPTY_LIST;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import static java.util.Collections.EMPTY_LIST;
+
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.graphics.drawable.Icon;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.pip.PipMediaController;
