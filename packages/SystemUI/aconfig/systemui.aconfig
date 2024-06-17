@@ -884,16 +884,6 @@ flag {
 }
 
 flag {
-    name: "shade_collapse_activity_launch_fix"
-    namespace: "systemui"
-    description: "Avoid collapsing the shade on activity launch if it is already collapsed, as this causes a flicker."
-    bug: "331591373"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "slice_broadcast_relay_in_background"
     namespace: "systemui"
     description: "Move handling of slice broadcast relay broadcasts to background threads"
