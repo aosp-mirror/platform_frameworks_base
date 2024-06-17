@@ -23,18 +23,21 @@ import android.app.RemoteInput;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class NotificationUiAdjustmentTest extends SysuiTestCase {
 
     @Test

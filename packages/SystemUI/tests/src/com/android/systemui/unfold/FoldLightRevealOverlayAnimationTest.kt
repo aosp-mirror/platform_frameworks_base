@@ -18,8 +18,8 @@ package com.android.systemui.unfold
 
 import android.os.PowerManager
 import android.os.SystemProperties
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.foldables.FoldLockSettingAvailabilityProvider
 import com.android.systemui.SysuiTestCase
@@ -50,7 +50,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
     private val kosmos = Kosmos()

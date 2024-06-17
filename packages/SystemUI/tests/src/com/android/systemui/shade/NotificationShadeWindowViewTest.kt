@@ -16,10 +16,10 @@
 package com.android.systemui.shade
 
 import android.os.SystemClock
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.LegacyLockIconViewController
@@ -82,7 +82,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class NotificationShadeWindowViewTest : SysuiTestCase() {
