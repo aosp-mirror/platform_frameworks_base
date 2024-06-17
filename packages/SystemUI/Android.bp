@@ -430,6 +430,8 @@ android_robolectric_test {
     plugins: [
         "dagger2-compiler",
     ],
+
+    strict_mode: false,
 }
 
 android_ravenwood_test {
