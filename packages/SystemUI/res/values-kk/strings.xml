@@ -1271,5 +1271,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Пернетақта жарығы"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Деңгей: %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Үй басқару элементтері"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Үй басқару элементтерін скринсейверден қолдану"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Үй басқару элементтерін скринсейверден қолданыңыз."</string>
 </resources>

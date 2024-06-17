@@ -170,7 +170,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"गलत पैटर्न"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"गलत पासवर्ड"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"आपकी कोशिशें बहुत बार गलत हुई हैं.\nआप <xliff:g id="NUMBER">%d</xliff:g> सेकंड में फिर से कोशिश कर सकते हैं."</string>
-    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"आपातकालीन कॉल"</string>
+    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"आपातकालीन कॉल करें"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"फिर से कोशिश करें. आप <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> में से <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> बार कोशिश कर चुके हैं."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"आपका डेटा मिटा दिया जाएगा"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"अगर आप फिर से गलत पैटर्न डालते हैं, तो इस डिवाइस का डेटा मिटा दिया जाएगा."</string>
@@ -345,7 +345,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"समस्या रिकॉर्ड करें"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"शुरू करें"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"रोकें"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"आपके डिवाइस की कौनसी सुविधा पर असर पड़ा था?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"आपके डिवाइस की किस सुविधा में समस्या आ रही थी?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"समस्या का टाइप चुनें"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"स्क्रीन रिकॉर्डर"</string>
   <string-array name="qs_record_issue_types">
@@ -563,7 +563,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"नहीं, रहने दें"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ऐप्लिकेशन पिन किया गया"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ऐप्लिकेशन अनपिन किया गया"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"कॉल करें"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"कॉल"</string>
     <string name="stream_system" msgid="7663148785370565134">"सिस्‍टम"</string>
     <string name="stream_ring" msgid="7550670036738697526">"रिंग"</string>
     <string name="stream_music" msgid="2188224742361847580">"मीडिया"</string>

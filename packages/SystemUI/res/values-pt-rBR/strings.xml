@@ -563,7 +563,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Agora não"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"App fixado"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App liberado"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Ligar"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Ligações"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Toques"</string>
     <string name="stream_music" msgid="2188224742361847580">"Mídia"</string>
