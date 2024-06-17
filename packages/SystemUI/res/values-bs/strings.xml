@@ -1271,5 +1271,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Pozadinsko osvjetljenje tastature"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. nivo od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrole za dom"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Brzo pristupajte kontrolama za dom kao čuvaru ekrana"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Brzo pristupajte kontrolama za dom putem čuvara ekrana"</string>
 </resources>
