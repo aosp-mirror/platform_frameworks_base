@@ -1403,6 +1403,19 @@ public final class Settings {
             "android.settings.QUICK_LAUNCH_SETTINGS";
 
     /**
+     * Activity Action: Showing settings to manage adaptive notifications.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_ADAPTIVE_NOTIFICATIONS =
+            "android.settings.MANAGE_ADAPTIVE_NOTIFICATIONS";
+
+    /**
      * Activity Action: Show settings to manage installed applications.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
