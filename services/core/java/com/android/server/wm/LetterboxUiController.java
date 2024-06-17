@@ -918,12 +918,14 @@ final class LetterboxUiController {
     // Check if we are in the given pose and in fullscreen mode.
     // Note that we check the task rather than the parent as with ActivityEmbedding the parent might
     // be a TaskFragment, and its windowing mode is always MULTI_WINDOW, even if the task is
-    // actually fullscreen.
+    // actually fullscreen. If display is still in transition e.g. unfolding, don't return true
+    // for HALF_FOLDED state or app will flicker.
     private boolean isDisplayFullScreenAndInPosture(boolean isTabletop) {
         Task task = mActivityRecord.getTask();
         return mActivityRecord.mDisplayContent != null && task != null
                 && mActivityRecord.mDisplayContent.getDisplayRotation().isDeviceInPosture(
                         DeviceStateController.DeviceState.HALF_FOLDED, isTabletop)
+                && !mActivityRecord.mDisplayContent.inTransition()
                 && task.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
     }
 
