@@ -5141,9 +5141,9 @@ final public class MediaCodec {
      * of negative QP and positive QP are chosen wisely, the overall viewing experience can be
      * improved.
      * <p>
-     * If byte array size is too small than the expected size, components may ignore the
-     * configuration silently. If the byte array exceeds the expected size, components shall use
-     * the initial portion and ignore the rest.
+     * If byte array size is smaller than the expected size, components will ignore the
+     * configuration and print an error message. If the byte array exceeds the expected size,
+     * components will use the initial portion and ignore the rest.
      * <p>
      * The scope of this key is throughout the encoding session until it is reconfigured during
      * running state.
@@ -5157,7 +5157,8 @@ final public class MediaCodec {
      * Set the region of interest as QpOffset-Rects on the next queued input frame.
      * <p>
      * The associated value is a String in the format "Top1,Left1-Bottom1,Right1=Offset1;Top2,
-     * Left2-Bottom2,Right2=Offset2;...". Co-ordinates (Top, Left), (Top, Right), (Bottom, Left)
+     * Left2-Bottom2,Right2=Offset2;...". If the configuration doesn't follow this pattern,
+     * it will be ignored. Co-ordinates (Top, Left), (Top, Right), (Bottom, Left)
      * and (Bottom, Right) form the vertices of bounding box of region of interest in pixels.
      * Pixel (0, 0) points to the top-left corner of the frame. Offset is the suggested
      * quantization parameter (QP) offset of the blocks in the bounding box. The bounding box
@@ -5169,9 +5170,10 @@ final public class MediaCodec {
      * negative QP and positive QP are chosen wisely, the overall viewing experience can be
      * improved.
      * <p>
-     * If Roi rect is not valid that is bounding box width is < 0 or bounding box height is < 0,
-     * components may ignore the configuration silently. If Roi rect extends outside frame
-     * boundaries, then rect shall be clamped to the frame boundaries.
+     * If roi (region of interest) rect is outside the frame boundaries, that is, left < 0 or
+     * top < 0 or right > width or bottom > height, then rect shall be clamped to the frame
+     * boundaries. If roi rect is not valid, that is left > right or top > bottom, then the
+     * parameter setting is ignored.
      * <p>
      * The scope of this key is throughout the encoding session until it is reconfigured during
      * running state.
