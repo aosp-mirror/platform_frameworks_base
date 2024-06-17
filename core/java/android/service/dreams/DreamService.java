@@ -523,7 +523,7 @@ public class DreamService extends Service implements Window.Callback {
      * @see View#findViewById(int)
      * @see DreamService#requireViewById(int)
      */
-    @Nullable
+    /* TODO(b/347672184): Re-add @Nullable */
     public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
     }
