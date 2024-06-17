@@ -22,19 +22,25 @@ import android.app.Notification.BubbleMetadata
 import android.app.Notification.CATEGORY_EVENT
 import android.app.Notification.CATEGORY_REMINDER
 import android.app.Notification.VISIBILITY_PRIVATE
+import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_HIGH
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.database.ContentObserver
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
 import android.os.PowerManager
+import android.os.SystemProperties
 import android.provider.Settings
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
@@ -47,6 +53,7 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.HeadsUpManager
+import com.android.systemui.util.NotificationChannels
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
@@ -244,18 +251,46 @@ class AlertKeyguardVisibilitySuppressor(
         keyguardNotificationVisibilityProvider.shouldHideNotification(entry)
 }
 
+/**
+ * Set with:
+ * adb shell setprop persist.force_show_avalanche_edu_once 1 && adb shell stop; adb shell start
+ */
+private const val FORCE_SHOW_AVALANCHE_EDU_ONCE = "persist.force_show_avalanche_edu_once"
+
+private const val PREF_HAS_SEEN_AVALANCHE_EDU = "has_seen_avalanche_edu"
+
 class AvalancheSuppressor(
     private val avalancheProvider: AvalancheProvider,
     private val systemClock: SystemClock,
     private val systemSettings: SystemSettings,
     private val packageManager: PackageManager,
     private val uiEventLogger: UiEventLogger,
+    private val context: Context,
+    private val notificationManager: NotificationManager
 ) :
     VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
         reason = "avalanche",
     ) {
     val TAG = "AvalancheSuppressor"
+
+    private val prefs = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
+
+    // SharedPreferences are persisted across reboots
+    var hasSeenEdu: Boolean
+        get() = prefs.getBoolean(PREF_HAS_SEEN_AVALANCHE_EDU, false)
+        set(value) = prefs.edit().putBoolean(PREF_HAS_SEEN_AVALANCHE_EDU, value).apply()
+
+    // Reset on reboot.
+    // The pipeline runs these suppressors many times very fast, so we must use a separate bool
+    // to force show for debug so that phone does not get stuck sending out infinite number of
+    // education HUNs.
+    private var hasShownOnceForDebug = false
+
+    private fun shouldShowEdu() : Boolean {
+        val forceShowOnce = SystemProperties.get(FORCE_SHOW_AVALANCHE_EDU_ONCE, "").equals("1")
+        return !hasSeenEdu || (forceShowOnce && !hasShownOnceForDebug)
+    }
 
     enum class State {
         ALLOW_CONVERSATION_AFTER_AVALANCHE,
@@ -309,7 +344,44 @@ class AvalancheSuppressor(
         if (state != State.SUPPRESS) {
             return false
         }
+        if (shouldShowEdu()) {
+            showEdu()
+        }
         return true
+    }
+
+    /**
+     * Show avalanche education HUN from SystemUI.
+     */
+    private fun showEdu() {
+        val res = context.resources
+        val titleStr = res.getString(
+            com.android.systemui.res.R.string.adaptive_notification_edu_hun_title)
+        val textStr = res.getString(
+            com.android.systemui.res.R.string.adaptive_notification_edu_hun_text)
+        val actionStr = res.getString(
+            com.android.systemui.res.R.string.go_to_adaptive_notification_settings)
+
+        val intent = Intent(Settings.ACTION_MANAGE_ADAPTIVE_NOTIFICATIONS)
+        val pendingIntent = PendingIntent.getActivity(
+            context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder =
+            Notification.Builder(context, NotificationChannels.ALERTS)
+                .setTicker(titleStr)
+                .setContentTitle(titleStr)
+                .setContentText(textStr)
+                .setSmallIcon(com.android.systemui.res.R.drawable.ic_settings)
+                .setCategory(Notification.CATEGORY_SYSTEM)
+                .setAutoCancel(true)
+                .addAction(android.R.drawable.button_onoff_indicator_off, actionStr, pendingIntent)
+                .setContentIntent(pendingIntent)
+
+        notificationManager.notify(SystemMessage.NOTE_ADAPTIVE_NOTIFICATIONS, builder.build())
+        hasSeenEdu = true
+        hasShownOnceForDebug = true;
     }
 
     private fun calculateState(entry: NotificationEntry): State {
