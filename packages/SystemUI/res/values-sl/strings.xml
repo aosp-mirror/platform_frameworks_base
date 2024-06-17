@@ -503,7 +503,7 @@
     <string name="stream_system" msgid="7663148785370565134">"Sistem"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Sprožitev zvonjenja"</string>
     <string name="stream_music" msgid="2188224742361847580">"Predstavnost"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"Opozorilo"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"Alarm"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Obvestilo"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Dvojna večtonska frekvenca"</string>
