@@ -37,7 +37,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-interface DraggableHandler {
+internal interface DraggableHandler {
     /**
      * Start a drag in the given [startedPosition], with the given [overSlop] and number of
      * [pointersDown].
@@ -51,7 +51,7 @@ interface DraggableHandler {
  * The [DragController] provides control over the transition between two scenes through the [onDrag]
  * and [onStop] methods.
  */
-interface DragController {
+internal interface DragController {
     /** Drag the current scene by [delta] pixels. */
     fun onDrag(delta: Float)
 
@@ -537,6 +537,7 @@ private fun SwipeTransition(
         orientation = orientation,
         isUpOrLeft = isUpOrLeft,
         requiresFullDistanceSwipe = result.requiresFullDistanceSwipe,
+        replacedTransition = null,
     )
 }
 
@@ -553,6 +554,7 @@ private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
             isUpOrLeft = old.isUpOrLeft,
             lastDistance = old.lastDistance,
             requiresFullDistanceSwipe = old.requiresFullDistanceSwipe,
+            replacedTransition = old,
         )
         .apply {
             _currentScene = old._currentScene
@@ -571,9 +573,10 @@ private class SwipeTransition(
     override val orientation: Orientation,
     override val isUpOrLeft: Boolean,
     val requiresFullDistanceSwipe: Boolean,
+    replacedTransition: SwipeTransition?,
     var lastDistance: Float = DistanceUnspecified,
 ) :
-    TransitionState.Transition(_fromScene.key, _toScene.key),
+    TransitionState.Transition(_fromScene.key, _toScene.key, replacedTransition),
     TransitionState.HasOverscrollProperties {
     var _currentScene by mutableStateOf(_fromScene)
     override val currentScene: SceneKey
