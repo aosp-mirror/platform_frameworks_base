@@ -53,35 +53,6 @@
                 android:name="android.service.dream"
                 android:resource="@xml/test_dream_metadata_invalid" />
         </service>
-
-        <service
-            android:name="com.android.server.dreams.TestDreamServiceWithNonexistentSettings"
-            android:exported="false"
-            android:label="Test Dream" >
-            <intent-filter>
-                <action android:name="android.service.dreams.DreamService" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="android.service.dream"
-                android:resource="@xml/test_dream_metadata_nonexistent_settings" />
-        </service>
-
-        <service
-            android:name="com.android.server.dreams.TestDreamServiceNoPackageNonexistentSettings"
-            android:exported="false"
-            android:label="Test Dream" >
-            <intent-filter>
-                <action android:name="android.service.dreams.DreamService" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="android.service.dream"
-                android:resource="@xml/test_dream_metadata_nopackage_nonexistent_settings" />
-        </service>
-
-        <activity android:name=".TestDreamSettingsActivity">
-        </activity>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
