@@ -127,6 +127,7 @@ public class CompanionDeviceDiscoveryService extends Service {
                 return false;
             }
         }
+        sScanResultsLiveData.setValue(Collections.emptyList());
         requireNonNull(associationRequest);
         final Intent intent = new Intent(context, CompanionDeviceDiscoveryService.class);
         intent.setAction(ACTION_START_DISCOVERY);
@@ -192,7 +193,6 @@ public class CompanionDeviceDiscoveryService extends Service {
             sDiscoveryStarted = true;
         }
         mStopAfterFirstMatch = request.isSingleDevice();
-        sScanResultsLiveData.setValue(Collections.emptyList());
         sStateLiveData.setValue(DiscoveryState.IN_PROGRESS);
 
         final List<DeviceFilter<?>> allFilters = request.getDeviceFilters();
