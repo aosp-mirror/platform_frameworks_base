@@ -1055,7 +1055,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public int getVirtualCameraId(@NonNull VirtualCameraConfig cameraConfig)
+    public String getVirtualCameraId(@NonNull VirtualCameraConfig cameraConfig)
             throws RemoteException {
         super.getVirtualCameraId_enforcePermission();
         Objects.requireNonNull(cameraConfig);

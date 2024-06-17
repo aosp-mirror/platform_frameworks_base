@@ -1413,7 +1413,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Omogućen je način testnog okvira"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Vratite na tvorničke postavke da biste onemogućili način testnog okvira."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serijska konzola omogućena"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Izvedba je otežana. Provjerite početni program za pokretanje da biste onemogućili konzolu."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Izvedba je otežana. Provjerite pokretač operativnog sustava da biste onemogućili konzolu."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Omogućen je eksperimentalni MTE"</string>
     <string name="mte_override_notification_message" msgid="2441170442725738942">"To može utjecati na izvedbu i stabilnost. Ponovno pokrenite da biste onemogućili. Ako je omogućeno pomoću arm64.memtag.bootctl, prethodno postavite na \"none\"."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Tekućina ili prljavština u USB priključku"</string>
@@ -1884,7 +1884,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN je prekratak. Mora imati barem 4 znamenke."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Pokušajte ponovo kasnije"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Gledanje preko cijelog zaslona"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Za izlaz prijeđite prstom od vrha prema dolje."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Shvaćam"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zakrenite kako biste bolje vidjeli"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otvorite aplikaciju <xliff:g id="NAME">%s</xliff:g> preko cijelog zaslona za bolji prikaz"</string>
@@ -2408,6 +2409,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privatni prostor"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Zajedničko"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privatni prostor"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Skriven je osjetljiv sadržaj obavijesti"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Sadržaj aplikacije sakriven je od dijeljenja zaslona radi sigurnosti"</string>

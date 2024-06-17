@@ -781,7 +781,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
-
+    WindowManagerInternal.OnImeRequestedChangedListener mOnImeRequestedChangedListener;
     @Nullable ImeTargetChangeListener mImeTargetChangeListener;
 
     SettingsObserver mSettingsObserver;
@@ -2027,7 +2027,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // Otherwise, look at the package
             final ApplicationInfo appInfo = mPmInternal.getApplicationInfo(
                     packageName, 0 /* flags */, SYSTEM_UID, UserHandle.getUserId(callingUid));
-            if (appInfo == null || appInfo.uid != callingUid) {
+            if (appInfo == null
+                    || !mPmInternal.isSameApp(
+                            packageName, callingUid, UserHandle.getUserId(callingUid))) {
                 throw new SecurityException("Package " + packageName + " not in UID "
                         + callingUid);
             }
@@ -2644,9 +2646,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (displayPolicy.areSystemBarsForcedConsumedLw()) {
                 result |= WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
-            }
-            if (!win.isGoneForLayout()) {
-                win.mResizedWhileGone = false;
             }
 
             if (outFrames != null && outMergedConfiguration != null) {
@@ -3505,10 +3504,11 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard")) {
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
-        if (!dreamHandlesConfirmKeys() && mAtmService.mKeyguardController.isShowingDream()) {
-            mAtmService.mTaskSupervisor.wakeUp("leaveDream");
-        }
         synchronized (mGlobalLock) {
+            if (!dreamHandlesConfirmKeys()
+                    && getDefaultDisplayContentLocked().getDisplayPolicy().isShowingDreamLw()) {
+                mAtmService.mTaskSupervisor.wakeUp("leaveDream");
+            }
             mPolicy.dismissKeyguardLw(callback, message);
         }
     }
@@ -8131,6 +8131,27 @@ public class WindowManagerService extends IWindowManager.Stub
                     getInputTargetFromWindowTokenLocked(imeTargetWindowToken);
                 if (imeTarget != null) {
                     imeTarget.getDisplayContent().updateImeInputAndControlTarget(imeTarget);
+
+                    if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                        // In case of a virtual display that may not show the IME, reset the
+                        // inputTarget of all other displays
+                        WindowState imeWindowState = imeTarget.getWindowState();
+                        if (imeWindowState != null) {
+                            InsetsControlTarget fallback =
+                                    imeTarget.getDisplayContent().getImeHostOrFallback(
+                                            imeWindowState);
+                            if (imeWindowState != fallback) {
+                                // fallback should be the RemoteInsetsControlTarget of the
+                                // default display
+                                int currentDisplayId = imeTarget.getDisplayContent().getDisplayId();
+                                mRoot.forAllDisplays(display -> {
+                                    if (display.getDisplayId() != currentDisplayId) {
+                                        display.setImeInputTarget(null);
+                                    }
+                                });
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -8147,6 +8168,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 OnHardKeyboardStatusChangeListener listener) {
             synchronized (mGlobalLock) {
                 mHardKeyboardStatusChangeListener = listener;
+            }
+        }
+
+        @Override
+        public void setOnImeRequestedChangedListener(
+                OnImeRequestedChangedListener listener) {
+            synchronized (mGlobalLock) {
+                mOnImeRequestedChangedListener = listener;
             }
         }
 

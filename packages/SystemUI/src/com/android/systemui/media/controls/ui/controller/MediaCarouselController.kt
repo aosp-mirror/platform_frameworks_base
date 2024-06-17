@@ -42,7 +42,6 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
@@ -124,7 +123,6 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 class MediaCarouselController
 @Inject
 constructor(
-    @Application applicationScope: CoroutineScope,
     private val context: Context,
     private val mediaControlPanelFactory: Provider<MediaControlPanel>,
     private val visualStabilityProvider: VisualStabilityProvider,
@@ -217,7 +215,7 @@ constructor(
     private var carouselLocale: Locale? = null
 
     private val animationScaleObserver: ContentObserver =
-        object : ContentObserver(null) {
+        object : ContentObserver(executor, 0) {
             override fun onChange(selfChange: Boolean) {
                 if (!mediaFlags.isSceneContainerEnabled()) {
                     MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
@@ -389,18 +387,20 @@ constructor(
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listenForAnyStateToGoneKeyguardTransition(this)
                 listenForAnyStateToLockscreenTransition(this)
+                listenForLockscreenSettingChanges(this)
 
                 if (!mediaFlags.isSceneContainerEnabled()) return@repeatOnLifecycle
                 listenForMediaItemsChanges(this)
             }
         }
-        listenForLockscreenSettingChanges(applicationScope)
 
         // Notifies all active players about animation scale changes.
-        globalSettings.registerContentObserver(
-            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-            animationScaleObserver
-        )
+        bgExecutor.execute {
+            globalSettings.registerContentObserverSync(
+                    Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+                    animationScaleObserver
+            )
+        }
     }
 
     private fun setUpListeners() {
@@ -884,7 +884,8 @@ constructor(
                     val previousVisibleIndex =
                         MediaPlayerData.playerKeys().indexOfFirst { key -> it == key }
                     mediaCarouselScrollHandler.scrollToPlayer(previousVisibleIndex, mediaIndex)
-                } ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
+                }
+                    ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
             }
         } else if (isRtl && mediaContent.childCount > 0) {
             // In RTL, Scroll to the first player as it is the rightmost player in media carousel.

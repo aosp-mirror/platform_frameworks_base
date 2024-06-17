@@ -33,8 +33,8 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
+import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
-import com.android.internal.logging.UiEvent;
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
@@ -86,7 +86,7 @@ class PeekDisabledSuppressor(
                 }
             }
 
-        globalSettings.registerContentObserver(
+        globalSettings.registerContentObserverSync(
             globalSettings.getUriFor(HEADS_UP_NOTIFICATIONS_ENABLED),
             /* notifyForDescendants = */ true,
             observer
@@ -94,7 +94,7 @@ class PeekDisabledSuppressor(
 
         // QQQ: Do we need to register for SETTING_HEADS_UP_TICKER? It seems unused.
 
-        observer.onChange(/* selfChange = */ true)
+        observer.onChange(/* selfChange= */ true)
     }
 }
 
@@ -243,6 +243,7 @@ class AlertKeyguardVisibilitySuppressor(
     override fun shouldSuppress(entry: NotificationEntry) =
         keyguardNotificationVisibilityProvider.shouldHideNotification(entry)
 }
+
 class AvalancheSuppressor(
     private val avalancheProvider: AvalancheProvider,
     private val systemClock: SystemClock,
@@ -268,38 +269,27 @@ class AvalancheSuppressor(
         SUPPRESS
     }
 
-     enum class AvalancheEvent(private val id: Int) : UiEventLogger.UiEventEnum {
-         @UiEvent(doc = "An avalanche event occurred but this notification was suppressed by a " +
-                 "non-avalanche suppressor.")
-         START(1802),
-
-         @UiEvent(doc = "HUN was suppressed in avalanche.")
-         SUPPRESS(1803),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is high priority.")
-         ALLOW_CONVERSATION_AFTER_AVALANCHE(1804),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is a high priority conversation.")
-         ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME(1805),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is a call.")
-         ALLOW_CALLSTYLE(1806),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is a calendar notification.")
-         ALLOW_CATEGORY_REMINDER(1807),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is a calendar notification.")
-         ALLOW_CATEGORY_EVENT(1808),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it has a full screen intent and " +
-                 "the full screen intent permission is granted.")
-         ALLOW_FSI_WITH_PERMISSION_ON(1809),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is colorized.")
-         ALLOW_COLORIZED(1810),
-
-         @UiEvent(doc = "HUN allowed during avalanche because it is an emergency notification.")
-         ALLOW_EMERGENCY(1811);
+    enum class AvalancheEvent(private val id: Int) : UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "An avalanche event occurred, and a suppression period will start now.")
+        AVALANCHE_SUPPRESSOR_RECEIVED_TRIGGERING_EVENT(1824),
+        @UiEvent(doc = "HUN was suppressed in avalanche.")
+        AVALANCHE_SUPPRESSOR_HUN_SUPPRESSED(1825),
+        @UiEvent(doc = "HUN allowed during avalanche because conversation newer than the trigger.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_NEW_CONVERSATION(1826),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a priority conversation.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_PRIORITY_CONVERSATION(1827),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a CallStyle notification.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CALL_STYLE(1828),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a reminder notification.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_REMINDER(1829),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a calendar notification.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_EVENT(1830),
+        @UiEvent(doc = "HUN allowed during avalanche because it has FSI.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_FSI_WITH_PERMISSION(1831),
+        @UiEvent(doc = "HUN allowed during avalanche because it is colorized.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_COLORIZED(1832),
+        @UiEvent(doc = "HUN allowed during avalanche because it is an emergency notification.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_EMERGENCY(1833);
 
         override fun getId(): Int {
             return id
@@ -327,46 +317,46 @@ class AvalancheSuppressor(
             entry.ranking.isConversation &&
                 entry.sbn.notification.getWhen() > avalancheProvider.startTime
         ) {
-            uiEventLogger.log(AvalancheEvent.ALLOW_CONVERSATION_AFTER_AVALANCHE)
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_NEW_CONVERSATION)
             return State.ALLOW_CONVERSATION_AFTER_AVALANCHE
         }
 
         if (entry.channel?.isImportantConversation == true) {
-            uiEventLogger.log(AvalancheEvent.ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME)
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_PRIORITY_CONVERSATION)
             return State.ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME
         }
 
         if (entry.sbn.notification.isStyle(Notification.CallStyle::class.java)) {
-            uiEventLogger.log(AvalancheEvent.ALLOW_CALLSTYLE)
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CALL_STYLE)
             return State.ALLOW_CALLSTYLE
         }
 
         if (entry.sbn.notification.category == CATEGORY_REMINDER) {
-            uiEventLogger.log(AvalancheEvent.ALLOW_CATEGORY_REMINDER)
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_REMINDER)
             return State.ALLOW_CATEGORY_REMINDER
         }
 
         if (entry.sbn.notification.category == CATEGORY_EVENT) {
-            uiEventLogger.log(AvalancheEvent.ALLOW_CATEGORY_EVENT)
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_EVENT)
             return State.ALLOW_CATEGORY_EVENT
         }
 
         if (entry.sbn.notification.fullScreenIntent != null) {
-            uiEventLogger.log(AvalancheEvent.ALLOW_FSI_WITH_PERMISSION_ON)
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_FSI_WITH_PERMISSION)
             return State.ALLOW_FSI_WITH_PERMISSION_ON
         }
         if (entry.sbn.notification.isColorized) {
-            uiEventLogger.log(AvalancheEvent.ALLOW_COLORIZED)
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_COLORIZED)
             return State.ALLOW_COLORIZED
         }
         if (
             packageManager.checkPermission(RECEIVE_EMERGENCY_BROADCAST, entry.sbn.packageName) ==
                 PERMISSION_GRANTED
         ) {
-            uiEventLogger.log(AvalancheEvent.ALLOW_EMERGENCY)
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_EMERGENCY)
             return State.ALLOW_EMERGENCY
         }
-        uiEventLogger.log(AvalancheEvent.SUPPRESS)
+        uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_SUPPRESSED)
         return State.SUPPRESS
     }
 

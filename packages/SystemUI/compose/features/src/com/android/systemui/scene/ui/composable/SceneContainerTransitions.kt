@@ -59,6 +59,13 @@ val SceneContainerTransitions = transitions {
         goneToShadeTransition(durationScale = 0.9)
     }
     from(Scenes.Gone, to = Scenes.QuickSettings) { goneToQuickSettingsTransition() }
+    from(
+        Scenes.Gone,
+        to = Scenes.QuickSettings,
+        key = SlightlyFasterShadeCollapse,
+    ) {
+        goneToQuickSettingsTransition(durationScale = 0.9)
+    }
     from(Scenes.Gone, to = Scenes.QuickSettingsShade) { goneToQuickSettingsShadeTransition() }
     from(Scenes.Lockscreen, to = Scenes.Bouncer) { lockscreenToBouncerTransition() }
     from(Scenes.Lockscreen, to = Scenes.Communal) { lockscreenToCommunalTransition() }
@@ -96,17 +103,18 @@ val SceneContainerTransitions = transitions {
     overscroll(Scenes.Shade, Orientation.Vertical) {
         translate(
             Notifications.Elements.NotificationScrim,
-            y = { Shade.Dimensions.ScrimOverscrollLimit }
+            y = Shade.Dimensions.ScrimOverscrollLimit
         )
+        translate(Shade.Elements.SplitShadeStartColumn, y = Shade.Dimensions.ScrimOverscrollLimit)
         translate(
-            Shade.Elements.SplitShadeStartColumn,
-            y = { Shade.Dimensions.ScrimOverscrollLimit }
+            Notifications.Elements.NotificationStackPlaceholder,
+            y = Shade.Dimensions.ScrimOverscrollLimit,
         )
     }
     overscroll(Scenes.NotificationsShade, Orientation.Vertical) {
-        translate(OverlayShade.Elements.Panel, y = { OverlayShade.Dimensions.OverscrollLimit })
+        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
     }
     overscroll(Scenes.QuickSettingsShade, Orientation.Vertical) {
-        translate(OverlayShade.Elements.Panel, y = { OverlayShade.Dimensions.OverscrollLimit })
+        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
     }
 }

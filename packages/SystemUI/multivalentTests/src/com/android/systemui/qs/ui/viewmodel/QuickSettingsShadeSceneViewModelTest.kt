@@ -31,6 +31,8 @@ import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintA
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.viewmodel.quickSettingsShadeSceneViewModel
 import com.android.systemui.testKosmos
@@ -60,38 +62,45 @@ class QuickSettingsShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_deviceLocked_lockscreen() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             lockDevice()
 
-            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
     fun upTransitionSceneKey_deviceUnlocked_gone() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             lockDevice()
             unlockDevice()
 
-            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(Scenes.Gone)
+            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
-            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
+            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
@@ -99,7 +108,8 @@ class QuickSettingsShadeSceneViewModelTest : SysuiTestCase() {
             runCurrent()
             sceneInteractor.changeScene(Scenes.Gone, "reason")
 
-            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(Scenes.Gone)
+            assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
     private fun TestScope.lockDevice() {

@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"পিন খুবই ছোট৷ এটিকে কমপক্ষে ৪ সংখ্যার হতে হবে৷"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"পরে আবার চেষ্টা করুন"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"পূর্ণ স্ক্রিনে দেখা হচ্ছে"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"প্রস্থান করতে উপর থেকে নিচের দিকে সোয়াইপ করুন"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুঝেছি"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"আরও ভাল ক্যামেরা ভিউ পাওয়ার জন্য ঘোরান"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"আরও ভাল ভিউয়ের জন্য ফুল স্ক্রিনে <xliff:g id="NAME">%s</xliff:g> খুলুন"</string>
@@ -2407,6 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"প্রাইভেট স্পেস"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ক্লোন"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"কমিউনাল"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"প্রাইভেট স্পেস"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"সংবেদনশীল বিজ্ঞপ্তির কন্টেন্ট লুকানো আছে"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"নিরাপত্তার জন্য স্ক্রিন শেয়ার করা থেকে লুকানো অ্যাপের কন্টেন্ট"</string>

@@ -13,11 +13,11 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableResources;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class InternetAdapterTest extends SysuiTestCase {
 
     private static final String WIFI_KEY = "Wi-Fi_Key";

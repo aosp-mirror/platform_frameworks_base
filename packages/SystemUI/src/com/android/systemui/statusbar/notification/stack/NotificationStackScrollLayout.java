@@ -833,6 +833,23 @@ public class NotificationStackScrollLayout
         int y = 0;
         drawDebugInfo(canvas, y, Color.RED, /* label= */ "y = " + y);
 
+        if (SceneContainerFlag.isEnabled()) {
+            y = (int) mScrollViewFields.getStackTop();
+            drawDebugInfo(canvas, y, Color.RED, /* label= */ "getStackTop() = " + y);
+
+            y = (int) mAmbientState.getStackCutoff();
+            drawDebugInfo(canvas, y, Color.MAGENTA, /* label= */ "getStackCutoff() = " + y);
+
+            y = (int) mScrollViewFields.getHeadsUpTop();
+            drawDebugInfo(canvas, y, Color.GREEN, /* label= */ "getHeadsUpTop() = " + y);
+
+            y += getTopHeadsUpHeight();
+            drawDebugInfo(canvas, y, Color.BLUE,
+                    /* label= */ "getHeadsUpTop() + getTopHeadsUpHeight() = " + y);
+
+            return; // the rest of the fields are not important in Flexiglass
+        }
+
         y = getTopPadding();
         drawDebugInfo(canvas, y, Color.RED, /* label= */ "getTopPadding() = " + y);
 
@@ -1203,8 +1220,8 @@ public class NotificationStackScrollLayout
     }
 
     @Override
-    public void setStackBottom(float stackBottom) {
-        mScrollViewFields.setStackBottom(stackBottom);
+    public void setStackCutoff(float stackCutoff) {
+        mAmbientState.setStackCutoff(stackCutoff);
     }
 
     @Override
@@ -3471,6 +3488,7 @@ public class NotificationStackScrollLayout
             }
 
             if (isUpOrCancel) {
+                mScrollViewFields.sendCurrentGestureOverscroll(false);
                 setIsBeingDragged(false);
             }
             return false;
@@ -3606,7 +3624,6 @@ public class NotificationStackScrollLayout
                 if (mIsBeingDragged) {
                     // Defer actual scrolling to the scene framework if enabled
                     if (SceneContainerFlag.isEnabled()) {
-                        setIsBeingDragged(false);
                         return false;
                     }
                     // Scroll to follow the motion event
@@ -3704,7 +3721,7 @@ public class NotificationStackScrollLayout
 
     protected boolean isInsideQsHeader(MotionEvent ev) {
         if (SceneContainerFlag.isEnabled()) {
-            return ev.getY() < mScrollViewFields.getScrimClippingShape().getBounds().getTop();
+            return ev.getY() < mScrollViewFields.getStackTop();
         }
 
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);

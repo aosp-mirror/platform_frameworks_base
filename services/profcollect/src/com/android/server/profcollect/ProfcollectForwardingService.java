@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
@@ -58,7 +59,6 @@ import java.util.concurrent.TimeUnit;
 public final class ProfcollectForwardingService extends SystemService {
     public static final String LOG_TAG = "ProfcollectForwardingService";
 
-    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
     private static final String INTENT_UPLOAD_PROFILES =
             "com.android.server.profcollect.UPLOAD_PROFILES";
     private static final long BG_PROCESS_INTERVAL = TimeUnit.HOURS.toMillis(4); // every 4 hours.
@@ -120,9 +120,6 @@ public final class ProfcollectForwardingService extends SystemService {
 
     @Override
     public void onStart() {
-        if (DEBUG) {
-            Log.d(LOG_TAG, "Profcollect forwarding service start");
-        }
         connectNativeService();
     }
 
@@ -245,9 +242,6 @@ public final class ProfcollectForwardingService extends SystemService {
 
         @Override
         public boolean onStartJob(JobParameters params) {
-            if (DEBUG) {
-                Log.d(LOG_TAG, "Starting background process job");
-            }
             createAndUploadReport(sSelfService);
             jobFinished(params, false);
             return true;
@@ -265,6 +259,7 @@ public final class ProfcollectForwardingService extends SystemService {
         BackgroundThread.get().getThreadHandler().post(
                 () -> {
                     registerAppLaunchObserver();
+                    registerCameraOpenObserver();
                     registerDex2oatObserver();
                     registerOTAObserver();
                 });
@@ -289,9 +284,6 @@ public final class ProfcollectForwardingService extends SystemService {
                 "applaunch_trace_freq", 2);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
-            if (DEBUG) {
-                Log.d(LOG_TAG, "Tracing on app launch event: " + packageName);
-            }
             BackgroundThread.get().getThreadHandler().post(() -> {
                 try {
                     mIProfcollect.trace_once("applaunch");
@@ -331,19 +323,14 @@ public final class ProfcollectForwardingService extends SystemService {
                 "dex2oat_trace_freq", 25);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
-            if (DEBUG) {
-                Log.d(LOG_TAG, "Tracing on dex2oat event");
-            }
-            BackgroundThread.get().getThreadHandler().post(() -> {
+            // Dex2oat could take a while before it starts. Add a short delay before start tracing.
+            BackgroundThread.get().getThreadHandler().postDelayed(() -> {
                 try {
-                    // Dex2oat could take a while before it starts. Add a short delay before start
-                    // tracing.
-                    Thread.sleep(1000);
                     mIProfcollect.trace_once("dex2oat");
-                } catch (RemoteException | InterruptedException e) {
+                } catch (RemoteException e) {
                     Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
                 }
-            });
+            }, 1000);
         }
     }
 
@@ -352,11 +339,6 @@ public final class ProfcollectForwardingService extends SystemService {
         updateEngine.bind(new UpdateEngineCallback() {
             @Override
             public void onStatusUpdate(int status, float percent) {
-                if (DEBUG) {
-                    Log.d(LOG_TAG, "Received OTA status update, status: " + status + ", percent: "
-                            + percent);
-                }
-
                 if (status == UpdateEngine.UpdateStatusConstants.UPDATED_NEED_REBOOT) {
                     createAndUploadReport(sSelfService);
                 }
@@ -388,8 +370,37 @@ public final class ProfcollectForwardingService extends SystemService {
                     .putExtra("filename", reportName);
             pfs.getContext().sendBroadcast(intent);
         });
-        if (DEBUG) {
-            Log.d(LOG_TAG, "Sent report for upload.");
-        }
+    }
+
+    private void registerCameraOpenObserver() {
+        CameraManager cm = getContext().getSystemService(CameraManager.class);
+        cm.registerAvailabilityCallback(new CameraManager.AvailabilityCallback() {
+            @Override
+            public void onCameraOpened(String cameraId, String packageId) {
+                Log.d(LOG_TAG, "Received camera open event from: " + packageId);
+                // Skip face auth and Android System Intelligence, since they trigger way too
+                // often.
+                if (packageId.startsWith("client.pid")
+                        || packageId.equals("com.google.android.as")) {
+                    return;
+                }
+                // Sample for a fraction of camera events.
+                final int traceFrequency =
+                        DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
+                        "camera_trace_freq", 10);
+                int randomNum = ThreadLocalRandom.current().nextInt(100);
+                if (randomNum >= traceFrequency) {
+                    return;
+                }
+                // Wait for 1s before starting tracing.
+                BackgroundThread.get().getThreadHandler().postDelayed(() -> {
+                    try {
+                        mIProfcollect.trace_once("camera");
+                    } catch (RemoteException e) {
+                        Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
+                    }
+                }, 1000);
+            }
+        }, null);
     }
 }

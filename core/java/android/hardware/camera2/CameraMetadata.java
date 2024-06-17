@@ -2360,11 +2360,8 @@ public abstract class CameraMetadata<TKey> {
      * <p>If the session configuration is not supported, the AE mode reported in the
      * CaptureResult will be 'ON' instead of 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY'.</p>
      * <p>When this AE mode is enabled, the CaptureResult field
-     * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} will be present and not null. Otherwise, the
-     * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} field will not be present in the CaptureResult.</p>
-     * <p>The application can observe the CaptureResult field
-     * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} to determine when low light boost is 'ACTIVE' or
-     * 'INACTIVE'.</p>
+     * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} will indicate when low light boost is 'ACTIVE'
+     * or 'INACTIVE'. By default {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} will be 'INACTIVE'.</p>
      * <p>The low light boost is 'ACTIVE' once the scene lighting condition is less than the
      * upper bound lux value defined by {@link CameraCharacteristics#CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE android.control.lowLightBoostInfoLuminanceRange}.
      * This mode will be 'INACTIVE' once the scene lighting condition is greater than the

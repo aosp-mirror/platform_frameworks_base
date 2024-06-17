@@ -16,17 +16,16 @@
 
 package com.android.systemui.communal.ui.compose
 
-import android.appwidget.AppWidgetHostView
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.SizeF
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
 import android.widget.FrameLayout
+import android.widget.RemoteViews
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -34,6 +33,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -46,6 +47,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -128,6 +130,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
+import com.android.compose.animation.Easings.Emphasized
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
@@ -144,6 +147,7 @@ import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.PopupType
+import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -154,6 +158,7 @@ import kotlinx.coroutines.launch
 fun CommunalHub(
     modifier: Modifier = Modifier,
     viewModel: BaseCommunalViewModel,
+    interactionHandler: RemoteViews.InteractionHandler? = null,
     dialogFactory: SystemUIDialogFactory? = null,
     widgetConfigurator: WidgetConfigurator? = null,
     onOpenWidgetPicker: (() -> Unit)? = null,
@@ -173,6 +178,10 @@ fun CommunalHub(
         derivedStateOf { selectedKey.value != null || reorderingWidgets }
     }
     val isEmptyState by viewModel.isEmptyState.collectAsStateWithLifecycle(initialValue = false)
+    val isCommunalContentVisible by
+        viewModel.isCommunalContentVisible.collectAsStateWithLifecycle(
+            initialValue = !viewModel.isEditMode
+        )
 
     val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     val contentOffset = beforeContentPadding(contentPadding).toOffset()
@@ -245,46 +254,88 @@ fun CommunalHub(
                     viewModel = viewModel,
                 )
             } else {
-                CommunalHubLazyGrid(
-                    communalContent = communalContent,
-                    viewModel = viewModel,
-                    contentPadding = contentPadding,
-                    contentOffset = contentOffset,
-                    setGridCoordinates = { gridCoordinates = it },
-                    updateDragPositionForRemove = { offset ->
-                        isPointerWithinEnabledRemoveButton(
-                            removeEnabled = removeButtonEnabled,
-                            offset = gridCoordinates?.let { it.positionInWindow() + offset },
-                            containerToCheck = removeButtonCoordinates
+                val slideOffsetInPx =
+                    with(LocalDensity.current) { Dimensions.SlideOffsetY.toPx().toInt() }
+                AnimatedVisibility(
+                    visible = isCommunalContentVisible,
+                    enter =
+                        fadeIn(
+                            animationSpec =
+                                tween(durationMillis = 83, delayMillis = 83, easing = LinearEasing)
+                        ) +
+                            slideInVertically(
+                                animationSpec = tween(durationMillis = 1000, easing = Emphasized),
+                                initialOffsetY = { -slideOffsetInPx }
+                            ),
+                    exit =
+                        fadeOut(
+                            animationSpec = tween(durationMillis = 167, easing = LinearEasing)
+                        ) +
+                            slideOutVertically(
+                                animationSpec = tween(durationMillis = 1000, easing = Emphasized),
+                                targetOffsetY = { -slideOffsetInPx }
+                            ),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Box {
+                        CommunalHubLazyGrid(
+                            communalContent = communalContent,
+                            viewModel = viewModel,
+                            contentPadding = contentPadding,
+                            contentOffset = contentOffset,
+                            setGridCoordinates = { gridCoordinates = it },
+                            updateDragPositionForRemove = { offset ->
+                                isPointerWithinEnabledRemoveButton(
+                                    removeEnabled = removeButtonEnabled,
+                                    offset =
+                                        gridCoordinates?.let { it.positionInWindow() + offset },
+                                    containerToCheck = removeButtonCoordinates
+                                )
+                            },
+                            gridState = gridState,
+                            contentListState = contentListState,
+                            selectedKey = selectedKey,
+                            widgetConfigurator = widgetConfigurator,
+                            interactionHandler = interactionHandler,
                         )
-                    },
-                    gridState = gridState,
-                    contentListState = contentListState,
-                    selectedKey = selectedKey,
-                    widgetConfigurator = widgetConfigurator,
-                )
+                    }
+                }
             }
         }
 
-        if (viewModel.isEditMode && onOpenWidgetPicker != null && onEditDone != null) {
-            Toolbar(
-                setToolbarSize = { toolbarSize = it },
-                setRemoveButtonCoordinates = { removeButtonCoordinates = it },
-                onEditDone = onEditDone,
-                onOpenWidgetPicker = onOpenWidgetPicker,
-                onRemoveClicked = {
-                    val index =
-                        selectedKey.value?.let { key ->
-                            contentListState.list.indexOfFirst { it.key == key }
+        if (onOpenWidgetPicker != null && onEditDone != null) {
+            AnimatedVisibility(
+                visible = viewModel.isEditMode && isCommunalContentVisible,
+                enter =
+                    fadeIn(animationSpec = tween(durationMillis = 250, easing = LinearEasing)) +
+                        slideInVertically(
+                            animationSpec = tween(durationMillis = 1000, easing = Emphasized),
+                        ),
+                exit =
+                    fadeOut(animationSpec = tween(durationMillis = 167, easing = LinearEasing)) +
+                        slideOutVertically(
+                            animationSpec = tween(durationMillis = 1000, easing = Emphasized)
+                        ),
+            ) {
+                Toolbar(
+                    setToolbarSize = { toolbarSize = it },
+                    setRemoveButtonCoordinates = { removeButtonCoordinates = it },
+                    onEditDone = onEditDone,
+                    onOpenWidgetPicker = onOpenWidgetPicker,
+                    onRemoveClicked = {
+                        val index =
+                            selectedKey.value?.let { key ->
+                                contentListState.list.indexOfFirst { it.key == key }
+                            }
+                        index?.let {
+                            contentListState.onRemove(it)
+                            contentListState.onSaveList()
+                            viewModel.setSelectedKey(null)
                         }
-                    index?.let {
-                        contentListState.onRemove(it)
-                        contentListState.onSaveList()
-                        viewModel.setSelectedKey(null)
-                    }
-                },
-                removeEnabled = removeButtonEnabled
-            )
+                    },
+                    removeEnabled = removeButtonEnabled
+                )
+            }
         }
         if (currentPopup == PopupType.CtaTile) {
             PopupOnDismissCtaTile(viewModel::onHidePopup)
@@ -327,16 +378,6 @@ fun CommunalHub(
                 onCancel = viewModel::onEnableWorkProfileDialogCancel
             )
         }
-
-        // This spacer covers the edge of the LazyHorizontalGrid and prevents it from receiving
-        // touches, so that the SceneTransitionLayout can intercept the touches and allow an edge
-        // swipe back to the blank scene.
-        Spacer(
-            Modifier.height(Dimensions.GridHeight)
-                .align(Alignment.CenterStart)
-                .width(Dimensions.Spacing)
-                .pointerInput(Unit) {}
-        )
     }
 }
 
@@ -391,6 +432,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
     widgetConfigurator: WidgetConfigurator?,
+    interactionHandler: RemoteViews.InteractionHandler?,
 ) {
     var gridModifier =
         Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
@@ -468,7 +510,8 @@ private fun BoxScope.CommunalHubLazyGrid(
                         selected = selected && !isDragging,
                         widgetConfigurator = widgetConfigurator,
                         index = index,
-                        contentListState = contentListState
+                        contentListState = contentListState,
+                        interactionHandler = interactionHandler,
                     )
                 }
             } else {
@@ -479,7 +522,8 @@ private fun BoxScope.CommunalHubLazyGrid(
                     size = size,
                     selected = false,
                     index = index,
-                    contentListState = contentListState
+                    contentListState = contentListState,
+                    interactionHandler = interactionHandler,
                 )
             }
         }
@@ -578,24 +622,23 @@ private fun Toolbar(
                 )
                 .onSizeChanged { setToolbarSize(it) },
     ) {
-        val spacerModifier = Modifier.width(ButtonDefaults.IconSpacing)
-
-        if (!removeEnabled) {
-            Button(
-                modifier = Modifier.align(Alignment.CenterStart),
-                onClick = onOpenWidgetPicker,
-                colors = filledButtonColors(),
-                contentPadding = Dimensions.ButtonPadding
-            ) {
-                Icon(Icons.Default.Add, stringResource(R.string.hub_mode_add_widget_button_text))
-                Spacer(spacerModifier)
-                Text(
-                    text = stringResource(R.string.hub_mode_add_widget_button_text),
-                )
-            }
+        ToolbarButton(
+            isPrimary = !removeEnabled,
+            modifier = Modifier.align(Alignment.CenterStart),
+            onClick = onOpenWidgetPicker,
+        ) {
+            Icon(Icons.Default.Add, stringResource(R.string.hub_mode_add_widget_button_text))
+            Text(
+                text = stringResource(R.string.hub_mode_add_widget_button_text),
+            )
         }
 
-        if (removeEnabled) {
+        AnimatedVisibility(
+            modifier = Modifier.align(Alignment.Center),
+            visible = removeEnabled,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             Button(
                 onClick = onRemoveClicked,
                 colors = filledButtonColors(),
@@ -603,33 +646,97 @@ private fun Toolbar(
                 modifier =
                     Modifier.graphicsLayer { alpha = removeButtonAlpha }
                         .onGloballyPositioned { setRemoveButtonCoordinates(it) }
-                        .align(Alignment.Center)
             ) {
-                RemoveButtonContent(spacerModifier)
+                Row(
+                    horizontalArrangement =
+                        Arrangement.spacedBy(
+                            ButtonDefaults.IconSpacing,
+                            Alignment.CenterHorizontally
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.Close, stringResource(R.string.button_to_remove_widget))
+                    Text(
+                        text = stringResource(R.string.button_to_remove_widget),
+                    )
+                }
             }
         }
 
-        if (!removeEnabled) {
-            Button(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                onClick = onEditDone,
-                colors = filledButtonColors(),
-                contentPadding = Dimensions.ButtonPadding
+        ToolbarButton(
+            isPrimary = !removeEnabled,
+            modifier = Modifier.align(Alignment.CenterEnd),
+            onClick = onEditDone,
+        ) {
+            Icon(
+                Icons.Default.Check,
+                stringResource(id = R.string.hub_mode_editing_exit_button_text)
+            )
+            Text(
+                text = stringResource(R.string.hub_mode_editing_exit_button_text),
+            )
+        }
+    }
+}
+
+/**
+ * Toolbar button that displays as a filled button if primary, and an outline button if secondary.
+ */
+@Composable
+private fun ToolbarButton(
+    isPrimary: Boolean = true,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit
+) {
+    val colors = LocalAndroidColorScheme.current
+    AnimatedVisibility(
+        visible = isPrimary,
+        modifier = modifier,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Button(
+            onClick = onClick,
+            colors = filledButtonColors(),
+            contentPadding = Dimensions.ButtonPadding,
+        ) {
+            Row(
+                horizontalArrangement =
+                    Arrangement.spacedBy(ButtonDefaults.IconSpacing, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    Icons.Default.Check,
-                    stringResource(id = R.string.hub_mode_editing_exit_button_text)
-                )
-                Spacer(spacerModifier)
-                Text(
-                    text = stringResource(R.string.hub_mode_editing_exit_button_text),
-                )
+                content()
+            }
+        }
+    }
+
+    AnimatedVisibility(
+        visible = !isPrimary,
+        modifier = modifier,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        OutlinedButton(
+            onClick = onClick,
+            colors =
+                ButtonDefaults.outlinedButtonColors(
+                    contentColor = colors.primary,
+                ),
+            border = BorderStroke(width = 2.0.dp, color = colors.primary),
+            contentPadding = Dimensions.ButtonPadding,
+        ) {
+            Row(
+                horizontalArrangement =
+                    Arrangement.spacedBy(ButtonDefaults.IconSpacing, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                content()
             }
         }
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun AnimatedVisibilityScope.ButtonToEditWidgets(
     onClick: () -> Unit,
@@ -732,15 +839,6 @@ private fun PopupOnDismissCtaTile(onHidePopup: () -> Unit) {
 }
 
 @Composable
-private fun RemoveButtonContent(spacerModifier: Modifier) {
-    Icon(Icons.Default.Close, stringResource(R.string.button_to_remove_widget))
-    Spacer(spacerModifier)
-    Text(
-        text = stringResource(R.string.button_to_remove_widget),
-    )
-}
-
-@Composable
 private fun filledButtonColors(): ButtonColors {
     val colors = LocalAndroidColorScheme.current
     return ButtonDefaults.buttonColors(
@@ -759,6 +857,7 @@ private fun CommunalContent(
     widgetConfigurator: WidgetConfigurator? = null,
     index: Int,
     contentListState: ContentListState,
+    interactionHandler: RemoteViews.InteractionHandler?,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
@@ -778,7 +877,7 @@ private fun CommunalContent(
         is CommunalContentModel.WidgetContent.PendingWidget ->
             PendingWidgetPlaceholder(model, modifier)
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
-        is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
+        is CommunalContentModel.Smartspace -> SmartspaceContent(interactionHandler, model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
         is CommunalContentModel.Umo -> Umo(viewModel, modifier)
     }
@@ -1091,13 +1190,17 @@ fun PendingWidgetPlaceholder(
 
 @Composable
 private fun SmartspaceContent(
+    interactionHandler: RemoteViews.InteractionHandler?,
     model: CommunalContentModel.Smartspace,
     modifier: Modifier = Modifier,
 ) {
     AndroidView(
         modifier = modifier,
         factory = { context ->
-            AppWidgetHostView(context).apply { updateAppWidget(model.remoteViews) }
+            SmartspaceAppWidgetHostView(context).apply {
+                interactionHandler?.let { setInteractionHandler(it) }
+                updateAppWidget(model.remoteViews)
+            }
         },
         // For reusing composition in lazy lists.
         onReset = {},
@@ -1263,6 +1366,7 @@ object Dimensions {
             horizontal = ToolbarButtonPaddingHorizontal,
         )
     val IconSize = 40.dp
+    val SlideOffsetY = 30.dp
 }
 
 private object Colors {

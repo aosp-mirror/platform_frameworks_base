@@ -52,6 +52,13 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_windowing_scvh_cache"
+    namespace: "lse_desktop_experience"
+    description: "Enables a SurfaceControlViewHost cache for window decorations"
+    bug: "345146928"
+}
+
+flag {
     name: "enable_desktop_windowing_wallpaper_activity"
     namespace: "lse_desktop_experience"
     description: "Enables desktop wallpaper activity to show wallpaper in the desktop mode"
@@ -91,4 +98,25 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Makes the App Header style adapt to the system's and app's light/dark theme"
     bug: "328668781"
+}
+
+flag {
+    name: "enable_camera_compat_for_desktop_windowing"
+    namespace: "lse_desktop_experience"
+    description: "Whether to apply Camera Compat treatment to fixed-orientation apps in desktop windowing mode"
+    bug: "314952133"
+}
+
+flag {
+    name: "enable_task_stack_observer_in_shell"
+    namespace: "lse_desktop_experience"
+    description: "Introduces a new observer in shell to track the task stack."
+    bug: "341932484"
+}
+
+flag {
+    name: "enable_desktop_windowing_size_constraints"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable min/max window size constraints when resizing a window in desktop windowing mode"
+    bug: "327589741"
 }

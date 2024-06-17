@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
@@ -85,6 +86,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Answers
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.anyFloat
@@ -132,6 +134,8 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var mGlanceableHubContainerController: GlanceableHubContainerController
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private lateinit var sysUiUnfoldComponent: SysUIUnfoldComponent
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
@@ -209,6 +213,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
                 dozeScrimController,
                 notificationShadeWindowController,
                 unfoldTransitionProgressProvider,
+                Optional.of(sysUiUnfoldComponent),
                 keyguardUnlockAnimationController,
                 notificationInsetsController,
                 ambientState,
@@ -516,6 +521,46 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
 
         // THEN touch should be intercepted by NotificationShade
         assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()
+    }
+
+    @Test
+    fun handleExternalTouch_intercepted_sendsOnTouch() {
+        // Accept dispatch and also intercept.
+        whenever(view.dispatchTouchEvent(any())).thenReturn(true)
+        whenever(view.onInterceptTouchEvent(any())).thenReturn(true)
+
+        underTest.handleExternalTouch(DOWN_EVENT)
+        underTest.handleExternalTouch(MOVE_EVENT)
+
+        // Once intercepted, both events are sent to the view.
+        verify(view).onTouchEvent(DOWN_EVENT)
+        verify(view).onTouchEvent(MOVE_EVENT)
+    }
+
+    @Test
+    fun handleExternalTouch_notDispatched_interceptNotCalled() {
+        // Don't accept dispatch
+        whenever(view.dispatchTouchEvent(any())).thenReturn(false)
+
+        underTest.handleExternalTouch(DOWN_EVENT)
+
+        // Interception is not offered.
+        verify(view, never()).onInterceptTouchEvent(any())
+    }
+
+    @Test
+    fun handleExternalTouch_notIntercepted_onTouchNotSent() {
+        // Accept dispatch, but don't dispatch
+        whenever(view.dispatchTouchEvent(any())).thenReturn(true)
+        whenever(view.onInterceptTouchEvent(any())).thenReturn(false)
+
+        underTest.handleExternalTouch(DOWN_EVENT)
+        underTest.handleExternalTouch(MOVE_EVENT)
+
+        // Interception offered for both events, but onTouchEvent is never called.
+        verify(view).onInterceptTouchEvent(DOWN_EVENT)
+        verify(view).onInterceptTouchEvent(MOVE_EVENT)
+        verify(view, never()).onTouchEvent(any())
     }
 
     @Test

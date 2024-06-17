@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -380,11 +381,13 @@ public final class WMShell implements
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
             public void moveFocusedTaskToDesktop(int displayId) {
-                desktopMode.moveFocusedTaskToDesktop(displayId);
+                desktopMode.moveFocusedTaskToDesktop(displayId,
+                        DesktopModeTransitionSource.KEYBOARD_SHORTCUT);
             }
             @Override
             public void moveFocusedTaskToFullscreen(int displayId) {
-                desktopMode.moveFocusedTaskToFullscreen(displayId);
+                desktopMode.moveFocusedTaskToFullscreen(displayId,
+                        DesktopModeTransitionSource.KEYBOARD_SHORTCUT);
             }
             @Override
             public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {

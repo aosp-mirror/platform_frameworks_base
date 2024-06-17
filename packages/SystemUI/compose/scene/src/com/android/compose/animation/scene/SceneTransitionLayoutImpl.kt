@@ -85,15 +85,14 @@ internal class SceneTransitionLayoutImpl(
      * The different values of a shared value keyed by a a [ValueKey] and the different elements and
      * scenes it is associated to.
      */
-    private var _sharedValues:
-        MutableMap<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>? =
+    private var _sharedValues: MutableMap<ValueKey, MutableMap<ElementKey?, SharedValue<*, *>>>? =
         null
-    internal val sharedValues:
-        MutableMap<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>
+    internal val sharedValues: MutableMap<ValueKey, MutableMap<ElementKey?, SharedValue<*, *>>>
         get() =
             _sharedValues
-                ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>()
-                    .also { _sharedValues = it }
+                ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SharedValue<*, *>>>().also {
+                    _sharedValues = it
+                }
 
     // TODO(b/317958526): Lazily allocate scene gesture handlers the first time they are needed.
     private val horizontalDraggableHandler: DraggableHandlerImpl
@@ -107,6 +106,13 @@ internal class SceneTransitionLayoutImpl(
                 ?: UserActionDistanceScopeImpl(layoutImpl = this).also {
                     _userActionDistanceScope = it
                 }
+
+    /**
+     * The [LookaheadScope] of this layout, that can be used to compute offsets relative to the
+     * layout.
+     */
+    internal lateinit var lookaheadScope: LookaheadScope
+        private set
 
     init {
         updateScenes(builder)
@@ -196,6 +202,8 @@ internal class SceneTransitionLayoutImpl(
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
+                lookaheadScope = this
+
                 BackHandler()
 
                 scenesToCompose().fastForEach { scene -> key(scene.key) { scene.Content() } }
@@ -285,7 +293,15 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
                 width = fromSize.width
                 height = fromSize.height
             } else {
-                val size = lerp(fromSize, toSize, transition.progress)
+                val overscrollSpec = transition.currentOverscrollSpec
+                val progress =
+                    when {
+                        overscrollSpec == null -> transition.progress
+                        overscrollSpec.scene == transition.toScene -> 1f
+                        else -> 0f
+                    }
+
+                val size = lerp(fromSize, toSize, progress)
                 width = size.width.coerceAtLeast(0)
                 height = size.height.coerceAtLeast(0)
             }

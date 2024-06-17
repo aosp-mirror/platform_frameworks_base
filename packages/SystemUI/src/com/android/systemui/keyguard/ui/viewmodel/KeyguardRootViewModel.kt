@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.StateToValue
@@ -65,7 +66,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -159,12 +159,26 @@ constructor(
                     edge = Edge.create(from = LOCKSCREEN, to = Scenes.Gone),
                     edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
                 ),
+                keyguardTransitionInteractor.isInTransition(
+                    edge = Edge.create(from = PRIMARY_BOUNCER, to = Scenes.Lockscreen),
+                    edgeWithoutSceneContainer =
+                        Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN),
+                ),
                 isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
-            ) { lockscreenToGoneTransitionRunning, isOnLockscreen, qsExpansion, shadeExpansion ->
+            ) {
+                lockscreenToGoneTransitionRunning,
+                primaryBouncerToLockscreenTransitionRunning,
+                isOnLockscreen,
+                qsExpansion,
+                shadeExpansion ->
                 // Fade out quickly as the shade expands
-                if (isOnLockscreen && !lockscreenToGoneTransitionRunning) {
+                if (
+                    isOnLockscreen &&
+                        !lockscreenToGoneTransitionRunning &&
+                        !primaryBouncerToLockscreenTransitionRunning
+                ) {
                     val alpha =
                         1f -
                             MathUtils.constrainedMap(
@@ -188,7 +202,7 @@ constructor(
         combine(
                 communalInteractor.isIdleOnCommunal,
                 keyguardTransitionInteractor
-                    .transitionValue(GONE)
+                    .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
                     .map { it == 1f }
                     .onStart { emit(false) },
                 keyguardTransitionInteractor
@@ -221,7 +235,7 @@ constructor(
                 // value emitted by any of them. Do not add flows that cannot make this guarantee.
                 merge(
                         alphaOnShadeExpansion,
-                        keyguardInteractor.dismissAlpha.filterNotNull(),
+                        keyguardInteractor.dismissAlpha,
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),

@@ -125,7 +125,7 @@ public class PersisterQueueTests {
                 processDuration < PRE_TASK_DELAY_MS);
 
         assertTrue("Target didn't call callback enough times.",
-                mFactory.waitForAllExpectedItemsProcessed(TIMEOUT_ALLOWANCE));
+                mListener.waitForAllExpectedCallbackDone(TIMEOUT_ALLOWANCE));
         // Once before processing this item, once after that.
         assertEquals(2, mListener.mProbablyDoneResults.size());
         // The last one must be called with probably done being true.

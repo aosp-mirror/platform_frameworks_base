@@ -16,7 +16,7 @@
 
 package com.android.systemui.qs.tileimpl
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -26,7 +26,7 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @MediumTest
 class TilesStatesTextTest : SysuiTestCase() {
 

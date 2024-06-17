@@ -121,10 +121,7 @@ object KeyguardSmartspaceViewBinder {
             ) {
                 val dateView =
                     constraintLayout.requireViewById<View>(sharedR.id.date_smartspace_view)
-                val weatherView =
-                    constraintLayout.requireViewById<View>(sharedR.id.weather_smartspace_view)
                 addView(dateView)
-                addView(weatherView)
             }
         }
     }
@@ -141,9 +138,6 @@ object KeyguardSmartspaceViewBinder {
             ) {
                 val dateView =
                     constraintLayout.requireViewById<View>(sharedR.id.date_smartspace_view)
-                val weatherView =
-                    constraintLayout.requireViewById<View>(sharedR.id.weather_smartspace_view)
-                removeView(weatherView)
                 removeView(dateView)
             }
         }

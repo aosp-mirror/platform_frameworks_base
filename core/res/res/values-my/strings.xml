@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ပင် နံပါတ် တိုလွန်းသည်။. အနည်းဆုံး ဂဏန်း ၄ လုံး ဖြစ်ရမည်။"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"နောက်မှ ပြန်ကြိုးစားပါ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"မျက်နှာပြင်အပြည့် ကြည့်နေသည်"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"ထွက်ရန် အပေါ်မှ အောက်သို့ ဆွဲချပါ။"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ရပါပြီ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ပိုကောင်းသောမြင်ကွင်းအတွက် လှည့်ပါ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ပိုကောင်းသောမြင်ကွင်းအတွက် ဖန်သားပြင်အပြည့်ဖြင့် <xliff:g id="NAME">%s</xliff:g> ကို ဖွင့်ပါ"</string>
@@ -2407,6 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"သီးသန့်နေရာ"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ပုံတူပွားရန်"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"အများသုံး"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"သီးသန့်နေရာ"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"သတိထားရမည့် အကြောင်းကြားချက်ပါ အချက်အလက်ကို ဖျောက်ထားသည်"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"အက်ပ်အကြောင်းအရာသည် လုံခြုံရေးအတွက် မျက်နှာပြင် မျှဝေခြင်းမှ ဖျောက်ထားသည်"</string>

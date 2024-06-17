@@ -39,9 +39,9 @@ object SettingsProxyExt {
                     }
                 }
 
-            names.forEach { name -> registerContentObserverForUser(name, observer, userId) }
+            names.forEach { name -> registerContentObserverForUserSync(name, observer, userId) }
 
-            awaitClose { unregisterContentObserver(observer) }
+            awaitClose { unregisterContentObserverSync(observer) }
         }
     }
 
@@ -57,9 +57,9 @@ object SettingsProxyExt {
                     }
                 }
 
-            names.forEach { name -> registerContentObserver(name, observer) }
+            names.forEach { name -> registerContentObserverSync(name, observer) }
 
-            awaitClose { unregisterContentObserver(observer) }
+            awaitClose { unregisterContentObserverSync(observer) }
         }
     }
 }

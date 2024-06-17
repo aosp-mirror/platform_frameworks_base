@@ -409,6 +409,22 @@ public class OverlayPresentationTest {
     }
 
     @Test
+    public void testSanitizeBounds_taskInSplitScreen() {
+        final TaskFragmentContainer overlayContainer =
+                createTestOverlayContainer(TASK_ID, "test1");
+        TaskContainer taskContainer = overlayContainer.getTaskContainer();
+        spyOn(taskContainer);
+        doReturn(new Rect(TASK_BOUNDS.left + TASK_BOUNDS.width() / 2, TASK_BOUNDS.top,
+                TASK_BOUNDS.right, TASK_BOUNDS.bottom)).when(taskContainer).getBounds();
+        final Rect taskBounds = taskContainer.getBounds();
+        final Rect bounds = new Rect(taskBounds.width() / 2, 0, taskBounds.width(),
+                taskBounds.height());
+
+        assertThat(sanitizeBounds(bounds, null, overlayContainer)
+                .isEmpty()).isFalse();
+    }
+
+    @Test
     public void testCreateOrUpdateOverlayTaskFragmentIfNeeded_createOverlay() {
         final Rect bounds = new Rect(0, 0, 100, 100);
         mSplitController.setActivityStackAttributesCalculator(params ->

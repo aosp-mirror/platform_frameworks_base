@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"பின் மிகவும் சிறியதாக உள்ளது. குறைந்தது 4 இலக்கங்கள் இருக்க வேண்டும்."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"முழுத் திரையில் காட்டுகிறது"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"வெளியேற, மேலிருந்து கீழே ஸ்வைப் செய்யவும்"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"புரிந்தது"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"சிறந்த காட்சிக்கு சுழற்றுங்கள்"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"சிறந்த காட்சிக்கு, <xliff:g id="NAME">%s</xliff:g> ஆப்ஸை முழுத்திரைப் பயன்முறையில் திறக்கவும்"</string>
@@ -2396,7 +2397,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"கீபோர்டு தளவமைப்பு <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… ஆகிய மொழிகளில் அமைக்கப்பட்டது, மாற்ற தட்டவும்."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"கீபோர்டுகள் உள்ளமைக்கப்பட்டன"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"கீபோர்டுகளைப் பார்க்க தட்டவும்"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"தனிப்பட்டது"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"இரகசியமானவை"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"குளோன்"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"பணி"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"பணி 2"</string>
@@ -2407,6 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ரகசிய இடம்"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"குளோன்"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"பொது"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"ரகசிய இடம்"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"உணர்வுபூர்வமான அறிவிப்பு உள்ளடக்கம் மறைக்கப்பட்டது"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"பாதுகாப்பிற்காக, திரைப் பகிர்வில் இருந்து ஆப்ஸ் உள்ளடக்கம் மறைக்கப்பட்டுள்ளது"</string>
@@ -2416,10 +2418,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"இது செயல்படும் விதம்"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"நிலுவையிலுள்ளது..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"கைரேகை அன்லாக் அம்சத்தை மீண்டும் அமையுங்கள்"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அது நீக்கப்பட்டது"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> மற்றும் <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அவை நீக்கப்பட்டன"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அது நீக்கபட்டது. கைரேகை மூலம் உங்கள் மொபைலை அன்லாக் செய்ய அதை மீண்டும் அமையுங்கள்."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> மற்றும் <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அவை நீக்கப்பட்டன. கைரேகை மூலம் உங்கள் மொபைலை அன்லாக் செய்ய அவற்றை மீண்டும் அமையுங்கள்."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை மீண்டும் அமையுங்கள்"</string>

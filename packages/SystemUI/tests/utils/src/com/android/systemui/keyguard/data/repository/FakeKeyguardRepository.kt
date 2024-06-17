@@ -80,7 +80,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     override val isAodAvailable: StateFlow<Boolean> = _isAodAvailable
 
     private val _isDreaming = MutableStateFlow(false)
-    override val isDreaming: Flow<Boolean> = _isDreaming
+    override val isDreaming: MutableStateFlow<Boolean> = _isDreaming
 
     private val _isDreamingWithOverlay = MutableStateFlow(false)
     override val isDreamingWithOverlay: Flow<Boolean> = _isDreamingWithOverlay
@@ -104,7 +104,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _biometricUnlockState =
         MutableStateFlow(BiometricUnlockModel(BiometricUnlockMode.NONE, null))
-    override val biometricUnlockState: Flow<BiometricUnlockModel> = _biometricUnlockState
+    override val biometricUnlockState: StateFlow<BiometricUnlockModel> =
+        _biometricUnlockState.asStateFlow()
 
     private val _fingerprintSensorLocation = MutableStateFlow<Point?>(null)
     override val fingerprintSensorLocation: Flow<Point?> = _fingerprintSensorLocation
@@ -117,6 +118,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha: StateFlow<Float> = _keyguardAlpha
+
+    override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
 
     override val lastRootViewTapPosition: MutableStateFlow<Point?> = MutableStateFlow(null)
 
@@ -203,7 +206,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _isAodAvailable.value = value
     }
 
-    fun setDreaming(isDreaming: Boolean) {
+    override fun setDreaming(isDreaming: Boolean) {
         _isDreaming.value = isDreaming
     }
 
@@ -256,6 +259,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
+    }
+
+    override fun setPanelAlpha(alpha: Float) {
+        panelAlpha.value = alpha
     }
 
     fun setIsEncryptedOrLockdown(value: Boolean) {

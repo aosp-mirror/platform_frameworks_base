@@ -146,10 +146,6 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void setMagnificationCallbackEnabled(int displayId, boolean enabled) {}
 
-    public boolean isMagnificationSystemUIConnected() {
-        return false;
-    }
-
     public boolean setSoftKeyboardShowMode(int showMode) {
         return false;
     }

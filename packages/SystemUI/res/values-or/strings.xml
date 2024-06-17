@@ -125,6 +125,32 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ଦେଖିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"ସ୍କ୍ରିନ ରେକର୍ଡିଂ ସେଭ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ସ୍କ୍ରିନ୍ ରେକର୍ଡିଂ ଆରମ୍ଭ କରିବାରେ ତ୍ରୁଟି"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"ସମସ୍ୟା ରେକର୍ଡର"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"ସମସ୍ୟାର ରେକର୍ଡିଂର ପ୍ରକ୍ରିୟାକରଣ"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"ଏକ ସମସ୍ୟା ସଂଗ୍ରହ ସେସନ ପାଇଁ ଚାଲୁଥିବା ବିଜ୍ଞପ୍ତି"</string>
@@ -135,7 +161,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"ସମସ୍ୟାର ରେକର୍ଡିଂ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"ସମସ୍ୟାର ରେକର୍ଡିଂ ଆରମ୍ଭ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନରେ ଦେଖିବା"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"ବାହାରି ଯିବା ପାଇଁ, ଶୀର୍ଷରୁ ତଳକୁ ସ୍ୱାଇପ କରନ୍ତୁ।"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"ବୁଝିଗଲି"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"ଫେରନ୍ତୁ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ହୋମ"</string>
@@ -278,11 +305,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ସେଭ କରାଯାଇଛି"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ଡିସକନେକ୍ଟ କରନ୍ତୁ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ଚାଲୁ କରନ୍ତୁ"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"ଆସନ୍ତାକାଲି ସ୍ୱତଃ ପୁଣି ଚାଲୁ ହେବ"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share ଏବଂ Find My Device ପରି ଫିଚରଗୁଡ଼ିକ ବ୍ଲୁଟୁଥ ବ୍ୟବହାର କରେ"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ବ୍ଲୁଟୁଥ ଆସନ୍ତା କାଲି ସକାଳେ ଚାଲୁ ହେବ"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"ଅଡିଓ ସେୟାରିଂ"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"ଅଡିଓ ସେୟାର କରାଯାଉଛି"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ବ୍ୟାଟେରୀ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ଅଡିଓ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ହେଡସେଟ୍‍"</string>
@@ -361,19 +391,19 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ଆପଣଙ୍କ ଡିଭାଇସ ଅନୁଭୂତିର କେଉଁ ଅଂଶ ପ୍ରଭାବିତ ହୋଇଛି?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ସମସ୍ୟାର ପ୍ରକାର ଚୟନ କରନ୍ତୁ"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ସ୍କ୍ରିନ ରେକର୍ଡ"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"ପରଫରମାନ୍ସ"</item>
-    <item msgid="1627504621139124393">"ୟୁଜର ଇଣ୍ଟରଫେସ"</item>
-    <item msgid="8309220355268900335">"ବେଟେରୀ"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"ପରଫରମାନ୍ସ"</string>
+    <string name="user_interface" msgid="3712869377953950887">"ୟୁଜର ଇଣ୍ଟରଫେସ"</string>
+    <string name="thermal" msgid="6758074791325414831">"ଥର୍ମାଲ"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"ଏକ-ହାତ ମୋଡ"</string>
-    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ହିଅରିଂ ଡିଭାଇସଗୁଡ଼ିକ"</string>
-    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ହିଅରିଂ ଡିଭାଇସଗୁଡ଼ିକ"</string>
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ଶ୍ରବଣ ଡିଭାଇସଗୁଡ଼ିକ"</string>
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"ସକ୍ରିୟ"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"ଡିସକନେକ୍ଟ ହୋଇଛି"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ଶ୍ରବଣ ଡିଭାଇସଗୁଡ଼ିକ"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ନୂଆ ଡିଭାଇସ ପେୟାର କରନ୍ତୁ"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ନୂଆ ଡିଭାଇସ ପେୟାର କରିବାକୁ କ୍ଲିକ କରନ୍ତୁ"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ପ୍ରିସେଟକୁ ଅପଡେଟ କରାଯାଇପାରିଲା ନାହିଁ"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ପ୍ରିସେଟ"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"ଲାଇଭ କେପ୍ସନ"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ କରିବେ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ଡିଭାଇସର କେମେରାକୁ ଅନବ୍ଲକ କରିବେ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ଡିଭାଇସର କ୍ୟାମେରା ଏବଂ ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ୍ କରିବେ?"</string>
@@ -727,11 +757,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ବଟନ୍‍ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"ହୋମ"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"ଫେରନ୍ତୁ"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"ଅପ ତୀର କୀ"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"ଡାଉନ ଆରୋ"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"ବାମ ତୀର କୀ"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"ଡାହାଣ ତୀର କୀ"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"କେନ୍ଦ୍ର"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"ସ୍ପେସ୍‍"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"ଏଣ୍ଟର୍"</string>
@@ -933,7 +958,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"ବ୍ୟାକଗ୍ରାଉଣ୍ଡରେ ଆପ୍‍ ଚାଲୁଛି"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ବ୍ୟାଟେରୀ ଏବଂ ଡାଟା ବ୍ୟବହାର ଉପରେ ବିବରଣୀ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"ମୋବାଇଲ୍‌ ଡାଟା ବନ୍ଦ କରିବେ?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"ଡାଟା କିମ୍ବା ଇଣ୍ଟରନେଟ୍‌କୁ <xliff:g id="CARRIER">%s</xliff:g> ଦ୍ଵାରା ଆପଣଙ୍କର  ଆକ୍ସେସ୍ ରହିବ ନାହିଁ। ଇଣ୍ଟରନେଟ୍‌ କେବଳ ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ ଉପଲବ୍ଧ ହେବ।"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"ଡାଟା କିମ୍ବା ଇଣ୍ଟର୍ନେଟକୁ <xliff:g id="CARRIER">%s</xliff:g> ଦ୍ଵାରା ଆପଣଙ୍କର ଆକ୍ସେସ ରହିବ ନାହିଁ। ଇଣ୍ଟର୍ନେଟ କେବଳ ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ ଉପଲବ୍ଧ ହେବ।"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ଆପଣଙ୍କ କେରିଅର୍"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g>କୁ ପୁଣି ସ୍ୱିଚ କରିବେ?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"ଉପଲବ୍ଧତା ଆଧାରରେ ମୋବାଇଲ ଡାଟା ସ୍ୱତଃ ସ୍ୱିଚ ହେବ ନାହିଁ"</string>
@@ -1178,6 +1203,8 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ଅଧିକ ସୂଚନା ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ଆଲାରାମ ସେଟ ହୋଇନାହିଁ"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"ସ୍କ୍ରିନ ଲକ ଲେଖନ୍ତୁ"</string>
+    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
+    <skip />
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"ଟିପଚିହ୍ନ ସେନ୍ସର୍"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ପ୍ରମାଣୀକରଣ କରନ୍ତୁ"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ଡିଭାଇସ୍ ବିଷୟରେ ସୂଚନା ଲେଖନ୍ତୁ"</string>
@@ -1210,7 +1237,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{#ଟି ଆପ ସକ୍ରିୟ ଅଛି}other{#ଟି ଆପ ସକ୍ରିୟ ଅଛି}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ନୂଆ ସୂଚନା"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ସକ୍ରିୟ ଆପ୍ସ"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"ଆପଣ ଏହି ଆପ୍ସକୁ ବ୍ୟବହାର କରୁନଥିଲେ ମଧ୍ୟ ସେଗୁଡ଼ିକ ସକ୍ରିୟ ରହିଥାଏ ଏବଂ ଚାଲୁଥାଏ। ଏହା ସେଗୁଡ଼ିକର କାର୍ଯ୍ୟକ୍ଷମତାକୁ ଉନ୍ନତ କରେ, କିନ୍ତୁ ଏହା ମଧ୍ୟ ବ୍ୟାଟେରୀ ଲାଇଫକୁ ପ୍ରଭାବିତ କରିପାରେ।"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"ଆପଣ ଏହି ଆପ୍ସକୁ ବ୍ୟବହାର କରୁନଥିଲେ ମଧ୍ୟ ସେଗୁଡ଼ିକ ସକ୍ରିୟ ରହିଥାଏ ଏବଂ ଚାଲୁଥାଏ। ଏହା ସେଗୁଡ଼ିକର କାର୍ଯ୍ୟକ୍ଷମତାକୁ ଉନ୍ନତ କରେ, କିନ୍ତୁ ଏହା ମଧ୍ୟ ବେଟେରୀ ଲାଇଫକୁ ପ୍ରଭାବିତ କରିପାରେ।"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ବନ୍ଦ ହୋଇଛି"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ହୋଇଗଲା"</string>
@@ -1275,7 +1302,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ଫୋଲ୍ଡେଡ"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ଅନଫୋଲ୍ଡେଡ"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ବେଟେରୀ ଚାର୍ଜ ବାକି ଅଛି"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"ଷ୍ଟାଇଲସ ବେଟେରୀ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ଏକ ଚାର୍ଜର ସହ ଆପଣଙ୍କ ଷ୍ଟାଇଲସକୁ କନେକ୍ଟ କରନ୍ତୁ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ଷ୍ଟାଇଲସ ବେଟେରୀର ଚାର୍ଜ କମ ଅଛି"</string>
     <string name="video_camera" msgid="7654002575156149298">"ଭିଡିଓ କେମେରା"</string>
@@ -1318,6 +1345,24 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"ଏବେ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) ଦ୍ୱାରା ବ୍ୟବହାର କରାଯାଉଛି"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଦ୍ୱାରା ବ୍ୟବହାର କରାଯାଉଛି (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ଏବେ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ଦ୍ୱାରା ବ୍ୟବହାର କରାଯାଉଛି"</string>
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"ସିଷ୍ଟମ"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ମଲ୍ଟିଟାସ୍କିଂ"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ଇନପୁଟ"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ଆପ ସର୍ଟକଟ"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ଆକ୍ସେସିବିଲିଟୀ"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"କୀବୋର୍ଡ ସର୍ଟକଟ"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ସର୍ଚ୍ଚ ସର୍ଟକଟ"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ଆଇକନକୁ ସଙ୍କୁଚିତ କରନ୍ତୁ"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ଆଇକନକୁ ବିସ୍ତାର କରନ୍ତୁ"</string>
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"କିମ୍ବା"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"କୀବୋର୍ଡ ବେକଲାଇଟ"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dରୁ %1$d ନମ୍ବର ଲେଭେଲ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ହୋମ କଣ୍ଟ୍ରୋଲ୍ସ"</string>

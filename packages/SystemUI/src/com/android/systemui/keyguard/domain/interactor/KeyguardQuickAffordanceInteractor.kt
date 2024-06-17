@@ -105,35 +105,33 @@ constructor(
         }
 
         return combine(
-                quickAffordanceAlwaysVisible(position),
-                keyguardInteractor.isDozing,
-                if (SceneContainerFlag.isEnabled) {
-                    sceneInteractor
-                        .get()
-                        .transitionState
-                        .map {
-                            when (it) {
-                                is ObservableTransitionState.Idle ->
-                                    it.currentScene == Scenes.Lockscreen
-                                is ObservableTransitionState.Transition ->
-                                    it.fromScene == Scenes.Lockscreen ||
-                                        it.toScene == Scenes.Lockscreen
-                            }
+            quickAffordanceAlwaysVisible(position),
+            keyguardInteractor.isDozing,
+            if (SceneContainerFlag.isEnabled) {
+                sceneInteractor
+                    .get()
+                    .transitionState
+                    .map {
+                        when (it) {
+                            is ObservableTransitionState.Idle ->
+                                it.currentScene == Scenes.Lockscreen
+                            is ObservableTransitionState.Transition ->
+                                it.fromScene == Scenes.Lockscreen || it.toScene == Scenes.Lockscreen
                         }
-                        .distinctUntilChanged()
-                } else {
-                    keyguardInteractor.isKeyguardShowing
-                },
-                shadeInteractor.anyExpansion.map { it < 1.0f }.distinctUntilChanged(),
-                biometricSettingsRepository.isCurrentUserInLockdown,
-            ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible, isUserInLockdown ->
-                if (!isDozing && isKeyguardShowing && isQuickSettingsVisible && !isUserInLockdown) {
-                    affordance
-                } else {
-                    KeyguardQuickAffordanceModel.Hidden
-                }
+                    }
+                    .distinctUntilChanged()
+            } else {
+                keyguardInteractor.isKeyguardShowing
+            },
+            shadeInteractor.anyExpansion.map { it < 1.0f }.distinctUntilChanged(),
+            biometricSettingsRepository.isCurrentUserInLockdown,
+        ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible, isUserInLockdown ->
+            if (!isDozing && isKeyguardShowing && isQuickSettingsVisible && !isUserInLockdown) {
+                affordance
+            } else {
+                KeyguardQuickAffordanceModel.Hidden
             }
-            .distinctUntilChanged()
+        }
     }
 
     /**

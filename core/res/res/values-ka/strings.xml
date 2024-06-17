@@ -161,7 +161,7 @@
     <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"დაკავშირებულია დაშიფრულ ქსელთან <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
     <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM-ბარათის კავშირი ახლა ბევრად უსაფრთხო გახდა"</string>
     <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"დაკავშირებულია დაუშიფრავ ქსელთან"</string>
-    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"ზარები, შეტყობინებები და მონაცემები ამჟამად უფრო მოწყვლადია თქვენი <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM-ბარათით სარგებლობისას"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"ზარები, შეტყობინებები/მონაცემები უფრო მოწყვლადია <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM-ბარათის გამოყენებისას"</string>
     <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"ზარები, შეტყობინებები და მონაცემები ამჟამად უფრო მოწყვლადია <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM-ბარათით სარგებლობისას.\n\nკავშირის ხელახლა დაშიფვრის შემთხვევაში კიდევ ერთ შეტყობინებას მიიღებთ."</string>
     <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"მობილური ქსელის უსაფრთოების პარამეტრები"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"შეიტყვეთ მეტი"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN ძალიან მოკლეა. უნდა შედგებოდეს სულ ცოტა 4 ციფრისგან."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"სცადეთ მოგვიანებით"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"სრულ ეკრანზე ნახვა"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"გამოსვლისათვის, გაასრიალეთ ზემოდან ქვემოთ."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"გასაგებია"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"შეატრიალეთ უკეთესი ხედისთვის"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"გახსენით <xliff:g id="NAME">%s</xliff:g> სრულ ეკრანზე უკეთესი ხედისთვის"</string>
@@ -2407,6 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"კერძო სივრცე"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"კლონის შექმნა"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"საერთო"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"კერძო სივრცე"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"სენსიტიური შეტყობინების კონტენტი დამალულია"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ეკრანის გაზიარებიდან აპის კონტენტი დამალულია უსაფრთხოების მიზნით"</string>

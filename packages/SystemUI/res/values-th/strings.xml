@@ -125,6 +125,32 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"แตะเพื่อดู"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"เกิดข้อผิดพลาดในการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"เกิดข้อผิดพลาดขณะเริ่มบันทึกหน้าจอ"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"โปรแกรมบันทึกปัญหา"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"กำลังประมวลผลการบันทึกปัญหา"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการรวบรวมปัญหา"</string>
@@ -135,7 +161,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"เกิดข้อผิดพลาดในการบันทึกไฟล์บันทึกปัญหา"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"เกิดข้อผิดพลาดในการเริ่มบันทึกปัญหา"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"กำลังดูแบบเต็มหน้าจอ"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"หากต้องการออก ให้ปัดลงจากด้านบน"</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"รับทราบ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"กลับ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"หน้าแรก"</string>
@@ -278,11 +305,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"บันทึกแล้ว"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ยกเลิกการเชื่อมต่อ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"เปิดใช้งาน"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"เปิดอีกครั้งโดยอัตโนมัติในวันพรุ่งนี้"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"ฟีเจอร์ต่างๆ เช่น Quick Share และหาอุปกรณ์ของฉัน ใช้บลูทูธ"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"ฟีเจอร์ต่างๆ เช่น Quick Share และ \"หาอุปกรณ์ของฉัน\" ใช้บลูทูธ"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"บลูทูธจะเปิดพรุ่งนี้เช้า"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"การแชร์เสียง"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"กำลังแชร์เสียง"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"เสียง"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ชุดหูฟัง"</string>
@@ -361,19 +391,19 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ประสบการณ์การใช้งานอุปกรณ์ส่วนใดที่ได้รับผลกระทบ"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"เลือกประเภทปัญหา"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"บันทึกหน้าจอ"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"ประสิทธิภาพ"</item>
-    <item msgid="1627504621139124393">"อินเทอร์เฟซผู้ใช้"</item>
-    <item msgid="8309220355268900335">"แบตเตอรี่"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"ประสิทธิภาพ"</string>
+    <string name="user_interface" msgid="3712869377953950887">"อินเทอร์เฟซผู้ใช้"</string>
+    <string name="thermal" msgid="6758074791325414831">"ความร้อน"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"โหมดมือเดียว"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"เครื่องช่วยฟัง"</string>
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"ใช้งานอยู่"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"ยกเลิกการเชื่อมต่อแล้ว"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"เครื่องช่วยฟัง"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"จับคู่อุปกรณ์ใหม่"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"คลิกเพื่อจับคู่อุปกรณ์ใหม่"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ไม่สามารถอัปเดตค่าที่กำหนดล่วงหน้า"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ค่าที่กำหนดล่วงหน้า"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"คำบรรยายสด"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"เลิกบล็อกไมโครโฟนของอุปกรณ์ใช่ไหม"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"เลิกบล็อกกล้องของอุปกรณ์ใช่ไหม"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"เลิกบล็อกกล้องและไมโครโฟนของอุปกรณ์ใช่ไหม"</string>
@@ -727,11 +757,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ปุ่ม <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"กลับ"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"ลูกศรขึ้น"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"ลูกศรลง"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"ลูกศรซ้าย"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"ลูกศรขวา"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"กึ่งกลาง"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"วรรค"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
@@ -1178,6 +1203,8 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"แตะดูข้อมูลเพิ่มเติม"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"ไม่มีการตั้งปลุก"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"ป้อนข้อมูลการล็อกหน้าจอ"</string>
+    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
+    <skip />
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"เซ็นเซอร์ลายนิ้วมือ"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ตรวจสอบสิทธิ์"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"เข้าถึงอุปกรณ์"</string>
@@ -1275,7 +1302,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"พับ"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"กางออก"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"เหลือแบตเตอรี่ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"แบตเตอรี่สไตลัส <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"เชื่อมต่อสไตลัสกับที่ชาร์จ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"แบตเตอรี่สไตลัสเหลือน้อย"</string>
     <string name="video_camera" msgid="7654002575156149298">"กล้องวิดีโอ"</string>
@@ -1318,6 +1345,24 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"ใช้ล่าสุดโดย <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"ใช้อยู่โดย <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ใช้ล่าสุดโดย <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"ระบบ"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"การทํางานหลายอย่างพร้อมกัน"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"อินพุต"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"แป้นพิมพ์ลัดของแอป"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"การช่วยเหลือพิเศษ"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"แป้นพิมพ์ลัด"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ค้นหาแป้นพิมพ์ลัด"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ไอคอนยุบ"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ไอคอนขยาย"</string>
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"หรือ"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ไฟแบ็กไลต์ของแป้นพิมพ์"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"ระดับที่ %1$d จาก %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ระบบควบคุมอุปกรณ์สมาร์ทโฮม"</string>

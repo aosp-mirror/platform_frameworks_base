@@ -25,7 +25,6 @@ import static com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.Flags.predictiveBackAnimateShade;
-import static com.android.systemui.Flags.shadeCollapseActivityLaunchFix;
 import static com.android.systemui.Flags.smartspaceRelocateToBottom;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
@@ -484,7 +483,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private float mBottomAreaShadeAlpha;
     final ValueAnimator mBottomAreaShadeAlphaAnimator;
     private final AnimatableProperty mPanelAlphaAnimator = AnimatableProperty.from("panelAlpha",
-            NotificationPanelView::setPanelAlphaInternal,
+            (view, alpha) -> {
+                setAlphaInternal(alpha);
+            },
             NotificationPanelView::getCurrentPanelAlpha,
             R.id.panel_alpha_animator_tag, R.id.panel_alpha_animator_start_tag,
             R.id.panel_alpha_animator_end_tag);
@@ -537,8 +538,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final KeyguardMediaController mKeyguardMediaController;
 
     private final Optional<KeyguardUnfoldTransition> mKeyguardUnfoldTransition;
-    private final Optional<NotificationPanelUnfoldAnimationController>
-            mNotificationPanelUnfoldAnimationController;
 
     /** The drag distance required to fully expand the split shade. */
     private int mSplitShadeFullTransitionDistance;
@@ -964,8 +963,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         mKeyguardUnfoldTransition = unfoldComponent.map(
                 SysUIUnfoldComponent::getKeyguardUnfoldTransition);
-        mNotificationPanelUnfoldAnimationController = unfoldComponent.map(
-                SysUIUnfoldComponent::getNotificationPanelUnfoldAnimationController);
 
         updateUserSwitcherFlags();
         mKeyguardBottomAreaViewModel = keyguardBottomAreaViewModel;
@@ -1131,9 +1128,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mShadeHeaderController.init();
         mShadeHeaderController.setShadeCollapseAction(
                 () -> collapse(/* delayed= */ false , /* speedUpFactor= */ 1.0f));
-        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
-        mNotificationPanelUnfoldAnimationController.ifPresent(controller ->
-                controller.setup(mNotificationContainerParent));
 
         // Dreaming->Lockscreen
         collectFlow(
@@ -1511,9 +1505,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         if (!KeyguardBottomAreaRefactor.isEnabled()) {
             setKeyguardBottomAreaVisibility(mBarState, false);
         }
-
-        mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
-        mNotificationPanelUnfoldAnimationController.ifPresent(u -> u.setup(mView));
     }
 
     private void attachSplitShadeMediaPlayerContainer(FrameLayout container) {
@@ -1797,6 +1788,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void updateKeyguardStatusViewAlignment(boolean animate) {
         boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
+        mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
         if (MigrateClocksToBlueprint.isEnabled()) {
             mKeyguardInteractor.setClockShouldBeCentered(shouldBeCentered);
             return;
@@ -1804,7 +1796,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ConstraintLayout layout = mNotificationContainerParent;
         mKeyguardStatusViewController.updateAlignment(
                 layout, mSplitShadeEnabled, shouldBeCentered, animate);
-        mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
     }
 
     private boolean shouldKeyguardStatusViewBeCentered() {
@@ -3085,6 +3076,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
     }
 
+    private void setAlphaInternal(float alpha) {
+        mKeyguardInteractor.setPanelAlpha(alpha / 255f);
+        mView.setPanelAlphaInternal(alpha);
+    }
+
     @Override
     public void setAlphaChangeAnimationEndAction(Runnable r) {
         mPanelAlphaEndAction = r;
@@ -4128,11 +4124,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public boolean canBeCollapsed() {
-        return !isFullyCollapsed() && !isTracking() && !isClosing()
-                // Don't try to collapse if on keyguard, as the expansion fraction is 1 in this
-                // case.
-                && !(shadeCollapseActivityLaunchFix() && mExpandedFraction == 1f
-                && mBarState == KEYGUARD);
+        return !isFullyCollapsed() && !isTracking() && !isClosing();
     }
 
     public void instantCollapse() {

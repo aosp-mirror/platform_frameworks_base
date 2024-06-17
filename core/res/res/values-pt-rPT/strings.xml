@@ -733,7 +733,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Não é possível criar o seu modelo de rosto. Tente novamente."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Óculos escuros detetados. O seu rosto tem de estar completamente visível."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máscara detetada. Todo o rosto tem de estar visível"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Cobertura facial detetada. O seu rosto tem de estar completamente visível."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Não pode validar o rosto. Hardware não disponível."</string>
@@ -1292,7 +1292,7 @@
     <string name="android_upgrading_complete" msgid="409800058018374746">"A concluir o arranque."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Premiu o botão ligar/desligar. Geralmente, esta ação desliga o ecrã.\n\nExperimente tocar levemente ao configurar a sua impressão digital."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Para terminar, desligue o ecrã"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Desligar"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Desativar"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continuar a validar a impressão digital?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Premiu o botão ligar/desligar. Geralmente, esta ação desliga o ecrã.\n\nExperimente tocar levemente para validar a sua impressão digital."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Desligar ecrã"</string>
@@ -1434,11 +1434,11 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Toque para selecionar o idioma e o esquema"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Sobrepor a outras apps"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Sobreposição a outras apps"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"A app <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplicações"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras app"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"Se não quer que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
-    <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desligar"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desativar"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"A verificar o <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"A rever o conteúdo atual…"</string>
     <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"A analisar o armazenamento de multimédia"</string>
@@ -1884,7 +1884,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"O PIN é demasiado pequeno. Deve ter, no mínimo, 4 dígitos."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Tente mais tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização de ecrã inteiro"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Para sair, deslize rapidamente para baixo a partir da parte superior."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rode para uma melhor visualização"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Abra <xliff:g id="NAME">%s</xliff:g> em ecrã inteiro para uma melhor visualização"</string>
@@ -2408,6 +2409,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espaço privado"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clone"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Comum"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Espaço privado"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Conteúdo das notificações sensíveis ocultado"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Conteúdo da app ocultado da partilha de ecrã por motivos de segurança"</string>

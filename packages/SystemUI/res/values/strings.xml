@@ -319,6 +319,35 @@
     <string name="screenrecord_save_error">Error saving screen recording</string>
     <!-- A toast message shown when the screen recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
     <string name="screenrecord_start_error">Error starting screen recording</string>
+    <!-- Title for a dialog shown to the user that will let them stop recording their screen [CHAR LIMIT=50] -->
+    <string name="screenrecord_stop_dialog_title">Stop recording screen?</string>
+    <!-- Text telling a user that they will stop recording their screen if they click the "Stop recording" button [CHAR LIMIT=100] -->
+    <string name="screenrecord_stop_dialog_message">You will stop recording your screen</string>
+    <!-- Text telling a user that they will stop recording the contents of the specified [app_name] if they click the "Stop recording" button. Note that the app name will appear in bold. [CHAR LIMIT=100] -->
+    <string name="screenrecord_stop_dialog_message_specific_app">You will stop recording &lt;b><xliff:g id="app_name" example="Photos App">%1$s</xliff:g>&lt;/b></string>
+    <!-- Button to stop a screen recording [CHAR LIMIT=35] -->
+    <string name="screenrecord_stop_dialog_button">Stop recording</string>
+
+    <!-- Title for a dialog shown to the user that will let them stop sharing their screen to another app on the device [CHAR LIMIT=50] -->
+    <string name="share_to_app_stop_dialog_title">Stop sharing screen?</string>
+    <!-- Text telling a user that they will stop sharing their screen if they click the "Stop sharing" button [CHAR LIMIT=100] -->
+    <string name="share_to_app_stop_dialog_message">You will stop sharing your screen</string>
+    <!-- Text telling a user that they will stop sharing the contents of the specified [app_name] if they click the "Stop sharing" button. Note that the app name will appear in bold. [CHAR LIMIT=100] -->
+    <string name="share_to_app_stop_dialog_message_specific_app">You will stop sharing &lt;b><xliff:g id="app_name" example="Photos App">%1$s</xliff:g>&lt;/b></string>
+    <!-- Button to stop screen sharing [CHAR LIMIT=35] -->
+    <string name="share_to_app_stop_dialog_button">Stop sharing</string>
+
+    <!-- Title for a dialog shown to the user that will let them stop casting their screen to a different device [CHAR LIMIT=50] -->
+    <string name="cast_to_other_device_stop_dialog_title">Stop casting screen?</string>
+    <!-- Text telling a user that they will stop casting their screen to a different device if they click the "Stop casting" button [CHAR LIMIT=100] -->
+    <string name="cast_to_other_device_stop_dialog_message">You will stop casting your screen</string>
+    <!-- Text telling a user that they will stop casting the contents of the specified [app_name] to a different device if they click the "Stop casting" button. Note that the app name will appear in bold.  [CHAR LIMIT=100] -->
+    <string name="cast_to_other_device_stop_dialog_message_specific_app">You will stop casting &lt;b><xliff:g id="app_name" example="Photos App">%1$s</xliff:g>&lt;/b></string>
+    <!-- Button to stop screen casting to a different device [CHAR LIMIT=35] -->
+    <string name="cast_to_other_device_stop_dialog_button">Stop casting</string>
+
+    <!-- Button to close a dialog without doing any action [CHAR LIMIT=20] -->
+    <string name="close_dialog_button">Close</string>
 
     <!-- Notification title displayed for issue recording [CHAR LIMIT=50]-->
     <string name="issuerecord_title">Issue Recorder</string>
@@ -344,7 +373,7 @@
     <!-- Cling help message title when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
     <string name="immersive_cling_title">Viewing full screen</string>
     <!-- Cling help message description when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
-    <string name="immersive_cling_description">To exit, swipe down from the top.</string>
+    <string name="immersive_cling_description">To exit, swipe down from the top of your screen</string>
     <!-- Cling help message confirmation button when hiding the navigation bar entering immersive mode [CHAR LIMIT=30] -->
     <string name="immersive_cling_positive">Got it</string>
 
@@ -693,15 +722,15 @@
     <!-- QuickSettings: Accessibility label to activate a device [CHAR LIMIT=NONE]-->
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate">activate</string>
     <!-- QuickSettings: Bluetooth auto on tomorrow [CHAR LIMIT=NONE]-->
-    <string name="turn_on_bluetooth_auto_tomorrow">Automatically turn on again tomorrow</string>
+    <string name="turn_on_bluetooth_auto_tomorrow">Automatically turn on tomorrow</string>
     <!-- QuickSettings: Bluetooth auto on info text when disabled [CHAR LIMIT=NONE]-->
     <string name="turn_on_bluetooth_auto_info_disabled">Features like Quick Share and Find My Device use Bluetooth</string>
     <!-- QuickSettings: Bluetooth auto on info text when enabled [CHAR LIMIT=NONE]-->
     <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow morning</string>
     <!-- QuickSettings: Bluetooth dialog audio sharing button text [CHAR LIMIT=50]-->
-    <string name="quick_settings_bluetooth_audio_sharing_button">Audio Sharing</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button">Share audio</string>
     <!-- QuickSettings: Bluetooth dialog audio sharing button text when sharing audio [CHAR LIMIT=50]-->
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing Audio</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing audio</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
@@ -895,11 +924,9 @@
     <string name="qs_record_issue_dropdown_screenrecord">Screen record</string>
 
     <!-- QuickSettings: Issue Type Drop down choices list in Record Issue Start Dialog [CHAR LIMIT=30] -->
-    <string-array name="qs_record_issue_types">
-        <item>Performance</item>
-        <item>User Interface</item>
-        <item>Battery</item>
-    </string-array>
+    <string name="performance">Performance</string>
+    <string name="user_interface">User Interface</string>
+    <string name="thermal">Thermal</string>
 
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
@@ -907,6 +934,10 @@
     <!-- Hearing devices -->
     <!-- QuickSettings: Hearing devices [CHAR LIMIT=NONE] -->
     <string name="quick_settings_hearing_devices_label">Hearing devices</string>
+    <!-- QuickSettings: Hearing Devices' secondary label shown when the hearing aids are currently connected. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hearing_devices_connected">Active</string>
+    <!-- QuickSettings: Hearing devices' secondary label shown when there is no connected hearing aids. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hearing_devices_disconnected">Disconnected</string>
     <!-- QuickSettings: Quick Settings Hearing devices dialog title [CHAR LIMIT=30] -->
     <string name="quick_settings_hearing_devices_dialog_title">Hearing devices</string>
     <!-- QuickSettings: Hearing devices dialog pair new device [CHAR LIMIT=NONE]-->
@@ -1944,15 +1975,15 @@
     <!-- Name used to refer to the "Back" key on the keyboard. -->
     <string name="keyboard_key_back">Back</string>
     <!-- Name used to refer to the "Up" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_up">Up arrow</string>
+    <string name="keyboard_key_dpad_up" translatable="false">Up arrow</string>
     <!-- Name used to refer to the "Down" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_down">Down arrow</string>
+    <string name="keyboard_key_dpad_down" translatable="false">Down arrow</string>
     <!-- Name used to refer to the "Left" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_left">Left arrow</string>
+    <string name="keyboard_key_dpad_left" translatable="false">Left arrow</string>
     <!-- Name used to refer to the "Right" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_right">Right arrow</string>
+    <string name="keyboard_key_dpad_right" translatable="false">Right arrow</string>
     <!-- Name used to refer to the "Center" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_center">Center</string>
+    <string name="keyboard_key_dpad_center" translatable="false">Center</string>
     <!-- Name used to refer to the "Tab" key on the keyboard. -->
     <string name="keyboard_key_tab">Tab</string>
     <!-- Name used to refer to the "Space" key on the keyboard. -->
@@ -3092,6 +3123,8 @@
 
     <!-- Accessibility label for a11y action to show the bouncer (pin/pattern/password) screen lock [CHAR LIMIT=NONE] -->
     <string name="accessibility_bouncer">enter screen lock</string>
+    <!-- Accessibility label for side fingerprint sensor indicator [CHAR LIMIT=NONE] -->
+    <string name="accessibility_side_fingerprint_indicator_label">Touch the fingerprint sensor. It\u2019s the shorter button on the side of the phone</string>
     <!-- Accessibility label for fingerprint sensor [CHAR LIMIT=NONE] -->
     <string name="accessibility_fingerprint_label">Fingerprint sensor</string>
     <!-- Accessibility action for tapping on an affordance that will bring up the user's
@@ -3369,7 +3402,7 @@
     <string name="rotation_tile_with_posture_secondary_label_template">%1$s / %2$s</string>
     <!-- Title for notification of low stylus battery with percentage. "percentage" is
         the value of the battery capacity remaining [CHAR LIMIT=none]-->
-    <string name="stylus_battery_low_percentage"><xliff:g id="percentage" example="16%">%s</xliff:g> battery remaining</string>
+    <string name="stylus_battery_low_percentage">Stylus battery <xliff:g id="percentage" example="16%">%s</xliff:g></string>
     <!-- Subtitle for the notification sent when a stylus battery is low. [CHAR LIMIT=none]-->
     <string name="stylus_battery_low_subtitle">Connect your stylus to a charger</string>
 
@@ -3527,6 +3560,23 @@
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_content_description_expand_icon">Expand icon</string>
+    <!-- Word that separates different possible key combinations of a shortcut. For example the
+         "Go to home screen" shortcut could be triggered using "home button" OR "ctrl + h".
+         This is that "or" separator.
+         The keyboard shortcut helper is a  component that shows the  user which keyboard shortcuts
+         they can use.
+         [CHAR LIMIT=NONE]
+          -->
+    <string name="shortcut_helper_key_combinations_or_separator">or</string>
+
+    <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_back_gesture_button">Back gesture</string>
+    <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_home_gesture_button">Home gesture</string>
+    <!-- Label for button opening tutorial on using Action key from keyboard [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_action_key_button">Action key</string>
+    <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_done_button">Done</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>

@@ -85,6 +85,26 @@ constructor(
         )
     }
 
+    override fun startPendingIntentWithoutDismissing(
+        intent: PendingIntent,
+        dismissShade: Boolean,
+        intentSentUiThreadCallback: Runnable?,
+        animationController: ActivityTransitionAnimator.Controller?,
+        fillInIntent: Intent?,
+        extraOptions: Bundle?
+    ) {
+        activityStarterInternal.startPendingIntentDismissingKeyguard(
+            intent = intent,
+            intentSentUiThreadCallback = intentSentUiThreadCallback,
+            animationController = animationController,
+            showOverLockscreen = true,
+            skipLockscreenChecks = true,
+            dismissShade = dismissShade,
+            fillInIntent = fillInIntent,
+            extraOptions = extraOptions,
+        )
+    }
+
     override fun startPendingIntentMaybeDismissingKeyguard(
         intent: PendingIntent,
         intentSentUiThreadCallback: Runnable?,

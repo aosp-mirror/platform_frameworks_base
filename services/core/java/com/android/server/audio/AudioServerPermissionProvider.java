@@ -16,40 +16,97 @@
 
 package com.android.server.audio;
 
+import static android.Manifest.permission.ACCESS_ULTRASOUND;
+import static android.Manifest.permission.BLUETOOTH_CONNECT;
+import static android.Manifest.permission.CALL_AUDIO_INTERCEPTION;
+import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.CAPTURE_AUDIO_OUTPUT;
+import static android.Manifest.permission.CAPTURE_MEDIA_OUTPUT;
+import static android.Manifest.permission.CAPTURE_TUNER_AUDIO_INPUT;
+import static android.Manifest.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT;
+import static android.Manifest.permission.MODIFY_AUDIO_ROUTING;
+import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS;
+import static android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS;
+import static android.Manifest.permission.MODIFY_PHONE_STATE;
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
+
 import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.IntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.media.permission.INativePermissionController;
+import com.android.media.permission.PermissionEnum;
 import com.android.media.permission.UidPackageState;
 import com.android.server.pm.pkg.PackageState;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /** Responsible for synchronizing system server permission state to the native audioserver. */
 public class AudioServerPermissionProvider {
 
+    static final String[] MONITORED_PERMS = new String[PermissionEnum.ENUM_SIZE];
+
+    static {
+        MONITORED_PERMS[PermissionEnum.RECORD_AUDIO] = RECORD_AUDIO;
+        MONITORED_PERMS[PermissionEnum.MODIFY_AUDIO_ROUTING] = MODIFY_AUDIO_ROUTING;
+        MONITORED_PERMS[PermissionEnum.MODIFY_AUDIO_SETTINGS] = MODIFY_AUDIO_SETTINGS;
+        MONITORED_PERMS[PermissionEnum.MODIFY_PHONE_STATE] = MODIFY_PHONE_STATE;
+        MONITORED_PERMS[PermissionEnum.MODIFY_DEFAULT_AUDIO_EFFECTS] = MODIFY_DEFAULT_AUDIO_EFFECTS;
+        MONITORED_PERMS[PermissionEnum.WRITE_SECURE_SETTINGS] = WRITE_SECURE_SETTINGS;
+        MONITORED_PERMS[PermissionEnum.CALL_AUDIO_INTERCEPTION] = CALL_AUDIO_INTERCEPTION;
+        MONITORED_PERMS[PermissionEnum.ACCESS_ULTRASOUND] = ACCESS_ULTRASOUND;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_AUDIO_OUTPUT] = CAPTURE_AUDIO_OUTPUT;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_MEDIA_OUTPUT] = CAPTURE_MEDIA_OUTPUT;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_AUDIO_HOTWORD] = CAPTURE_AUDIO_HOTWORD;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_TUNER_AUDIO_INPUT] = CAPTURE_TUNER_AUDIO_INPUT;
+        MONITORED_PERMS[PermissionEnum.CAPTURE_VOICE_COMMUNICATION_OUTPUT] =
+                CAPTURE_VOICE_COMMUNICATION_OUTPUT;
+        MONITORED_PERMS[PermissionEnum.BLUETOOTH_CONNECT] = BLUETOOTH_CONNECT;
+    }
+
     private final Object mLock = new Object();
+    private final Supplier<int[]> mUserIdSupplier;
+    private final BiPredicate<Integer, String> mPermissionPredicate;
 
     @GuardedBy("mLock")
     private INativePermissionController mDest;
 
     @GuardedBy("mLock")
     private final Map<Integer, Set<String>> mPackageMap;
+    // Values are sorted
+    @GuardedBy("mLock")
+    private final int[][] mPermMap = new int[PermissionEnum.ENUM_SIZE][];
+
+    @GuardedBy("mLock")
+    private boolean mIsUpdateDeferred = true;
 
     /**
      * @param appInfos - PackageState for all apps on the device, used to populate init state
      */
-    public AudioServerPermissionProvider(Collection<PackageState> appInfos) {
+    public AudioServerPermissionProvider(
+            Collection<PackageState> appInfos,
+            BiPredicate<Integer, String> permissionPredicate,
+            Supplier<int[]> userIdSupplier) {
+        for (int i = 0; i < PermissionEnum.ENUM_SIZE; i++) {
+            Objects.requireNonNull(MONITORED_PERMS[i]);
+        }
+        mUserIdSupplier = userIdSupplier;
+        mPermissionPredicate = permissionPredicate;
         // Initialize the package state
         mPackageMap = generatePackageMappings(appInfos);
     }
@@ -64,6 +121,18 @@ public class AudioServerPermissionProvider {
         synchronized (mLock) {
             mDest = pc;
             resetNativePackageState();
+            try {
+                for (byte i = 0; i < PermissionEnum.ENUM_SIZE; i++) {
+                    if (mIsUpdateDeferred) {
+                        mPermMap[i] = getUidsHoldingPerm(MONITORED_PERMS[i]);
+                    }
+                    mDest.populatePermissionState(i, mPermMap[i]);
+                }
+                mIsUpdateDeferred = false;
+            } catch (RemoteException e) {
+                // We will re-init the state when the service comes back up
+                mDest = null;
+            }
         }
     }
 
@@ -106,6 +175,30 @@ public class AudioServerPermissionProvider {
         }
     }
 
+    /** Called whenever any package/permission changes occur which invalidate uids holding perms */
+    public void onPermissionStateChanged() {
+        synchronized (mLock) {
+            if (mDest == null) {
+                mIsUpdateDeferred = true;
+                return;
+            }
+            try {
+                for (byte i = 0; i < PermissionEnum.ENUM_SIZE; i++) {
+                    var newPerms = getUidsHoldingPerm(MONITORED_PERMS[i]);
+                    if (!Arrays.equals(newPerms, mPermMap[i])) {
+                        mPermMap[i] = newPerms;
+                        mDest.populatePermissionState(i, newPerms);
+                    }
+                }
+            } catch (RemoteException e) {
+                // We will re-init the state when the service comes back up
+                mDest = null;
+                // We didn't necessarily finish
+                mIsUpdateDeferred = true;
+            }
+        }
+    }
+
     /** Called when full syncing package state to audioserver. */
     @GuardedBy("mLock")
     private void resetNativePackageState() {
@@ -126,6 +219,23 @@ public class AudioServerPermissionProvider {
             // We will re-init the state when the service comes back up
             mDest = null;
         }
+    }
+
+    @GuardedBy("mLock")
+    /** Return all uids (not app-ids) which currently hold a given permission. Not app-op aware */
+    private int[] getUidsHoldingPerm(String perm) {
+        IntArray acc = new IntArray();
+        for (int userId : mUserIdSupplier.get()) {
+            for (int appId : mPackageMap.keySet()) {
+                int uid = UserHandle.getUid(userId, appId);
+                if (mPermissionPredicate.test(uid, perm)) {
+                    acc.add(uid);
+                }
+            }
+        }
+        var unwrapped = acc.toArray();
+        Arrays.sort(unwrapped);
+        return unwrapped;
     }
 
     /**

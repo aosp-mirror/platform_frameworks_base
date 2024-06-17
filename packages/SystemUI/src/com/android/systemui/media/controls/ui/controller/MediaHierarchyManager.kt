@@ -36,6 +36,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.traceSection
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Flags.mediaControlsLockscreenShadeBugFix
 import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -167,6 +168,7 @@ constructor(
     private var targetBounds: Rect = Rect()
     private val mediaFrame
         get() = mediaCarouselController.mediaFrame
+
     private var statusbarState: Int = statusBarStateController.state
     private var animator =
         ValueAnimator.ofFloat(0.0f, 1.0f).apply {
@@ -482,8 +484,7 @@ constructor(
             object : StatusBarStateController.StateListener {
                 override fun onStatePreChange(oldState: Int, newState: Int) {
                     // We're updating the location before the state change happens, since we want
-                    // the
-                    // location of the previous state to still be up to date when the animation
+                    // the location of the previous state to still be up to date when the animation
                     // starts
                     if (
                         newState == StatusBarState.SHADE_LOCKED &&
@@ -587,6 +588,17 @@ constructor(
             }
         }
 
+        if (mediaControlsLockscreenShadeBugFix()) {
+            coroutineScope.launch {
+                shadeInteractor.shadeExpansion.collect { expansion ->
+                    if (expansion >= 1f || expansion <= 0f) {
+                        // Shade has fully expanded or collapsed: force transition amount update
+                        setTransitionToFullShadeAmount(expansion)
+                    }
+                }
+            }
+        }
+
         val settingsObserver: ContentObserver =
             object : ContentObserver(handler) {
                 override fun onChange(selfChange: Boolean, uri: Uri?) {
@@ -600,7 +612,7 @@ constructor(
                     }
                 }
             }
-        secureSettings.registerContentObserverForUser(
+        secureSettings.registerContentObserverForUserSync(
             Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
             settingsObserver,
             UserHandle.USER_ALL

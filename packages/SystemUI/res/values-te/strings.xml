@@ -125,6 +125,32 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"చూడటానికి ట్యాప్ చేయండి"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"స్క్రీన్ రికార్డింగ్‌ను సేవ్ చేయడంలో ఎర్రర్ ఏర్పడింది"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"స్క్రీన్ రికార్డింగ్ ప్రారంభించడంలో ఎర్రర్ ఏర్పడింది"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"సమస్య రికార్డర్"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"సమస్య రికార్డింగ్ ప్రాసెసింగ్"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"సమస్య సేకరణ సెషన్ కోసం కొనసాగుతోన్న నోటిఫికేషన్"</string>
@@ -135,7 +161,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"సమస్య రికార్డింగ్‌ను సేవ్ చేయడంలో ఎర్రర్ ఏర్పడింది"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"సమస్య రికార్డింగ్‌ను ప్రారంభించడంలో ఎర్రర్ ఏర్పడింది"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"ఫుల్ స్క్రీన్‌లో చూస్తున్నారు"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"నిష్క్రమించడానికి, పై నుండి కిందికి స్వైప్ చేయండి."</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"సరే"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"వెనుకకు"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"హోమ్"</string>
@@ -278,11 +305,12 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"సేవ్ అయ్యింది"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"డిస్‌కనెక్ట్ చేయండి"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"యాక్టివేట్ చేయండి"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"రేపు మళ్లీ ఆటోమేటిక్‌గా ఆన్ చేస్తుంది"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"క్విక్ షేర్, Find My Device వంటి ఫీచర్‌లు బ్లూటూత్‌ను ఉపయోగిస్తాయి"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"బ్లూటూత్ రేపు ఉదయం ఆన్ అవుతుంది"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"ఆడియో షేరింగ్"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"ఆడియోను షేర్ చేస్తున్నారు"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ఆడియోను షేర్ చేయండి"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ఆడియోను షేర్ చేస్తున్నారు"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> బ్యాటరీ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ఆడియో"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"హెడ్‌సెట్"</string>
@@ -361,19 +389,19 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"మీ పరికర అనుభవంలో ఏ భాగం ప్రభావితమైంది?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"సమస్య రకాన్ని ఎంచుకోండి"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"స్క్రీన్ రికార్డ్"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"పనితీరు"</item>
-    <item msgid="1627504621139124393">"యూజర్ ఇంటర్‌ఫేస్"</item>
-    <item msgid="8309220355268900335">"బ్యాటరీ"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"పనితీరు"</string>
+    <string name="user_interface" msgid="3712869377953950887">"యూజర్ ఇంటర్‌ఫేస్"</string>
+    <string name="thermal" msgid="6758074791325414831">"థర్మల్"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"వన్-హ్యాండెడ్ మోడ్"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"వినికిడి పరికరాలు"</string>
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"యాక్టివ్"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"డిస్‌కనెక్ట్ అయ్యింది"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"వినికిడి పరికరాలు"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"కొత్త పరికరాన్ని పెయిర్ చేయండి"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"కొత్త పరికరాన్ని పెయిర్ చేయడానికి క్లిక్ చేయండి"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ప్రీసెట్‌ను అప్‌డేట్ చేయడం సాధ్యపడలేదు"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ప్రీసెట్"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"లైవ్ క్యాప్షన్"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"పరికరం మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయమంటారా?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"పరికరంలోని కెమెరాను అన్‌బ్లాక్ చేయమంటారా?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"పరికరంలోని కెమెరా, మైక్రోఫోన్‌లను అన్‌బ్లాక్ చేయమంటారా?"</string>
@@ -727,11 +755,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"బటన్ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"వెనుకకు"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"పై వైపు బాణం"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"కింది వైపు బాణం"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"ఎడమ వైపు బాణం"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"కుడి వైపు బాణం"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"మధ్య"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
@@ -988,7 +1011,7 @@
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"మాగ్నిఫికేషన్ సెట్టింగ్‌లను మూసివేయండి"</string>
     <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"సవరణ మోడ్ నుండి ఎగ్జిట్ అవ్వండి"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"సైజ్ మార్చడానికి మూలను లాగండి"</string>
-    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"డయాగనల్ స్క్రోలింగ్‌ను అనుమతించండి"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"డయాగోనల్ స్క్రోలింగ్‌ను అనుమతించండి"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"సైజ్ మార్చండి"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"మ్యాగ్నిఫికేషన్ రకాన్ని మార్చండి"</string>
     <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"సైజ్‌ను మార్చడం ముగించండి"</string>
@@ -1178,6 +1201,8 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"మరింత సమాచారం కోసం ట్యాప్ చేయండి"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"అలారం సెట్ చేయలేదు"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"స్క్రీన్ లాక్‌ను ఎంటర్ చేయండి"</string>
+    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
+    <skip />
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"వేలిముద్ర సెన్సార్"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"ప్రామాణీకరించండి"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"పరికరాన్ని ఎంటర్ చేయండి"</string>
@@ -1275,7 +1300,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"మడిచే సదుపాయం గల పరికరం"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"మడిచే సదుపాయం లేని పరికరం"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> బ్యాటరీ మిగిలి ఉంది"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"స్టయిలస్ బ్యాటరీ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"మీ స్టైలస్‌ను ఛార్జర్‌కి కనెక్ట్ చేయండి"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"తక్కువ స్టైలస్ బ్యాటరీ"</string>
     <string name="video_camera" msgid="7654002575156149298">"వీడియో కెమెరా"</string>
@@ -1318,6 +1343,24 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) ద్వారా ఇటీవల వినియోగించబడింది"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ద్వారా వినియోగంలో ఉంది"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ద్వారా ఇటీవల ఉపయోగించబడింది"</string>
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"సిస్టమ్"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"మల్టీ-టాస్కింగ్"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ఇన్‌పుట్"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"యాప్ షార్ట్‌కట్‌లు"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"యాక్సెసిబిలిటీ"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"కీబోర్డ్ షార్ట్‌కట్‌లు"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"సెర్చ్ షార్ట్‌కట్‌లు"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"కుదించండి చిహ్నం"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"విస్తరించండి చిహ్నం"</string>
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"లేదా"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"కీబోర్డ్ బ్యాక్‌లైట్"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dలో %1$dవ స్థాయి"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"హోమ్ కంట్రోల్స్"</string>

@@ -169,6 +169,7 @@ import com.android.wm.shell.bubbles.BubbleViewInfoTask;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.bubbles.StackEducationView;
+import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.bubbles.properties.BubbleProperties;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -2106,6 +2107,33 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(mBubbleData.getBubbles()).hasSize(1);
         assertBubbleIsInflatedForStack(mBubbleData.getBubbles().get(0));
         assertBubbleIsInflatedForStack(mBubbleData.getOverflow());
+    }
+
+    @Test
+    public void registerBubbleBarListener_switchToBarWhileExpanded() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+
+        mEntryListener.onEntryAdded(mRow);
+        mBubbleController.updateBubble(mBubbleEntry);
+        BubbleStackView stackView = mBubbleController.getStackView();
+        spyOn(stackView);
+
+        mBubbleData.setExpanded(true);
+
+        assertStackMode();
+        assertThat(mBubbleData.isExpanded()).isTrue();
+        assertThat(stackView.isExpanded()).isTrue();
+
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        BubbleBarLayerView layerView = mBubbleController.getLayerView();
+        spyOn(layerView);
+
+        assertBarMode();
+        assertThat(mBubbleData.isExpanded()).isTrue();
+        assertThat(layerView.isExpanded()).isTrue();
     }
 
     @Test

@@ -445,6 +445,7 @@ class Task extends TaskFragment {
     int mPrevDisplayId = INVALID_DISPLAY;
 
     int mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
+    WindowContainerToken mMultiWindowRestoreParent;
 
     /**
      * Last requested orientation reported to DisplayContent. This is different from {@link
@@ -3514,7 +3515,10 @@ class Task extends TaskFragment {
                 && !appCompatTaskInfo.topActivityInSizeCompat
                 && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings()
                 && !info.isTopActivityTransparent;
-        appCompatTaskInfo.topActivityBoundsLetterboxed = top != null  && top.areBoundsLetterboxed();
+        appCompatTaskInfo.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
+        appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top == null
+                ? CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE
+                : top.mLetterboxUiController.getFreeformCameraCompatMode();
     }
 
     /**
@@ -3739,7 +3743,13 @@ class Task extends TaskFragment {
         return !isOwnActivity && !isTrustedTaskFragment;
     }
 
-    void setDecorSurfaceBoosted(
+    /**
+     * Sets the requested boosted state for the decor surface.
+     *
+     * The caller must call {@link #commitDecorSurfaceBoostedState()} to ensure that the change is
+     * applied.
+     */
+    void requestDecorSurfaceBoosted(
             @NonNull TaskFragment ownerTaskFragment,
             boolean isBoosted,
             @Nullable SurfaceControl.Transaction clientTransaction) {
@@ -3747,9 +3757,17 @@ class Task extends TaskFragment {
                 || mDecorSurfaceContainer.mOwnerTaskFragment != ownerTaskFragment) {
             return;
         }
-        mDecorSurfaceContainer.setBoosted(isBoosted, clientTransaction);
-        // scheduleAnimation() is called inside assignChildLayers(), which ensures that child
-        // surface visibility is updated with prepareSurfaces()
+        mDecorSurfaceContainer.requestBoosted(isBoosted, clientTransaction);
+    }
+
+    void commitDecorSurfaceBoostedState() {
+        if (mDecorSurfaceContainer == null) {
+            return;
+        }
+        mDecorSurfaceContainer.commitBoostedState();
+
+        // assignChildLayers() calls scheduleAnimation(), which calls prepareSurfaces()
+        // to ensure child surface visibility.
         assignChildLayers();
     }
 
@@ -4563,7 +4581,10 @@ class Task extends TaskFragment {
         }
         final WindowState w = getTopVisibleAppMainWindow();
         if (w != null) {
+            w.mIsSurfacePositionPaused = true;
             w.applyWithNextDraw((d) -> {
+                w.mIsSurfacePositionPaused = false;
+                w.updateSurfacePosition(d);
                 d.merge(t);
             });
         } else {
@@ -4615,6 +4636,25 @@ class Task extends TaskFragment {
     @Override
     long getProtoFieldId() {
         return TASK;
+    }
+
+    /**
+     * Restores to the windowing mode saved when task requested to enter fullscreen using
+     * {@link Activity#requestFullscreenMode} API if it is valid. The task is also reparented to
+     * the previous parent if parent has changed.
+     */
+    void restoreWindowingMode() {
+        if (mMultiWindowRestoreWindowingMode == INVALID_WINDOWING_MODE) {
+            return;
+        }
+        if (!getParent().mRemoteToken.toWindowContainerToken()
+                .equals(mMultiWindowRestoreParent)) {
+            // Restore previous parent if parent has changed.
+            final Task parent = fromWindowContainerToken(mMultiWindowRestoreParent);
+            reparent(parent, MAX_VALUE);
+        }
+
+        setWindowingMode(mMultiWindowRestoreWindowingMode);
     }
 
     @Override
@@ -4749,6 +4789,12 @@ class Task extends TaskFragment {
                     if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()
                             && lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
                         lastParentBeforePip.prepareSurfaces();
+                        // If the moveToFront is a part of finishing transition, then make sure
+                        // the z-order of tasks are up-to-date.
+                        if (topActivity.mTransitionController.inFinishingTransition(topActivity)) {
+                            Transition.assignLayers(taskDisplayArea,
+                                    taskDisplayArea.getPendingTransaction());
+                        }
                     }
                 }
                 if (isPip2ExperimentEnabled) {
@@ -6787,11 +6833,11 @@ class Task extends TaskFragment {
      * Associates the decor surface with the given TF, or create one if there
      * isn't one in the Task yet. The surface will be removed with the TF,
      * and become invisible if the TF is invisible. */
-    void moveOrCreateDecorSurfaceFor(TaskFragment taskFragment) {
+    void moveOrCreateDecorSurfaceFor(TaskFragment taskFragment, boolean visible) {
         if (mDecorSurfaceContainer != null) {
             mDecorSurfaceContainer.mOwnerTaskFragment = taskFragment;
         } else {
-            mDecorSurfaceContainer = new DecorSurfaceContainer(taskFragment);
+            mDecorSurfaceContainer = new DecorSurfaceContainer(taskFragment, visible);
             assignChildLayers();
             sendTaskFragmentParentInfoChangedIfNeeded();
         }
@@ -6808,6 +6854,13 @@ class Task extends TaskFragment {
 
     @Nullable SurfaceControl getDecorSurface() {
         return mDecorSurfaceContainer != null ? mDecorSurfaceContainer.mDecorSurface : null;
+    }
+
+    void setDecorSurfaceVisible(@NonNull SurfaceControl.Transaction t) {
+        if (mDecorSurfaceContainer == null) {
+            return;
+        }
+        t.show(mDecorSurfaceContainer.mDecorSurface);
     }
 
     /**
@@ -6849,12 +6902,13 @@ class Task extends TaskFragment {
         @NonNull TaskFragment mOwnerTaskFragment;
 
         private boolean mIsBoosted;
+        private boolean mIsBoostedRequested;
 
         // The surface transactions that will be applied when the layer is reassigned.
         @NonNull private final List<SurfaceControl.Transaction> mPendingClientTransactions =
                 new ArrayList<>();
 
-        private DecorSurfaceContainer(@NonNull TaskFragment initialOwner) {
+        private DecorSurfaceContainer(@NonNull TaskFragment initialOwner, boolean visible) {
             mOwnerTaskFragment = initialOwner;
             mContainerSurface = makeSurface().setContainerLayer()
                     .setParent(mSurfaceControl)
@@ -6867,23 +6921,36 @@ class Task extends TaskFragment {
             mDecorSurface = makeSurface()
                     .setParent(mContainerSurface)
                     .setName(mSurfaceControl + " - decor surface")
-                    .setHidden(false)
+                    .setHidden(!visible)
                     .setCallsite("Task.DecorSurfaceContainer")
                     .build();
         }
 
-        private void setBoosted(
+        /**
+         * Sets the requested boosted state. The state is not applied until
+         * {@link commitBoostedState} is called.
+         */
+        private void requestBoosted(
                 boolean isBoosted, @Nullable SurfaceControl.Transaction clientTransaction) {
-            mIsBoosted = isBoosted;
-            // The client transaction will be applied together with the next assignLayer.
+            mIsBoostedRequested = isBoosted;
+            // The client transaction will be applied together with the next commitBoostedState.
             if (clientTransaction != null) {
                 mPendingClientTransactions.add(clientTransaction);
             }
         }
 
+        /** Applies the last requested boosted state. */
+        private void commitBoostedState() {
+            mIsBoosted = mIsBoostedRequested;
+            applyPendingClientTransactions(getSyncTransaction());
+        }
+
         private void assignLayer(@NonNull SurfaceControl.Transaction t, int layer) {
             t.setLayer(mContainerSurface, layer);
             t.setVisibility(mContainerSurface, mOwnerTaskFragment.isVisible() || mIsBoosted);
+        }
+
+        private void applyPendingClientTransactions(@NonNull SurfaceControl.Transaction t) {
             for (int i = 0; i < mPendingClientTransactions.size(); i++) {
                 t.merge(mPendingClientTransactions.get(i));
             }

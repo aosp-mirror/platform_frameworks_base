@@ -1885,7 +1885,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN jest za krótki. Musi mieć co najmniej 4 cyfry."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Spróbuj ponownie później"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Włączony pełny ekran"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Aby wyjść, przesuń palcem z góry na dół."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Obróć, aby lepiej widzieć"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otwórz aplikację <xliff:g id="NAME">%s</xliff:g> na pełnym ekranie, aby lepiej widzieć"</string>
@@ -2409,6 +2410,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Przestrzeń prywatna"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Wspólny"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Przestrzeń prywatna"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Treść poufnego powiadomienia została ukryta"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Ze względów bezpieczeństwa zawartość aplikacji jest niewidoczna podczas udostępniania ekranu"</string>

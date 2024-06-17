@@ -169,3 +169,25 @@ flag {
          purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "disable_object_pool"
+    description: "Whether to disable object pool and let the GC handle lifecycle items"
+    bug: "311089192"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "rear_display_disable_force_desktop_system_decorations"
+    description: "Block system decorations from being added to a rear display when desktop mode is forced"
+    bug: "346103150"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

@@ -521,6 +521,7 @@
   <java-symbol type="bool" name="config_preferKeepClearForFocus" />
   <java-symbol type="bool" name="config_hibernationDeletesOatArtifactsEnabled"/>
   <java-symbol type="integer" name="config_defaultAnalogClockSecondsHandFps"/>
+  <java-symbol type="bool" name="config_enableGaiaEducationInPrivateSpace"/>
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -1116,6 +1117,7 @@
   <java-symbol type="string" name="accessibility_label_private_profile" />
   <java-symbol type="string" name="accessibility_label_clone_profile" />
   <java-symbol type="string" name="accessibility_label_communal_profile" />
+  <java-symbol type="string" name="private_space_biometric_prompt_title" />
   <java-symbol type="string" name="mediasize_unknown_portrait" />
   <java-symbol type="string" name="mediasize_unknown_landscape" />
   <java-symbol type="string" name="mediasize_iso_a0" />
@@ -1617,6 +1619,7 @@
   <java-symbol type="layout" name="restrictions_pin_challenge" />
   <java-symbol type="layout" name="restrictions_pin_setup" />
   <java-symbol type="layout" name="immersive_mode_cling" />
+  <java-symbol type="id" name="immersive_cling_icon" />
   <java-symbol type="layout" name="user_switching_dialog" />
   <java-symbol type="layout" name="common_tab_settings" />
   <java-symbol type="layout" name="resolver_list_per_profile" />
@@ -1694,6 +1697,12 @@
   <java-symbol type="style" name="Pointer" />
   <java-symbol type="style" name="LargePointer" />
   <java-symbol type="style" name="VectorPointer" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillBlack" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillGreen" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillYellow" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillPink" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillBlue" />
+  <java-symbol type="attr" name="pointerIconVectorFill" />
   <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Title" />
   <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Info" />
 
@@ -5418,6 +5427,8 @@
   <java-symbol type="string" name="lockscreen_too_many_failed_attempts_countdown" />
 
   <java-symbol type="bool" name="config_enable_a11y_magnification_single_panning" />
+  <java-symbol type="bool" name="config_enable_a11y_fullscreen_magnification_overscroll_handler" />
+  <java-symbol type="dimen" name="accessibility_fullscreen_magnification_gesture_edge_slop" />
 
   <java-symbol type="string" name="config_hapticFeedbackCustomizationFile" />
 
@@ -5503,4 +5514,16 @@
   <java-symbol type="string" name="face_dangling_notification_msg" />
   <java-symbol type="string" name="biometric_dangling_notification_action_set_up" />
   <java-symbol type="string" name="biometric_dangling_notification_action_not_now" />
+
+  <!-- Priority Modes icons -->
+  <java-symbol type="drawable" name="ic_zen_mode_type_bedtime" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_driving" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_immersive" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_managed" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_other" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_schedule_calendar" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_schedule_time" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_theater" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_unknown" />
+
 </resources>

@@ -329,7 +329,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"acceder a ficheiros no teu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acceder a música e audio do dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"fotos e vídeos"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"acceder a fotos e vídeos do dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar audio"</string>
@@ -346,7 +346,7 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensores corporais"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceder aos datos dos sensores sobre as túas constantes vitais"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notificacións"</string>
-    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"mostra notificacións"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"mostrar notificacións"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar contido da ventá"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecciona o contido dunha ventá coa que estás interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activar a exploración táctil"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"O PIN é demasiado curto. Debe conter polo menos 4 díxitos."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Téntao de novo máis tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Vendo pantalla completa"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Para saír, pasa o dedo cara abaixo desde a parte superior."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendido"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Xira a pantalla para que se vexa mellor"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Abre <xliff:g id="NAME">%s</xliff:g> en pantalla completa para unha mellor visualización"</string>
@@ -2407,6 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espazo privado"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clonado"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Compartido"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Espazo privado"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Contido confidencial da notificación oculto"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Por motivos de seguranza, ocultouse o contido da aplicación para que no se mostre na pantalla compartida"</string>

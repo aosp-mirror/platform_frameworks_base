@@ -97,7 +97,8 @@ public class StatusBarIconViewTest extends SysuiTestCase {
 
         mIconView = new StatusBarIconView(mContext, "test_slot", null);
         mStatusBarIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
-                Icon.createWithResource(mContext, R.drawable.ic_android), 0, 0, "");
+                Icon.createWithResource(mContext, R.drawable.ic_android), 0, 0, "",
+                StatusBarIcon.Type.SystemIcon);
     }
 
     @Test
@@ -138,7 +139,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         Bitmap largeBitmap = Bitmap.createBitmap(6000, 6000, Bitmap.Config.ARGB_8888);
         Icon icon = Icon.createWithBitmap(largeBitmap);
         StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
-                icon, 0, 0, "");
+                icon, 0, 0, "", StatusBarIcon.Type.SystemIcon);
         assertTrue(mIconView.set(largeIcon));
 
         // The view should downscale the bitmap.
@@ -152,7 +153,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         Bitmap bitmap = Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888);
         Icon icon = Icon.createWithBitmap(bitmap);
         StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
-                icon, 0, 0, "");
+                icon, 0, 0, "", StatusBarIcon.Type.SystemIcon);
         mIconView.setNotification(getMockSbn());
         mIconView.getIcon(largeIcon);
         // no crash? good
@@ -172,7 +173,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         Bitmap bitmap = Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888);
         Icon icon = Icon.createWithBitmap(bitmap);
         StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
-                icon, 0, 0, "");
+                icon, 0, 0, "", StatusBarIcon.Type.SystemIcon);
         mIconView.getIcon(largeIcon);
         // No crash? good
     }
@@ -430,7 +431,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
                 width, height, Bitmap.Config.ARGB_8888);
         Icon icon = Icon.createWithBitmap(bitmap);
         mStatusBarIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
-                icon, 0, 0, "");
+                icon, 0, 0, "", StatusBarIcon.Type.SystemIcon);
         // Since we only want to verify icon scale logic here, we directly use
         // {@link StatusBarIconView#setImageDrawable(Drawable)} to set the image drawable
         // to iconView instead of call {@link StatusBarIconView#set(StatusBarIcon)}. It's to prevent

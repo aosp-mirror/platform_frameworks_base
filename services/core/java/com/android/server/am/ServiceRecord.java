@@ -1005,7 +1005,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (isForeground || foregroundId != 0) {
             pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
             pw.print(" foregroundId="); pw.print(foregroundId);
-            pw.printf(" types=%08X", foregroundServiceType);
+            pw.printf(" types=0x%08X", foregroundServiceType);
             pw.print(" foregroundNoti="); pw.println(foregroundNoti);
 
             if (isShortFgs() && mShortFgsInfo != null) {

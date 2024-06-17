@@ -17,15 +17,18 @@
 package com.android.systemui.volume.domain.interactor
 
 import android.bluetooth.BluetoothAdapter
+import android.content.Context
 import android.media.AudioDeviceInfo
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.media.BluetoothMediaDevice
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.media.MediaDevice.MediaDeviceType
+import com.android.settingslib.media.PhoneMediaDevice
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.data.repository.AudioSharingRepository
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.volume.domain.model.AudioOutputDevice
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
@@ -36,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -47,6 +51,7 @@ import kotlinx.coroutines.flow.stateIn
 class AudioOutputInteractor
 @Inject
 constructor(
+    @Application private val context: Context,
     audioRepository: AudioRepository,
     audioModeInteractor: AudioModeInteractor,
     @VolumePanelScope scope: CoroutineScope,
@@ -58,7 +63,7 @@ constructor(
     audioSharingRepository: AudioSharingRepository,
 ) {
 
-    val currentAudioDevice: Flow<AudioOutputDevice> =
+    val currentAudioDevice: StateFlow<AudioOutputDevice> =
         audioModeInteractor.isOngoingCall
             .flatMapLatest { isOngoingCall ->
                 if (isOngoingCall) {
@@ -102,7 +107,7 @@ constructor(
             )
         }
         return AudioOutputDevice.BuiltIn(
-            name = productName.toString(),
+            name = PhoneMediaDevice.getMediaTransferThisDeviceName(context),
             icon = deviceIconInteractor.loadIcon(type),
         )
     }

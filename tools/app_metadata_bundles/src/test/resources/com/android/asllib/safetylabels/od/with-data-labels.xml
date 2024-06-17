@@ -8,7 +8,6 @@
                         <item value="1"/>
                     </int-array>
                     <boolean name="is_sharing_optional" value="false"/>
-                    <boolean name="ephemeral" value="false"/>
                 </pbundle_as_map>
             </pbundle_as_map>
         </pbundle_as_map>

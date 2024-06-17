@@ -1270,7 +1270,7 @@
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Isilinganisi"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Bonisa njalo"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Yenza kuphinde kusebenze kuzilungiselelo Zesistimue &gt; Izinhlelo zokusebenza &gt; Okulayishiwe."</string>
-    <string name="unsupported_display_size_message" msgid="7265211375269394699">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayisekeli isilungiselelo sosayizi sokubonisa samanje futhi ingasebenza ngokungalindelekile."</string>
+    <string name="unsupported_display_size_message" msgid="7265211375269394699">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayisekeli isethingi sosayizi sokubonisa samanje futhi ingasebenza ngokungalindelekile."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Bonisa njalo"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> yakhiwe kunguqulo engahambisani ye-Android OS futhi ingaziphatha ngokungalindelekile. Inguqulo ebuyekeziwe yohlelo lokusebenza ingatholakala."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Bonisa njalo"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"I-PIN yimfushane kakhulu. Okungenani kumele ibe namadijithi angu-4."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Zama futhi emva kwesikhathi"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Ukubuka isikrini esigcwele"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Ukuze uphume, swayiphela phansi kusuka phezulu."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ngiyitholile"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zungezisa ukuze uthole ukubuka okungcono"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Vula i-<xliff:g id="NAME">%s</xliff:g> kusikrini esigcwele ngokubuka okungcono"</string>
@@ -2407,6 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Indawo engasese"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Yenza i-Clone"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Okomphakathi"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Indawo engasese"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Okuqukethwe kwesaziso esizwelayo kufihliwe"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Okuqukethwe kwe-app kufihliwe kusuka ekwabelaneni kwesikrini ngokuvikelwa"</string>

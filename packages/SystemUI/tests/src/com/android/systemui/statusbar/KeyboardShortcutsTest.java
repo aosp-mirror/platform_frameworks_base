@@ -18,12 +18,16 @@ package com.android.systemui.statusbar;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static java.util.Collections.singletonList;
+
+import android.annotation.Nullable;
 import android.app.Dialog;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
@@ -44,11 +48,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -56,7 +62,7 @@ public class KeyboardShortcutsTest extends SysuiTestCase {
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
 
-    private static int DEVICE_ID = 1;
+    private static final int DEVICE_ID = 1;
     private KeyboardShortcuts mKeyboardShortcuts;
 
     @Mock private Dialog mDialog;
@@ -66,26 +72,35 @@ public class KeyboardShortcutsTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mKeyboardShortcuts = new KeyboardShortcuts(mContext, mWindowManager);
-        mKeyboardShortcuts.sInstance = mKeyboardShortcuts;
+        KeyboardShortcuts.sInstance = mKeyboardShortcuts;
         mKeyboardShortcuts.mKeyboardShortcutsDialog = mDialog;
         mKeyboardShortcuts.mContext = mContext;
         mKeyboardShortcuts.mBackgroundHandler = mHandler;
+        when(mHandler.post(any()))
+                .thenAnswer(
+                        new Answer<>() {
+                            @Override
+                            public Object answer(InvocationOnMock invocation) {
+                                ((Runnable) invocation.getArgument(0)).run();
+                                return null;
+                            }
+                        });
     }
 
     @Test
     public void toggle_isShowingTrue_instanceShouldBeNull() {
         when(mDialog.isShowing()).thenReturn(true);
 
-        mKeyboardShortcuts.toggle(mContext, DEVICE_ID);
+        KeyboardShortcuts.toggle(mContext, DEVICE_ID);
 
-        assertThat(mKeyboardShortcuts.sInstance).isNull();
+        assertThat(KeyboardShortcuts.sInstance).isNull();
     }
 
     @Test
     public void toggle_isShowingFalse_showKeyboardShortcuts() {
         when(mDialog.isShowing()).thenReturn(false);
 
-        mKeyboardShortcuts.toggle(mContext, DEVICE_ID);
+        KeyboardShortcuts.toggle(mContext, DEVICE_ID);
 
         verify(mWindowManager).requestAppKeyboardShortcuts(any(), anyInt());
         verify(mWindowManager).requestImeKeyboardShortcuts(any(), anyInt());
@@ -95,7 +110,7 @@ public class KeyboardShortcutsTest extends SysuiTestCase {
     public void sanitiseShortcuts_clearsIcons() {
         KeyboardShortcutGroup group = createKeyboardShortcutGroupForIconTests();
 
-        KeyboardShortcuts.sanitiseShortcuts(Collections.singletonList(group));
+        KeyboardShortcuts.sanitiseShortcuts(singletonList(group));
 
         verify(group.getItems().get(0)).clearIcon();
         verify(group.getItems().get(1)).clearIcon();
@@ -106,7 +121,7 @@ public class KeyboardShortcutsTest extends SysuiTestCase {
         KeyboardShortcutGroup group = createKeyboardShortcutGroupForIconTests();
         group.setPackageName(null);
 
-        KeyboardShortcuts.sanitiseShortcuts(Collections.singletonList(group));
+        KeyboardShortcuts.sanitiseShortcuts(singletonList(group));
 
         verify(group.getItems().get(0)).clearIcon();
         verify(group.getItems().get(1)).clearIcon();
@@ -116,16 +131,9 @@ public class KeyboardShortcutsTest extends SysuiTestCase {
     @EnableFlags(Flags.FLAG_VALIDATE_KEYBOARD_SHORTCUT_HELPER_ICON_URI)
     public void requestAppKeyboardShortcuts_callback_sanitisesIcons() {
         KeyboardShortcutGroup group = createKeyboardShortcutGroupForIconTests();
+        KeyboardShortcuts.toggle(mContext, DEVICE_ID);
 
-        mKeyboardShortcuts.toggle(mContext, DEVICE_ID);
-
-        ArgumentCaptor<WindowManager.KeyboardShortcutsReceiver> callbackCaptor =
-                ArgumentCaptor.forClass(WindowManager.KeyboardShortcutsReceiver.class);
-        ArgumentCaptor<Runnable> handlerRunnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(mWindowManager).requestAppKeyboardShortcuts(callbackCaptor.capture(), anyInt());
-        callbackCaptor.getValue().onKeyboardShortcutsReceived(Collections.singletonList(group));
-        verify(mHandler).post(handlerRunnableCaptor.capture());
-        handlerRunnableCaptor.getValue().run();
+        emitAppShortcuts(singletonList(group), DEVICE_ID);
 
         verify(group.getItems().get(0)).clearIcon();
         verify(group.getItems().get(1)).clearIcon();
@@ -135,20 +143,38 @@ public class KeyboardShortcutsTest extends SysuiTestCase {
     @EnableFlags(Flags.FLAG_VALIDATE_KEYBOARD_SHORTCUT_HELPER_ICON_URI)
     public void requestImeKeyboardShortcuts_callback_sanitisesIcons() {
         KeyboardShortcutGroup group = createKeyboardShortcutGroupForIconTests();
+        KeyboardShortcuts.toggle(mContext, DEVICE_ID);
 
-        mKeyboardShortcuts.toggle(mContext, DEVICE_ID);
-
-        ArgumentCaptor<WindowManager.KeyboardShortcutsReceiver> callbackCaptor =
-                ArgumentCaptor.forClass(WindowManager.KeyboardShortcutsReceiver.class);
-        ArgumentCaptor<Runnable> handlerRunnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(mWindowManager).requestImeKeyboardShortcuts(callbackCaptor.capture(), anyInt());
-        callbackCaptor.getValue().onKeyboardShortcutsReceived(Collections.singletonList(group));
-        verify(mHandler).post(handlerRunnableCaptor.capture());
-        handlerRunnableCaptor.getValue().run();
+        emitImeShortcuts(singletonList(group), DEVICE_ID);
 
         verify(group.getItems().get(0)).clearIcon();
         verify(group.getItems().get(1)).clearIcon();
+    }
 
+    @Test
+    public void onImeAndAppShortcutsReceived_appShortcutsNull_doesNotCrash() {
+        KeyboardShortcutGroup group = createKeyboardShortcutGroupForIconTests();
+        KeyboardShortcuts.toggle(mContext, DEVICE_ID);
+
+        emitImeShortcuts(singletonList(group), DEVICE_ID);
+        emitAppShortcuts(/* groups= */ null, DEVICE_ID);
+    }
+
+    @Test
+    public void onImeAndAppShortcutsReceived_imeShortcutsNull_doesNotCrash() {
+        KeyboardShortcutGroup group = createKeyboardShortcutGroupForIconTests();
+        KeyboardShortcuts.toggle(mContext, DEVICE_ID);
+
+        emitAppShortcuts(singletonList(group), DEVICE_ID);
+        emitImeShortcuts(/* groups= */ null, DEVICE_ID);
+    }
+
+    @Test
+    public void onImeAndAppShortcutsReceived_bothNull_doesNotCrash() {
+        KeyboardShortcuts.toggle(mContext, DEVICE_ID);
+
+        emitImeShortcuts(/* groups= */ null, DEVICE_ID);
+        emitAppShortcuts(/* groups= */ null, DEVICE_ID);
     }
 
     private KeyboardShortcutGroup createKeyboardShortcutGroupForIconTests() {
@@ -159,9 +185,23 @@ public class KeyboardShortcutsTest extends SysuiTestCase {
         when(info1.getIcon()).thenReturn(icon);
         when(info2.getIcon()).thenReturn(icon);
 
-        KeyboardShortcutGroup group = new KeyboardShortcutGroup("label",
-                Arrays.asList(new KeyboardShortcutInfo[]{ info1, info2}));
+        KeyboardShortcutGroup group =
+                new KeyboardShortcutGroup("label", Arrays.asList(info1, info2));
         group.setPackageName("com.example");
         return group;
+    }
+
+    private void emitImeShortcuts(@Nullable List<KeyboardShortcutGroup> groups, int deviceId) {
+        ArgumentCaptor<WindowManager.KeyboardShortcutsReceiver> callbackCaptor =
+                ArgumentCaptor.forClass(WindowManager.KeyboardShortcutsReceiver.class);
+        verify(mWindowManager).requestImeKeyboardShortcuts(callbackCaptor.capture(), eq(deviceId));
+        callbackCaptor.getValue().onKeyboardShortcutsReceived(groups);
+    }
+
+    private void emitAppShortcuts(@Nullable List<KeyboardShortcutGroup> groups, int deviceId) {
+        ArgumentCaptor<WindowManager.KeyboardShortcutsReceiver> callbackCaptor =
+                ArgumentCaptor.forClass(WindowManager.KeyboardShortcutsReceiver.class);
+        verify(mWindowManager).requestAppKeyboardShortcuts(callbackCaptor.capture(), eq(deviceId));
+        callbackCaptor.getValue().onKeyboardShortcutsReceived(groups);
     }
 }

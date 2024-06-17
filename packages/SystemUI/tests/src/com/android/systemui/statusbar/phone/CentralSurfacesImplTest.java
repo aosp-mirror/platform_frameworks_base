@@ -112,6 +112,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -133,6 +134,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
+import com.android.systemui.scene.domain.startable.ScrimStartable;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
@@ -254,7 +256,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private IDreamManager mDreamManager;
     @Mock private LightRevealScrimViewModel mLightRevealScrimViewModel;
     @Mock private LightRevealScrim mLightRevealScrim;
-    @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     @Mock private BiometricUnlockController mBiometricUnlockController;
@@ -339,6 +340,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyboardShortcutListSearch mKeyboardShortcutListSearch;
     @Mock private PackageManager mPackageManager;
     @Mock private GlanceableHubContainerController mGlanceableHubContainerController;
+    @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
 
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -355,6 +357,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor =
             mKosmos.getBrightnessMirrorShowingInteractor();
+    private ScrimController mScrimController;
 
     @Before
     public void setup() throws Exception {
@@ -471,6 +474,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));
+
+        mScrimController = mKosmos.getScrimController();
 
         createCentralSurfaces();
     }
@@ -593,7 +598,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 () -> mFingerprintManager,
                 mActivityStarter,
                 mBrightnessMirrorShowingInteractor,
-                mGlanceableHubContainerController
+                mGlanceableHubContainerController,
+                mEmergencyGestureIntentFactory
         );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();
@@ -733,7 +739,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void testFingerprintNotification_UpdatesScrims() {
         mCentralSurfaces.notifyBiometricAuthModeChanged();
-        verify(mScrimController).transitionTo(any(), any());
+        verify(mScrimController).legacyTransitionTo(any(), any());
     }
 
     @Test
@@ -742,7 +748,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mBiometricUnlockController.getMode())
                 .thenReturn(BiometricUnlockController.MODE_WAKE_AND_UNLOCK);
         mCentralSurfaces.updateScrimController();
-        verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
+        verify(mScrimController).legacyTransitionTo(eq(ScrimState.UNLOCKED), any());
     }
 
     @Test
@@ -753,7 +759,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // Starting a pulse should change the scrim controller to the pulsing state
         when(mCameraLauncher.isLaunchingAffordance()).thenReturn(true);
         mCentralSurfaces.updateScrimController();
-        verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
+        verify(mScrimController).legacyTransitionTo(eq(ScrimState.UNLOCKED), any());
     }
 
     @Test
@@ -789,7 +795,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // Starting a pulse should change the scrim controller to the pulsing state
         when(mCameraLauncher.isLaunchingAffordance()).thenReturn(false);
         mCentralSurfaces.updateScrimController();
-        verify(mScrimController).transitionTo(eq(ScrimState.KEYGUARD));
+        verify(mScrimController).legacyTransitionTo(eq(ScrimState.KEYGUARD));
     }
 
     @Test
@@ -817,12 +823,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // Starting a pulse should change the scrim controller to the pulsing state
         when(mDozeServiceHost.isPulsing()).thenReturn(true);
         mCentralSurfaces.updateScrimController();
-        verify(mScrimController).transitionTo(eq(ScrimState.PULSING), any());
+        verify(mScrimController).legacyTransitionTo(eq(ScrimState.PULSING), any());
 
         // Ending a pulse should take it back to keyguard state
         when(mDozeServiceHost.isPulsing()).thenReturn(false);
         mCentralSurfaces.updateScrimController();
-        verify(mScrimController).transitionTo(eq(ScrimState.KEYGUARD));
+        verify(mScrimController).legacyTransitionTo(eq(ScrimState.KEYGUARD));
     }
 
     @Test
@@ -833,7 +839,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         mCentralSurfaces.updateScrimController();
 
-        verify(mScrimController, times(2)).transitionTo(eq(ScrimState.AOD));
+        verify(mScrimController, times(2)).legacyTransitionTo(eq(ScrimState.AOD));
         verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
     }
 
@@ -845,7 +851,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         mCentralSurfaces.updateScrimController();
 
-        verify(mScrimController).transitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
+        verify(mScrimController).legacyTransitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
         verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
     }
 
@@ -861,7 +867,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         mCentralSurfaces.updateScrimController();
 
-        verify(mScrimController).transitionTo(eq(ScrimState.AUTH_SCRIMMED));
+        verify(mScrimController).legacyTransitionTo(eq(ScrimState.AUTH_SCRIMMED));
     }
 
     @Test
@@ -877,7 +883,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.updateScrimController();
 
         // Tests the safeguard to reset the scrimstate
-        verify(mScrimController, never()).transitionTo(any());
+        verify(mScrimController, never()).legacyTransitionTo(any());
     }
 
     @Test
@@ -893,7 +899,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.updateScrimController();
 
         // Tests the safeguard to reset the scrimstate
-        verify(mScrimController, never()).transitionTo(eq(ScrimState.KEYGUARD));
+        verify(mScrimController, never()).legacyTransitionTo(eq(ScrimState.KEYGUARD));
     }
 
     @Test
@@ -908,7 +914,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         mCentralSurfaces.updateScrimController();
 
-        verify(mScrimController).transitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
+        verify(mScrimController).legacyTransitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
     }
 
     @Test
@@ -920,7 +926,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState also transitions.
-        verify(mScrimController).transitionTo(ScrimState.GLANCEABLE_HUB);
+        verify(mScrimController).legacyTransitionTo(ScrimState.GLANCEABLE_HUB);
 
         // Transition away from the glanceable hub.
         mKosmos.getCommunalRepository()
@@ -929,7 +935,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState goes back to UNLOCKED.
-        verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
+        verify(mScrimController).legacyTransitionTo(eq(ScrimState.UNLOCKED), any());
     }
 
     @Test
@@ -945,7 +951,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState also transitions.
-        verify(mScrimController).transitionTo(ScrimState.GLANCEABLE_HUB_OVER_DREAM);
+        verify(mScrimController).legacyTransitionTo(ScrimState.GLANCEABLE_HUB_OVER_DREAM);
 
         // Transition away from the glanceable hub.
         mKosmos.getCommunalRepository()
@@ -954,7 +960,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState goes back to UNLOCKED.
-        verify(mScrimController).transitionTo(eq(ScrimState.DREAMING));
+        verify(mScrimController).legacyTransitionTo(eq(ScrimState.DREAMING));
     }
 
     @Test
@@ -1164,6 +1170,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @EnableSceneContainer
     public void brightnesShowingChanged_flagEnabled_ScrimControllerNotified() {
         mCentralSurfaces.registerCallbacks();
+        final ScrimStartable scrimStartable = mKosmos.getScrimStartable();
+        scrimStartable.start();
 
         mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
         mTestScope.getTestScheduler().runCurrent();
@@ -1173,7 +1181,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mTestScope.getTestScheduler().runCurrent();
         ArgumentCaptor<ScrimState> captor = ArgumentCaptor.forClass(ScrimState.class);
         // The default is to call the one with the callback argument
-        verify(mScrimController, atLeastOnce()).transitionTo(captor.capture(), any());
+        verify(mScrimController, atLeastOnce()).transitionTo(captor.capture());
         assertThat(captor.getValue()).isNotEqualTo(ScrimState.BRIGHTNESS_MIRROR);
     }
 
@@ -1184,8 +1192,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
         mTestScope.getTestScheduler().runCurrent();
-        verify(mScrimController, never()).transitionTo(ScrimState.BRIGHTNESS_MIRROR);
-        verify(mScrimController, never()).transitionTo(eq(ScrimState.BRIGHTNESS_MIRROR), any());
+        verify(mScrimController, never()).legacyTransitionTo(ScrimState.BRIGHTNESS_MIRROR);
+        verify(mScrimController, never())
+                .legacyTransitionTo(eq(ScrimState.BRIGHTNESS_MIRROR), any());
     }
 
     @Test

@@ -17,13 +17,11 @@ package com.android.server.am;
 
 import android.app.ActivityThread;
 import android.content.ContentResolver;
-import android.content.Intent;
 import android.provider.Settings;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FrameworkStatsLog;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -126,26 +124,5 @@ public class ActivityManagerUtils {
         final int hash = getUnsignedHashCached(packageName) ^ getAndroidIdHash();
 
         return (((double) hash) / Integer.MAX_VALUE) <= rate;
-    }
-
-    /**
-     * Helper method to log an unsafe intent event.
-     */
-    public static void logUnsafeIntentEvent(int event, int callingUid,
-            Intent intent, String resolvedType, boolean blocked) {
-        String[] categories = intent.getCategories() == null ? new String[0]
-                : intent.getCategories().toArray(String[]::new);
-        String component = intent.getComponent() == null ? null
-                : intent.getComponent().flattenToString();
-        FrameworkStatsLog.write(FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED,
-                event,
-                callingUid,
-                component,
-                intent.getPackage(),
-                intent.getAction(),
-                categories,
-                resolvedType,
-                intent.getScheme(),
-                blocked);
     }
 }

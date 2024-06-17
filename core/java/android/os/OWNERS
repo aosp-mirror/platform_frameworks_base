@@ -3,9 +3,9 @@ per-file *Vibration* = file:/services/core/java/com/android/server/vibrator/OWNE
 per-file *Vibrator* = file:/services/core/java/com/android/server/vibrator/OWNERS
 
 # PowerManager
-per-file IPowerManager.aidl = michaelwr@google.com, santoscordon@google.com
-per-file PowerManager.java = michaelwr@google.com, santoscordon@google.com
-per-file PowerManagerInternal.java = michaelwr@google.com, santoscordon@google.com
+per-file IPowerManager.aidl = file:/services/core/java/com/android/server/power/OWNERS
+per-file PowerManager.java = file:/services/core/java/com/android/server/power/OWNERS
+per-file PowerManagerInternal.java = file:/services/core/java/com/android/server/power/OWNERS
 
 # BatteryStats
 per-file *BatteryConsumer* = file:/BATTERY_STATS_OWNERS
@@ -108,3 +108,7 @@ per-file ProfilingServiceManager.java = file:/PERFORMANCE_OWNERS
 
 # Memory
 per-file OomKillRecord.java = file:/MEMORY_OWNERS
+
+# MessageQueue
+per-file MessageQueue.java = mfasheh@google.com, shayba@google.com
+per-file Message.java = mfasheh@google.com, shayba@google.com

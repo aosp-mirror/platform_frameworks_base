@@ -17,9 +17,9 @@ package com.android.systemui.battery
 
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.widget.ImageView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.flags.Flags.FLAG_NEW_STATUS_BAR_ICONS
 import com.android.systemui.res.R
@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class BatteryMeterViewTest : SysuiTestCase() {
 

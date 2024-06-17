@@ -46,6 +46,8 @@ import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.emergency.EmergencyGesture;
+import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
@@ -113,6 +115,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private int mDisabled1;
     private int mDisabled2;
 
+    private final EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
+
     @Inject
     CentralSurfacesCommandQueueCallbacks(
             CentralSurfaces centralSurfaces,
@@ -143,7 +147,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             Lazy<CameraLauncher> cameraLauncherLazy,
             UserTracker userTracker,
             QSHost qsHost,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter,
+            EmergencyGestureIntentFactory emergencyGestureIntentFactory) {
         mCentralSurfaces = centralSurfaces;
         mQsController = quickSettingsController;
         mContext = context;
@@ -176,6 +181,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
                 mVibratorOptional, resources);
         mActivityStarter = activityStarter;
+        mEmergencyGestureIntentFactory = emergencyGestureIntentFactory;
     }
 
     @Override
@@ -395,7 +401,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void onEmergencyActionLaunchGestureDetected() {
-        Intent emergencyIntent = mCentralSurfaces.getEmergencyActionIntent();
+        Intent emergencyIntent = mEmergencyGestureIntentFactory.invoke(
+                EmergencyGesture.ACTION_LAUNCH_EMERGENCY);
 
         if (emergencyIntent == null) {
             Log.wtf(CentralSurfaces.TAG, "Couldn't find an app to process the emergency intent.");

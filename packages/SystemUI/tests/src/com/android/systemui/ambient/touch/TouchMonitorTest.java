@@ -36,7 +36,6 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.GestureDetector;
 import android.view.IWindowManager;
@@ -50,6 +49,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -79,7 +79,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class TouchMonitorTest extends SysuiTestCase {
     private KosmosJavaAdapter mKosmos;

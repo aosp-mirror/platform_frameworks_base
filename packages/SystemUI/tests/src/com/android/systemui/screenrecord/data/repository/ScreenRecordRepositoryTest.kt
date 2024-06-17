@@ -119,4 +119,12 @@ class ScreenRecordRepositoryTest : SysuiTestCase() {
 
             assertThat(lastModel).isEqualTo(isRecording)
         }
+
+    @Test
+    fun stopRecording_invokesController() =
+        testScope.runTest {
+            underTest.stopRecording()
+
+            verify(recordingController).stopRecording()
+        }
 }

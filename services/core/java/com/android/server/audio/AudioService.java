@@ -219,6 +219,7 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.service.notification.ZenModeConfig;
@@ -256,6 +257,7 @@ import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.utils.EventLogger;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -284,6 +286,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
@@ -10327,7 +10331,7 @@ public class AudioService extends IAudioService.Stub
         try {
             if (!permissionOverridesCheck && mHardeningEnforcer.blockFocusMethod(uid,
                     HardeningEnforcer.METHOD_AUDIO_MANAGER_REQUEST_AUDIO_FOCUS,
-                    clientId, durationHint, callingPackageName)) {
+                    clientId, durationHint, callingPackageName, attributionTag, sdk)) {
                 final String reason = "Audio focus request blocked by hardening";
                 Log.w(TAG, reason);
                 mmi.set(MediaMetrics.Property.EARLY_RETURN, reason).record();
@@ -10339,7 +10343,7 @@ public class AudioService extends IAudioService.Stub
 
         mmi.record();
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
-                clientId, callingPackageName, attributionTag, flags, sdk,
+                clientId, callingPackageName, flags, sdk,
                 forceFocusDuckingForAccessibility(aa, durationHint, uid), -1 /*testUid, ignored*/,
                 permissionOverridesCheck);
     }
@@ -10357,7 +10361,7 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
-                clientId, callingPackageName, null, flags,
+                clientId, callingPackageName, flags,
                 sdk, false /*forceDuck*/, fakeUid, true /*permissionOverridesCheck*/);
     }
 
@@ -11950,12 +11954,40 @@ public class AudioService extends IAudioService.Stub
                         .withUnfilteredSnapshot()) {
             packageStates = snapshot.getPackageStates().values();
         }
-        var provider = new AudioServerPermissionProvider(packageStates);
+        var umi = LocalServices.getService(UserManagerInternal.class);
+        var pmsi = LocalServices.getService(PermissionManagerServiceInternal.class);
+        var provider = new AudioServerPermissionProvider(packageStates,
+                (Integer uid, String perm) -> (pmsi.checkUidPermission(uid, perm,
+                        Context.DEVICE_ID_DEFAULT) == PackageManager.PERMISSION_GRANTED),
+                () -> umi.getUserIds()
+                );
         audioPolicy.registerOnStartTask(() -> {
             provider.onServiceStart(audioPolicy.getPermissionController());
         });
 
         // Set up event listeners
+        // Must be kept in sync with PermissionManager
+        Runnable cacheSysPropHandler = new Runnable() {
+            private AtomicReference<SystemProperties.Handle> mHandle = new AtomicReference();
+            private AtomicLong mNonce = new AtomicLong();
+            @Override
+            public void run() {
+                if (mHandle.get() == null) {
+                    // Cache the handle
+                    mHandle.compareAndSet(null, SystemProperties.find(
+                            PermissionManager.CACHE_KEY_PACKAGE_INFO));
+                }
+                long nonce;
+                SystemProperties.Handle ref;
+                if ((ref = mHandle.get()) != null && (nonce = ref.getLong(0)) != 0 &&
+                        mNonce.getAndSet(nonce) != nonce) {
+                    audioserverExecutor.execute(() -> provider.onPermissionStateChanged());
+                }
+            }
+        };
+
+        SystemProperties.addChangeCallback(cacheSysPropHandler);
+
         IntentFilter packageUpdateFilter = new IntentFilter();
         packageUpdateFilter.addAction(ACTION_PACKAGE_ADDED);
         packageUpdateFilter.addAction(ACTION_PACKAGE_REMOVED);
@@ -13879,9 +13911,8 @@ public class AudioService extends IAudioService.Stub
         final int stream = AudioAttributes.toLegacyStreamType(aa);
         final boolean mutingFromVolume = getStreamVolume(stream) == 0;
         if (mutingFromVolume) {
-            if (DEBUG_VOL) {
-                Slog.d(TAG, "notification should not play due to muted stream " + stream);
-            }
+            Slog.i(TAG, "shouldNotificationSoundPlay false: muted stream:" + stream
+                    + " attr:" + aa);
             return false;
         }
 
@@ -13894,10 +13925,8 @@ public class AudioService extends IAudioService.Stub
         // is the owner of GAIN_TRANSIENT_EXCLUSIVE focus also recording?
         final boolean mutingFromFocusAndRecording = mRecordMonitor.isRecordingActiveForUid(uid);
         if (mutingFromFocusAndRecording) {
-            if (DEBUG_VOL) {
-                Slog.d(TAG, "notification should not play due to exclusive focus owner recording "
-                        + " uid:" + uid);
-            }
+            Slog.i(TAG, "shouldNotificationSoundPlay false: exclusive focus owner recording "
+                        + " uid:" + uid + " attr:" + aa);
             return false;
         }
         return true;

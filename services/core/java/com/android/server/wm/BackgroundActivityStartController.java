@@ -31,6 +31,7 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.provider.DeviceConfig.NAMESPACE_WINDOW_MANAGER;
+import static android.security.Flags.asmOptSystemIntoEnforcement;
 
 import static com.android.server.wm.ActivityStarter.ASM_RESTRICTIONS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
@@ -424,19 +425,6 @@ public class BackgroundActivityStartController {
                 name = "uid=" + uid;
             }
             return name + "[debugOnly]";
-        }
-
-        /** @return valid targetSdk or <code>-1</code> */
-        private int getTargetSdk(String packageName) {
-            if (packageName == null) {
-                return -1;
-            }
-            try {
-                PackageManager pm = mService.mContext.getPackageManager();
-                return pm.getTargetSdkVersion(packageName);
-            } catch (Exception e) {
-                return -1;
-            }
         }
 
         private boolean hasRealCaller() {
@@ -1462,13 +1450,18 @@ public class BackgroundActivityStartController {
             return bas.matchesSource();
         }
 
+        if (ar.isUid(SYSTEM_UID)) {
+            if (asmOptSystemIntoEnforcement()) {
+                return bas.optedIn(ar);
+            } else {
+                return bas;
+            }
+        }
+
         if (!CompatChanges.isChangeEnabled(ASM_RESTRICTIONS, ar.getUid())) {
             return bas;
         }
 
-        if (ar.isUid(SYSTEM_UID)) {
-            return bas.optedIn(ar);
-        }
 
         String packageName = ar.packageName;
         if (packageName == null) {
@@ -1566,6 +1559,7 @@ public class BackgroundActivityStartController {
         joiner.add(prefix + "Allowed By Grace Period: " + allowedByGracePeriod);
         joiner.add(prefix + "LastResumedActivity: "
                        + recordToString.apply(mService.mLastResumedActivity));
+        joiner.add(prefix + "System opted into enforcement: " + asmOptSystemIntoEnforcement());
 
         if (mTopFinishedActivity != null) {
             joiner.add(prefix + "TopFinishedActivity: " + mTopFinishedActivity.mDebugInfo);
@@ -1723,7 +1717,9 @@ public class BackgroundActivityStartController {
                 state.mResultForRealCaller == null ? BAL_BLOCK
                         : state.mResultForRealCaller.getRawCode(),
                 state.mBalAllowedByPiSender.allowsBackgroundActivityStarts(),
-                state.realCallerExplicitOptInOrOut()
+                state.realCallerExplicitOptInOrOut(),
+                getTargetSdk(state.mCallingPackage),
+                getTargetSdk(state.mRealCallingPackage)
         );
     }
 
@@ -1802,6 +1798,19 @@ public class BackgroundActivityStartController {
                 + ", lastLaunchTime=" + ar.lastLaunchTime
                 + ", lastVisibleTime=" + ar.lastVisibleTime
                 + ", taskFragment=" + ar.getTaskFragment();
+    }
+
+    /** @return valid targetSdk or <code>-1</code> */
+    private int getTargetSdk(String packageName) {
+        if (packageName == null) {
+            return -1;
+        }
+        try {
+            PackageManager pm = mService.mContext.getPackageManager();
+            return pm.getTargetSdkVersion(packageName);
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     private class FinishedActivityEntry {

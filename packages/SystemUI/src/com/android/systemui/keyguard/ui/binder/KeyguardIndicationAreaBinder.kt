@@ -65,7 +65,7 @@ object KeyguardIndicationAreaBinder {
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
         val disposableHandle =
             view.repeatWhenAttached {
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch("$TAG#viewModel.alpha") {
                         // Do not independently apply alpha, as [KeyguardRootViewModel] should work
                         // for this and all its children

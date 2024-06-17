@@ -33,6 +33,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_SESSION_INVALID;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
@@ -316,14 +317,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS = 60000;
 
     /**
-     * If an app being installed targets {@link Build.VERSION_CODES#S API 31} and above, the app
-     * can be installed without user action.
+     * If an app being installed targets {@link Build.VERSION_CODES#TIRAMISU API 33} and above,
+     * the app can be installed without user action.
      * See {@link PackageInstaller.SessionParams#setRequireUserAction} for other conditions required
      * to be satisfied for a silent install.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
-    private static final long SILENT_INSTALL_ALLOWED = 265131695L;
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long SILENT_INSTALL_ALLOWED = 325888262L;
 
     /**
      * The system supports pre-approval and update ownership features from
@@ -966,7 +967,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 getInstallSource().mInstallerPackageName, mInstallerUid);
     }
 
-    private boolean isEmergencyInstallerEnabled(String packageName, Computer snapshot) {
+    static boolean isEmergencyInstallerEnabled(String packageName, Computer snapshot, int userId,
+            int installerUid) {
         final PackageStateInternal ps = snapshot.getPackageStateInternal(packageName);
         if (ps == null || ps.getPkg() == null || !ps.isSystem()) {
             return false;
@@ -974,7 +976,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         int uid = UserHandle.getUid(userId, ps.getAppId());
         String emergencyInstaller = ps.getPkg().getEmergencyInstaller();
         if (emergencyInstaller == null || !ArrayUtils.contains(
-                snapshot.getPackagesForUid(mInstallerUid), emergencyInstaller)) {
+                snapshot.getPackagesForUid(installerUid), emergencyInstaller)) {
             return false;
         }
         // Only system installers can have an emergency installer
@@ -987,7 +989,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return false;
         }
         return (snapshot.checkUidPermission(Manifest.permission.EMERGENCY_INSTALL_PACKAGES,
-                mInstallerUid) == PackageManager.PERMISSION_GRANTED);
+                installerUid) == PackageManager.PERMISSION_GRANTED);
     }
 
     private static final int USER_ACTION_NOT_NEEDED = 0;
@@ -1075,7 +1077,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 getInstallerPackageName());
         final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
         final boolean isEmergencyInstall =
-                isEmergencyInstallerEnabled(packageName, snapshot);
+                isEmergencyInstallerEnabled(packageName, snapshot, userId, mInstallerUid);
         final boolean isPermissionGranted = isInstallPermissionGranted
                 || (isUpdatePermissionGranted && isUpdate)
                 || (isSelfUpdatePermissionGranted && isSelfUpdate)
@@ -3458,11 +3460,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        if (mHasAppMetadataFile && !getStagedAppMetadataFile().exists()) {
-            throw new PackageManagerException(INSTALL_FAILED_VERIFICATION_FAILURE,
-                    "App metadata file expected but not found in " + stageDir.getAbsolutePath());
-        }
-
         final List<ApkLite> addedFiles = getAddedApkLitesLocked();
         if (addedFiles.isEmpty()
                 && (removeSplitList.size() == 0 || mHasAppMetadataFile)) {
@@ -3592,6 +3589,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        File stagedAppMetadataFile = isIncrementalInstallation()
+                ? getTmpAppMetadataFile() : getStagedAppMetadataFile();
+        if (mHasAppMetadataFile && !stagedAppMetadataFile.exists()) {
+            throw new PackageManagerException(INSTALL_FAILED_SESSION_INVALID,
+                    "App metadata file expected but not found in " + stageDir.getAbsolutePath());
+        }
+
         if (isIncrementalInstallation()) {
             if (!isIncrementalInstallationAllowed(existingPkgSetting)) {
                 throw new PackageManagerException(
@@ -3600,8 +3604,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             // Since we moved the staged app metadata file so that incfs can be initialized, lets
             // now move it back.
-            File appMetadataFile = getTmpAppMetadataFile();
-            if (appMetadataFile.exists()) {
+            if (mHasAppMetadataFile) {
+                File appMetadataFile = getTmpAppMetadataFile();
                 final IncrementalFileStorages incrementalFileStorages =
                         getIncrementalFileStorages();
                 try {

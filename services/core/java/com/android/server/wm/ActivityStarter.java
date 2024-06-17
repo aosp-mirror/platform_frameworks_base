@@ -139,6 +139,7 @@ import com.android.server.wm.BackgroundActivityStartController.BalCode;
 import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 import com.android.server.wm.TaskFragment.EmbeddingCheckResult;
+import com.android.wm.shell.Flags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -936,13 +937,8 @@ class ActivityStarter {
         }
         mLastStartReason = request.reason;
         mLastStartActivityTimeMs = System.currentTimeMillis();
-        // Reset the ActivityRecord#mCurrentLaunchCanTurnScreenOn state of last start activity in
-        // case the state is not yet consumed during rapid activity launch.
-        if (mLastStartActivityRecord != null) {
-            mLastStartActivityRecord.setCurrentLaunchCanTurnScreenOn(false);
-        }
-        mLastStartActivityRecord = null;
 
+        final ActivityRecord previousStart = mLastStartActivityRecord;
         final IApplicationThread caller = request.caller;
         Intent intent = request.intent;
         NeededUriGrants intentGrants = request.intentGrants;
@@ -1728,7 +1724,14 @@ class ActivityStarter {
         // Get top task at beginning because the order may be changed when reusing existing task.
         final Task prevTopRootTask = mPreferredTaskDisplayArea.getFocusedRootTask();
         final Task prevTopTask = prevTopRootTask != null ? prevTopRootTask.getTopLeafTask() : null;
-        final Task reusedTask = resolveReusableTask();
+        final boolean sourceActivityLaunchedFromBubble =
+                sourceRecord != null && sourceRecord.getLaunchedFromBubble();
+        // if the flag is enabled, allow reusing bubbled tasks only if the source activity is
+        // bubbled.
+        final boolean includeLaunchedFromBubble =
+                Flags.onlyReuseBubbledTaskWhenLaunchedFromBubble()
+                        ? sourceActivityLaunchedFromBubble : true;
+        final Task reusedTask = resolveReusableTask(includeLaunchedFromBubble);
 
         // If requested, freeze the task list
         if (mOptions != null && mOptions.freezeRecentTasksReordering()
@@ -2727,8 +2730,11 @@ class ActivityStarter {
     /**
      * Decide whether the new activity should be inserted into an existing task. Returns null
      * if not or an ActivityRecord with the task into which the new activity should be added.
+     *
+     * @param includeLaunchedFromBubble whether a task whose top activity was launched from a bubble
+     *                                  should be allowed to be reused for the new activity.
      */
-    private Task resolveReusableTask() {
+    private Task resolveReusableTask(boolean includeLaunchedFromBubble) {
         // If a target task is specified, try to reuse that one
         if (mOptions != null && mOptions.getLaunchTaskId() != INVALID_TASK_ID) {
             Task launchTask = mRootWindowContainer.anyTaskForId(mOptions.getLaunchTaskId());
@@ -2772,7 +2778,8 @@ class ActivityStarter {
             } else {
                 // Otherwise find the best task to put the activity in.
                 intentActivity =
-                        mRootWindowContainer.findTask(mStartActivity, mPreferredTaskDisplayArea);
+                        mRootWindowContainer.findTask(mStartActivity, mPreferredTaskDisplayArea,
+                                includeLaunchedFromBubble);
             }
         }
 

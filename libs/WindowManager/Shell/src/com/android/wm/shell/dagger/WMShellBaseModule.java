@@ -87,6 +87,7 @@ import com.android.wm.shell.performance.PerfHintController;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
+import com.android.wm.shell.recents.TaskStackTransitionObserver;
 import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.shared.ShellTransitions;
 import com.android.wm.shell.shared.annotations.ShellAnimationThread;
@@ -619,12 +620,13 @@ public abstract class WMShellBaseModule {
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
             Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            TaskStackTransitionObserver taskStackTransitionObserver,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return Optional.ofNullable(
                 RecentTasksController.create(context, shellInit, shellController,
                         shellCommandHandler, taskStackListener, activityTaskManager,
-                        desktopModeTaskRepository, mainExecutor));
+                        desktopModeTaskRepository, taskStackTransitionObserver, mainExecutor));
     }
 
     @BindsOptionalOf
@@ -921,6 +923,19 @@ public abstract class WMShellBaseModule {
             }
             return Optional.empty();
         });
+    }
+
+    //
+    // Task Stack
+    //
+
+    @WMSingleton
+    @Provides
+    static TaskStackTransitionObserver provideTaskStackTransitionObserver(
+            Lazy<Transitions> transitions,
+            ShellInit shellInit
+    ) {
+        return new TaskStackTransitionObserver(transitions, shellInit);
     }
 
     //

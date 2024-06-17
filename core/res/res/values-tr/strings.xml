@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN çok kısa. En az 4 basamaklı olmalı."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Daha sonra tekrar deneyin"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Tam ekran olarak görüntüleme"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Çıkmak için yukarıdan aşağıya doğru hızlıca kaydırın."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Anladım"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Daha iyi bir görünüm elde etmek için ekranı döndürün"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Daha iyi görünüm için <xliff:g id="NAME">%s</xliff:g> uygulamasını açın"</string>
@@ -2407,6 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Özel alan"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Paylaşılan"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Özel alan"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Hassas bildirim içerikleri gizlendi"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Uygulama içerikleri, güvenlik nedeniyle ekran paylaşımında gizlendi"</string>

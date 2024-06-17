@@ -106,6 +106,10 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setDisplayEnabled(true);
             case "disable-display":
                 return setDisplayEnabled(false);
+            case "power-on":
+                return requestDisplayPower(true);
+            case "power-off":
+                return requestDisplayPower(false);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -590,6 +594,23 @@ class DisplayManagerShellCommand extends ShellCommand {
             return 1;
         }
         mService.enableConnectedDisplay(displayId, enable);
+        return 0;
+    }
+
+    private int requestDisplayPower(boolean enable) {
+        final String displayIdText = getNextArg();
+        if (displayIdText == null) {
+            getErrPrintWriter().println("Error: no displayId specified");
+            return 1;
+        }
+        final int displayId;
+        try {
+            displayId = Integer.parseInt(displayIdText);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid displayId: '" + displayIdText + "'");
+            return 1;
+        }
+        mService.requestDisplayPower(displayId, enable);
         return 0;
     }
 }

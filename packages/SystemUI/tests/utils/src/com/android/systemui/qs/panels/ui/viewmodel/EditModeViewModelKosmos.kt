@@ -22,6 +22,7 @@ import com.android.systemui.qs.panels.domain.interactor.editTilesListInteractor
 import com.android.systemui.qs.panels.domain.interactor.gridLayoutMap
 import com.android.systemui.qs.panels.domain.interactor.gridLayoutTypeInteractor
 import com.android.systemui.qs.panels.domain.interactor.infiniteGridLayout
+import com.android.systemui.qs.panels.domain.interactor.tilesAvailabilityInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.minimumTilesInteractor
 
@@ -30,6 +31,7 @@ val Kosmos.editModeViewModel by
         EditModeViewModel(
             editTilesListInteractor,
             currentTilesInteractor,
+            tilesAvailabilityInteractor,
             minimumTilesInteractor,
             infiniteGridLayout,
             applicationCoroutineScope,

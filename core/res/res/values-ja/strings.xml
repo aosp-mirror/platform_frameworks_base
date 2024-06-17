@@ -716,7 +716,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"スマートフォンを左に動かしてください"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"スマートフォンを右に動かしてください"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"もっとまっすぐデバイスに顔を向けてください。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"顔を確認できません。スマートフォンを目の高さに合わせます。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"顔を確認できません。目の高さに合わせてください"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"あまり動かさないでください。安定させてください。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"顔を登録し直してください。"</string>
     <string name="face_acquired_too_different" msgid="4505278456634706967">"顔を認識できません。もう一度お試しください。"</string>
@@ -1883,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で設定してください。"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"しばらくしてから再試行"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"全画面表示"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"終了するには、上から下にスワイプします。"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"画面を回転させて見やすくしましょう"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"<xliff:g id="NAME">%s</xliff:g> を全画面表示で開いて見やすくしましょう"</string>
@@ -2407,6 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"プライベート スペース"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"複製"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"共用"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"プライベート スペース"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"プライベートな通知内容は表示されません"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"セキュリティ上、画面共有ではアプリの内容は非表示となります"</string>

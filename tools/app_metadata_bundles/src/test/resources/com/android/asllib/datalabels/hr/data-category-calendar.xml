@@ -1,5 +1,4 @@
 <data-labels>
-    <data-shared dataCategory="calendar"
-        dataType="calendar"
+    <data-shared dataType="calendar_data_type_calendar"
         purposes="analytics" />
 </data-labels>

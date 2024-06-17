@@ -482,31 +482,38 @@ public class BubbleExpandedView extends LinearLayout {
                 mPointerWidth, mPointerHeight, true /* pointLeft */));
         mRightPointer = new ShapeDrawable(TriangleShape.createHorizontal(
                 mPointerWidth, mPointerHeight, false /* pointLeft */));
-        if (mPointerView != null) {
-            updatePointerView();
-        }
+        updatePointerViewIfExists();
+        updateManageButtonIfExists();
+    }
 
-        if (mManageButton != null) {
-            int visibility = mManageButton.getVisibility();
-            removeView(mManageButton);
-            ContextThemeWrapper ctw = new ContextThemeWrapper(getContext(),
-                    com.android.internal.R.style.Theme_DeviceDefault_DayNight);
-            mManageButton = (AlphaOptimizedButton) LayoutInflater.from(ctw).inflate(
-                    R.layout.bubble_manage_button, this /* parent */, false /* attach */);
-            addView(mManageButton);
-            mManageButton.setVisibility(visibility);
-            post(() -> {
-                int touchAreaHeight =
-                        getResources().getDimensionPixelSize(
-                                R.dimen.bubble_manage_button_touch_area_height);
-                Rect r = new Rect();
-                mManageButton.getHitRect(r);
-                int extraTouchArea = (touchAreaHeight - r.height()) / 2;
-                r.top -= extraTouchArea;
-                r.bottom += extraTouchArea;
-                setTouchDelegate(new TouchDelegate(r, mManageButton));
-            });
+
+    /**
+     * Reinflate manage button if {@link #mManageButton} is initialized.
+     * Does nothing otherwise.
+     */
+    private void updateManageButtonIfExists() {
+        if (mManageButton == null) {
+            return;
         }
+        int visibility = mManageButton.getVisibility();
+        removeView(mManageButton);
+        ContextThemeWrapper ctw = new ContextThemeWrapper(getContext(),
+                com.android.internal.R.style.Theme_DeviceDefault_DayNight);
+        mManageButton = (AlphaOptimizedButton) LayoutInflater.from(ctw).inflate(
+                R.layout.bubble_manage_button, this /* parent */, false /* attach */);
+        addView(mManageButton);
+        mManageButton.setVisibility(visibility);
+        post(() -> {
+            int touchAreaHeight =
+                    getResources().getDimensionPixelSize(
+                            R.dimen.bubble_manage_button_touch_area_height);
+            Rect r = new Rect();
+            mManageButton.getHitRect(r);
+            int extraTouchArea = (touchAreaHeight - r.height()) / 2;
+            r.top -= extraTouchArea;
+            r.bottom += extraTouchArea;
+            setTouchDelegate(new TouchDelegate(r, mManageButton));
+        });
     }
 
     void updateFontSize() {
@@ -548,11 +555,18 @@ public class BubbleExpandedView extends LinearLayout {
         if (mTaskView != null) {
             mTaskView.setCornerRadius(mCornerRadius);
         }
-        updatePointerView();
+        updatePointerViewIfExists();
+        updateManageButtonIfExists();
     }
 
-    /** Updates the size and visuals of the pointer. **/
-    private void updatePointerView() {
+    /**
+     * Updates the size and visuals of the pointer if {@link #mPointerView} is initialized.
+     * Does nothing otherwise.
+     */
+    private void updatePointerViewIfExists() {
+        if (mPointerView == null) {
+            return;
+        }
         LayoutParams lp = (LayoutParams) mPointerView.getLayoutParams();
         if (mCurrentPointer == mLeftPointer || mCurrentPointer == mRightPointer) {
             lp.width = mPointerHeight;
@@ -1055,7 +1069,7 @@ public class BubbleExpandedView extends LinearLayout {
         // Post because we need the width of the view
         post(() -> {
             mCurrentPointer = showVertically ? onLeft ? mLeftPointer : mRightPointer : mTopPointer;
-            updatePointerView();
+            updatePointerViewIfExists();
             if (showVertically) {
                 mPointerPos.y = bubbleCenter - (mPointerWidth / 2f);
                 if (!isRtl) {

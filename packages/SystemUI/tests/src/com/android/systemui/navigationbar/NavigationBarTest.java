@@ -57,7 +57,6 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.telecom.TelecomManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
@@ -73,6 +72,7 @@ import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -132,7 +132,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class NavigationBarTest extends SysuiTestCase {

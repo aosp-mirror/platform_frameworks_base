@@ -148,9 +148,9 @@ internal class DraggableHandlerImpl(
         val swipes = computeSwipes(fromScene, startedPosition, pointersDown)
         val result =
             swipes.findUserActionResult(fromScene, overSlop, true)
-            // As we were unable to locate a valid target scene, the initial SwipeTransition
-            // cannot be defined. Consequently, a simple NoOp Controller will be returned.
-            ?: return NoOpDragController
+                // As we were unable to locate a valid target scene, the initial SwipeTransition
+                // cannot be defined. Consequently, a simple NoOp Controller will be returned.
+                ?: return NoOpDragController
 
         return updateDragController(
             swipes = swipes,
@@ -257,7 +257,7 @@ private class DragControllerImpl(
 
     fun updateTransition(newTransition: SwipeTransition, force: Boolean = false) {
         if (isDrivingTransition || force) {
-            layoutState.startTransition(newTransition, newTransition.key)
+            layoutState.startTransition(newTransition)
         }
 
         swipeTransition = newTransition
@@ -521,6 +521,7 @@ private fun SwipeTransition(
         }
 
     return SwipeTransition(
+        layoutImpl = layoutImpl,
         layoutState = layoutState,
         coroutineScope = coroutineScope,
         key = result.transitionKey,
@@ -534,6 +535,7 @@ private fun SwipeTransition(
 
 private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
     return SwipeTransition(
+            layoutImpl = old.layoutImpl,
             layoutState = old.layoutState,
             coroutineScope = old.coroutineScope,
             key = old.key,
@@ -550,9 +552,10 @@ private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
 }
 
 private class SwipeTransition(
+    val layoutImpl: SceneTransitionLayoutImpl,
     val layoutState: BaseSceneTransitionLayoutState,
     val coroutineScope: CoroutineScope,
-    val key: TransitionKey?,
+    override val key: TransitionKey?,
     val _fromScene: Scene,
     val _toScene: Scene,
     val userActionDistanceScope: UserActionDistanceScope,
@@ -607,6 +610,12 @@ private class SwipeTransition(
 
     override val overscrollScope: OverscrollScope =
         object : OverscrollScope {
+            override val density: Float
+                get() = layoutImpl.density.density
+
+            override val fontScale: Float
+                get() = layoutImpl.density.fontScale
+
             override val absoluteDistance: Float
                 get() = distance().absoluteValue
         }
@@ -683,6 +692,8 @@ private class SwipeTransition(
         return startOffsetAnimation {
             val animatable = Animatable(dragOffset, OffsetVisibilityThreshold)
             val isTargetGreater = targetOffset > animatable.value
+            val startedWhenOvercrollingTargetScene =
+                if (targetScene == fromScene) progress < 0f else progress > 1f
             val job =
                 coroutineScope
                     // Important: We start atomically to make sure that we start the coroutine even
@@ -694,6 +705,8 @@ private class SwipeTransition(
                         // coroutine if we don't need to animate.
                         if (skipAnimation) {
                             snapToScene(targetScene)
+                            cancelOffsetAnimation()
+                            dragOffset = targetOffset
                             return@launch
                         }
 
@@ -709,10 +722,19 @@ private class SwipeTransition(
                                 if (bouncingScene == null) {
                                     val isBouncing =
                                         if (isTargetGreater) {
-                                            value > targetOffset
+                                            if (startedWhenOvercrollingTargetScene) {
+                                                value >= targetOffset
+                                            } else {
+                                                value > targetOffset
+                                            }
                                         } else {
-                                            value < targetOffset
+                                            if (startedWhenOvercrollingTargetScene) {
+                                                value <= targetOffset
+                                            } else {
+                                                value < targetOffset
+                                            }
                                         }
+
                                     if (isBouncing) {
                                         bouncingScene = targetScene
 
@@ -730,7 +752,6 @@ private class SwipeTransition(
                                 }
                             }
                         } finally {
-                            bouncingScene = null
                             snapToScene(targetScene)
                         }
                     }
