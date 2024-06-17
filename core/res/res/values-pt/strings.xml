@@ -1371,7 +1371,7 @@
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Ativar serviço móvel"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Baixe o app da operadora para ativar seu novo chip"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Baixe o app <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar seu novo chip"</string>
-    <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Fazer download do app"</string>
+    <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Baixar o app"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Novo chip inserido"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Toque para configurar"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Definir hora"</string>
