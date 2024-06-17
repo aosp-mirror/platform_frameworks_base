@@ -568,6 +568,8 @@ public class CompanionAssociationActivity extends FragmentActivity implements
 
         updateSingleDeviceUi();
 
+        if (mRequest.isSkipPrompt()) return;
+
         mSummary.setVisibility(View.VISIBLE);
         mButtonAllow.setVisibility(View.VISIBLE);
         mButtonNotAllow.setVisibility(View.VISIBLE);
