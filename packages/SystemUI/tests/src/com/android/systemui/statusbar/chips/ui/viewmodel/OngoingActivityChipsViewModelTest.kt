@@ -198,7 +198,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         fun assertIsShareToAppChip(latest: OngoingActivityChipModel?) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_screenshot_share)
+            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_present_to_all)
         }
 
         fun assertIsCallChip(latest: OngoingActivityChipModel?) {

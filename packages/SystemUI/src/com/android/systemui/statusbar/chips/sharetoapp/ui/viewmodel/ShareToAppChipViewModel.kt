@@ -97,7 +97,6 @@ constructor(
         )
 
     companion object {
-        // TODO(b/332662551): Use the right icon.
-        @DrawableRes val SHARE_TO_APP_ICON = R.drawable.ic_screenshot_share
+        @DrawableRes val SHARE_TO_APP_ICON = R.drawable.ic_present_to_all
     }
 }
