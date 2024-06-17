@@ -1632,7 +1632,7 @@ public abstract class Window {
      * @see View#findViewById(int)
      * @see Window#requireViewById(int)
      */
-    @Nullable
+    /* TODO(b/347672184): Re-add @Nullable */
     public <T extends View> T findViewById(@IdRes int id) {
         return getDecorView().findViewById(id);
     }
