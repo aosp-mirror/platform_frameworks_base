@@ -417,10 +417,7 @@ fun NotificationStackCutoffGuideline(
 ) {
     Spacer(
         modifier =
-            modifier
-                    .fillMaxWidth()
-                    .height(0.dp)
-                    .onGloballyPositioned { coordinates ->
+            modifier.fillMaxWidth().height(0.dp).onGloballyPositioned { coordinates ->
                 val positionY = coordinates.positionInWindow().y
                 debugLog(viewModel) { "STACK cutoff onGloballyPositioned: y=$positionY" }
                 stackScrollView.setStackCutoff(positionY)

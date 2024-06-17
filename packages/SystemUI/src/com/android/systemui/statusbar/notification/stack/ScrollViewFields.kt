@@ -70,9 +70,11 @@ class ScrollViewFields {
     /** send the [syntheticScroll] to the [syntheticScrollConsumer], if present. */
     fun sendSyntheticScroll(syntheticScroll: Float) =
         syntheticScrollConsumer?.accept(syntheticScroll)
+
     /** send [isCurrentGestureOverscroll] to the [currentGestureOverscrollConsumer], if present. */
     fun sendCurrentGestureOverscroll(isCurrentGestureOverscroll: Boolean) =
         currentGestureOverscrollConsumer?.accept(isCurrentGestureOverscroll)
+
     /** send the [headsUpHeight] to the [headsUpHeightConsumer], if present. */
     fun sendHeadsUpHeight(headsUpHeight: Float) = headsUpHeightConsumer?.accept(headsUpHeight)
 
