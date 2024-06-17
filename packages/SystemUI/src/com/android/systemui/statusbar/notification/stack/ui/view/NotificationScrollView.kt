@@ -50,8 +50,11 @@ interface NotificationScrollView {
     /** set the y position in px of the top of the stack in this view's coordinates */
     fun setStackTop(stackTop: Float)
 
-    /** set the y position in px of the bottom of the stack in this view's coordinates */
-    fun setStackBottom(stackBottom: Float)
+    /**
+     * set the bottom-most acceptable y-position of the bottom of the notification stack/ shelf /
+     * footer.
+     */
+    fun setStackCutoff(stackBottom: Float)
 
     /** set the y position in px of the top of the HUN in this view's coordinates */
     fun setHeadsUpTop(headsUpTop: Float)
