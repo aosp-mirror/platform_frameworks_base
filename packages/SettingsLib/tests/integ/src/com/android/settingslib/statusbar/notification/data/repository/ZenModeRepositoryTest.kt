@@ -20,9 +20,12 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings.Global
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.flags.Flags
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -46,14 +49,11 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class ZenModeRepositoryTest {
 
-    @Mock
-    private lateinit var context: Context
+    @Mock private lateinit var context: Context
 
-    @Mock
-    private lateinit var notificationManager: NotificationManager
+    @Mock private lateinit var notificationManager: NotificationManager
 
-    @Captor
-    private lateinit var receiverCaptor: ArgumentCaptor<BroadcastReceiver>
+    @Captor private lateinit var receiverCaptor: ArgumentCaptor<BroadcastReceiver>
 
     private lateinit var underTest: ZenModeRepository
 
@@ -72,13 +72,15 @@ class ZenModeRepositoryTest {
             )
     }
 
+    @DisableFlags(android.app.Flags.FLAG_MODES_API, Flags.FLAG_VOLUME_PANEL_BROADCAST_FIX)
     @Test
-    fun consolidatedPolicyChanges_repositoryEmits() {
+    fun consolidatedPolicyChanges_repositoryEmits_flagsOff() {
         testScope.runTest {
             val values = mutableListOf<NotificationManager.Policy?>()
             `when`(notificationManager.consolidatedNotificationPolicy).thenReturn(testPolicy1)
-            underTest.consolidatedNotificationPolicy.onEach { values.add(it) }
-                    .launchIn(backgroundScope)
+            underTest.consolidatedNotificationPolicy
+                .onEach { values.add(it) }
+                .launchIn(backgroundScope)
             runCurrent()
 
             `when`(notificationManager.consolidatedNotificationPolicy).thenReturn(testPolicy2)
@@ -86,8 +88,29 @@ class ZenModeRepositoryTest {
             runCurrent()
 
             assertThat(values)
-                    .containsExactlyElementsIn(listOf(null, testPolicy1, testPolicy2))
-                    .inOrder()
+                .containsExactlyElementsIn(listOf(null, testPolicy1, testPolicy2))
+                .inOrder()
+        }
+    }
+
+    @EnableFlags(android.app.Flags.FLAG_MODES_API, Flags.FLAG_VOLUME_PANEL_BROADCAST_FIX)
+    @Test
+    fun consolidatedPolicyChanges_repositoryEmits_flagsOn() {
+        testScope.runTest {
+            val values = mutableListOf<NotificationManager.Policy?>()
+            `when`(notificationManager.consolidatedNotificationPolicy).thenReturn(testPolicy1)
+            underTest.consolidatedNotificationPolicy
+                .onEach { values.add(it) }
+                .launchIn(backgroundScope)
+            runCurrent()
+
+            `when`(notificationManager.consolidatedNotificationPolicy).thenReturn(testPolicy2)
+            triggerIntent(NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED)
+            runCurrent()
+
+            assertThat(values)
+                .containsExactlyElementsIn(listOf(null, testPolicy1, testPolicy2))
+                .inOrder()
         }
     }
 
@@ -104,10 +127,9 @@ class ZenModeRepositoryTest {
             runCurrent()
 
             assertThat(values)
-                    .containsExactlyElementsIn(
-                        listOf(null, Global.ZEN_MODE_OFF, Global.ZEN_MODE_ALARMS)
-                    )
-                    .inOrder()
+                .containsExactlyElementsIn(
+                    listOf(null, Global.ZEN_MODE_OFF, Global.ZEN_MODE_ALARMS))
+                .inOrder()
         }
     }
 

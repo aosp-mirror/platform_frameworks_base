@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import com.android.settingslib.flags.Flags
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -65,21 +66,34 @@ class ZenModeRepositoryImpl(
                     IntentFilter().apply {
                         addAction(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED)
                         addAction(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED)
+                        if (Flags.volumePanelBroadcastFix() && android.app.Flags.modesApi())
+                            addAction(
+                                NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED)
                     })
 
                 awaitClose { context.unregisterReceiver(receiver) }
             }
-            .shareIn(
-                started = SharingStarted.WhileSubscribed(),
-                scope = scope,
-            )
+            .apply {
+                if (Flags.volumePanelBroadcastFix()) {
+                    flowOn(backgroundCoroutineContext)
+                    stateIn(scope, SharingStarted.WhileSubscribed(), null)
+                } else {
+                    shareIn(
+                        started = SharingStarted.WhileSubscribed(),
+                        scope = scope,
+                    )
+                }
+            }
 
     override val consolidatedNotificationPolicy: StateFlow<NotificationManager.Policy?> =
-        // TODO(b/347707024): This should use ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED
-        // instead.
-        flowFromBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED) {
-            notificationManager.consolidatedNotificationPolicy
-        }
+        if (Flags.volumePanelBroadcastFix() && android.app.Flags.modesApi())
+            flowFromBroadcast(NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED) {
+                notificationManager.consolidatedNotificationPolicy
+            }
+        else
+            flowFromBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED) {
+                notificationManager.consolidatedNotificationPolicy
+            }
 
     override val globalZenMode: StateFlow<Int?> =
         flowFromBroadcast(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED) {
