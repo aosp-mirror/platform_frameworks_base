@@ -93,16 +93,6 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "window_token_config_thread_safe"
-    description: "Ensure the Configuration pre/post changed is thread safe"
-    bug: "334285008"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "always_defer_transition_when_apply_wct"
     description: "Report error when defer transition fails when it should not"
     bug: "335562144"
