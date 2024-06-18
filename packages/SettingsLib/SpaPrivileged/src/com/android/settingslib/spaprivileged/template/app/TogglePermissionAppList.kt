@@ -19,6 +19,7 @@ package com.android.settingslib.spaprivileged.template.app
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.os.Process
+import android.os.UserHandle
 import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -88,7 +89,8 @@ interface TogglePermissionAppListModel<T : AppRecord> {
  *
  * If true, the app gets all permissions, so the permission toggle always not changeable.
  */
-fun AppRecord.isSystemOrRootUid(): Boolean = app.uid in listOf(Process.SYSTEM_UID, Process.ROOT_UID)
+fun AppRecord.isSystemOrRootUid(): Boolean =
+    UserHandle.getAppId(app.uid) in listOf(Process.SYSTEM_UID, Process.ROOT_UID)
 
 /**
  * Gets whether the permission on / off is changeable for the given app.
