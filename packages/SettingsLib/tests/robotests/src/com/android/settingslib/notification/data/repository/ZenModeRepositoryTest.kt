@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.android.settingslib.statusbar.notification.data.repository
+package com.android.settingslib.notification.data.repository
 
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
@@ -23,7 +23,6 @@ import android.content.Intent
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings.Global
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.flags.Flags
 import com.google.common.truth.Truth.assertThat
@@ -43,9 +42,10 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 @SmallTest
 class ZenModeRepositoryTest {
 

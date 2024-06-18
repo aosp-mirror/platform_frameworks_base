@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.notification;
+package com.android.settingslib.notification.modes;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -77,7 +77,7 @@ public class EnableZenModeDialogTest {
         mController = spy(new EnableZenModeDialog(mContext));
         mController.mContext = mContext;
         mController.mLayoutInflater = mLayoutInflater;
-        mController.mForeverId =  Condition.newId(mContext).appendPath("forever").build();
+        mController.mForeverId = Condition.newId(mContext).appendPath("forever").build();
         when(mContext.getString(com.android.internal.R.string.zen_mode_forever))
                 .thenReturn("testSummary");
         when(mContext.getString(com.android.internal.R.string.selected))
@@ -96,9 +96,9 @@ public class EnableZenModeDialogTest {
         doNothing().when(mController).bindNextAlarm(any());
 
         // as a result of doing nothing above, must bind manually:
-        Uri alarm =  Condition.newId(mContext).appendPath("alarm").build();
+        Uri alarm = Condition.newId(mContext).appendPath("alarm").build();
         mAlarmCondition = new Condition(alarm, "alarm", "", "", 0, 0, 0);
-        Uri countdown =  Condition.newId(mContext).appendPath("countdown").build();
+        Uri countdown = Condition.newId(mContext).appendPath("countdown").build();
         mCountdownCondition = new Condition(countdown, "countdown", "", "", 0, 0, 0);
         mController.bind(mCountdownCondition,
                 mController.mZenRadioGroupContent.getChildAt(

@@ -20,7 +20,7 @@ import android.media.AudioManager
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.statusbar.notification.data.repository.updateNotificationPolicy
+import com.android.settingslib.notification.data.repository.updateNotificationPolicy
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.RingerMode
