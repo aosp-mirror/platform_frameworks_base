@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.window.WindowContainerTransaction
+import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource.UNKNOWN
 import com.android.wm.shell.sysui.ShellCommandHandler
 import java.io.PrintWriter
 
@@ -64,7 +64,7 @@ class DesktopModeShellCommandHandler(private val controller: DesktopTasksControl
                 return false
             }
 
-        return controller.moveToDesktop(taskId, WindowContainerTransaction())
+        return controller.moveToDesktop(taskId, transitionSource = UNKNOWN)
     }
 
     private fun runMoveToNextDisplay(args: Array<String>, pw: PrintWriter): Boolean {

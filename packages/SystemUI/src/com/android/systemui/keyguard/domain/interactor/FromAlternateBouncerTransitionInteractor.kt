@@ -24,9 +24,12 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
@@ -36,7 +39,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
@@ -57,7 +59,7 @@ constructor(
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
-    private val keyguardInteractor: KeyguardInteractor,
+    keyguardInteractor: KeyguardInteractor,
     private val communalInteractor: CommunalInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
@@ -70,6 +72,7 @@ constructor(
         bgDispatcher = bgDispatcher,
         powerInteractor = powerInteractor,
         keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+        keyguardInteractor = keyguardInteractor,
     ) {
 
     override fun start() {
@@ -80,17 +83,16 @@ constructor(
     }
 
     val surfaceBehindVisibility: Flow<Boolean?> =
-        combine(
-                transitionInteractor.startedKeyguardTransitionStep,
-                transitionInteractor.transitionStepsFromState(KeyguardState.ALTERNATE_BOUNCER)
-            ) { startedStep, fromBouncerStep ->
-                if (startedStep.to != KeyguardState.GONE) {
-                    return@combine null
-                }
-
+        transitionInteractor
+            .transition(
+                edge = Edge.create(from = KeyguardState.ALTERNATE_BOUNCER, to = Scenes.Gone),
+                edgeWithoutSceneContainer =
+                    Edge.create(from = KeyguardState.ALTERNATE_BOUNCER, to = KeyguardState.GONE)
+            )
+            .map<TransitionStep, Boolean?> {
                 // The alt bouncer is pretty fast to hide, so start the surface behind animation
                 // around 30%.
-                fromBouncerStep.value > 0.3f
+                it.value > 0.3f
             }
             .onStart {
                 // Default to null ("don't care, use a reasonable default").
@@ -112,13 +114,26 @@ constructor(
                     powerInteractor.isAwake,
                     keyguardInteractor.isAodAvailable,
                     communalInteractor.isIdleOnCommunal,
+                    communalInteractor.editModeOpen,
                     keyguardInteractor.isKeyguardOccluded,
                 )
                 .filterRelevantKeyguardStateAnd {
                     (isAlternateBouncerShowing, isPrimaryBouncerShowing, _, _, _) ->
                     !isAlternateBouncerShowing && !isPrimaryBouncerShowing
                 }
-                .collect { (_, _, isAwake, isAodAvailable, isIdleOnCommunal, isOccluded) ->
+                .collect {
+                    (
+                        _,
+                        _,
+                        isAwake,
+                        isAodAvailable,
+                        isIdleOnCommunal,
+                        isCommunalEditMode,
+                        isOccluded) ->
+                    // When unlocking over glanceable hub to enter edit mode, transitioning directly
+                    // to GONE prevents the lockscreen flash. Let listenForAlternateBouncerToGone
+                    // handle it.
+                    if (isCommunalEditMode) return@collect
                     val to =
                         if (!isAwake) {
                             if (isAodAvailable) {

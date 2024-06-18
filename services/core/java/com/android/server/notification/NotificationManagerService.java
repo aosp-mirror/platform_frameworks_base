@@ -23,6 +23,7 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREG
 import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.OP_RECEIVE_SENSITIVE_NOTIFICATIONS;
 import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.app.Flags.lifetimeExtensionRefactor;
 import static android.app.Flags.sortSectionByTime;
@@ -224,6 +225,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
@@ -284,6 +286,7 @@ import android.service.notification.NotificationRecordProto;
 import android.service.notification.NotificationServiceDumpProto;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeProto;
 import android.service.notification.ZenPolicy;
@@ -2311,7 +2314,7 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     void clearNotifications() {
-        synchronized (mNotificationList) {
+        synchronized (mNotificationLock) {
             mEnqueuedNotifications.clear();
             mNotificationList.clear();
             mNotificationsByKey.clear();
@@ -2321,21 +2324,27 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     void addNotification(NotificationRecord r) {
-        mNotificationList.add(r);
-        mNotificationsByKey.put(r.getSbn().getKey(), r);
-        if (r.getSbn().isGroup()) {
-            mSummaryByGroupKey.put(r.getGroupKey(), r);
+        synchronized (mNotificationLock) {
+            mNotificationList.add(r);
+            mNotificationsByKey.put(r.getSbn().getKey(), r);
+            if (r.getSbn().isGroup()) {
+                mSummaryByGroupKey.put(r.getGroupKey(), r);
+            }
         }
     }
 
     @VisibleForTesting
     void addEnqueuedNotification(NotificationRecord r) {
-        mEnqueuedNotifications.add(r);
+        synchronized (mNotificationLock) {
+            mEnqueuedNotifications.add(r);
+        }
     }
 
     @VisibleForTesting
     NotificationRecord getNotificationRecord(String key) {
-        return mNotificationsByKey.get(key);
+        synchronized (mNotificationLock) {
+            return mNotificationsByKey.get(key);
+        }
     }
 
     @VisibleForTesting
@@ -4528,6 +4537,34 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public List<String> getPackagesBypassingDnd(int userId,
+                                                    boolean includeConversationChannels) {
+            checkCallerIsSystem();
+
+            final ArraySet<String> packageNames = new ArraySet<>();
+
+            for (int user : mUm.getProfileIds(userId, false)) {
+                List<PackageInfo> pkgs = mPackageManagerClient.getInstalledPackagesAsUser(0, user);
+                for (PackageInfo pi : pkgs) {
+                    String pkg = pi.packageName;
+                    // If any NotificationChannel for this package is bypassing, the
+                    // package is considered bypassing.
+                    for (NotificationChannel channel : getNotificationChannelsBypassingDnd(pkg,
+                            pi.applicationInfo.uid).getList()) {
+                        // Skips non-demoted conversation channels.
+                        if (!includeConversationChannels
+                                && !TextUtils.isEmpty(channel.getConversationId())
+                                && !channel.isDemoted()) {
+                            continue;
+                        }
+                        packageNames.add(pkg);
+                    }
+                }
+            }
+            return new ArrayList<String>(packageNames);
+        }
+
+        @Override
         public boolean areChannelsBypassingDnd() {
             if (android.app.Flags.modesApi()) {
                 return mZenModeHelper.getConsolidatedNotificationPolicy().allowPriorityChannels()
@@ -5499,6 +5536,14 @@ public class NotificationManagerService extends SystemService {
 
             return mZenModeHelper.addAutomaticZenRule(rulePkg, automaticZenRule,
                     computeZenOrigin(fromUser), "addAutomaticZenRule", Binder.getCallingUid());
+        }
+
+        @Override
+        public void setManualZenRuleDeviceEffects(ZenDeviceEffects effects) throws RemoteException {
+            checkCallerIsSystem();
+
+            mZenModeHelper.setManualZenRuleDeviceEffects(effects, computeZenOrigin(true),
+                    "Update manual mode non-policy settings", Binder.getCallingUid());
         }
 
         @Override
@@ -11927,7 +11972,10 @@ public class NotificationManagerService extends SystemService {
             long token = Binder.clearCallingIdentity();
             try {
                 if (mPackageManager.checkUidPermission(RECEIVE_SENSITIVE_NOTIFICATIONS, uid)
-                        == PERMISSION_GRANTED || mPackageManagerInternal.isPlatformSigned(pkg)) {
+                        == PERMISSION_GRANTED || mPackageManagerInternal.isPlatformSigned(pkg)
+                        || mAppOps
+                        .noteOpNoThrow(OP_RECEIVE_SENSITIVE_NOTIFICATIONS, uid, pkg, null, null)
+                        == MODE_ALLOWED) {
                     return true;
                 }
 

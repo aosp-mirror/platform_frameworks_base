@@ -477,6 +477,11 @@ public abstract class ActivityManagerInternal {
      */
     public static final int OOM_ADJ_REASON_COMPONENT_DISABLED = 22;
 
+    /**
+     * Oom Adj Reason: Follow up update for time sensitive state evaluations.
+     */
+    public static final int OOM_ADJ_REASON_FOLLOW_UP = 23;
+
     @IntDef(prefix = {"OOM_ADJ_REASON_"}, value = {
         OOM_ADJ_REASON_NONE,
         OOM_ADJ_REASON_ACTIVITY,
@@ -501,6 +506,7 @@ public abstract class ActivityManagerInternal {
         OOM_ADJ_REASON_EXECUTING_SERVICE,
         OOM_ADJ_REASON_RESTRICTION_CHANGE,
         OOM_ADJ_REASON_COMPONENT_DISABLED,
+        OOM_ADJ_REASON_FOLLOW_UP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OomAdjReason {}
@@ -1101,19 +1107,9 @@ public abstract class ActivityManagerInternal {
     public abstract ArraySet<String> getClientPackages(String servicePackageName);
 
     /**
-     * Retrieve an IUnsafeIntentStrictModeCallback matching the given callingUid.
-     * Returns null no match is found.
-     * @param callingPid The PID mapped with the callback.
-     * @return The callback, if it exists.
+     * Trigger an unsafe intent usage strict mode violation.
      */
-    public abstract IUnsafeIntentStrictModeCallback getRegisteredStrictModeCallback(
-            int callingPid);
-
-    /**
-     * Unregisters an IUnsafeIntentStrictModeCallback matching the given callingUid.
-     * @param callingPid The PID mapped with the callback.
-     */
-    public abstract void unregisterStrictModeCallback(int callingPid);
+    public abstract void triggerUnsafeIntentStrictMode(int callingPid, int type, Intent intent);
 
     /**
      * Start a foreground service delegate.

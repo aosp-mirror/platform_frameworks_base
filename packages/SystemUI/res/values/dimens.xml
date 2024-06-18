@@ -713,7 +713,6 @@
     <dimen name="qs_header_mobile_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <dimen name="qs_header_carrier_separator_width">6dp</dimen>
     <dimen name="qs_carrier_margin_width">4dp</dimen>
-    <dimen name="qs_footer_icon_size">20dp</dimen>
     <dimen name="qs_header_height">120dp</dimen>
     <dimen name="qs_header_row_min_height">48dp</dimen>
 
@@ -721,11 +720,7 @@
     <dimen name="new_qs_header_non_clickable_element_height">24sp</dimen>
 
     <dimen name="qs_footer_padding">20dp</dimen>
-    <dimen name="qs_security_footer_height">88dp</dimen>
-    <dimen name="qs_security_footer_single_line_height">48dp</dimen>
     <dimen name="qs_footers_margin_bottom">8dp</dimen>
-    <dimen name="qs_security_footer_background_inset">0dp</dimen>
-    <dimen name="qs_security_footer_corner_radius">28dp</dimen>
 
     <dimen name="segmented_button_spacing">0dp</dimen>
     <dimen name="borderless_button_radius">2dp</dimen>
@@ -815,6 +810,8 @@
     <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
     <!-- The amount to translate lockscreen elements on the GONE->AOD transition -->
     <dimen name="keyguard_enter_from_top_translation_y">-100dp</dimen>
+    <!-- The amount to translate lockscreen elements on the GONE->AOD transition, on device fold -->
+    <dimen name="keyguard_enter_from_side_translation_x">-100dp</dimen>
 
     <dimen name="notification_scrim_corner_radius">32dp</dimen>
 
@@ -917,6 +914,10 @@
         obvious when corner radii differ.-->
     <dimen name="communal_enforced_rounded_corner_max_radius">28dp</dimen>
 
+    <!-- Width and height used to filter widgets displayed in the communal widget picker -->
+    <dimen name="communal_widget_picker_desired_width">360dp</dimen>
+    <dimen name="communal_widget_picker_desired_height">240dp</dimen>
+
     <!-- The width/height of the unlock icon view on keyguard. -->
     <dimen name="keyguard_lock_height">42dp</dimen>
     <dimen name="keyguard_lock_padding">20dp</dimen>
@@ -944,6 +945,9 @@
 
     <!-- Padding between signal cluster and battery icon -->
     <dimen name="signal_cluster_battery_padding">6dp</dimen>
+
+    <!-- end padding for battery icon in status bar -->
+    <dimen name="status_bar_battery_end_padding">0dp</dimen>
 
     <!-- Screen pinning request width -->
     <dimen name="screen_pinning_request_width">@dimen/match_parent</dimen>
@@ -1106,6 +1110,7 @@
     <dimen name="biometric_dialog_button_negative_max_width">160dp</dimen>
     <dimen name="biometric_dialog_button_positive_max_width">136dp</dimen>
     <dimen name="biometric_dialog_corner_size">28dp</dimen>
+    <dimen name="biometric_dialog_indicator_max_width">280dp</dimen>
     <!-- Y translation when showing/dismissing the dialog-->
     <dimen name="biometric_dialog_animation_translation_offset">350dp</dimen>
     <dimen name="biometric_dialog_border_padding">4dp</dimen>
@@ -1119,11 +1124,18 @@
     <dimen name="biometric_dialog_height">240dp</dimen>
 
     <!-- Dimensions for biometric prompt panel padding -->
-    <dimen name="biometric_prompt_small_horizontal_guideline_padding">344dp</dimen>
-    <dimen name="biometric_prompt_udfps_horizontal_guideline_padding">114dp</dimen>
-    <dimen name="biometric_prompt_udfps_mid_guideline_padding">409dp</dimen>
-    <dimen name="biometric_prompt_medium_horizontal_guideline_padding">640dp</dimen>
-    <dimen name="biometric_prompt_medium_mid_guideline_padding">330dp</dimen>
+    <dimen name="biometric_prompt_panel_max_width">640dp</dimen>
+    <dimen name="biometric_prompt_land_small_horizontal_guideline_padding">344dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_horizontal_guideline_padding">114dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_shorter_content_width">216dp</dimen>
+    <dimen name="biometric_prompt_two_pane_udfps_shorter_horizontal_guideline_padding">661dp</dimen>
+    <dimen name="biometric_prompt_two_pane_medium_horizontal_guideline_padding">640dp</dimen>
+    <dimen name="biometric_prompt_one_pane_medium_top_guideline_padding">119dp</dimen>
+    <dimen name="biometric_prompt_one_pane_medium_horizontal_guideline_padding">0dp</dimen>
+
+    <!-- Dimensions for biometric prompt scroll view padding -->
+    <dimen name="biometric_prompt_top_scroll_view_bottom_padding">24dp</dimen>
+    <dimen name="biometric_prompt_top_scroll_view_horizontal_padding">24dp</dimen>
 
     <!-- Dimensions for biometric prompt icon padding -->
     <dimen name="biometric_prompt_portrait_small_bottom_padding">60dp</dimen>
@@ -1136,6 +1148,7 @@
 
     <!-- Dimensions for biometric prompt custom content view. -->
     <dimen name="biometric_prompt_logo_size">32dp</dimen>
+    <dimen name="biometric_prompt_logo_description_top_padding">8dp</dimen>
     <dimen name="biometric_prompt_content_corner_radius">28dp</dimen>
     <dimen name="biometric_prompt_content_padding_horizontal">24dp</dimen>
     <dimen name="biometric_prompt_content_padding_vertical">16dp</dimen>
@@ -1671,6 +1684,7 @@
     <dimen name="rounded_slider_background_padding">8dp</dimen>
     <!-- rounded_slider_corner_radius + rounded_slider_background_padding -->
     <dimen name="rounded_slider_background_rounded_corner">32dp</dimen>
+    <dimen name="rounded_slider_boundary_offset">16dp</dimen>
 
     <!-- Location on the screen of the center of the physical power button. This is a reasonable
     default that should be overridden by device-specific overlays. -->
@@ -1778,6 +1792,9 @@
     <dimen name="hearing_devices_preset_spinner_text_padding_vertical">15dp</dimen>
     <dimen name="hearing_devices_preset_spinner_arrow_size">24dp</dimen>
     <dimen name="hearing_devices_preset_spinner_background_radius">28dp</dimen>
+    <dimen name="hearing_devices_tool_icon_frame_width">94dp</dimen>
+    <dimen name="hearing_devices_tool_icon_frame_height">64dp</dimen>
+    <dimen name="hearing_devices_tool_icon_size">28dp</dimen>
 
     <!-- Height percentage of the parent container occupied by the communal view -->
     <item name="communal_source_height_percentage" format="float" type="dimen">0.80</item>

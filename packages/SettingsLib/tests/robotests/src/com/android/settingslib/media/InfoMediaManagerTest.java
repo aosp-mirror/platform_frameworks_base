@@ -559,7 +559,7 @@ public class InfoMediaManagerTest {
         routingSessionInfos.add(info);
 
         final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
-        final MediaDevice device = new InfoMediaDevice(mContext, route2Info);
+        final MediaDevice device = new InfoMediaDevice(mContext, route2Info, /* item */ null);
 
         final List<String> list = new ArrayList<>();
         list.add(TEST_ID);
@@ -580,7 +580,7 @@ public class InfoMediaManagerTest {
         routingSessionInfos.add(info);
 
         final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
-        final MediaDevice device = new InfoMediaDevice(mContext, route2Info);
+        final MediaDevice device = new InfoMediaDevice(mContext, route2Info, /* item */ null);
 
         final List<String> list = new ArrayList<>();
         list.add("fake_id");
@@ -602,7 +602,7 @@ public class InfoMediaManagerTest {
         routingSessionInfos.add(info);
 
         final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
-        final MediaDevice device = new InfoMediaDevice(mContext, route2Info);
+        final MediaDevice device = new InfoMediaDevice(mContext, route2Info, /* item */ null);
 
         final List<String> list = new ArrayList<>();
         list.add(TEST_ID);
@@ -623,7 +623,7 @@ public class InfoMediaManagerTest {
         routingSessionInfos.add(info);
 
         final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
-        final MediaDevice device = new InfoMediaDevice(mContext, route2Info);
+        final MediaDevice device = new InfoMediaDevice(mContext, route2Info, /* item */ null);
 
         final List<String> list = new ArrayList<>();
         list.add("fake_id");

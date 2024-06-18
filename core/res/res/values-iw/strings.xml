@@ -202,10 +202,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"פרופיל העבודה שלך אינו זמין עוד במכשיר הזה"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"בוצעו ניסיונות רבים מדי להזנת סיסמה"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"מנהל המערכת ביטל את האפשרות לשימוש במכשיר לצרכים אישיים"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"המרחב הפרטי הוסר"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"הארגון שלך לא מאפשר שימוש במרחבים פרטיים במכשיר המנוהל הזה."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"המכשיר מנוהל"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"הארגון שלך מנהל את המכשיר הזה והוא עשוי לנטר את התנועה ברשת. יש להקיש לקבלת פרטים."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"לאפליקציות יש הרשאת גישה למיקום שלך"</string>
@@ -1886,7 +1884,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"קוד הגישה קצר מדי. חייב להיות באורך 4 ספרות לפחות."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"יש לנסות שוב מאוחר יותר"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"צפייה במסך מלא"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"כדי לצאת, פשוט מחליקים אצבע מלמעלה למטה."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"הבנתי"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"מסובבים כדי לראות טוב יותר"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"צריך לפתוח את <xliff:g id="NAME">%s</xliff:g> במסך מלא כדי לראות טוב יותר"</string>
@@ -2041,7 +2040,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"הצמדה של‏ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"ביטול הצמדה"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"ביטול ההצמדה של <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"פרטי אפליקציה"</string>
+    <string name="app_info" msgid="6113278084877079851">"פרטי האפליקציה"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"תהליך ההדגמה מתחיל…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"מתבצע איפוס של המכשיר…"</string>
@@ -2199,7 +2198,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"‏לחצן שמאלי ב-Dpad"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"‏לחצן ימני ב-Dpad"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"‏לחצן אמצעי ב-Dpad"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"סרגל כיתוב של <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> התווספה לקטגוריה \'מוגבל\'"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"נשלחה תמונה"</string>
@@ -2400,7 +2398,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"פריסת המקלדת מוגדרת ל<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… אפשר להקיש כדי לשנות את ההגדרה הזו."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"הוגדרו מקלדות פיזיות"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"יש להקיש כדי להציג את המקלדות"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"פרופיל פרטי"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"פרטי"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"שכפול"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"פרופיל עבודה"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"פרופיל עבודה 2"</string>
@@ -2411,6 +2409,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"המרחב הפרטי"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"שכפול"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"שיתופי"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"המרחב הפרטי"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"יש תוכן רגיש בהתראה שהוסתר"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"תוכן האפליקציה מוסתר משיתוף המסך מטעמי אבטחה"</string>

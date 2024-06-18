@@ -779,6 +779,21 @@
     </xs:complexType>
 
     <xs:complexType name="blockingZoneConfig">
+        <!-- list of supported modes for blocking zone . Each point corresponds to one mode.
+            Supported only for lowerBlockingZoneConfigs
+            Mode format is : first = refreshRate, second = vsyncRate. E.g. :
+            <supportedModes>
+                <point>
+                    <first>60</first>   // refreshRate
+                    <second>60</second> //vsyncRate
+                </point>
+                ....
+            </supportedModes>
+        -->
+        <xs:element type="nonNegativeFloatToFloatMap" name="supportedModes" minOccurs="0">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
         <xs:element name="defaultRefreshRate" type="xs:nonNegativeInteger"
                     minOccurs="1" maxOccurs="1">
             <xs:annotation name="final"/>

@@ -22,6 +22,7 @@ import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -51,10 +52,12 @@ import android.window.TaskConstants;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams.OccludingCaptionElement;
+import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -196,8 +199,16 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     void relayout(RelayoutParams params, SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT, WindowContainerTransaction wct, T rootView,
             RelayoutResult<T> outResult) {
-        outResult.reset();
+        updateViewsAndSurfaces(params, startT, finishT, wct, rootView, outResult);
+        if (outResult.mRootView != null) {
+            updateViewHost(params, startT, outResult);
+        }
+    }
 
+    protected void updateViewsAndSurfaces(RelayoutParams params,
+            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
+            WindowContainerTransaction wct, T rootView, RelayoutResult<T> outResult) {
+        outResult.reset();
         if (params.mRunningTaskInfo != null) {
             mTaskInfo = params.mRunningTaskInfo;
         }
@@ -210,13 +221,38 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             return;
         }
 
+        inflateIfNeeded(params, wct, rootView, oldLayoutResId, outResult);
+        if (outResult.mRootView == null) {
+            // Didn't manage to create a root view, early out.
+            return;
+        }
+        rootView = null; // Clear it just in case we use it accidentally
+
+        updateCaptionVisibility(outResult.mRootView, mTaskInfo.displayId);
+
+        final Rect taskBounds = mTaskInfo.getConfiguration().windowConfiguration.getBounds();
+        outResult.mWidth = taskBounds.width();
+        outResult.mHeight = taskBounds.height();
+        outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
+        final Resources resources = mDecorWindowContext.getResources();
+        outResult.mCaptionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
+        outResult.mCaptionWidth = params.mCaptionWidthId != Resources.ID_NULL
+                ? loadDimensionPixelSize(resources, params.mCaptionWidthId) : taskBounds.width();
+        outResult.mCaptionX = (outResult.mWidth - outResult.mCaptionWidth) / 2;
+
+        updateDecorationContainerSurface(startT, outResult);
+        updateCaptionContainerSurface(startT, outResult);
+        updateCaptionInsets(params, wct, outResult, taskBounds);
+        updateTaskSurface(params, startT, finishT, outResult);
+    }
+
+    private void inflateIfNeeded(RelayoutParams params, WindowContainerTransaction wct,
+            T rootView, int oldLayoutResId, RelayoutResult<T> outResult) {
         if (rootView == null && params.mLayoutResId == 0) {
             throw new IllegalArgumentException("layoutResId and rootView can't both be invalid.");
         }
 
         outResult.mRootView = rootView;
-        rootView = null; // Clear it just in case we use it accidentally
-
         final int oldDensityDpi = mWindowDecorConfig != null
                 ? mWindowDecorConfig.densityDpi : DENSITY_DPI_UNDEFINED;
         final int oldNightMode =  mWindowDecorConfig != null
@@ -250,25 +286,17 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             outResult.mRootView = (T) LayoutInflater.from(mDecorWindowContext)
                     .inflate(params.mLayoutResId, null);
         }
+    }
 
-        updateCaptionVisibility(outResult.mRootView, mTaskInfo.displayId);
-
-        final Resources resources = mDecorWindowContext.getResources();
-        final Configuration taskConfig = mTaskInfo.getConfiguration();
-        final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
-        final boolean isFullscreen = taskConfig.windowConfiguration.getWindowingMode()
-                == WINDOWING_MODE_FULLSCREEN;
-        outResult.mWidth = taskBounds.width();
-        outResult.mHeight = taskBounds.height();
-
-        // DecorationContainerSurface
+    private void updateDecorationContainerSurface(
+            SurfaceControl.Transaction startT, RelayoutResult<T> outResult) {
         if (mDecorationContainerSurface == null) {
             final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
             mDecorationContainerSurface = builder
                     .setName("Decor container of Task=" + mTaskInfo.taskId)
                     .setContainerLayer()
                     .setParent(mTaskSurface)
-                    .setCallsite("WindowDecoration.relayout_1")
+                    .setCallsite("WindowDecoration.updateDecorationContainerSurface")
                     .build();
 
             startT.setTrustedOverlay(mDecorationContainerSurface, true)
@@ -278,101 +306,101 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         startT.setWindowCrop(mDecorationContainerSurface, outResult.mWidth, outResult.mHeight)
                 .show(mDecorationContainerSurface);
+    }
 
-        // CaptionContainerSurface, CaptionWindowManager
+    private void updateCaptionContainerSurface(
+            SurfaceControl.Transaction startT, RelayoutResult<T> outResult) {
         if (mCaptionContainerSurface == null) {
             final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
             mCaptionContainerSurface = builder
                     .setName("Caption container of Task=" + mTaskInfo.taskId)
                     .setContainerLayer()
                     .setParent(mDecorationContainerSurface)
-                    .setCallsite("WindowDecoration.relayout_2")
+                    .setCallsite("WindowDecoration.updateCaptionContainerSurface")
                     .build();
         }
-
-        outResult.mCaptionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
-        outResult.mCaptionWidth = params.mCaptionWidthId != Resources.ID_NULL
-                ? loadDimensionPixelSize(resources, params.mCaptionWidthId) : taskBounds.width();
-        outResult.mCaptionX = (outResult.mWidth - outResult.mCaptionWidth) / 2;
 
         startT.setWindowCrop(mCaptionContainerSurface, outResult.mCaptionWidth,
                         outResult.mCaptionHeight)
                 .setPosition(mCaptionContainerSurface, outResult.mCaptionX, 0 /* y */)
                 .setLayer(mCaptionContainerSurface, CAPTION_LAYER_Z_ORDER)
                 .show(mCaptionContainerSurface);
+    }
 
-        outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
-
-        // Caption insets
-        if (mIsCaptionVisible) {
-            // Caption inset is the full width of the task with the |captionHeight| and
-            // positioned at the top of the task bounds, also in absolute coordinates.
-            // So just reuse the task bounds and adjust the bottom coordinate.
-            final Rect captionInsetsRect = new Rect(taskBounds);
-            captionInsetsRect.bottom = captionInsetsRect.top + outResult.mCaptionHeight;
-
-            // Caption bounding rectangles: these are optional, and are used to present finer
-            // insets than traditional |Insets| to apps about where their content is occluded.
-            // These are also in absolute coordinates.
-            final Rect[] boundingRects;
-            final int numOfElements = params.mOccludingCaptionElements.size();
-            if (numOfElements == 0) {
-                boundingRects = null;
-            } else {
-                // The customizable region can at most be equal to the caption bar.
-                if (params.hasInputFeatureSpy()) {
-                    outResult.mCustomizableCaptionRegion.set(captionInsetsRect);
-                }
-                boundingRects = new Rect[numOfElements];
-                for (int i = 0; i < numOfElements; i++) {
-                    final OccludingCaptionElement element =
-                            params.mOccludingCaptionElements.get(i);
-                    final int elementWidthPx =
-                            resources.getDimensionPixelSize(element.mWidthResId);
-                    boundingRects[i] =
-                            calculateBoundingRect(element, elementWidthPx, captionInsetsRect);
-                    // Subtract the regions used by the caption elements, the rest is
-                    // customizable.
-                    if (params.hasInputFeatureSpy()) {
-                        outResult.mCustomizableCaptionRegion.op(boundingRects[i],
-                                Region.Op.DIFFERENCE);
-                    }
-                }
-            }
-
-            final WindowDecorationInsets newInsets = new WindowDecorationInsets(
-                    mTaskInfo.token, mOwner, captionInsetsRect, boundingRects);
-            if (!newInsets.equals(mWindowDecorationInsets)) {
-                // Add or update this caption as an insets source.
-                mWindowDecorationInsets = newInsets;
-                mWindowDecorationInsets.addOrUpdate(wct);
-            }
-        } else {
+    private void updateCaptionInsets(RelayoutParams params, WindowContainerTransaction wct,
+            RelayoutResult<T> outResult, Rect taskBounds) {
+        if (!mIsCaptionVisible) {
             if (mWindowDecorationInsets != null) {
                 mWindowDecorationInsets.remove(wct);
                 mWindowDecorationInsets = null;
             }
+            return;
         }
+        // Caption inset is the full width of the task with the |captionHeight| and
+        // positioned at the top of the task bounds, also in absolute coordinates.
+        // So just reuse the task bounds and adjust the bottom coordinate.
+        final Rect captionInsetsRect = new Rect(taskBounds);
+        captionInsetsRect.bottom = captionInsetsRect.top + outResult.mCaptionHeight;
 
-        // Task surface itself
-        float shadowRadius;
-        final Point taskPosition = mTaskInfo.positionInParent;
-        if (isFullscreen) {
-            // Shadow is not needed for fullscreen tasks
-            shadowRadius = 0;
+        // Caption bounding rectangles: these are optional, and are used to present finer
+        // insets than traditional |Insets| to apps about where their content is occluded.
+        // These are also in absolute coordinates.
+        final Rect[] boundingRects;
+        final int numOfElements = params.mOccludingCaptionElements.size();
+        if (numOfElements == 0) {
+            boundingRects = null;
         } else {
-            shadowRadius = loadDimension(resources, params.mShadowRadiusId);
+            // The customizable region can at most be equal to the caption bar.
+            if (params.hasInputFeatureSpy()) {
+                outResult.mCustomizableCaptionRegion.set(captionInsetsRect);
+            }
+            final Resources resources = mDecorWindowContext.getResources();
+            boundingRects = new Rect[numOfElements];
+            for (int i = 0; i < numOfElements; i++) {
+                final OccludingCaptionElement element =
+                        params.mOccludingCaptionElements.get(i);
+                final int elementWidthPx =
+                        resources.getDimensionPixelSize(element.mWidthResId);
+                boundingRects[i] =
+                        calculateBoundingRect(element, elementWidthPx, captionInsetsRect);
+                // Subtract the regions used by the caption elements, the rest is
+                // customizable.
+                if (params.hasInputFeatureSpy()) {
+                    outResult.mCustomizableCaptionRegion.op(boundingRects[i],
+                            Region.Op.DIFFERENCE);
+                }
+            }
         }
 
+        final WindowDecorationInsets newInsets = new WindowDecorationInsets(
+                mTaskInfo.token, mOwner, captionInsetsRect, boundingRects);
+        if (!newInsets.equals(mWindowDecorationInsets)) {
+            // Add or update this caption as an insets source.
+            mWindowDecorationInsets = newInsets;
+            mWindowDecorationInsets.addOrUpdate(wct);
+        }
+    }
+
+    private void updateTaskSurface(RelayoutParams params, SurfaceControl.Transaction startT,
+            SurfaceControl.Transaction finishT, RelayoutResult<T> outResult) {
         if (params.mSetTaskPositionAndCrop) {
+            final Point taskPosition = mTaskInfo.positionInParent;
             startT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
             finishT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight)
                     .setPosition(mTaskSurface, taskPosition.x, taskPosition.y);
         }
 
-        startT.setShadowRadius(mTaskSurface, shadowRadius)
-                .show(mTaskSurface);
+        float shadowRadius;
+        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+            // Shadow is not needed for fullscreen tasks
+            shadowRadius = 0;
+        } else {
+            shadowRadius =
+                    loadDimension(mDecorWindowContext.getResources(), params.mShadowRadiusId);
+        }
+        startT.setShadowRadius(mTaskSurface, shadowRadius).show(mTaskSurface);
         finishT.setShadowRadius(mTaskSurface, shadowRadius);
+
         if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             if (!DesktopModeStatus.isVeiledResizeEnabled()) {
                 // When fluid resize is enabled, add a background to freeform tasks
@@ -387,7 +415,19 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         } else if (!DesktopModeStatus.isVeiledResizeEnabled()) {
             startT.unsetColor(mTaskSurface);
         }
+    }
 
+    /**
+     * Updates a {@link SurfaceControlViewHost} to connect the window decoration surfaces with our
+     * View hierarchy.
+     *
+     * @param params parameters to use from the last relayout
+     * @param onDrawTransaction a transaction to apply in sync with #onDraw
+     * @param outResult results to use from the last relayout
+     *
+     */
+    protected void updateViewHost(RelayoutParams params,
+            SurfaceControl.Transaction onDrawTransaction, RelayoutResult<T> outResult) {
         Trace.beginSection("CaptionViewHostLayout");
         if (mCaptionWindowManager == null) {
             // Put caption under a container surface because ViewRootImpl sets the destination frame
@@ -396,12 +436,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     mTaskInfo.getConfiguration(), mCaptionContainerSurface,
                     null /* hostInputToken */);
         }
-
-        // Caption view
-        mCaptionWindowManager.setConfiguration(taskConfig);
+        mCaptionWindowManager.setConfiguration(mTaskInfo.getConfiguration());
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(outResult.mCaptionWidth, outResult.mCaptionHeight,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
+                        TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
         lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
@@ -411,14 +449,20 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
                     mCaptionWindowManager);
             if (params.mApplyStartTransactionOnDraw) {
-                mViewHost.getRootSurfaceControl().applyTransactionOnDraw(startT);
+                if (onDrawTransaction == null) {
+                    throw new IllegalArgumentException("Trying to sync a null Transaction");
+                }
+                mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
             }
             mViewHost.setView(outResult.mRootView, lp);
             Trace.endSection();
         } else {
             Trace.beginSection("CaptionViewHostLayout-relayout");
             if (params.mApplyStartTransactionOnDraw) {
-                mViewHost.getRootSurfaceControl().applyTransactionOnDraw(startT);
+                if (onDrawTransaction == null) {
+                    throw new IllegalArgumentException("Trying to sync a null Transaction");
+                }
+                mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
             }
             mViewHost.relayout(lp);
             Trace.endSection();
@@ -568,10 +612,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * @param yPos         y position of new window
      * @param width        width of new window
      * @param height       height of new window
-     * @return the {@link AdditionalWindow} that was added.
+     * @return the {@link AdditionalViewHostViewContainer} that was added.
      */
-    AdditionalWindow addWindow(int layoutId, String namePrefix, SurfaceControl.Transaction t,
-            SurfaceSyncGroup ssg, int xPos, int yPos, int width, int height) {
+    AdditionalViewHostViewContainer addWindow(int layoutId, String namePrefix,
+            SurfaceControl.Transaction t, SurfaceSyncGroup ssg, int xPos, int yPos,
+            int width, int height) {
         final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
         SurfaceControl windowSurfaceControl = builder
                 .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
@@ -585,9 +630,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .setWindowCrop(windowSurfaceControl, width, height)
                 .show(windowSurfaceControl);
         final WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(width, height,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
+                new WindowManager.LayoutParams(width, height, TYPE_APPLICATION,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                        PixelFormat.TRANSPARENT);
         lp.setTitle("Additional window of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
         WindowlessWindowManager windowManager = new WindowlessWindowManager(mTaskInfo.configuration,
@@ -595,7 +640,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         SurfaceControlViewHost viewHost = mSurfaceControlViewHostFactory
                 .create(mDecorWindowContext, mDisplay, windowManager);
         ssg.add(viewHost.getSurfacePackage(), () -> viewHost.setView(v, lp));
-        return new AdditionalWindow(windowSurfaceControl, viewHost,
+        return new AdditionalViewHostViewContainer(windowSurfaceControl, viewHost,
                 mSurfaceControlTransactionSupplier);
     }
 
@@ -687,7 +732,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
     }
 
-    interface SurfaceControlViewHostFactory {
+    @VisibleForTesting
+    public interface SurfaceControlViewHostFactory {
         default SurfaceControlViewHost create(Context c, Display d, WindowlessWindowManager wmm) {
             return new SurfaceControlViewHost(c, d, wmm, "WindowDecoration");
         }
@@ -735,43 +781,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         @Override
         public int hashCode() {
             return Objects.hash(mToken, mOwner, mFrame, Arrays.hashCode(mBoundingRects));
-        }
-    }
-
-    /**
-     * Subclass for additional windows associated with this WindowDecoration
-     */
-    static class AdditionalWindow {
-        SurfaceControl mWindowSurface;
-        SurfaceControlViewHost mWindowViewHost;
-        Supplier<SurfaceControl.Transaction> mTransactionSupplier;
-
-        AdditionalWindow(SurfaceControl surfaceControl,
-                SurfaceControlViewHost surfaceControlViewHost,
-                Supplier<SurfaceControl.Transaction> transactionSupplier) {
-            mWindowSurface = surfaceControl;
-            mWindowViewHost = surfaceControlViewHost;
-            mTransactionSupplier = transactionSupplier;
-        }
-
-        void releaseView() {
-            WindowlessWindowManager windowManager = mWindowViewHost.getWindowlessWM();
-
-            if (mWindowViewHost != null) {
-                mWindowViewHost.release();
-                mWindowViewHost = null;
-            }
-            windowManager = null;
-            final SurfaceControl.Transaction t = mTransactionSupplier.get();
-            boolean released = false;
-            if (mWindowSurface != null) {
-                t.remove(mWindowSurface);
-                mWindowSurface = null;
-                released = true;
-            }
-            if (released) {
-                t.apply();
-            }
         }
     }
 }

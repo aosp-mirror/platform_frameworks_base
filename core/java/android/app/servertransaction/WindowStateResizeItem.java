@@ -18,8 +18,6 @@ package android.app.servertransaction;
 
 import static android.view.Display.INVALID_DISPLAY;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
@@ -39,11 +37,10 @@ import java.util.Objects;
  * Message to deliver window resize info.
  * @hide
  */
-public class WindowStateResizeItem extends ClientTransactionItem {
+public class WindowStateResizeItem extends WindowStateTransactionItem {
 
     private static final String TAG = "WindowStateResizeItem";
 
-    private IWindow mWindow;
     private ClientWindowFrames mFrames;
     private boolean mReportDraw;
     private MergedConfiguration mConfiguration;
@@ -59,15 +56,12 @@ public class WindowStateResizeItem extends ClientTransactionItem {
     private ActivityWindowInfo mActivityWindowInfo;
 
     @Override
-    public void execute(@NonNull ClientTransactionHandler client,
+    public void execute(@NonNull ClientTransactionHandler client, @NonNull IWindow window,
             @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER,
                 mReportDraw ? "windowResizedReport" : "windowResized");
-        if (mWindow instanceof ResizeListener listener) {
-            listener.onExecutingWindowStateResizeItem();
-        }
         try {
-            mWindow.resized(mFrames, mReportDraw, mConfiguration, mInsetsState, mForceLayout,
+            window.resized(mFrames, mReportDraw, mConfiguration, mInsetsState, mForceLayout,
                     mAlwaysConsumeSystemBars, mDisplayId, mSyncSeqId, mDragResizing,
                     mActivityWindowInfo);
         } catch (RemoteException e) {
@@ -94,7 +88,7 @@ public class WindowStateResizeItem extends ClientTransactionItem {
         if (instance == null) {
             instance = new WindowStateResizeItem();
         }
-        instance.mWindow = requireNonNull(window);
+        instance.setWindow(window);
         instance.mFrames = new ClientWindowFrames(frames);
         instance.mReportDraw = reportDraw;
         instance.mConfiguration = new MergedConfiguration(configuration);
@@ -113,7 +107,7 @@ public class WindowStateResizeItem extends ClientTransactionItem {
 
     @Override
     public void recycle() {
-        mWindow = null;
+        super.recycle();
         mFrames = null;
         mReportDraw = false;
         mConfiguration = null;
@@ -132,7 +126,7 @@ public class WindowStateResizeItem extends ClientTransactionItem {
     /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeStrongBinder(mWindow.asBinder());
+        super.writeToParcel(dest, flags);
         dest.writeTypedObject(mFrames, flags);
         dest.writeBoolean(mReportDraw);
         dest.writeTypedObject(mConfiguration, flags);
@@ -147,7 +141,7 @@ public class WindowStateResizeItem extends ClientTransactionItem {
 
     /** Reads from Parcel. */
     private WindowStateResizeItem(@NonNull Parcel in) {
-        mWindow = IWindow.Stub.asInterface(in.readStrongBinder());
+        super(in);
         mFrames = in.readTypedObject(ClientWindowFrames.CREATOR);
         mReportDraw = in.readBoolean();
         mConfiguration = in.readTypedObject(MergedConfiguration.CREATOR);
@@ -175,12 +169,11 @@ public class WindowStateResizeItem extends ClientTransactionItem {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!super.equals(o)) {
             return false;
         }
         final WindowStateResizeItem other = (WindowStateResizeItem) o;
-        return Objects.equals(mWindow, other.mWindow)
-                && Objects.equals(mFrames, other.mFrames)
+        return Objects.equals(mFrames, other.mFrames)
                 && mReportDraw == other.mReportDraw
                 && Objects.equals(mConfiguration, other.mConfiguration)
                 && Objects.equals(mInsetsState, other.mInsetsState)
@@ -195,7 +188,7 @@ public class WindowStateResizeItem extends ClientTransactionItem {
     @Override
     public int hashCode() {
         int result = 17;
-        result = 31 * result + Objects.hashCode(mWindow);
+        result = 31 * result + super.hashCode();
         result = 31 * result + Objects.hashCode(mFrames);
         result = 31 * result + (mReportDraw ? 1 : 0);
         result = 31 * result + Objects.hashCode(mConfiguration);
@@ -211,16 +204,10 @@ public class WindowStateResizeItem extends ClientTransactionItem {
 
     @Override
     public String toString() {
-        return "WindowStateResizeItem{window=" + mWindow
+        return "WindowStateResizeItem{" + super.toString()
                 + ", reportDrawn=" + mReportDraw
                 + ", configuration=" + mConfiguration
                 + ", activityWindowInfo=" + mActivityWindowInfo
                 + "}";
-    }
-
-    /** The interface for IWindow to perform resize directly if possible. */
-    public interface ResizeListener {
-        /** Notifies that IWindow#resized is going to be called from WindowStateResizeItem. */
-        void onExecutingWindowStateResizeItem();
     }
 }

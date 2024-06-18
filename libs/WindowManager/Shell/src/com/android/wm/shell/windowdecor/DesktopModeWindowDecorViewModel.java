@@ -83,6 +83,7 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -102,6 +103,7 @@ import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionReg
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -151,6 +153,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final DisplayInsetsController mDisplayInsetsController;
     private final Region mExclusionRegion = Region.obtain();
     private boolean mInImmersiveMode;
+    private final String mSysUIPackageName;
 
     private final ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
@@ -246,6 +249,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mInputManager = mContext.getSystemService(InputManager.class);
         mWindowDecorByTaskId = windowDecorByTaskId;
+        mSysUIPackageName = mContext.getResources().getString(
+                com.android.internal.R.string.config_systemUi);
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -386,6 +391,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         private final DragPositioningCallback mDragPositioningCallback;
         private final DragDetector mDragDetector;
         private final GestureDetector mGestureDetector;
+        private final int mDisplayId;
 
         /**
          * Whether to pilfer the next motion event to send cancellations to the windows below.
@@ -407,6 +413,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             mDragPositioningCallback = dragPositioningCallback;
             mDragDetector = new DragDetector(this);
             mGestureDetector = new GestureDetector(mContext, this);
+            mDisplayId = taskInfo.displayId;
             mCloseMaximizeWindowRunnable = () -> {
                 final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
                 if (decoration == null) return;
@@ -432,11 +439,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mTaskOperations.closeTask(mTaskToken, wct);
                 }
             } else if (id == R.id.back_button) {
-                mTaskOperations.injectBackKey();
+                mTaskOperations.injectBackKey(mDisplayId);
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(decoration.mTaskInfo);
-                    decoration.createHandleMenu();
+                    decoration.createHandleMenu(mSplitScreenController);
                 } else {
                     decoration.closeHandleMenu();
                 }
@@ -445,7 +452,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 // App sometimes draws before the insets from WindowDecoration#relayout have
                 // been added, so they must be added here
                 mWindowDecorByTaskId.get(mTaskId).addCaptionInset(wct);
-                mDesktopTasksController.moveToDesktop(mTaskId, wct);
+                mDesktopTasksController.moveToDesktop(mTaskId, wct,
+                        DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON);
                 decoration.closeHandleMenu();
             } else if (id == R.id.fullscreen_button) {
                 decoration.closeHandleMenu();
@@ -453,7 +461,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mSplitScreenController.moveTaskToFullscreen(mTaskId,
                             SplitScreenController.EXIT_REASON_DESKTOP_MODE);
                 } else {
-                    mDesktopTasksController.moveToFullscreen(mTaskId);
+                    mDesktopTasksController.moveToFullscreen(mTaskId,
+                            DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON);
                 }
             } else if (id == R.id.split_screen_button) {
                 decoration.closeHandleMenu();
@@ -581,17 +590,20 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (ev.getAction() == ACTION_HOVER_MOVE
                     && MaximizeMenu.Companion.isMaximizeMenuView(id)) {
                 decoration.onMaximizeMenuHoverMove(id, ev);
+                mMainHandler.removeCallbacks(mCloseMaximizeWindowRunnable);
             } else if (ev.getAction() == ACTION_HOVER_EXIT) {
                 if (!decoration.isMaximizeMenuActive() && id == R.id.maximize_window) {
                     decoration.onMaximizeWindowHoverExit();
-                } else if (id == R.id.maximize_window || id == R.id.maximize_menu) {
+                } else if (id == R.id.maximize_window
+                        || MaximizeMenu.Companion.isMaximizeMenuView(id)) {
                     // Close menu if not hovering over maximize menu or maximize button after a
                     // delay to give user a chance to re-enter view or to move from one maximize
                     // menu view to another.
                     mMainHandler.postDelayed(mCloseMaximizeWindowRunnable,
                             CLOSE_MAXIMIZE_MENU_DELAY_MS);
-                } else if (MaximizeMenu.Companion.isMaximizeMenuView(id)) {
-                    decoration.onMaximizeMenuHoverExit(id, ev);
+                    if (id != R.id.maximize_window) {
+                        decoration.onMaximizeMenuHoverExit(id, ev);
+                    }
                 }
                 return true;
             }
@@ -1027,8 +1039,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && taskInfo.isFocused) {
             return false;
         }
+        // TODO(b/347289970): Consider replacing with API
         if (Flags.enableDesktopWindowingModalsPolicy()
                 && isSingleTopActivityTranslucent(taskInfo)) {
+            return false;
+        }
+        if (isSystemUIApplication(taskInfo)) {
             return false;
         }
         return DesktopModeStatus.canEnterDesktopMode(mContext)
@@ -1099,6 +1115,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private boolean isTaskInSplitScreen(int taskId) {
         return mSplitScreenController != null
                 && mSplitScreenController.isTaskInSplitScreen(taskId);
+    }
+
+    // TODO(b/347289970): Consider replacing with API
+    private boolean isSystemUIApplication(RunningTaskInfo taskInfo) {
+        if (taskInfo.baseActivity != null) {
+            return (Objects.equals(taskInfo.baseActivity.getPackageName(), mSysUIPackageName));
+        }
+        return false;
     }
 
     private void dump(PrintWriter pw, String prefix) {

@@ -122,6 +122,8 @@ public class QuickStepContract {
     public static final long SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY = 1L << 31;
     // Physical keyboard shortcuts helper is showing
     public static final long SYSUI_STATE_SHORTCUT_HELPER_SHOWING = 1L << 32;
+    // Touchpad gestures are disabled
+    public static final long SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED = 1L << 33;
 
     // Mask for SystemUiStateFlags to isolate SYSUI_STATE_AWAKE and
     // SYSUI_STATE_WAKEFULNESS_TRANSITION, to match WAKEFULNESS_* constants
@@ -170,6 +172,7 @@ public class QuickStepContract {
             SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE,
             SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY,
             SYSUI_STATE_SHORTCUT_HELPER_SHOWING,
+            SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED,
     })
     public @interface SystemUiStateFlags {}
 
@@ -270,6 +273,9 @@ public class QuickStepContract {
         }
         if ((flags & SYSUI_STATE_SHORTCUT_HELPER_SHOWING) != 0) {
             str.add("shortcut_helper_showing");
+        }
+        if ((flags & SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED) != 0) {
+            str.add("touchpad_gestures_disabled");
         }
 
         return str.toString();

@@ -48,6 +48,9 @@ interface MobileConnectionRepository {
     /** Reflects the value from the carrier config INFLATE_SIGNAL_STRENGTH for this connection */
     val inflateSignalStrength: StateFlow<Boolean>
 
+    /** Carrier config KEY_SHOW_5G_SLICE_ICON_BOOL for this connection */
+    val allowNetworkSliceIndicator: StateFlow<Boolean>
+
     /**
      * The table log buffer created for this connection. Will have the name "MobileConnectionLog
      * [subId]"

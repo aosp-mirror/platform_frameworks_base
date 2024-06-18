@@ -52,8 +52,10 @@
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"Georgisk"</string>
     <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"Thai (Kedmanee)"</string>
     <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"Thai (Pattachote)"</string>
-    <!-- no translation found for keyboard_layout_serbian_latin (3128791759390046571) -->
+    <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"Serbisk (latinsk)"</string>
+    <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"Montenegrisk (latinsk)"</string>
+    <!-- no translation found for keyboard_layout_serbian_cyrillic (7013541044323542196) -->
     <skip />
-    <!-- no translation found for keyboard_layout_montenegrin_latin (1467832503378949945) -->
+    <!-- no translation found for keyboard_layout_montenegrin_cyrillic (2391253952894077421) -->
     <skip />
 </resources>

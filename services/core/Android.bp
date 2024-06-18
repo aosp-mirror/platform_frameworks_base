@@ -93,38 +93,6 @@ genrule {
 }
 
 genrule {
-    name: "checked-protolog.json",
-    srcs: [
-        ":generate-protolog.json",
-        ":services.core.protolog.json",
-    ],
-    cmd: "cp $(location :generate-protolog.json) $(out) && " +
-        "{ ! (diff $(out) $(location :services.core.protolog.json) | grep -q '^<') || " +
-        "{ echo -e '\\n\\n################################################################\\n#\\n" +
-        "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
-        "#  cp $${ANDROID_BUILD_TOP}/$(location :generate-protolog.json) " +
-        "$${ANDROID_BUILD_TOP}/$(location :services.core.protolog.json)\\n#\\n" +
-        "################################################################\\n\\n' >&2 && false; } }",
-    out: ["services.core.protolog.json"],
-}
-
-genrule {
-    name: "checked-core.protolog.pb",
-    srcs: [
-        ":gen-core.protolog.pb",
-        ":file-core.protolog.pb",
-    ],
-    cmd: "cp $(location :gen-core.protolog.pb) $(out) && " +
-        "{ ! (diff $(out) $(location :file-core.protolog.pb) | grep -q '^<') || " +
-        "{ echo -e '\\n\\n################################################################\\n#\\n" +
-        "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
-        "#  cp $${ANDROID_BUILD_TOP}/$(location :gen-core.protolog.pb) " +
-        "$${ANDROID_BUILD_TOP}/$(location :file-core.protolog.pb)\\n#\\n" +
-        "################################################################\\n\\n' >&2 && false; } }",
-    out: ["core.protolog.pb"],
-}
-
-genrule {
     name: "statslog-art-java-gen",
     tools: ["stats-log-api-gen"],
     cmd: "$(location stats-log-api-gen) --java $(out) --module art" +
@@ -232,7 +200,6 @@ java_library_static {
         "android.hardware.rebootescrow-V1-java",
         "android.hardware.power.stats-V2-java",
         "android.hidl.manager-V1.2-java",
-        "audio-permission-aidl-java",
         "cbor-java",
         "com.android.media.audio-aconfig-java",
         "icu4j_calendar_astronomer",
@@ -260,6 +227,7 @@ java_library_static {
         "connectivity_flags_lib",
         "dreams_flags_lib",
         "aconfig_new_storage_flags_lib",
+        "powerstats_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
@@ -304,7 +272,7 @@ prebuilt_etc {
 
 genrule {
     name: "services.core.json.gz",
-    srcs: [":checked-protolog.json"],
+    srcs: [":generate-protolog.json"],
     out: ["services.core.protolog.json.gz"],
     cmd: "gzip -c < $(in) > $(out)",
 }
@@ -316,5 +284,5 @@ prebuilt_etc {
 
 prebuilt_etc {
     name: "core.protolog.pb",
-    src: ":checked-core.protolog.pb",
+    src: ":gen-core.protolog.pb",
 }

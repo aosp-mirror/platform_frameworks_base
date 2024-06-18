@@ -228,6 +228,7 @@ constructor(
         associatedView: View?,
         animationController: ActivityTransitionAnimator.Controller?,
         showOverLockscreen: Boolean,
+        skipLockscreenChecks: Boolean,
         fillInIntent: Intent?,
         extraOptions: Bundle?,
     ) {
@@ -246,10 +247,11 @@ constructor(
         val actuallyShowOverLockscreen =
             showOverLockscreen &&
                 intent.isActivity &&
-                activityIntentHelper.wouldPendingShowOverLockscreen(
-                    intent,
-                    lockScreenUserManager.currentUserId
-                )
+                (skipLockscreenChecks ||
+                    activityIntentHelper.wouldPendingShowOverLockscreen(
+                        intent,
+                        lockScreenUserManager.currentUserId
+                    ))
 
         val animate =
             !willLaunchResolverActivity &&
@@ -413,6 +415,7 @@ constructor(
         afterKeyguardGone: Boolean,
         customMessage: String?,
     ) {
+        Log.i(TAG, "Invoking dismissKeyguardThenExecute, afterKeyguardGone: $afterKeyguardGone")
         if (
             !action.willRunAnimationOnKeyguard() &&
                 wakefulnessLifecycle.wakefulness == WakefulnessLifecycle.WAKEFULNESS_ASLEEP &&
@@ -468,12 +471,16 @@ constructor(
                         shadeControllerLazy.get().collapseShadeForActivityStart()
                     }
                     if (communalHub()) {
-                        communalSceneInteractor.snapToScene(CommunalScenes.Blank)
+                        communalSceneInteractor.changeSceneForActivityStartOnDismissKeyguard()
                     }
                     return deferred
                 }
 
                 override fun willRunAnimationOnKeyguard(): Boolean {
+                    if (communalHub() && communalSceneInteractor.isIdleOnCommunal.value) {
+                        // Override to false when launching activity over the hub that requires auth
+                        return false
+                    }
                     return willAnimateOnKeyguard
                 }
             }
@@ -554,7 +561,12 @@ constructor(
 
                 override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                     super.onTransitionAnimationStart(isExpandingFullyAbove)
-
+                    if (communalHub()) {
+                        communalSceneInteractor.snapToScene(
+                            CommunalScenes.Blank,
+                            ActivityTransitionAnimator.TIMINGS.totalDuration
+                        )
+                    }
                     // Double check that the keyguard is still showing and not going
                     // away, but if so set the keyguard occluded. Typically, WM will let
                     // KeyguardViewMediator know directly, but we're overriding that to
@@ -580,9 +592,6 @@ constructor(
                     // collapse the shade (or at least run the post collapse runnables)
                     // later on.
                     centralSurfaces?.setIsLaunchingActivityOverLockscreen(false, false)
-                    if (communalHub()) {
-                        communalSceneInteractor.snapToScene(CommunalScenes.Blank)
-                    }
                     delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
                 }
 

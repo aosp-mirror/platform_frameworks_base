@@ -30,7 +30,6 @@ import static org.mockito.Mockito.verify;
 
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.WindowManager;
@@ -38,6 +37,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
@@ -62,7 +62,7 @@ import java.util.Collections;
 import java.util.List;
 
 /** Tests for {@link MenuListViewTouchHandler}. */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class MenuListViewTouchHandlerTest extends SysuiTestCase {

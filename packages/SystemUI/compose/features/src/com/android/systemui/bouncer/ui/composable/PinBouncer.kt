@@ -24,6 +24,7 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -41,6 +42,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -284,6 +287,8 @@ private fun PinPadButton(
         contentAlignment = Alignment.Center,
         modifier =
             modifier
+                .focusRequester(FocusRequester.Default)
+                .focusable()
                 .sizeIn(maxWidth = pinButtonMaxSize, maxHeight = pinButtonMaxSize)
                 .aspectRatio(1f)
                 .drawBehind {

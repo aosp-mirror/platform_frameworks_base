@@ -21,8 +21,10 @@ import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -38,12 +40,17 @@ import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
+import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
 import javax.inject.Named
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,8 +59,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 /** The default view model used for showing the communal hub. */
@@ -62,29 +71,48 @@ import kotlinx.coroutines.launch
 class CommunalViewModel
 @Inject
 constructor(
+    @Main val mainDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
     @Main private val resources: Resources,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     keyguardInteractor: KeyguardInteractor,
     communalSceneInteractor: CommunalSceneInteractor,
     private val communalInteractor: CommunalInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     private val shadeInteractor: ShadeInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     @CommunalLog logBuffer: LogBuffer,
 ) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
 
+    private val _isMediaHostVisible =
+        conflatedCallbackFlow<Boolean> {
+                val callback = { visible: Boolean ->
+                    trySend(visible)
+                    Unit
+                }
+                mediaHost.addVisibilityChangeListener(callback)
+                awaitClose { mediaHost.removeVisibilityChangeListener(callback) }
+            }
+            .onStart { emit(mediaHost.visible) }
+            .flowOn(mainDispatcher)
+
     private val logger = Logger(logBuffer, "CommunalViewModel")
 
+    /** Communal content saved from the previous emission when the flow is active (not "frozen"). */
+    private var frozenCommunalContent: List<CommunalContentModel>? = null
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val communalContent: Flow<List<CommunalContentModel>> =
+    private val latestCommunalContent: Flow<List<CommunalContentModel>> =
         tutorialInteractor.isTutorialAvailable
             .flatMapLatest { isTutorialMode ->
                 if (isTutorialMode) {
                     return@flatMapLatest flowOf(communalInteractor.tutorialContent)
                 }
+                val ongoingContent =
+                    _isMediaHostVisible.flatMapLatest { communalInteractor.getOngoingContent(it) }
                 combine(
-                    communalInteractor.ongoingContent,
+                    ongoingContent,
                     communalInteractor.widgetContent,
                     communalInteractor.ctaTileContent,
                 ) { ongoing, widgets, ctaTile,
@@ -93,7 +121,40 @@ constructor(
                 }
             }
             .onEach { models ->
+                frozenCommunalContent = models
                 logger.d({ "Content updated: $str1" }) { str1 = models.joinToString { it.key } }
+            }
+
+    override val isCommunalContentVisible: Flow<Boolean> = MutableStateFlow(true)
+
+    /**
+     * Freeze the content flow, when an activity is about to show, like starting a timer via voice:
+     * 1) in handheld mode, use the keyguard occluded state;
+     * 2) in dreaming mode, where keyguard is already occluded by dream, use the dream wakeup
+     *    signal. Since in this case the shell transition info does not include
+     *    KEYGUARD_VISIBILITY_TRANSIT_FLAGS, KeyguardTransitionHandler will not run the
+     *    occludeAnimation on KeyguardViewMediator.
+     */
+    override val isCommunalContentFlowFrozen: Flow<Boolean> =
+        allOf(
+                keyguardTransitionInteractor.isFinishedInState(KeyguardState.GLANCEABLE_HUB),
+                keyguardInteractor.isKeyguardOccluded,
+                not(keyguardInteractor.isAbleToDream)
+            )
+            .distinctUntilChanged()
+            .onEach { logger.d("isCommunalContentFlowFrozen: $it") }
+
+    override val communalContent: Flow<List<CommunalContentModel>> =
+        isCommunalContentFlowFrozen
+            .flatMapLatestConflated { isFrozen ->
+                if (isFrozen) {
+                    flowOf(frozenCommunalContent ?: emptyList())
+                } else {
+                    latestCommunalContent
+                }
+            }
+            .onEach { models ->
+                logger.d({ "CommunalContent: $str1" }) { str1 = models.joinToString { it.key } }
             }
 
     override val isEmptyState: Flow<Boolean> =
@@ -248,6 +309,10 @@ constructor(
      */
     val showGestureIndicator: Flow<Boolean> = not(keyguardInteractor.isDreaming)
 
+    /** The type of background to use for the hub. */
+    val communalBackground: Flow<CommunalBackgroundType> =
+        communalSettingsInteractor.communalBackground
+
     companion object {
         const val POPUP_AUTO_HIDE_TIMEOUT_MS = 12000L
     }
@@ -255,5 +320,6 @@ constructor(
 
 sealed class PopupType {
     object CtaTile : PopupType()
+
     object CustomizeWidgetButton : PopupType()
 }

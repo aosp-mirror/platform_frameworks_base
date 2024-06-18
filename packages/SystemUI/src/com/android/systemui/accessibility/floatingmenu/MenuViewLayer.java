@@ -334,6 +334,7 @@ class MenuViewLayer extends FrameLayout implements
         mDragToInteractView.updateResources();
         mDismissView.updateResources();
         mDragToInteractAnimationController.updateResources();
+        mMenuAnimationController.skipAnimations();
     }
 
     @Override

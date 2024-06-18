@@ -7,7 +7,6 @@
             <item value="3" />
         </int-array>
         <boolean name="is_sharing_optional" value="true" />
-        <boolean name="ephemeral" value="true" />
     </pbundle_as_map>
     <pbundle_as_map name="email_address">
         <int-array name="purposes" num="1">

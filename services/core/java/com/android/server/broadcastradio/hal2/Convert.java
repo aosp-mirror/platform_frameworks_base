@@ -304,10 +304,7 @@ final class Convert {
 
     private static boolean isEmpty(
             @NonNull android.hardware.broadcastradio.V2_0.ProgramSelector sel) {
-        if (sel.primaryId.type != 0) return false;
-        if (sel.primaryId.value != 0) return false;
-        if (!sel.secondaryIds.isEmpty()) return false;
-        return true;
+        return sel.primaryId.type == 0 && sel.primaryId.value == 0 && sel.secondaryIds.isEmpty();
     }
 
     static @Nullable ProgramSelector programSelectorFromHal(

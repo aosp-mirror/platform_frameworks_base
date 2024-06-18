@@ -140,6 +140,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         PropertyInvalidatedCache.disableForTestMode()
         val apply = ExtendedMockito.mockitoSession()
                 .strictness(Strictness.LENIENT)
+                .mockStatic(SaferIntentUtils::class.java)
                 .mockStatic(SystemProperties::class.java)
                 .mockStatic(SystemConfig::class.java)
                 .mockStatic(SELinuxMMAC::class.java, Mockito.CALLS_REAL_METHODS)

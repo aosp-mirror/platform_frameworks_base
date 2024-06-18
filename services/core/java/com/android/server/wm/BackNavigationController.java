@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -200,6 +201,9 @@ class BackNavigationController {
             }
             infoBuilder.setOnBackInvokedCallback(callbackInfo.getCallback());
             infoBuilder.setAnimationCallback(callbackInfo.isAnimationCallback());
+            infoBuilder.setTouchableRegion(window.getFrame());
+            infoBuilder.setAppProgressAllowed((window.getAttrs().privateFlags
+                    & PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED) != 0);
             mNavigationMonitor.startMonitor(window, navigationObserver);
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
@@ -1099,10 +1103,6 @@ class BackNavigationController {
         }
 
         void finishPresentAnimations() {
-            if (!mComposed) {
-                return;
-            }
-
             if (mCloseAdaptor != null) {
                 mCloseAdaptor.mTarget.cancelAnimation();
                 mCloseAdaptor = null;
@@ -1131,8 +1131,10 @@ class BackNavigationController {
         }
 
         void clearBackAnimateTarget() {
-            finishPresentAnimations();
-            mComposed = false;
+            if (mComposed) {
+                mComposed = false;
+                finishPresentAnimations();
+            }
             mWaitTransition = false;
             mStartingSurfaceTargetMatch = false;
             mSwitchType = UNKNOWN;
@@ -1367,8 +1369,6 @@ class BackNavigationController {
                                         ? task.getSurfaceControl()
                                         : mAdaptors[0].mTarget.getSurfaceControl());
                     }
-                    // remove starting surface.
-                    mStartingSurface = null;
                 }
             }
 
@@ -1385,7 +1385,10 @@ class BackNavigationController {
                         .removeWindowlessStartingSurface(mRequestedStartingSurfaceId,
                                 !openTransitionMatch);
                 mRequestedStartingSurfaceId = INVALID_TASK_ID;
-                mStartingSurface = null;
+                if (mStartingSurface != null && mStartingSurface.isValid()) {
+                    mStartingSurface.release();
+                    mStartingSurface = null;
+                }
             }
         }
 

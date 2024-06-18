@@ -22,7 +22,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -36,6 +41,13 @@ import android.widget.RemoteViews;
 @RemoteViews.RemoteView
 public class NotificationRowIconView extends CachingIconView {
     private boolean mApplyCircularCrop = false;
+    private boolean mShouldShowAppIcon = false;
+
+    // Padding and background set on the view prior to being changed by setShouldShowAppIcon(true),
+    // to be restored if shouldShowAppIcon becomes false again.
+    private Rect mOriginalPadding = null;
+    private Drawable mOriginalBackground = null;
+
 
     public NotificationRowIconView(Context context) {
         super(context);
@@ -65,6 +77,42 @@ public class NotificationRowIconView extends CachingIconView {
         }
 
         super.onFinishInflate();
+    }
+
+    /** Whether the icon represents the app icon (instead of the small icon). */
+    @RemotableViewMethod
+    public void setShouldShowAppIcon(boolean shouldShowAppIcon) {
+        if (Flags.notificationsUseAppIconInRow()) {
+            if (mShouldShowAppIcon == shouldShowAppIcon) {
+                return; // no change
+            }
+
+            mShouldShowAppIcon = shouldShowAppIcon;
+            if (mShouldShowAppIcon) {
+                if (mOriginalPadding == null && mOriginalBackground == null) {
+                    mOriginalPadding = new Rect(getPaddingLeft(), getPaddingTop(),
+                            getPaddingRight(), getPaddingBottom());
+                    mOriginalBackground = getBackground();
+                }
+
+                setPadding(0, 0, 0, 0);
+
+                // Make the background white in case the icon itself doesn't have one.
+                int white = Color.rgb(255, 255, 255);
+                ColorFilter colorFilter = new PorterDuffColorFilter(white,
+                        PorterDuff.Mode.SRC_ATOP);
+                getBackground().mutate().setColorFilter(colorFilter);
+            } else {
+                // Restore original padding and background if needed
+                if (mOriginalPadding != null) {
+                    setPadding(mOriginalPadding.left, mOriginalPadding.top, mOriginalPadding.right,
+                            mOriginalPadding.bottom);
+                    mOriginalPadding = null;
+                }
+                setBackground(mOriginalBackground);
+                mOriginalBackground = null;
+            }
+        }
     }
 
     @Nullable

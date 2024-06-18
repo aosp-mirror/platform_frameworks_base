@@ -38,6 +38,7 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +49,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
@@ -57,6 +61,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val underTest = kosmos.keyguardBlueprintInteractor
+    private val keyguardBlueprintRepository = kosmos.keyguardBlueprintRepository
     private val clockRepository by lazy { kosmos.fakeKeyguardClockRepository }
     private val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
     private val fingerprintPropertyRepository by lazy { kosmos.fakeFingerprintPropertyRepository }
@@ -103,20 +108,6 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun fingerprintPropertyInitialized_updatesBlueprint() {
-        testScope.runTest {
-            assertThat(kosmos.keyguardBlueprintRepository.targetTransitionConfig).isNull()
-
-            fingerprintPropertyRepository.supportsUdfps() // initialize properties
-
-            runCurrent()
-            advanceUntilIdle()
-            assertThat(kosmos.keyguardBlueprintRepository.targetTransitionConfig).isNotNull()
-        }
-    }
-
-    @Test
     @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testDoesNotApplySplitShadeBlueprint() {
         testScope.runTest {
@@ -132,15 +123,31 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
+    fun fingerprintPropertyInitialized_updatesBlueprint() {
+        testScope.runTest {
+            underTest.start()
+            reset(keyguardBlueprintRepository)
+
+            fingerprintPropertyRepository.supportsUdfps() // initialize properties
+
+            runCurrent()
+            advanceUntilIdle()
+            verify(keyguardBlueprintRepository, times(2)).refreshBlueprint(any())
+        }
+    }
+
+    @Test
     fun testRefreshFromConfigChange() {
         testScope.runTest {
-            assertThat(kosmos.keyguardBlueprintRepository.targetTransitionConfig).isNull()
+            underTest.start()
+            reset(keyguardBlueprintRepository)
 
             configurationRepository.onConfigurationChange()
 
             runCurrent()
             advanceUntilIdle()
-            assertThat(kosmos.keyguardBlueprintRepository.targetTransitionConfig).isNotNull()
+            verify(keyguardBlueprintRepository, times(2)).refreshBlueprint(any())
         }
     }
 }

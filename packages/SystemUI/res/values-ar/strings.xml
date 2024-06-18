@@ -76,8 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"أرسَل صورة"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"جارٍ حفظ لقطة الشاشة..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"جارٍ حفظ لقطة الشاشة في ملف العمل…"</string>
-    <!-- no translation found for screenshot_saving_private_profile (8934706048497093297) -->
-    <skip />
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"يتم حاليًا حفظ لقطة الشاشة في الملف الشخصي الخاص"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"تم حفظ لقطة الشاشة."</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"تعذّر حفظ لقطة الشاشة"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"الشاشة الخارجية"</string>
@@ -126,6 +125,32 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"انقر لعرض التسجيل"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"حدث خطأ أثناء حفظ تسجيل محتوى الشاشة."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"حدث خطأ في بدء تسجيل الشاشة"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"مسجّلة المشاكل"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"يجري معالجة تسجيل المشكلة."</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"إشعار بنشاط مستمر في الخلفية لجلسة جمع البيانات حول المشكلة"</string>
@@ -136,7 +161,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"حدث خطأ أثناء حفظ تسجيل المشكلة."</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"حدث خطأ أثناء بدء تسجيل المشكلة."</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"جارٍ العرض بملء الشاشة"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"للخروج، مرِّر سريعًا من أعلى الشاشة لأسفلها."</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"حسنًا"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"رجوع"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"الرئيسية"</string>
@@ -279,11 +305,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"محفوظ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"إلغاء الربط"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"تفعيل"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"تفعيل البلوتوث تلقائيًا مرة أخرى غدًا"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"‏يُستخدَم البلوتوث في ميزات مثل Quick Share و\"العثور على جهازي\""</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"سيتم تفعيل البلوتوث صباح الغد"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"مشاركة الصوت"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"مشاركة الصوت"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"مستوى طاقة البطارية <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"صوت"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"سماعة الرأس"</string>
@@ -302,11 +331,11 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"المستخدم"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"الإنترنت"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"الشبكات متوفرة"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"تتوفّر شبكات"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"الشبكات غير متوفرة"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"‏لا تتوفر أي شبكة Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"جارٍ التفعيل…"</string>
-    <string name="quick_settings_cast_title" msgid="3033553249449938182">"الإرسال"</string>
+    <string name="quick_settings_cast_title" msgid="3033553249449938182">"البث"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"جارٍ الإرسال"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"جهاز لا يحمل اسمًا"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"لا يتوفر أي جهاز"</string>
@@ -362,19 +391,19 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ما هو الجانب الذي تأثّر في تجربة استخدام الجهاز؟"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"اختيار نوع المشكلة"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"تسجيل الشاشة"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"الأداء"</item>
-    <item msgid="1627504621139124393">"واجهة المستخدم"</item>
-    <item msgid="8309220355268900335">"البطارية"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"الأداء"</string>
+    <string name="user_interface" msgid="3712869377953950887">"واجهة المستخدم"</string>
+    <string name="thermal" msgid="6758074791325414831">"الأداء الحراري"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"وضع \"التصفح بيد واحدة\""</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"سماعات الأذن الطبية"</string>
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"متّصلة حاليًا"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"غير متّصلة"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"سماعات الأذن الطبية"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"إقران جهاز جديد"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"انقر لإقران جهاز جديد"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"تعذَّر تعديل الإعداد المسبق"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"الإعدادات المسبقة"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"النسخ النصي التلقائي"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"هل تريد إزالة حظر ميكروفون الجهاز؟"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"هل تريد إزالة حظر كاميرا الجهاز؟"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"هل تريد إزالة حظر الكاميرا والميكروفون؟"</string>
@@ -616,7 +645,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. انقر للتعيين على الاهتزاز."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. انقر لكتم الصوت."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"التحكُّم في مستوى الضجيج"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"التحكُّم في مستوى الضوضاء"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"الصوت المكاني"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"غير مفعّل"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"تفعيل"</string>
@@ -728,11 +757,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"الزر <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Back"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"سهم متّجه للأعلى"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"سهم متّجه للأسفل"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"سهم متّجه لليسار"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"سهم متّجه لليمين"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"وسط"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"مسافة"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
@@ -1179,6 +1203,8 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"انقر للحصول على مزيد من المعلومات."</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"لم يتم ضبط منبّه"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"إدخال الرمز لفتح القفل"</string>
+    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
+    <skip />
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"مستشعر بصمات الإصبع"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"المصادقة"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"الدخول إلى الجهاز"</string>
@@ -1276,7 +1302,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"مطوي"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"غير مطوي"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"‫%1$s / %2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"النسبة المئوية المتبقية من شحن البطارية: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"مستوى شحن بطارية قلم الشاشة: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"عليك توصيل قلم الشاشة بشاحن."</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"بطارية قلم الشاشة منخفضة"</string>
     <string name="video_camera" msgid="7654002575156149298">"كاميرا فيديو"</string>
@@ -1319,8 +1345,26 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"تم الاستخدام مؤخرًا في <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"قيد الاستخدام في <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"تم الاستخدام مؤخرًا في <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"النظام"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"تعدُّد المهام"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"الإدخال"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"اختصارات التطبيقات"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"تسهيل الاستخدام"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"اختصارات لوحة المفاتيح"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"اختصارات طلبات البحث"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"رمز التصغير"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"رمز التوسيع"</string>
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"أو"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"الإضاءة الخلفية للوحة المفاتيح"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏مستوى الإضاءة: %1$d من %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"إدارة المنزل آليًّا"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"إدارة المنزل آليًّا بشكل سريع من شاشة الاستراحة"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"يمكنك إدارة المنزل آليًّا بشكل سريع من شاشة الاستراحة"</string>
 </resources>

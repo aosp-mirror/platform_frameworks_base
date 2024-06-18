@@ -55,13 +55,15 @@ fun SceneTransitionLayout(
     state: SceneTransitionLayoutState,
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
-    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
+    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0.05f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     SceneTransitionLayoutForTesting(
         state,
         modifier,
         swipeSourceDetector,
+        swipeDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
         scenes,
@@ -95,6 +97,7 @@ fun SceneTransitionLayout(
     transitions: SceneTransitions,
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
     enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
     scenes: SceneTransitionLayoutScope.() -> Unit,
@@ -111,6 +114,7 @@ fun SceneTransitionLayout(
         state,
         modifier,
         swipeSourceDetector,
+        swipeDetector,
         transitionInterceptionThreshold,
         scenes,
     )
@@ -163,6 +167,9 @@ interface ElementStateScope {
 @Stable
 @ElementDsl
 interface BaseSceneScope : ElementStateScope {
+    /** The key of this scene. */
+    val sceneKey: SceneKey
+
     /** The state of the [SceneTransitionLayout] in which this scene is contained. */
     val layoutState: SceneTransitionLayoutState
 
@@ -281,9 +288,7 @@ interface SceneScope : BaseSceneScope {
      *
      * @param value the value of this shared value in the current scene.
      * @param key the key of this shared value.
-     * @param lerp the *linear* interpolation function that should be used to interpolate between
-     *   two different values. Note that it has to be linear because the [fraction] passed to this
-     *   interpolator is already interpolated.
+     * @param type the [SharedValueType] of this animated value.
      * @param canOverflow whether this value can overflow past the values it is interpolated
      *   between, for instance because the transition is animated using a bouncy spring.
      * @see animateSceneIntAsState
@@ -295,9 +300,37 @@ interface SceneScope : BaseSceneScope {
     fun <T> animateSceneValueAsState(
         value: T,
         key: ValueKey,
-        lerp: (start: T, stop: T, fraction: Float) -> T,
+        type: SharedValueType<T, *>,
         canOverflow: Boolean,
     ): AnimatedState<T>
+}
+
+/**
+ * The type of a shared value animated using [ElementScope.animateElementValueAsState] or
+ * [SceneScope.animateSceneValueAsState].
+ */
+@Stable
+interface SharedValueType<T, Delta> {
+    /** The unspecified value for this type. */
+    val unspecifiedValue: T
+
+    /**
+     * The zero value of this type. It should be equal to what [diff(x, x)] returns for any value of
+     * x.
+     */
+    val zeroDeltaValue: Delta
+
+    /**
+     * Return the linear interpolation of [a] and [b] at the given [progress], i.e. `a + (b - a) *
+     * progress`.
+     */
+    fun lerp(a: T, b: T, progress: Float): T
+
+    /** Return `a - b`. */
+    fun diff(a: T, b: T): Delta
+
+    /** Return `a + b * bWeight`. */
+    fun addWeighted(a: T, b: Delta, bWeight: Float): T
 }
 
 @Stable
@@ -308,9 +341,7 @@ interface ElementScope<ContentScope> {
      *
      * @param value the value of this shared value in the current scene.
      * @param key the key of this shared value.
-     * @param lerp the *linear* interpolation function that should be used to interpolate between
-     *   two different values. Note that it has to be linear because the [fraction] passed to this
-     *   interpolator is already interpolated.
+     * @param type the [SharedValueType] of this animated value.
      * @param canOverflow whether this value can overflow past the values it is interpolated
      *   between, for instance because the transition is animated using a bouncy spring.
      * @see animateElementIntAsState
@@ -322,7 +353,7 @@ interface ElementScope<ContentScope> {
     fun <T> animateElementValueAsState(
         value: T,
         key: ValueKey,
-        lerp: (start: T, stop: T, fraction: Float) -> T,
+        type: SharedValueType<T, *>,
         canOverflow: Boolean,
     ): AnimatedState<T>
 
@@ -430,7 +461,7 @@ data class UserActionResult(
     val transitionKey: TransitionKey? = null,
 )
 
-interface UserActionDistance {
+fun interface UserActionDistance {
     /**
      * Return the **absolute** distance of the user action given the size of the scene we are
      * animating from and the [orientation].
@@ -467,6 +498,7 @@ internal fun SceneTransitionLayoutForTesting(
     state: SceneTransitionLayoutState,
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
     scenes: SceneTransitionLayoutScope.() -> Unit,
@@ -502,5 +534,5 @@ internal fun SceneTransitionLayoutForTesting(
         layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
     }
 
-    layoutImpl.Content(modifier)
+    layoutImpl.Content(modifier, swipeDetector)
 }

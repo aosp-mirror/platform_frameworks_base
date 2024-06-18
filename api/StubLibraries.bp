@@ -922,6 +922,7 @@ java_defaults {
         "i18n.module.public.api.stubs.source.system.api.contribution",
         "i18n.module.public.api.stubs.source.module_lib.api.contribution",
     ],
+    previous_api: ":android.api.public.latest",
 }
 
 // Java API library definitions per API surface

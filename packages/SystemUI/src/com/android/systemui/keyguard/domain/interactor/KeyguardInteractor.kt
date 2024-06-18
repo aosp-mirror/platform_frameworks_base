@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -47,8 +48,11 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.notification.NotificationUtils.interpolate
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
+import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import javax.inject.Provider
@@ -66,12 +70,15 @@ import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -86,7 +93,7 @@ constructor(
     bouncerRepository: KeyguardBouncerRepository,
     configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     sceneInteractorProvider: Provider<SceneInteractor>,
     private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
     private val fromLockscreenTransitionInteractor: Provider<FromLockscreenTransitionInteractor>,
@@ -96,17 +103,54 @@ constructor(
     // TODO(b/296118689): move to a repository
     private val _notificationPlaceholderBounds = MutableStateFlow(NotificationContainerBounds())
 
+    // When going to AOD, we interpolate bounds when receiving the new bounds
+    // When going back to LS, we'll apply new bounds directly
+    private val _nonSplitShadeNotifciationPlaceholderBounds =
+        _notificationPlaceholderBounds.pairwise().flatMapLatest { (oldBounds, newBounds) ->
+            val lastChangeStep = keyguardTransitionInteractor.transitionState.first()
+            if (lastChangeStep.to == AOD) {
+                keyguardTransitionInteractor.transitionState.map { step ->
+                    val startingProgress = lastChangeStep.value
+                    val progress = step.value
+                    if (step.to == AOD && progress >= startingProgress && startingProgress < 1f) {
+                        val adjustedProgress =
+                            ((progress - startingProgress) / (1F - startingProgress)).coerceIn(
+                                0F,
+                                1F
+                            )
+                        val top = interpolate(oldBounds.top, newBounds.top, adjustedProgress)
+                        val bottom =
+                            interpolate(
+                                oldBounds.bottom,
+                                newBounds.bottom,
+                                adjustedProgress.coerceIn(0F, 1F)
+                            )
+                        NotificationContainerBounds(top = top, bottom = bottom)
+                    } else {
+                        newBounds
+                    }
+                }
+            } else {
+                flow { emit(newBounds) }
+            }
+        }
+
     /** Bounds of the notification container. */
     val notificationContainerBounds: StateFlow<NotificationContainerBounds> by lazy {
         SceneContainerFlag.assertInLegacyMode()
         combine(
                 _notificationPlaceholderBounds,
+                _nonSplitShadeNotifciationPlaceholderBounds,
                 sharedNotificationContainerInteractor.get().configurationBasedDimensions,
-            ) { bounds, cfg ->
+            ) { bounds, nonSplitShadeBounds: NotificationContainerBounds, cfg ->
                 // We offset the placeholder bounds by the configured top margin to account for
                 // legacy placement behavior within notifications for splitshade.
-                if (MigrateClocksToBlueprint.isEnabled && cfg.useSplitShade) {
-                    bounds.copy(bottom = bounds.bottom - cfg.keyguardSplitShadeTopMargin)
+                if (MigrateClocksToBlueprint.isEnabled) {
+                    if (cfg.useSplitShade) {
+                        bounds.copy(bottom = bounds.bottom - cfg.keyguardSplitShadeTopMargin)
+                    } else {
+                        nonSplitShadeBounds
+                    }
                 } else bounds
             }
             .stateIn(
@@ -138,6 +182,8 @@ constructor(
 
     /** Doze transition information. */
     val dozeTransitionModel: Flow<DozeTransitionModel> = repository.dozeTransitionModel
+
+    val isPulsing: Flow<Boolean> = dozeTransitionModel.map { it.to == DozeStateModel.DOZE_PULSING }
 
     /**
      * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
@@ -204,21 +250,17 @@ constructor(
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
 
     /** Keyguard can be clipped at the top as the shade is dragged */
-    val topClippingBounds: Flow<Int?> =
-        combineTransform(
-                configurationInteractor.onAnyConfigurationChange,
+    val topClippingBounds: Flow<Int?> by lazy {
+        repository.topClippingBounds
+            .sampleFilter(
                 keyguardTransitionInteractor
-                    .transitionValue(GONE)
-                    .map { it == 1f }
-                    .onStart { emit(false) }
-                    .distinctUntilChanged(),
-                repository.topClippingBounds
-            ) { _, isGone, topClippingBounds ->
-                if (!isGone) {
-                    emit(topClippingBounds)
-                }
+                    .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+                    .onStart { emit(0f) }
+            ) { goneValue ->
+                goneValue != 1f
             }
             .distinctUntilChanged()
+    }
 
     /** Last point that [KeyguardRootView] view was tapped */
     val lastRootViewTapPosition: Flow<Point?> = repository.lastRootViewTapPosition.asStateFlow()
@@ -279,6 +321,10 @@ constructor(
     @Deprecated("Use the relevant TransitionViewModel")
     val keyguardAlpha: Flow<Float> = repository.keyguardAlpha
 
+    /** Temporary shim for fading out content when the brightness slider is used */
+    @Deprecated("SceneContainer uses NotificationStackAppearanceInteractor")
+    val panelAlpha: StateFlow<Float> = repository.panelAlpha.asStateFlow()
+
     /**
      * When the lockscreen can be dismissed, emit an alpha value as the user swipes up. This is
      * useful just before the code commits to moving to GONE.
@@ -286,28 +332,35 @@ constructor(
      * This uses legacyShadeExpansion to process swipe up events. In the future, the touch input
      * signal should be sent directly to transitions.
      */
-    val dismissAlpha: Flow<Float?> =
+    val dismissAlpha: Flow<Float> =
         shadeRepository.legacyShadeExpansion
-            .filter { it < 1f }
             .sampleCombine(
                 statusBarState,
                 keyguardTransitionInteractor.currentKeyguardState,
+                keyguardTransitionInteractor.transitionState,
                 isKeyguardDismissible,
             )
-            .map {
-                (legacyShadeExpansion, statusBarState, currentKeyguardState, isKeyguardDismissible)
-                ->
+            .filter { (_, _, _, step, _) -> !step.transitionState.isTransitioning() }
+            .transform {
+                (
+                    legacyShadeExpansion,
+                    statusBarState,
+                    currentKeyguardState,
+                    step,
+                    isKeyguardDismissible) ->
                 if (
                     statusBarState == StatusBarState.KEYGUARD &&
                         isKeyguardDismissible &&
-                        currentKeyguardState == LOCKSCREEN
+                        currentKeyguardState == LOCKSCREEN &&
+                        legacyShadeExpansion != 1f
                 ) {
-                    MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion)
-                } else {
-                    null
+                    emit(MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion))
+                } else if (legacyShadeExpansion == 0f || legacyShadeExpansion == 1f) {
+                    // Resets alpha state
+                    emit(1f)
                 }
             }
-            .onStart { emit(null) }
+            .onStart { emit(1f) }
             .distinctUntilChanged()
 
     val keyguardTranslationY: Flow<Float> =
@@ -409,6 +462,10 @@ constructor(
         repository.setKeyguardAlpha(alpha)
     }
 
+    fun setPanelAlpha(alpha: Float) {
+        repository.setPanelAlpha(alpha)
+    }
+
     fun setAnimateDozingTransitions(animate: Boolean) {
         repository.setAnimateDozingTransitions(animate)
     }
@@ -431,6 +488,10 @@ constructor(
 
     fun setTopClippingBounds(top: Int?) {
         repository.topClippingBounds.value = top
+    }
+
+    fun setDreaming(isDreaming: Boolean) {
+        repository.setDreaming(isDreaming)
     }
 
     /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */

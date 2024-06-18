@@ -22,11 +22,12 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -38,8 +39,9 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -52,9 +54,8 @@ constructor(
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
-    private val keyguardInteractor: KeyguardInteractor,
+    keyguardInteractor: KeyguardInteractor,
     private val communalInteractor: CommunalInteractor,
-    private val flags: FeatureFlags,
     private val keyguardSecurityModel: KeyguardSecurityModel,
     private val selectedUserInteractor: SelectedUserInteractor,
     powerInteractor: PowerInteractor,
@@ -67,6 +68,7 @@ constructor(
         bgDispatcher = bgDispatcher,
         powerInteractor = powerInteractor,
         keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+        keyguardInteractor = keyguardInteractor,
     ) {
 
     override fun start() {
@@ -78,21 +80,25 @@ constructor(
     }
 
     val surfaceBehindVisibility: Flow<Boolean?> =
-        combine(
-                transitionInteractor.startedKeyguardTransitionStep,
-                transitionInteractor.transitionStepsFromState(KeyguardState.PRIMARY_BOUNCER)
-            ) { startedStep, fromBouncerStep ->
-                if (startedStep.to != KeyguardState.GONE) {
-                    return@combine null
+        if (SceneContainerFlag.isEnabled) {
+            // The edge Scenes.Bouncer <-> Scenes.Gone is handled by STL
+            flowOf(null)
+        } else {
+            transitionInteractor
+                .transition(
+                    edge = Edge.INVALID,
+                    edgeWithoutSceneContainer =
+                        Edge.create(from = KeyguardState.PRIMARY_BOUNCER, to = KeyguardState.GONE)
+                )
+                .map<TransitionStep, Boolean?> {
+                    it.value > TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD
                 }
-
-                fromBouncerStep.value > 0.5f
-            }
-            .onStart {
-                // Default to null ("don't care, use a reasonable default").
-                emit(null)
-            }
-            .distinctUntilChanged()
+                .onStart {
+                    // Default to null ("don't care, use a reasonable default").
+                    emit(null)
+                }
+                .distinctUntilChanged()
+        }
 
     fun dismissPrimaryBouncer() {
         scope.launch { startTransitionTo(KeyguardState.GONE) }
@@ -221,16 +227,24 @@ constructor(
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
-            duration = DEFAULT_DURATION.inWholeMilliseconds
+            duration =
+                when (toState) {
+                    KeyguardState.AOD -> TO_AOD_DURATION
+                    KeyguardState.DOZING -> TO_DOZING_DURATION
+                    KeyguardState.GONE -> TO_GONE_DURATION
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
 
     companion object {
         private val DEFAULT_DURATION = 300.milliseconds
+        val TO_AOD_DURATION = DEFAULT_DURATION
+        val TO_DOZING_DURATION = DEFAULT_DURATION
         val TO_GONE_DURATION = 500.milliseconds
         val TO_GONE_SHORT_DURATION = 200.milliseconds
-        val TO_AOD_DURATION = DEFAULT_DURATION
-        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
-        val TO_DOZING_DURATION = DEFAULT_DURATION
+        val TO_LOCKSCREEN_DURATION = 450.milliseconds
+        val TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD = 0.5f
     }
 }

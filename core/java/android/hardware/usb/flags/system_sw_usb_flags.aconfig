@@ -29,3 +29,10 @@ flag {
     description: "Enables signal API with staking"
     bug: "287498482"
 }
+
+flag {
+    name: "enable_usb_sysfs_midi_identification"
+    namespace: "system_sw_usb"
+    description: "Enable identifying midi device using USB sysfs"
+    bug: "333778731"
+}

@@ -43,6 +43,7 @@ interface MediaDomainModule {
     @IntoMap
     @ClassKey(MediaDataProcessor::class)
     fun bindMediaDataProcessor(interactor: MediaDataProcessor): CoreStartable
+
     companion object {
 
         @Provides
@@ -52,7 +53,7 @@ interface MediaDomainModule {
             newProvider: Provider<MediaCarouselInteractor>,
             mediaFlags: MediaFlags,
         ): MediaDataManager {
-            return if (mediaFlags.isMediaControlsRefactorEnabled()) {
+            return if (mediaFlags.isSceneContainerEnabled()) {
                 newProvider.get()
             } else {
                 legacyProvider.get()

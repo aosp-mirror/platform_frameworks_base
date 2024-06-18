@@ -1044,11 +1044,6 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_PENDING_INTENT_TEMPLATE_TAG;
         }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mPendingIntentTemplate.visitUris(visitor);
-        }
     }
 
     /**
@@ -1424,6 +1419,10 @@ public class RemoteViews implements Parcelable, Filter {
                                 context.unbindService(this);
                             }
 
+                            if (items == null) {
+                                items = new RemoteCollectionItems.Builder().build();
+                            }
+
                             result.complete(items);
                         }
 
@@ -1524,11 +1523,6 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_REMOTE_VIEW_ADAPTER_INTENT_TAG;
         }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mIntent.visitUris(visitor);
-        }
     }
 
     /**
@@ -1607,11 +1601,6 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_ON_CLICK_RESPONSE_TAG;
         }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mResponse.visitUris(visitor);
-        }
     }
 
     /** Helper action to configure handwriting delegation via {@link PendingIntent}. */
@@ -1658,11 +1647,6 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_ON_STYLUS_HANDWRITING_RESPONSE_TAG;
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mPendingIntent.visitUris(visitor);
         }
     }
 
@@ -1733,11 +1717,6 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_ON_CHECKED_CHANGE_RESPONSE_TAG;
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mResponse.visitUris(visitor);
         }
     }
 
@@ -2297,10 +2276,6 @@ public class RemoteViews implements Parcelable, Filter {
                 case ICON:
                     final Icon icon = (Icon) getParameterValue(null);
                     if (icon != null) visitIconUri(icon, visitor);
-                    break;
-                case INTENT:
-                    final Intent intent = (Intent) getParameterValue(null);
-                    if (intent != null) intent.visitUris(visitor);
                     break;
                 // TODO(b/281044385): Should we do anything about type BUNDLE?
             }
@@ -6661,7 +6636,8 @@ public class RemoteViews implements Parcelable, Filter {
     public static final class ColorResources {
         // Set of valid colors resources.
         private static final int FIRST_RESOURCE_COLOR_ID = android.R.color.system_neutral1_0;
-        private static final int LAST_RESOURCE_COLOR_ID = android.R.color.system_accent3_1000;
+        private static final int LAST_RESOURCE_COLOR_ID =
+            android.R.color.system_error_1000;
         // Size, in bytes, of an entry in the array of colors in an ARSC file.
         private static final int ARSC_ENTRY_SIZE = 16;
 
@@ -7219,20 +7195,6 @@ public class RemoteViews implements Parcelable, Filter {
             int[] viewIds = parcel.createIntArray();
             mViewIds = viewIds == null ? null : IntArray.wrap(viewIds);
             mElementNames = parcel.createStringArrayList();
-        }
-
-        /**
-         * See {@link RemoteViews#visitUris(Consumer)}.
-         *
-         * @hide
-         */
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mPendingIntent != null) {
-                mPendingIntent.visitUris(visitor);
-            }
-            if (mFillIntent != null) {
-                mFillIntent.visitUris(visitor);
-            }
         }
 
         private void handleViewInteraction(

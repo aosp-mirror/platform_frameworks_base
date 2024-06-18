@@ -32,6 +32,9 @@ interface NotificationScrollView {
      */
     val intrinsicStackHeight: Int
 
+    /** Height in pixels required to display the top HeadsUp Notification. */
+    val topHeadsUpHeight: Int
+
     /**
      * Since this is an interface rather than a literal View, this provides cast-like access to the
      * underlying view.
@@ -47,8 +50,11 @@ interface NotificationScrollView {
     /** set the y position in px of the top of the stack in this view's coordinates */
     fun setStackTop(stackTop: Float)
 
-    /** set the y position in px of the bottom of the stack in this view's coordinates */
-    fun setStackBottom(stackBottom: Float)
+    /**
+     * set the bottom-most acceptable y-position of the bottom of the notification stack/ shelf /
+     * footer.
+     */
+    fun setStackCutoff(stackBottom: Float)
 
     /** set the y position in px of the top of the HUN in this view's coordinates */
     fun setHeadsUpTop(headsUpTop: Float)
@@ -58,8 +64,10 @@ interface NotificationScrollView {
 
     /** Set a consumer for synthetic scroll events */
     fun setSyntheticScrollConsumer(consumer: Consumer<Float>?)
+
     /** Set a consumer for current gesture overscroll events */
     fun setCurrentGestureOverscrollConsumer(consumer: Consumer<Boolean>?)
+
     /** Set a consumer for heads up height changed events */
     fun setHeadsUpHeightConsumer(consumer: Consumer<Float>?)
 
@@ -72,9 +80,18 @@ interface NotificationScrollView {
     /** Sets whether the view is displayed in doze mode. */
     fun setDozing(dozing: Boolean)
 
-    /** Sets a listener to be notified, when the stack height might have changed. */
+    /** Adds a listener to be notified, when the stack height might have changed. */
     fun addStackHeightChangedListener(runnable: Runnable)
 
     /** @see addStackHeightChangedListener */
     fun removeStackHeightChangedListener(runnable: Runnable)
+
+    /**
+     * Adds a listener to be notified, when the height of the top heads up notification might have
+     * changed.
+     */
+    fun addHeadsUpHeightChangedListener(runnable: Runnable)
+
+    /** @see addHeadsUpHeightChangedListener */
+    fun removeHeadsUpHeightChangedListener(runnable: Runnable)
 }

@@ -151,6 +151,7 @@ import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -176,6 +177,10 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
+import dagger.Lazy;
+
+import kotlinx.coroutines.CoroutineDispatcher;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -184,9 +189,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-
-import dagger.Lazy;
-import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -2380,7 +2382,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             }
             mCustomMessage = message;
             mKeyguardViewControllerLazy.get().dismissAndCollapse();
-        } else if (callback != null) {
+            return;
+        }
+        Log.w(TAG, "Ignoring request to DISMISS because mShowing=false");
+        if (callback != null) {
             new DismissCallbackWrapper(callback).notifyDismissError();
         }
     }
@@ -3011,7 +3016,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         && mPM.isInteractive(), WakeAndUnlockUpdateReason.HIDE);
             }
 
-            if ((mShowing && !mOccluded) || mUnlockingAndWakingFromDream) {
+            if (mBootCompleted && ((mShowing && !mOccluded) || mUnlockingAndWakingFromDream)) {
                 if (mUnlockingAndWakingFromDream) {
                     Log.d(TAG, "hiding keyguard before waking from dream");
                 }
@@ -3498,12 +3503,14 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         +  " --> flags=0x" + Integer.toHexString(flags));
             }
 
-            try {
-                mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
-                        mContext.getPackageName(),
-                        mSelectedUserInteractor.getSelectedUserId(true));
-            } catch (RemoteException e) {
-                Log.d(TAG, "Failed to set disable flags: " + flags, e);
+            if (!SceneContainerFlag.isEnabled()) {
+                try {
+                    mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
+                            mContext.getPackageName(),
+                            mSelectedUserInteractor.getSelectedUserId(true));
+                } catch (RemoteException e) {
+                    Log.d(TAG, "Failed to set disable flags: " + flags, e);
+                }
             }
         }
     }

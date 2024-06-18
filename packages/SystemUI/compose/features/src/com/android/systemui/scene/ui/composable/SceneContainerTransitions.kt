@@ -1,10 +1,12 @@
 package com.android.systemui.scene.ui.composable
 
 import androidx.compose.foundation.gestures.Orientation
+import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.bouncer.ui.composable.Bouncer
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.OpenBottomShade
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransition
@@ -22,6 +24,7 @@ import com.android.systemui.scene.ui.composable.transitions.lockscreenToQuickSet
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToSplitShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettingsTransition
+import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.Shade
 
 /**
@@ -41,7 +44,12 @@ val SceneContainerTransitions = transitions {
     // Scene transitions
 
     from(Scenes.Bouncer, to = Scenes.Gone) { bouncerToGoneTransition() }
-    from(Scenes.Gone, to = Scenes.NotificationsShade) { goneToNotificationsShadeTransition() }
+    from(Scenes.Gone, to = Scenes.NotificationsShade) {
+        goneToNotificationsShadeTransition(Edge.Top)
+    }
+    from(Scenes.Gone, to = Scenes.NotificationsShade, key = OpenBottomShade) {
+        goneToNotificationsShadeTransition(Edge.Bottom)
+    }
     from(Scenes.Gone, to = Scenes.Shade) { goneToShadeTransition() }
     from(
         Scenes.Gone,
@@ -58,6 +66,13 @@ val SceneContainerTransitions = transitions {
         goneToShadeTransition(durationScale = 0.9)
     }
     from(Scenes.Gone, to = Scenes.QuickSettings) { goneToQuickSettingsTransition() }
+    from(
+        Scenes.Gone,
+        to = Scenes.QuickSettings,
+        key = SlightlyFasterShadeCollapse,
+    ) {
+        goneToQuickSettingsTransition(durationScale = 0.9)
+    }
     from(Scenes.Gone, to = Scenes.QuickSettingsShade) { goneToQuickSettingsShadeTransition() }
     from(Scenes.Lockscreen, to = Scenes.Bouncer) { lockscreenToBouncerTransition() }
     from(Scenes.Lockscreen, to = Scenes.Communal) { lockscreenToCommunalTransition() }
@@ -95,11 +110,18 @@ val SceneContainerTransitions = transitions {
     overscroll(Scenes.Shade, Orientation.Vertical) {
         translate(
             Notifications.Elements.NotificationScrim,
-            y = { Shade.Dimensions.ScrimOverscrollLimit }
+            y = Shade.Dimensions.ScrimOverscrollLimit
         )
+        translate(Shade.Elements.SplitShadeStartColumn, y = Shade.Dimensions.ScrimOverscrollLimit)
         translate(
-            Shade.Elements.SplitShadeStartColumn,
-            y = { Shade.Dimensions.ScrimOverscrollLimit }
+            Notifications.Elements.NotificationStackPlaceholder,
+            y = Shade.Dimensions.ScrimOverscrollLimit,
         )
+    }
+    overscroll(Scenes.NotificationsShade, Orientation.Vertical) {
+        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
+    }
+    overscroll(Scenes.QuickSettingsShade, Orientation.Vertical) {
+        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
     }
 }
