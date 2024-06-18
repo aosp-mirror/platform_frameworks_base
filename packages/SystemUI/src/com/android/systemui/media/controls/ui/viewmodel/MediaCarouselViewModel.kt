@@ -98,9 +98,9 @@ constructor(
 
     private var allowReorder = false
 
-    fun onSwipeToDismiss() {
+    fun onSwipeToDismiss(location: Int) {
         logger.logSwipeDismiss()
-        interactor.onSwipeToDismiss()
+        interactor.onSwipeToDismiss(location)
     }
 
     fun onReorderingAllowed() {
@@ -175,7 +175,6 @@ constructor(
         commonViewModel: MediaCommonViewModel,
         commonModel: MediaCommonModel.MediaControl
     ) {
-        // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_RECEIVED)
         if (commonModel.canBeRemoved && !Utils.useMediaResumption(applicationContext)) {
             // This media control is due for removal as it is now paused + timed out, and resumption
             // setting is off.
@@ -196,8 +195,6 @@ constructor(
             if (!mediaFlags.isPersistentSsCardEnabled()) {
                 commonViewModel.onRemoved(true)
             }
-        } else {
-            // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_RECEIVED)
         }
     }
 

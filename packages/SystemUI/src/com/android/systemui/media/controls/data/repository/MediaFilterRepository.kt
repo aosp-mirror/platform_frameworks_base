@@ -366,7 +366,7 @@ constructor(
     /** Log user event on media card if smartspace logging is enabled. */
     fun logSmartspaceCardUserEvent(
         eventId: Int,
-        location: Int,
+        surface: Int,
         interactedSubCardRank: Int = 0,
         interactedSubCardCardinality: Int = 0,
         instanceId: InstanceId? = null,
@@ -381,7 +381,7 @@ constructor(
                                 instanceId,
                                 index,
                                 eventId,
-                                location,
+                                surface,
                                 mediaCommonModel.mediaLoadedModel.isSsReactivated,
                                 interactedSubCardRank,
                                 interactedSubCardCardinality
@@ -395,7 +395,7 @@ constructor(
                         if (isSmartspaceLoggingEnabled(mediaCommonModel, index)) {
                             logSmarspaceRecommendationCardUserEvent(
                                 eventId,
-                                location,
+                                surface,
                                 index,
                                 interactedSubCardRank,
                                 interactedSubCardCardinality
@@ -409,7 +409,7 @@ constructor(
     }
 
     /** Log media and recommendation cards dismissal if smartspace logging is enabled for each. */
-    fun logSmartspaceCardsOnSwipeToDismiss(location: Int) {
+    fun logSmartspaceCardsOnSwipeToDismiss(surface: Int) {
         _currentMedia.value.forEachIndexed { index, mediaCommonModel ->
             if (isSmartspaceLoggingEnabled(mediaCommonModel, index)) {
                 when (mediaCommonModel) {
@@ -418,14 +418,14 @@ constructor(
                             mediaCommonModel.mediaLoadedModel.instanceId,
                             index,
                             SMARTSPACE_CARD_DISMISS_EVENT,
-                            location,
+                            surface,
                             mediaCommonModel.mediaLoadedModel.isSsReactivated,
                             isSwipeToDismiss = true
                         )
                     is MediaCommonModel.MediaRecommendations ->
                         logSmarspaceRecommendationCardUserEvent(
                             SMARTSPACE_CARD_DISMISS_EVENT,
-                            location,
+                            surface,
                             index,
                             isSwipeToDismiss = true
                         )
@@ -470,7 +470,7 @@ constructor(
         instanceId: InstanceId,
         index: Int,
         eventId: Int,
-        location: Int,
+        surface: Int,
         isReactivated: Boolean,
         interactedSubCardRank: Int = 0,
         interactedSubCardCardinality: Int = 0,
@@ -481,7 +481,7 @@ constructor(
                 eventId,
                 it.smartspaceId,
                 it.appUid,
-                location,
+                surface,
                 _currentMedia.value.size,
                 isSsReactivated = isReactivated,
                 interactedSubcardRank = interactedSubCardRank,
@@ -494,7 +494,7 @@ constructor(
 
     private fun logSmarspaceRecommendationCardUserEvent(
         eventId: Int,
-        location: Int,
+        surface: Int,
         index: Int,
         interactedSubCardRank: Int = 0,
         interactedSubCardCardinality: Int = 0,
@@ -504,7 +504,7 @@ constructor(
             eventId,
             SmallHash.hash(_smartspaceMediaData.value.targetId),
             _smartspaceMediaData.value.getUid(applicationContext),
-            location,
+            surface,
             _currentMedia.value.size,
             isRecommendationCard = true,
             interactedSubcardRank = interactedSubCardRank,

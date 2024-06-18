@@ -397,8 +397,8 @@ constructor(
         // Notifies all active players about animation scale changes.
         bgExecutor.execute {
             globalSettings.registerContentObserverSync(
-                    Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-                    animationScaleObserver
+                Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+                animationScaleObserver
             )
         }
     }
@@ -884,8 +884,7 @@ constructor(
                     val previousVisibleIndex =
                         MediaPlayerData.playerKeys().indexOfFirst { key -> it == key }
                     mediaCarouselScrollHandler.scrollToPlayer(previousVisibleIndex, mediaIndex)
-                }
-                    ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
+                } ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
             }
         } else if (isRtl && mediaContent.childCount > 0) {
             // In RTL, Scroll to the first player as it is the rightmost player in media carousel.
@@ -1547,7 +1546,7 @@ constructor(
     @VisibleForTesting
     fun onSwipeToDismiss() {
         if (mediaFlags.isSceneContainerEnabled()) {
-            mediaCarouselViewModel.onSwipeToDismiss()
+            mediaCarouselViewModel.onSwipeToDismiss(currentEndLocation)
             return
         }
         MediaPlayerData.players().forEachIndexed { index, it ->

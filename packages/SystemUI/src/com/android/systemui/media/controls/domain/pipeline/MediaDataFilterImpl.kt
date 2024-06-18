@@ -338,8 +338,9 @@ constructor(
     }
 
     /** Invoked when the user has dismissed the media carousel */
-    fun onSwipeToDismiss() {
+    fun onSwipeToDismiss(surface: Int) {
         if (DEBUG) Log.d(TAG, "Media carousel swiped away")
+        mediaFilterRepository.logSmartspaceCardsOnSwipeToDismiss(surface)
         val mediaEntries = mediaFilterRepository.allUserEntries.value.entries
         mediaEntries.forEach { (key, data) ->
             if (mediaFilterRepository.selectedUserEntries.value.containsKey(data.instanceId)) {
