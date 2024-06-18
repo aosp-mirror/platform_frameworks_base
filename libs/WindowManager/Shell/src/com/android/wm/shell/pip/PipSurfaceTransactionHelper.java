@@ -137,7 +137,7 @@ public class PipSurfaceTransactionHelper {
         mTmpDestinationRect.inset(insets);
         // Scale to the bounds no smaller than the destination and offset such that the top/left
         // of the scaled inset source rect aligns with the top/left of the destination bounds
-        final float scale, left, top;
+        final float scale;
         if (isInPipDirection
                 && sourceRectHint != null && sourceRectHint.width() < sourceBounds.width()) {
             // scale by sourceRectHint if it's not edge-to-edge, for entering PiP transition only.
@@ -148,14 +148,17 @@ public class PipSurfaceTransactionHelper {
                     ? (float) destinationBounds.width() / sourceBounds.width()
                     : (float) destinationBounds.height() / sourceBounds.height();
             scale = (1 - fraction) * startScale + fraction * endScale;
-            left = destinationBounds.left - insets.left * scale;
-            top = destinationBounds.top - insets.top * scale;
         } else {
             scale = Math.max((float) destinationBounds.width() / sourceBounds.width(),
                     (float) destinationBounds.height() / sourceBounds.height());
-            // Work around the rounding error by fix the position at very beginning.
-            left = scale == 1 ? 0 : destinationBounds.left - insets.left * scale;
-            top = scale == 1 ? 0 : destinationBounds.top - insets.top * scale;
+        }
+        float left = destinationBounds.left - insets.left * scale;
+        float top = destinationBounds.top - insets.top * scale;
+        if (scale == 1) {
+            // Work around the 1 pixel off error by rounding the position down at very beginning.
+            // We noticed such error from flicker tests, not visually.
+            left = sourceBounds.left;
+            top = sourceBounds.top;
         }
         mTmpTransform.setScale(scale, scale);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
