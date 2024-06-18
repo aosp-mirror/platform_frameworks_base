@@ -228,7 +228,6 @@ class DesktopModeLoggerTransitionObserver(
      * Log the appropriate log event based on the new state of TasksInfos and previously cached
      * state and update it
      */
-    // TODO(b/326231724): Trigger logging when task size or position is changed.
     private fun identifyLogEventAndUpdateState(
         transitionInfo: TransitionInfo,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
@@ -289,10 +288,17 @@ class DesktopModeLoggerTransitionObserver(
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>
     ) {
-        // find new tasks that were added
         postTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
-            if (!preTransitionVisibleFreeformTasks.containsKey(taskId)) {
-                desktopModeEventLogger.logTaskAdded(sessionId, buildTaskUpdateForTask(taskInfo))
+            val currentTaskUpdate = buildTaskUpdateForTask(taskInfo)
+            val previousTaskInfo = preTransitionVisibleFreeformTasks[taskId]
+            when {
+                // new tasks added
+                previousTaskInfo == null ->
+                    desktopModeEventLogger.logTaskAdded(sessionId, currentTaskUpdate)
+                // old tasks that were resized or repositioned
+                // TODO(b/347935387): Log changes only once they are stable.
+                buildTaskUpdateForTask(previousTaskInfo) != currentTaskUpdate ->
+                    desktopModeEventLogger.logTaskInfoChanged(sessionId, currentTaskUpdate)
             }
         }
 
