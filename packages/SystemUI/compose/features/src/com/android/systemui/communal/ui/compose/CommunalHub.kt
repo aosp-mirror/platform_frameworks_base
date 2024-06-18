@@ -378,16 +378,6 @@ fun CommunalHub(
                 onCancel = viewModel::onEnableWorkProfileDialogCancel
             )
         }
-
-        // This spacer covers the edge of the LazyHorizontalGrid and prevents it from receiving
-        // touches, so that the SceneTransitionLayout can intercept the touches and allow an edge
-        // swipe back to the blank scene.
-        Spacer(
-            Modifier.height(Dimensions.GridHeight)
-                .align(Alignment.CenterStart)
-                .width(Dimensions.Spacing)
-                .pointerInput(Unit) {}
-        )
     }
 }
 

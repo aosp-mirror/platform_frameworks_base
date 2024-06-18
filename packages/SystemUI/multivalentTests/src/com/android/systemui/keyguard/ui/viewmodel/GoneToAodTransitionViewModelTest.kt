@@ -28,6 +28,9 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.data.repository.powerRepository
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
@@ -47,10 +50,18 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
     private val underTest = kosmos.goneToAodTransitionViewModel
     private val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
     private val biometricSettingsRepository = kosmos.biometricSettingsRepository
+    private val powerRepository = kosmos.powerRepository
 
     @Test
-    fun enterFromTopTranslationY() =
+    fun enterFromTopTranslationY_whenNotOnFold() =
         testScope.runTest {
+            powerRepository.updateWakefulness(
+                rawState = WakefulnessState.STARTING_TO_SLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.POWER_BUTTON,
+                powerButtonLaunchGestureTriggered = false
+            )
+
             val pixels = -100f
             val enterFromTopTranslationY by
                 collectLastValue(underTest.enterFromTopTranslationY(pixels.toInt()))
@@ -77,6 +88,80 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             // At the end, the translation should be complete and set to zero
             repository.sendTransitionStep(step(1f))
             assertThat(enterFromTopTranslationY)
+                .isEqualTo(
+                    StateToValue(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.AOD,
+                        transitionState = TransitionState.RUNNING,
+                        value = 0f
+                    )
+                )
+        }
+
+    @Test
+    fun enterFromTopTranslationY_whenOnFold_emitsNothing() =
+        testScope.runTest {
+            powerRepository.updateWakefulness(
+                rawState = WakefulnessState.STARTING_TO_SLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.FOLD,
+                powerButtonLaunchGestureTriggered = false
+            )
+
+            val pixels = -100f
+            val enterFromTopTranslationY by
+                collectLastValue(underTest.enterFromTopTranslationY(pixels.toInt()))
+            runCurrent()
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(enterFromTopTranslationY).isNull()
+
+            repository.sendTransitionStep(step(.55f))
+            assertThat(enterFromTopTranslationY).isNull()
+
+            repository.sendTransitionStep(step(.85f))
+            assertThat(enterFromTopTranslationY).isNull()
+
+            repository.sendTransitionStep(step(1f))
+            assertThat(enterFromTopTranslationY).isNull()
+        }
+
+    @Test
+    fun enterFromSideTranslationX_onFold() =
+        testScope.runTest {
+            powerRepository.updateWakefulness(
+                rawState = WakefulnessState.STARTING_TO_SLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.FOLD,
+                powerButtonLaunchGestureTriggered = false
+            )
+
+            val pixels = -100f
+            val enterFromSideTranslationX by
+                collectLastValue(underTest.enterFromSideTranslationX(pixels.toInt()))
+            runCurrent()
+
+            // The animation should only start > .4f way through
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(enterFromSideTranslationX)
+                .isEqualTo(
+                    StateToValue(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.AOD,
+                        transitionState = TransitionState.STARTED,
+                        value = pixels
+                    )
+                )
+
+            repository.sendTransitionStep(step(.55f))
+            assertThat(enterFromSideTranslationX!!.value ?: -1f).isIn(Range.closed(pixels, 0f))
+
+            repository.sendTransitionStep(step(.85f))
+            assertThat(enterFromSideTranslationX!!.value ?: -1f).isIn(Range.closed(pixels, 0f))
+
+            // At the end, the translation should be complete and set to zero
+            repository.sendTransitionStep(step(1f))
+            assertThat(enterFromSideTranslationX)
                 .isEqualTo(
                     StateToValue(
                         from = KeyguardState.GONE,

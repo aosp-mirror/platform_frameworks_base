@@ -43,7 +43,7 @@ import java.util.LinkedList;
 public class NotificationPlayer implements OnCompletionListener, OnErrorListener {
     private static final int PLAY = 1;
     private static final int STOP = 2;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final class Command {
         int code;

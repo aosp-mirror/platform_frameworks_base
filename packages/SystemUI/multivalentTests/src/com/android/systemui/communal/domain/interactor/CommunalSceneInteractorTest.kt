@@ -83,24 +83,27 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun snapToSceneForActivity() =
+    fun changeSceneForActivityStartOnDismissKeyguard() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
-            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
-
-            underTest.snapToSceneForActivityStart(CommunalScenes.Communal)
+            underTest.snapToScene(CommunalScenes.Communal)
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
+
+            underTest.changeSceneForActivityStartOnDismissKeyguard()
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
         }
 
     @Test
-    fun snapToSceneForActivity_willNotChangeScene_forEditModeActivity() =
+    fun changeSceneForActivityStartOnDismissKeyguard_willNotChangeScene_forEditModeActivity() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
-            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+            underTest.snapToScene(CommunalScenes.Communal)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
 
             underTest.setEditModeState(EditModeState.STARTING)
-            underTest.snapToSceneForActivityStart(CommunalScenes.Communal)
-            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+
+            underTest.changeSceneForActivityStartOnDismissKeyguard()
+            assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
         }
 
     @Test
