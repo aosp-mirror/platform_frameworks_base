@@ -218,6 +218,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mKeyguardRepository,
                 keyguardTransitionInteractor,
                 powerInteractor,
+                mShadeRepository,
                 new FakeUserSetupRepository(),
                 mUserSwitcherInteractor,
                 new ShadeInteractorLegacyImpl(
@@ -308,6 +309,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 new JavaAdapter(mTestScope.getBackgroundScope()),
                 mCastController,
                 splitShadeStateController,
+                () -> mKosmos.getCommunalTransitionViewModel(),
                 () -> mLargeScreenHeaderHelper
         );
         mQsController.init();

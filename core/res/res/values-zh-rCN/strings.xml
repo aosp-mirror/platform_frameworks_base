@@ -201,10 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"您的工作资料已不在此设备上"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"密码尝试次数过多"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"管理员已将该设备开放给个人使用"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"私密空间已移除"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"贵组织不允许在此受管设备上使用私密空间。"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"设备为受管理设备"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"贵单位会管理该设备，且可能会监控网络流量。点按即可了解详情。"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"应用可以访问您的位置信息"</string>
@@ -583,7 +581,7 @@
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"更改网络共享连接"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"允许应用更改绑定网络连接的状态。"</string>
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"查看WLAN连接"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"允许该应用查看WLAN网络的相关信息，例如是否启用了WLAN以及连接的WLAN设备的名称。"</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"允许该应用查看 WLAN 网络的相关信息，例如是否启用了 WLAN 以及连接的 WLAN 设备的名称。"</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"连接WLAN网络和断开连接"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"允许该应用与WLAN接入点建立和断开连接，以及更改WLAN网络的设备配置。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"允许接收WLAN多播"</string>
@@ -1885,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN码太短，至少应包含4位数字。"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"稍后重试"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"目前处于全屏模式"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"要退出，请从顶部向下滑动。"</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋转可改善预览效果"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"在全屏模式下打开“<xliff:g id="NAME">%s</xliff:g>”可改善预览效果"</string>
@@ -2198,7 +2197,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"向左方向键"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"向右方向键"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"方向键中心"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>的标题栏。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 已被放入受限存储分区"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>："</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"发送了一张图片"</string>
@@ -2410,6 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"私密空间"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"克隆"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"共用"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"私密空间"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"已隐藏敏感通知内容"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"为安全起见而在屏幕共享画面中处于隐藏状态的应用内容"</string>

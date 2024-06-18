@@ -83,6 +83,8 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFO
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
+import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -115,6 +117,8 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.view.Display;
@@ -1341,6 +1345,27 @@ public class DisplayContentTests extends WindowTestsBase {
             mDisplayContent.getImeInputTarget().getWindowState());
         mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
         assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget());
+    }
+
+    @SetupWindows(addWindows = W_ACTIVITY)
+    @Test
+    public void testShouldImeAttachedToApp_targetBoundsDifferentFromImeContainer_returnsFalse()
+            throws Exception {
+        Rect imeContainerBounds = new Rect(0, 0, 100, 100);
+        Rect imeTargetBounds = new Rect(0, 0, 100, 200);
+        spyOn(mAppWindow);
+        spyOn(mAppWindow.mActivityRecord);
+        doReturn(imeTargetBounds).when(mAppWindow).getBounds();
+        doReturn(true).when(mAppWindow.mActivityRecord).matchParentBounds();
+        mDisplayContent.setImeInputTarget(mAppWindow);
+        mDisplayContent.setImeLayeringTarget(
+                mDisplayContent.getImeInputTarget().getWindowState());
+        mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
+        final DisplayArea.Tokens imeContainer = mDisplayContent.getImeContainer();
+        spyOn(imeContainer);
+        doReturn(imeContainerBounds).when(imeContainer).getBounds();
+
+        assertFalse(mDisplayContent.shouldImeAttachedToApp());
     }
 
     @Test
@@ -2799,6 +2824,31 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(dc.hasAccess(uid2));
 
         verify(mWm.mUmInternal, never()).isUserVisible(userId2, displayId);
+    }
+
+    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @Test
+    public void cameraCompatFreeformFlagEnabled_cameraCompatFreeformPolicyNotNull() {
+        doReturn(true).when(() ->
+                DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+
+        assertNotNull(createNewDisplay().mCameraCompatFreeformPolicy);
+    }
+
+    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @Test
+    public void cameraCompatFreeformFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
+        doReturn(true).when(() ->
+                DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+
+        assertNull(createNewDisplay().mCameraCompatFreeformPolicy);
+    }
+
+    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @Test
+    public void desktopWindowingFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
+        assertNull(createNewDisplay().mCameraCompatFreeformPolicy);
     }
 
     private void removeRootTaskTests(Runnable runnable) {

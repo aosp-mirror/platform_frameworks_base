@@ -140,6 +140,27 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun panelAlpha() =
+        testScope.runTest {
+            assertThat(underTest.panelAlpha.value).isEqualTo(1f)
+
+            underTest.setPanelAlpha(0.1f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.1f)
+
+            underTest.setPanelAlpha(0.2f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.2f)
+
+            underTest.setPanelAlpha(0.3f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.3f)
+
+            underTest.setPanelAlpha(0.5f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.5f)
+
+            underTest.setPanelAlpha(1.0f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(1f)
+        }
+
+    @Test
     fun topClippingBounds() =
         testScope.runTest {
             assertThat(underTest.topClippingBounds.value).isNull()
@@ -333,27 +354,16 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isDreamingFromKeyguardUpdateMonitor() =
-        TestScope(mainDispatcher).runTest {
-            whenever(keyguardUpdateMonitor.isDreaming()).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isDreaming.onEach { latest = it }.launchIn(this)
+    fun isDreaming() =
+        testScope.runTest {
+            val isDreaming by collectLastValue(underTest.isDreaming)
+            assertThat(isDreaming).isFalse()
 
-            runCurrent()
-            assertThat(latest).isFalse()
+            underTest.setDreaming(true)
+            assertThat(isDreaming).isTrue()
 
-            val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
-            verify(keyguardUpdateMonitor).registerCallback(captor.capture())
-
-            captor.value.onDreamingStateChanged(true)
-            runCurrent()
-            assertThat(latest).isTrue()
-
-            captor.value.onDreamingStateChanged(false)
-            runCurrent()
-            assertThat(latest).isFalse()
-
-            job.cancel()
+            underTest.setDreaming(false)
+            assertThat(isDreaming).isFalse()
         }
 
     @Test

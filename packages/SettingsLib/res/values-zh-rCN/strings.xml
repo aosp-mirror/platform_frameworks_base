@@ -96,8 +96,8 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"已连接（无手机或媒体信号），电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"使用中。电池电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"使用中。左侧电池电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右侧电池电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>。"</string>
-    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"使用中。左侧剩余电量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
-    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"使用中。右侧剩余电量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"使用中。左侧电量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"使用中。右侧电量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 的电量"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"电池电量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"左侧电池电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右侧电池电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>。"</string>
@@ -708,8 +708,8 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"实体键盘"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"选择键盘布局"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"默认"</string>
-    <string name="turn_screen_on_title" msgid="2662312432042116026">"屏幕开启控件"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"允许开启屏幕"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"屏幕唤醒设置"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"允许唤醒屏幕"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"允许应用唤醒屏幕。如获授权，该应用便可在您未明确表达意愿的情况下随时唤醒屏幕。"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"要停止广播“<xliff:g id="APP_NAME">%1$s</xliff:g>”的内容吗？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"如果广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容或更改输出来源，当前的广播就会停止"</string>

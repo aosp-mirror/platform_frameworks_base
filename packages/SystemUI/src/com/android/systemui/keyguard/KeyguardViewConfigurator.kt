@@ -39,6 +39,7 @@ import com.android.keyguard.LegacyLockIconViewController
 import com.android.keyguard.LockIconView
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
+import com.android.systemui.biometrics.ui.binder.DeviceEntryUnlockTrackerViewBinder
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
@@ -53,7 +54,6 @@ import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
-import com.android.systemui.keyguard.ui.view.layout.KeyguardBlueprintCommandListener
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import dagger.Lazy
+import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -89,7 +90,6 @@ constructor(
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
-    private val keyguardBlueprintCommandListener: KeyguardBlueprintCommandListener,
     private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
     private val configuration: ConfigurationState,
@@ -105,9 +105,9 @@ constructor(
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val lockscreenContentViewModel: LockscreenContentViewModel,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
-    private val keyguardBlueprintViewBinder: KeyguardBlueprintViewBinder,
     private val clockInteractor: KeyguardClockInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
+    private val deviceEntryUnlockTrackerViewBinder: Optional<DeviceEntryUnlockTrackerViewBinder>,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -152,7 +152,7 @@ constructor(
                 cs.connect(composeView.id, BOTTOM, PARENT_ID, BOTTOM)
                 keyguardRootView.addView(composeView)
             } else {
-                keyguardBlueprintViewBinder.bind(
+                KeyguardBlueprintViewBinder.bind(
                     keyguardRootView,
                     keyguardBlueprintViewModel,
                     keyguardClockViewModel,
@@ -160,7 +160,9 @@ constructor(
                 )
             }
         }
-        keyguardBlueprintCommandListener.start()
+        if (deviceEntryUnlockTrackerViewBinder.isPresent) {
+            deviceEntryUnlockTrackerViewBinder.get().bind(keyguardRootView)
+        }
     }
 
     fun bindIndicationArea() {
@@ -200,12 +202,14 @@ constructor(
             KeyguardRootViewBinder.bind(
                 keyguardRootView,
                 keyguardRootViewModel,
+                keyguardBlueprintViewModel,
                 configuration,
                 occludingAppDeviceEntryMessageViewModel,
                 chipbarCoordinator,
                 screenOffAnimationController,
                 shadeInteractor,
                 clockInteractor,
+                keyguardClockViewModel,
                 interactionJankMonitor,
                 deviceEntryHapticsInteractor,
                 vibratorHelper,

@@ -58,7 +58,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
     @Test
     fun registerContentObserverForUser_inputString_success() {
-        mSettings.registerContentObserverForUser(
+        mSettings.registerContentObserverForUserSync(
             TEST_SETTING,
             mContentObserver,
             mUserTracker.userId
@@ -74,7 +74,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
     @Test
     fun registerContentObserverForUser_inputString_notifyForDescendants_true() {
-        mSettings.registerContentObserverForUser(
+        mSettings.registerContentObserverForUserSync(
             TEST_SETTING,
             notifyForDescendants = true,
             mContentObserver,
@@ -91,7 +91,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
     @Test
     fun registerContentObserverForUser_inputUri_success() {
-        mSettings.registerContentObserverForUser(
+        mSettings.registerContentObserverForUserSync(
             TEST_SETTING_URI,
             mContentObserver,
             mUserTracker.userId
@@ -107,7 +107,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
     @Test
     fun registerContentObserverForUser_inputUri_notifyForDescendants_true() {
-        mSettings.registerContentObserverForUser(
+        mSettings.registerContentObserverForUserSync(
             TEST_SETTING_URI,
             notifyForDescendants = true,
             mContentObserver,
@@ -124,14 +124,14 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
     @Test
     fun registerContentObserver_inputUri_success() {
-        mSettings.registerContentObserver(TEST_SETTING_URI, mContentObserver)
+        mSettings.registerContentObserverSync(TEST_SETTING_URI, mContentObserver)
         verify(mSettings.getContentResolver())
             .registerContentObserver(eq(TEST_SETTING_URI), eq(false), eq(mContentObserver), eq(0))
     }
 
     @Test
     fun registerContentObserver_inputUri_notifyForDescendants_true() {
-        mSettings.registerContentObserver(
+        mSettings.registerContentObserverSync(
             TEST_SETTING_URI,
             notifyForDescendants = true,
             mContentObserver

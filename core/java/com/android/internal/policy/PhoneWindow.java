@@ -537,8 +537,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         mContentParent.requestApplyInsets();
         final Callback cb = getCallback();
-        if (cb != null && !isDestroyed()) {
-            cb.onContentChanged();
+        if (!isDestroyed()) {
+            if (cb != null) {
+                cb.onContentChanged();
+            }
+            if (mDecorContentParent != null) {
+                mDecorContentParent.notifyContentChanged();
+            }
         }
         mContentParentExplicitlySet = true;
     }
@@ -568,8 +573,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         mContentParent.requestApplyInsets();
         final Callback cb = getCallback();
-        if (cb != null && !isDestroyed()) {
-            cb.onContentChanged();
+        if (!isDestroyed()) {
+            if (cb != null) {
+                cb.onContentChanged();
+            }
+            if (mDecorContentParent != null) {
+                mDecorContentParent.notifyContentChanged();
+            }
         }
         mContentParentExplicitlySet = true;
     }
@@ -586,8 +596,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mContentParent.addView(view, params);
         mContentParent.requestApplyInsets();
         final Callback cb = getCallback();
-        if (cb != null && !isDestroyed()) {
-            cb.onContentChanged();
+        if (!isDestroyed()) {
+            if (cb != null) {
+                cb.onContentChanged();
+            }
+            if (mDecorContentParent != null) {
+                mDecorContentParent.notifyContentChanged();
+            }
         }
     }
 
@@ -4054,9 +4069,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void setResizingCaptionDrawable(Drawable drawable) {
-        mDecor.setUserCaptionBackgroundDrawable(drawable);
-    }
+    public void setResizingCaptionDrawable(Drawable drawable) {}
 
     @Override
     public void setDecorCaptionShade(int decorCaptionShade) {

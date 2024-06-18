@@ -2745,17 +2745,6 @@ public class Resources {
                 ar.recycle();
                 Log.i(TAG, "...preloaded " + numberOfEntries + " resources in "
                         + (SystemClock.uptimeMillis() - startTime) + "ms.");
-
-                if (sysRes.getBoolean(
-                        com.android.internal.R.bool.config_freeformWindowManagement)) {
-                    startTime = SystemClock.uptimeMillis();
-                    ar = sysRes.obtainTypedArray(
-                            com.android.internal.R.array.preloaded_freeform_multi_window_drawables);
-                    numberOfEntries = preloadDrawables(sysRes, ar);
-                    ar.recycle();
-                    Log.i(TAG, "...preloaded " + numberOfEntries + " resource in "
-                            + (SystemClock.uptimeMillis() - startTime) + "ms.");
-                }
             }
             sysRes.finishPreloading();
         } catch (RuntimeException e) {

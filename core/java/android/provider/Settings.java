@@ -1736,6 +1736,24 @@ public final class Settings {
             "android.settings.NETWORK_OPERATOR_SETTINGS";
 
     /**
+     * Activity Action: Show settings for selecting the network provider.
+     * <p>
+     * In some cases, a matching Activity may not be provided, so ensure you
+     * safeguard against this.
+     * <p>
+     * Access to this preference can be customized via Settings' app.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NETWORK_PROVIDER_SETTINGS =
+            "android.settings.NETWORK_PROVIDER_SETTINGS";
+
+    /**
      * Activity Action: Show settings for selection of 2G/3G.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -6083,6 +6101,15 @@ public final class Settings {
         public static final String POINTER_SPEED = "pointer_speed";
 
         /**
+         * Pointer scale setting.
+         *
+         * <p>This float value represents the scale by which the size of the pointer increases.
+         * @hide
+         */
+        @Readable
+        public static final String POINTER_SCALE = "pointer_scale";
+
+        /**
          * Touchpad pointer speed setting.
          * This is an integer value in a range between -7 and +7, so there are 15 possible values.
          *   -7 = slowest
@@ -6127,6 +6154,15 @@ public final class Settings {
          * @hide
          */
         public static final String TOUCHPAD_RIGHT_CLICK_ZONE = "touchpad_right_click_zone";
+
+        /**
+         * Pointer fill style, specified by
+         * {@link android.view.PointerIcon.PointerIconVectorStyleFill} constants.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String POINTER_FILL_STYLE = "pointer_fill_style";
 
         /**
          * Whether lock-to-app will be triggered by long-press on recents.
@@ -6330,6 +6366,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SIP_ADDRESS_ONLY);
             PRIVATE_SETTINGS.add(SIP_ASK_ME_EACH_TIME);
             PRIVATE_SETTINGS.add(POINTER_SPEED);
+            PRIVATE_SETTINGS.add(POINTER_FILL_STYLE);
+            PRIVATE_SETTINGS.add(POINTER_SCALE);
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
@@ -12666,6 +12704,16 @@ public final class Settings {
          * @hide
          */
         public static final String CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode";
+
+        /**
+         * String property which contains the package name of the contextual
+         * search provider supplied by individual OEM's
+         * R.string.config_defaultContextualSearchPackageName.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String CONTEXTUAL_SEARCH_PACKAGE = "contextual_search_package";
     }
 
     /**
@@ -19928,6 +19976,12 @@ public final class Settings {
              * @hide
              */
             public static final String NETWORK_LOCATION_OPT_IN = "network_location_opt_in";
+
+            /**
+             * Whether haptics are enabled for Active Unlock on wear.
+             * @hide
+             */
+            public static final String VIBRATE_FOR_ACTIVE_UNLOCK = "wear_vibrate_for_active_unlock";
 
             /**
              * The custom foreground color.

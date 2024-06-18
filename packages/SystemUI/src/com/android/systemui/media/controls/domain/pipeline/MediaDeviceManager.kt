@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable
 import android.media.MediaRouter2Manager
 import android.media.RoutingSessionInfo
 import android.media.session.MediaController
+import android.media.session.MediaController.PlaybackInfo
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.AnyThread
@@ -73,6 +74,11 @@ constructor(
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val entries: MutableMap<String, Entry> = mutableMapOf()
+
+    companion object {
+        private val EMPTY_AND_DISABLED_MEDIA_DEVICE_DATA =
+            MediaDeviceData(enabled = false, icon = null, name = null, showBroadcastButton = false)
+    }
 
     /** Add a listener for changes to the media route (ie. device). */
     fun addListener(listener: Listener) = listeners.add(listener)
@@ -333,28 +339,48 @@ constructor(
         @WorkerThread
         private fun updateCurrent() {
             if (isLeAudioBroadcastEnabled()) {
-                if (enableLeAudioSharing()) {
-                    current =
-                        MediaDeviceData(
-                            enabled = false,
-                            icon =
+                current = getLeAudioBroadcastDeviceData()
+            } else if (Flags.usePlaybackInfoForRoutingControls()) {
+                val activeDevice: MediaDeviceData?
+
+                // LocalMediaManager provides the connected device based on PlaybackInfo.
+                // TODO (b/342197065): Simplify nullability once we make currentConnectedDevice
+                //  non-null.
+                val connectedDevice = localMediaManager.currentConnectedDevice?.toMediaDeviceData()
+
+                if (controller?.playbackInfo?.playbackType == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
+                    val routingSession =
+                        mr2manager.get().getRoutingSessionForMediaController(controller)
+
+                    activeDevice =
+                        routingSession?.let {
+                            val icon = if (it.selectedRoutes.size > 1) {
                                 context.getDrawable(
-                                    com.android.settingslib.R.drawable.ic_bt_le_audio_sharing
-                                ),
-                            name = context.getString(R.string.audio_sharing_description),
-                            intent = null,
+                                        com.android.settingslib.R.drawable.ic_media_group_device)
+                            } else {
+                                connectedDevice?.icon // Single route. We don't change the icon.
+                            }
+                            // For a remote session, always use the current device from
+                            // LocalMediaManager. Override with routing session information if
+                            // available:
+                            //   - Name: To show the dynamic group name.
+                            //   - Icon: To show the group icon if there's more than one selected
+                            //           route.
+                            connectedDevice?.copy(
+                                    name = it.name ?: connectedDevice.name,
+                                    icon = icon)
+                        } ?: MediaDeviceData(
+                            enabled = false,
+                            icon = context.getDrawable(R.drawable.ic_media_home_devices),
+                            name = context.getString(R.string.media_seamless_other_device),
                             showBroadcastButton = false
                         )
                 } else {
-                    current =
-                        MediaDeviceData(
-                            /* enabled */ true,
-                            /* icon */ context.getDrawable(R.drawable.settings_input_antenna),
-                            /* name */ broadcastDescription,
-                            /* intent */ null,
-                            /* showBroadcastButton */ showBroadcastButton = true
-                        )
+                    // Prefer SASS if available when playback is local.
+                    activeDevice = getSassDevice() ?: connectedDevice
                 }
+
+                current = activeDevice ?: EMPTY_AND_DISABLED_MEDIA_DEVICE_DATA
             } else {
                 val aboutToConnect = aboutToConnectDeviceOverride
                 if (
@@ -389,6 +415,43 @@ constructor(
             }
         }
 
+        private fun getSassDevice(): MediaDeviceData? {
+            val sassDevice = aboutToConnectDeviceOverride ?: return null
+            return sassDevice.fullMediaDevice?.toMediaDeviceData()
+                ?: sassDevice.backupMediaDeviceData
+        }
+
+        private fun MediaDevice.toMediaDeviceData() =
+            MediaDeviceData(
+                enabled = true,
+                icon = iconWithoutBackground,
+                name = name,
+                id = id,
+                showBroadcastButton = false
+            )
+
+        private fun getLeAudioBroadcastDeviceData(): MediaDeviceData {
+            return if (enableLeAudioSharing()) {
+                MediaDeviceData(
+                    enabled = false,
+                    icon =
+                        context.getDrawable(
+                            com.android.settingslib.R.drawable.ic_bt_le_audio_sharing
+                        ),
+                    name = context.getString(R.string.audio_sharing_description),
+                    intent = null,
+                    showBroadcastButton = false
+                )
+            } else {
+                MediaDeviceData(
+                    enabled = true,
+                    icon = context.getDrawable(R.drawable.settings_input_antenna),
+                    name = broadcastDescription,
+                    intent = null,
+                    showBroadcastButton = true
+                )
+            }
+        }
         /** Return a display name for the current device / route, or null if not possible */
         private fun getDeviceName(
             device: MediaDevice?,

@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.panels.ui.compose
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,9 +37,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.addOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -66,12 +71,11 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
             tiles.forEach { it.startListening(token) }
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
-        val iconTilesSpecs by viewModel.iconTilesSpecs.collectAsStateWithLifecycle()
         val columns by viewModel.columns.collectAsStateWithLifecycle()
         val showLabels by viewModel.showLabels.collectAsStateWithLifecycle()
         val largeTileHeight = tileHeight()
         val iconTileHeight = tileHeight(showLabels)
-        val (smallTiles, largeTiles) = tiles.partition { iconTilesSpecs.contains(it.spec) }
+        val (smallTiles, largeTiles) = tiles.partition { viewModel.isIconTile(it.spec) }
 
         TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
             // Large tiles
@@ -103,7 +107,6 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         onAddTile: (TileSpec, Int) -> Unit,
         onRemoveTile: (TileSpec) -> Unit
     ) {
-        val iconOnlySpecs by viewModel.iconTilesSpecs.collectAsStateWithLifecycle()
         val columns by viewModel.columns.collectAsStateWithLifecycle()
         val showLabels by viewModel.showLabels.collectAsStateWithLifecycle()
 
@@ -111,8 +114,6 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
             onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
         }
-        val isIconOnly: (TileSpec) -> Boolean =
-            remember(iconOnlySpecs) { { tileSpec: TileSpec -> tileSpec in iconOnlySpecs } }
         val largeTileHeight = tileHeight()
         val iconTileHeight = tileHeight(showLabels)
         val tilePadding = dimensionResource(R.dimen.qs_tile_margin_vertical)
@@ -151,7 +152,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 iconTileHeight = iconTileHeight,
                 tilePadding = tilePadding,
                 onRemoveTile = onRemoveTile,
-                isIconOnly = isIconOnly,
+                isIconOnly = viewModel::isIconTile,
                 columns = columns,
                 showLabels = showLabels,
             )
@@ -161,7 +162,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 iconTileHeight = iconTileHeight,
                 tilePadding = tilePadding,
                 addTileToEnd = addTileToEnd,
-                isIconOnly = isIconOnly,
+                isIconOnly = viewModel::isIconTile,
                 showLabels = showLabels,
                 columns = columns,
             )
@@ -232,7 +233,7 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         val largeGridHeight = gridHeight(largeTiles.size, largeTileHeight, columns / 2, tilePadding)
         val smallGridHeight = gridHeight(smallTiles.size, iconTileHeight, columns, tilePadding)
         val largeGridHeightCustom =
-            gridHeight(tilesCustom.size, largeTileHeight, columns / 2, tilePadding)
+            gridHeight(tilesCustom.size, iconTileHeight, columns, tilePadding)
 
         // Add up the height of all three grids and add padding in between
         val gridHeight =
@@ -257,8 +258,14 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 )
                 fillUpRow(nTiles = smallTiles.size, columns = columns)
 
-                // Custom tiles, all large
-                editTiles(tilesCustom, ClickAction.ADD, addTileToEnd, isIconOnly)
+                // Custom tiles, all icons
+                editTiles(
+                    tilesCustom,
+                    ClickAction.ADD,
+                    addTileToEnd,
+                    isIconOnly,
+                    showLabels = showLabels
+                )
             }
         }
     }
@@ -267,10 +274,9 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
     private fun CurrentTilesContainer(content: @Composable () -> Unit) {
         Box(
             Modifier.fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    shape = RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius))
+                .dashedBorder(
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
+                    shape = Dimensions.ContainerShape,
                 )
                 .padding(dimensionResource(R.dimen.qs_tile_margin_vertical))
         ) {
@@ -283,9 +289,9 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         Box(
             Modifier.fillMaxWidth()
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    color = MaterialTheme.colorScheme.background,
                     alpha = { 1f },
-                    shape = RoundedCornerShape(dimensionResource(R.dimen.qs_corner_radius))
+                    shape = Dimensions.ContainerShape,
                 )
                 .padding(dimensionResource(R.dimen.qs_tile_margin_vertical))
         ) {
@@ -303,5 +309,28 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
         if (nTiles % columns != 0) {
             item(span = { GridItemSpan(maxCurrentLineSpan) }) { Spacer(Modifier) }
         }
+    }
+
+    private fun Modifier.dashedBorder(
+        color: Color,
+        shape: Shape,
+    ): Modifier {
+        return this.drawWithContent {
+            val outline = shape.createOutline(size, layoutDirection, this)
+            val path = Path()
+            path.addOutline(outline)
+            val stroke =
+                Stroke(
+                    width = 1.dp.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
+                )
+            this.drawContent()
+            drawPath(path = path, style = stroke, color = color)
+        }
+    }
+
+    private object Dimensions {
+        // Corner radius is half the height of a tile + padding
+        val ContainerShape = RoundedCornerShape(48.dp)
     }
 }

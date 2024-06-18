@@ -86,6 +86,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private final List<OnHeadsUpPhoneListenerChange> mHeadsUpPhoneListeners = new ArrayList<>();
     private final VisualStabilityProvider mVisualStabilityProvider;
 
+    private final AvalancheController mAvalancheController;
+
     // TODO(b/328393698) move the topHeadsUpRow logic to an interactor
     private final MutableStateFlow<HeadsUpRowRepository> mTopHeadsUpRow =
             StateFlowKt.MutableStateFlow(null);
@@ -155,6 +157,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         mBypassController = bypassController;
         mGroupMembershipManager = groupMembershipManager;
         mVisualStabilityProvider = visualStabilityProvider;
+        mAvalancheController = avalancheController;
 
         updateResources();
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
@@ -199,6 +202,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
      * Gets the touchable region needed for heads up notifications. Returns null if no touchable
      * region is required (ie: no heads up notification currently exists).
      */
+    // TODO(b/347007367): With scene container enabled this method may report outdated regions
     @Override
     public @Nullable Region getTouchableRegion() {
         NotificationEntry topEntry = getTopEntry();
@@ -653,9 +657,10 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             boolean wasKeyguard = mStatusBarState == StatusBarState.KEYGUARD;
             boolean isKeyguard = newState == StatusBarState.KEYGUARD;
             mStatusBarState = newState;
+
             if (wasKeyguard && !isKeyguard && mBypassController.getBypassEnabled()) {
                 ArrayList<String> keysToRemove = new ArrayList<>();
-                for (HeadsUpEntry entry : mHeadsUpEntryMap.values()) {
+                for (HeadsUpEntry entry : getHeadsUpEntryList()) {
                     if (entry.mEntry != null && entry.mEntry.isBubble() && !entry.isSticky()) {
                         keysToRemove.add(entry.mEntry.getKey());
                     }
@@ -671,7 +676,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             if (!isDozing) {
                 // Let's make sure all huns we got while dozing time out within the normal timeout
                 // duration. Otherwise they could get stuck for a very long time
-                for (HeadsUpEntry entry : mHeadsUpEntryMap.values()) {
+                for (HeadsUpEntry entry : getHeadsUpEntryList()) {
                     entry.updateEntry(true /* updatePostTime */, "onDozingChanged(false)");
                 }
             }

@@ -76,8 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"a envoyé une image"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Enregistrement de la capture d\'écran…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Enregistrement de capture d\'écran dans profil pro…"</string>
-    <!-- no translation found for screenshot_saving_private_profile (8934706048497093297) -->
-    <skip />
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"Enregistrement de la capture d\'écran dans le profil privé"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Capture d\'écran enregistrée"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Impossible d\'enregistrer la capture d\'écran"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"Écran externe"</string>
@@ -126,6 +125,32 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Appuyez pour afficher"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Erreur lors de l\'enregistrement de l\'écran"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Erreur lors du démarrage de l\'enregistrement de l\'écran"</string>
+    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
+    <skip />
+    <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
+    <skip />
+    <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
+    <skip />
+    <!-- no translation found for close_dialog_button (4749497706540104133) -->
+    <skip />
     <string name="issuerecord_title" msgid="286627115110121849">"Enregistreur de problèmes"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Enregistrement du problème"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Notification d\'activité en cours concernant la session d\'enregistrement d\'un problème"</string>
@@ -136,7 +161,8 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Erreur lors de l\'enregistrement du problème"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Erreur lors du démarrage de l\'enregistrement du problème"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Affichage en plein écran"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"Pour quitter, balayez l\'écran du haut vers le bas."</string>
+    <!-- no translation found for immersive_cling_description (2717426731830851921) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Retour"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Accueil"</string>
@@ -279,11 +305,14 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Enregistré"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"dissocier"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activer"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Réactiver automatiquement demain"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (3345758139235739006) -->
+    <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Certaines fonctionnalités, telles que Quick Share et Localiser mon appareil, utilisent le Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Le Bluetooth sera activé demain matin"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Partage audio"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Audio partagé"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de batterie"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Casque"</string>
@@ -362,19 +391,19 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Quel problème avez-vous rencontré avec votre appareil ?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Sélectionnez un type de problème"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Enregistrement de l\'écran"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"Performances"</item>
-    <item msgid="1627504621139124393">"Interface utilisateur"</item>
-    <item msgid="8309220355268900335">"Batterie"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"Performances"</string>
+    <string name="user_interface" msgid="3712869377953950887">"Interface utilisateur"</string>
+    <string name="thermal" msgid="6758074791325414831">"Thermique"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode une main"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Appareils auditifs"</string>
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Actifs"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Déconnectés"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Appareils auditifs"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Associer un nouvel appareil"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Cliquer pour associer un nouvel appareil"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Impossible de mettre à jour les préréglages"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Préréglage"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"Sous-titres instantanés"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Débloquer le micro de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Débloquer la caméra de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Débloquer l\'appareil photo et le micro de l\'appareil ?"</string>
@@ -728,11 +757,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Bouton <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Accueil"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Précédent"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Flèche vers le haut"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Flèche vers le bas"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Flèche vers la gauche"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Flèche vers la droite"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Centre"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Espace"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Entrée"</string>
@@ -1179,6 +1203,8 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Appuyer pour en savoir plus"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Pas d\'alarme définie"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"accéder au verrouillage de l\'écran"</string>
+    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
+    <skip />
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Lecteur d\'empreinte digitale"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"s\'authentifier"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"accéder à l\'appareil"</string>
@@ -1213,7 +1239,7 @@
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Applis actives"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ces applis sont actives et s\'exécutent même lorsque vous ne les utilisez pas. Cela améliore leur fonctionnement, mais peut également affecter l\'autonomie de la batterie."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Arrêter"</string>
-    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Arrêtée"</string>
+    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Arrêté"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"OK"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Copié"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"De <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
@@ -1276,7 +1302,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"plié"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"déplié"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> de batterie restante"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"Batterie du stylet à <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connectez votre stylet à un chargeur"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"La batterie du stylet est faible"</string>
     <string name="video_camera" msgid="7654002575156149298">"Caméra"</string>
@@ -1319,6 +1345,24 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Récemment utilisé par <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"En cours d\'utilisation par <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Récemment utilisé par <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"Système"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitâche"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Entrée"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Raccourcis d\'application"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibilité"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Raccourcis clavier"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Raccourcis de recherche"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icône Réduire"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icône Développer"</string>
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (2746834288077265946) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (7640544867625955304) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_action_key_button (3220074511852927267) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_done_button (176168488821755503) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Rétroéclairage du clavier"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d sur %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Contrôle de la maison"</string>

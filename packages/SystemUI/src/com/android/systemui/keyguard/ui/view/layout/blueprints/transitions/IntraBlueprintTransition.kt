@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.view.layout.blueprints.transitions
 
 import android.transition.TransitionSet
+import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.sections.transitions.ClockSizeTransition
 import com.android.systemui.keyguard.ui.view.layout.sections.transitions.DefaultClockSteppingTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
@@ -30,22 +31,23 @@ class IntraBlueprintTransition(
 
     enum class Type(
         val priority: Int,
+        val animateNotifChanges: Boolean,
     ) {
-        ClockSize(100),
-        ClockCenter(99),
-        DefaultClockStepping(98),
-        AodNotifIconsTransition(97),
-        SmartspaceVisibility(2),
-        DefaultTransition(1),
+        ClockSize(100, true),
+        ClockCenter(99, false),
+        DefaultClockStepping(98, false),
+        SmartspaceVisibility(2, true),
+        DefaultTransition(1, false),
         // When transition between blueprint, we don't need any duration or interpolator but we need
         // all elements go to correct state
-        NoTransition(0),
+        NoTransition(0, false),
     }
 
     data class Config(
         val type: Type,
         val checkPriority: Boolean = true,
         val terminatePrevious: Boolean = true,
+        val rebuildSections: List<KeyguardSection> = listOf(),
     ) {
         companion object {
             val DEFAULT = Config(Type.NoTransition)
@@ -60,7 +62,7 @@ class IntraBlueprintTransition(
                 addTransition(
                     clockViewModel.currentClock.value?.let { DefaultClockSteppingTransition(it) }
                 )
-            else -> addTransition(ClockSizeTransition(config, clockViewModel, smartspaceViewModel))
+            else -> addTransition(ClockSizeTransition(config, clockViewModel))
         }
     }
 }

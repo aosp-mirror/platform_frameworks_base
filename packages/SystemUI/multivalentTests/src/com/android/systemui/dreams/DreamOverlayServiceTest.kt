@@ -397,6 +397,9 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         verify(mStateController).setOverlayActive(false)
         verify(mStateController).setLowLightActive(false)
         verify(mStateController).setEntryAnimationsFinished(false)
+
+        // Verify touch monitor destroyed
+        verify(mTouchMonitor).destroy()
     }
 
     @Test
@@ -775,6 +778,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             DREAM_COMPONENT,
             false /*shouldShowComplication*/
         )
+        testScope.runCurrent()
         mMainExecutor.runAllReady()
         assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.STARTED)
     }

@@ -538,6 +538,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     // later to awaken.
                 }
                 mNotificationShadeWindowController.setNotificationShadeFocusable(false);
+                // Notify the interactor first, to prevent race conditions with the screen waking up
+                // that would show a flicker of the lockscreen on DOZING->GONE
+                mBiometricUnlockInteractor.setBiometricUnlockState(mode, biometricUnlockSource);
                 mKeyguardViewMediator.onWakeAndUnlocking(wakeInKeyguard);
                 Trace.endSection();
                 break;

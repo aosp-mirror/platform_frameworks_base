@@ -49,6 +49,8 @@ import static android.provider.Settings.Secure.RESOLUTION_MODE_FULL;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_HIGH;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_UNKNOWN;
 
+import static com.android.server.display.layout.Layout.Display.POSITION_REAR;
+
 import android.Manifest;
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -3404,6 +3406,31 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    boolean requestDisplayPower(int displayId, boolean on) {
+        synchronized (mSyncRoot) {
+            final var display = mLogicalDisplayMapper.getDisplayLocked(displayId);
+            if (display == null) {
+                Slog.w(TAG, "requestDisplayPower: Cannot find a display with displayId="
+                        + displayId);
+                return false;
+            }
+            final BrightnessPair brightnessPair = mDisplayBrightnesses.get(displayId);
+            var runnable = display.getPrimaryDisplayDeviceLocked().requestDisplayStateLocked(
+                    on ? Display.STATE_ON : Display.STATE_OFF,
+                    on ? brightnessPair.brightness : PowerManager.BRIGHTNESS_OFF_FLOAT,
+                    brightnessPair.sdrBrightness,
+                    display.getDisplayOffloadSessionLocked());
+            if (runnable == null) {
+                Slog.w(TAG, "requestDisplayPower: Cannot update the power state to ON=" + on
+                        + " for a display with displayId=" + displayId + ", runnable is null");
+                return false;
+            }
+            runnable.run();
+            Slog.i(TAG, "requestDisplayPower(displayId=" + displayId + ", on=" + on + ")");
+        }
+        return true;
+    }
+
     /**
      * This is the object that everything in the display manager locks on.
      * We make it an inner class within the {@link DisplayManagerService} to so that it is
@@ -4627,6 +4654,12 @@ public final class DisplayManagerService extends SystemService {
             DisplayManagerService.this.enableConnectedDisplay(displayId, false);
         }
 
+        @EnforcePermission(MANAGE_DISPLAYS)
+        public boolean requestDisplayPower(int displayId, boolean on) {
+            requestDisplayPower_enforcePermission();
+            return DisplayManagerService.this.requestDisplayPower(displayId, on);
+        }
+
         @EnforcePermission(RESTRICT_DISPLAY_MODES)
         @Override // Binder call
         public void requestDisplayModes(IBinder token, int displayId, @Nullable int[] modeIds) {
@@ -4972,8 +5005,9 @@ public final class DisplayManagerService extends SystemService {
                 }
 
                 final DisplayDevice displayDevice = display.getPrimaryDisplayDeviceLocked();
-                final boolean ownContent = (displayDevice.getDisplayDeviceInfoLocked().flags
-                        & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0;
+                final boolean isRearDisplay = display.getDevicePositionLocked() == POSITION_REAR;
+                final boolean ownContent = ((displayDevice.getDisplayDeviceInfoLocked().flags
+                        & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0) || isRearDisplay;
                 // If the display has enabled mirroring, but specified that it will be managed by
                 // WindowManager, return an invalid display id. This is to ensure we don't
                 // accidentally select the display id to mirror based on DM logic and instead allow

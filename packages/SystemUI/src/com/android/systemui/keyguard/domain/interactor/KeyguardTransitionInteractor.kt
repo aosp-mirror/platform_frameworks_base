@@ -223,6 +223,17 @@ constructor(
         }
     }
 
+    fun transitionValue(
+        scene: SceneKey,
+        stateWithoutSceneContainer: KeyguardState,
+    ): Flow<Float> {
+        return if (SceneContainerFlag.isEnabled) {
+            sceneInteractor.get().transitionProgress(scene)
+        } else {
+            transitionValue(stateWithoutSceneContainer)
+        }
+    }
+
     /**
      * The amount of transition into or out of the given [KeyguardState].
      *
@@ -232,25 +243,12 @@ constructor(
     fun transitionValue(
         state: KeyguardState,
     ): Flow<Float> {
+        if (SceneContainerFlag.isEnabled && state != state.mapToSceneContainerState()) {
+            Log.e(TAG, "SceneContainer is enabled but a deprecated state $state is used.")
+            return transitionValue(state.mapToSceneContainerScene()!!, state)
+        }
         return getTransitionValueFlow(state)
     }
-
-    /**
-     * AOD<->* transition information, mapped to dozeAmount range of AOD (1f) <->
-     * * (0f).
-     */
-    @SuppressLint("SharedFlowCreation")
-    val dozeAmountTransition: Flow<TransitionStep> =
-        repository.transitions
-            .filter { step -> step.from == AOD || step.to == AOD }
-            .map { step ->
-                if (step.from == AOD) {
-                    step.copy(value = 1 - step.value)
-                } else {
-                    step
-                }
-            }
-            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     /** The last [TransitionStep] with a [TransitionState] of STARTED */
     val startedKeyguardTransitionStep: Flow<TransitionStep> =
@@ -266,8 +264,6 @@ constructor(
         startedKeyguardTransitionStep
             .map { step -> step.to }
             .shareIn(scope, SharingStarted.Eagerly, replay = 1)
-
-    val currentTransitionInfo: StateFlow<TransitionInfo> = repository.currentTransitionInfoInternal
 
     /** The from state of the last [TransitionState.STARTED] transition. */
     // TODO: is it performant to have several SharedFlows side by side instead of one?
@@ -415,14 +411,6 @@ constructor(
     /** Whether we've currently STARTED a transition and haven't yet FINISHED it. */
     val isInTransitionToAnyState = isInTransitionWhere({ true }, { true })
 
-    fun transitionStepsFromState(fromState: KeyguardState): Flow<TransitionStep> {
-        return transition(Edge.create(from = fromState, to = null))
-    }
-
-    fun transitionStepsToState(toState: KeyguardState): Flow<TransitionStep> {
-        return transition(Edge.create(from = null, to = toState))
-    }
-
     /**
      * Called to start a transition that will ultimately dismiss the keyguard from the current
      * state.
@@ -556,10 +544,6 @@ constructor(
 
     fun getCurrentState(): KeyguardState {
         return currentKeyguardState.replayCache.last()
-    }
-
-    fun getStartedState(): KeyguardState {
-        return startedKeyguardState.replayCache.last()
     }
 
     fun getStartedFromState(): KeyguardState {

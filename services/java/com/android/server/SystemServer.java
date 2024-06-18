@@ -761,9 +761,6 @@ public final class SystemServer implements Dumpable {
         }
     }
 
-    private static final long BINDER_CALLBACK_THROTTLE_MS = 10_100L;
-    private long mBinderCallbackLast = -1;
-
     private void run() {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         try {
@@ -968,14 +965,6 @@ public final class SystemServer implements Dumpable {
         Binder.setTransactionCallback(new IBinderCallback() {
             @Override
             public void onTransactionError(int pid, int code, int flags, int err) {
-
-                final long now = SystemClock.uptimeMillis();
-                if (now < mBinderCallbackLast + BINDER_CALLBACK_THROTTLE_MS) {
-                    Slog.d(TAG, "Too many transaction errors, throttling freezer binder callback.");
-                    return;
-                }
-                mBinderCallbackLast = now;
-                Slog.wtfStack(TAG, "Binder Transaction Error");
                 mActivityManagerService.frozenBinderTransactionDetected(pid, code, flags, err);
             }
         });
@@ -1207,11 +1196,12 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(RecoverySystemService.Lifecycle.class);
         t.traceEnd();
 
+        // Initialize RescueParty.
+        RescueParty.registerHealthObserver(mSystemContext);
         if (!Flags.recoverabilityDetection()) {
             // Now that we have the bare essentials of the OS up and running, take
             // note that we just booted, which might send out a rescue party if
             // we're stuck in a runtime restart loop.
-            RescueParty.registerHealthObserver(mSystemContext);
             PackageWatchdog.getInstance(mSystemContext).noteBoot();
         }
 
@@ -1934,7 +1924,11 @@ public final class SystemServer implements Dumpable {
             startRotationResolverService(context, t);
             startSystemCaptionsManagerService(context, t);
             startTextToSpeechManagerService(context, t);
-            startWearableSensingService(t);
+            if (!isWatch || !android.server.Flags.removeWearableSensingServiceFromWear()) {
+                startWearableSensingService(t);
+            } else {
+                Slog.d(TAG, "Not starting WearableSensingService");
+            }
             startOnDeviceIntelligenceService(t);
 
             if (deviceHasConfigString(
@@ -2928,10 +2922,10 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         if (Flags.recoverabilityDetection()) {
-            // Now that we have the essential services needed for rescue party, initialize
-            // RescuParty. note that we just booted, which might send out a rescue party if
-            // we're stuck in a runtime restart loop.
-            RescueParty.registerHealthObserver(mSystemContext);
+            // Now that we have the essential services needed for mitigations, register the boot
+            // with package watchdog.
+            // Note that we just booted, which might send out a rescue party if we're stuck in a
+            // runtime restart loop.
             PackageWatchdog.getInstance(mSystemContext).noteBoot();
         }
 

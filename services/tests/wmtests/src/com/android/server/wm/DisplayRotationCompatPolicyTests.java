@@ -142,6 +142,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
         doNothing().when(mDisplayRotationCompatPolicy).showToast(anyInt());
         doNothing().when(mDisplayRotationCompatPolicy).showToast(anyInt(), anyString());
 
+        mDisplayRotationCompatPolicy.start();
         cameraStateMonitor.startListeningToCameraState();
     }
 

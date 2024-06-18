@@ -7188,9 +7188,10 @@ public abstract class Context {
      * as the package remains in the foreground, or has any active manifest components (e.g. when
      * another app is accessing a content provider in the package).
      * <p>
-     * If you want to revoke the permissions right away, you could call {@code System.exit()}, but
-     * this could affect other apps that are accessing your app at the moment. For example, apps
-     * accessing a content provider in your app will all crash.
+     * If you want to revoke the permissions right away, you could call {@code System.exit()} in
+     * {@code Handler.postDelayed} with a delay to allow completion of async IPC, But
+     * {@code System.exit()} could affect other apps that are accessing your app at the moment.
+     * For example, apps accessing a content provider in your app will all crash.
      * <p>
      * Note that the settings UI shows a permission group as granted as long as at least one
      * permission in the group is granted. If you want the user to observe the revocation in the

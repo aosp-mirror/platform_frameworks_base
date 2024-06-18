@@ -29,10 +29,11 @@
         android:layout_gravity="center_vertical"
         android:layout_marginStart="24dp"
         android:layout_marginBottom="8dp"
-        android:ellipsize="end"
-        android:maxLines="2"
         android:visibility="invisible"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/button_center_guideline"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Cancel Button, replaces negative button when biometric is accepted -->
@@ -46,7 +47,10 @@
         android:layout_marginBottom="8dp"
         android:text="@string/cancel"
         android:visibility="invisible"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/button_center_guideline"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
     <!-- "Use Credential" Button, replaces if device credential is allowed -->
@@ -59,7 +63,10 @@
         android:layout_marginStart="24dp"
         android:layout_marginBottom="8dp"
         android:visibility="invisible"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/button_center_guideline"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Positive Button -->
@@ -71,12 +78,13 @@
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="8dp"
-        android:ellipsize="end"
-        android:maxLines="2"
         android:text="@string/biometric_dialog_confirm"
         android:visibility="invisible"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@id/button_center_guideline" />
 
     <!-- Try Again Button -->
     <Button
@@ -87,11 +95,19 @@
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="8dp"
-        android:ellipsize="end"
-        android:maxLines="2"
         android:text="@string/biometric_dialog_try_again"
         android:visibility="invisible"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@id/button_center_guideline" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/button_center_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

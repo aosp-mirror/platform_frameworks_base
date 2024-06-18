@@ -46,18 +46,39 @@ flag {
 }
 
 flag {
-  name: "visit_risky_uris"
+  name: "visit_person_uri"
   namespace: "systemui"
-  description: "Guards the security fix that ensures all URIs in intents and Person.java are valid"
+  description: "Guards the security fix that ensures all URIs Person.java are valid"
   bug: "281044385"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
+
+# vvv Prototypes for using app icons in notifications vvv
 
 flag {
   name: "notifications_use_app_icon"
   namespace: "systemui"
-  description: "Experiment to replace the small icon in a notification with the app icon."
+  description: "Experiment to replace the small icon in a notification with the app icon. This includes the status bar, AOD, shelf and notification row itself."
   bug: "335211019"
 }
+
+flag {
+  name: "notifications_use_app_icon_in_row"
+  namespace: "systemui"
+  description: "Experiment to replace the small icon in a notification row with the app icon."
+  bug: "335211019"
+}
+
+flag {
+  name: "notifications_use_monochrome_app_icon"
+  namespace: "systemui"
+  description: "Experiment to replace the notification icon in the status bar and shelf with the monochrome app icon, if available."
+  bug: "335211019"
+}
+
+# ^^^ Prototypes for using app icons in notifications ^^^
 
 flag {
   name: "notification_expansion_optional"
@@ -173,4 +194,19 @@ flag {
   namespace: "systemui"
   description: "Removes all custom views"
   bug: "342602960"
+}
+
+flag {
+  name: "redact_sensitive_content_notifications_on_lockscreen"
+  namespace: "systemui"
+  description: "redacts notifications on the lockscreen if they have the 'sensitiveContent' flag"
+  bug: "343631648"
+}
+
+flag {
+  name: "api_rich_ongoing"
+  is_exported: true
+  namespace: "systemui"
+  description: "Guards new android.app.richongoingnotification api"
+  bug: "337261753"
 }

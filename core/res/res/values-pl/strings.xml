@@ -203,10 +203,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Twój profil służbowy nie jest już dostępny na tym urządzeniu"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Zbyt wiele prób podania hasła"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator odstąpił urządzenie do użytku osobistego"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Przestrzeń prywatna została usunięta"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Twoja organizacja nie zezwala na przestrzenie prywatne na tym urządzeniu zarządzanym."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Urządzenie jest zarządzane"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Twoja organizacja zarządza tym urządzeniem i może monitorować ruch w sieci. Kliknij, by dowiedzieć się więcej."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikacje mogą mieć dostęp do Twojej lokalizacji"</string>
@@ -1887,7 +1885,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN jest za krótki. Musi mieć co najmniej 4 cyfry."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Spróbuj ponownie później"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Włączony pełny ekran"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Aby wyjść, przesuń palcem z góry na dół."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Obróć, aby lepiej widzieć"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otwórz aplikację <xliff:g id="NAME">%s</xliff:g> na pełnym ekranie, aby lepiej widzieć"</string>
@@ -2200,7 +2199,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad – w lewo"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad – w prawo"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad – środek"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Pasek napisów w aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Umieszczono pakiet <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> w zasobniku danych RESTRICTED"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"wysłano obraz"</string>
@@ -2412,6 +2410,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Przestrzeń prywatna"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Wspólny"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Przestrzeń prywatna"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Treść poufnego powiadomienia została ukryta"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Ze względów bezpieczeństwa zawartość aplikacji jest niewidoczna podczas udostępniania ekranu"</string>

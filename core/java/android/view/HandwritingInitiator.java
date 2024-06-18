@@ -227,7 +227,10 @@ public class HandwritingInitiator {
                             mState.mStylusDownY, /* isHover */ false);
                     if (candidateView != null && candidateView.isEnabled()) {
                         boolean candidateHasFocus = candidateView.hasFocus();
-                        if (shouldShowHandwritingUnavailableMessageForView(candidateView)) {
+                        if (!candidateView.isStylusHandwritingAvailable()) {
+                            mState.mShouldInitHandwriting = false;
+                            return false;
+                        } else if (shouldShowHandwritingUnavailableMessageForView(candidateView)) {
                             int messagesResId = (candidateView instanceof TextView tv
                                     && tv.isAnyPasswordInputType())
                                     ? R.string.error_handwriting_unsupported_password
@@ -493,9 +496,10 @@ public class HandwritingInitiator {
         if (delegatorPackageName == null) {
             delegatorPackageName = view.getContext().getOpPackageName();
         }
+        WeakReference<View> viewRef = new WeakReference<>(view);
         Consumer<Boolean> consumer = delegationAccepted -> {
             if (delegationAccepted) {
-                onDelegationAccepted(view);
+                onDelegationAccepted(viewRef.get());
             }
         };
         mImm.acceptStylusHandwritingDelegation(view, delegatorPackageName, view::post, consumer);
@@ -505,6 +509,10 @@ public class HandwritingInitiator {
         if (mState != null) {
             mState.mHandled = true;
             mState.mShouldInitHandwriting = false;
+        }
+        if (view == null) {
+            // can be null if view was detached and was GCed.
+            return;
         }
         if (view instanceof TextView) {
             ((TextView) view).hideHint();

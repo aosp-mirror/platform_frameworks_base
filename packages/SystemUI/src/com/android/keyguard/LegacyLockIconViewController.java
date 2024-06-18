@@ -70,7 +70,7 @@ import com.android.systemui.keyguard.KeyguardBottomAreaRefactor;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
@@ -167,9 +167,9 @@ public class LegacyLockIconViewController implements Dumpable, LockIconViewContr
     private LockIconView mView;
 
     @VisibleForTesting
-    final Consumer<TransitionStep> mDozeTransitionCallback = (TransitionStep step) -> {
-        mInterpolatedDarkAmount = step.getValue();
-        mView.setDozeAmount(step.getValue());
+    final Consumer<Float> mDozeTransitionCallback = (Float value) -> {
+        mInterpolatedDarkAmount = value;
+        mView.setDozeAmount(value);
         updateBurnInOffsets();
     };
 
@@ -265,7 +265,7 @@ public class LegacyLockIconViewController implements Dumpable, LockIconViewContr
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
 
         if (mFeatureFlags.isEnabled(DOZING_MIGRATION_1)) {
-            collectFlow(mView, mTransitionInteractor.getDozeAmountTransition(),
+            collectFlow(mView, mTransitionInteractor.transitionValue(KeyguardState.AOD),
                     mDozeTransitionCallback);
             collectFlow(mView, mKeyguardInteractor.isDozing(), mIsDozingCallback);
         }

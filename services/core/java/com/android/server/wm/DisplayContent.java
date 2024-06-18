@@ -263,6 +263,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.RegionUtils;
 import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -477,6 +478,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Nullable
     final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     @Nullable
+    final CameraCompatFreeformPolicy mCameraCompatFreeformPolicy;
+    @Nullable
     final CameraStateMonitor mCameraStateMonitor;
     @Nullable
     final ActivityRefresher mActivityRefresher;
@@ -682,7 +685,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * the case of the IME moving to a SurfaceControlViewHost backed EmbeddedWindow
      */
     private InputTarget mLastImeInputTarget;
-
 
     /**
      * Tracks the windowToken of the input method input target and the corresponding
@@ -1233,11 +1235,26 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // without the need to restart the device.
         final boolean shouldCreateDisplayRotationCompatPolicy =
                 mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
-        if (shouldCreateDisplayRotationCompatPolicy) {
+        final boolean shouldCreateCameraCompatFreeformPolicy = Flags.cameraCompatForFreeform()
+                && DesktopModeLaunchParamsModifier.canEnterDesktopMode(mWmService.mContext);
+        if (shouldCreateDisplayRotationCompatPolicy || shouldCreateCameraCompatFreeformPolicy) {
             mCameraStateMonitor = new CameraStateMonitor(this, mWmService.mH);
             mActivityRefresher = new ActivityRefresher(mWmService, mWmService.mH);
-            mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(
-                    this, mCameraStateMonitor, mActivityRefresher);
+            if (shouldCreateDisplayRotationCompatPolicy) {
+                mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(this,
+                        mCameraStateMonitor, mActivityRefresher);
+                mDisplayRotationCompatPolicy.start();
+            } else {
+                mDisplayRotationCompatPolicy = null;
+            }
+
+            if (shouldCreateCameraCompatFreeformPolicy) {
+                mCameraCompatFreeformPolicy = new CameraCompatFreeformPolicy(this,
+                        mCameraStateMonitor, mActivityRefresher);
+                mCameraCompatFreeformPolicy.start();
+            } else {
+                mCameraCompatFreeformPolicy = null;
+            }
 
             mCameraStateMonitor.startListeningToCameraState();
         } else {
@@ -1245,8 +1262,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mCameraStateMonitor = null;
             mActivityRefresher = null;
             mDisplayRotationCompatPolicy = null;
+            mCameraCompatFreeformPolicy = null;
         }
-
 
         mRotationReversionController = new DisplayRotationReversionController(this);
 
@@ -3350,6 +3367,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mDisplayRotationCompatPolicy != null) {
             mDisplayRotationCompatPolicy.dispose();
         }
+
+        if (mCameraCompatFreeformPolicy != null) {
+            mCameraCompatFreeformPolicy.dispose();
+        }
+
         if (mCameraStateMonitor != null) {
             mCameraStateMonitor.dispose();
         }
@@ -4160,6 +4182,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mImeLayeringTarget != null
                 && mImeLayeringTarget.mActivityRecord != null
                 && mImeLayeringTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && mImeLayeringTarget.getBounds().equals(mImeWindowsContainer.getBounds())
                 // IME is attached to app windows that fill display area. This excludes
                 // letterboxed windows.
                 && mImeLayeringTarget.matchesDisplayAreaBounds();
@@ -4191,7 +4214,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && target.getDisplayContent().getImePolicy() == DISPLAY_IME_POLICY_LOCAL) {
             return target;
         }
-        return getImeFallback();
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            final DisplayContent defaultDc = mWmService.getDefaultDisplayContentLocked();
+            return defaultDc.mRemoteInsetsControlTarget;
+        } else {
+            return getImeFallback();
+        }
     }
 
     InsetsControlTarget getImeFallback() {
@@ -4624,6 +4652,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     && !mInputMethodSurfaceParent.isSameSurface(
                             mImeWindowsContainer.getParent().mSurfaceControl));
             updateImeControlTarget(forceUpdateImeParent);
+
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                mInsetsStateController.getImeSourceProvider().onInputTargetChanged(target);
+            }
         }
     }
 
@@ -4727,6 +4759,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // in case seeing unexpected IME surface visibility change when delivering the IME leash
             // to the remote insets target during the IME restarting, but the focus window is not in
             // multi-windowing mode, return null target until the next input target updated.
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                // The control target could be the RemoteInsetsControlTarget (if the focussed
+                // view is on a virtual display that can not show the IME (and therefore it will
+                // be shown on the default display)
+                if (isDefaultDisplay && mRemoteInsetsControlTarget != null) {
+                    return mRemoteInsetsControlTarget;
+                }
+            }
             return null;
         }
 
@@ -5701,15 +5741,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
     boolean supportsSystemDecorations() {
+        boolean forceDesktopModeOnDisplay = forceDesktopMode();
+
+        if (com.android.window.flags.Flags.rearDisplayDisableForceDesktopSystemDecorations()) {
+            // System decorations should not be forced on a rear display due to security policies.
+            forceDesktopModeOnDisplay =
+                    forceDesktopModeOnDisplay && ((mDisplay.getFlags() & Display.FLAG_REAR) == 0);
+        }
+
         return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
                 || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                || forceDesktopMode())
+                || forceDesktopModeOnDisplay)
                 // VR virtual display will be used to run and render 2D app within a VR experience.
                 && mDisplayId != mWmService.mVr2dDisplayId
                 // Do not show system decorations on untrusted virtual display.
-                && isTrusted()
-                // No system decoration on rear display.
-                && (mDisplay.getFlags() & Display.FLAG_REAR) == 0;
+                && isTrusted();
     }
 
     /**
@@ -7062,14 +7108,30 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         @Override
         public boolean isRequestedVisible(@InsetsType int types) {
-            return ((types & ime()) != 0
-                            && getInsetsStateController().getImeSourceProvider().isImeShowing())
-                    || (mRequestedVisibleTypes & types) != 0;
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                return (mRequestedVisibleTypes & types) != 0;
+            } else {
+                return ((types & ime()) != 0
+                        && getInsetsStateController().getImeSourceProvider().isImeShowing())
+                        || (mRequestedVisibleTypes & types) != 0;
+            }
         }
 
         @Override
         public @InsetsType int getRequestedVisibleTypes() {
             return mRequestedVisibleTypes;
+        }
+
+        @Override
+        public void setImeInputTargetRequestedVisibility(boolean visible) {
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                try {
+                    // TODO stats token
+                    mRemoteInsetsController.setImeInputTargetRequestedVisibility(visible);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to deliver setImeInputTargetRequestedVisibility", e);
+                }
+            }
         }
 
         /**

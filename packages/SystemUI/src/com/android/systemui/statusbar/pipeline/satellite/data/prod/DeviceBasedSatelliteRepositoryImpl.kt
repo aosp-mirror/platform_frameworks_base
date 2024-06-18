@@ -23,6 +23,7 @@ import android.telephony.satellite.NtnSignalStrengthCallback
 import android.telephony.satellite.SatelliteManager
 import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS
 import android.telephony.satellite.SatelliteModemStateCallback
+import android.telephony.satellite.SatelliteProvisionStateCallback
 import android.telephony.satellite.SatelliteSupportedStateCallback
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -317,11 +318,60 @@ constructor(
                     }
                     trySend(supported)
                 }
-                satelliteManager.registerForSupportedStateChanged(
+
+                var registered = false
+                try {
+                    satelliteManager.registerForSupportedStateChanged(
+                        bgDispatcher.asExecutor(),
+                        callback
+                    )
+                    registered = true
+                } catch (e: Exception) {
+                    logBuffer.e("error registering for supported state change", e)
+                }
+
+                awaitClose {
+                    if (registered) {
+                        satelliteManager.unregisterForSupportedStateChanged(callback)
+                    }
+                }
+            }
+        }
+
+    override val isSatelliteProvisioned: StateFlow<Boolean> =
+        satelliteSupport
+            .whenSupported(
+                supported = ::satelliteProvisioned,
+                orElse = flowOf(false),
+                retrySignal = telephonyProcessCrashedEvent,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    private fun satelliteProvisioned(sm: SupportedSatelliteManager): Flow<Boolean> =
+        conflatedCallbackFlow {
+            val callback = SatelliteProvisionStateCallback { provisioned ->
+                logBuffer.i {
+                    "onSatelliteProvisionStateChanged: " +
+                        if (provisioned) "provisioned" else "not provisioned"
+                }
+                trySend(provisioned)
+            }
+
+            var registered = false
+            try {
+                sm.registerForProvisionStateChanged(
                     bgDispatcher.asExecutor(),
-                    callback
+                    callback,
                 )
-                awaitClose { satelliteManager.unregisterForSupportedStateChanged(callback) }
+                registered = true
+            } catch (e: Exception) {
+                logBuffer.e("error registering for provisioning state callback", e)
+            }
+
+            awaitClose {
+                if (registered) {
+                    sm.unregisterForProvisionStateChanged(callback)
+                }
             }
         }
 

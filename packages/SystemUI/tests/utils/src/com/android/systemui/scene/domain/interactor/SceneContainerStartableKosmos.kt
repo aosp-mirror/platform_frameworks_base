@@ -26,6 +26,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInt
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.windowManagerLockscreenVisibilityInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
@@ -67,5 +68,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         uiEventLogger = uiEventLogger,
         sceneBackInteractor = sceneBackInteractor,
         shadeSessionStorage = shadeSessionStorage,
+        windowMgrLockscreenVisInteractor = windowManagerLockscreenVisibilityInteractor,
     )
 }

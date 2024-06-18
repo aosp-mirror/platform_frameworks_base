@@ -41,10 +41,8 @@ import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrUse
  * instances, unifying setting related actions in one place.
  */
 interface UserSettingsProxy : SettingsProxy {
-
     /** Returns that [UserTracker] this instance was constructed with. */
     val userTracker: UserTracker
-
     /** Returns the user id for the associated [ContentResolver]. */
     var userId: Int
         get() = getContentResolver().userId
@@ -64,17 +62,17 @@ interface UserSettingsProxy : SettingsProxy {
         } else userTracker.userId
     }
 
-    override fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) {
-        registerContentObserverForUser(uri, settingsObserver, userId)
+    override fun registerContentObserverSync(uri: Uri, settingsObserver: ContentObserver) {
+        registerContentObserverForUserSync(uri, settingsObserver, userId)
     }
 
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
-    override fun registerContentObserver(
+    override fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver
     ) {
-        registerContentObserverForUser(uri, notifyForDescendants, settingsObserver, userId)
+        registerContentObserverForUserSync(uri, notifyForDescendants, settingsObserver, userId)
     }
 
     /**
@@ -82,21 +80,21 @@ interface UserSettingsProxy : SettingsProxy {
      *
      * Implicitly calls [getUriFor] on the passed in name.
      */
-    fun registerContentObserverForUser(
+    fun registerContentObserverForUserSync(
         name: String,
         settingsObserver: ContentObserver,
         userHandle: Int
     ) {
-        registerContentObserverForUser(getUriFor(name), settingsObserver, userHandle)
+        registerContentObserverForUserSync(getUriFor(name), settingsObserver, userHandle)
     }
 
     /** Convenience wrapper around [ContentResolver.registerContentObserver] */
-    fun registerContentObserverForUser(
+    fun registerContentObserverForUserSync(
         uri: Uri,
         settingsObserver: ContentObserver,
         userHandle: Int
     ) {
-        registerContentObserverForUser(uri, false, settingsObserver, userHandle)
+        registerContentObserverForUserSync(uri, false, settingsObserver, userHandle)
     }
 
     /**
@@ -104,13 +102,13 @@ interface UserSettingsProxy : SettingsProxy {
      *
      * Implicitly calls [getUriFor] on the passed in name.
      */
-    fun registerContentObserverForUser(
+    fun registerContentObserverForUserSync(
         name: String,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
         userHandle: Int
     ) {
-        registerContentObserverForUser(
+        registerContentObserverForUserSync(
             getUriFor(name),
             notifyForDescendants,
             settingsObserver,
@@ -119,7 +117,7 @@ interface UserSettingsProxy : SettingsProxy {
     }
 
     /** Convenience wrapper around [ContentResolver.registerContentObserver] */
-    fun registerContentObserverForUser(
+    fun registerContentObserverForUserSync(
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
@@ -159,6 +157,7 @@ interface UserSettingsProxy : SettingsProxy {
      * @return true if the value was set, false on database errors
      */
     fun putString(name: String, value: String, overrideableByRestore: Boolean): Boolean
+
     override fun putString(name: String, value: String): Boolean {
         return putStringForUser(name, value, userId)
     }

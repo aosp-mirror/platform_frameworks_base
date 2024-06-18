@@ -35,13 +35,13 @@ import static org.mockito.Mockito.when;
 import android.app.WallpaperColors;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
 import androidx.core.graphics.drawable.IconCompat;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.media.LocalMediaManager;
@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MediaOutputAdapterTest extends SysuiTestCase {
 
@@ -113,8 +113,8 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
                 LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
         mMediaDevices.add(mMediaDevice1);
         mMediaDevices.add(mMediaDevice2);
-        mMediaItems.add(new MediaItem(mMediaDevice1));
-        mMediaItems.add(new MediaItem(mMediaDevice2));
+        mMediaItems.add(MediaItem.createDeviceMediaItem(mMediaDevice1));
+        mMediaItems.add(MediaItem.createDeviceMediaItem(mMediaDevice2));
 
         mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
         mMediaOutputAdapter.updateItems();
@@ -146,7 +146,8 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.updateItems();
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
-        mMediaItems.add(new MediaItem());
+        mMediaItems.add(MediaItem.createPairNewDeviceMediaItem());
+        mMediaItems.add(MediaItem.createPairNewDeviceMediaItem());
         mMediaOutputAdapter.updateItems();
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
 
@@ -589,7 +590,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.updateItems();
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
-        mMediaItems.add(new MediaItem());
+        mMediaItems.add(MediaItem.createPairNewDeviceMediaItem());
         mMediaOutputAdapter.updateItems();
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
         mViewHolder.mContainerLayout.performClick();
@@ -725,7 +726,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     public void updateItems_controllerItemsUpdated_notUpdatesInAdapterUntilUpdateItems() {
         mMediaOutputAdapter.updateItems();
         List<MediaItem> updatedList = new ArrayList<>();
-        updatedList.add(new MediaItem());
+        updatedList.add(MediaItem.createPairNewDeviceMediaItem());
         when(mMediaOutputController.getMediaItemList()).thenReturn(updatedList);
         assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaItems.size());
 

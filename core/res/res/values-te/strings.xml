@@ -201,10 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ఈ పరికరంలో మీ కార్యాలయ ప్రొఫైల్ ఇప్పుడు అందుబాటులో లేదు"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"చాలా ఎక్కువ పాస్‌వర్డ్ ప్రయత్నాలు చేశారు"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"వ్యక్తిగత వినియోగం కోసం నిర్వాహకులు పరికరాన్ని తీసి వేశారు"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ప్రైవేట్ స్పేస్ తీసివేయబడింది"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"మీ సంస్థ ఈ మేనేజ్ చేసే పరికరంలో ప్రైవేట్ స్పేస్‌లను అనుమతించదు."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"పరికరం నిర్వహించబడింది"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"మీ సంస్థ ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు. వివరాల కోసం నొక్కండి."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"యాప్‌లు మీ లొకేషన్‌ను యాక్సెస్ చేయగలవు"</string>
@@ -1303,7 +1301,7 @@
     <string name="heavy_weight_switcher_title" msgid="3861984210040100886">"గేమ్‌ను ఎంచుకోండి"</string>
     <string name="heavy_weight_switcher_text" msgid="6814316627367160126">"మెరుగైన పనితీరు పొందడానికి, ఈ గేమ్‌లలో ఒకసారికి ఒక్కటి మాత్రమే తెరవగలరు."</string>
     <string name="old_app_action" msgid="725331621042848590">"<xliff:g id="OLD_APP">%1$s</xliff:g>కి తిరిగి వెళ్లు"</string>
-    <string name="new_app_action" msgid="547772182913269801">"<xliff:g id="NEW_APP">%1$s</xliff:g>ని తెరువు"</string>
+    <string name="new_app_action" msgid="547772182913269801">"<xliff:g id="NEW_APP">%1$s</xliff:g>‌ను తెరవండి"</string>
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> సేవ్ చేయకుండానే మూసివేయబడుతుంది"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> మెమరీ పరిమితిని మించిపోయింది"</string>
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> హీప్ డంప్ సిద్ధంగా ఉంది"</string>
@@ -1885,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"పిన్‌ చాలా చిన్నదిగా ఉంది. తప్పనిసరిగా కనీసం 4 అంకెలు ఉండాలి."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"తర్వాత మళ్లీ ట్రై చేయండి"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ఫుల్-స్క్రీన్‌లో వీక్షిస్తున్నారు"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"నిష్క్రమించడానికి, పై నుండి క్రిందికి స్వైప్ చేయండి."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"అర్థమైంది"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"మెరుగైన వీక్షణ కోసం తిప్పండి"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"మెరుగైన వీక్షణ కోసం <xliff:g id="NAME">%s</xliff:g>‌ను ఫుల్ స్క్రీన్‌లో తెరవండి"</string>
@@ -1911,7 +1910,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"సరే"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేసి, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లు, నిర్దిష్ట ఫీచర్‌లు, ఇంకా కొన్ని నెట్‌వర్క్ కనెక్షన్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేసి, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లు, నిర్దిష్ట ఫీచర్‌లు, ఇంకా కొన్ని నెట్‌వర్క్ కనెక్షన్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు నొక్కే వరకు ఇమేజ్‌లు ప్రదర్శించబడవు."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు ఇమేజ్‌ల‌పై ట్యాప్ చేసే వరకు అవి క‌నిపించ‌వు."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ఆన్ చేయి"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{ఒక నిమిషానికి ({formattedTime} వరకు)}other{# నిమిషాలకు ({formattedTime} వరకు)}}"</string>
@@ -2198,7 +2197,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ఎడమవైపున"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad కుడివైపున"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"DPad మధ్యన"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> క్యాప్షన్ బార్."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> పరిమితం చేయబడిన బకెట్‌లో ఉంచబడింది"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ఇమేజ్‌ను పంపారు"</string>
@@ -2410,6 +2408,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ప్రైవేట్ స్పేస్"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"క్లోన్"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"కమ్యూనల్"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"ప్రైవేట్ స్పేస్"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"గోప్యమైన నోటిఫికేషన్ కంటెంట్ దాచబడింది"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"సెక్యూరిటీ కోసం స్క్రీన్ షేర్ నుండి యాప్ కంటెంట్ దాచబడింది"</string>

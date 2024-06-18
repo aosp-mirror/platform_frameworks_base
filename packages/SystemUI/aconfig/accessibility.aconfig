@@ -81,3 +81,13 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "hearing_devices_dialog_related_tools"
+    namespace: "accessibility"
+    description: "Shows the related tools for hearing devices dialog."
+    bug: "341648471"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

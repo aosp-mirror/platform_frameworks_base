@@ -20,12 +20,9 @@ package com.android.systemui.shade
 
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.concurrency.fakeExecutor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -52,15 +49,13 @@ val Kosmos.shadeControllerSceneImpl by
             shadeInteractor = shadeInteractor,
             sceneInteractor = sceneInteractor,
             notificationStackScrollLayout = mock<NotificationStackScrollLayout>(),
-            deviceEntryInteractor = deviceEntryInteractor,
-            touchLog = mock<LogBuffer>(),
             vibratorHelper = mock<VibratorHelper>(),
             commandQueue = mock<CommandQueue>(),
             statusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>(),
             notificationShadeWindowController = mock<NotificationShadeWindowController>(),
-            assistManagerLazy = { mock<AssistManager>() },
-            deviceUnlockedInteractor = deviceUnlockedInteractor,
-        )
+        ) {
+            mock<AssistManager>()
+        }
     }
 
 val Kosmos.shadeControllerImpl by

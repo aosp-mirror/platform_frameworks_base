@@ -8,3 +8,12 @@ flag {
      description: "Feature flag for the ANR timer service"
      bug: "282428924"
 }
+
+flag {
+     name: "anr_timer_freezer"
+     namespace: "system_performance"
+     is_fixed_read_only: true
+     description: "Enable freezing of a process when an ANR is triggered"
+     bug: "325594551"
+}
+

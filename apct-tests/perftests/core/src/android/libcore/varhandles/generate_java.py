@@ -21,7 +21,7 @@ Adapted to use CrystalBall from art/test/2239-varhandle-perf/util-src/generate_j
 To run use: python generate_java.py <destination_directory>
 
 And then to correct lint errors (from frameworks/base):
-../../tools/repohooks/tools/google-java-format.py --fix --sort-imports  --google-java-format-diff ../../external/google-java-format/scripts/google-java-format-diff.py
+../../tools/repohooks/tools/google-java-format.py --fix --google-java-format-diff ../../external/google-java-format/scripts/google-java-format-diff.py
 """
 
 

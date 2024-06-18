@@ -709,4 +709,18 @@ public class HdmiUtilsTest {
         assertThat(HdmiUtils.buildMessage("40:32:65:6E:67").getParams()).isEqualTo(
                 new byte[]{0x65, 0x6E, 0x67});
     }
+
+    @Test
+    public void testVerifyAddressType() {
+        assertTrue(HdmiUtils.verifyAddressType(Constants.ADDR_TV,
+                HdmiDeviceInfo.DEVICE_TV));
+        assertTrue(HdmiUtils.verifyAddressType(Constants.ADDR_AUDIO_SYSTEM,
+                HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM));
+        assertTrue(HdmiUtils.verifyAddressType(Constants.ADDR_PLAYBACK_1,
+                HdmiDeviceInfo.DEVICE_PLAYBACK));
+        assertFalse(HdmiUtils.verifyAddressType(Constants.ADDR_SPECIFIC_USE,
+                HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM));
+        assertFalse(HdmiUtils.verifyAddressType(Constants.ADDR_PLAYBACK_2,
+                HdmiDeviceInfo.DEVICE_VIDEO_PROCESSOR));
+    }
 }

@@ -18,7 +18,6 @@ package com.android.systemui.decor
 
 import android.graphics.Insets
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableResources
 import android.util.RotationUtils
 import android.util.Size
@@ -27,6 +26,7 @@ import android.view.DisplayCutout
 import android.view.DisplayCutout.BOUNDS_POSITION_LENGTH
 import android.view.DisplayInfo
 import android.view.Surface
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
@@ -38,7 +38,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.doAnswer
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class CutoutDecorProviderFactoryTest : SysuiTestCase() {
 

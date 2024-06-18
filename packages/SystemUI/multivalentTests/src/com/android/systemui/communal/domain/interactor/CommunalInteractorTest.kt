@@ -52,6 +52,7 @@ import com.android.systemui.communal.domain.model.CommunalTransitionProgressMode
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
@@ -121,6 +122,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var communalPrefsRepository: FakeCommunalPrefsRepository
     private lateinit var editWidgetsActivityStarter: EditWidgetsActivityStarter
     private lateinit var sceneInteractor: SceneInteractor
+    private lateinit var communalSceneInteractor: CommunalSceneInteractor
     private lateinit var userTracker: FakeUserTracker
     private lateinit var activityStarter: ActivityStarter
     private lateinit var userManager: UserManager
@@ -141,6 +143,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         editWidgetsActivityStarter = kosmos.editWidgetsActivityStarter
         communalPrefsRepository = kosmos.fakeCommunalPrefsRepository
         sceneInteractor = kosmos.sceneInteractor
+        communalSceneInteractor = kosmos.communalSceneInteractor
         userTracker = kosmos.fakeUserTracker
         activityStarter = kosmos.activityStarter
         userManager = kosmos.userManager
@@ -295,7 +298,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             val targets = listOf(target1, target2, target3)
             smartspaceRepository.setCommunalSmartspaceTargets(targets)
 
-            val smartspaceContent by collectLastValue(underTest.ongoingContent)
+            val smartspaceContent by collectLastValue(underTest.getOngoingContent(true))
             assertThat(smartspaceContent?.size).isEqualTo(1)
             assertThat(smartspaceContent?.get(0)?.key)
                 .isEqualTo(CommunalContentModel.KEY.smartspace("target3"))
@@ -393,7 +396,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             smartspaceRepository.setCommunalSmartspaceTargets(targets)
 
-            val smartspaceContent by collectLastValue(underTest.ongoingContent)
+            val smartspaceContent by collectLastValue(underTest.getOngoingContent(true))
             assertThat(smartspaceContent?.size).isEqualTo(totalTargets)
             for (index in 0 until totalTargets) {
                 assertThat(smartspaceContent?.get(index)?.size).isEqualTo(expectedSizes[index])
@@ -409,11 +412,25 @@ class CommunalInteractorTest : SysuiTestCase() {
             // Media is playing.
             mediaRepository.mediaActive()
 
-            val umoContent by collectLastValue(underTest.ongoingContent)
+            val umoContent by collectLastValue(underTest.getOngoingContent(true))
 
             assertThat(umoContent?.size).isEqualTo(1)
             assertThat(umoContent?.get(0)).isInstanceOf(CommunalContentModel.Umo::class.java)
             assertThat(umoContent?.get(0)?.key).isEqualTo(CommunalContentModel.KEY.umo())
+        }
+
+    @Test
+    fun umo_mediaPlaying_doNotShowUmo() =
+        testScope.run {
+            // Tutorial completed.
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+
+            // Media is playing.
+            mediaRepository.mediaActive()
+
+            val umoContent by collectLastValue(underTest.getOngoingContent(false))
+
+            assertThat(umoContent?.size).isEqualTo(0)
         }
 
     @Test
@@ -439,7 +456,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             val timer3 = smartspaceTimer("timer3", timestamp = 4L)
             smartspaceRepository.setCommunalSmartspaceTargets(listOf(timer1, timer2, timer3))
 
-            val ongoingContent by collectLastValue(underTest.ongoingContent)
+            val ongoingContent by collectLastValue(underTest.getOngoingContent(true))
             assertThat(ongoingContent?.size).isEqualTo(4)
             assertThat(ongoingContent?.get(0)?.key)
                 .isEqualTo(CommunalContentModel.KEY.smartspace("timer3"))
@@ -801,7 +818,11 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun testShowWidgetEditorStartsActivity() =
         testScope.runTest {
+            val editModeState by collectLastValue(communalSceneInteractor.editModeState)
+
             underTest.showWidgetEditor()
+
+            assertThat(editModeState).isEqualTo(EditModeState.STARTING)
             verify(editWidgetsActivityStarter).startActivity()
         }
 

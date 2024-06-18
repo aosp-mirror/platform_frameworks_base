@@ -438,6 +438,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFakeKeyguardRepository,
                 mKeyguardTransitionInteractor,
                 mPowerInteractor,
+                mShadeRepository,
                 new FakeUserSetupRepository(),
                 mock(UserSwitcherInteractor.class),
                 new ShadeInteractorLegacyImpl(
@@ -837,6 +838,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mJavaAdapter,
                 mCastController,
                 new ResourcesSplitShadeStateController(),
+                () -> mKosmos.getCommunalTransitionViewModel(),
                 () -> mLargeScreenHeaderHelper
         );
     }

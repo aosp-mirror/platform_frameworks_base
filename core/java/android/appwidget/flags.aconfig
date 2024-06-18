@@ -40,3 +40,13 @@ flag {
   description: "Throttle the widget view updates to mitigate transaction exceptions"
   bug: "326145514"
 }
+
+flag {
+  name: "support_resume_restore_after_reboot"
+  namespace: "app_widgets"
+  description: "Enable support for resume restore widget after reboot by persisting intermediate states to disk"
+  bug: "336976070"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}

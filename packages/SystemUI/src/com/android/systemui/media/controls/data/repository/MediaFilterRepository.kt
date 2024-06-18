@@ -218,9 +218,9 @@ constructor(
                         mediaFromRecPackageName = null
                         _currentMedia.value = sortedMap.values.toList()
                     }
-                } else if (sortedMap.size > sortedMedia.size) {
+                } else if (sortedMap.size > _currentMedia.value.size && it.active) {
                     _currentMedia.value = sortedMap.values.toList()
-                } else if (sortedMap.size == sortedMedia.size) {
+                } else {
                     // When loading an update for an existing media control.
                     val currentList =
                         mutableListOf<MediaCommonModel>().apply { addAll(_currentMedia.value) }
@@ -294,6 +294,18 @@ constructor(
 
     fun setMediaFromRecPackageName(packageName: String) {
         mediaFromRecPackageName = packageName
+    }
+
+    fun hasActiveMedia(): Boolean {
+        return _selectedUserEntries.value.any { it.value.active }
+    }
+
+    fun hasAnyMedia(): Boolean {
+        return _selectedUserEntries.value.entries.isNotEmpty()
+    }
+
+    fun isRecommendationActive(): Boolean {
+        return _smartspaceMediaData.value.isActive
     }
 
     private fun canBeRemoved(data: MediaData): Boolean {

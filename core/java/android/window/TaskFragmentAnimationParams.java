@@ -16,17 +16,21 @@
 
 package android.window;
 
+import static android.window.TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID;
+
+import android.annotation.AnimRes;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Data object for animation related override of TaskFragment.
  * @hide
  */
-// TODO(b/206557124): Add more animation customization options.
 public final class TaskFragmentAnimationParams implements Parcelable {
 
     /** The default {@link TaskFragmentAnimationParams} to use when there is no app override. */
@@ -43,8 +47,22 @@ public final class TaskFragmentAnimationParams implements Parcelable {
     @ColorInt
     private final int mAnimationBackgroundColor;
 
-    private TaskFragmentAnimationParams(@ColorInt int animationBackgroundColor) {
+    @AnimRes
+    private final int mOpenAnimationResId;
+
+    @AnimRes
+    private final int mChangeAnimationResId;
+
+    @AnimRes
+    private final int mCloseAnimationResId;
+
+    private TaskFragmentAnimationParams(@ColorInt int animationBackgroundColor,
+            @AnimRes int openAnimationResId, @AnimRes int changeAnimationResId,
+            @AnimRes int closeAnimationResId) {
         mAnimationBackgroundColor = animationBackgroundColor;
+        mOpenAnimationResId = openAnimationResId;
+        mChangeAnimationResId = changeAnimationResId;
+        mCloseAnimationResId = closeAnimationResId;
     }
 
     /**
@@ -58,13 +76,52 @@ public final class TaskFragmentAnimationParams implements Parcelable {
         return mAnimationBackgroundColor;
     }
 
+    /**
+     * Returns the resources ID of open animation that applies to this TaskFragment.
+     * <p>
+     * The default value is {@link DEFAULT_ANIMATION_RESOURCES_ID}, which is to use the system
+     * default animation.
+     */
+    @AnimRes
+    public int getOpenAnimationResId() {
+        return mOpenAnimationResId;
+    }
+
+    /**
+     * Returns the resources ID of change animation that applies to this TaskFragment.
+     * <p>
+     * The default value is {@link DEFAULT_ANIMATION_RESOURCES_ID}, which is to use the system
+     * default animation.
+     */
+    @AnimRes
+    public int getChangeAnimationResId() {
+        return mChangeAnimationResId;
+    }
+
+    /**
+     * Returns the resources ID of close animation that applies to this TaskFragment.
+     * <p>
+     * The default value is {@link DEFAULT_ANIMATION_RESOURCES_ID}, which is to use the system
+     * default animation.
+     */
+    @AnimRes
+    public int getCloseAnimationResId() {
+        return mCloseAnimationResId;
+    }
+
     private TaskFragmentAnimationParams(Parcel in) {
         mAnimationBackgroundColor = in.readInt();
+        mOpenAnimationResId = in.readInt();
+        mChangeAnimationResId = in.readInt();
+        mCloseAnimationResId = in.readInt();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mAnimationBackgroundColor);
+        dest.writeInt(mOpenAnimationResId);
+        dest.writeInt(mChangeAnimationResId);
+        dest.writeInt(mCloseAnimationResId);
     }
 
     @NonNull
@@ -85,21 +142,37 @@ public final class TaskFragmentAnimationParams implements Parcelable {
     public String toString() {
         return "TaskFragmentAnimationParams{"
                 + " animationBgColor=" + Integer.toHexString(mAnimationBackgroundColor)
+                + " openAnimResId=" + mOpenAnimationResId
+                + " changeAnimResId=" + mChangeAnimationResId
+                + " closeAnimResId=" + mCloseAnimationResId
                 + "}";
     }
 
     @Override
     public int hashCode() {
-        return mAnimationBackgroundColor;
+        return Objects.hash(mAnimationBackgroundColor, mOpenAnimationResId, mChangeAnimationResId,
+                mCloseAnimationResId);
     }
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (!(obj instanceof TaskFragmentAnimationParams)) {
+        if (!(obj instanceof TaskFragmentAnimationParams other)) {
             return false;
         }
-        final TaskFragmentAnimationParams other = (TaskFragmentAnimationParams) obj;
-        return mAnimationBackgroundColor == other.mAnimationBackgroundColor;
+        return mAnimationBackgroundColor == other.mAnimationBackgroundColor
+                && mOpenAnimationResId == other.mOpenAnimationResId
+                && mChangeAnimationResId == other.mChangeAnimationResId
+                && mCloseAnimationResId == other.mCloseAnimationResId;
+    }
+
+    /**
+     * Returns {@code true} if one of {@link #getOpenAnimationResId()},
+     * {@link #getChangeAnimationResId()} or {@link #getCloseAnimationResId()} is specified.
+     */
+    public boolean hasOverrideAnimation() {
+        return mOpenAnimationResId != DEFAULT_ANIMATION_RESOURCES_ID
+                || mChangeAnimationResId != DEFAULT_ANIMATION_BACKGROUND_COLOR
+                || mCloseAnimationResId != DEFAULT_ANIMATION_RESOURCES_ID;
     }
 
     @Override
@@ -112,6 +185,15 @@ public final class TaskFragmentAnimationParams implements Parcelable {
 
         @ColorInt
         private int mAnimationBackgroundColor = DEFAULT_ANIMATION_BACKGROUND_COLOR;
+
+        @AnimRes
+        private int mOpenAnimationResId = DEFAULT_ANIMATION_RESOURCES_ID;
+
+        @AnimRes
+        private int mChangeAnimationResId = DEFAULT_ANIMATION_RESOURCES_ID;
+
+        @AnimRes
+        private int mCloseAnimationResId = DEFAULT_ANIMATION_RESOURCES_ID;
 
         /**
          * Sets the {@link ColorInt} to use for the background during the animation with this
@@ -128,10 +210,50 @@ public final class TaskFragmentAnimationParams implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the open animation resources ID this TaskFragment. The default value is
+         * {@link DEFAULT_ANIMATION_RESOURCES_ID}, which is to use the system default animation.
+         *
+         * @param resId the open animation resources ID.
+         * @return this {@link Builder}.
+         */
+        @NonNull
+        public Builder setOpenAnimationResId(@AnimRes int resId) {
+            mOpenAnimationResId = resId;
+            return this;
+        }
+
+        /**
+         * Sets the change animation resources ID this TaskFragment. The default value is
+         * {@link DEFAULT_ANIMATION_RESOURCES_ID}, which is to use the system default animation.
+         *
+         * @param resId the change animation resources ID.
+         * @return this {@link Builder}.
+         */
+        @NonNull
+        public Builder setChangeAnimationResId(@AnimRes int resId) {
+            mChangeAnimationResId = resId;
+            return this;
+        }
+
+        /**
+         * Sets the close animation resources ID this TaskFragment. The default value is
+         * {@link DEFAULT_ANIMATION_RESOURCES_ID}, which is to use the system default animation.
+         *
+         * @param resId the close animation resources ID.
+         * @return this {@link Builder}.
+         */
+        @NonNull
+        public Builder setCloseAnimationResId(@AnimRes int resId) {
+            mCloseAnimationResId = resId;
+            return this;
+        }
+
         /** Constructs the {@link TaskFragmentAnimationParams}. */
         @NonNull
         public TaskFragmentAnimationParams build() {
-            return new TaskFragmentAnimationParams(mAnimationBackgroundColor);
+            return new TaskFragmentAnimationParams(mAnimationBackgroundColor,
+                    mOpenAnimationResId, mChangeAnimationResId, mCloseAnimationResId);
         }
     }
 }

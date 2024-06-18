@@ -269,6 +269,7 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
             }
             mScrimManager.removeCallback(mScrimManagerCallback);
             mCapture = null;
+            mTouchSession = null;
 
             if (!Flags.communalBouncerDoNotModifyPluginOpen()) {
                 mNotificationShadeWindowController.setForcePluginOpen(false, this);

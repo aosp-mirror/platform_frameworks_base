@@ -48,8 +48,8 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"50 % oben"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"30 % oben"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Vollbild unten"</string>
-    <string name="accessibility_split_left" msgid="1713683765575562458">"Links teilen"</string>
-    <string name="accessibility_split_right" msgid="8441001008181296837">"Rechts teilen"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Links positionieren"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Rechts positionieren"</string>
     <string name="accessibility_split_top" msgid="2789329702027147146">"Oben teilen"</string>
     <string name="accessibility_split_bottom" msgid="8694551025220868191">"Unten teilen"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Einhandmodus wird verwendet"</string>
@@ -84,6 +84,10 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bubble"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Verwalten"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bubble verworfen."</string>
+    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
+    <skip />
+    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
+    <skip />
     <string name="restart_button_description" msgid="4564728020654658478">"Tippen, um diese App neu zu starten und die Ansicht zu verbessern"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Seitenverhältnis der App in den Einstellungen ändern"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Seitenverhältnis ändern"</string>

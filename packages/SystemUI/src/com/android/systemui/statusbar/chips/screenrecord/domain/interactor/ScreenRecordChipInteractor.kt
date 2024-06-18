@@ -16,51 +16,60 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
 
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.res.R
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.ScreenRecordRepository
-import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
-import com.android.systemui.util.time.SystemClock
+import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Interactor for the screen recording chip shown in the status bar. */
 @SysUISingleton
-open class ScreenRecordChipInteractor
+class ScreenRecordChipInteractor
 @Inject
 constructor(
-    @Application scope: CoroutineScope,
-    screenRecordRepository: ScreenRecordRepository,
-    val systemClock: SystemClock,
-) : OngoingActivityChipInteractor {
-    override val chip: StateFlow<OngoingActivityChipModel> =
-        screenRecordRepository.screenRecordState
-            .map { state ->
-                when (state) {
-                    is ScreenRecordModel.DoingNothing,
+    @Application private val scope: CoroutineScope,
+    private val screenRecordRepository: ScreenRecordRepository,
+    private val mediaProjectionRepository: MediaProjectionRepository,
+) {
+    val screenRecordState: StateFlow<ScreenRecordChipModel> =
+        // ScreenRecordRepository has the main "is the screen being recorded?" state, and
+        // MediaProjectionRepository has information about what specifically is being recorded (a
+        // single app or the entire screen)
+        combine(
+                screenRecordRepository.screenRecordState,
+                mediaProjectionRepository.mediaProjectionState,
+            ) { screenRecordState, mediaProjectionState ->
+                when (screenRecordState) {
+                    is ScreenRecordModel.DoingNothing -> ScreenRecordChipModel.DoingNothing
                     // TODO(b/332662551): Implement the 3-2-1 countdown chip.
-                    is ScreenRecordModel.Starting -> OngoingActivityChipModel.Hidden
-                    is ScreenRecordModel.Recording ->
-                        OngoingActivityChipModel.Shown(
-                            // TODO(b/332662551): Also provide a content description.
-                            icon =
-                                Icon.Resource(
-                                    R.drawable.stat_sys_screen_record,
-                                    contentDescription = null
-                                ),
-                            startTimeMs = systemClock.elapsedRealtime()
-                        ) {
-                            // TODO(b/332662551): Implement the pause dialog.
-                        }
+                    is ScreenRecordModel.Starting ->
+                        ScreenRecordChipModel.Starting(screenRecordState.millisUntilStarted)
+                    is ScreenRecordModel.Recording -> {
+                        val recordedTask =
+                            if (
+                                mediaProjectionState is MediaProjectionState.Projecting.SingleTask
+                            ) {
+                                mediaProjectionState.task
+                            } else {
+                                null
+                            }
+                        ScreenRecordChipModel.Recording(recordedTask)
+                    }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), ScreenRecordChipModel.DoingNothing)
+
+    /** Stops the recording. */
+    fun stopRecording() {
+        scope.launch { screenRecordRepository.stopRecording() }
+    }
 }

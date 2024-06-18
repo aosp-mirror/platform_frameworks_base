@@ -29,7 +29,6 @@ import android.view.MotionEvent.ACTION_MOVE
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -114,10 +113,8 @@ class ScreenRecordPermissionDialogDelegate(
     }
 
     private lateinit var tapsSwitch: Switch
-    private lateinit var tapsSwitchContainer: ViewGroup
     private lateinit var tapsView: View
     private lateinit var audioSwitch: Switch
-    private lateinit var audioSwitchContainer: ViewGroup
     private lateinit var options: Spinner
 
     override fun createDialog(): SystemUIDialog {
@@ -164,16 +161,11 @@ class ScreenRecordPermissionDialogDelegate(
     private fun initRecordOptionsView() {
         audioSwitch = dialog.requireViewById(R.id.screenrecord_audio_switch)
         tapsSwitch = dialog.requireViewById(R.id.screenrecord_taps_switch)
-        audioSwitchContainer = dialog.requireViewById(R.id.screenrecord_audio_switch_container)
-        tapsSwitchContainer = dialog.requireViewById(R.id.screenrecord_taps_switch_container)
 
         // Add these listeners so that the switch only responds to movement
         // within its target region, to meet accessibility requirements
         audioSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
         tapsSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
-
-        audioSwitchContainer.setOnClickListener { audioSwitch.toggle() }
-        tapsSwitchContainer.setOnClickListener { tapsSwitch.toggle() }
 
         tapsView = dialog.requireViewById(R.id.show_taps)
         updateTapsViewVisibility()

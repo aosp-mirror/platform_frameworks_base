@@ -39,7 +39,7 @@ import com.android.app.animation.Interpolators
 import com.android.internal.R
 import com.android.keyguard.KeyguardClockSwitchController
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.Flags.fastUnlockTransition
+import com.android.systemui.Flags.fasterUnlockTransition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
@@ -363,9 +363,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         with(wallpaperCannedUnlockAnimator) {
-            duration = if (fastUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
+            duration = if (fasterUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
                     else LAUNCHER_ICONS_ANIMATION_DURATION_MS
-            interpolator = if (fastUnlockTransition()) Interpolators.LINEAR
+            interpolator = if (fasterUnlockTransition()) Interpolators.LINEAR
                     else Interpolators.ALPHA_OUT
             addUpdateListener { valueAnimator: ValueAnimator ->
                 setWallpaperAppearAmount(valueAnimator.animatedValue as Float)
@@ -613,7 +613,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         val isWakeAndUnlockNotFromDream = biometricUnlockControllerLazy.get().isWakeAndUnlock &&
             biometricUnlockControllerLazy.get().mode != MODE_WAKE_AND_UNLOCK_FROM_DREAM
 
-        val duration = if (fastUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
+        val duration = if (fasterUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
                 else LAUNCHER_ICONS_ANIMATION_DURATION_MS
         listeners.forEach {
             it.onUnlockAnimationStarted(
@@ -712,7 +712,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // As soon as the shade starts animating out of the way, start the canned unlock animation,
         // which will finish keyguard exit when it completes. The in-window animations in the
         // Launcher window will end on their own.
-        if (fastUnlockTransition()) hideKeyguardViewAfterRemoteAnimation()
         handler.postDelayed({
             if (keyguardViewMediator.get().isShowingAndNotOccluded &&
                 !keyguardStateController.isKeyguardGoingAway) {
@@ -723,7 +722,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
             if ((wallpaperTargets?.isNotEmpty() == true)) {
                 fadeInWallpaper()
-                if (!fastUnlockTransition()) hideKeyguardViewAfterRemoteAnimation()
+                hideKeyguardViewAfterRemoteAnimation()
             } else {
                 keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                     false /* cancelled */)
@@ -1149,7 +1148,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * TODO (b/298186160) replace references with the constant itself when flag is removed
      */
     private fun cannedUnlockStartDelayMs(): Long {
-        return if (fastUnlockTransition()) CANNED_UNLOCK_START_DELAY
+        return if (fasterUnlockTransition()) CANNED_UNLOCK_START_DELAY
                 else LEGACY_CANNED_UNLOCK_START_DELAY
     }
 
@@ -1158,7 +1157,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * TODO (b/298186160) replace references with the constant itself when flag is removed
      */
     private fun unlockAnimationDurationMs(): Long {
-        return if (fastUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
+        return if (fasterUnlockTransition()) UNLOCK_ANIMATION_DURATION_MS
                 else LEGACY_UNLOCK_ANIMATION_DURATION_MS
     }
 
@@ -1167,7 +1166,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * TODO (b/298186160) replace references with the constant itself when flag is removed
      */
     private fun surfaceBehindFadeOutDurationMs(): Long {
-        return if (fastUnlockTransition()) SURFACE_BEHIND_FADE_OUT_DURATION_MS
+        return if (fasterUnlockTransition()) SURFACE_BEHIND_FADE_OUT_DURATION_MS
                 else LEGACY_SURFACE_BEHIND_SWIPE_FADE_DURATION_MS
     }
 
@@ -1176,7 +1175,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * TODO (b/298186160) replace references with the constant itself when flag is removed
      */
     private fun surfaceBehindFadeOutStartDelayMs(): Long {
-        return if (fastUnlockTransition()) SURFACE_BEHIND_FADE_OUT_START_DELAY_MS
+        return if (fasterUnlockTransition()) SURFACE_BEHIND_FADE_OUT_START_DELAY_MS
                 else LEGACY_UNLOCK_ANIMATION_SURFACE_BEHIND_START_DELAY_MS
     }
 

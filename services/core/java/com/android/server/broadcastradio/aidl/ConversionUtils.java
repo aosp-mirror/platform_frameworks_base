@@ -446,6 +446,7 @@ final class ConversionUtils {
                         sel.secondaryIds[i]);
                 if (id == null) {
                     Slogf.e(TAG, "invalid secondary id: %s", sel.secondaryIds[i]);
+                    continue;
                 }
                 secondaryIdList.add(id);
             }
@@ -688,9 +689,6 @@ final class ConversionUtils {
         if (!identifierMeetsSdkVersionRequirement(info.getLogicallyTunedTo(), uid)
                 || !identifierMeetsSdkVersionRequirement(info.getPhysicallyTunedTo(), uid)) {
             return false;
-        }
-        if (info.getRelatedContent() == null) {
-            return true;
         }
         Iterator<ProgramSelector.Identifier> relatedContentIt = info.getRelatedContent().iterator();
         while (relatedContentIt.hasNext()) {

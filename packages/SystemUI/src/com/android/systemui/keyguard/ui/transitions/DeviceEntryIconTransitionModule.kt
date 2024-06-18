@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToDreamingTransit
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDozingTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.GoneToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDozingTransitionViewModel
@@ -245,5 +246,11 @@ abstract class DeviceEntryIconTransitionModule {
     @IntoSet
     abstract fun occludedToGlanceableHub(
         impl: OccludedToGlanceableHubTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun goneToGlanceableHub(
+        impl: GoneToGlanceableHubTransitionViewModel
     ): DeviceEntryIconTransition
 }
