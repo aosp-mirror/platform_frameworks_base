@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
+import androidx.compose.ui.Alignment
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -24,6 +25,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.OpenBottomShade
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -175,6 +177,7 @@ constructor(
         sceneInteractor.changeScene(
             SceneFamilies.NotifShade,
             "ShadeController.animateExpandShade",
+            OpenBottomShade.takeIf { shadeInteractor.shadeAlignment == Alignment.BottomEnd }
         )
     }
 

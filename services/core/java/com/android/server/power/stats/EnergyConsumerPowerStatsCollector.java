@@ -16,10 +16,13 @@
 
 package com.android.server.power.stats;
 
+import android.hardware.power.stats.EnergyConsumerAttribution;
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.util.Slog;
+import android.util.SparseLongArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
@@ -27,9 +30,7 @@ import com.android.internal.os.PowerStats;
 import java.util.function.IntSupplier;
 
 public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
-    private static final String TAG = "CameraPowerStatsCollector";
-
-    private static final long CAMERA_ACTIVITY_REQUEST_TIMEOUT = 20000;
+    private static final String TAG = "EnergyConsumerPowerStatsCollector";
 
     private static final long ENERGY_UNSPECIFIED = -1;
 
@@ -48,21 +49,22 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
     private final int mEnergyConsumerType;
     private final String mEnergyConsumerName;
 
-    private final BinaryStatePowerStatsLayout mLayout;
+    private final EnergyConsumerPowerStatsLayout mLayout;
     private boolean mIsInitialized;
 
     private PowerStats mPowerStats;
     private ConsumedEnergyRetriever mConsumedEnergyRetriever;
     private IntSupplier mVoltageSupplier;
-    private int[] mEnergyConsumerIds = new int[0];
+    private int[] mEnergyConsumerIds;
     private long mLastConsumedEnergyUws = ENERGY_UNSPECIFIED;
+    private SparseLongArray mLastConsumerEnergyPerUid = new SparseLongArray();
     private int mLastVoltageMv;
     private long mLastUpdateTimestamp;
     private boolean mFirstCollection = true;
 
     EnergyConsumerPowerStatsCollector(Injector injector, int powerComponentId,
             String powerComponentName, @EnergyConsumerType int energyConsumerType,
-            String energyConsumerName, BinaryStatePowerStatsLayout statsLayout) {
+            String energyConsumerName, EnergyConsumerPowerStatsLayout statsLayout) {
         super(injector.getHandler(),
                 injector.getPowerStatsCollectionThrottlePeriod(powerComponentName),
                 injector.getUidResolver(), injector.getClock());
@@ -71,6 +73,21 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
         mPowerComponentName = powerComponentName;
         mEnergyConsumerType = energyConsumerType;
         mEnergyConsumerName = energyConsumerName;
+        mLayout = statsLayout;
+    }
+
+    EnergyConsumerPowerStatsCollector(Injector injector, int powerComponentId,
+            String powerComponentName, int energyConsumerId,
+            EnergyConsumerPowerStatsLayout statsLayout) {
+        super(injector.getHandler(),
+                injector.getPowerStatsCollectionThrottlePeriod(powerComponentName),
+                injector.getUidResolver(), injector.getClock());
+        mInjector = injector;
+        mPowerComponentId = powerComponentId;
+        mPowerComponentName = powerComponentName;
+        mEnergyConsumerIds = new int[]{energyConsumerId};
+        mEnergyConsumerType = EnergyConsumerType.OTHER;
+        mEnergyConsumerName = null;
         mLayout = statsLayout;
     }
 
@@ -85,9 +102,10 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
 
         mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
         mVoltageSupplier = mInjector.getVoltageSupplier();
-        mEnergyConsumerIds = mConsumedEnergyRetriever.getEnergyConsumerIds(mEnergyConsumerType,
-                mEnergyConsumerName);
-
+        if (mEnergyConsumerIds == null) {
+            mEnergyConsumerIds = mConsumedEnergyRetriever.getEnergyConsumerIds(mEnergyConsumerType,
+                    mEnergyConsumerName);
+        }
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);
         PowerStats.Descriptor powerStatsDescriptor = new PowerStats.Descriptor(
@@ -110,18 +128,13 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        EnergyConsumerResult[] energy =
+                    mConsumedEnergyRetriever.getConsumedEnergy(mEnergyConsumerIds);
         long consumedEnergy = 0;
-        int voltageMv = mVoltageSupplier.getAsInt();
-        if (voltageMv <= 0) {
-            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMv
-                    + " mV) when querying energy consumers");
-        } else {
-            long[] energyUws = mConsumedEnergyRetriever.getConsumedEnergyUws(mEnergyConsumerIds);
-            if (energyUws != null) {
-                for (int i = energyUws.length - 1; i >= 0; i--) {
-                    if (energyUws[i] != ENERGY_UNSPECIFIED) {
-                        consumedEnergy += energyUws[i];
-                    }
+        if (energy != null) {
+            for (int i = energy.length - 1; i >= 0; i--) {
+                if (energy[i].energyUWs != ENERGY_UNSPECIFIED) {
+                    consumedEnergy += energy[i].energyUWs;
                 }
             }
         }
@@ -138,13 +151,56 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        int voltageMv = mVoltageSupplier.getAsInt();
+        if (voltageMv <= 0) {
+            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMv
+                    + " mV) when querying energy consumers");
+            voltageMv = 0;
+        }
+
         int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
         mLastVoltageMv = voltageMv;
         mLayout.setConsumedEnergy(mPowerStats.stats, 0, uJtoUc(energyDelta, averageVoltage));
+
+        for (int i = mPowerStats.uidStats.size() - 1; i >= 0; i--) {
+            mLayout.setUidConsumedEnergy(mPowerStats.uidStats.valueAt(i), 0, 0);
+        }
+
+        if (energy != null) {
+            for (int i = energy.length - 1; i >= 0; i--) {
+                EnergyConsumerAttribution[] perUid = energy[i].attribution;
+                if (perUid == null) {
+                    continue;
+                }
+
+                for (EnergyConsumerAttribution attribution : perUid) {
+                    int uid = mUidResolver.mapUid(attribution.uid);
+                    long lastEnergy = mLastConsumerEnergyPerUid.get(uid);
+                    long deltaEnergy = attribution.energyUWs - lastEnergy;
+                    mLastConsumerEnergyPerUid.put(uid, attribution.energyUWs);
+                    if (deltaEnergy <= 0) {
+                        continue;
+                    }
+                    long[] uidStats = mPowerStats.uidStats.get(uid);
+                    if (uidStats == null) {
+                        uidStats = new long[mLayout.getUidStatsArrayLength()];
+                        mPowerStats.uidStats.put(uid, uidStats);
+                    }
+
+                    mLayout.setUidConsumedEnergy(uidStats, 0,
+                            mLayout.getUidConsumedEnergy(uidStats, 0) + deltaEnergy);
+                }
+            }
+        }
         long timestamp = mClock.elapsedRealtime();
         mPowerStats.durationMs = timestamp - mLastUpdateTimestamp;
         mLastUpdateTimestamp = timestamp;
         mFirstCollection = false;
         return mPowerStats;
+    }
+
+    @Override
+    protected void onUidRemoved(int uid) {
+        mLastConsumerEnergyPerUid.delete(uid);
     }
 }
