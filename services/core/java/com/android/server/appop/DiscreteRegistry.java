@@ -26,6 +26,7 @@ import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
 import static android.app.AppOpsManager.FILTER_BY_UID;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
+import static android.app.AppOpsManager.OP_EMERGENCY_LOCATION;
 import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
@@ -135,9 +136,10 @@ final class DiscreteRegistry {
     private static final String PROPERTY_DISCRETE_FLAGS = "discrete_history_op_flags";
     private static final String PROPERTY_DISCRETE_OPS_LIST = "discrete_history_ops_cslist";
     private static final String DEFAULT_DISCRETE_OPS = OP_FINE_LOCATION + "," + OP_COARSE_LOCATION
-            + "," + OP_CAMERA + "," + OP_RECORD_AUDIO + "," + OP_PHONE_CALL_MICROPHONE + ","
-            + OP_PHONE_CALL_CAMERA + "," + OP_RECEIVE_AMBIENT_TRIGGER_AUDIO + ","
-            + OP_RECEIVE_SANDBOX_TRIGGER_AUDIO + "," + OP_RESERVED_FOR_TESTING;
+            + "," + OP_EMERGENCY_LOCATION + "," + OP_CAMERA + "," + OP_RECORD_AUDIO + ","
+            + OP_PHONE_CALL_MICROPHONE + "," + OP_PHONE_CALL_CAMERA + ","
+            + OP_RECEIVE_AMBIENT_TRIGGER_AUDIO + "," + OP_RECEIVE_SANDBOX_TRIGGER_AUDIO
+            + "," + OP_RESERVED_FOR_TESTING;
     private static final long DEFAULT_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(7).toMillis();
     private static final long MAXIMUM_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(30).toMillis();
     private static final long DEFAULT_DISCRETE_HISTORY_QUANTIZATION =
