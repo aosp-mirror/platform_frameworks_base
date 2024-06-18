@@ -4415,6 +4415,7 @@
   <java-symbol type="bool" name="config_profcollectReportUploaderEnabled" />
   <java-symbol type="string" name="config_defaultProfcollectReportUploaderApp" />
   <java-symbol type="string" name="config_defaultProfcollectReportUploaderAction" />
+  <java-symbol type="array" name="config_profcollectOnCameraOpenedSkipPackages" />
 
   <java-symbol type="string" name="usb_device_resolve_prompt_warn" />
 
