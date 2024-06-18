@@ -899,14 +899,23 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     void updateContainersInTaskIfVisible(@NonNull WindowContainerTransaction wct, int taskId) {
         final TaskContainer taskContainer = getTaskContainer(taskId);
-        if (taskContainer != null && taskContainer.isVisible()) {
+        if (taskContainer == null) {
+            return;
+        }
+
+        if (taskContainer.isVisible()) {
             updateContainersInTask(wct, taskContainer);
+        } else if (Flags.fixNoContainerUpdateWithoutResize()) {
+            // the TaskFragmentContainers need to be updated when the task becomes visible
+            taskContainer.mTaskFragmentContainersNeedsUpdate = true;
         }
     }
 
     @GuardedBy("mLock")
     private void updateContainersInTask(@NonNull WindowContainerTransaction wct,
             @NonNull TaskContainer taskContainer) {
+        taskContainer.mTaskFragmentContainersNeedsUpdate = false;
+
         // Update all TaskFragments in the Task. Make a copy of the list since some may be
         // removed on updating.
         final List<TaskFragmentContainer> containers = taskContainer.getTaskFragmentContainers();

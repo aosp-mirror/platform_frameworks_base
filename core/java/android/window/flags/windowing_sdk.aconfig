@@ -191,3 +191,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "fix_no_container_update_without_resize"
+    description: "Fix the containers not being updated when the Task is brought to front and has the same configuration"
+    bug: "344721335"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
