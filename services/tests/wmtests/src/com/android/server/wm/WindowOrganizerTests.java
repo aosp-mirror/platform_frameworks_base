@@ -851,6 +851,12 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertNotNull(o.mInfo);
         assertNotNull(o.mInfo.pictureInPictureParams);
 
+        // Bypass the quota check, which causes NPE in current test setup.
+        if (mWm.mAtmService.mActivityClientController.mSetPipAspectRatioQuotaTracker != null) {
+            mWm.mAtmService.mActivityClientController.mSetPipAspectRatioQuotaTracker
+                    .setEnabled(false);
+        }
+
         final PictureInPictureParams p2 = new PictureInPictureParams.Builder()
                 .setAspectRatio(new Rational(3, 4)).build();
         mWm.mAtmService.mActivityClientController.setPictureInPictureParams(record.token, p2);
