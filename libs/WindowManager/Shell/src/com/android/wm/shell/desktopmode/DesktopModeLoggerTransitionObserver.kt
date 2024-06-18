@@ -228,6 +228,7 @@ class DesktopModeLoggerTransitionObserver(
      * Log the appropriate log event based on the new state of TasksInfos and previously cached
      * state and update it
      */
+    // TODO(b/326231724): Trigger logging when task size or position is changed.
     private fun identifyLogEventAndUpdateState(
         transitionInfo: TransitionInfo,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
@@ -282,7 +283,6 @@ class DesktopModeLoggerTransitionObserver(
         visibleFreeformTaskInfos.putAll(postTransitionVisibleFreeformTasks)
     }
 
-    // TODO(b/326231724) - Add logging around taskInfoChanges Updates
     /** Compare the old and new state of taskInfos and identify and log the changes */
     private fun identifyAndLogTaskUpdates(
         sessionId: Int,
@@ -304,13 +304,17 @@ class DesktopModeLoggerTransitionObserver(
         }
     }
 
-    // TODO(b/326231724: figure out how to get taskWidth and taskHeight from TaskInfo
     private fun buildTaskUpdateForTask(taskInfo: TaskInfo): TaskUpdate {
-        val taskUpdate = TaskUpdate(taskInfo.taskId, taskInfo.userId)
-        // add task x, y if available
-        taskInfo.positionInParent?.let { taskUpdate.copy(taskX = it.x, taskY = it.y) }
-
-        return taskUpdate
+        val screenBounds = taskInfo.configuration.windowConfiguration.bounds
+        val positionInParent = taskInfo.positionInParent
+        return TaskUpdate(
+            instanceId = taskInfo.taskId,
+            uid = taskInfo.userId,
+            taskHeight = screenBounds.height(),
+            taskWidth = screenBounds.width(),
+            taskX = positionInParent.x,
+            taskY = positionInParent.y,
+        )
     }
 
     /** Get [EnterReason] for this session enter */
