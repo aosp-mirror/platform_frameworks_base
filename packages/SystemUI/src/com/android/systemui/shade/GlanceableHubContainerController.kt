@@ -47,8 +47,6 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -150,9 +148,6 @@ constructor(
     /**
      * True if either the primary or alternate bouncer are open, meaning the hub should not receive
      * any touch input.
-     *
-     * Tracks [KeyguardTransitionInteractor.isFinishedInStateWhere] for
-     * [KeyguardState.isBouncerState].
      */
     private var anyBouncerShowing = false
 

@@ -146,12 +146,6 @@ enum class KeyguardState {
             return state != GONE
         }
 
-        /** Whether either of the bouncers are visible when we're FINISHED in the given state. */
-        @JvmStatic
-        fun isBouncerState(state: KeyguardState): Boolean {
-            return state == PRIMARY_BOUNCER || state == ALTERNATE_BOUNCER
-        }
-
         /**
          * Whether the device is awake ([PowerInteractor.isAwake]) when we're FINISHED in the given
          * keyguard state.
