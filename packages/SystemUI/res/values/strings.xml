@@ -3577,6 +3577,12 @@
     <string name="touchpad_tutorial_action_key_button">Action key</string>
     <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_done_button">Done</string>
+    <!-- Touchpad back gesture action name in tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_back_gesture_action_title">Go back</string>
+    <!-- Touchpad back gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_back_gesture_guidance">To go back, swipe left or right using three fingers anywhere on the touchpad.</string>
+    <string name="touchpad_back_gesture_animation_content_description">Touchpad showing three fingers moving right and left</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description">Device screen showing animation for back gesture</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>
