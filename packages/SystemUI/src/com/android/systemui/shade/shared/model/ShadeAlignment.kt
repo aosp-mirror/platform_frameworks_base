@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.ui.composable.transitions
+package com.android.systemui.shade.shared.model
 
-import com.android.compose.animation.scene.TransitionBuilder
+/** Enumerates all supported alignments of the shade. */
+sealed interface ShadeAlignment {
 
-fun TransitionBuilder.lockscreenToNotificationsShadeTransition(
-    durationScale: Double = 1.0,
-) {
-    toNotificationsShadeTransition(durationScale = durationScale)
+    /** Aligns the shade to the top. */
+    data object Top : ShadeAlignment
+
+    /** Aligns the shade to the bottom. */
+    data object Bottom : ShadeAlignment
 }

@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
@@ -75,7 +74,6 @@ constructor(
         OverlayShade(
             modifier = modifier,
             viewModel = overlayShadeViewModel,
-            panelAlignment = Alignment.TopEnd,
             lockscreenContent = lockscreenContent,
         ) {
             Column {
