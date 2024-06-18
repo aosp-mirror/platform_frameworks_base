@@ -23,13 +23,14 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.credentials.Credential
 import android.credentials.flags.Flags
-import android.credentials.ui.AuthenticationEntry
-import android.credentials.ui.Entry
-import android.credentials.ui.GetCredentialProviderData
+import android.credentials.selection.AuthenticationEntry
+import android.credentials.selection.Entry
+import android.credentials.selection.GetCredentialProviderData
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import android.util.Log
 import androidx.activity.result.IntentSenderRequest
+import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.provider.Action
 import androidx.credentials.provider.AuthenticationAction
@@ -39,6 +40,7 @@ import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import androidx.credentials.provider.RemoteEntry
 import com.android.credentialmanager.IS_AUTO_SELECTED_KEY
+import com.android.credentialmanager.R
 import com.android.credentialmanager.model.get.ActionEntryInfo
 import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
@@ -46,8 +48,9 @@ import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.credentialmanager.TAG
+import com.android.credentialmanager.model.EntryInfo
 
-fun CredentialEntryInfo.getIntentSenderRequest(
+fun EntryInfo.getIntentSenderRequest(
     isAutoSelected: Boolean = false
 ): IntentSenderRequest? {
     val entryIntent = fillInIntent?.putExtra(IS_AUTO_SELECTED_KEY, isAutoSelected)
@@ -123,6 +126,7 @@ private fun getCredentialOptionInfoList(
                     pendingIntent = credentialEntry.pendingIntent,
                     fillInIntent = it.frameworkExtrasIntent,
                     credentialType = CredentialType.PASSWORD,
+                    rawCredentialType = PasswordCredential.TYPE_PASSWORD_CREDENTIAL,
                     credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
                     userName = credentialEntry.username.toString(),
                     displayName = credentialEntry.displayName?.toString(),
@@ -131,6 +135,10 @@ private fun getCredentialOptionInfoList(
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
                 )
                 )
             }
@@ -144,14 +152,21 @@ private fun getCredentialOptionInfoList(
                     pendingIntent = credentialEntry.pendingIntent,
                     fillInIntent = it.frameworkExtrasIntent,
                     credentialType = CredentialType.PASSKEY,
+                    rawCredentialType = PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL,
                     credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
                     userName = credentialEntry.username.toString(),
                     displayName = credentialEntry.displayName?.toString(),
-                    icon = credentialEntry.icon.loadDrawable(context),
+                    icon = if (credentialEntry.hasDefaultIcon)
+                        context.getDrawable(R.drawable.ic_passkey_24)
+                    else credentialEntry.icon.loadDrawable(context),
                     shouldTintIcon = credentialEntry.hasDefaultIcon,
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
                 )
                 )
             }
@@ -165,6 +180,7 @@ private fun getCredentialOptionInfoList(
                     pendingIntent = credentialEntry.pendingIntent,
                     fillInIntent = it.frameworkExtrasIntent,
                     credentialType = CredentialType.UNKNOWN,
+                    rawCredentialType = credentialEntry.type,
                     credentialTypeDisplayName =
                     credentialEntry.typeDisplayName?.toString().orEmpty(),
                     userName = credentialEntry.title.toString(),
@@ -174,6 +190,10 @@ private fun getCredentialOptionInfoList(
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
                 )
                 )
             }

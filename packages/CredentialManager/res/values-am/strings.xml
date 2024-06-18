@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"ወደ የይለፍ ቃል የሌለው ወደፊት ስንሄድ የይለፍ ቃላት ከይለፍ ቁልፎች ጎን ለጎን ይገኛሉ።"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"የእርስዎን <xliff:g id="CREATETYPES">%1$s</xliff:g> የት እንደሚያስቀምጡ ይምረጡ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"መረጃዎን ለማስቀመጥ እና በቀጣይ ጊዜ በፍጥነት በመለያ ለመግባት የሚስጥር ቁልፍ አስተዳዳሪን ይምረጡ"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የይለፍ ቁልፍ ይፈጠር?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የይለፍ ቃል ይቀመጥ?"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"ወደ <xliff:g id="APPNAME">%1$s</xliff:g> ለመግባት የይለፍ ቁልፍ ይፈጠር?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"ወደ <xliff:g id="APPNAME">%1$s</xliff:g> ለመግባት የይለፍ ቃል ይቀመጥ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የመግቢያ መረጃ ይቀመጥ?"</string>
     <string name="passkey" msgid="632353688396759522">"የይለፍ ቁልፍ"</string>
     <string name="password" msgid="6738570945182936667">"የይለፍ ቃል"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ከሌላ መሣሪያ"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"የተለየ መሣሪያ ይጠቀሙ"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"ጥያቄ በ<xliff:g id="APP_NAME">%1$s</xliff:g> ተሰርዟል"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"የመግቢያ አማራጮች"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"ተጨማሪ"</string>
 </resources>

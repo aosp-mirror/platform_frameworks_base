@@ -16,13 +16,13 @@
 
 package com.android.wm.shell.flicker.service.splitscreen.flicker
 
-import android.tools.common.Rotation
-import android.tools.common.flicker.FlickerConfig
-import android.tools.common.flicker.annotation.ExpectedScenarios
-import android.tools.common.flicker.annotation.FlickerConfigProvider
-import android.tools.common.flicker.config.FlickerConfig
-import android.tools.common.flicker.config.FlickerServiceConfig
-import android.tools.device.flicker.junit.FlickerServiceJUnit4ClassRunner
+import android.tools.Rotation
+import android.tools.flicker.FlickerConfig
+import android.tools.flicker.annotation.ExpectedScenarios
+import android.tools.flicker.annotation.FlickerConfigProvider
+import android.tools.flicker.config.FlickerConfig
+import android.tools.flicker.config.FlickerServiceConfig
+import android.tools.flicker.junit.FlickerServiceJUnit4ClassRunner
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.DismissSplitScreenByDivider
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -69,6 +69,7 @@ public class AbsoluteVolumeBehaviorTest {
     private AudioSystemAdapter mSpyAudioSystem;
     private SystemServerAdapter mSystemServer;
     private SettingsAdapter mSettingsAdapter;
+    private AudioVolumeGroupHelperBase mAudioVolumeGroupHelper;
     private TestLooper mTestLooper;
 
     private AudioService mAudioService;
@@ -93,9 +94,11 @@ public class AbsoluteVolumeBehaviorTest {
         mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSystemServer = new NoOpSystemServerAdapter();
         mSettingsAdapter = new NoOpSettingsAdapter();
+        mAudioVolumeGroupHelper = new AudioVolumeGroupHelperBase();
 
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSystemServer,
-                mSettingsAdapter, mMockAudioPolicy, mTestLooper.getLooper()) {
+                mSettingsAdapter, mAudioVolumeGroupHelper, mMockAudioPolicy,
+                mTestLooper.getLooper()) {
             @Override
             public int getDeviceForStream(int stream) {
                 return AudioSystem.DEVICE_OUT_SPEAKER;

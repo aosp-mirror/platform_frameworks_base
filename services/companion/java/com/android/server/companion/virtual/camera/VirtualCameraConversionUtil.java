@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import android.companion.virtualcamera.IVirtualCameraService;
 import android.companion.virtualcamera.SupportedStreamConfiguration;
 import android.companion.virtualcamera.VirtualCameraConfiguration;
 import android.graphics.ImageFormat;
+import android.graphics.PixelFormat;
 import android.os.RemoteException;
 import android.view.Surface;
 
@@ -45,12 +46,12 @@ public final class VirtualCameraConversionUtil {
             getServiceCameraConfiguration(@NonNull VirtualCameraConfig cameraConfig)
                     throws RemoteException {
         VirtualCameraConfiguration serviceConfiguration = new VirtualCameraConfiguration();
-
         serviceConfiguration.supportedStreamConfigs =
                 cameraConfig.getStreamConfigs().stream()
                         .map(VirtualCameraConversionUtil::convertSupportedStreamConfiguration)
                         .toArray(SupportedStreamConfiguration[]::new);
-
+        serviceConfiguration.sensorOrientation = cameraConfig.getSensorOrientation();
+        serviceConfiguration.lensFacing = cameraConfig.getLensFacing();
         serviceConfiguration.virtualCameraCallback = convertCallback(cameraConfig.getCallback());
         return serviceConfiguration;
     }
@@ -60,17 +61,15 @@ public final class VirtualCameraConversionUtil {
             @NonNull IVirtualCameraCallback camera) {
         return new android.companion.virtualcamera.IVirtualCameraCallback.Stub() {
             @Override
-            public void onStreamConfigured(
-                    int streamId, Surface surface, int width, int height, int pixelFormat)
-                    throws RemoteException {
-                VirtualCameraStreamConfig streamConfig =
-                        createStreamConfig(width, height, pixelFormat);
-                camera.onStreamConfigured(streamId, surface, streamConfig);
+            public void onStreamConfigured(int streamId, Surface surface, int width, int height,
+                    int format) throws RemoteException {
+                camera.onStreamConfigured(streamId, surface, width, height,
+                        convertToJavaFormat(format));
             }
 
             @Override
             public void onProcessCaptureRequest(int streamId, int frameId) throws RemoteException {
-                camera.onProcessCaptureRequest(streamId, frameId, /*metadata=*/ null);
+                camera.onProcessCaptureRequest(streamId, frameId);
             }
 
             @Override
@@ -81,23 +80,30 @@ public final class VirtualCameraConversionUtil {
     }
 
     @NonNull
-    private static VirtualCameraStreamConfig createStreamConfig(
-            int width, int height, int pixelFormat) {
-        return new VirtualCameraStreamConfig(width, height, pixelFormat);
-    }
-
-    @NonNull
     private static SupportedStreamConfiguration convertSupportedStreamConfiguration(
             VirtualCameraStreamConfig stream) {
         SupportedStreamConfiguration supportedConfig = new SupportedStreamConfiguration();
         supportedConfig.height = stream.getHeight();
         supportedConfig.width = stream.getWidth();
-        supportedConfig.pixelFormat = convertFormat(stream.getFormat());
+        supportedConfig.pixelFormat = convertToHalFormat(stream.getFormat());
+        supportedConfig.maxFps = stream.getMaximumFramesPerSecond();
         return supportedConfig;
     }
 
-    private static int convertFormat(int format) {
-        return format == ImageFormat.YUV_420_888 ? Format.YUV_420_888 : Format.UNKNOWN;
+    private static int convertToHalFormat(int javaFormat) {
+        return switch (javaFormat) {
+            case ImageFormat.YUV_420_888 -> Format.YUV_420_888;
+            case PixelFormat.RGBA_8888 -> Format.RGBA_8888;
+            default -> Format.UNKNOWN;
+        };
+    }
+
+    private static int convertToJavaFormat(int halFormat) {
+        return switch (halFormat) {
+            case Format.YUV_420_888 -> ImageFormat.YUV_420_888;
+            case Format.RGBA_8888 -> PixelFormat.RGBA_8888;
+            default -> ImageFormat.UNKNOWN;
+        };
     }
 
     private VirtualCameraConversionUtil() {

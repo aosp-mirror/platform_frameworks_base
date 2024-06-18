@@ -16,6 +16,10 @@
 
 package com.android.systemui.communal.ui.compose
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
@@ -32,15 +36,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.zIndex
-import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
+import com.android.systemui.communal.ui.compose.extensions.plus
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -109,13 +113,10 @@ internal constructor(
 
     internal fun onDragStart(offset: Offset, contentOffset: Offset) {
         state.layoutInfo.visibleItemsInfo
-            .firstOrNull { item ->
-                // grid item offset is based off grid content container so we need to deduct
-                // before content padding from the initial pointer position
-                item.isEditable &&
-                    (offset.x - contentOffset.x).toInt() in item.offset.x..item.offsetEnd.x &&
-                    (offset.y - contentOffset.y).toInt() in item.offset.y..item.offsetEnd.y
-            }
+            .filter { item -> contentListState.isItemEditable(item.index) }
+            // grid item offset is based off grid content container so we need to deduct
+            // before content padding from the initial pointer position
+            .firstItemAtOffset(offset - contentOffset)
             ?.apply {
                 dragStartPointerOffset = offset - this.offset.toOffset()
                 draggingItemIndex = index
@@ -148,12 +149,11 @@ internal constructor(
         val middleOffset = startOffset + (endOffset - startOffset) / 2f
 
         val targetItem =
-            state.layoutInfo.visibleItemsInfo.find { item ->
-                item.isEditable &&
-                    middleOffset.x.toInt() in item.offset.x..item.offsetEnd.x &&
-                    middleOffset.y.toInt() in item.offset.y..item.offsetEnd.y &&
-                    draggingItem.index != item.index
-            }
+            state.layoutInfo.visibleItemsInfo
+                .asSequence()
+                .filter { item -> contentListState.isItemEditable(item.index) }
+                .filter { item -> draggingItem.index != item.index }
+                .firstItemAtOffset(middleOffset)
 
         if (targetItem != null) {
             val scrollToIndex =
@@ -187,10 +187,6 @@ internal constructor(
     private val LazyGridItemInfo.offsetEnd: IntOffset
         get() = this.offset + this.size
 
-    /** Whether the grid item can be dragged or be a drop target. Only widget card is editable. */
-    private val LazyGridItemInfo.isEditable: Boolean
-        get() = contentListState.list[this.index] is CommunalContentModel.Widget
-
     /** Calculate the amount dragged out of bound on both sides. Returns 0f if not overscrolled */
     private fun checkForOverscroll(startOffset: Offset, endOffset: Offset): Float {
         return when {
@@ -210,34 +206,33 @@ internal constructor(
     }
 }
 
-private operator fun IntOffset.plus(size: IntSize): IntOffset {
-    return IntOffset(x + size.width, y + size.height)
-}
-
-private operator fun Offset.plus(size: Size): Offset {
-    return Offset(x + size.width, y + size.height)
-}
-
 fun Modifier.dragContainer(
     dragDropState: GridDragDropState,
-    beforeContentPadding: ContentPaddingInPx
+    contentOffset: Offset,
+    viewModel: BaseCommunalViewModel,
 ): Modifier {
-    return pointerInput(dragDropState, beforeContentPadding) {
-        detectDragGesturesAfterLongPress(
-            onDrag = { change, offset ->
-                change.consume()
-                dragDropState.onDrag(offset = offset)
-            },
-            onDragStart = { offset ->
-                dragDropState.onDragStart(
-                    offset,
-                    Offset(beforeContentPadding.startPadding, beforeContentPadding.topPadding)
-                )
-            },
-            onDragEnd = { dragDropState.onDragInterrupted() },
-            onDragCancel = { dragDropState.onDragInterrupted() }
-        )
-    }
+    return this.then(
+        pointerInput(dragDropState, contentOffset) {
+            detectDragGesturesAfterLongPress(
+                onDrag = { change, offset ->
+                    change.consume()
+                    dragDropState.onDrag(offset = offset)
+                },
+                onDragStart = { offset ->
+                    dragDropState.onDragStart(offset, contentOffset)
+                    viewModel.onReorderWidgetStart()
+                },
+                onDragEnd = {
+                    dragDropState.onDragInterrupted()
+                    viewModel.onReorderWidgetEnd()
+                },
+                onDragCancel = {
+                    dragDropState.onDragInterrupted()
+                    viewModel.onReorderWidgetCancel()
+                }
+            )
+        }
+    )
 }
 
 /** Wrap LazyGrid item with additional modifier needed for drag and drop. */
@@ -247,24 +242,39 @@ fun LazyGridItemScope.DraggableItem(
     dragDropState: GridDragDropState,
     index: Int,
     enabled: Boolean,
+    selected: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable (isDragging: Boolean) -> Unit
 ) {
     if (!enabled) {
         return Box(modifier = modifier) { content(false) }
     }
+
     val dragging = index == dragDropState.draggingItemIndex
+    val itemAlpha: Float by
+        animateFloatAsState(
+            targetValue = if (dragDropState.isDraggingToRemove) 0.5f else 1f,
+            label = "DraggableItemAlpha"
+        )
     val draggingModifier =
         if (dragging) {
             Modifier.zIndex(1f).graphicsLayer {
                 translationX = dragDropState.draggingItemOffset.x
                 translationY = dragDropState.draggingItemOffset.y
-                alpha = if (dragDropState.isDraggingToRemove) 0.5f else 1f
+                alpha = itemAlpha
             }
         } else {
             Modifier.animateItemPlacement()
         }
-    Box(modifier = modifier.then(draggingModifier), propagateMinConstraints = true) {
-        content(dragging)
+
+    Box(modifier) {
+        AnimatedVisibility(
+            visible = (dragging || selected) && !dragDropState.isDraggingToRemove,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            HighlightedItem()
+        }
+        Box(modifier = draggingModifier, propagateMinConstraints = true) { content(dragging) }
     }
 }

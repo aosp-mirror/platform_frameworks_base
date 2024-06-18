@@ -7,3 +7,22 @@ flag {
     description: "When enabled, allows setting and displaying local overrides via adb."
     bug: "298392357"
 }
+
+flag {
+    name: "load_aconfig_defaults"
+    namespace: "core_experiments_team_internal"
+    description: "When enabled, loads aconfig default values into DeviceConfig on boot."
+    bug: "311155098"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "stage_all_aconfig_flags"
+    namespace: "core_experiments_team_internal"
+    description: "Stage _all_ aconfig flags on writes, even local ones."
+    bug: "326598713"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

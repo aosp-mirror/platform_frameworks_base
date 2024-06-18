@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ኃይል በመሙላት ላይ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • በፍጥነት ኃይልን በመሙላት ላይ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • በዝግታ ኃይልን በመሙላት ላይ"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ባትሪን ለመጠበቅ ኃይል መሙላት ተብቷል"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ተለዋዋጭን ኃይል በመሙላት ላይ ችግር"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> - ባትሪን ለመጠበቅ ኃይል መሙላት በይቆይ ላይ"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • የኃይል መሙላት መለዋወጫን ይፈትሹ"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"አውታረ መረብ ተቆልፏል"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ምንም SIM የለም"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ጥቅም ላይ የማይውል ሲም።"</string>
@@ -108,7 +108,7 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"መሣሪያ እንደገና ከጀመረ በኋላ ስርዓተ ጥለት ያስፈልጋል"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"መሣሪያ እንደገና ከጀመረ በኋላ ፒን ያስፈልጋል"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"መሣሪያ እንደገና ከጀመረ በኋላ የይለፍ ቃል ያስፈልጋል"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ለተጨማሪ ደህንነት በምትኩ ስርዓተ ጥለት ይጠቀሙ"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ለተጨማሪ ደህንነት በምትኩ ሥርዓተ ጥለት ይጠቀሙ"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ለተጨማሪ ደህንነት በምትኩ ፒን ይጠቀሙ"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ለተጨማሪ ደህንነት በምትኩ የይለፍ ቃል ይጠቀሙ"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"መሣሪያ በአስተዳዳሪ ተቆልፏል"</string>

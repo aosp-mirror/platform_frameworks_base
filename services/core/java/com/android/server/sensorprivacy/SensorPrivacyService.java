@@ -45,6 +45,11 @@ import static android.hardware.SensorPrivacyManager.Sources.OTHER;
 import static android.hardware.SensorPrivacyManager.Sources.QS_TILE;
 import static android.hardware.SensorPrivacyManager.Sources.SETTINGS;
 import static android.hardware.SensorPrivacyManager.Sources.SHELL;
+import static android.hardware.SensorPrivacyManager.StateTypes.AUTOMOTIVE_DRIVER_ASSISTANCE_APPS;
+import static android.hardware.SensorPrivacyManager.StateTypes.AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS;
+import static android.hardware.SensorPrivacyManager.StateTypes.AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS;
+import static android.hardware.SensorPrivacyManager.StateTypes.DISABLED;
+import static android.hardware.SensorPrivacyManager.StateTypes.ENABLED;
 import static android.hardware.SensorPrivacyManager.TOGGLE_TYPE_HARDWARE;
 import static android.hardware.SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE;
 import static android.os.UserHandle.USER_NULL;
@@ -52,6 +57,9 @@ import static android.service.SensorPrivacyIndividualEnabledSensorProto.UNKNOWN;
 
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION;
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__ACTION_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_APPS;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS;
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_OFF;
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_ON;
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__CAMERA;
@@ -63,8 +71,11 @@ import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__SOURCE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.write;
 
+import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -87,6 +98,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
+import android.hardware.CameraPrivacyAllowlistEntry;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
 import android.hardware.SensorPrivacyManager;
@@ -123,6 +135,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.camera.flags.Flags;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
@@ -131,6 +144,7 @@ import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 
@@ -139,6 +153,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -154,7 +169,24 @@ public final class SensorPrivacyService extends SystemService {
             SensorPrivacyService.class.getName() + ".action.disable_sensor_privacy";
 
     public static final int REMINDER_DIALOG_DELAY_MILLIS = 500;
-
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    private static final int ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS =
+            PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS;
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    private static final int ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS =
+            PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS;
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    private static final int ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_APPS =
+            PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_APPS;
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    private static final int ACTION__TOGGLE_ON =
+            PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_ON;
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    private static final int ACTION__TOGGLE_OFF =
+            PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_OFF;
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    private static final int ACTION__ACTION_UNKNOWN =
+            PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__ACTION_UNKNOWN;
     private final Context mContext;
     private final SensorPrivacyServiceImpl mSensorPrivacyServiceImpl;
     private final UserManagerInternal mUserManagerInternal;
@@ -176,6 +208,9 @@ public final class SensorPrivacyService extends SystemService {
     private CallStateHelper mCallStateHelper;
     private KeyguardManager mKeyguardManager;
 
+    List<CameraPrivacyAllowlistEntry> mCameraPrivacyAllowlist =
+            new ArrayList<CameraPrivacyAllowlistEntry>();
+
     private int mCurrentUser = USER_NULL;
 
     public SensorPrivacyService(Context context) {
@@ -192,6 +227,15 @@ public final class SensorPrivacyService extends SystemService {
         mPackageManagerInternal = getLocalService(PackageManagerInternal.class);
         mNotificationManager = mContext.getSystemService(NotificationManager.class);
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl();
+        ArrayMap<String, Boolean> cameraPrivacyAllowlist =
+                SystemConfig.getInstance().getCameraPrivacyAllowlist();
+
+        for (Map.Entry<String, Boolean> entry : cameraPrivacyAllowlist.entrySet()) {
+            CameraPrivacyAllowlistEntry ent = new CameraPrivacyAllowlistEntry();
+            ent.packageName = entry.getKey();
+            ent.isMandatory =  entry.getValue();
+            mCameraPrivacyAllowlist.add(ent);
+        }
     }
 
     @Override
@@ -324,8 +368,15 @@ public final class SensorPrivacyService extends SystemService {
                     mHandler, mHandler::handleSensorPrivacyChanged);
             mSensorPrivacyStateController.setSensorPrivacyListener(
                     mHandler,
-                    (toggleType, userId, sensor, state) -> mHandler.handleSensorPrivacyChanged(
-                            userId, toggleType, sensor, state.isEnabled()));
+                    (toggleType, userId, sensor, state) -> {
+                        mHandler.handleSensorPrivacyChanged(
+                                userId, toggleType, sensor, state.isEnabled());
+                        if (Flags.cameraPrivacyAllowlist()) {
+                            mHandler.handleSensorPrivacyChanged(
+                                    userId, toggleType, sensor, state.getState());
+                        }
+                    });
+
         }
 
         // If sensor privacy is enabled for a sensor, but the device doesn't support sensor privacy
@@ -400,9 +451,15 @@ public final class SensorPrivacyService extends SystemService {
          * @param packageName The package name of the app using the sensor
          * @param sensor The sensor that is attempting to be used
          */
+        @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
         private void onSensorUseStarted(int uid, String packageName, int sensor) {
             UserHandle user = UserHandle.of(mCurrentUser);
-            if (!isCombinedToggleSensorPrivacyEnabled(sensor)) {
+
+            if (Flags.cameraPrivacyAllowlist() && (sensor == CAMERA) && isAutomotive(mContext)) {
+                if (!isCameraPrivacyEnabled(packageName)) {
+                    return;
+                }
+            } else if (!isCombinedToggleSensorPrivacyEnabled(sensor)) {
                 return;
             }
 
@@ -727,6 +784,12 @@ public final class SensorPrivacyService extends SystemService {
                     == Configuration.UI_MODE_TYPE_TELEVISION;
         }
 
+        private boolean isAutomotive(Context context) {
+            int uiMode = context.getResources().getConfiguration().uiMode;
+            return (uiMode & Configuration.UI_MODE_TYPE_MASK)
+                    == Configuration.UI_MODE_TYPE_CAR;
+        }
+
         /**
          * Sets the sensor privacy to the provided state and notifies all listeners of the new
          * state.
@@ -764,6 +827,225 @@ public final class SensorPrivacyService extends SystemService {
             }
 
             setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, source, sensor, enable);
+        }
+
+
+        @Override
+        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+        @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
+        public void setToggleSensorPrivacyState(int userId, int source, int sensor, int state) {
+            if (DEBUG) {
+                Log.d(TAG, "callingUid=" + Binder.getCallingUid()
+                        + " callingPid=" + Binder.getCallingPid()
+                        + " setToggleSensorPrivacyState("
+                        + "userId=" + userId
+                        + " source=" + source
+                        + " sensor=" + sensor
+                        + " state=" + state
+                        + ")");
+            }
+            enforceManageSensorPrivacyPermission();
+            if (userId == UserHandle.USER_CURRENT) {
+                userId = mCurrentUser;
+            }
+
+            if (!canChangeToggleSensorPrivacy(userId, sensor)) {
+                return;
+            }
+            if (!supportsSensorToggle(TOGGLE_TYPE_SOFTWARE, sensor)) {
+                // Do not enable sensor privacy if the device doesn't support it.
+                return;
+            }
+
+            setToggleSensorPrivacyStateUnchecked(TOGGLE_TYPE_SOFTWARE, userId, source, sensor,
+                    state);
+        }
+
+        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+        private void setToggleSensorPrivacyStateUnchecked(int toggleType, int userId, int source,
+                int sensor, int state) {
+            if (DEBUG) {
+                Log.d(TAG, "callingUid=" + Binder.getCallingUid()
+                        + " callingPid=" + Binder.getCallingPid()
+                        + " setToggleSensorPrivacyStateUnchecked("
+                        + "userId=" + userId
+                        + " source=" + source
+                        + " sensor=" + sensor
+                        + " state=" + state
+                        + ")");
+            }
+            long[] lastChange = new long[1];
+            mSensorPrivacyStateController.atomic(() -> {
+                SensorState sensorState = mSensorPrivacyStateController
+                        .getState(toggleType, userId, sensor);
+                lastChange[0] = sensorState.getLastChange();
+                mSensorPrivacyStateController.setState(
+                        toggleType, userId, sensor, state, mHandler,
+                        changeSuccessful -> {
+                            if (changeSuccessful) {
+                                if (userId == mUserManagerInternal.getProfileParentId(userId)) {
+                                    mHandler.sendMessage(PooledLambda.obtainMessage(
+                                            SensorPrivacyServiceImpl::logSensorPrivacyStateToggle,
+                                            this,
+                                            source, sensor, state, lastChange[0], false));
+                                }
+                            }
+                        });
+            });
+        }
+
+        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+        private void logSensorPrivacyStateToggle(int source, int sensor, int state,
+                long lastChange, boolean onShutDown) {
+            long logMins = Math.max(0, (getCurrentTimeMillis() - lastChange) / (1000 * 60));
+
+            int logAction = ACTION__ACTION_UNKNOWN;
+            if (!onShutDown) {
+                switch(state) {
+                    case ENABLED :
+                        logAction = ACTION__TOGGLE_OFF;
+                        break;
+                    case DISABLED :
+                        logAction = ACTION__TOGGLE_ON;
+                        break;
+                    case AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS :
+                        logAction = ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS;
+                        break;
+                    case AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS :
+                        logAction = ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS;
+                        break;
+                    case AUTOMOTIVE_DRIVER_ASSISTANCE_APPS :
+                        logAction = ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_APPS;
+                        break;
+                    default :
+                        logAction = ACTION__ACTION_UNKNOWN;
+                        break;
+                }
+            }
+
+            int logSensor = PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__SENSOR_UNKNOWN;
+            switch(sensor) {
+                case CAMERA:
+                    logSensor = PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__CAMERA;
+                    break;
+                case MICROPHONE:
+                    logSensor = PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__MICROPHONE;
+                    break;
+                default:
+                    logSensor = PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__SENSOR_UNKNOWN;
+                    break;
+            }
+
+            int logSource = PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__SOURCE_UNKNOWN;
+            switch(source) {
+                case QS_TILE :
+                    logSource = PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__QS_TILE;
+                    break;
+                case DIALOG :
+                    logSource = PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__DIALOG;
+                    break;
+                case SETTINGS:
+                    logSource = PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__SETTINGS;
+                    break;
+                default:
+                    logSource = PRIVACY_SENSOR_TOGGLE_INTERACTION__SOURCE__SOURCE_UNKNOWN;
+                    break;
+            }
+
+            if (DEBUG || DEBUG_LOGGING) {
+                Log.d(TAG, "Logging sensor toggle interaction:" + " logSensor=" + logSensor
+                        + " logAction=" + logAction + " logSource=" + logSource + " logMins="
+                        + logMins);
+            }
+            write(PRIVACY_SENSOR_TOGGLE_INTERACTION, logSensor, logAction, logSource, logMins);
+
+        }
+
+        @Override
+        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+        @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
+        public void setToggleSensorPrivacyStateForProfileGroup(int userId, int source, int sensor,
+                int  state) {
+            enforceManageSensorPrivacyPermission();
+            if (userId == UserHandle.USER_CURRENT) {
+                userId = mCurrentUser;
+            }
+            int parentId = mUserManagerInternal.getProfileParentId(userId);
+            forAllUsers(userId2 -> {
+                if (parentId == mUserManagerInternal.getProfileParentId(userId2)) {
+                    setToggleSensorPrivacyState(userId2, source, sensor, state);
+                }
+            });
+        }
+
+        @Override
+        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+        @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
+        public List<CameraPrivacyAllowlistEntry> getCameraPrivacyAllowlist() {
+            enforceObserveSensorPrivacyPermission();
+            return mCameraPrivacyAllowlist;
+        }
+
+        @Override
+        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+        @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
+        public boolean isCameraPrivacyEnabled(String packageName) {
+            if (DEBUG) {
+                Log.d(TAG, "callingUid=" + Binder.getCallingUid()
+                        + " callingPid=" + Binder.getCallingPid()
+                        + " isCameraPrivacyEnabled("
+                        + "packageName=" + packageName
+                        + ")");
+            }
+            enforceObserveSensorPrivacyPermission();
+
+            int state =  mSensorPrivacyStateController.getState(TOGGLE_TYPE_SOFTWARE, mCurrentUser,
+                    CAMERA).getState();
+            if (state == ENABLED) {
+                return true;
+            } else if (state == DISABLED) {
+                return false;
+            } else if (state == AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS) {
+                for (CameraPrivacyAllowlistEntry entry : mCameraPrivacyAllowlist) {
+                    if ((packageName.equals(entry.packageName)) && !entry.isMandatory) {
+                        return false;
+                    }
+                }
+                return true;
+            } else if (state == AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS) {
+                for (CameraPrivacyAllowlistEntry entry : mCameraPrivacyAllowlist) {
+                    if ((packageName.equals(entry.packageName)) && entry.isMandatory) {
+                        return false;
+                    }
+                }
+                return true;
+            } else if (state == AUTOMOTIVE_DRIVER_ASSISTANCE_APPS) {
+                for (CameraPrivacyAllowlistEntry entry : mCameraPrivacyAllowlist) {
+                    if (packageName.equals(entry.packageName)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+        @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
+        public int getToggleSensorPrivacyState(int toggleType, int sensor) {
+            if (DEBUG) {
+                Log.d(TAG, "callingUid=" + Binder.getCallingUid()
+                        + " callingPid=" + Binder.getCallingPid()
+                        + " getToggleSensorPrivacyState("
+                        + "toggleType=" + toggleType
+                        + " sensor=" + sensor
+                        + ")");
+            }
+            enforceObserveSensorPrivacyPermission();
+
+            return mSensorPrivacyStateController.getState(toggleType, mCurrentUser, sensor)
+                    .getState();
         }
 
         private void setToggleSensorPrivacyUnchecked(int toggleType, int userId, int source,
@@ -899,16 +1181,23 @@ public final class SensorPrivacyService extends SystemService {
          * Enforces the caller contains the necessary permission to change the state of sensor
          * privacy.
          */
+        @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
         private void enforceManageSensorPrivacyPermission() {
-            enforcePermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY,
-                    "Changing sensor privacy requires the following permission: "
-                            + MANAGE_SENSOR_PRIVACY);
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_SENSOR_PRIVACY) == PERMISSION_GRANTED) {
+                return;
+            }
+
+            String message = "Changing sensor privacy requires the following permission: "
+                    + MANAGE_SENSOR_PRIVACY;
+            throw new SecurityException(message);
         }
 
         /**
          * Enforces the caller contains the necessary permission to observe changes to the sate of
          * sensor privacy.
          */
+        @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
         private void enforceObserveSensorPrivacyPermission() {
             String systemUIPackage = mContext.getString(R.string.config_systemUi);
             int systemUIAppId = UserHandle.getAppId(mPackageManagerInternal
@@ -917,15 +1206,13 @@ public final class SensorPrivacyService extends SystemService {
                 // b/221782106, possible race condition with role grant might bootloop device.
                 return;
             }
-            enforcePermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY,
-                    "Observing sensor privacy changes requires the following permission: "
-                            + android.Manifest.permission.OBSERVE_SENSOR_PRIVACY);
-        }
-
-        private void enforcePermission(String permission, String message) {
-            if (mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) == PERMISSION_GRANTED) {
                 return;
             }
+
+            String message = "Observing sensor privacy changes requires the following permission: "
+                    + android.Manifest.permission.OBSERVE_SENSOR_PRIVACY;
             throw new SecurityException(message);
         }
 
@@ -1293,11 +1580,13 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         @Override
+        @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
                 FileDescriptor err, String[] args, ShellCallback callback,
                 ResultReceiver resultReceiver) {
             (new ShellCommand() {
                 @Override
+                @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
                 public int onCommand(String cmd) {
                     if (cmd == null) {
                         return handleDefaultCommands(cmd);
@@ -1327,6 +1616,45 @@ public final class SensorPrivacyService extends SystemService {
                             setToggleSensorPrivacy(userId, SHELL, sensor, false);
                         }
                         break;
+                        case "automotive_driver_assistance_apps" : {
+                            if (Flags.cameraPrivacyAllowlist()) {
+                                int sensor = sensorStrToId(getNextArgRequired());
+                                if ((!isAutomotive(mContext)) || (sensor != CAMERA)) {
+                                    pw.println("Command not valid for this sensor");
+                                    return -1;
+                                }
+
+                                setToggleSensorPrivacyState(userId, SHELL, sensor,
+                                        AUTOMOTIVE_DRIVER_ASSISTANCE_APPS);
+                            }
+                        }
+                        break;
+                        case "automotive_driver_assistance_helpful_apps" : {
+                            if (Flags.cameraPrivacyAllowlist()) {
+                                int sensor = sensorStrToId(getNextArgRequired());
+                                if ((!isAutomotive(mContext)) || (sensor != CAMERA)) {
+                                    pw.println("Command not valid for this sensor");
+                                    return -1;
+                                }
+
+                                setToggleSensorPrivacyState(userId, SHELL, sensor,
+                                        AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS);
+                            }
+                        }
+                        break;
+                        case "automotive_driver_assistance_required_apps" : {
+                            if (Flags.cameraPrivacyAllowlist()) {
+                                int sensor = sensorStrToId(getNextArgRequired());
+                                if ((!isAutomotive(mContext)) || (sensor != CAMERA)) {
+                                    pw.println("Command not valid for this sensor");
+                                    return -1;
+                                }
+
+                                setToggleSensorPrivacyState(userId, SHELL, sensor,
+                                        AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS);
+                            }
+                        }
+                        break;
                         default:
                             return handleDefaultCommands(cmd);
                     }
@@ -1349,6 +1677,24 @@ public final class SensorPrivacyService extends SystemService {
                     pw.println("  disable USER_ID SENSOR");
                     pw.println("    Disable privacy for a certain sensor.");
                     pw.println("");
+                    if (Flags.cameraPrivacyAllowlist()) {
+                        if (isAutomotive(mContext)) {
+                            pw.println("  automotive_driver_assistance_apps USER_ID SENSOR");
+                            pw.println("    Disable privacy for automotive apps which help you"
+                                    + " drive and apps which are required by OEM");
+                            pw.println("");
+                            pw.println("  automotive_driver_assistance_helpful_apps "
+                                    + "USER_ID SENSOR");
+                            pw.println("    Disable privacy for automotive apps which "
+                                    + "help you drive.");
+                            pw.println("");
+                            pw.println("  automotive_driver_assistance_required_apps "
+                                    + "USER_ID SENSOR");
+                            pw.println("    Disable privacy for automotive apps which are "
+                                    + "required by OEM.");
+                            pw.println("");
+                        }
+                    }
                 }
             }).exec(this, in, out, err, args, callback, resultReceiver);
         }
@@ -1444,6 +1790,38 @@ public final class SensorPrivacyService extends SystemService {
                                 i);
                         try {
                             listener.onSensorPrivacyChanged(toggleType, sensor, enabled);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Caught an exception notifying listener " + listener + ": ",
+                                    e);
+                        }
+                    }
+                } finally {
+                    mToggleSensorListeners.finishBroadcast();
+                }
+            }
+
+            mSensorPrivacyServiceImpl.showSensorStateChangedActivity(sensor, toggleType);
+        }
+
+        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+        public void handleSensorPrivacyChanged(int userId, int toggleType, int sensor,
+                int state) {
+            if (userId == mCurrentUser) {
+                mSensorPrivacyServiceImpl.setGlobalRestriction(sensor,
+                        mSensorPrivacyServiceImpl.isCombinedToggleSensorPrivacyEnabled(sensor));
+            }
+
+            if (userId != mCurrentUser) {
+                return;
+            }
+            synchronized (mListenerLock) {
+                try {
+                    final int count = mToggleSensorListeners.beginBroadcast();
+                    for (int i = 0; i < count; i++) {
+                        ISensorPrivacyListener listener = mToggleSensorListeners.getBroadcastItem(
+                                i);
+                        try {
+                            listener.onSensorPrivacyStateChanged(toggleType, sensor, state);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Caught an exception notifying listener " + listener + ": ",
                                     e);

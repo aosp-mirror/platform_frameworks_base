@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.Process;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -87,8 +86,12 @@ public class WebViewLibraryLoader {
             } finally {
                 // We must do our best to always notify the update service, even if something fails.
                 try {
-                    WebViewFactory.getUpdateServiceUnchecked().notifyRelroCreationCompleted();
-                } catch (RemoteException e) {
+                    if (Flags.updateServiceIpcWrapper()) {
+                        WebViewUpdateManager.getInstance().notifyRelroCreationCompleted();
+                    } else {
+                        WebViewFactory.getUpdateServiceUnchecked().notifyRelroCreationCompleted();
+                    }
+                } catch (Exception e) {
                     Log.e(LOGTAG, "error notifying update service", e);
                 }
 
@@ -114,8 +117,12 @@ public class WebViewLibraryLoader {
             public void run() {
                 try {
                     Log.e(LOGTAG, "relro file creator for " + abi + " crashed. Proceeding without");
-                    WebViewFactory.getUpdateService().notifyRelroCreationCompleted();
-                } catch (RemoteException e) {
+                    if (Flags.updateServiceIpcWrapper()) {
+                        WebViewUpdateManager.getInstance().notifyRelroCreationCompleted();
+                    } else {
+                        WebViewFactory.getUpdateService().notifyRelroCreationCompleted();
+                    }
+                } catch (Exception e) {
                     Log.e(LOGTAG, "Cannot reach WebViewUpdateService. " + e.getMessage());
                 }
             }

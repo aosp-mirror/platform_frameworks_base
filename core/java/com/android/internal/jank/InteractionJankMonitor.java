@@ -117,8 +117,6 @@ public class InteractionJankMonitor {
     @Deprecated public static final int CUJ_NOTIFICATION_SHADE_ROW_SWIPE = Cuj.CUJ_NOTIFICATION_SHADE_ROW_SWIPE;
     @Deprecated public static final int CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE = Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
     @Deprecated public static final int CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE = Cuj.CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE;
-    @Deprecated public static final int CUJ_LAUNCHER_APP_CLOSE_TO_HOME = Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME;
-    @Deprecated public static final int CUJ_LAUNCHER_QUICK_SWITCH = Cuj.CUJ_LAUNCHER_QUICK_SWITCH;
     @Deprecated public static final int CUJ_NOTIFICATION_HEADS_UP_APPEAR = Cuj.CUJ_NOTIFICATION_HEADS_UP_APPEAR;
     @Deprecated public static final int CUJ_NOTIFICATION_HEADS_UP_DISAPPEAR = Cuj.CUJ_NOTIFICATION_HEADS_UP_DISAPPEAR;
     @Deprecated public static final int CUJ_NOTIFICATION_ADD = Cuj.CUJ_NOTIFICATION_ADD;

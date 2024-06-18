@@ -49,6 +49,7 @@ import java.util.zip.ZipOutputStream
 class HostStubGen(val options: HostStubGenOptions) {
     fun run() {
         val errors = HostStubGenErrors()
+        val stats = HostStubGenStats()
 
         // Load all classes.
         val allClasses = loadClassStructures(options.inJar.get)
@@ -80,7 +81,14 @@ class HostStubGen(val options: HostStubGenOptions) {
                 options.enableClassChecker.get,
                 allClasses,
                 errors,
+                stats,
         )
+
+        // Dump statistics, if specified.
+        options.statsFile.ifSet {
+            PrintWriter(it).use { pw -> stats.dump(pw) }
+            log.i("Dump file created at $it")
+        }
     }
 
     /**
@@ -237,6 +245,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             enableChecker: Boolean,
             classes: ClassNodes,
             errors: HostStubGenErrors,
+            stats: HostStubGenStats,
             ) {
         log.i("Converting %s into [stub: %s, impl: %s] ...", inJar, outStubJar, outImplJar)
         log.i("ASM CheckClassAdapter is %s", if (enableChecker) "enabled" else "disabled")
@@ -254,7 +263,8 @@ class HostStubGen(val options: HostStubGenOptions) {
                         while (inEntries.hasMoreElements()) {
                             val entry = inEntries.nextElement()
                             convertSingleEntry(inZip, entry, stubOutStream, implOutStream,
-                                    filter, packageRedirector, enableChecker, classes, errors)
+                                    filter, packageRedirector, enableChecker, classes, errors,
+                                    stats)
                         }
                         log.i("Converted all entries.")
                     }
@@ -287,6 +297,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             enableChecker: Boolean,
             classes: ClassNodes,
             errors: HostStubGenErrors,
+            stats: HostStubGenStats,
             ) {
         log.d("Entry: %s", entry.name)
         log.withIndent {
@@ -300,7 +311,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             // If it's a class, convert it.
             if (name.endsWith(".class")) {
                 processSingleClass(inZip, entry, stubOutStream, implOutStream, filter,
-                        packageRedirector, enableChecker, classes, errors)
+                        packageRedirector, enableChecker, classes, errors, stats)
                 return
             }
 
@@ -354,6 +365,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             enableChecker: Boolean,
             classes: ClassNodes,
             errors: HostStubGenErrors,
+            stats: HostStubGenStats,
             ) {
         val classInternalName = entry.name.replaceFirst("\\.class$".toRegex(), "")
         val classPolicy = filter.getPolicyForClass(classInternalName)
@@ -370,7 +382,7 @@ class HostStubGen(val options: HostStubGenOptions) {
                     stubOutStream.putNextEntry(newEntry)
                     convertClass(classInternalName, /*forImpl=*/false, bis,
                             stubOutStream, filter, packageRedirector, enableChecker, classes,
-                            errors)
+                            errors, null)
                     stubOutStream.closeEntry()
                 }
             }
@@ -383,7 +395,7 @@ class HostStubGen(val options: HostStubGenOptions) {
                     implOutStream.putNextEntry(newEntry)
                     convertClass(classInternalName, /*forImpl=*/true, bis,
                             implOutStream, filter, packageRedirector, enableChecker, classes,
-                            errors)
+                            errors, stats)
                     implOutStream.closeEntry()
                 }
             }
@@ -403,6 +415,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             enableChecker: Boolean,
             classes: ClassNodes,
             errors: HostStubGenErrors,
+            stats: HostStubGenStats?,
             ) {
         val cr = ClassReader(input)
 
@@ -420,6 +433,7 @@ class HostStubGen(val options: HostStubGenOptions) {
                 enablePostTrace = options.enablePostTrace.get,
                 enableNonStubMethodCallDetection = options.enableNonStubMethodCallDetection.get,
                 errors = errors,
+                stats = stats,
         )
         outVisitor = BaseAdapter.getVisitor(classInternalName, classes, outVisitor, filter,
                 packageRedirector, forImpl, visitorOptions)

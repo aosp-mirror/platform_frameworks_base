@@ -1,0 +1,6 @@
+map_s2_level: 6
+cache_tile_s2_level: 2
+disk_tile_s2_level: 0
+model_a_meters: 322622.0
+model_b_meters: 2828.0
+model_rmse_meters: 0.707

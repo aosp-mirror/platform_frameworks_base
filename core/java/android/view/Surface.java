@@ -39,8 +39,10 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.flags.Flags;
 
 import dalvik.system.CloseGuard;
+import dalvik.system.VMRuntime;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -100,6 +102,10 @@ public class Surface implements Parcelable {
     private static native int nativeSetFrameRate(
             long nativeObject, float frameRate, int compatibility, int changeFrameRateStrategy);
     private static native void nativeDestroy(long nativeObject);
+
+    // 5MB is a wild guess for what the average surface should be. On most new phones, a full-screen
+    // surface is about 9MB... but not all surfaces are screen size. This should be a nice balance.
+    private static final long SURFACE_NATIVE_ALLOCATION_SIZE_BYTES = 5_000_000;
 
     public static final @android.annotation.NonNull Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -274,7 +280,8 @@ public class Surface implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_CATEGORY_"},
             value = {FRAME_RATE_CATEGORY_DEFAULT, FRAME_RATE_CATEGORY_NO_PREFERENCE,
-                    FRAME_RATE_CATEGORY_LOW, FRAME_RATE_CATEGORY_NORMAL, FRAME_RATE_CATEGORY_HIGH})
+                    FRAME_RATE_CATEGORY_LOW, FRAME_RATE_CATEGORY_NORMAL,
+                    FRAME_RATE_CATEGORY_HIGH_HINT, FRAME_RATE_CATEGORY_HIGH})
     public @interface FrameRateCategory {}
 
     // From native_window.h or window.h. Keep these in sync.
@@ -308,11 +315,21 @@ public class Surface implements Parcelable {
     public static final int FRAME_RATE_CATEGORY_NORMAL = 3;
 
     /**
+     * Hints that, as a result of a user interaction, an animation is likely to start.
+     * This category is a signal that a user interaction heuristic determined the need of a
+     * high refresh rate, and is not an explicit request from the app.
+     * As opposed to {@link #FRAME_RATE_CATEGORY_HIGH}, this vote may be ignored in favor of
+     * more explicit votes.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_HIGH_HINT = 4;
+
+    /**
      * Indicates a frame rate suitable for animations that require a high frame rate, which may
      * increase smoothness but may also increase power usage.
      * @hide
      */
-    public static final int FRAME_RATE_CATEGORY_HIGH = 4;
+    public static final int FRAME_RATE_CATEGORY_HIGH = 5;
 
     /**
      * Create an empty surface, which will later be filled in by readFromParcel().
@@ -320,6 +337,7 @@ public class Surface implements Parcelable {
      */
     @UnsupportedAppUsage
     public Surface() {
+        registerNativeMemoryUsage();
     }
 
     /**
@@ -332,6 +350,7 @@ public class Surface implements Parcelable {
      */
     public Surface(@NonNull SurfaceControl from) {
         copyFrom(from);
+        registerNativeMemoryUsage();
     }
 
     /**
@@ -359,6 +378,7 @@ public class Surface implements Parcelable {
             mName = surfaceTexture.toString();
             setNativeObjectLocked(nativeCreateFromSurfaceTexture(surfaceTexture));
         }
+        registerNativeMemoryUsage();
     }
 
     /* called from android_view_Surface_createFromIGraphicBufferProducer() */
@@ -367,6 +387,7 @@ public class Surface implements Parcelable {
         synchronized (mLock) {
             setNativeObjectLocked(nativeObject);
         }
+        registerNativeMemoryUsage();
     }
 
     @Override
@@ -378,6 +399,7 @@ public class Surface implements Parcelable {
             release();
         } finally {
             super.finalize();
+            freeNativeMemoryUsage();
         }
     }
 
@@ -402,7 +424,7 @@ public class Surface implements Parcelable {
     /**
      * Free all server-side state associated with this surface and
      * release this object's reference.  This method can only be
-     * called from the process that created the service.
+     * called from the process that created the surface.
      * @hide
      */
     @UnsupportedAppUsage
@@ -1051,8 +1073,7 @@ public class Surface implements Parcelable {
             if (error == -EINVAL) {
                 throw new IllegalArgumentException("Invalid argument to Surface.setFrameRate()");
             } else if (error != 0) {
-                throw new RuntimeException("Failed to set frame rate on Surface. Native error: "
-                        + error);
+                Log.e(TAG, "Failed to set frame rate on Surface. Native error: " + error);
             }
         }
     }
@@ -1230,6 +1251,18 @@ public class Surface implements Parcelable {
 
         boolean isWideColorGamut() {
             return mIsWideColorGamut;
+        }
+    }
+
+    private static void registerNativeMemoryUsage() {
+        if (Flags.enableSurfaceNativeAllocRegistrationRo()) {
+            VMRuntime.getRuntime().registerNativeAllocation(SURFACE_NATIVE_ALLOCATION_SIZE_BYTES);
+        }
+    }
+
+    private static void freeNativeMemoryUsage() {
+        if (Flags.enableSurfaceNativeAllocRegistrationRo()) {
+            VMRuntime.getRuntime().registerNativeFree(SURFACE_NATIVE_ALLOCATION_SIZE_BYTES);
         }
     }
 }

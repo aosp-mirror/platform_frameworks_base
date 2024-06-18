@@ -29,6 +29,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
 import android.provider.Telephony.Carriers;
+import android.provider.Telephony.Carriers.EditStatus;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
@@ -37,6 +38,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.telephony.flags.Flags;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -571,6 +573,13 @@ public class ApnSetting implements Parcelable {
     private final boolean mEsimBootstrapProvisioning;
 
     /**
+     * The APN edited status.
+     *
+     * Note it is intended not using this field for {@link #equals(Object)} or {@link #hashCode()}.
+     */
+    private final @EditStatus int mEditedStatus;
+
+    /**
      * Returns the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
      * up by this APN setting. Note this value will only be used when MTU size is not provided
      * in {@code DataCallResponse#getMtuV4()} during network bring up.
@@ -992,6 +1001,22 @@ public class ApnSetting implements Parcelable {
         return mEsimBootstrapProvisioning;
     }
 
+    /**
+     * @return APN edited status. APN could be added/edited/deleted by a user or carrier.
+     *
+     * @see Carriers#UNEDITED
+     * @see Carriers#USER_EDITED
+     * @see Carriers#USER_DELETED
+     * @see Carriers#CARRIER_EDITED
+     * @see Carriers#CARRIER_DELETED
+     *
+     * @hide
+     */
+    @EditStatus
+    public int getEditedStatus() {
+        return mEditedStatus;
+    }
+
     private ApnSetting(Builder builder) {
         this.mEntryName = builder.mEntryName;
         this.mApnName = builder.mApnName;
@@ -1030,6 +1055,7 @@ public class ApnSetting implements Parcelable {
         this.mAlwaysOn = builder.mAlwaysOn;
         this.mInfrastructureBitmask = builder.mInfrastructureBitmask;
         this.mEsimBootstrapProvisioning = builder.mEsimBootstrapProvisioning;
+        this.mEditedStatus = builder.mEditedStatus;
     }
 
     /**
@@ -1113,6 +1139,8 @@ public class ApnSetting implements Parcelable {
                         Telephony.Carriers.INFRASTRUCTURE_BITMASK)))
                 .setEsimBootstrapProvisioning(cursor.getInt(
                         cursor.getColumnIndexOrThrow(Carriers.ESIM_BOOTSTRAP_PROVISIONING)) == 1)
+                .setEditedStatus(cursor.getInt(
+                        cursor.getColumnIndexOrThrow(Carriers.EDITED_STATUS)))
                 .buildWithoutCheck();
     }
 
@@ -1154,6 +1182,7 @@ public class ApnSetting implements Parcelable {
                 .setAlwaysOn(apn.mAlwaysOn)
                 .setInfrastructureBitmask(apn.mInfrastructureBitmask)
                 .setEsimBootstrapProvisioning(apn.mEsimBootstrapProvisioning)
+                .setEditedStatus(apn.mEditedStatus)
                 .buildWithoutCheck();
     }
 
@@ -1202,6 +1231,7 @@ public class ApnSetting implements Parcelable {
         sb.append(", ").append(mInfrastructureBitmask);
         sb.append(", ").append(Objects.hash(mUser, mPassword));
         sb.append(", ").append(mEsimBootstrapProvisioning);
+        sb.append(", ").append(TelephonyUtils.apnEditedStatusToString(mEditedStatus));
         return sb.toString();
     }
 
@@ -1748,6 +1778,7 @@ public class ApnSetting implements Parcelable {
         dest.writeBoolean(mAlwaysOn);
         dest.writeInt(mInfrastructureBitmask);
         dest.writeBoolean(mEsimBootstrapProvisioning);
+        dest.writeInt(mEditedStatus);
     }
 
     private static ApnSetting readFromParcel(Parcel in) {
@@ -1785,6 +1816,7 @@ public class ApnSetting implements Parcelable {
                 .setAlwaysOn(in.readBoolean())
                 .setInfrastructureBitmask(in.readInt())
                 .setEsimBootstrapProvisioning(in.readBoolean())
+                .setEditedStatus(in.readInt())
                 .buildWithoutCheck();
     }
 
@@ -1868,6 +1900,7 @@ public class ApnSetting implements Parcelable {
         private boolean mAlwaysOn;
         private int mInfrastructureBitmask = INFRASTRUCTURE_CELLULAR | INFRASTRUCTURE_SATELLITE;
         private boolean mEsimBootstrapProvisioning;
+        private @EditStatus int mEditedStatus = Carriers.UNEDITED;
 
         /**
          * Default constructor for Builder.
@@ -2310,11 +2343,33 @@ public class ApnSetting implements Parcelable {
          *
          * @param esimBootstrapProvisioning {@code true} if the APN is used for eSIM bootstrap
          * provisioning, {@code false} otherwise.
+         *
+         * @return The builder.
          * @hide
          */
         @NonNull
         public Builder setEsimBootstrapProvisioning(boolean esimBootstrapProvisioning) {
             this.mEsimBootstrapProvisioning = esimBootstrapProvisioning;
+            return this;
+        }
+
+        /**
+         * Set the edited status. APN could be added/edited/deleted by a user or carrier.
+         *
+         * @param editedStatus The APN edited status
+         * @return The builder.
+         *
+         * @see Carriers#UNEDITED
+         * @see Carriers#USER_EDITED
+         * @see Carriers#USER_DELETED
+         * @see Carriers#CARRIER_EDITED
+         * @see Carriers#CARRIER_DELETED
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setEditedStatus(@EditStatus int editedStatus) {
+            this.mEditedStatus = editedStatus;
             return this;
         }
 

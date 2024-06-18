@@ -499,10 +499,14 @@ public final class ContentCaptureManager {
 
     @Nullable
     @GuardedBy("mLock")
-    private Handler mHandler;
+    private Handler mUiHandler;
+
+    @Nullable
+    @GuardedBy("mLock")
+    private Handler mContentCaptureHandler;
 
     @GuardedBy("mLock")
-    private MainContentCaptureSession mMainSession;
+    private ContentCaptureSession mMainSession;
 
     @Nullable // set on-demand by addDumpable()
     private Dumper mDumpable;
@@ -587,11 +591,10 @@ public final class ContentCaptureManager {
      */
     @NonNull
     @UiThread
-    public MainContentCaptureSession getMainContentCaptureSession() {
+    public ContentCaptureSession getMainContentCaptureSession() {
         synchronized (mLock) {
             if (mMainSession == null) {
-                mMainSession = new MainContentCaptureSession(
-                        mContext, this, prepareContentCaptureHandler(), mService);
+                mMainSession = prepareMainSession();
                 if (sVerbose) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
             }
             return mMainSession;
@@ -600,15 +603,36 @@ public final class ContentCaptureManager {
 
     @NonNull
     @GuardedBy("mLock")
-    private Handler prepareContentCaptureHandler() {
-        if (mHandler == null) {
-            if (runOnBackgroundThreadEnabled()) {
-                mHandler = BackgroundThread.getHandler();
-            } else {
-                mHandler = Handler.createAsync(Looper.getMainLooper());
-            }
+    private ContentCaptureSession prepareMainSession() {
+        if (runOnBackgroundThreadEnabled()) {
+            return new MainContentCaptureSessionV2(
+                    mContext,
+                    this,
+                    prepareUiHandler(),
+                    prepareContentCaptureHandler(),
+                    mService
+            );
+        } else {
+            return new MainContentCaptureSession(mContext, this, prepareUiHandler(), mService);
         }
-        return mHandler;
+    }
+
+    @NonNull
+    @GuardedBy("mLock")
+    private Handler prepareContentCaptureHandler() {
+        if (mContentCaptureHandler == null) {
+            mContentCaptureHandler = BackgroundThread.getHandler();
+        }
+        return mContentCaptureHandler;
+    }
+
+    @NonNull
+    @GuardedBy("mLock")
+    private Handler prepareUiHandler() {
+        if (mUiHandler == null) {
+            mUiHandler = Handler.createAsync(Looper.getMainLooper());
+        }
+        return mUiHandler;
     }
 
     /** @hide */
@@ -726,7 +750,7 @@ public final class ContentCaptureManager {
     public boolean isContentCaptureEnabled() {
         if (mOptions.lite) return false;
 
-        final MainContentCaptureSession mainSession;
+        final ContentCaptureSession mainSession;
         synchronized (mLock) {
             mainSession = mMainSession;
         }
@@ -777,7 +801,7 @@ public final class ContentCaptureManager {
             Log.d(TAG, "setContentCaptureEnabled(): setting to " + enabled + " for " + mContext);
         }
 
-        MainContentCaptureSession mainSession;
+        ContentCaptureSession mainSession;
         synchronized (mLock) {
             if (enabled) {
                 mFlags &= ~ContentCaptureContext.FLAG_DISABLED_BY_APP;
@@ -803,7 +827,7 @@ public final class ContentCaptureManager {
         final boolean flagSecureEnabled =
                 (params.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0;
 
-        MainContentCaptureSession mainSession;
+        ContentCaptureSession mainSession;
         boolean alreadyDisabledByApp;
         synchronized (mLock) {
             alreadyDisabledByApp = (mFlags & ContentCaptureContext.FLAG_DISABLED_BY_APP) != 0;

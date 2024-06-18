@@ -41,7 +41,7 @@ import java.util.List;
 
     NoOpInfoMediaManager(
             Context context,
-            String packageName,
+            @NonNull String packageName,
             Notification notification,
             LocalBluetoothManager localBluetoothManager) {
         super(context, packageName, notification, localBluetoothManager);
@@ -55,11 +55,6 @@ import java.util.List;
     @Override
     protected void startScanOnRouter() {
         // Do nothing.
-    }
-
-    @Override
-    protected boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device) {
-        return false;
     }
 
     @Override
@@ -132,12 +127,6 @@ import java.util.List;
     @Override
     protected RoutingSessionInfo getRoutingSessionById(@NonNull String sessionId) {
         return null;
-    }
-
-    @NonNull
-    @Override
-    protected List<MediaRoute2Info> getAllRoutes() {
-        return Collections.emptyList();
     }
 
     @NonNull

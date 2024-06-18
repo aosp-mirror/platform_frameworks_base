@@ -51,6 +51,7 @@ import java.util.Map;
 import java.util.Set;
 
 /** {@hide} */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class XmlUtils {
     private static final String STRING_ARRAY_SEPARATOR = ":";
 

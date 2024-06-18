@@ -18,6 +18,7 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 /**
  * An exception specific to a service.
@@ -33,6 +34,7 @@ import android.annotation.SystemApi;
  * @hide
  */
 @SystemApi
+@RavenwoodKeepWholeClass
 public class ServiceSpecificException extends RuntimeException {
     public final int errorCode;
 

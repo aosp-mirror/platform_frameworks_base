@@ -16,14 +16,18 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
 
 val Kosmos.notificationStackAppearanceViewModel by Fixture {
     NotificationStackAppearanceViewModel(
+        dumpManager = dumpManager,
         stackAppearanceInteractor = notificationStackAppearanceInteractor,
         shadeInteractor = shadeInteractor,
+        sceneInteractor = sceneInteractor,
     )
 }

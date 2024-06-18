@@ -21,6 +21,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 /**
  * Provides the ability to cancel an operation in progress.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class CancellationSignal {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean mIsCanceled;

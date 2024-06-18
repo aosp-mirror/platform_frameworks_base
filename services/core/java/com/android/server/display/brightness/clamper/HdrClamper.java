@@ -104,8 +104,7 @@ public class HdrClamper {
     public void resetHdrConfig(HdrBrightnessData data, int width, int height,
             float minimumHdrPercentOfScreen, IBinder displayToken) {
         mHdrBrightnessData = data;
-        mHdrListener.mHdrMinPixels = minimumHdrPercentOfScreen <= 0 ? -1
-                : (float) (width * height) * minimumHdrPercentOfScreen;
+        mHdrListener.mHdrMinPixels = (float) (width * height) * minimumHdrPercentOfScreen;
         if (displayToken != mRegisteredDisplayToken) { // token changed, resubscribe
             if (mRegisteredDisplayToken != null) { // previous token not null, unsubscribe
                 mHdrListener.unregister(mRegisteredDisplayToken);
@@ -115,7 +114,7 @@ public class HdrClamper {
             // new token not null and hdr min % of the screen is set, subscribe.
             // e.g. for virtual display, HBM data will be missing and HdrListener
             // should not be registered
-            if (displayToken != null && mHdrListener.mHdrMinPixels > 0) {
+            if (displayToken != null && mHdrListener.mHdrMinPixels >= 0) {
                 mHdrListener.register(displayToken);
                 mRegisteredDisplayToken = displayToken;
             }
@@ -140,8 +139,11 @@ public class HdrClamper {
         pw.println("  mDesiredMaxBrightness=" + mDesiredMaxBrightness);
         pw.println("  mTransitionRate=" + mTransitionRate);
         pw.println("  mDesiredTransitionRate=" + mDesiredTransitionRate);
+        pw.println("  mHdrVisible=" + mHdrVisible);
+        pw.println("  mHdrListener.mHdrMinPixels=" + mHdrListener.mHdrMinPixels);
         pw.println("  mHdrBrightnessData=" + (mHdrBrightnessData == null ? "null"
                 : mHdrBrightnessData.toString()));
+        pw.println("  mHdrListener registered=" + (mRegisteredDisplayToken != null));
         pw.println("  mAmbientLux=" + mAmbientLux);
     }
 

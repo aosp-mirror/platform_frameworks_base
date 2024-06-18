@@ -49,6 +49,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions.LaunchCookie;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
@@ -784,7 +785,7 @@ public class MediaProjectionManagerServiceTest {
             @RecordContent int recordedContent)
             throws NameNotFoundException {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
-        projection.setLaunchCookie(mock(IBinder.class));
+        projection.setLaunchCookie(new LaunchCookie());
         projection.start(mIMediaProjectionCallback);
         projection.notifyVirtualDisplayCreated(10);
         // Waiting for user to review consent.
@@ -825,7 +826,7 @@ public class MediaProjectionManagerServiceTest {
     public void testSetUserReviewGrantedConsentResult_displayMirroring_noPriorSession()
             throws NameNotFoundException {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
-        projection.setLaunchCookie(mock(IBinder.class));
+        projection.setLaunchCookie(new LaunchCookie());
         projection.start(mIMediaProjectionCallback);
         // Skip setting the prior session details.
 
@@ -844,7 +845,7 @@ public class MediaProjectionManagerServiceTest {
     public void testSetUserReviewGrantedConsentResult_displayMirroring_sessionNotWaiting()
             throws NameNotFoundException {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
-        projection.setLaunchCookie(mock(IBinder.class));
+        projection.setLaunchCookie(new LaunchCookie());
         projection.start(mIMediaProjectionCallback);
         // Session is not waiting for user's consent.
         doReturn(true).when(mWindowManagerInternal).setContentRecordingSession(

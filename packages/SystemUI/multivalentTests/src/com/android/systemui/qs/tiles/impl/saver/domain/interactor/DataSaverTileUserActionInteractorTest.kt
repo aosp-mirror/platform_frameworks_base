@@ -23,7 +23,7 @@ import android.testing.LeakCheck
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.actions.intentInputs
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
@@ -75,7 +75,7 @@ class DataSaverTileUserActionInteractorTest : SysuiTestCase() {
                 EmptyCoroutineContext,
                 dataSaverController,
                 qsTileIntentUserActionHandler,
-                mock<DialogLaunchAnimator>(),
+                mock<DialogTransitionAnimator>(),
                 dialogFactory,
                 userFileManager,
             )

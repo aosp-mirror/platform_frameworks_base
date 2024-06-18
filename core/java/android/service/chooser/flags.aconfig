@@ -2,9 +2,40 @@ package: "android.service.chooser"
 container: "system"
 
 flag {
-  name: "support_nfc_resolver"
-  namespace: "systemui"
-  description: "This flag controls the new NFC 'resolver' activity"
-  bug: "268089816"
+  name: "chooser_album_text"
+  namespace: "intentresolver"
+  description: "Flag controlling the album text subtype hint for sharesheet"
+  bug: "323380224"
+}
+
+flag {
+    name: "enable_sharesheet_metadata_extra"
+    namespace: "intentresolver"
+    description: "This flag enables sharesheet metadata to be displayed to users."
+    bug: "318942069"
+}
+
+flag {
+  name: "chooser_payload_toggling"
+  namespace: "intentresolver"
+  description: "This flag controls content toggling in Chooser"
+  bug: "302691505"
+}
+
+flag {
+  name: "enable_chooser_result"
+  namespace: "intentresolver"
+  description: "Provides additional callbacks with information about user actions in ChooserResult"
+  bug: "263474465"
+}
+
+flag {
+  name: "legacy_chooser_pinning_removal"
+  namespace: "intentresolver"
+  description: "Removing pinning functionality from the legacy chooser (used by partial screenshare)"
+  bug: "301068735"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 

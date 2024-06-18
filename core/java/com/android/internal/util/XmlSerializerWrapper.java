@@ -28,6 +28,7 @@ import java.util.Objects;
 /**
  * Wrapper which delegates all calls through to the given {@link XmlSerializer}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class XmlSerializerWrapper implements XmlSerializer {
     private final XmlSerializer mWrapped;
 

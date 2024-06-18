@@ -24,6 +24,7 @@ import android.util.Log;
  *
  * {@hide}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 class AndroidPrintStream extends LoggingPrintStream {
 
     private final int priority;

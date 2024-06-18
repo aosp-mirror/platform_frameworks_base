@@ -154,6 +154,14 @@ android_app {
     },
 
     generate_product_characteristics_rro: true,
+
+    flags_packages: [
+        "android.content.pm.flags-aconfig",
+        "android.provider.flags-aconfig",
+        "camera_platform_flags",
+        "android.net.platform.flags-aconfig",
+        "com.android.window.flags.window-aconfig",
+    ],
 }
 
 java_genrule {

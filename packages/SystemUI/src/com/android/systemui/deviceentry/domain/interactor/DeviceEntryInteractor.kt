@@ -20,18 +20,15 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
-import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -55,16 +52,14 @@ class DeviceEntryInteractor
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    repository: DeviceEntryRepository,
+    private val repository: DeviceEntryRepository,
     private val authenticationInteractor: AuthenticationInteractor,
     private val sceneInteractor: SceneInteractor,
     deviceEntryFaceAuthRepository: DeviceEntryFaceAuthRepository,
     trustRepository: TrustRepository,
     flags: SceneContainerFlags,
+    deviceUnlockedInteractor: DeviceUnlockedInteractor,
 ) {
-    val enteringDeviceFromBiometricUnlock: Flow<BiometricUnlockSource> =
-        repository.enteringDeviceFromBiometricUnlock
-
     /**
      * Whether the device is unlocked.
      *
@@ -74,19 +69,7 @@ constructor(
      * of this flow will always be `true`, even if the lockscreen is showing and still needs to be
      * dismissed by the user to proceed.
      */
-    val isUnlocked: StateFlow<Boolean> =
-        combine(
-                repository.isUnlocked,
-                authenticationInteractor.authenticationMethod,
-            ) { isUnlocked, authenticationMethod ->
-                (!authenticationMethod.isSecure || isUnlocked) &&
-                    authenticationMethod != AuthenticationMethodModel.Sim
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = false,
-            )
+    val isUnlocked: StateFlow<Boolean> = deviceUnlockedInteractor.isDeviceUnlocked
 
     /**
      * Whether the device has been entered (i.e. the lockscreen has been dismissed, by any method).
@@ -96,12 +79,11 @@ constructor(
      * Note: This does not imply that the lockscreen is visible or not.
      */
     val isDeviceEntered: StateFlow<Boolean> =
-        sceneInteractor.desiredScene
-            .map { it.key }
+        sceneInteractor.currentScene
             .filter { currentScene ->
-                currentScene == SceneKey.Gone || currentScene == SceneKey.Lockscreen
+                currentScene == Scenes.Gone || currentScene == Scenes.Lockscreen
             }
-            .map { it == SceneKey.Gone }
+            .map { it == Scenes.Gone }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -159,19 +141,19 @@ constructor(
     fun attemptDeviceEntry() {
         // TODO (b/307768356),
         //       1. Check if the device is already authenticated by trust agent/passive biometrics
-        //       2. show SPFS/UDFPS bouncer if it is available AlternateBouncerInteractor.show
+        //       2. Show SPFS/UDFPS bouncer if it is available AlternateBouncerInteractor.show
         //       3. For face auth only setups trigger face auth, delay transitioning to bouncer for
         //          a small amount of time.
         //       4. Transition to bouncer scene
         applicationScope.launch {
             if (isAuthenticationRequired()) {
                 sceneInteractor.changeScene(
-                    scene = SceneModel(SceneKey.Bouncer),
+                    toScene = Scenes.Bouncer,
                     loggingReason = "request to unlock device while authentication required",
                 )
             } else {
                 sceneInteractor.changeScene(
-                    scene = SceneModel(SceneKey.Gone),
+                    toScene = Scenes.Gone,
                     loggingReason = "request to unlock device while authentication isn't required",
                 )
             }
@@ -197,8 +179,8 @@ constructor(
     init {
         if (flags.isEnabled()) {
             applicationScope.launch {
-                authenticationInteractor.authenticationChallengeResult.collectLatest { successful ->
-                    if (successful) {
+                authenticationInteractor.onAuthenticationResult.collectLatest { isSuccessful ->
+                    if (isSuccessful) {
                         repository.reportSuccessfulAuthentication()
                     }
                 }

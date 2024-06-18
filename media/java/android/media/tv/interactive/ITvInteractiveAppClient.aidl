@@ -48,6 +48,7 @@ oneway interface ITvInteractiveAppClient {
     void onRequestCurrentChannelLcn(int seq);
     void onRequestStreamVolume(int seq);
     void onRequestTrackInfoList(int seq);
+    void onRequestSelectedTrackInfo(int seq);
     void onRequestCurrentTvInputId(int seq);
     void onRequestTimeShiftMode(int seq);
     void onRequestAvailableSpeeds(int seq);
@@ -60,7 +61,10 @@ oneway interface ITvInteractiveAppClient {
     void onSetTvRecordingInfo(in String recordingId, in TvRecordingInfo recordingInfo, int seq);
     void onRequestTvRecordingInfo(in String recordingId, int seq);
     void onRequestTvRecordingInfoList(in int type, int seq);
-    void onRequestSigning(
-            in String id, in String algorithm, in String alias, in byte[] data, int seq);
+    void onRequestSigning(in String id, in String algorithm, in String alias, in byte[] data,
+            int seq);
+    void onRequestSigning2(in String id, in String algorithm, in String host,
+            int port, in byte[] data, int seq);
+    void onRequestCertificate(in String host, int port, int seq);
     void onAdRequest(in AdRequest request, int Seq);
 }

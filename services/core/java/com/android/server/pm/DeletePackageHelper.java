@@ -282,8 +282,8 @@ final class DeletePackageHelper {
         // other processes clean up before deleting resources.
         synchronized (mPm.mInstallLock) {
             if (info.mArgs != null) {
-                mRemovePackageHelper.cleanUpResources(info.mArgs.mCodeFile,
-                        info.mArgs.mInstructionSets);
+                mRemovePackageHelper.cleanUpResources(info.mArgs.getPackageName(),
+                        info.mArgs.getCodeFile(), info.mArgs.getInstructionSets());
             }
 
             boolean reEnableStub = false;
@@ -487,7 +487,7 @@ final class DeletePackageHelper {
                     // Do not uninstall the APK if an app should be cached
                     boolean keepUninstalledPackage =
                             mPm.shouldKeepUninstalledPackageLPr(packageName);
-                    if (ps.isInstalledOrHasDataOnAnyOtherUser(
+                    if (ps.isInstalledOnAnyOtherUser(
                             mUserManagerInternal.getUserIds(), userId) || keepUninstalledPackage) {
                         // Other users still have this package installed, so all
                         // we need to do is clear this user's data and save that
@@ -533,7 +533,7 @@ final class DeletePackageHelper {
                 // artifacts are not stored in the same directory as the APKs
                 deleteArtDexoptArtifacts(packageName);
             }
-            deleteInstalledPackageLIF(ps, deleteCodeAndResources, flags, allUserHandles,
+            deleteInstalledPackageLIF(ps, userId, deleteCodeAndResources, flags, allUserHandles,
                     outInfo, writeSettings);
         }
 
@@ -554,7 +554,7 @@ final class DeletePackageHelper {
     }
 
     @GuardedBy("mPm.mInstallLock")
-    private void deleteInstalledPackageLIF(PackageSetting ps,
+    private void deleteInstalledPackageLIF(PackageSetting ps, int userId,
             boolean deleteCodeAndResources, int flags, @NonNull int[] allUserHandles,
             @NonNull PackageRemovedInfo outInfo, boolean writeSettings) {
         synchronized (mPm.mLock) {
@@ -567,11 +567,11 @@ final class DeletePackageHelper {
 
         // Delete package data from internal structures and also remove data if flag is set
         mRemovePackageHelper.removePackageDataLIF(
-                ps, allUserHandles, outInfo, flags, writeSettings);
+                ps, userId, allUserHandles, outInfo, flags, writeSettings);
 
         // Delete application code and resources only for parent packages
         if (deleteCodeAndResources) {
-            outInfo.mArgs = new InstallArgs(
+            outInfo.mArgs = new CleanUpArgs(ps.getName(),
                     ps.getPathString(), getAppDexInstructionSets(
                             ps.getPrimaryCpuAbiLegacy(), ps.getSecondaryCpuAbiLegacy()));
             if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.mArgs);
@@ -677,8 +677,8 @@ final class DeletePackageHelper {
             flags |= PackageManager.DELETE_KEEP_DATA;
         }
         synchronized (mPm.mInstallLock) {
-            deleteInstalledPackageLIF(deletedPs, true, flags, allUserHandles, outInfo,
-                    writeSettings);
+            deleteInstalledPackageLIF(deletedPs, UserHandle.USER_ALL, true, flags, allUserHandles,
+                    outInfo, writeSettings);
         }
     }
 
@@ -829,6 +829,9 @@ final class DeletePackageHelper {
                         int returnCodeOfChild;
                         for (int childId : childUserIds) {
                             if (childId == userId) continue;
+                            if (mUserManagerInternal.getProfileParentId(childId) != userId) {
+                                continue;
+                            }
 
                             // If package is not present in child then don't attempt to delete.
                             if (!packageState.getUserStateOrDefault(childId).isInstalled()) {

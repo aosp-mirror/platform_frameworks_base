@@ -507,10 +507,16 @@ public final class RadioMetadata implements Parcelable {
      *
      * @param key The key the value is stored under.
      * @return a bitmap identifier or 0 if it's missing.
-     * @hide This API is not thoroughly elaborated yet
+     * @throws NullPointerException if metadata key is {@code null}
+     * @throws IllegalArgumentException if the metadata with the key is not found in
+     * metadata or the key is not of bitmap-key type
      */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
     public int getBitmapId(@NonNull String key) {
-        if (!METADATA_KEY_ICON.equals(key) && !METADATA_KEY_ART.equals(key)) return 0;
+        Objects.requireNonNull(key, "Metadata key can not be null");
+        if (!METADATA_KEY_ICON.equals(key) && !METADATA_KEY_ART.equals(key)) {
+            throw new IllegalArgumentException("Failed to retrieve key " + key + " as bitmap key");
+        }
         return getInt(key);
     }
 
@@ -587,7 +593,7 @@ public final class RadioMetadata implements Parcelable {
      * Helper for getting the String key used by {@link RadioMetadata} from the
      * corrsponding native integer key.
      *
-     * @param editorKey The key used by the editor
+     * @param nativeKey The key used by the editor
      * @return the key used by this class or null if no mapping exists
      * @hide
      */
@@ -737,11 +743,11 @@ public final class RadioMetadata implements Parcelable {
          * Put a {@link RadioMetadata.Clock} into the meta data. Custom keys may be used, but if the
          * METADATA_KEYs defined in this class are used they may only be one of the following:
          * <ul>
-         * <li>{@link #MEADATA_KEY_CLOCK}</li>
+         * <li>{@link #METADATA_KEY_CLOCK}</li>
          * </ul>
          *
          * @param utcSecondsSinceEpoch Number of seconds since epoch for UTC + 0 timezone.
-         * @param timezoneOffsetInMinutes Offset of timezone from UTC + 0 in minutes.
+         * @param timezoneOffsetMinutes Offset of timezone from UTC + 0 in minutes.
          * @return the same Builder instance.
          */
         public Builder putClock(String key, long utcSecondsSinceEpoch, int timezoneOffsetMinutes) {

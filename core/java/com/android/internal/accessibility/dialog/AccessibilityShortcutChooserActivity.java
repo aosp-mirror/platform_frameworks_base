@@ -262,6 +262,11 @@ public class AccessibilityShortcutChooserActivity extends Activity {
         return mMenuDialog;
     }
 
+    @VisibleForTesting
+    public Dialog getPermissionDialog() {
+        return mPermissionDialog;
+    }
+
     private AlertDialog createMenuDialog() {
         final String dialogTitle =
                 getString(R.string.accessibility_select_shortcut_menu_title);

@@ -333,4 +333,14 @@ public abstract class DevicePolicyManagerInternal {
      */
     public abstract List<EnforcingUser> getUserRestrictionSources(String restriction,
                 @UserIdInt int userId);
+
+    /**
+     * Enforces resolved security logging policy, should only be invoked from device policy engine.
+     */
+    public abstract void enforceSecurityLoggingPolicy(boolean enabled);
+
+    /**
+     * Enforces resolved audit logging policy, should only be invoked from device policy engine.
+     */
+    public abstract void enforceAuditLoggingPolicy(boolean enabled);
 }

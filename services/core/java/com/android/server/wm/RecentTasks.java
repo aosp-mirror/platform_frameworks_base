@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.FLAG_AND_UNLOCKED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
@@ -69,6 +68,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -89,9 +89,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Class for managing the recent tasks list. The list is ordered by most recent (index 0) to the
@@ -167,8 +167,9 @@ class RecentTasks {
 
     /**
      * Mapping of user id -> whether recent tasks have been loaded for that user.
+     * The AtomicBoolean per user will be locked when reading persisted task from storage.
      */
-    private final SparseBooleanArray mUsersWithRecentsLoaded = new SparseBooleanArray(
+    private final SparseArray<AtomicBoolean> mUsersWithRecentsLoaded = new SparseArray<>(
             DEFAULT_INITIAL_CAPACITY);
 
     /**
@@ -481,29 +482,49 @@ class RecentTasks {
 
     /**
      * Loads the persistent recentTasks for {@code userId} into this list from persistent storage.
-     * Does nothing if they are already loaded.
-     *
-     * @param userId the user Id
+     * Does nothing if they are already loaded. This may perform IO operation, so the caller should
+     * not hold a lock.
      */
-    void loadUserRecentsLocked(int userId) {
-        if (mUsersWithRecentsLoaded.get(userId)) {
-            // User already loaded, return early
-            return;
-        }
-
-        // Load the task ids if not loaded.
-        loadPersistedTaskIdsForUserLocked(userId);
-
-        // Check if any tasks are added before recents is loaded
-        final SparseBooleanArray preaddedTasks = new SparseBooleanArray();
-        for (final Task task : mTasks) {
-            if (task.mUserId == userId && shouldPersistTaskLocked(task)) {
-                preaddedTasks.put(task.mTaskId, true);
+    void loadRecentTasksIfNeeded(int userId) {
+        AtomicBoolean userLoaded;
+        synchronized (mService.mGlobalLock) {
+            userLoaded = mUsersWithRecentsLoaded.get(userId);
+            if (userLoaded == null) {
+                mUsersWithRecentsLoaded.append(userId, userLoaded = new AtomicBoolean());
             }
         }
+        synchronized (userLoaded) {
+            if (userLoaded.get()) {
+                // The recent tasks of the user are already loaded.
+                return;
+            }
+            // Read task files from storage.
+            final SparseBooleanArray persistedTaskIds =
+                    mTaskPersister.readPersistedTaskIdsFromFileForUser(userId);
+            final TaskPersister.RecentTaskFiles taskFiles = TaskPersister.loadTasksForUser(userId);
+            synchronized (mService.mGlobalLock) {
+                restoreRecentTasksLocked(userId, persistedTaskIds, taskFiles);
+            }
+            userLoaded.set(true);
+        }
+    }
 
-        Slog.i(TAG, "Loading recents for user " + userId + " into memory.");
-        List<Task> tasks = mTaskPersister.restoreTasksForUserLocked(userId, preaddedTasks);
+    /** Restores recent tasks from raw data (the files are already read into memory). */
+    private void restoreRecentTasksLocked(int userId, SparseBooleanArray persistedTaskIds,
+            TaskPersister.RecentTaskFiles taskFiles) {
+        mTaskPersister.setPersistedTaskIds(userId, persistedTaskIds);
+        mPersistedTaskIds.put(userId, persistedTaskIds.clone());
+        // Check if any tasks are added before recents is loaded.
+        final IntArray existedTaskIds = new IntArray();
+        for (int i = mTasks.size() - 1; i >= 0; i--) {
+            final Task task = mTasks.get(i);
+            if (task.mUserId == userId && shouldPersistTaskLocked(task)) {
+                existedTaskIds.add(task.mTaskId);
+            }
+        }
+        Slog.i(TAG, "Restoring recents for user " + userId);
+        final ArrayList<Task> tasks = mTaskPersister.restoreTasksForUserLocked(userId, taskFiles,
+                existedTaskIds);
 
         // Tasks are ordered from most recent to least recent. Update the last active time to be
         // in sync with task recency when device reboots, so the most recent task has the
@@ -516,37 +537,34 @@ class RecentTasks {
 
         mTasks.addAll(tasks);
         cleanupLocked(userId);
-        mUsersWithRecentsLoaded.put(userId, true);
 
         // If we have tasks added before loading recents, we need to update persistent task IDs.
-        if (preaddedTasks.size() > 0) {
+        if (existedTaskIds.size() > 0) {
             syncPersistentTaskIdsLocked();
         }
     }
 
-    private void loadPersistedTaskIdsForUserLocked(int userId) {
-        // An empty instead of a null set here means that no persistent taskIds were present
-        // on file when we loaded them.
-        if (mPersistedTaskIds.get(userId) == null) {
-            mPersistedTaskIds.put(userId, mTaskPersister.loadPersistedTaskIdsForUser(userId));
-            Slog.i(TAG, "Loaded persisted task ids for user " + userId);
-        }
+    private boolean isRecentTasksLoaded(int userId) {
+        final AtomicBoolean userLoaded = mUsersWithRecentsLoaded.get(userId);
+        return userLoaded != null && userLoaded.get();
     }
 
     /**
      * @return whether the {@param taskId} is currently in use for the given user.
      */
     boolean containsTaskId(int taskId, int userId) {
-        loadPersistedTaskIdsForUserLocked(userId);
-        return mPersistedTaskIds.get(userId).get(taskId);
+        final SparseBooleanArray taskIds = mPersistedTaskIds.get(userId);
+        return taskIds != null && taskIds.get(taskId);
     }
 
-    /**
-     * @return all the task ids for the user with the given {@param userId}.
-     */
-    SparseBooleanArray getTaskIdsForUser(int userId) {
-        loadPersistedTaskIdsForUserLocked(userId);
-        return mPersistedTaskIds.get(userId);
+    /** Returns all the task ids for the user from {@link #usersWithRecentsLoadedLocked}. */
+    SparseBooleanArray getTaskIdsForLoadedUser(int loadedUserId) {
+        final SparseBooleanArray taskIds = mPersistedTaskIds.get(loadedUserId);
+        if (taskIds == null) {
+            Slog.wtf(TAG, "Loaded user without loaded tasks, userId=" + loadedUserId);
+            return new SparseBooleanArray();
+        }
+        return taskIds;
     }
 
     /**
@@ -565,7 +583,7 @@ class RecentTasks {
     private void syncPersistentTaskIdsLocked() {
         for (int i = mPersistedTaskIds.size() - 1; i >= 0; i--) {
             int userId = mPersistedTaskIds.keyAt(i);
-            if (mUsersWithRecentsLoaded.get(userId)) {
+            if (isRecentTasksLoaded(userId)) {
                 // Recents are loaded only after task ids are loaded. Therefore, the set of taskids
                 // referenced here should not be null.
                 mPersistedTaskIds.valueAt(i).clear();
@@ -621,7 +639,7 @@ class RecentTasks {
         int len = 0;
         for (int i = 0; i < usersWithRecentsLoaded.length; i++) {
             int userId = mUsersWithRecentsLoaded.keyAt(i);
-            if (mUsersWithRecentsLoaded.valueAt(i)) {
+            if (mUsersWithRecentsLoaded.valueAt(i).get()) {
                 usersWithRecentsLoaded[len++] = userId;
             }
         }
@@ -639,7 +657,7 @@ class RecentTasks {
      * @param userId the id of the user
      */
     void unloadUserDataFromMemoryLocked(int userId) {
-        if (mUsersWithRecentsLoaded.get(userId)) {
+        if (isRecentTasksLoaded(userId)) {
             Slog.i(TAG, "Unloading recents for user " + userId + " from memory.");
             mUsersWithRecentsLoaded.delete(userId);
             removeTasksForUserLocked(userId);
@@ -922,11 +940,6 @@ class RecentTasks {
         return mService.mAmInternal.getCurrentProfileIds();
     }
 
-    @VisibleForTesting
-    boolean isUserRunning(int userId, int flags) {
-        return mService.mAmInternal.isUserRunning(userId, flags);
-    }
-
     /**
      * @return the list of recent tasks for presentation.
      */
@@ -942,13 +955,6 @@ class RecentTasks {
     private ArrayList<ActivityManager.RecentTaskInfo> getRecentTasksImpl(int maxNum, int flags,
             boolean getTasksAllowed, int userId, int callingUid) {
         final boolean withExcluded = (flags & RECENT_WITH_EXCLUDED) != 0;
-
-        if (!isUserRunning(userId, FLAG_AND_UNLOCKED)) {
-            Slog.i(TAG, "user " + userId + " is still locked. Cannot load recents");
-            return new ArrayList<>();
-        }
-        loadUserRecentsLocked(userId);
-
         final Set<Integer> includedUsers = getProfileIds(userId);
         includedUsers.add(Integer.valueOf(userId));
 
@@ -1135,16 +1141,17 @@ class RecentTasks {
                     if (!mFreezeTaskListReordering) {
                         // Simple case: this is not an affiliated task, so we just move it to the
                         // front unless overridden by the provided activity options
+                        int indexToAdd = findIndexToAdd(task);
                         mTasks.remove(taskIndex);
-                        mTasks.add(0, task);
+                        mTasks.add(indexToAdd, task);
                         if (taskIndex != 0) {
                             // Only notify when position changes
                             mTaskNotificationController.notifyTaskListUpdated();
                         }
 
                         if (DEBUG_RECENTS) {
-                            Slog.d(TAG_RECENTS, "addRecent: moving to top " + task
-                                    + " from " + taskIndex);
+                            Slog.d(TAG_RECENTS, "addRecent: moving " + task + " to index "
+                                    + indexToAdd + " from " + taskIndex);
                         }
                     }
                     notifyTaskPersisterLocked(task, false);
@@ -1229,6 +1236,42 @@ class RecentTasks {
 
         mCheckTrimmableTasksOnIdle = true;
         notifyTaskPersisterLocked(task, false /* flush */);
+    }
+
+    // Looks for a new index to move the recent Task. Note that the recent Task should not be
+    // placed higher than another recent Task that has higher hierarchical z-ordering.
+    private int findIndexToAdd(Task task) {
+        int indexToAdd = 0;
+        for (int i = 0; i < mTasks.size(); i++) {
+            final Task otherTask = mTasks.get(i);
+            if (task == otherTask) {
+                break;
+            }
+
+            if (!otherTask.isAttached()) {
+                // Stop searching if not attached.
+                break;
+            }
+
+            if (otherTask.inPinnedWindowingMode()) {
+                // Skip pip task without increasing index since pip is always on screen.
+                continue;
+            }
+
+            if (otherTask.topRunningActivity() == null) {
+                // Skip if there's no running activity in the Task.
+                continue;
+            }
+
+            // Stop searching if the task has higher z-ordering, or increase the index and
+            // continue the search.
+            if (task.compareTo(otherTask) > 0) {
+                break;
+            }
+
+            indexToAdd = i + 1;
+        }
+        return indexToAdd;
     }
 
     /**

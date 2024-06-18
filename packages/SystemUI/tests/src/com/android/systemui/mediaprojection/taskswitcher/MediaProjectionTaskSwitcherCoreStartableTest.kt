@@ -18,38 +18,27 @@ package com.android.systemui.mediaprojection.taskswitcher
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_PSS_TASK_SWITCHER
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.taskswitcher.ui.TaskSwitcherNotificationCoordinator
-import com.android.systemui.util.mockito.whenever
-import org.junit.Before
+import com.android.systemui.util.mockito.mock
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class MediaProjectionTaskSwitcherCoreStartableTest : SysuiTestCase() {
 
-    @Mock private lateinit var flags: FeatureFlags
-    @Mock private lateinit var coordinator: TaskSwitcherNotificationCoordinator
+    private val coordinator = mock<TaskSwitcherNotificationCoordinator>()
 
-    private lateinit var coreStartable: MediaProjectionTaskSwitcherCoreStartable
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        coreStartable = MediaProjectionTaskSwitcherCoreStartable(coordinator, flags)
-    }
+    private val coreStartable =
+        MediaProjectionTaskSwitcherCoreStartable(notificationCoordinatorLazy = { coordinator })
 
     @Test
     fun start_flagEnabled_startsCoordinator() {
-        whenever(flags.isEnabled(Flags.PARTIAL_SCREEN_SHARING_TASK_SWITCHER)).thenReturn(true)
+        mSetFlagsRule.enableFlags(FLAG_PSS_TASK_SWITCHER)
 
         coreStartable.start()
 
@@ -58,7 +47,7 @@ class MediaProjectionTaskSwitcherCoreStartableTest : SysuiTestCase() {
 
     @Test
     fun start_flagDisabled_doesNotStartCoordinator() {
-        whenever(flags.isEnabled(Flags.PARTIAL_SCREEN_SHARING_TASK_SWITCHER)).thenReturn(false)
+        mSetFlagsRule.disableFlags(FLAG_PSS_TASK_SWITCHER)
 
         coreStartable.start()
 

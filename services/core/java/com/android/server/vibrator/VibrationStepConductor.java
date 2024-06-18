@@ -21,7 +21,9 @@ import android.annotation.Nullable;
 import android.os.Build;
 import android.os.CombinedVibration;
 import android.os.IBinder;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
@@ -38,6 +40,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Creates and manages a queue of steps for performing a VibrationEffect, as well as coordinating
@@ -65,14 +69,17 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     public final VibrationThread.VibratorManagerHooks vibratorManagerHooks;
 
     private final DeviceAdapter mDeviceAdapter;
+    private final VibrationScaler mVibrationScaler;
 
     // Not guarded by lock because it's mostly used to read immutable fields by this conductor.
     // This is only modified here at the prepareToStart method which always runs at the vibration
     // thread, to update the adapted effect and report start time.
     private final HalVibration mVibration;
-
     private final PriorityQueue<Step> mNextSteps = new PriorityQueue<>();
     private final Queue<Step> mPendingOnVibratorCompleteSteps = new LinkedList<>();
+
+    @Nullable
+    private final CompletableFuture<Void> mRequestVibrationParamsFuture;
 
     // Signalling fields.
     // Note that vibrator callback signals may happen inside vibrator HAL calls made by the
@@ -97,10 +104,14 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
 
     VibrationStepConductor(HalVibration vib, VibrationSettings vibrationSettings,
             DeviceAdapter deviceAdapter,
+            VibrationScaler vibrationScaler,
+            CompletableFuture<Void> requestVibrationParamsFuture,
             VibrationThread.VibratorManagerHooks vibratorManagerHooks) {
         this.mVibration = vib;
         this.vibrationSettings = vibrationSettings;
         this.mDeviceAdapter = deviceAdapter;
+        mVibrationScaler = vibrationScaler;
+        mRequestVibrationParamsFuture = requestVibrationParamsFuture;
         this.vibratorManagerHooks = vibratorManagerHooks;
         this.mSignalVibratorsComplete =
                 new IntArray(mDeviceAdapter.getAvailableVibratorIds().length);
@@ -143,7 +154,18 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);
         }
-        // Scaling happened before the effect was dispatched to this conductor (or to input devices)
+
+        if (!mVibration.callerInfo.attrs.isFlagSet(
+                VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)) {
+            if (Flags.adaptiveHapticsEnabled()) {
+                waitForVibrationParamsIfRequired();
+            }
+            // Scale resolves the default amplitudes from the effect before scaling them.
+            mVibration.scaleEffects(mVibrationScaler);
+        } else {
+            mVibration.resolveEffects(mVibrationScaler.getDefaultVibrationAmplitude());
+        }
+
         mVibration.adaptToDevice(mDeviceAdapter);
         CombinedVibration.Sequential sequentialEffect = toSequential(mVibration.getEffectToPlay());
         mPendingVibrateSteps++;
@@ -361,6 +383,9 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
                             + mSignalCancelImmediate);
                 }
             }
+            if (mRequestVibrationParamsFuture != null) {
+                mRequestVibrationParamsFuture.cancel(/* mayInterruptIfRunning= */true);
+            }
             mLock.notify();
         }
     }
@@ -417,6 +442,30 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         }
         synchronized (mLock) {
             return mSignalCancel != null;
+        }
+    }
+
+    /**
+     * Blocks until the vibration params future is complete.
+     *
+     * This should be called by the VibrationThread and may be interrupted by calling
+     * `notifyCancelled` from outside it.
+     */
+    private void waitForVibrationParamsIfRequired() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+
+        if (mRequestVibrationParamsFuture == null) {
+            return;
+        }
+
+        try {
+            mRequestVibrationParamsFuture.orTimeout(
+                    vibrationSettings.getRequestVibrationParamsTimeoutMs(),
+                    TimeUnit.MILLISECONDS).get();
+        } catch (Throwable e) {
+            Slog.w(TAG, "Failed to retrieve vibration params.", e);
         }
     }
 

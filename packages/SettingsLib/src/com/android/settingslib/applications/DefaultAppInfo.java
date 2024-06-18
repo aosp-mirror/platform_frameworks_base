@@ -17,7 +17,6 @@
 package com.android.settingslib.applications;
 
 import android.app.AppGlobals;
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -27,6 +26,8 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.util.IconDrawableFactory;
+
+import androidx.annotation.Nullable;
 
 import com.android.settingslib.widget.CandidateInfo;
 

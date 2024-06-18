@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Мікрафон"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Журналы выклікаў"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Прылады паблізу"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Змяніць прыладу вываду медыя"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Фота і медыяфайлы"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Апавяшчэнні"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Апавяшчэнні"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Праграмы"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Перадача плынню"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Можа рабіць тэлефонныя выклікі і кіраваць імі"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Можа счытваць і запісваць даныя ў журнале тэлефонных выклікаў"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Можа адпраўляць і праглядаць SMS-паведамленні"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Можа атрымліваць доступ да вашых кантактаў"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Можа атрымліваць доступ да вашага календара"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Можа запісваць аўдыя"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Можа знаходзіць прылады паблізу, падключацца да іх і вызначаць іх прыблізнае месцазнаходжанне"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Можа счытваць усе апавяшчэнні, уключаючы паведамленні, фота і інфармацыю пра кантакты"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Ажыццяўленне тэлефонных выклікаў і кіраванне імі"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Чытанне і запіс журнала тэлефонных выклікаў"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Адпраўка SMS-паведамленняў і іх прагляд"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Доступ да вашых кантактаў"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Доступ да вашага календара"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Запіс гуку"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Пошук прылад паблізу, падключэнне да іх і вызначэнне іх адноснага месцазнаходжання"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Чытанне ўсіх апавяшчэнняў, у тым ліку такой інфармацыі, як кантакты, паведамленні і фота"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Чытанне ўсіх апавяшчэнняў, у тым ліку такой інфармацыі, як кантакты, паведамленні і фота.&lt;br/&gt;• Адпраўка апавяшчэнняў.&lt;br/&gt;&lt;br/&gt;Дазволы гэтай праграмы на чытанне і адпраўку апавяшчэнняў можна змяніць у любы час, выбраўшы пункт меню \"Налады &gt; Апавяшчэнні\"."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Трансляцыя змесціва праграм з вашага тэлефона"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Перадача плынню змесціва праграм і іншых функцый сістэмы з вашага тэлефона"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Прагляд спіса даступных прылад і кіраванне тым, на якой з іх будзе трансліравацца аўдыя і відэа з іншых праграм"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"тэлефон"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"планшэт"</string>
 </resources>

@@ -34,11 +34,14 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.shared.clocks.ClockRegistry
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
@@ -66,6 +69,10 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
     @Mock private lateinit var largeClock: ClockFaceController
     @Mock private lateinit var clockFaceConfig: ClockFaceConfig
     @Mock private lateinit var eventController: ClockEventController
+    @Mock private lateinit var splitShadeStateController: SplitShadeStateController
+    @Mock private lateinit var notifsKeyguardInteractor: NotificationsKeyguardInteractor
+    @Mock private lateinit var areNotificationsFullyHidden: Flow<Boolean>
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -87,11 +94,15 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
                 scope.backgroundScope
             )
         keyguardClockInteractor = KeyguardClockInteractor(keyguardClockRepository)
+        whenever(notifsKeyguardInteractor.areNotificationsFullyHidden)
+            .thenReturn(areNotificationsFullyHidden)
         underTest =
             KeyguardClockViewModel(
                 keyguardInteractor,
                 keyguardClockInteractor,
                 scope.backgroundScope,
+                splitShadeStateController,
+                notifsKeyguardInteractor
             )
     }
 

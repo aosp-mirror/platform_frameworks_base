@@ -81,3 +81,5 @@ adb shell dumpsys activity service SystemUIService WMShell
 adb shell dumpsys activity service SystemUIService WMShell help
 adb shell dumpsys activity service SystemUIService WMShell <cmd> <args> ...
 ```
+
+More detail can be found in [Debugging in the Shell](debugging.md) section.

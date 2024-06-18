@@ -127,6 +127,9 @@ option java_package com.android.server.am
 30102 am_foreground_service_stop (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
 30103 am_foreground_service_timed_out (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
 
+# Report collection of cpu used by a process
+30104 am_cpu (Pid|2|5),(UID|2|5),(Base Name|3),(Uptime|2|3),(Stime|2|3),(Utime|2|3)
+
 # Intent Sender redirect for UserHandle.USER_CURRENT
 30110 am_intent_sender_redirect_user (userId|1|5)
 

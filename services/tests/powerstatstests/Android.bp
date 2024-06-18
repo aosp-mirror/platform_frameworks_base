@@ -1,4 +1,5 @@
 package {
+    default_team: "trendy_team_framework_backstage_power",
     // See: http://go/android-license-faq
     default_applicable_licenses: ["frameworks_base_license"],
 }
@@ -8,12 +9,50 @@ filegroup {
     srcs: [
         "src/com/android/server/power/stats/AggregatedPowerStatsProcessorTest.java",
         "src/com/android/server/power/stats/AggregatedPowerStatsTest.java",
+        "src/com/android/server/power/stats/AmbientDisplayPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/AudioPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/BatteryChargeCalculatorTest.java",
+        "src/com/android/server/power/stats/BatteryStatsCounterTest.java",
+        "src/com/android/server/power/stats/BatteryStatsCpuTimesTest.java",
+        "src/com/android/server/power/stats/BatteryStatsDualTimerTest.java",
+        "src/com/android/server/power/stats/BatteryStatsDurationTimerTest.java",
+        "src/com/android/server/power/stats/BatteryStatsHistoryIteratorTest.java",
+        "src/com/android/server/power/stats/BatteryStatsHistoryTest.java",
+        "src/com/android/server/power/stats/BatteryStatsImplTest.java",
+        "src/com/android/server/power/stats/BatteryStatsNoteTest.java",
+        "src/com/android/server/power/stats/BatteryStatsSamplingTimerTest.java",
+        "src/com/android/server/power/stats/BatteryStatsSensorTest.java",
+        "src/com/android/server/power/stats/BatteryStatsServTest.java",
+        "src/com/android/server/power/stats/BatteryStatsStopwatchTimerTest.java",
+        "src/com/android/server/power/stats/BatteryStatsTimeBaseTest.java",
+        "src/com/android/server/power/stats/BatteryStatsTimerTest.java",
+        "src/com/android/server/power/stats/BatteryUsageStatsProviderTest.java",
+        "src/com/android/server/power/stats/BatteryUsageStatsTest.java",
+        "src/com/android/server/power/stats/BluetoothPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/CameraPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/CpuAggregatedPowerStatsProcessorTest.java",
+        "src/com/android/server/power/stats/CpuPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/CustomEnergyConsumerPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/EnergyConsumerSnapshotTest.java",
+        "src/com/android/server/power/stats/FlashlightPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/GnssPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/IdlePowerCalculatorTest.java",
+        "src/com/android/server/power/stats/LongSamplingCounterArrayTest.java",
+        "src/com/android/server/power/stats/LongSamplingCounterTest.java",
+        "src/com/android/server/power/stats/MemoryPowerCalculatorTest.java",
         "src/com/android/server/power/stats/MultiStateStatsTest.java",
         "src/com/android/server/power/stats/PowerStatsAggregatorTest.java",
         "src/com/android/server/power/stats/PowerStatsCollectorTest.java",
+        "src/com/android/server/power/stats/PowerStatsExporterTest.java",
         "src/com/android/server/power/stats/PowerStatsSchedulerTest.java",
         "src/com/android/server/power/stats/PowerStatsStoreTest.java",
         "src/com/android/server/power/stats/PowerStatsUidResolverTest.java",
+        "src/com/android/server/power/stats/ScreenPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/SensorPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/UserPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/VideoPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/WakelockPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/WifiPowerCalculatorTest.java",
     ],
 }
 
@@ -23,10 +62,6 @@ android_test {
     // Include all test java files.
     srcs: [
         "src/**/*.java",
-    ],
-
-    exclude_srcs: [
-        ":power_stats_ravenwood_tests",
     ],
 
     static_libs: [
@@ -40,9 +75,11 @@ android_test {
         "androidx.test.ext.truth",
         "androidx.test.uiautomator_uiautomator",
         "mockito-target-minus-junit4",
+        "ravenwood-junit",
         "servicestests-utils",
         "platform-test-annotations",
         "flag-junit",
+        "ravenwood-junit",
     ],
 
     libs: [
@@ -79,10 +116,12 @@ android_ravenwood_test {
         "androidx.annotation_annotation",
         "androidx.test.rules",
         "truth",
-        "mockito_ravenwood",
     ],
     srcs: [
         ":power_stats_ravenwood_tests",
+
+        "src/com/android/server/power/stats/BatteryUsageStatsRule.java",
+        "src/com/android/server/power/stats/MockBatteryStatsImpl.java",
         "src/com/android/server/power/stats/MockClock.java",
     ],
     auto_gen_config: true,

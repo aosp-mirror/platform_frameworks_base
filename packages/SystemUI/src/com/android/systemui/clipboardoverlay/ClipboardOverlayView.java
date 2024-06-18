@@ -143,7 +143,7 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
         mTextPreview.getViewTreeObserver().addOnPreDrawListener(() -> {
             int availableHeight = mTextPreview.getHeight()
                     - (mTextPreview.getPaddingTop() + mTextPreview.getPaddingBottom());
-            mTextPreview.setMaxLines(availableHeight / mTextPreview.getLineHeight());
+            mTextPreview.setMaxLines(Math.max(availableHeight / mTextPreview.getLineHeight(), 1));
             return true;
         });
         super.onFinishInflate();

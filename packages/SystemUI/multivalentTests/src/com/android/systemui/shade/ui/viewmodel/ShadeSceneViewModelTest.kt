@@ -19,16 +19,21 @@ package com.android.systemui.shade.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.media.controls.pipeline.MediaDataManager
-import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
-import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.privacyChipInteractor
+import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
@@ -36,6 +41,7 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobi
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -53,15 +59,10 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class ShadeSceneViewModelTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val sceneInteractor = utils.sceneInteractor()
-    private val authenticationInteractor = utils.authenticationInteractor()
-    private val deviceEntryInteractor =
-        utils.deviceEntryInteractor(
-            authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
-        )
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
 
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
@@ -82,14 +83,13 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             scope = testScope.backgroundScope,
         )
 
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter { mock() }
+    private val qsFlexiglassAdapter = FakeQSSceneAdapter({ mock() })
 
     private lateinit var shadeHeaderViewModel: ShadeHeaderViewModel
 
     private lateinit var underTest: ShadeSceneViewModel
 
     @Mock private lateinit var mediaDataManager: MediaDataManager
-    @Mock private lateinit var mediaHost: MediaHost
 
     @Before
     fun setUp() {
@@ -98,9 +98,10 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             ShadeHeaderViewModel(
                 applicationScope = testScope.backgroundScope,
                 context = context,
-                sceneInteractor = sceneInteractor,
                 mobileIconsInteractor = mobileIconsInteractor,
                 mobileIconsViewModel = mobileIconsViewModel,
+                privacyChipInteractor = kosmos.privacyChipInteractor,
+                clockInteractor = kosmos.shadeHeaderClockInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
 
@@ -110,9 +111,8 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 deviceEntryInteractor = deviceEntryInteractor,
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
-                notifications = utils.notificationsPlaceholderViewModel(),
+                notifications = kosmos.notificationsPlaceholderViewModel,
                 mediaDataManager = mediaDataManager,
-                mediaHost = mediaHost,
             )
     }
 
@@ -120,70 +120,108 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_deviceLocked_lockScreen() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.deviceEntryRepository.setUnlocked(false)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
+            assertThat(upTransitionSceneKey).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
     fun upTransitionSceneKey_deviceUnlocked_gone() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.deviceEntryRepository.setUnlocked(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
+            assertThat(upTransitionSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.deviceEntryRepository.setLockscreenEnabled(true)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
+            kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
+            sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
+            assertThat(upTransitionSceneKey).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.deviceEntryRepository.setLockscreenEnabled(true)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone), "reason")
+            kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
+            runCurrent()
+            sceneInteractor.changeScene(Scenes.Gone, "reason")
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
+            assertThat(upTransitionSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun isClickable_deviceUnlocked_false() =
+        testScope.runTest {
+            val isClickable by collectLastValue(underTest.isClickable)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            runCurrent()
+
+            assertThat(isClickable).isFalse()
+        }
+
+    @Test
+    fun isClickable_deviceLockedSecurely_true() =
+        testScope.runTest {
+            val isClickable by collectLastValue(underTest.isClickable)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
+            runCurrent()
+
+            assertThat(isClickable).isTrue()
         }
 
     @Test
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.deviceEntryRepository.setUnlocked(true)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
             runCurrent()
 
             underTest.onContentClicked()
 
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
 
     @Test
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.deviceEntryRepository.setUnlocked(false)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
             runCurrent()
 
             underTest.onContentClicked()
 
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test

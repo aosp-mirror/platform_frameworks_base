@@ -16,10 +16,11 @@
 
 package com.android.systemui.keyguard.data.repository
 
-import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
+import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
+import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject

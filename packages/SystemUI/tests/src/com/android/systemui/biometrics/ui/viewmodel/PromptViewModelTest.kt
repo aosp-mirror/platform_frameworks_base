@@ -16,9 +16,17 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.graphics.Point
+import android.graphics.drawable.BitmapDrawable
+import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
+import android.hardware.biometrics.PromptContentItemBulletedText
+import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptInfo
+import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
@@ -60,7 +68,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -68,13 +75,16 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito.times
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 4
 private const val CHALLENGE = 2L
 private const val DELAY = 1000L
+private const val OP_PACKAGE_NAME = "biometric.testapp"
+private const val OP_PACKAGE_NAME_NO_ICON = "biometric.testapp.noicon"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -87,9 +97,18 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var udfpsUtils: UdfpsUtils
+    @Mock private lateinit var packageManager: PackageManager
+    @Mock private lateinit var applicationInfoWithIcon: ApplicationInfo
+    @Mock private lateinit var applicationInfoNoIcon: ApplicationInfo
 
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope()
+    private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
+    private val logoResFromApp = R.drawable.ic_cake
+    private val logoFromApp = context.getDrawable(logoResFromApp)
+    private val logoBitmapFromApp = Bitmap.createBitmap(400, 400, Bitmap.Config.RGB_565)
+    private val defaultLogoDescription = "Test Android App"
+    private val logoDescriptionFromApp = "Test Cake App"
 
     private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
     private lateinit var promptRepository: FakePromptRepository
@@ -101,6 +120,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private lateinit var selector: PromptSelectorInteractor
     private lateinit var viewModel: PromptViewModel
     private lateinit var iconViewModel: PromptIconViewModel
+    private lateinit var promptContentView: PromptContentView
 
     @Before
     fun setup() {
@@ -128,6 +148,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             )
         udfpsOverlayInteractor =
             UdfpsOverlayInteractor(
+                context,
                 authController,
                 selectedUserInteractor,
                 testScope.backgroundScope
@@ -135,6 +156,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         selector =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
+        promptContentView =
+            PromptVerticalListContentView.Builder()
+                .addListItem(PromptContentItemBulletedText("content item 1"))
+                .addListItem(PromptContentItemBulletedText("content item 2"), 1)
+                .build()
 
         viewModel =
             PromptViewModel(
@@ -145,6 +171,19 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 udfpsUtils
             )
         iconViewModel = viewModel.iconViewModel
+
+        // Set up default logo icon and app customized icon
+        whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_NO_ICON), anyInt()))
+            .thenReturn(applicationInfoNoIcon)
+        whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME), anyInt()))
+            .thenReturn(applicationInfoWithIcon)
+        whenever(packageManager.getApplicationIcon(applicationInfoWithIcon))
+            .thenReturn(defaultLogoIcon)
+        whenever(packageManager.getApplicationLabel(applicationInfoWithIcon))
+            .thenReturn(defaultLogoDescription)
+        context.setMockPackageManager(packageManager)
+        val resources = context.getOrCreateTestableResources()
+        resources.addOverride(logoResFromApp, logoFromApp)
     }
 
     @Test
@@ -202,19 +241,27 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
             viewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
 
-            val confirmConstant by collectLastValue(viewModel.hapticsToPlay)
-            assertThat(confirmConstant)
+            val confirmHaptics by collectLastValue(viewModel.hapticsToPlay)
+            assertThat(confirmHaptics?.hapticFeedbackConstant)
                 .isEqualTo(
                     if (expectConfirmation) HapticFeedbackConstants.NO_HAPTICS
                     else HapticFeedbackConstants.CONFIRM
+                )
+            assertThat(confirmHaptics?.flag)
+                .isEqualTo(
+                    if (expectConfirmation) null
+                    else HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
                 )
 
             if (expectConfirmation) {
                 viewModel.confirmAuthenticated()
             }
 
-            val confirmedConstant by collectLastValue(viewModel.hapticsToPlay)
-            assertThat(confirmedConstant).isEqualTo(HapticFeedbackConstants.CONFIRM)
+            val confirmedHaptics by collectLastValue(viewModel.hapticsToPlay)
+            assertThat(confirmedHaptics?.hapticFeedbackConstant)
+                .isEqualTo(HapticFeedbackConstants.CONFIRM)
+            assertThat(confirmedHaptics?.flag)
+                .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
         }
 
     @Test
@@ -226,16 +273,21 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             viewModel.confirmAuthenticated()
         }
 
-        val currentConstant by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(currentConstant).isEqualTo(HapticFeedbackConstants.CONFIRM)
+        val currentHaptics by collectLastValue(viewModel.hapticsToPlay)
+        assertThat(currentHaptics?.hapticFeedbackConstant)
+            .isEqualTo(HapticFeedbackConstants.CONFIRM)
+        assertThat(currentHaptics?.flag)
+            .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
     }
 
     @Test
     fun playErrorHaptic_SetsRejectConstant() = runGenericTest {
         viewModel.showTemporaryError("test", "messageAfterError", false)
 
-        val currentConstant by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(currentConstant).isEqualTo(HapticFeedbackConstants.REJECT)
+        val currentHaptics by collectLastValue(viewModel.hapticsToPlay)
+        assertThat(currentHaptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
+        assertThat(currentHaptics?.flag)
+            .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
     }
 
     @Test
@@ -761,8 +813,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             hapticFeedback = true,
         )
 
-        val constant by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(constant).isEqualTo(HapticFeedbackConstants.REJECT)
+        val haptics by collectLastValue(viewModel.hapticsToPlay)
+        assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
+        assertThat(haptics?.flag).isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
     }
 
     @Test
@@ -774,8 +827,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             hapticFeedback = false,
         )
 
-        val constant by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(constant).isEqualTo(HapticFeedbackConstants.NO_HAPTICS)
+        val haptics by collectLastValue(viewModel.hapticsToPlay)
+        assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.NO_HAPTICS)
     }
 
     private suspend fun TestScope.showTemporaryErrors(
@@ -1199,6 +1252,82 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
     }
 
+    @Test
+    fun descriptionOverriddenByContentView() =
+        runGenericTest(contentView = promptContentView, description = "test description") {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            val contentView by collectLastValue(viewModel.contentView)
+            val description by collectLastValue(viewModel.description)
+
+            assertThat(description).isEqualTo("")
+            assertThat(contentView).isEqualTo(promptContentView)
+        }
+
+    @Test
+    fun descriptionWithoutContentView() =
+        runGenericTest(description = "test description") {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            val contentView by collectLastValue(viewModel.contentView)
+            val description by collectLastValue(viewModel.description)
+
+            assertThat(description).isEqualTo("test description")
+            assertThat(contentView).isNull()
+        }
+
+    @Test
+    fun logoIsNullIfPackageNameNotFound() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            val logo by collectLastValue(viewModel.logo)
+            assertThat(logo).isNull()
+        }
+
+    @Test
+    fun defaultLogoIfNoLogoSet() = runGenericTest {
+        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+        val logo by collectLastValue(viewModel.logo)
+        assertThat(logo).isEqualTo(defaultLogoIcon)
+    }
+
+    @Test
+    fun logoResSetByApp() =
+        runGenericTest(logoRes = logoResFromApp) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            val logo by collectLastValue(viewModel.logo)
+            assertThat(logo).isEqualTo(logoFromApp)
+        }
+
+    @Test
+    fun logoBitmapSetByApp() =
+        runGenericTest(logoBitmap = logoBitmapFromApp) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            val logo by collectLastValue(viewModel.logo)
+            assertThat((logo as BitmapDrawable).bitmap).isEqualTo(logoBitmapFromApp)
+        }
+
+    @Test
+    fun logoDescriptionIsEmptyIfPackageNameNotFound() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            val logoDescription by collectLastValue(viewModel.logoDescription)
+            assertThat(logoDescription).isEqualTo("")
+        }
+
+    @Test
+    fun defaultLogoDescriptionIfNoLogoDescriptionSet() = runGenericTest {
+        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+        val logoDescription by collectLastValue(viewModel.logoDescription)
+        assertThat(logoDescription).isEqualTo(defaultLogoDescription)
+    }
+
+    @Test
+    fun logoDescriptionSetByApp() =
+        runGenericTest(logoDescription = logoDescriptionFromApp) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            val logoDescription by collectLastValue(viewModel.logoDescription)
+            assertThat(logoDescription).isEqualTo(logoDescriptionFromApp)
+        }
+
     /** Asserts that the selected buttons are visible now. */
     private suspend fun TestScope.assertButtonsVisible(
         tryAgain: Boolean = false,
@@ -1218,13 +1347,25 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private fun runGenericTest(
         doNotStart: Boolean = false,
         allowCredentialFallback: Boolean = false,
-        block: suspend TestScope.() -> Unit
+        description: String? = null,
+        contentView: PromptContentView? = null,
+        logoRes: Int = -1,
+        logoBitmap: Bitmap? = null,
+        logoDescription: String? = null,
+        packageName: String = OP_PACKAGE_NAME,
+        block: suspend TestScope.() -> Unit,
     ) {
         selector.initializePrompt(
             requireConfirmation = testCase.confirmationRequested,
             allowCredentialFallback = allowCredentialFallback,
             fingerprint = testCase.fingerprint,
             face = testCase.face,
+            descriptionFromApp = description,
+            contentViewFromApp = contentView,
+            logoResFromApp = logoRes,
+            logoBitmapFromApp = logoBitmap,
+            logoDescriptionFromApp = logoDescription,
+            packageName = packageName,
         )
 
         // put the view model in the initial authenticating state, unless explicitly skipped
@@ -1400,20 +1541,33 @@ private fun PromptSelectorInteractor.initializePrompt(
     face: FaceSensorPropertiesInternal? = null,
     requireConfirmation: Boolean = false,
     allowCredentialFallback: Boolean = false,
+    descriptionFromApp: String? = null,
+    contentViewFromApp: PromptContentView? = null,
+    logoResFromApp: Int = -1,
+    logoBitmapFromApp: Bitmap? = null,
+    logoDescriptionFromApp: String? = null,
+    packageName: String = OP_PACKAGE_NAME,
 ) {
     val info =
         PromptInfo().apply {
+            logoRes = logoResFromApp
+            logoBitmap = logoBitmapFromApp
+            logoDescription = logoDescriptionFromApp
             title = "t"
             subtitle = "s"
+            description = descriptionFromApp
+            contentView = contentViewFromApp
             authenticators = listOf(face, fingerprint).extractAuthenticatorTypes()
             isDeviceCredentialAllowed = allowCredentialFallback
             isConfirmationRequested = requireConfirmation
         }
+
     useBiometricsForAuthentication(
         info,
         USER_ID,
         CHALLENGE,
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
+        packageName,
     )
 }
 

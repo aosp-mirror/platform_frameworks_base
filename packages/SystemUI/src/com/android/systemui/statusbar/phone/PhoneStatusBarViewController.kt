@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
 import android.graphics.Point
 import android.util.Log
+import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -81,6 +82,22 @@ private constructor(
         statusContainer.setOnHoverListener(
             statusOverlayHoverListenerFactory.createDarkAwareListener(statusContainer)
         )
+        statusContainer.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View, event: MotionEvent): Boolean {
+                // We want to handle only mouse events here to avoid stealing finger touches from
+                // status bar which expands shade when swiped down on. We're using onTouchListener
+                // instead of onClickListener as the later will lead to isClickable being set to
+                // true and hence ALL touches always being intercepted. See [View.OnTouchEvent]
+                if (event.source == InputDevice.SOURCE_MOUSE) {
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        v.performClick()
+                        shadeController.animateExpandShade()
+                    }
+                    return true
+                }
+                return false
+            }
+        })
 
         progressProvider?.setReadyToHandleTransition(true)
         configurationController.addCallback(configurationListener)

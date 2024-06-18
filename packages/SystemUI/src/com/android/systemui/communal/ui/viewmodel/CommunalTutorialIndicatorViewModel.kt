@@ -20,17 +20,30 @@ import com.android.systemui.communal.domain.interactor.CommunalTutorialInteracto
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 /** View model for communal tutorial indicator on keyguard */
 class CommunalTutorialIndicatorViewModel
 @Inject
 constructor(
-    communalTutorialInteractor: CommunalTutorialInteractor,
+    private val communalTutorialInteractor: CommunalTutorialInteractor,
     bottomAreaInteractor: KeyguardBottomAreaInteractor,
 ) {
-    /** An observable for whether the tutorial indicator view should be visible. */
-    val showIndicator: Flow<Boolean> = communalTutorialInteractor.isTutorialAvailable
+    /**
+     * An observable for whether the tutorial indicator view should be visible.
+     *
+     * @param isPreviewMode Whether for preview keyguard mode in wallpaper settings.
+     */
+    fun showIndicator(isPreviewMode: Boolean): StateFlow<Boolean> {
+        return if (isPreviewMode) {
+            MutableStateFlow(false).asStateFlow()
+        } else {
+            communalTutorialInteractor.isTutorialAvailable
+        }
+    }
 
     /** An observable for the alpha level for the tutorial indicator. */
     val alpha: Flow<Float> = bottomAreaInteractor.alpha.distinctUntilChanged()

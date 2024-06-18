@@ -60,6 +60,7 @@ public class AudioServiceTest {
     private Context mContext;
     private AudioSystemAdapter mSpyAudioSystem;
     private SettingsAdapter mSettingsAdapter;
+    private AudioVolumeGroupHelperBase mAudioVolumeGroupHelper;
 
     @Spy private NoOpSystemServerAdapter mSpySystemServer;
     @Mock private AppOpsManager mMockAppOpsManager;
@@ -80,11 +81,12 @@ public class AudioServiceTest {
         mContext = InstrumentationRegistry.getTargetContext();
         mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSettingsAdapter = new NoOpSettingsAdapter();
+        mAudioVolumeGroupHelper = new AudioVolumeGroupHelperBase();
         when(mMockAppOpsManager.noteOp(anyInt(), anyInt(), anyString(), anyString(), anyString()))
                 .thenReturn(AppOpsManager.MODE_ALLOWED);
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSpySystemServer,
-                mSettingsAdapter, mMockAudioPolicy, null, mMockAppOpsManager,
-                mMockPermissionEnforcer);
+                mSettingsAdapter, mAudioVolumeGroupHelper, mMockAudioPolicy, null,
+                mMockAppOpsManager, mMockPermissionEnforcer);
     }
 
     /**

@@ -99,6 +99,9 @@ enum : package_property_t {
 
   // The apk assets only contain the overlayable declarations information.
   PROPERTY_ONLY_OVERLAYABLES = 1U << 5U,
+
+  // Optimize the resource lookups by name via an in-memory lookup table.
+  PROPERTY_OPTIMIZE_NAME_LOOKUPS = 1U << 6U,
 };
 
 struct OverlayableInfo {
@@ -285,7 +288,9 @@ class LoadedPackage {
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
 
-  LoadedPackage() = default;
+  explicit LoadedPackage(bool optimize_name_lookups = false)
+      : type_string_pool_(optimize_name_lookups), key_string_pool_(optimize_name_lookups) {
+  }
 
   ResStringPool type_string_pool_;
   ResStringPool key_string_pool_;

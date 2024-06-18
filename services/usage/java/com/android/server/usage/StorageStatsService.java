@@ -19,7 +19,9 @@ package com.android.server.usage;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.util.ArrayUtils.defeatNullable;
+import static com.android.server.pm.DexOptHelper.getArtManagerLocal;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.PackageManagerServiceUtils.getPackageManagerLocal;
 import static com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
 
 import android.Manifest;
@@ -28,6 +30,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.usage.ExternalStorageStats;
+import android.app.usage.Flags;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.StorageStats;
 import android.app.usage.UsageStatsManagerInternal;
@@ -75,6 +78,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.art.ArtManagerLocal;
+import com.android.server.art.model.ArtManagedFileStats;
+import com.android.server.pm.PackageManagerLocal.FilteredSnapshot;
 import com.android.server.IoThread;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
@@ -377,7 +383,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             return queryStatsForUid(volumeUuid, appInfo.uid, callingPackage);
         } else {
             // Multiple packages means we need to go manual
-            final int appId = UserHandle.getUserId(appInfo.uid);
+            final int appId = UserHandle.getAppId(appInfo.uid);
             final String[] packageNames = new String[] { packageName };
             final long[] ceDataInodes = new long[1];
             String[] codePaths = new String[0];
@@ -434,6 +440,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         final long[] ceDataInodes = new long[packageNames.length];
         String[] codePaths = new String[0];
 
+        final PackageStats stats = new PackageStats(TAG);
         for (int i = 0; i < packageNames.length; i++) {
             try {
                 final ApplicationInfo appInfo = mPackage.getApplicationInfoAsUser(packageNames[i],
@@ -443,7 +450,11 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 } else {
                     if (appInfo.getCodePath() != null) {
                         codePaths = ArrayUtils.appendElement(String.class, codePaths,
-                                appInfo.getCodePath());
+                            appInfo.getCodePath());
+                    }
+                    if (Flags.getAppBytesByDataTypeApi()) {
+                        computeAppStatsByDataTypes(
+                            stats, appInfo.sourceDir, packageNames[i]);
                     }
                 }
             } catch (NameNotFoundException e) {
@@ -451,7 +462,6 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             }
         }
 
-        final PackageStats stats = new PackageStats(TAG);
         try {
             mInstaller.getAppSize(volumeUuid, packageNames, userId, getDefaultFlags(),
                     appId, ceDataInodes, codePaths, stats);
@@ -587,6 +597,12 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         res.codeBytes = stats.codeSize + stats.externalCodeSize;
         res.dataBytes = stats.dataSize + stats.externalDataSize;
         res.cacheBytes = stats.cacheSize + stats.externalCacheSize;
+        res.dexoptBytes = stats.dexoptSize;
+        res.curProfBytes = stats.curProfSize;
+        res.refProfBytes = stats.refProfSize;
+        res.apkBytes = stats.apkSize;
+        res.libBytes = stats.libSize;
+        res.dmBytes = stats.dmSize;
         res.externalCacheBytes = stats.externalCacheSize;
         return res;
     }
@@ -892,6 +908,82 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 @NonNull StorageStatsAugmenter storageStatsAugmenter,
                 @NonNull String tag) {
             mStorageStatsAugmenters.add(Pair.create(tag, storageStatsAugmenter));
+        }
+    }
+
+    private long getDirBytes(File dir) {
+        if (!dir.isDirectory()) {
+            return 0;
+        }
+
+        long size = 0;
+        try {
+            for (File file : dir.listFiles()) {
+                if (file.isFile()) {
+                    size += file.length();
+                    continue;
+                }
+                if (file.isDirectory()) {
+                    size += getDirBytes(file);
+                }
+            }
+        } catch (NullPointerException e) {
+            Slog.w(TAG, "Failed to list directory " + dir.getName());
+        }
+
+        return size;
+    }
+
+    private long getFileBytesInDir(File dir, String suffix) {
+        if (!dir.isDirectory()) {
+            return 0;
+        }
+
+        long size = 0;
+        try {
+            for (File file : dir.listFiles()) {
+                if (file.isFile() && file.getName().endsWith(suffix)) {
+                    size += file.length();
+                }
+            }
+        } catch (NullPointerException e) {
+             Slog.w(TAG, "Failed to list directory " + dir.getName());
+        }
+
+        return size;
+    }
+
+    private void computeAppStatsByDataTypes(
+        PackageStats stats, String sourceDirName, String packageName) {
+
+        // Get apk, lib, dm file sizes.
+        File srcDir = new File(sourceDirName);
+        if (srcDir.isFile()) {
+            sourceDirName = srcDir.getParent();
+            srcDir = new File(sourceDirName);
+        }
+
+        stats.apkSize += getFileBytesInDir(srcDir, ".apk");
+        stats.dmSize += getFileBytesInDir(srcDir, ".dm");
+        stats.libSize += getDirBytes(new File(sourceDirName + "/lib/"));
+
+        // Get dexopt, current profle and reference profile sizes.
+        if (SystemProperties.getBoolean("dalvik.vm.features.art_managed_file_stats", false)) {
+            ArtManagedFileStats artManagedFileStats;
+            try (var snapshot = getPackageManagerLocal().withFilteredSnapshot()) {
+                artManagedFileStats =
+                    getArtManagerLocal().getArtManagedFileStats(snapshot, packageName);
+            }
+
+            stats.dexoptSize +=
+                artManagedFileStats
+                    .getTotalSizeBytesByType(ArtManagedFileStats.TYPE_DEXOPT_ARTIFACT);
+            stats.refProfSize +=
+                artManagedFileStats
+                    .getTotalSizeBytesByType(ArtManagedFileStats.TYPE_REF_PROFILE);
+            stats.curProfSize +=
+                artManagedFileStats
+                    .getTotalSizeBytesByType(ArtManagedFileStats.TYPE_CUR_PROFILE);
         }
     }
 }

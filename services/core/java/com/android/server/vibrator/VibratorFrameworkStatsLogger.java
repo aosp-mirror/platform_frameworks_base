@@ -19,10 +19,12 @@ package com.android.server.vibrator;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.view.HapticFeedbackConstants;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.expresslog.Counter;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -135,6 +137,23 @@ public class VibratorFrameworkStatsLogger {
         if (needsScheduling) {
             mHandler.postDelayed(mConsumeVibrationStatsQueueRunnable,
                     mVibrationReportedLogIntervalMillis);
+        }
+    }
+
+    /** Logs only if the haptics feedback effect is one of the KEYBOARD_ constants. */
+    public static void logPerformHapticsFeedbackIfKeyboard(int uid, int hapticsFeedbackEffect) {
+        boolean isKeyboard;
+        switch (hapticsFeedbackEffect) {
+            case HapticFeedbackConstants.KEYBOARD_TAP:
+            case HapticFeedbackConstants.KEYBOARD_RELEASE:
+                isKeyboard = true;
+                break;
+            default:
+                isKeyboard = false;
+                break;
+        }
+        if (isKeyboard) {
+            Counter.logIncrementWithUid("vibrator.value_perform_haptic_feedback_keyboard", uid);
         }
     }
 }

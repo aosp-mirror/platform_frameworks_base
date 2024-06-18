@@ -1,0 +1,59 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_app {
+    name: "CredentialManagerRobo",
+    srcs: [],
+    static_libs: [
+        "SystemUI-core",
+        "CredentialManager-handheld",
+        "ScreenshotComposeUtilsLib",
+        "androidx.test.espresso.core",
+        "androidx.compose.material3_material3",
+        "platform-screenshot-diff-core",
+    ],
+    manifest: "robo-manifest.xml",
+    dont_merge_manifests: true,
+    platform_apis: true,
+    system_ext_specific: true,
+    certificate: "platform",
+    privileged: true,
+    kotlincflags: ["-Xjvm-default=all"],
+    asset_dirs: ["customization/assets"],
+    resource_dirs: ["screenshot/customization/res"],
+    use_resource_processor: true,
+}
+
+// This is a RNG (Robolectric native graphics) test target.
+android_robolectric_test {
+    name: "CredentialManagerScreenshotTest",
+    srcs: [
+        ":CredentialManagerScreenshotTestFiles",
+    ],
+
+    // Do not add any libraries here, instead add them to the ScreenshotTestRobo
+    static_libs: [
+        "androidx.compose.runtime_runtime",
+        "androidx.test.uiautomator_uiautomator",
+        "androidx.test.ext.junit",
+        "inline-mockito-robolectric-prebuilt",
+        "platform-parametric-runner-lib",
+        "uiautomator-helpers",
+        "flag-junit-base",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+        "truth",
+    ],
+    upstream: true,
+    java_resource_dirs: ["config"],
+    instrumentation_for: "CredentialManagerRobo",
+}

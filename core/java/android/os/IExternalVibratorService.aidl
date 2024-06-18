@@ -17,6 +17,7 @@
 package android.os;
 
 import android.os.ExternalVibration;
+import android.os.ExternalVibrationScale;
 
 /**
  * The communication channel by which an external system that wants to control the system
@@ -32,29 +33,24 @@ import android.os.ExternalVibration;
  * {@hide}
  */
 interface IExternalVibratorService {
-    const int SCALE_MUTE = -100;
-    const int SCALE_VERY_LOW = -2;
-    const int SCALE_LOW = -1;
-    const int SCALE_NONE = 0;
-    const int SCALE_HIGH = 1;
-    const int SCALE_VERY_HIGH = 2;
-
     /**
      * A method called by the external system to start a vibration.
      *
-     * If this returns {@code SCALE_MUTE}, then the vibration should <em>not</em> play. If this
-     * returns any other scale level, then any currently playing vibration controlled by the
-     * requesting system must be muted and this vibration can begin playback.
+     * This returns an {@link ExternalVibrationScale} which includes the vibration scale level and
+     * the adaptive haptics scale.
+     *
+     * If the returned scale level is {@link ExternalVibrationScale.ScaleLevel#SCALE_MUTE}, then
+     * the vibration should <em>not</em> play. If it returns any other scale level, then
+     * any currently playing vibration controlled by the requesting system must be muted and this
+     * vibration can begin playback.
      *
      * Note that the IExternalVibratorService implementation will not call mute on any currently
      * playing external vibrations in order to avoid re-entrancy with the system on the other side.
      *
-     * @param vibration An ExternalVibration
-     *
-     * @return {@code SCALE_MUTE} if the external vibration should not play, and any other scale
-     *         level if it should.
+     * @param vib The external vibration starting.
+     * @return {@link ExternalVibrationScale} including scale level and adaptive haptics scale.
      */
-    int onExternalVibrationStart(in ExternalVibration vib);
+    ExternalVibrationScale onExternalVibrationStart(in ExternalVibration vib);
 
     /**
      * A method called by the external system when a vibration no longer wants to play.

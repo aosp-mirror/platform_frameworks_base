@@ -181,12 +181,6 @@ BroadcastBehavior: android.media.tv.TvContract#ACTION_WATCH_NEXT_PROGRAM_BROWSAB
     Field 'ACTION_WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED' is missing @BroadcastBehavior
 BroadcastBehavior: android.net.Proxy#PROXY_CHANGE_ACTION:
     Field 'PROXY_CHANGE_ACTION' is missing @BroadcastBehavior
-BroadcastBehavior: android.nfc.NfcAdapter#ACTION_ADAPTER_STATE_CHANGED:
-    Field 'ACTION_ADAPTER_STATE_CHANGED' is missing @BroadcastBehavior
-BroadcastBehavior: android.nfc.NfcAdapter#ACTION_PREFERRED_PAYMENT_CHANGED:
-    Field 'ACTION_PREFERRED_PAYMENT_CHANGED' is missing @BroadcastBehavior
-BroadcastBehavior: android.nfc.NfcAdapter#ACTION_TRANSACTION_DETECTED:
-    Field 'ACTION_TRANSACTION_DETECTED' is missing @BroadcastBehavior
 BroadcastBehavior: android.os.DropBoxManager#ACTION_DROPBOX_ENTRY_ADDED:
     Field 'ACTION_DROPBOX_ENTRY_ADDED' is missing @BroadcastBehavior
 BroadcastBehavior: android.provider.CalendarContract#ACTION_EVENT_REMINDER:
@@ -249,6 +243,14 @@ BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SUBSCRIPTION_SPECIF
     Field 'ACTION_SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED' is missing @BroadcastBehavior
 BroadcastBehavior: android.telephony.euicc.EuiccManager#ACTION_NOTIFY_CARRIER_SETUP_INCOMPLETE:
     Field 'ACTION_NOTIFY_CARRIER_SETUP_INCOMPLETE' is missing @BroadcastBehavior
+
+
+CompileTimeConstant: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_GIMBAL:
+    All constants must be defined at compile time: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_GIMBAL
+CompileTimeConstant: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_LOCKED:
+    All constants must be defined at compile time: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_LOCKED
+CompileTimeConstant: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_OFF:
+    All constants must be defined at compile time: android.hardware.camera2.ExtensionCaptureRequest#EFV_STABILIZATION_MODE_OFF
 
 
 DeprecationMismatch: android.accounts.AccountManager#newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, String[], boolean, String, String, String[], android.os.Bundle):
@@ -395,6 +397,12 @@ InvalidNullabilityOverride: android.media.midi.MidiUmpDeviceService#onBind(andro
     Invalid nullability on parameter `intent` in method `onBind`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
 
 
+KotlinOperator: android.graphics.Matrix44#get(int, int):
+    Method can be invoked with an indexing operator from Kotlin: `get` (this is usually desirable; just make sure it makes sense for this type of object)
+KotlinOperator: android.graphics.Matrix44#set(int, int, float):
+    Method can be invoked with an indexing operator from Kotlin: `set` (this is usually desirable; just make sure it makes sense for this type of object)
+
+
 RequiresPermission: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
     Method 'getAccountsByTypeAndFeatures' documentation mentions permissions without declaring @RequiresPermission
 RequiresPermission: android.accounts.AccountManager#hasFeatures(android.accounts.Account, String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
@@ -483,6 +491,8 @@ RequiresPermission: android.app.admin.DevicePolicyManager#clearResetPasswordToke
     Method 'clearResetPasswordToken' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#generateKeyPair(android.content.ComponentName, String, android.security.keystore.KeyGenParameterSpec, int):
     Method 'generateKeyPair' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getContentProtectionPolicy(android.content.ComponentName):
+    Method 'getContentProtectionPolicy' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#getCrossProfileWidgetProviders(android.content.ComponentName):
     Method 'getCrossProfileWidgetProviders' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#getLockTaskFeatures(android.content.ComponentName):
@@ -519,6 +529,8 @@ RequiresPermission: android.app.admin.DevicePolicyManager#removeCrossProfileWidg
     Method 'removeCrossProfileWidgetProvider' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#setAlwaysOnVpnPackage(android.content.ComponentName, String, boolean):
     Method 'setAlwaysOnVpnPackage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setContentProtectionPolicy(android.content.ComponentName, int):
+    Method 'setContentProtectionPolicy' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#setLockTaskFeatures(android.content.ComponentName, int):
     Method 'setLockTaskFeatures' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#setLockTaskPackages(android.content.ComponentName, String[]):
@@ -715,86 +727,6 @@ RequiresPermission: android.net.sip.SipAudioCall#setSpeakerMode(boolean):
     Method 'setSpeakerMode' documentation mentions permissions without declaring @RequiresPermission
 RequiresPermission: android.net.sip.SipAudioCall#startAudio():
     Method 'startAudio' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.NfcAdapter#disableForegroundDispatch(android.app.Activity):
-    Method 'disableForegroundDispatch' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.NfcAdapter#enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]):
-    Method 'enableForegroundDispatch' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.cardemulation.CardEmulation#isDefaultServiceForAid(android.content.ComponentName, String):
-    Method 'isDefaultServiceForAid' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.cardemulation.CardEmulation#isDefaultServiceForCategory(android.content.ComponentName, String):
-    Method 'isDefaultServiceForCategory' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.cardemulation.CardEmulation#setOffHostForService(android.content.ComponentName, String):
-    Method 'setOffHostForService' documentation mentions permissions already declared by @RequiresPermission
-RequiresPermission: android.nfc.tech.IsoDep#getTimeout():
-    Method 'getTimeout' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.IsoDep#setTimeout(int):
-    Method 'setTimeout' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.IsoDep#transceive(byte[]):
-    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#authenticateSectorWithKeyA(int, byte[]):
-    Method 'authenticateSectorWithKeyA' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#authenticateSectorWithKeyB(int, byte[]):
-    Method 'authenticateSectorWithKeyB' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#decrement(int, int):
-    Method 'decrement' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#getTimeout():
-    Method 'getTimeout' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#increment(int, int):
-    Method 'increment' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#readBlock(int):
-    Method 'readBlock' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#restore(int):
-    Method 'restore' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#setTimeout(int):
-    Method 'setTimeout' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#transceive(byte[]):
-    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#transfer(int):
-    Method 'transfer' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareClassic#writeBlock(int, byte[]):
-    Method 'writeBlock' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareUltralight#getTimeout():
-    Method 'getTimeout' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareUltralight#readPages(int):
-    Method 'readPages' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareUltralight#setTimeout(int):
-    Method 'setTimeout' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareUltralight#transceive(byte[]):
-    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.MifareUltralight#writePage(int, byte[]):
-    Method 'writePage' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.Ndef#getNdefMessage():
-    Method 'getNdefMessage' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.Ndef#isWritable():
-    Method 'isWritable' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.Ndef#makeReadOnly():
-    Method 'makeReadOnly' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.Ndef#writeNdefMessage(android.nfc.NdefMessage):
-    Method 'writeNdefMessage' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.NdefFormatable#format(android.nfc.NdefMessage):
-    Method 'format' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.NdefFormatable#formatReadOnly(android.nfc.NdefMessage):
-    Method 'formatReadOnly' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.NfcA#getTimeout():
-    Method 'getTimeout' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.NfcA#setTimeout(int):
-    Method 'setTimeout' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.NfcA#transceive(byte[]):
-    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.NfcB#transceive(byte[]):
-    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.NfcF#getTimeout():
-    Method 'getTimeout' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.NfcF#setTimeout(int):
-    Method 'setTimeout' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.NfcF#transceive(byte[]):
-    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.NfcV#transceive(byte[]):
-    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.TagTechnology#close():
-    Method 'close' documentation mentions permissions without declaring @RequiresPermission
-RequiresPermission: android.nfc.tech.TagTechnology#connect():
-    Method 'connect' documentation mentions permissions without declaring @RequiresPermission
 RequiresPermission: android.os.BugreportManager#cancelBugreport():
     Method 'cancelBugreport' documentation mentions permissions without declaring @RequiresPermission
 RequiresPermission: android.os.Build#getSerial():
@@ -1163,12 +1095,80 @@ RequiresPermission: android.webkit.WebSettings#setGeolocationEnabled(boolean):
     Method 'setGeolocationEnabled' documentation mentions permissions without declaring @RequiresPermission
 
 
+StaticUtils: ExtensionCaptureRequest:
+    Fully-static utility classes must not have constructor
+StaticUtils: android.hardware.camera2.ExtensionCaptureRequest:
+    Fully-static utility classes must not have constructor
+StaticUtils: android.hardware.camera2.ExtensionCaptureResult:
+    Fully-static utility classes must not have constructor
+
+
 Todo: android.hardware.camera2.params.StreamConfigurationMap:
     Documentation mentions 'TODO'
 Todo: android.provider.ContactsContract.RawContacts#newEntityIterator(android.database.Cursor):
     Documentation mentions 'TODO'
 
 
+UnflaggedApi: android.R.color#on_surface_disabled_material:
+    New API must be flagged with @FlaggedApi: field android.R.color.on_surface_disabled_material
+UnflaggedApi: android.R.color#outline_disabled_material:
+    New API must be flagged with @FlaggedApi: field android.R.color.outline_disabled_material
+UnflaggedApi: android.R.color#surface_disabled_material:
+    New API must be flagged with @FlaggedApi: field android.R.color.surface_disabled_material
+UnflaggedApi: android.R.color#system_error_0:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_0
+UnflaggedApi: android.R.color#system_error_10:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_10
+UnflaggedApi: android.R.color#system_error_100:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_100
+UnflaggedApi: android.R.color#system_error_1000:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_1000
+UnflaggedApi: android.R.color#system_error_200:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_200
+UnflaggedApi: android.R.color#system_error_300:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_300
+UnflaggedApi: android.R.color#system_error_400:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_400
+UnflaggedApi: android.R.color#system_error_50:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_50
+UnflaggedApi: android.R.color#system_error_500:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_500
+UnflaggedApi: android.R.color#system_error_600:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_600
+UnflaggedApi: android.R.color#system_error_700:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_700
+UnflaggedApi: android.R.color#system_error_800:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_800
+UnflaggedApi: android.R.color#system_error_900:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_900
+UnflaggedApi: android.R.color#system_on_surface_disabled:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_on_surface_disabled
+UnflaggedApi: android.R.color#system_on_surface_disabled_dark:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_on_surface_disabled_dark
+UnflaggedApi: android.R.color#system_on_surface_disabled_light:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_on_surface_disabled_light
+UnflaggedApi: android.R.color#system_outline_disabled:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_outline_disabled
+UnflaggedApi: android.R.color#system_outline_disabled_dark:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_outline_disabled_dark
+UnflaggedApi: android.R.color#system_outline_disabled_light:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_outline_disabled_light
+UnflaggedApi: android.R.color#system_surface_disabled:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_surface_disabled
+UnflaggedApi: android.R.color#system_surface_disabled_dark:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_surface_disabled_dark
+UnflaggedApi: android.R.color#system_surface_disabled_light:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_surface_disabled_light
+UnflaggedApi: android.R.dimen#system_corner_radius_large:
+    New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_large
+UnflaggedApi: android.R.dimen#system_corner_radius_medium:
+    New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_medium
+UnflaggedApi: android.R.dimen#system_corner_radius_small:
+    New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_small
+UnflaggedApi: android.R.dimen#system_corner_radius_xlarge:
+    New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_xlarge
+UnflaggedApi: android.R.dimen#system_corner_radius_xsmall:
+    New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_xsmall
 UnflaggedApi: android.accessibilityservice.AccessibilityService#OVERLAY_RESULT_INTERNAL_ERROR:
     New API must be flagged with @FlaggedApi: field android.accessibilityservice.AccessibilityService.OVERLAY_RESULT_INTERNAL_ERROR
 UnflaggedApi: android.accessibilityservice.AccessibilityService#OVERLAY_RESULT_INVALID:
@@ -1461,6 +1461,15 @@ UnflaggedApi: android.graphics.text.PositionedGlyphs#getItalicOverride(int):
     New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getItalicOverride(int)
 UnflaggedApi: android.graphics.text.PositionedGlyphs#getWeightOverride(int):
     New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getWeightOverride(int)
+
+UnflaggedApi: android.hardware.camera2.ExtensionCaptureRequest:
+    New API must be flagged with @FlaggedApi: class android.hardware.camera2.ExtensionCaptureRequest
+UnflaggedApi: android.hardware.camera2.ExtensionCaptureRequest#ExtensionCaptureRequest():
+    New API must be flagged with @FlaggedApi: constructor android.hardware.camera2.ExtensionCaptureRequest()
+UnflaggedApi: android.hardware.camera2.ExtensionCaptureResult:
+    New API must be flagged with @FlaggedApi: class android.hardware.camera2.ExtensionCaptureResult
+UnflaggedApi: android.hardware.camera2.ExtensionCaptureResult#ExtensionCaptureResult():
+    New API must be flagged with @FlaggedApi: constructor android.hardware.camera2.ExtensionCaptureResult()
 UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_CAR:
     New API must be flagged with @FlaggedApi: field android.media.MediaRoute2Info.TYPE_REMOTE_CAR
 UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_COMPUTER:

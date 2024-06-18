@@ -57,6 +57,7 @@
         <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_ethernet</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_oem_satellite</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_wifi</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
@@ -102,6 +103,7 @@
     <string translatable="false" name="status_bar_call_strength">call_strength</string>
     <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
     <string translatable="false" name="status_bar_screen_record">screen_record</string>
+    <string translatable="false" name="status_bar_oem_satellite">satellite</string>
 
     <!-- Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window
@@ -280,6 +282,20 @@
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
+
+    <!-- The duration (in milliseconds) that the vibrator control service will wait for new
+         vibration params. -->
+    <integer name="config_requestVibrationParamsTimeout">50</integer>
+
+    <!-- Array containing the usages that should request vibration params before they are played.
+         These usages don't have strong latency requirements, e.g. ringtone and notification, and
+         can be slightly delayed. -->
+    <integer-array name="config_requestVibrationParamsForUsages">
+        <item>17</item> <!-- USAGE_ALARM -->
+        <item>33</item> <!-- USAGE_RINGTONE -->
+        <item>49</item> <!-- USAGE_NOTIFICATION -->
+        <item>65</item> <!-- USAGE_COMMUNICATION_REQUEST -->
+    </integer-array>
 
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->
@@ -2125,6 +2141,12 @@
         <item>com.android.location.fused</item>
     </string-array>
 
+   <!-- Package name of the extension software fallback. -->
+    <string name="config_extensionFallbackPackageName" translatable="false"></string>
+
+   <!-- Service name of the extension software fallback. -->
+    <string name="config_extensionFallbackServiceName" translatable="false"></string>
+
     <!-- Package name(s) of Advanced Driver Assistance applications. These packages have additional
     management of access to location, specific to driving assistance use-cases. They must be system
     packages. This configuration is only applicable to devices that declare
@@ -2262,6 +2284,9 @@
     <!-- The default min volume for the alarm stream -->
     <integer name="config_audio_alarm_min_vol">1</integer>
 
+    <!-- Flag indicating if ringer mode affects alarm stream -->
+    <bool name="config_audio_ringer_mode_affects_alarm_stream">false</bool>
+
     <!-- The default value for whether head tracking for
          spatial audio is enabled for a newly connected audio device -->
     <bool name="config_spatial_audio_head_tracking_enabled_default">false</bool>
@@ -2346,6 +2371,8 @@
     <string name="config_defaultCallRedirection" translatable="false"></string>
     <!-- The name of the package that will hold the call screening role by default. -->
     <string name="config_defaultCallScreening" translatable="false"></string>
+    <!-- The name of the package that will hold the wallet role by default. -->
+    <string name="config_defaultWallet" translatable="false" />
     <!-- The name of the package that will hold the system gallery role. -->
     <string name="config_systemGallery" translatable="false">com.android.gallery3d</string>
     <!-- The names of the packages that will hold the automotive projection role. -->
@@ -2977,12 +3004,13 @@
          will be locked. -->
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
-    <!-- Whether the device allows users to start in background visible on displays.
+    <!-- Whether the device allows full users to start in background visible on displays.
+         Note: this flag does NOT control the Communal Profile, which is not a full user.
          Should be false for all devices in production. Can be enabled only for development use
          in automotive vehicles with passenger displays. -->
     <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
 
-    <!-- Whether the device allows users to start in background visible on the default display.
+    <!-- Whether the device allows full users to start in background visible on the default display.
          Should be false for all devices in production. Can be enabled only for development use
          in passenger-only automotive build (i.e., when Android runs in a separate system in the
          back seat to manage the passenger displays).
@@ -3320,9 +3348,27 @@
     <string name="config_carrierAppInstallDialogComponent" translatable="false"
             >com.android.simappdialog/com.android.simappdialog.InstallCarrierAppActivity</string>
 
-    <!-- Name of the dialog that is used to get or save an app credential -->
+    <!-- Name of the default framework dialog that is used to get or save an app credential.
+
+    This UI should be always launch-able and is used as a fallback when an oem replacement activity
+    (defined at config_oemCredentialManagerDialogComponent) is undefined / not found. -->
     <string name="config_credentialManagerDialogComponent" translatable="false"
             >com.android.credentialmanager/com.android.credentialmanager.CredentialSelectorActivity</string>
+    <!-- Whether to allow the credential selector activity to be replaced by an activity at
+     run-time (restricted to the privileged activity specified by
+     config_credentialSelectorActivityName).
+
+     When disabled, the fallback activity defined at
+     config_credentialManagerDialogComponent will be used instead. -->
+    <bool name="config_enableOemCredentialManagerDialogComponent" translatable="false">true</bool>
+    <!-- Fully qualified activity name providing the credential selector UI, that serves the
+     CredentialManager APIs.
+
+     Used only when config_enableOemCredentialManagerDialogComponent is true.
+
+     If the activity specified cannot be found or launched, then the fallback activity defined at
+     config_credentialManagerDialogComponent will be used instead. -->
+    <string name="config_oemCredentialManagerDialogComponent" translatable="false"></string>
 
     <!-- Name of the broadcast receiver that is used to receive provider change events -->
     <string name="config_credentialManagerReceiverComponent" translatable="false"
@@ -3568,8 +3614,7 @@
     <!-- Whether this device prefers to show snapshot or splash screen on back predict target.
          When set true, there will create windowless starting surface for the preview target, so it
          won't affect activity's lifecycle. This should only be disabled on low-ram device. -->
-    <!-- TODO(b/268563842) enable once activity snapshot is ready -->
-    <bool name="config_predictShowStartingSurface">false</bool>
+    <bool name="config_predictShowStartingSurface">true</bool>
 
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
@@ -4014,6 +4059,24 @@
          by shrinking the display such that it does not overlap the cutout area. -->
     <bool name="config_maskMainBuiltInDisplayCutout">false</bool>
 
+    <!-- This string array provide override side of each rotation of the given insets.
+         Array of [side] for rotation 0, 90, 180 and 270 in order.
+         The options of [side] are:
+            - Option 0 - Left.
+            - Option 1 - Top.
+            - Option 2 - Right.
+            - Option 3 - Bottom.
+         When there are cutouts on multiple edges of the display, the override won't take any
+         effect. -->
+    <integer-array name="config_mainBuiltInDisplayCutoutSideOverride">
+        <!-- Example of at top for rotation 0 and 90, and at bottom for rotation 180 and 270:
+        <item>1</item>
+        <item>1</item>
+        <item>3</item>
+        <item>3</item>
+        -->
+    </integer-array>
+
     <!-- Ultrasound support for Mic/speaker path -->
     <!-- Whether the default microphone audio source supports near-ultrasound frequencies
          (range of 18 - 21 kHz). -->
@@ -4036,6 +4099,13 @@
 
     <!-- How close vibration request should be when they're aggregated for dumpsys, in ms. -->
     <integer name="config_previousVibrationsDumpAggregationTimeMillisLimit">1000</integer>
+
+    <!-- How long history of vibration control service should be kept for the dumpsys. -->
+    <integer name="config_vibratorControlServiceDumpSizeLimit">50</integer>
+
+    <!-- How close requests to vibration control service should be when they're aggregated for
+         dumpsys, in ms. -->
+    <integer name="config_vibratorControlServiceDumpAggregationTimeMillisLimit">60000</integer>
 
     <!-- The default vibration strength, must be between 1 and 255 inclusive. -->
     <integer name="config_defaultVibrationAmplitude">255</integer>
@@ -4254,6 +4324,9 @@
     <!-- Wallpaper will get top app scheduling priority if this is set to true.
     -->
     <bool name="config_wallpaperTopApp">false</bool>
+
+    <!-- True if the device supports dVRR  -->
+    <bool name="config_supportsDvrr">false</bool>
 
     <!-- True if the device supports at least one form of multi-window.
          E.g. freeform, split-screen, picture-in-picture. -->
@@ -4475,6 +4548,16 @@
     <!-- URI for default Accessibility notification sound when to enable accessibility shortcut. -->
     <string name="config_defaultAccessibilityNotificationSound" translatable="false"></string>
 
+    <!-- Array of component names, each flattened to a string, for accessibility services that
+         can be enabled by the user without showing a warning prompt. These services must be
+         preinstalled. -->
+    <string-array translatable="false" name="config_trustedAccessibilityServices">
+        <!--
+        <item>com.example.package.first/com.example.class.FirstService</item>
+        <item>com.example.package.second/com.example.class.SecondService</item>
+        -->
+    </string-array>
+
     <!-- Warning: This API can be dangerous when not implemented properly. In particular,
          escrow token must NOT be retrievable from device storage. In other words, either
          escrow token is not stored on device or its ciphertext is stored on device while
@@ -4592,6 +4675,13 @@
         See android.service.wearable.WearableSensingService.
    -->
     <string name="config_defaultWearableSensingService" translatable="false"></string>
+
+
+    <!-- The component name for the default system on-device intelligence service, -->
+    <string name="config_defaultOnDeviceIntelligenceService" translatable="false"></string>
+
+    <!-- The component name for the default system on-device trusted inference service. -->
+    <string name="config_defaultOnDeviceTrustedInferenceService" translatable="false"></string>
 
     <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent for
          wearable sensing. -->
@@ -5668,6 +5758,9 @@
     <!-- The action name for the default profcollect report uploader app. -->
     <string name="config_defaultProfcollectReportUploaderAction" translatable="false"></string>
 
+    <!-- Names of packages excluded by Profcollect onCameraOpened observer. -->
+    <string-array name="config_profcollectOnCameraOpenedSkipPackages" translatable="false"></string-array>
+
     <!-- The default value used for RawContacts.ACCOUNT_NAME when contacts are inserted without this
          column set. These contacts are stored locally on the device and will not be removed even
          if no android.account.Account with this name exists. A null string will be used if the
@@ -6367,6 +6460,8 @@
     </string>
     <bool name="config_fillSecondaryBuiltInDisplayCutout">false</bool>
     <bool name="config_maskSecondaryBuiltInDisplayCutout">false</bool>
+    <string-array name="config_secondaryBuiltInDisplayCutoutSideOverride" translatable="false">
+    </string-array>
 
     <!-- An array contains unique ids of all built-in displays and the unique id of a display can be
          obtained from {@link Display#getUniqueId}. This array should be set for multi-display
@@ -6411,6 +6506,11 @@
         <item>@string/config_mainBuiltInDisplayCutoutRectApproximation</item>
         <item>@string/config_secondaryBuiltInDisplayCutoutRectApproximation</item>
     </string-array>
+
+    <array name="config_displayCutoutSideOverrideArray" translatable="false">
+        <item>@array/config_mainBuiltInDisplayCutoutSideOverride</item>
+        <item>@array/config_secondaryBuiltInDisplayCutoutSideOverride</item>
+    </array>
 
     <!-- The maskBuiltInDisplayCutout config for each display in a multi-display device. -->
     <array name="config_maskBuiltInDisplayCutoutArray" translatable="false">
@@ -6573,7 +6673,7 @@
     </string-array>
 
     <!-- Whether or not the monitoring on the apps' background battery drain is enabled -->
-    <bool name="config_bg_current_drain_monitor_enabled">true</bool>
+    <bool name="config_bg_current_drain_monitor_enabled">false</bool>
 
     <!-- The threshold of the background current drain (in percentage) to the restricted
          standby bucket.
@@ -6859,4 +6959,33 @@
 
     <!-- Whether the media player is shown on the quick settings -->
     <bool name="config_quickSettingsShowMediaPlayer">true</bool>
+
+    <!-- Defines suitability of the built-in speaker route.
+         Refer to {@link MediaRoute2Info} to see supported values.  -->
+    <integer name="config_mediaRouter_builtInSpeakerSuitability">0</integer>
+
+    <!-- Whether to show a percentage text next to the progressbar while preparing to update the
+         device -->
+    <bool name="config_showPercentageTextDuringRebootToUpdate">true</bool>
+
+    <!-- Defines the minimum interval (in ms) between two input-based user-activity poke events. -->
+    <integer name="config_minMillisBetweenInputUserActivityEvents">100</integer>
+
+    <!-- Name of the starting activity for DisplayCompat host. specific to automotive.-->
+    <string name="config_defaultDisplayCompatHostActivity" translatable="false"></string>
+
+    <!-- Whether to use file hashes cache in watchlist-->
+    <bool name="config_watchlistUseFileHashesCache">false</bool>
+
+    <!-- Name of the package responsible to handle Contextual Search. -->
+    <string name="config_defaultContextualSearchPackageName" translatable="false" />
+
+    <!-- The key containing the entrypoint for Contextual Search. -->
+    <string name="config_defaultContextualSearchKey" translatable="false" />
+
+    <!-- The key containing the branching boolean for Contextual Search. -->
+    <string name="config_defaultContextualSearchEnabled" translatable="false" />
+
+    <!-- The key containing the branching boolean for legacy Search. -->
+    <string name="config_defaultContextualSearchLegacyEnabled" translatable="false" />
 </resources>

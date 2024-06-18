@@ -40,6 +40,7 @@ import android.os.RemoteCallback;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.AttachedSurfaceControl;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.SurfaceControlViewHost;
@@ -332,9 +333,11 @@ public final class SplashScreenView extends FrameLayout {
                                     + Thread.currentThread().getId());
                 }
 
+                AttachedSurfaceControl attachedSurfaceControl = surfaceView.getRootSurfaceControl();
                 SurfaceControlViewHost viewHost = new SurfaceControlViewHost(viewContext,
                         viewContext.getDisplay(),
-                        surfaceView.getHostToken(),
+                        attachedSurfaceControl == null ? null
+                                : attachedSurfaceControl.getInputTransferToken(),
                         "SplashScreenView");
                 ImageView imageView = new ImageView(viewContext);
                 imageView.setBackground(mIconDrawable);

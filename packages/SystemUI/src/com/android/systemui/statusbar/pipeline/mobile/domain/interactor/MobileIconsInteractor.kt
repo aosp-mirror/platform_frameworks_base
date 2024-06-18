@@ -32,9 +32,9 @@ import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
+import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
 import com.android.systemui.util.CarrierConfigTracker
 import java.lang.ref.WeakReference
 import javax.inject.Inject
@@ -71,6 +71,12 @@ interface MobileIconsInteractor {
     /** List of subscriptions, potentially filtered for CBRS */
     val filteredSubscriptions: Flow<List<SubscriptionModel>>
 
+    /**
+     * The current list of [MobileIconInteractor]s associated with the current list of
+     * [filteredSubscriptions]
+     */
+    val icons: StateFlow<List<MobileIconInteractor>>
+
     /** True if the active mobile data subscription has data enabled */
     val activeDataConnectionHasDataEnabled: StateFlow<Boolean>
 
@@ -99,7 +105,7 @@ interface MobileIconsInteractor {
     val isDefaultConnectionFailed: StateFlow<Boolean>
 
     /** True once the user has been set up */
-    val isUserSetup: StateFlow<Boolean>
+    val isUserSetUp: StateFlow<Boolean>
 
     /** True if we're configured to force-hide the mobile icons and false otherwise. */
     val isForceHidden: Flow<Boolean>
@@ -259,6 +265,13 @@ constructor(
         }
     }
 
+    override val icons =
+        filteredSubscriptions
+            .mapLatest { subs ->
+                subs.map { getMobileConnectionInteractorForSubId(it.subscriptionId) }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
+
     /**
      * Copied from the old pipeline. We maintain a 2s period of time where we will keep the
      * validated bit from the old active network (A) while data is changing to the new one (B).
@@ -349,7 +362,7 @@ constructor(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    override val isUserSetup: StateFlow<Boolean> = userSetupRepo.isUserSetupFlow
+    override val isUserSetUp: StateFlow<Boolean> = userSetupRepo.isUserSetUp
 
     override val isForceHidden: Flow<Boolean> =
         connectivityRepository.forceHiddenSlots

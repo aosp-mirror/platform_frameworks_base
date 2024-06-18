@@ -122,6 +122,16 @@ public class HdrClamperTest {
     }
 
     @Test
+    public void testRegisterHdrListener_ZeroMinHdrPercent() {
+        IBinder otherBinder = mock(IBinder.class);
+        mHdrClamper.resetHdrConfig(TEST_HDR_DATA, WIDTH, HEIGHT,
+            /* minimumHdrPercentOfScreen= */ 0, otherBinder);
+
+        verify(mMockHdrInfoListener).unregister(mMockBinder);
+        verify(mMockHdrInfoListener).register(otherBinder);
+    }
+
+    @Test
     public void testRegisterNotCalledIfHbmConfigIsMissing() {
         IBinder otherBinder = mock(IBinder.class);
         mHdrClamper.resetHdrConfig(TEST_HDR_DATA, WIDTH, HEIGHT, -1, otherBinder);

@@ -49,6 +49,12 @@ public class InitialPhaseMetric {
     // Stores the deduped request information, particularly {"req":5}
     private Map<String, Integer> mRequestCounts = new LinkedHashMap<>();
 
+    // The session id of autofill if the request is from autofill, defaults to -1
+    private int mAutofillSessionId = -1;
+
+    // The request id of autofill if the request is from autofill, defaults to -1
+    private int mAutofillRequestId = -1;
+
 
     public InitialPhaseMetric(int sessionIdTrackOne) {
         mSessionIdCaller = sessionIdTrackOne;
@@ -124,6 +130,24 @@ public class InitialPhaseMetric {
 
     public boolean isOriginSpecified() {
         return mOriginSpecified;
+    }
+
+    /* ------ Autofill Integration ------ */
+
+    public void setAutofillSessionId(int autofillSessionId) {
+        mAutofillSessionId = autofillSessionId;
+    }
+
+    public int getAutofillSessionId() {
+        return mAutofillSessionId;
+    }
+
+    public void setAutofillRequestId(int autofillRequestId) {
+        mAutofillRequestId = autofillRequestId;
+    }
+
+    public int getAutofillRequestId() {
+        return mAutofillRequestId;
     }
 
     /* ------ Unique Request Counts Map Information ------ */

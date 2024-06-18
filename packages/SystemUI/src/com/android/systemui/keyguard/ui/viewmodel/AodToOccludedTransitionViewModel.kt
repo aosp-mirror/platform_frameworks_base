@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
@@ -29,13 +28,13 @@ import javax.inject.Inject
 class AodToOccludedTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromAodTransitionInteractor.TO_OCCLUDED_DURATION,
-            stepFlow = interactor.transition(KeyguardState.AOD, KeyguardState.OCCLUDED),
+            from = KeyguardState.AOD,
+            to = KeyguardState.OCCLUDED,
         )
 
     override val deviceEntryParentViewAlpha = transitionAnimation.immediatelyTransitionTo(0f)

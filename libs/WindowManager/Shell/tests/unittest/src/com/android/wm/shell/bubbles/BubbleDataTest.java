@@ -1190,6 +1190,23 @@ public class BubbleDataTest extends ShellTestCase {
         assertThat(mBubbleData.getBubbleInStackWithKey(appBubbleKey)).isNull();
     }
 
+    @Test
+    public void test_removeOverflowBubble() {
+        sendUpdatedEntryAtTime(mEntryA1, 2000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA1));
+
+        mBubbleData.removeOverflowBubble(mBubbleA1);
+        verifyUpdateReceived();
+
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.removedOverflowBubble).isEqualTo(mBubbleA1);
+        assertOverflowChangedTo(ImmutableList.of());
+    }
+
     private void verifyUpdateReceived() {
         verify(mListener).applyUpdate(mUpdateCaptor.capture());
         reset(mListener);

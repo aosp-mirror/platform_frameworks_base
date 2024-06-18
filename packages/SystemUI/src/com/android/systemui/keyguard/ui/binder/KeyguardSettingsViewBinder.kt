@@ -22,8 +22,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.animation.view.LaunchableLinearLayout
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.common.ui.binder.TextViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
@@ -43,15 +42,13 @@ import kotlinx.coroutines.launch
 
 object KeyguardSettingsViewBinder {
     fun bind(
-        parentView: View,
+        view: View,
         viewModel: KeyguardSettingsMenuViewModel,
         longPressViewModel: KeyguardLongPressViewModel,
-        rootViewModel: KeyguardRootViewModel,
+        rootViewModel: KeyguardRootViewModel?,
         vibratorHelper: VibratorHelper,
         activityStarter: ActivityStarter
     ): DisposableHandle {
-        val view = parentView.requireViewById<LaunchableLinearLayout>(R.id.keyguard_settings_button)
-
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -62,7 +59,6 @@ object KeyguardSettingsViewBinder {
                                 vibratorHelper.vibrate(KeyguardBottomAreaVibrations.Activated)
                                 view.setOnTouchListener(
                                     KeyguardSettingsButtonOnTouchListener(
-                                        view = view,
                                         viewModel = viewModel,
                                     )
                                 )
@@ -96,7 +92,7 @@ object KeyguardSettingsViewBinder {
                     }
 
                     launch {
-                        rootViewModel.lastRootViewTapPosition.filterNotNull().collect { point ->
+                        rootViewModel?.lastRootViewTapPosition?.filterNotNull()?.collect { point ->
                             if (view.isVisible) {
                                 val hitRect = Rect()
                                 view.getHitRect(hitRect)
@@ -119,7 +115,7 @@ object KeyguardSettingsViewBinder {
         activityStarter.postStartActivityDismissingKeyguard(
             WallpaperPickerIntentUtils.getIntent(view.context, LAUNCH_SOURCE_KEYGUARD),
             /* delay= */ 0,
-            /* animationController= */ ActivityLaunchAnimator.Controller.fromView(view),
+            /* animationController= */ ActivityTransitionAnimator.Controller.fromView(view),
             /* customMessage= */ view.context.getString(R.string.keyguard_unlock_to_customize_ls)
         )
     }

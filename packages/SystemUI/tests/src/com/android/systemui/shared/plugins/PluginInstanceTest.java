@@ -17,13 +17,17 @@
 package com.android.systemui.shared.plugins;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -40,7 +44,11 @@ import org.junit.runner.RunWith;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -104,6 +112,7 @@ public class PluginInstanceTest extends SysuiTestCase {
         mPluginInstance = mPluginInstanceFactory.create(
                 mContext, mAppInfo, TEST_PLUGIN_COMPONENT_NAME,
                 TestPlugin.class, mPluginListener);
+        mPluginInstance.setLogFunc((tag, msg) -> Log.d((String) tag, (String) msg));
         mPluginContext = new WeakReference<>(mPluginInstance.getPluginContext());
     }
 
@@ -158,12 +167,71 @@ public class PluginInstanceTest extends SysuiTestCase {
 
     @Test
     public void testOnAttach_SkipLoad() {
-        mPluginListener.mAttachReturn = false;
+        mPluginListener.mOnAttach = () -> false;
         mPluginInstance.onCreate();
         assertEquals(1, mPluginListener.mAttachedCount);
         assertEquals(0, mPluginListener.mLoadCount);
         assertNull(mPluginInstance.getPlugin());
         assertInstances(0, 0);
+    }
+
+    @Test
+    public void testLoadUnloadSimultaneous_HoldsUnload() throws Exception {
+        final Semaphore loadLock = new Semaphore(1);
+        final Semaphore unloadLock = new Semaphore(1);
+
+        mPluginListener.mOnAttach = () -> false;
+        mPluginListener.mOnLoad = () -> {
+            assertNotNull(mPluginInstance.getPlugin());
+
+            // Allow the bg thread the opportunity to delete the plugin
+            loadLock.release();
+            Thread.yield();
+            boolean isLocked = getLock(unloadLock, 1000);
+
+            // Ensure the bg thread failed to do delete the plugin
+            assertNotNull(mPluginInstance.getPlugin());
+            // We expect that bgThread deadlocked holding the semaphore
+            assertFalse(isLocked);
+        };
+
+        AtomicBoolean isBgThreadFailed = new AtomicBoolean(false);
+        Thread bgThread = new Thread(() -> {
+            assertTrue(getLock(unloadLock, 10));
+            assertTrue(getLock(loadLock, 4000)); // Wait for the foreground thread
+            assertNotNull(mPluginInstance.getPlugin());
+            // Attempt to delete the plugin, this should block until the load completes
+            mPluginInstance.unloadPlugin();
+            assertNull(mPluginInstance.getPlugin());
+            unloadLock.release();
+            loadLock.release();
+        });
+
+        // This protects the test suite from crashing due to the uncaught exception.
+        bgThread.setUncaughtExceptionHandler((Thread t, Throwable ex) -> {
+            Log.e("testLoadUnloadSimultaneous_HoldsUnload", "Exception from BG Thread", ex);
+            isBgThreadFailed.set(true);
+        });
+
+        loadLock.acquire();
+        mPluginInstance.onCreate();
+
+        assertNull(mPluginInstance.getPlugin());
+        bgThread.start();
+        mPluginInstance.loadPlugin();
+
+        bgThread.join(5000);
+        assertFalse(isBgThreadFailed.get());
+        assertNull(mPluginInstance.getPlugin());
+    }
+
+    private boolean getLock(Semaphore lock, long millis) {
+        try {
+            return lock.tryAcquire(millis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ex) {
+            fail();
+            return false;
+        }
     }
 
     // This target class doesn't matter, it just needs to have a Requires to hit the flow where
@@ -226,7 +294,10 @@ public class PluginInstanceTest extends SysuiTestCase {
     }
 
     public class FakeListener implements PluginListener<TestPlugin> {
-        public boolean mAttachReturn = true;
+        public Supplier<Boolean> mOnAttach = null;
+        public Runnable mOnDetach = null;
+        public Runnable mOnLoad = null;
+        public Runnable mOnUnload = null;
         public int mAttachedCount = 0;
         public int mDetachedCount = 0;
         public int mLoadCount = 0;
@@ -236,13 +307,16 @@ public class PluginInstanceTest extends SysuiTestCase {
         public boolean onPluginAttached(PluginLifecycleManager<TestPlugin> manager) {
             mAttachedCount++;
             assertEquals(PluginInstanceTest.this.mPluginInstance, manager);
-            return mAttachReturn;
+            return mOnAttach != null ? mOnAttach.get() : true;
         }
 
         @Override
         public void onPluginDetached(PluginLifecycleManager<TestPlugin> manager) {
             mDetachedCount++;
             assertEquals(PluginInstanceTest.this.mPluginInstance, manager);
+            if (mOnDetach != null) {
+                mOnDetach.run();
+            }
         }
 
         @Override
@@ -261,6 +335,9 @@ public class PluginInstanceTest extends SysuiTestCase {
                 assertEquals(expectedContext, pluginContext);
             }
             assertEquals(PluginInstanceTest.this.mPluginInstance, manager);
+            if (mOnLoad != null) {
+                mOnLoad.run();
+            }
         }
 
         @Override
@@ -274,6 +351,9 @@ public class PluginInstanceTest extends SysuiTestCase {
                 assertEquals(expectedPlugin, plugin);
             }
             assertEquals(PluginInstanceTest.this.mPluginInstance, manager);
+            if (mOnUnload != null) {
+                mOnUnload.run();
+            }
         }
     }
 }

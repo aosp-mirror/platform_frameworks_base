@@ -27,25 +27,26 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.statusbar.SmartReplyController
+import com.android.systemui.statusbar.notification.ColorUpdateLogger
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider
 import com.android.systemui.statusbar.notification.collection.render.FakeNodeController
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
-import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController.BUBBLES_SETTING_URI
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationRowStatsLogger
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.SmartReplyConstants
@@ -82,6 +83,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val rivSubComponentFactory: RemoteInputViewSubcomponent.Factory = mock()
     private val metricsLogger: MetricsLogger = mock()
     private val logBufferLogger = NotificationRowLogger(logcatLogBuffer(), logcatLogBuffer())
+    private val colorUpdateLogger: ColorUpdateLogger = mock()
     private val listContainer: NotificationListContainer = mock()
     private val childrenContainer: NotificationChildrenContainer = mock()
     private val smartReplyConstants: SmartReplyConstants = mock()
@@ -92,7 +94,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val groupMembershipManager: GroupMembershipManager = mock()
     private val groupExpansionManager: GroupExpansionManager = mock()
     private val rowContentBindStage: RowContentBindStage = mock()
-    private val notifLogger: NotificationLogger = mock()
+    private val notifLogger: NotificationRowStatsLogger = mock()
     private val headsUpManager: HeadsUpManager = mock()
     private val onExpandClickListener: ExpandableNotificationRow.OnExpandClickListener = mock()
     private val statusBarStateController: StatusBarStateController = mock()
@@ -117,6 +119,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 activableNotificationViewController,
                 rivSubComponentFactory,
                 metricsLogger,
+                colorUpdateLogger,
                 logBufferLogger,
                 NotificationChildrenContainerLogger(logcatLogBuffer()),
                 listContainer,

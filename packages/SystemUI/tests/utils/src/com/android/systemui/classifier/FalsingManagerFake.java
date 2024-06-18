@@ -201,4 +201,13 @@ public class FalsingManagerFake implements FalsingManager {
     public List<FalsingTapListener> getTapListeners() {
         return mTapListeners;
     }
+
+    /**
+     * Calls every registered {@link FalsingBeliefListener} as if false touch occurred.
+     */
+    public void sendFalsingBelief() {
+        for (FalsingBeliefListener listener : mFalsingBeliefListeners) {
+            listener.onFalse();
+        }
+    }
 }

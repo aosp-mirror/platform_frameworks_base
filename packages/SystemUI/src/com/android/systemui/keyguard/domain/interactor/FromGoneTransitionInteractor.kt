@@ -18,16 +18,20 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -37,30 +41,45 @@ class FromGoneTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
-    override val transitionInteractor: KeyguardTransitionInteractor,
-    @Application private val scope: CoroutineScope,
+    transitionInteractor: KeyguardTransitionInteractor,
+    @Background private val scope: CoroutineScope,
+    @Background bgDispatcher: CoroutineDispatcher,
+    @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
     private val powerInteractor: PowerInteractor,
+    private val communalInteractor: CommunalInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.GONE,
+        transitionInteractor = transitionInteractor,
+        mainDispatcher = mainDispatcher,
+        bgDispatcher = bgDispatcher,
     ) {
 
     override fun start() {
         listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
-        listenForGoneToLockscreen()
+        listenForGoneToLockscreenOrHub()
         listenForGoneToDreamingLockscreenHosted()
     }
 
     // Primarily for when the user chooses to lock down the device
-    private fun listenForGoneToLockscreen() {
+    private fun listenForGoneToLockscreenOrHub() {
         scope.launch {
             keyguardInteractor.isKeyguardShowing
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { (isKeyguardShowing, lastStartedStep) ->
-                    if (isKeyguardShowing && lastStartedStep.to == KeyguardState.GONE) {
-                        startTransitionTo(KeyguardState.LOCKSCREEN)
+                .sample(
+                    startedKeyguardState,
+                    communalInteractor.isIdleOnCommunal,
+                )
+                .collect { (isKeyguardShowing, startedState, isIdleOnCommunal) ->
+                    if (isKeyguardShowing && startedState == KeyguardState.GONE) {
+                        val to =
+                            if (isIdleOnCommunal) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        startTransitionTo(to)
                     }
                 }
         }
@@ -69,7 +88,7 @@ constructor(
     private fun listenForGoneToDreamingLockscreenHosted() {
         scope.launch {
             keyguardInteractor.isActiveDreamLockscreenHosted
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(startedKeyguardTransitionStep, ::Pair)
                 .collect { (isActiveDreamLockscreenHosted, lastStartedStep) ->
                     if (isActiveDreamLockscreenHosted && lastStartedStep.to == KeyguardState.GONE) {
                         startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
@@ -83,7 +102,7 @@ constructor(
             keyguardInteractor.isAbleToDream
                 .sample(
                     combine(
-                        transitionInteractor.startedKeyguardTransitionStep,
+                        startedKeyguardTransitionStep,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
                         ::Pair
                     ),
@@ -106,7 +125,7 @@ constructor(
             powerInteractor.isAsleep
                 .sample(
                     combine(
-                        transitionInteractor.startedKeyguardTransitionStep,
+                        startedKeyguardTransitionStep,
                         keyguardInteractor.isAodAvailable,
                         ::Pair
                     ),
@@ -131,6 +150,7 @@ constructor(
                 when (toState) {
                     KeyguardState.DREAMING -> TO_DREAMING_DURATION
                     KeyguardState.AOD -> TO_AOD_DURATION
+                    KeyguardState.DOZING -> TO_DOZING_DURATION
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
@@ -141,6 +161,7 @@ constructor(
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_AOD_DURATION = 1300.milliseconds
+        val TO_DOZING_DURATION = 933.milliseconds
         val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
     }
 }

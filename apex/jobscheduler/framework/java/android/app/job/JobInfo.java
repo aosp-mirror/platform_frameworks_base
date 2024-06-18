@@ -23,7 +23,6 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
-import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.util.TimeUtils.formatDuration;
 
 import android.annotation.BytesLong;
@@ -50,9 +49,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -126,6 +123,15 @@ public class JobInfo implements Parcelable {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     @Overridable // Aid in testing
     public static final long ENFORCE_MINIMUM_TIME_WINDOWS = 311402873L;
+
+    /**
+     * Require that minimum latencies and override deadlines are nonnegative.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long REJECT_NEGATIVE_DELAYS_AND_DEADLINES = 323349338L;
 
     /** @hide */
     @IntDef(prefix = { "NETWORK_TYPE_" }, value = {
@@ -205,6 +211,8 @@ public class JobInfo implements Parcelable {
 
     /* Minimum flex for a periodic job, in milliseconds. */
     private static final long MIN_FLEX_MILLIS = 5 * 60 * 1000L; // 5 minutes
+
+    private static final long MIN_ALLOWED_TIME_WINDOW_MILLIS = MIN_PERIOD_MILLIS;
 
     /**
      * Minimum backoff interval for a job, in milliseconds
@@ -288,12 +296,16 @@ public class JobInfo implements Parcelable {
     public static final int PRIORITY_HIGH = 400;
 
     /**
-     * This task should be run ahead of all other tasks. Only Expedited Jobs
-     * {@link Builder#setExpedited(boolean)} can have this priority and as such,
-     * are subject to the same execution time details noted in
-     * {@link Builder#setExpedited(boolean)}.
-     * A sample task of max priority: receiving a text message and processing it to
-     * show a notification
+     * This task is critical to user experience or functionality
+     * and should be run ahead of all other tasks. Only
+     * {@link Builder#setExpedited(boolean) expedited jobs} and
+     * {@link Builder#setUserInitiated(boolean) user-initiated jobs} can have this priority.
+     * <p>
+     * Example tasks of max priority:
+     * <ul>
+     *     <li>Receiving a text message and processing it to show a notification</li>
+     *     <li>Downloading or uploading some content the user requested to transfer immediately</li>
+     * </ul>
      */
     public static final int PRIORITY_MAX = 500;
 
@@ -689,14 +701,14 @@ public class JobInfo implements Parcelable {
      * @see JobInfo.Builder#setMinimumLatency(long)
      */
     public long getMinLatencyMillis() {
-        return minLatencyMillis;
+        return Math.max(0, minLatencyMillis);
     }
 
     /**
      * @see JobInfo.Builder#setOverrideDeadline(long)
      */
     public long getMaxExecutionDelayMillis() {
-        return maxExecutionDelayMillis;
+        return Math.max(0, maxExecutionDelayMillis);
     }
 
     /**
@@ -1866,6 +1878,13 @@ public class JobInfo implements Parcelable {
          * Because it doesn't make sense setting this property on a periodic job, doing so will
          * throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
+         *
+         * Negative latencies also don't make sense for a job and are indicative of an error,
+         * so starting in Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+         * setting a negative deadline will result in
+         * {@link android.app.job.JobInfo.Builder#build()} throwing an
+         * {@link java.lang.IllegalArgumentException}.
+         *
          * @param minLatencyMillis Milliseconds before which this job will not be considered for
          *                         execution.
          * @see JobInfo#getMinLatencyMillis()
@@ -1877,42 +1896,43 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Set deadline which is the maximum scheduling latency. The job will be run by this
-         * deadline even if other requirements (including a delay set through
-         * {@link #setMinimumLatency(long)}) are not met.
+         * Set a deadline after which all other functional requested constraints will be ignored.
+         * After the deadline has passed, the job can run even if other requirements (including
+         * a delay set through {@link #setMinimumLatency(long)}) are not met.
          * {@link JobParameters#isOverrideDeadlineExpired()} will return {@code true} if the job's
-         * deadline has passed.
+         * deadline has passed. The job's execution may be delayed beyond the set deadline by
+         * other factors such as Doze mode and system health signals.
          *
          * <p>
          * Because it doesn't make sense setting this property on a periodic job, doing so will
          * throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
          *
+         * <p>
+         * Negative deadlines also don't make sense for a job and are indicative of an error,
+         * so starting in Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+         * setting a negative deadline will result in
+         * {@link android.app.job.JobInfo.Builder#build()} throwing an
+         * {@link java.lang.IllegalArgumentException}.
+         *
          * <p class="note">
          * Since a job will run once the deadline has passed regardless of the status of other
-         * constraints, setting a deadline of 0 with other constraints makes those constraints
-         * meaningless when it comes to execution decisions. Avoid doing this.
-         * </p>
-         *
-         * <p>
-         * Short deadlines hinder the system's ability to optimize scheduling behavior and may
-         * result in running jobs at inopportune times. Therefore, starting in Android version
-         * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, minimum time windows will be
-         * enforced to help make it easier to better optimize job execution. Time windows are
+         * constraints, setting a deadline of 0 (or a {@link #setMinimumLatency(long) delay} equal
+         * to the deadline) with other constraints makes those constraints
+         * meaningless when it comes to execution decisions. Since doing so is indicative of an
+         * error in the logic, starting in Android version
+         * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, jobs with extremely short
+         * time windows will fail to build. Time windows are
          * defined as the time between a job's {@link #setMinimumLatency(long) minimum latency}
          * and its deadline. If the minimum latency is not set, it is assumed to be 0.
-         * The following minimums will be enforced:
-         * <ul>
-         *     <li>
-         *         Jobs with {@link #PRIORITY_DEFAULT} or higher priorities have a minimum time
-         *         window of one hour.
-         *     </li>
-         *     <li>Jobs with {@link #PRIORITY_LOW} have a minimum time window of 6 hours.</li>
-         *     <li>Jobs with {@link #PRIORITY_MIN} have a minimum time window of 12 hours.</li>
-         * </ul>
          *
          * Work that must happen immediately should use {@link #setExpedited(boolean)} or
          * {@link #setUserInitiated(boolean)} in the appropriate manner.
+         *
+         * <p>
+         * This API aimed to guarantee execution of the job by the deadline only on Android version
+         * {@link android.os.Build.VERSION_CODES#LOLLIPOP}. That aim and guarantee has not existed
+         * since {@link android.os.Build.VERSION_CODES#M}.
          *
          * @see JobInfo#getMaxExecutionDelayMillis()
          */
@@ -1967,6 +1987,9 @@ public class JobInfo implements Parcelable {
          *     <li>Be subject to background location throttling</li>
          *     <li>Be exempt from delay to optimize job execution</li>
          * </ol>
+         *
+         * <p>
+         * Expedited jobs are given {@link #PRIORITY_MAX} by default.
          *
          * <p>
          * Since these jobs have stronger guarantees than regular jobs, they will be subject to
@@ -2059,6 +2082,7 @@ public class JobInfo implements Parcelable {
          * <p>
          * These jobs will not be subject to quotas and will be started immediately once scheduled
          * if all constraints are met and the device system health allows for additional tasks.
+         * They are also given {@link #PRIORITY_MAX} by default, and the priority cannot be changed.
          *
          * @see JobInfo#isUserInitiated()
          */
@@ -2188,13 +2212,15 @@ public class JobInfo implements Parcelable {
         public JobInfo build() {
             return build(Compatibility.isChangeEnabled(DISALLOW_DEADLINES_FOR_PREFETCH_JOBS),
                     Compatibility.isChangeEnabled(REJECT_NEGATIVE_NETWORK_ESTIMATES),
-                    Compatibility.isChangeEnabled(ENFORCE_MINIMUM_TIME_WINDOWS));
+                    Compatibility.isChangeEnabled(ENFORCE_MINIMUM_TIME_WINDOWS),
+                    Compatibility.isChangeEnabled(REJECT_NEGATIVE_DELAYS_AND_DEADLINES));
         }
 
         /** @hide */
         public JobInfo build(boolean disallowPrefetchDeadlines,
                 boolean rejectNegativeNetworkEstimates,
-                boolean enforceMinimumTimeWindows) {
+                boolean enforceMinimumTimeWindows,
+                boolean rejectNegativeDelaysAndDeadlines) {
             // This check doesn't need to be inside enforceValidity. It's an unnecessary legacy
             // check that would ideally be phased out instead.
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
@@ -2204,7 +2230,7 @@ public class JobInfo implements Parcelable {
             }
             JobInfo jobInfo = new JobInfo(this);
             jobInfo.enforceValidity(disallowPrefetchDeadlines, rejectNegativeNetworkEstimates,
-                    enforceMinimumTimeWindows);
+                    enforceMinimumTimeWindows, rejectNegativeDelaysAndDeadlines);
             return jobInfo;
         }
 
@@ -2224,7 +2250,8 @@ public class JobInfo implements Parcelable {
      */
     public final void enforceValidity(boolean disallowPrefetchDeadlines,
             boolean rejectNegativeNetworkEstimates,
-            boolean enforceMinimumTimeWindows) {
+            boolean enforceMinimumTimeWindows,
+            boolean rejectNegativeDelaysAndDeadlines) {
         // Check that network estimates require network type and are reasonable values.
         if ((networkDownloadBytes > 0 || networkUploadBytes > 0 || minimumNetworkChunkBytes > 0)
                 && networkRequest == null) {
@@ -2256,6 +2283,17 @@ public class JobInfo implements Parcelable {
         }
         if (minimumNetworkChunkBytes != NETWORK_BYTES_UNKNOWN && minimumNetworkChunkBytes <= 0) {
             throw new IllegalArgumentException("Minimum chunk size must be positive");
+        }
+
+        if (rejectNegativeDelaysAndDeadlines) {
+            if (minLatencyMillis < 0) {
+                throw new IllegalArgumentException(
+                        "Minimum latency is negative: " + minLatencyMillis);
+            }
+            if (maxExecutionDelayMillis < 0) {
+                throw new IllegalArgumentException(
+                        "Override deadline is negative: " + maxExecutionDelayMillis);
+            }
         }
 
         final boolean hasDeadline = maxExecutionDelayMillis != 0L;
@@ -2339,35 +2377,36 @@ public class JobInfo implements Parcelable {
                 throw new IllegalArgumentException("Invalid priority level provided: " + mPriority);
         }
 
-        if (enforceMinimumTimeWindows
-                && Flags.enforceMinimumTimeWindows()
-                // TODO(312197030): remove exemption for the system
-                && !UserHandle.isCore(Process.myUid())
-                && hasLateConstraint && !isPeriodic) {
-            final long windowStart = hasEarlyConstraint ? minLatencyMillis : 0;
-            if (mPriority >= PRIORITY_DEFAULT) {
-                if (maxExecutionDelayMillis - windowStart < HOUR_IN_MILLIS) {
-                    throw new IllegalArgumentException(
-                            getPriorityString(mPriority)
-                                    + " cannot have a time window less than 1 hour."
-                                    + " Delay=" + windowStart
-                                    + ", deadline=" + maxExecutionDelayMillis);
-                }
-            } else if (mPriority >= PRIORITY_LOW) {
-                if (maxExecutionDelayMillis - windowStart < 6 * HOUR_IN_MILLIS) {
-                    throw new IllegalArgumentException(
-                            getPriorityString(mPriority)
-                                    + " cannot have a time window less than 6 hours."
-                                    + " Delay=" + windowStart
-                                    + ", deadline=" + maxExecutionDelayMillis);
-                }
+        final boolean hasFunctionalConstraint = networkRequest != null
+                || constraintFlags != 0
+                || (triggerContentUris != null && triggerContentUris.length > 0);
+        if (hasLateConstraint && !isPeriodic) {
+            if (!hasFunctionalConstraint) {
+                Log.w(TAG, "Job '" + service.flattenToShortString() + "#" + jobId + "'"
+                        + " has a deadline with no functional constraints."
+                        + " The deadline won't improve job execution latency."
+                        + " Consider removing the deadline.");
             } else {
-                if (maxExecutionDelayMillis - windowStart < 12 * HOUR_IN_MILLIS) {
-                    throw new IllegalArgumentException(
-                            getPriorityString(mPriority)
-                                    + " cannot have a time window less than 12 hours."
-                                    + " Delay=" + windowStart
-                                    + ", deadline=" + maxExecutionDelayMillis);
+                final long windowStart = hasEarlyConstraint ? minLatencyMillis : 0;
+                if (maxExecutionDelayMillis - windowStart < MIN_ALLOWED_TIME_WINDOW_MILLIS) {
+                    if (enforceMinimumTimeWindows
+                            && Flags.enforceMinimumTimeWindows()) {
+                        throw new IllegalArgumentException("Time window too short. Constraints"
+                                + " unlikely to be satisfied. Increase deadline to a reasonable"
+                                + " duration."
+                                + " Job '" + service.flattenToShortString() + "#" + jobId + "'"
+                                + " has delay=" + windowStart
+                                + ", deadline=" + maxExecutionDelayMillis);
+                    } else {
+                        Log.w(TAG, "Job '" + service.flattenToShortString() + "#" + jobId + "'"
+                                + " has a deadline with functional constraints and an extremely"
+                                + " short time window of "
+                                + (maxExecutionDelayMillis - windowStart) + " ms"
+                                + " (delay=" + windowStart
+                                + ", deadline=" + maxExecutionDelayMillis + ")."
+                                + " The functional constraints are not likely to be satisfied when"
+                                + " the job runs.");
+                    }
                 }
             }
         }

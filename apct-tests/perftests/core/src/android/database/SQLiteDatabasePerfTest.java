@@ -433,6 +433,17 @@ public class SQLiteDatabasePerfTest {
         performMultithreadedReadWriteTest();
     }
 
+    /**
+     * This test measures a multi-threaded read-write environment where there are 2 readers and
+     * 1 writer in the database using WAL journal mode and NORMAL syncMode.
+     */
+    @Test
+    public void testMultithreadedReadWriteWithWalNormal() {
+        recreateTestDatabase(SQLiteDatabase.JOURNAL_MODE_WAL, SQLiteDatabase.SYNC_MODE_NORMAL);
+        insertT1TestDataSet();
+        performMultithreadedReadWriteTest();
+    }
+
     private void doReadLoop(int totalIterations) {
         Random rnd = new Random(0);
         int currentIteration = 0;
@@ -472,7 +483,6 @@ public class SQLiteDatabasePerfTest {
     }
 
     private void doUpdateLoop(int totalIterations) {
-        SQLiteDatabase db = mContext.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null);
         Random rnd = new Random(0);
         int i = 0;
         ContentValues cv = new ContentValues();
@@ -485,22 +495,10 @@ public class SQLiteDatabasePerfTest {
             cv.put("COL_B", "UpdatedValue");
             cv.put("COL_C", i);
             argArray[0] = String.valueOf(id);
-            db.update("T1", cv, "_ID=?", argArray);
+            mDatabase.update("T1", cv, "_ID=?", argArray);
             i++;
             android.os.Trace.endSection();
         }
-    }
-
-    /**
-     * This test measures a multi-threaded read-write environment where there are 2 readers and
-     * 1 writer in the database using WAL journal mode and NORMAL syncMode.
-     */
-    @Test
-    public void testMultithreadedReadWriteWithWalNormal() {
-        recreateTestDatabase(SQLiteDatabase.JOURNAL_MODE_WAL, SQLiteDatabase.SYNC_MODE_NORMAL);
-        insertT1TestDataSet();
-
-        performMultithreadedReadWriteTest();
     }
 
     private void performMultithreadedReadWriteTest() {
@@ -555,4 +553,3 @@ public class SQLiteDatabasePerfTest {
         createOrOpenTestDatabase(journalMode, syncMode);
     }
 }
-

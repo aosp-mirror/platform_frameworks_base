@@ -62,6 +62,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.IWindow;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent.EventType;
 
@@ -2067,10 +2068,10 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Start sequence (infinite) type of flash notification. Use
-     * {@code Context.getOpPackageName()} as the identifier of this flash notification.
+     * Start sequence (infinite) type of flash notification. Use {@code Context} to retrieve the
+     * package name as the identifier of this flash notification.
      * The notification can be cancelled later by calling {@link #stopFlashNotificationSequence}
-     * with same {@code Context.getOpPackageName()}.
+     * with same {@code Context}.
      * If the binder associated with this {@link AccessibilityManager} instance dies then the
      * sequence will stop automatically. It is strongly recommended to call
      * {@link #stopFlashNotificationSequence} within a reasonable amount of time after calling
@@ -2104,8 +2105,8 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Stop sequence (infinite) type of flash notification. The flash notification with
-     * {@code Context.getOpPackageName()} as identifier will be stopped if exist.
+     * Stop sequence (infinite) type of flash notification. The flash notification with the
+     * package name retrieved from {@code Context} as identifier will be stopped if exist.
      * It is strongly recommended to call this method within a reasonable amount of time after
      * calling {@link #startFlashNotificationSequence} method.
      *
@@ -2440,6 +2441,55 @@ public final class AccessibilityManager {
         }
         try {
             return service.getWindowTransformationSpec(windowId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Attaches a {@link android.view.SurfaceControl} containing an accessibility overlay to the
+     * specified display.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    public void attachAccessibilityOverlayToDisplay(
+            int displayId, @NonNull SurfaceControl surfaceControl) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.attachAccessibilityOverlayToDisplay(
+                    displayId, surfaceControl);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies that the current a11y tiles in QuickSettings Panel has been changed
+     *
+     * @param userId            The userId of the user attempts to change the qs panel.
+     * @param tileComponentNames A list of Accessibility feature's TileServices' component names
+     *                           and the a11y platform tiles' component names
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.STATUS_BAR_SERVICE)
+    public void notifyQuickSettingsTilesChanged(
+            @UserIdInt int userId, List<ComponentName> tileComponentNames) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.notifyQuickSettingsTilesChanged(userId, tileComponentNames);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

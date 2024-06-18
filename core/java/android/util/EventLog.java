@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
  */
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 @android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
-        "com.android.hoststubgen.nativesubstitution.EventLog_host")
+        "com.android.platform.test.ravenwood.nativesubstitution.EventLog_host")
 public class EventLog {
     /** @hide */ public EventLog() {}
 

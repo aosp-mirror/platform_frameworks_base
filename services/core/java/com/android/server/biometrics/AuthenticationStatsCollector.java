@@ -54,8 +54,8 @@ public class AuthenticationStatsCollector {
 
     @NonNull private final Context mContext;
     @NonNull private final PackageManager mPackageManager;
-    @NonNull private final FaceManager mFaceManager;
-    @NonNull private final FingerprintManager mFingerprintManager;
+    @Nullable private final FaceManager mFaceManager;
+    @Nullable private final FingerprintManager mFingerprintManager;
 
     private final boolean mEnabled;
     private final float mThreshold;
@@ -153,13 +153,13 @@ public class AuthenticationStatsCollector {
         if (authenticationStats.getTotalAttempts() < MINIMUM_ATTEMPTS) {
             return;
         }
-
         // Don't send notification if FRR below the threshold.
         if (authenticationStats.getEnrollmentNotifications() >= MAXIMUM_ENROLLMENT_NOTIFICATIONS
                 || authenticationStats.getFrr() < mThreshold) {
             authenticationStats.resetData();
             return;
         }
+
 
         authenticationStats.resetData();
 
@@ -186,6 +186,28 @@ public class AuthenticationStatsCollector {
         }
     }
 
+    /**
+     * This is meant for debug purposes only, this will bypass many checks.
+     * The origination of this call should be from an adb shell command sent from
+     * FaceService.
+     *
+     * adb shell cmd face notification
+     */
+    public void sendFaceReEnrollNotification() {
+        mBiometricNotification.sendFaceEnrollNotification(mContext);
+    }
+
+    /**
+     * This is meant for debug purposes only, this will bypass many checks.
+     * The origination of this call should be from an adb shell command sent from
+     * FingerprintService.
+     *
+     * adb shell cmd fingerprint notification
+     */
+    public void sendFingerprintReEnrollNotification() {
+        mBiometricNotification.sendFpEnrollNotification(mContext);
+    }
+
     private void onUserRemoved(final int userId) {
         mUserAuthenticationStatsMap.remove(userId);
         mAuthenticationStatsPersister.removeFrrStats(userId);
@@ -197,11 +219,11 @@ public class AuthenticationStatsCollector {
     }
 
     private boolean hasEnrolledFace(int userId) {
-        return mFaceManager.hasEnrolledTemplates(userId);
+        return mFaceManager != null && mFaceManager.hasEnrolledTemplates(userId);
     }
 
     private boolean hasEnrolledFingerprint(int userId) {
-        return mFingerprintManager.hasEnrolledTemplates(userId);
+        return mFingerprintManager != null && mFingerprintManager.hasEnrolledTemplates(userId);
     }
 
     /**

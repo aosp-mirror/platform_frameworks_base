@@ -45,6 +45,7 @@ import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@android.platform.test.annotations.EnabledOnRavenwood
 public class DreamConditionTest extends SysuiTestCase {
     @Mock
     Condition.Callback mCallback;

@@ -16,7 +16,7 @@
 
 package com.android.settingslib.graph;
 
-import android.annotation.NonNull;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
@@ -25,6 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.view.Gravity;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;

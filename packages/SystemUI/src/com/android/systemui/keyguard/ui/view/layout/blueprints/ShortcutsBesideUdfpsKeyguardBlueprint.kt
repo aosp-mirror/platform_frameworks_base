@@ -17,58 +17,72 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
+import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialIndicatorSection
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AlignShortcutsToUdfpsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntrySection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultUdfpsAccessibilityOverlaySection
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule
-import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
+import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSliceViewSection
+import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.util.kotlin.getOrNull
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Vertically aligns the shortcuts with the udfps. */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class ShortcutsBesideUdfpsKeyguardBlueprint
 @Inject
 constructor(
+    alignShortcutsToUdfpsSection: AlignShortcutsToUdfpsSection,
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
     defaultDeviceEntrySection: DefaultDeviceEntrySection,
     @Named(KeyguardSectionsModule.KEYGUARD_AMBIENT_INDICATION_AREA_SECTION)
     defaultAmbientIndicationAreaSection: Optional<KeyguardSection>,
     defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
-    alignShortcutsToUdfpsSection: AlignShortcutsToUdfpsSection,
     defaultStatusViewSection: DefaultStatusViewSection,
     defaultStatusBarSection: DefaultStatusBarSection,
-    splitShadeGuidelines: SplitShadeGuidelines,
     defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
     aodNotificationIconsSection: AodNotificationIconsSection,
     aodBurnInSection: AodBurnInSection,
+    communalTutorialIndicatorSection: CommunalTutorialIndicatorSection,
+    clockSection: ClockSection,
+    smartspaceSection: SmartspaceSection,
+    keyguardSliceViewSection: KeyguardSliceViewSection,
+    udfpsAccessibilityOverlaySection: DefaultUdfpsAccessibilityOverlaySection,
 ) : KeyguardBlueprint {
     override val id: String = SHORTCUTS_BESIDE_UDFPS
 
     override val sections =
         listOfNotNull(
             defaultIndicationAreaSection,
+            alignShortcutsToUdfpsSection,
             defaultAmbientIndicationAreaSection.getOrNull(),
             defaultSettingsPopupMenuSection,
-            alignShortcutsToUdfpsSection,
             defaultStatusViewSection,
             defaultStatusBarSection,
             defaultNotificationStackScrollLayoutSection,
-            splitShadeGuidelines,
             aodNotificationIconsSection,
+            smartspaceSection,
             aodBurnInSection,
-            defaultDeviceEntrySection, // Add LAST: Intentionally has z-order above other views.
+            communalTutorialIndicatorSection,
+            clockSection,
+            keyguardSliceViewSection,
+            defaultDeviceEntrySection,
+            udfpsAccessibilityOverlaySection, // Add LAST: Intentionally has z-order above others
         )
 
     companion object {

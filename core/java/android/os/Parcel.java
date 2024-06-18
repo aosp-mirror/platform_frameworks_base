@@ -233,7 +233,8 @@ import java.util.function.IntFunction;
  * {@link #readSparseArray(ClassLoader, Class)}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass("com.android.hoststubgen.nativesubstitution.Parcel_host")
+@RavenwoodNativeSubstitutionClass(
+        "com.android.platform.test.ravenwood.nativesubstitution.Parcel_host")
 public final class Parcel {
 
     private static final boolean DEBUG_RECYCLE = false;

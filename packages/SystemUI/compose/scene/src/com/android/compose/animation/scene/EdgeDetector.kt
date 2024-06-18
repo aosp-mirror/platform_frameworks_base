@@ -23,24 +23,19 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 
-interface EdgeDetector {
-    /**
-     * Return the [Edge] associated to [position] inside a layout of size [layoutSize], given
-     * [density] and [orientation].
-     */
-    fun edge(
-        layoutSize: IntSize,
-        position: IntOffset,
-        density: Density,
-        orientation: Orientation,
-    ): Edge?
+/** The edge of a [SceneTransitionLayout]. */
+enum class Edge : SwipeSource {
+    Left,
+    Right,
+    Top,
+    Bottom,
 }
 
 val DefaultEdgeDetector = FixedSizeEdgeDetector(40.dp)
 
-/** An [EdgeDetector] that detects edges assuming a fixed edge size of [size]. */
-class FixedSizeEdgeDetector(val size: Dp) : EdgeDetector {
-    override fun edge(
+/** An [SwipeSourceDetector] that detects edges assuming a fixed edge size of [size]. */
+class FixedSizeEdgeDetector(val size: Dp) : SwipeSourceDetector {
+    override fun source(
         layoutSize: IntSize,
         position: IntOffset,
         density: Density,

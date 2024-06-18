@@ -36,6 +36,7 @@ import android.app.Instrumentation;
 import android.app.KeyguardManager;
 import android.app.UiAutomation;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -57,6 +58,7 @@ import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortc
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -330,8 +332,10 @@ public class AccessibilityMenuServiceTest {
         AccessibilityNodeInfo assistantButton = findGridButtonInfo(getGridButtonList(),
                 String.valueOf(ShortcutId.ID_ASSISTANT_VALUE.ordinal()));
         Intent expectedIntent = new Intent(Intent.ACTION_VOICE_COMMAND);
-        String expectedPackage = expectedIntent.resolveActivity(
-                sInstrumentation.getContext().getPackageManager()).getPackageName();
+        ComponentName componentName = expectedIntent.resolveActivity(
+                sInstrumentation.getContext().getPackageManager());
+        Assume.assumeNotNull(componentName);
+        String expectedPackage = componentName.getPackageName();
 
         sUiAutomation.executeAndWaitForEvent(
                 () -> assistantButton.performAction(CLICK_ID),

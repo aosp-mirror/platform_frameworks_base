@@ -525,6 +525,12 @@ public class CarrierConfigManager {
     public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
 
     /**
+     * Used in the Preferred Network Types menu to determine if the 3G option is displayed.
+     */
+    @FlaggedApi(Flags.FLAG_HIDE_PREFER_3G_ITEM)
+    public static final String KEY_PREFER_3G_VISIBILITY_BOOL = "prefer_3g_visibility_bool";
+
+    /**
      * Used in Cellular Network Settings for preferred network type to show 4G only mode.
      * @hide
      */
@@ -2173,6 +2179,14 @@ public class CarrierConfigManager {
      */
     public static final String KEY_MMS_NETWORK_RELEASE_TIMEOUT_MILLIS_INT =
             "mms_network_release_timeout_millis_int";
+    /**
+     * Maximum size in bytes of the PDU to send or download when connected to a non-terrestrial
+     * network. MmsService will return a result code of MMS_ERROR_TOO_LARGE_FOR_TRANSPORT if
+     * the PDU exceeds this limit when connected to a non-terrestrial network.
+     * @hide
+     */
+    public static final String KEY_MMS_MAX_NTN_PAYLOAD_SIZE_BYTES_INT =
+            "mms_max_ntn_payload_size_bytes_int";
 
     /**
      * The flatten {@link android.content.ComponentName componentName} of the activity that can
@@ -3715,19 +3729,19 @@ public class CarrierConfigManager {
      * This configuration allows the system UI to display different 5G icons for different 5G
      * scenarios.
      *
-     * There are five 5G scenarios:
-     * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
-     *    millimeter wave.
-     * 2. connected: device currently connected to 5G cell as the secondary cell but not using
-     *    millimeter wave.
-     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability(not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in IDLE state.
-     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability(not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in CONNECTED state.
-     * 5. restricted: device camped on a network that has 5G capability(not necessary to connect a
-     *    5G cell as a secondary cell) but the use of 5G is restricted.
+     * There are six 5G scenarios for icon configuration:
+     * 1. connected_mmwave: device currently connected to 5G cell as the primary or secondary cell
+     *    and considered NR advanced.
+     * 2. connected: device currently connected to 5G cell as the primary or secondary cell but not
+     *    considered NR advanced.
+     * 3. connected_rrc_idle: device currently connected to 5G cell as the primary or secondary cell
+     *    and RRC currently in IDLE state.
+     * 4. not_restricted_rrc_idle: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in IDLE state.
+     * 5. not_restricted_rrc_con: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in CONNECTED state.
+     * 6. restricted: device camped on a network that has 5G capability but the use of 5G is
+     *    restricted.
      *
      * The configured string contains multiple key-value pairs separated by comma. For each pair,
      * the key and value are separated by a colon. The key corresponds to a 5G status above and
@@ -3748,21 +3762,21 @@ public class CarrierConfigManager {
      * This configuration allows the system UI to determine how long to continue to display 5G icons
      * when the device switches between different 5G scenarios.
      *
-     * There are seven 5G scenarios:
-     * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
-     *    millimeter wave.
-     * 2. connected: device currently connected to 5G cell as the secondary cell but not using
-     *    millimeter wave.
-     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability (not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in IDLE state.
-     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability (not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in CONNECTED state.
-     * 5. restricted: device camped on a network that has 5G capability (not necessary to connect a
-     *    5G cell as a secondary cell) but the use of 5G is restricted.
-     * 6. legacy: device is not camped on a network that has 5G capability
-     * 7. any: any of the above scenarios
+     * There are eight 5G scenarios:
+     * 1. connected_mmwave: device currently connected to 5G cell as the primary or secondary cell
+     *    and considered NR advanced.
+     * 2. connected: device currently connected to 5G cell as the primary or secondary cell but not
+     *    considered NR advanced.
+     * 3. connected_rrc_idle: device currently connected to 5G cell as the primary or secondary cell
+     *    and RRC currently in IDLE state.
+     * 4. not_restricted_rrc_idle: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in IDLE state.
+     * 5. not_restricted_rrc_con: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in CONNECTED state.
+     * 6. restricted: device camped on a network that has 5G capability but the use of 5G is
+     *    restricted.
+     * 7. legacy: device is not camped on a network that has 5G capability
+     * 8. any: any of the above scenarios
      *
      * The configured string contains various timer rules separated by a semicolon.
      * Each rule will have three items: prior 5G scenario, current 5G scenario, and grace period
@@ -3770,8 +3784,8 @@ public class CarrierConfigManager {
      * 5G scenario, the system UI will continue to show the icon for the prior 5G scenario (defined
      * in {@link #KEY_5G_ICON_CONFIGURATION_STRING}) for the amount of time specified by the grace
      * period. If the prior 5G scenario is reestablished, the timer will reset and start again if
-     * the UE changes 5G scenarios again. Defined states (5G scenarios #1-5) take precedence over
-     * 'any' (5G scenario #6), and unspecified transitions have a default grace period of 0.
+     * the UE changes 5G scenarios again. Defined states (5G scenarios #1-7) take precedence over
+     * 'any' (5G scenario #8), and unspecified transitions have a default grace period of 0.
      * The order of rules in the configuration determines the priority (the first applicable timer
      * rule will be used).
      *
@@ -3794,21 +3808,21 @@ public class CarrierConfigManager {
      * This configuration extends {@link #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING} to allow the
      * system UI to continue displaying 5G icons after the initial timer expires.
      *
-     * There are seven 5G scenarios:
-     * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
-     *    millimeter wave.
-     * 2. connected: device currently connected to 5G cell as the secondary cell but not using
-     *    millimeter wave.
-     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability (not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in IDLE state.
-     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability (not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in CONNECTED state.
-     * 5. restricted: device camped on a network that has 5G capability (not necessary to connect a
-     *    5G cell as a secondary cell) but the use of 5G is restricted.
-     * 6. legacy: device is not camped on a network that has 5G capability
-     * 7. any: any of the above scenarios
+     * There are eight 5G scenarios:
+     * 1. connected_mmwave: device currently connected to 5G cell as the primary or secondary cell
+     *    and considered NR advanced.
+     * 2. connected: device currently connected to 5G cell as the primary or secondary cell but not
+     *    considered NR advanced.
+     * 3. connected_rrc_idle: device currently connected to 5G cell as the primary or secondary cell
+     *    and RRC currently in IDLE state.
+     * 4. not_restricted_rrc_idle: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in IDLE state.
+     * 5. not_restricted_rrc_con: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in CONNECTED state.
+     * 6. restricted: device camped on a network that has 5G capability but the use of 5G is
+     *    restricted.
+     * 7. legacy: device is not camped on a network that has 5G capability
+     * 8. any: any of the above scenarios
      *
      * The configured string contains various timer rules separated by a semicolon.
      * Each rule will have three items: primary 5G scenario, secondary 5G scenario, and
@@ -3818,7 +3832,7 @@ public class CarrierConfigManager {
      * period. If the primary 5G scenario is reestablished, the timers will reset and the system UI
      * will continue to display the icon for the primary 5G scenario without interruption. If the
      * secondary 5G scenario is lost, the timer will reset and the icon will reflect the true state.
-     * Defined states (5G scenarios #1-5) take precedence over 'any' (5G scenario #6), and
+     * Defined states (5G scenarios #1-7) take precedence over 'any' (5G scenario #8), and
      * unspecified transitions have a default grace period of 0. The order of rules in the
      * configuration determines the priority (the first applicable timer rule will be used).
      *
@@ -3830,13 +3844,27 @@ public class CarrierConfigManager {
      * and if the 5G state changes to neither 'connected' not 'not_restricted_rrc_idle', the icon
      * will change to reflect the true state.
      *
+     * The value can be overridden by {@link #KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT}
      * @hide
      */
     public static final String KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING =
             "5g_icon_display_secondary_grace_period_string";
 
     /**
-     * Whether device reset all of NR timers when device camped on a network that haven't 5G
+     * The secondary grace periods in seconds to use if NR advanced icon was shown due to connecting
+     * to bands specified in {@link #KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY}.
+     *
+     * The default value is 0, meaning the original value in
+     * {@link #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING} is used. Otherwise, it overrides
+     * the value in {@link #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING}.
+     *
+     * @hide
+     */
+    public static final String KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT =
+            "nr_advanced_bands_secondary_timer_seconds_int";
+
+    /**
+     * Whether device resets all of NR timers when device camped on a network that haven't 5G
      * capability and RRC currently in IDLE state.
      *
      * The default value is false;
@@ -3845,6 +3873,30 @@ public class CarrierConfigManager {
      */
     public static final String KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL =
             "nr_timers_reset_if_non_endc_and_rrc_idle_bool";
+
+    /**
+     * Whether device resets all of NR timers when device is in a voice call and QOS is established.
+     * The default value is false;
+     *
+     * @see #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING
+     * @see #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING
+     *
+     * @hide
+     */
+    public static final String KEY_NR_TIMERS_RESET_ON_VOICE_QOS_BOOL =
+            "nr_timers_reset_on_voice_qos_bool";
+
+    /**
+     * Whether device resets all of NR timers when the PLMN changes.
+     * The default value is false;
+     *
+     * @see #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING
+     * @see #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING
+     *
+     * @hide
+     */
+    public static final String KEY_NR_TIMERS_RESET_ON_PLMN_CHANGE_BOOL =
+            "nr_timers_reset_on_plmn_change_bool";
 
     /**
      * A list of additional NR advanced band would map to
@@ -4751,12 +4803,51 @@ public class CarrierConfigManager {
          */
         public static final String KEY_FCM_SENDER_ID_STRING = KEY_PREFIX + "fcm_sender_id_string";
 
+        /**
+         * Indicates the supported protocol version in the parameter entitlement_version.
+         * The default value is 2. The possible value is 2 and 8.
+         *
+         * Reference: GSMA TS.43-v8 section 2.5 Protocol version control and
+         * Table 3. GET Parameters for Entitlement Configuration in section 2.3
+         * HTTP GET method Parameters.
+         * @hide
+         */
+        public static final String KEY_ENTITLEMENT_VERSION_INT =
+                KEY_PREFIX + "entitlement_version_int";
+
+        /**
+         * Controls the service entitlement status when receiving the VERS characteristic
+         * with both version and validity set to -1 or -2.
+         * If {@code true}, default service entitlement status is enabled.
+         * If {@code false}, default service entitlement status is disabled.
+         *
+         * Reference: GSMA TS.14-v8 section 2.1, overview
+         * @hide
+         */
+        public static final String KEY_DEFAULT_SERVICE_ENTITLEMENT_STATUS_BOOL =
+                KEY_PREFIX + "default_service_entitlement_status_bool";
+
+        /**
+         * Indicates if UE can skip service entitlement check when the user turns on Wi-Fi Calling.
+         * UE still shows Wi-Fi Calling emergency address update web view when the user clicks
+         * "Update Emergency Address" on the WiFi calling setting.
+         *
+         * Note: this is effective only if the {@link #KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING}
+         * is set to this app.
+         * @hide
+         */
+        public static final String KEY_SKIP_WFC_ACTIVATION_BOOL =
+                KEY_PREFIX + "skip_wfc_activation_bool";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putString(KEY_ENTITLEMENT_SERVER_URL_STRING, "");
             defaults.putString(KEY_FCM_SENDER_ID_STRING, "");
             defaults.putBoolean(KEY_SHOW_VOWIFI_WEBVIEW_BOOL, false);
             defaults.putBoolean(KEY_IMS_PROVISIONING_BOOL, false);
+            defaults.putBoolean(KEY_DEFAULT_SERVICE_ENTITLEMENT_STATUS_BOOL, false);
+            defaults.putBoolean(KEY_SKIP_WFC_ACTIVATION_BOOL, false);
+            defaults.putInt(KEY_ENTITLEMENT_VERSION_INT, 2);
             return defaults;
         }
     }
@@ -7503,8 +7594,8 @@ public class CarrierConfigManager {
          *
          * The default value for this key is
          * {{@link AccessNetworkConstants.AccessNetworkType#EUTRAN},
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String
                 KEY_EMERGENCY_OVER_IMS_SUPPORTED_3GPP_NETWORK_TYPES_INT_ARRAY = KEY_PREFIX
                         + "emergency_over_ims_supported_3gpp_network_types_int_array";
@@ -7521,8 +7612,8 @@ public class CarrierConfigManager {
          *
          * The default value for this key is
          * {{@link AccessNetworkConstants.AccessNetworkType#EUTRAN},
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String
                 KEY_EMERGENCY_OVER_IMS_ROAMING_SUPPORTED_3GPP_NETWORK_TYPES_INT_ARRAY = KEY_PREFIX
                         + "emergency_over_ims_roaming_supported_3gpp_network_types_int_array";
@@ -7541,8 +7632,8 @@ public class CarrierConfigManager {
          * The default value for this key is
          * {{@link AccessNetworkConstants.AccessNetworkType#UTRAN},
          * {@link AccessNetworkConstants.AccessNetworkType#GERAN}}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_OVER_CS_SUPPORTED_ACCESS_NETWORK_TYPES_INT_ARRAY =
                 KEY_PREFIX + "emergency_over_cs_supported_access_network_types_int_array";
 
@@ -7560,8 +7651,8 @@ public class CarrierConfigManager {
          * The default value for this key is
          * {{@link AccessNetworkConstants.AccessNetworkType#UTRAN},
          * {@link AccessNetworkConstants.AccessNetworkType#GERAN}}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String
                 KEY_EMERGENCY_OVER_CS_ROAMING_SUPPORTED_ACCESS_NETWORK_TYPES_INT_ARRAY = KEY_PREFIX
                         + "emergency_over_cs_roaming_supported_access_network_types_int_array";
@@ -7576,20 +7667,20 @@ public class CarrierConfigManager {
 
         /**
          * Circuit switched domain.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final int DOMAIN_CS = 1;
 
         /**
          * Packet switched domain over 3GPP networks.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final int DOMAIN_PS_3GPP = 2;
 
         /**
          * Packet switched domain over non-3GPP networks such as Wi-Fi.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final int DOMAIN_PS_NON_3GPP = 3;
 
         /**
@@ -7606,8 +7697,8 @@ public class CarrierConfigManager {
          * {{@link #DOMAIN_PS_3GPP},
          * {@link #DOMAIN_CS},
          * {@link #DOMAIN_PS_NON_3GPP}}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_DOMAIN_PREFERENCE_INT_ARRAY =
                 KEY_PREFIX + "emergency_domain_preference_int_array";
 
@@ -7625,18 +7716,22 @@ public class CarrierConfigManager {
          * {{@link #DOMAIN_PS_3GPP},
          * {@link #DOMAIN_CS},
          * {@link #DOMAIN_PS_NON_3GPP}}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_DOMAIN_PREFERENCE_ROAMING_INT_ARRAY =
                 KEY_PREFIX + "emergency_domain_preference_roaming_int_array";
 
         /**
-         * Specifies if emergency call shall be attempted on IMS, if PS is attached even though IMS
-         * is not registered and normal calls fallback to the CS networks.
+         * Specifies whether the emergency call shall be preferred over IMS or not
+         * irrespective of IMS registration status.
+         * If the value of the config is {@code true} then emergency calls shall prefer IMS
+         * when device is combined-attached in LTE network and IMS is not registered.
+         * If the value of the config is {@code false} then emergency calls use CS domain
+         * in the same scenario.
          *
          * The default value for this key is {@code false}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_PREFER_IMS_EMERGENCY_WHEN_VOICE_CALLS_ON_CS_BOOL =
                 KEY_PREFIX + "prefer_ims_emergency_when_voice_calls_on_cs_bool";
 
@@ -7653,32 +7748,39 @@ public class CarrierConfigManager {
          * If {@link ImsWfc#KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL} is {@code true},
          * VoWi-Fi emergency call shall be attempted if Wi-Fi network is connected.
          * Otherwise, it shall be attempted if IMS is registered over Wi-Fi.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final int VOWIFI_REQUIRES_NONE = 0;
 
         /**
          * VoWi-Fi emergency call shall be attempted on IMS over Wi-Fi if Wi-Fi network is connected
          * and Wi-Fi calling setting is enabled. This value is applicable if the value of
          * {@link ImsWfc#KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL} is {@code true}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final int VOWIFI_REQUIRES_SETTING_ENABLED = 1;
 
         /**
          * VoWi-Fi emergency call shall be attempted on IMS over Wi-Fi if Wi-Fi network is connected
-         * and Wi-Fi calling is activated successfully. This value is applicable if the value of
+         * and Wi-Fi calling is activated successfully. The device shall have the valid
+         * Entitlement ID if the user activates VoWi-Fi emergency calling successfully.
+         * This value is applicable if the value of
          * {@link ImsWfc#KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL} is {@code true}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final int VOWIFI_REQUIRES_VALID_EID = 2;
 
         /**
          * Specifies the condition when emergency call shall be attempted on IMS over Wi-Fi.
          *
-         * The default value for this key is {@code #VOWIFI_REQUIRES_NONE}.
-         * @hide
+         * <p>Possible values are,
+         * {@link #VOWIFI_REQUIRES_NONE}
+         * {@link #VOWIFI_REQUIRES_SETTING_ENABLED}
+         * {@link #VOWIFI_REQUIRES_VALID_EID}
+         *
+         * The default value for this key is {@link #VOWIFI_REQUIRES_NONE}.
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_VOWIFI_REQUIRES_CONDITION_INT =
                 KEY_PREFIX + "emergency_vowifi_requires_condition_int";
 
@@ -7689,8 +7791,8 @@ public class CarrierConfigManager {
          * {@link #KEY_EMERGENCY_DOMAIN_PREFERENCE_ROAMING_INT_ARRAY}.
          *
          * The default value for this key is 1.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_MAXIMUM_NUMBER_OF_EMERGENCY_TRIES_OVER_VOWIFI_INT =
                 KEY_PREFIX + "maximum_number_of_emergency_tries_over_vowifi_int";
 
@@ -7698,14 +7800,14 @@ public class CarrierConfigManager {
          * Emergency scan timer to wait for scan results from radio before attempting the call
          * over Wi-Fi. On timer expiry, if emergency call on Wi-Fi is allowed and possible,
          * telephony shall cancel the scan and place the call on Wi-Fi. If emergency call on Wi-Fi
-         * is not possible, then domain seleciton continues to wait for the scan result from the
+         * is not possible, then domain selection continues to wait for the scan result from the
          * radio. If an emergency scan result is received before the timer expires, the timer shall
          * be stopped and no dialing over Wi-Fi will be tried. If this value is set to 0, then
          * the timer is never started and domain selection waits for the scan result from the radio.
          *
          * The default value for the timer is 10 seconds.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_SCAN_TIMER_SEC_INT =
                 KEY_PREFIX + "emergency_scan_timer_sec_int";
 
@@ -7723,8 +7825,8 @@ public class CarrierConfigManager {
          * started.
          *
          * The default value for the timer is {@link #REDIAL_TIMER_DISABLED}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_MAXIMUM_CELLULAR_SEARCH_TIMER_SEC_INT =
                 KEY_PREFIX + "maximum_cellular_search_timer_sec_int";
 
@@ -7739,21 +7841,21 @@ public class CarrierConfigManager {
         /**
          * No specific preference given to the modem. Modem can return an emergency
          * capable network either with limited service or full service.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final int SCAN_TYPE_NO_PREFERENCE = 0;
 
         /**
          * Modem will attempt to camp on a network with full service only.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final int SCAN_TYPE_FULL_SERVICE = 1;
 
         /**
          * Telephony shall attempt full service scan first.
          * If a full service network is not found, telephony shall attempt a limited service scan.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final int SCAN_TYPE_FULL_SERVICE_FOLLOWED_BY_LIMITED_SERVICE = 2;
 
         /**
@@ -7765,8 +7867,8 @@ public class CarrierConfigManager {
          * {@link #SCAN_TYPE_FULL_SERVICE_FOLLOWED_BY_LIMITED_SERVICE}
          *
          * The default value for this key is {@link #SCAN_TYPE_NO_PREFERENCE}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_NETWORK_SCAN_TYPE_INT =
                 KEY_PREFIX + "emergency_network_scan_type_int";
 
@@ -7777,8 +7879,8 @@ public class CarrierConfigManager {
          * If this value is set to 0, the timer shall be disabled.
          *
          * The default value for this key is 0.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_CALL_SETUP_TIMER_ON_CURRENT_NETWORK_SEC_INT =
                 KEY_PREFIX + "emergency_call_setup_timer_on_current_network_sec_int";
 
@@ -7787,8 +7889,8 @@ public class CarrierConfigManager {
          * This is applicable only for the case PS is in service.
          *
          * The default value for this key is {@code false}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_REQUIRES_IMS_REGISTRATION_BOOL =
                 KEY_PREFIX + "emergency_requires_ims_registration_bool";
 
@@ -7797,8 +7899,8 @@ public class CarrierConfigManager {
          * over NR. If not, CS will be preferred.
          *
          * The default value for this key is {@code false}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_LTE_PREFERRED_AFTER_NR_FAILED_BOOL =
                 KEY_PREFIX + "emergency_lte_preferred_after_nr_failed_bool";
 
@@ -7806,8 +7908,8 @@ public class CarrierConfigManager {
          * Specifies the numbers to be dialed over CDMA network in case of dialing over CS network.
          *
          * The default value for this key is an empty string array.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_CDMA_PREFERRED_NUMBERS_STRING_ARRAY =
                 KEY_PREFIX + "emergency_cdma_preferred_numbers_string_array";
 
@@ -7816,8 +7918,8 @@ public class CarrierConfigManager {
          * only when VoLTE is enabled.
          *
          * The default value for this key is {@code false}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_EMERGENCY_REQUIRES_VOLTE_ENABLED_BOOL =
                 KEY_PREFIX + "emergency_requires_volte_enabled_bool";
 
@@ -7828,8 +7930,8 @@ public class CarrierConfigManager {
          * @see #KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT
          * @see #KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT
          * @see #KEY_MAXIMUM_CELLULAR_SEARCH_TIMER_SEC_INT
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final int REDIAL_TIMER_DISABLED = 0;
 
         /**
@@ -7841,8 +7943,8 @@ public class CarrierConfigManager {
          * This value should be greater than the value of {@link #KEY_EMERGENCY_SCAN_TIMER_SEC_INT}.
          *
          * The default value for the timer is 120 seconds.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT =
                 KEY_PREFIX + "cross_stack_redial_timer_sec_int";
 
@@ -7857,8 +7959,8 @@ public class CarrierConfigManager {
          * in the roaming networks and non-domestic networks.
          *
          * The default value for the timer is {@link #REDIAL_TIMER_DISABLED}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT =
                 KEY_PREFIX + "quick_cross_stack_redial_timer_sec_int";
 
@@ -7867,10 +7969,23 @@ public class CarrierConfigManager {
          * the device is registered to the network.
          *
          * The default value is {@code true}.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
         public static final String KEY_START_QUICK_CROSS_STACK_REDIAL_TIMER_WHEN_REGISTERED_BOOL =
                 KEY_PREFIX + "start_quick_cross_stack_redial_timer_when_registered_bool";
+
+        /**
+         * Indicates whether limited service only scanning will be requested after VoLTE fails.
+         * This value is applicable if the value of
+         * {@link #KEY_EMERGENCY_NETWORK_SCAN_TYPE_INT} is any of {@link #SCAN_TYPE_NO_PREFERENCE}
+         * or {@link #SCAN_TYPE_FULL_SERVICE_FOLLOWED_BY_LIMITED_SERVICE}.
+         *
+         * The default value is {@code false}.
+         */
+        @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
+        public static final String
+                KEY_SCAN_LIMITED_SERVICE_AFTER_VOLTE_FAILURE_BOOL =
+                    KEY_PREFIX + "scan_limited_service_after_volte_failure_bool";
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
@@ -7943,6 +8058,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT, REDIAL_TIMER_DISABLED);
             defaults.putBoolean(KEY_START_QUICK_CROSS_STACK_REDIAL_TIMER_WHEN_REGISTERED_BOOL,
                     true);
+            defaults.putBoolean(KEY_SCAN_LIMITED_SERVICE_AFTER_VOLTE_FAILURE_BOOL, false);
 
             return defaults;
         }
@@ -8885,18 +9001,18 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "epdg_static_address_roaming_string";
 
         /**
-         * Controls if the multiple SA proposals allowed for IKE session to include
-         * all the 3GPP TS 33.210 and RFC 8221 supported cipher suites in multiple
-         * IKE SA proposals as per RFC 7296.
+         * Enables the use of multiple IKE SA proposals, encompassing both carrier-preferred
+         * ciphers and all supported ciphers from 3GPP TS 33.210 and RFC 8221,
+         * as defined in RFC 7296.
          */
         @FlaggedApi(Flags.FLAG_ENABLE_MULTIPLE_SA_PROPOSALS)
         public static final String KEY_SUPPORTS_IKE_SESSION_MULTIPLE_SA_PROPOSALS_BOOL =
                 KEY_PREFIX + "supports_ike_session_multiple_sa_proposals_bool";
 
         /**
-         * Controls if the multiple SA proposals allowed for Child session to include
-         * all the 3GPP TS 33.210 and RFC 8221 supported cipher suites in multiple
-         * Child SA proposals as per RFC 7296.
+         * Enables the use of multiple Child SA proposals, encompassing both carrier-preferred
+         * ciphers and all supported ciphers from 3GPP TS 33.210 and RFC 8221,
+         * as defined in RFC 7296.
          */
         @FlaggedApi(Flags.FLAG_ENABLE_MULTIPLE_SA_PROPOSALS)
         public static final String KEY_SUPPORTS_CHILD_SESSION_MULTIPLE_SA_PROPOSALS_BOOL =
@@ -9424,16 +9540,6 @@ public class CarrierConfigManager {
             "missed_incoming_call_sms_originator_string_array";
 
     /**
-     * String array of Apn Type configurations.
-     * The entries should be of form "APN_TYPE_NAME:priority".
-     * priority is an integer that is sorted from highest to lowest.
-     * example: cbs:5
-     *
-     * @hide
-     */
-    public static final String KEY_APN_PRIORITY_STRING_ARRAY = "apn_priority_string_array";
-
-    /**
      * Network capability priority for determine the satisfy order in telephony. The priority is
      * from the lowest 0 to the highest 100. The long-lived network shall have the lowest priority.
      * This allows other short-lived requests like MMS requests to be established. Emergency request
@@ -9577,14 +9683,20 @@ public class CarrierConfigManager {
             "satellite_attach_supported_bool";
 
     /**
-     * The carrier-enabled satellite connection hysteresis time in seconds to determine whether to
-     * recommend Dialer to prompt users to use satellite emergency messaging.
+     * The carrier-enabled satellite connection hysteresis time in seconds for which the device
+     * continues in satellite mode after it loses the connection with the satellite network.
      * <p>
-     * A timer is started when there is an ongoing emergency call, and the IMS is not registered,
-     * and cellular service is not available, and the device was connected to a satellite network
-     * within this time in the past. When the timer expires, Telephony will send the event
+     * If the device is in satellite mode, the following actions will be taken by the device:
+     * <ul>
+     * <li>System UI will continue showing the satellite icon.</li>
+     * <li>When there is an ongoing emergency call, and the IMS is not registered, and cellular
+     * service is not available, and the device is in satellite mode, a timer with a duration
+     * defined by the overlay config
+     * {@code config_emergency_call_wait_for_connection_timeout_millis} will be started. When the
+     * timer expires, Telephony will send the event
      * {@link TelephonyManager#EVENT_DISPLAY_EMERGENCY_MESSAGE} to Dialer, which will then prompt
-     * users to switch to using satellite emergency messaging.
+     * users to switch to using satellite emergency messaging.</li>
+     * </ul>
      * <p>
      * The default value is 300 seconds.
      */
@@ -9671,6 +9783,51 @@ public class CarrierConfigManager {
             "parameters_used_for_ntn_lte_signal_bar_int";
 
     /**
+     * Indicating whether plmns associated with carrier satellite can be exposed to user when
+     * manually scanning available cellular network.
+     * If key is {@code true}, satellite plmn should not be exposed to user and should be
+     * automatically set, {@code false} otherwise. Default value is {@code true}.
+     *
+     * @hide
+     */
+    public static final String KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL =
+            "remove_satellite_plmn_in_manual_network_scan_bool";
+
+    /**
+     * Determine whether to override roaming Wi-Fi Calling preference when device is connected to
+     * non-terrestrial network.
+     * {@code true}  - roaming preference cannot be changed by user independently.
+     *                 Roaming preference is overridden to
+     *                 {@link com.android.ims.ImsConfig.WfcModeFeatureValueConstants#WIFI_PREFERRED}
+     * {@code false} - roaming preference can be changed by user independently and is not
+     *                 overridden when device is connected to non-terrestrial network.
+     * @hide
+     */
+    public static final String KEY_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN_BOOL =
+            "override_wfc_roaming_mode_while_using_ntn_bool";
+
+    /**
+     * An integer key holds the time interval for refreshing or re-querying the satellite
+     * entitlement status from the entitlement server to ensure it is the latest.
+     *
+     * The default value is 30 days (1 month).
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT =
+            "satellite_entitlement_status_refresh_days_int";
+
+    /**
+     * This configuration enables device to query the entitlement server to get the satellite
+     * configuration.
+     * This will need agreement the carrier before enabling this flag.
+     *
+     * The default value is false.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL =
+            "satellite_entitlement_supported_bool";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -9696,6 +9853,13 @@ public class CarrierConfigManager {
      * Indicates if the carrier supports call composer.
      */
     public static final String KEY_SUPPORTS_CALL_COMPOSER_BOOL = "supports_call_composer_bool";
+
+    /**
+     * Indicates if the carrier supports a business call composer.
+     */
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_BUSINESS_CALL_COMPOSER)
+    public static final String KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL =
+            "supports_business_call_composer_bool";
 
     /**
      * Indicates the carrier server url that serves the call composer picture.
@@ -10038,6 +10202,49 @@ public class CarrierConfigManager {
     public static final String KEY_AUTO_DATA_SWITCH_RAT_SIGNAL_SCORE_BUNDLE =
             "auto_data_switch_rat_signal_score_string_bundle";
 
+    // TODO(b/316183370): replace @code with @link in javadoc after feature is released
+    /**
+     * An array of cellular services supported by a subscription.
+     *
+     * <p>Permissible values include:
+     * <ul>
+     *   <li>{@code SubscriptionManager#SERVICE_CAPABILITY_VOICE} for voice services</li>
+     *   <li>{@code SubscriptionManager#SERVICE_CAPABILITY_SMS} for SMS services</li>
+     *   <li>{@code SubscriptionManager#SERVICE_CAPABILITY_DATA} for data services</li>
+     * </ul>
+     *
+     * <p>Carrier-specific factors may influence how these services are supported. Therefore,
+     * modifying this carrier configuration might not always enable the specified services. These
+     * capability bitmasks should be considered as indicators of a carrier's preferred services
+     * to enhance user experience, rather than as absolute platform guarantees.
+     *
+     * <p>Device-level service capabilities, defined by
+     * {@code TelephonyManager#isDeviceVoiceCapable} and
+     * {@code TelephonyManager#isDeviceSmsCapable}, take precedence over these subscription-level
+     * settings. For instance, a device where {@code TelephonyManager#isDeviceVoiceCapable} returns
+     * false may not be able to make voice calls, even if subscribed to a service marked as
+     * voice-capable.
+     *
+     * <p>To determine a subscription's cellular service capabilities, use
+     * {@code SubscriptionInfo#getServiceCapabilities()}. To track changes in services, register
+     * a {@link SubscriptionManager.OnSubscriptionsChangedListener} and invoke the
+     * same method in its callback.
+     *
+     * <p>Emergency service availability may not depend on the cellular service capabilities.
+     * For example, emergency calls might be possible on a subscription even if it lacks
+     * {@code SubscriptionManager#SERVICE_CAPABILITY_VOICE}.
+     *
+     * <p>If unset, the default value is “[1, 2, 3]” (supports all cellular services).
+     *
+     * @see TelephonyManager#isDeviceVoiceCapable
+     * @see TelephonyManager#isDeviceSmsCapable
+     * @see SubscriptionInfo#getServiceCapabilities()
+     * @see SubscriptionManager.OnSubscriptionsChangedListener
+     */
+    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
+    public static final String KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY =
+            "cellular_service_capabilities_int_array";
+
     /** The default value for every variable. */
     private static final PersistableBundle sDefaults;
 
@@ -10138,6 +10345,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
         sDefaults.putBoolean(KEY_PREFER_2G_BOOL, false);
+        sDefaults.putBoolean(KEY_PREFER_3G_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_4G_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_APN_SETTING_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CDMA_CHOICES_BOOL, false);
@@ -10298,6 +10506,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_MMS_SMS_TO_MMS_TEXT_THRESHOLD_INT, -1);
         sDefaults.putInt(KEY_MMS_SUBJECT_MAX_LENGTH_INT, 40);
         sDefaults.putInt(KEY_MMS_NETWORK_RELEASE_TIMEOUT_MILLIS_INT, 5 * 1000);
+        sDefaults.putInt(KEY_MMS_MAX_NTN_PAYLOAD_SIZE_BYTES_INT, 3 * 1000);
         sDefaults.putString(KEY_MMS_EMAIL_GATEWAY_NUMBER_STRING, "");
         sDefaults.putString(KEY_MMS_HTTP_PARAMS_STRING, "");
         sDefaults.putString(KEY_MMS_NAI_SUFFIX_STRING, "");
@@ -10552,11 +10761,14 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_CALL_WAITING_USSD_BOOL, false);
         sDefaults.putInt(KEY_CALL_WAITING_SERVICE_CLASS_INT, 1 /* SERVICE_CLASS_VOICE */);
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
-                "connected_mmwave:5G,connected:5G,not_restricted_rrc_idle:5G,"
+                "connected_mmwave:5G,connected:5G,connected_rrc_idle:5G,not_restricted_rrc_idle:5G,"
                         + "not_restricted_rrc_con:5G");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING, "");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
+        sDefaults.putInt(KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT, 0);
         sDefaults.putBoolean(KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL, false);
+        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_VOICE_QOS_BOOL, false);
+        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_PLMN_CHANGE_BOOL, false);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putIntArray(KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY, new int[0]);
@@ -10667,17 +10879,14 @@ public class CarrierConfigManager {
                 TimeUnit.DAYS.toMillis(1));
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
-        sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
-                "enterprise:0", "default:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
-                "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
-        });
 
         // Do not modify the priority unless you know what you are doing. This will have significant
         // impacts on the order of data network setup.
         sDefaults.putStringArray(
                 KEY_TELEPHONY_NETWORK_CAPABILITY_PRIORITIES_STRING_ARRAY, new String[] {
                         "eims:90", "supl:80", "mms:70", "xcap:70", "cbs:50", "mcx:50", "fota:50",
-                        "ims:40", "dun:30", "enterprise:20", "internet:20"
+                        "ims:40", "rcs:40", "dun:30", "enterprise:20", "internet:20",
+                        "prioritize_bandwidth:20", "prioritize_latency:20"
                 });
         sDefaults.putStringArray(
                 KEY_TELEPHONY_DATA_SETUP_RETRY_RULES_STRING_ARRAY, new String[] {
@@ -10689,9 +10898,10 @@ public class CarrierConfigManager {
                         // registration state changes) retry can still happen.
                         "permanent_fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|"
                                 + "-3|65543|65547|2252|2253|2254, retry_interval=2500",
-                        "capabilities=mms|supl|cbs, retry_interval=2000",
-                        "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2500|3000|"
-                                + "5000|10000|15000|20000|40000|60000|120000|240000|"
+                        "capabilities=mms|supl|cbs|rcs, retry_interval=2000",
+                        "capabilities=internet|enterprise|dun|ims|fota|xcap|mcx|"
+                                + "prioritize_bandwidth|prioritize_latency, retry_interval="
+                                + "2500|3000|5000|10000|15000|20000|40000|60000|120000|240000|"
                                 + "600000|1200000|1800000, maximum_retries=20"
                 });
         sDefaults.putStringArray(
@@ -10731,9 +10941,14 @@ public class CarrierConfigManager {
                 });
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
+        sDefaults.putBoolean(KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL, true);
+        sDefaults.putBoolean(KEY_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN_BOOL, true);
+        sDefaults.putInt(KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT, 30);
+        sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL, false);
         sDefaults.putString(KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING, "");
         sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
         sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, true);
@@ -10824,6 +11039,7 @@ public class CarrierConfigManager {
                 new boolean[] {false, false, true, false, false});
         sDefaults.putStringArray(KEY_CARRIER_SERVICE_NAME_STRING_ARRAY, new String[0]);
         sDefaults.putStringArray(KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY, new String[0]);
+        sDefaults.putIntArray(KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY, new int[]{1, 2, 3});
     }
 
     /**
@@ -10898,6 +11114,9 @@ public class CarrierConfigManager {
      * @return A {@link PersistableBundle} containing the config for the given subId, or default
      *         values for an invalid subId.
      *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *
      * @deprecated Use {@link #getConfigForSubId(int, String...)} instead.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
@@ -10945,6 +11164,9 @@ public class CarrierConfigManager {
      * @return A {@link PersistableBundle} with key/value mapping for the specified configuration
      * on success, or an empty (but never null) bundle on failure (for example, when the calling app
      * has no permission).
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresPermission(anyOf = {
             Manifest.permission.READ_PHONE_STATE,
@@ -10990,6 +11212,9 @@ public class CarrierConfigManager {
      * @param overrideValues Key-value pairs of the values that are to be overridden. If set to
      *                       {@code null}, this will remove all previous overrides and set the
      *                       carrier configuration back to production values.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -11047,6 +11272,10 @@ public class CarrierConfigManager {
      *
      * @see #getConfigForSubId
      * @see #getConfig(String...)
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *
      * @deprecated use {@link #getConfig(String...)} instead.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
@@ -11081,6 +11310,9 @@ public class CarrierConfigManager {
      * configs on success, or an empty (but never null) bundle on failure.
      * @see #getConfigForSubId(int, String...)
      * @see SubscriptionManager#getDefaultSubscriptionId()
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresPermission(anyOf = {
             Manifest.permission.READ_PHONE_STATE,
@@ -11132,6 +11364,9 @@ public class CarrierConfigManager {
      *
      * <p>This method returns before the reload has completed, and {@link
      * android.service.carrier.CarrierService#onLoadConfig} will be called from an arbitrary thread.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -11155,6 +11390,8 @@ public class CarrierConfigManager {
      * <p>Depending on simState, the config may be cleared or loaded from config app. This is only
      * used by SubscriptionInfoUpdater.
      *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      * @hide
      */
     @SystemApi
@@ -11177,6 +11414,8 @@ public class CarrierConfigManager {
      * Gets the package name for a default carrier service.
      * @return the package name for a default carrier service; empty string if not available.
      *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      * @hide
      */
     @NonNull
@@ -11230,6 +11469,9 @@ public class CarrierConfigManager {
      * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
      *
      * @see #getConfigForSubId
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)

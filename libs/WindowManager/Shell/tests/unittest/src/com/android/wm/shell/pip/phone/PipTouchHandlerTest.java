@@ -51,6 +51,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 /**
  * Unit tests against {@link PipTouchHandler}, including but not limited to:
  * - Update movement bounds based on new bounds
@@ -116,10 +118,12 @@ public class PipTouchHandlerTest extends ShellTestCase {
                 new PipKeepClearAlgorithmInterface() {}, mPipDisplayLayoutState, mSizeSpecSource);
         PipMotionHelper pipMotionHelper = new PipMotionHelper(mContext, mPipBoundsState,
                 mPipTaskOrganizer, mPhonePipMenuController, mPipSnapAlgorithm,
-                mMockPipTransitionController, mFloatingContentCoordinator);
+                mMockPipTransitionController, mFloatingContentCoordinator,
+                Optional.empty() /* pipPerfHintControllerOptional */);
         mPipTouchHandler = new PipTouchHandler(mContext, mShellInit, mPhonePipMenuController,
                 mPipBoundsAlgorithm, mPipBoundsState, mSizeSpecSource, mPipTaskOrganizer,
-                pipMotionHelper, mFloatingContentCoordinator, mPipUiEventLogger, mMainExecutor);
+                pipMotionHelper, mFloatingContentCoordinator, mPipUiEventLogger, mMainExecutor,
+                Optional.empty() /* pipPerfHintControllerOptional */);
         // We aren't actually using ShellInit, so just call init directly
         mPipTouchHandler.onInit();
         mMotionHelper = Mockito.spy(mPipTouchHandler.getMotionHelper());

@@ -259,6 +259,7 @@ public class AudioServiceEvents {
         /** used for VOL_ADJUST_VOL_UID,
          *           VOL_ADJUST_SUGG_VOL,
          *           VOL_ADJUST_STREAM_VOL,
+         *           VOL_SET_LE_AUDIO_VOL
          */
         VolumeEvent(int op, int stream, int val1, int val2, String caller) {
             mOp = op;
@@ -434,6 +435,8 @@ public class AudioServiceEvents {
                             .set(MediaMetrics.Property.EVENT, "setLeAudioVolume")
                             .set(MediaMetrics.Property.INDEX, mVal1)
                             .set(MediaMetrics.Property.MAX_INDEX, mVal2)
+                            .set(MediaMetrics.Property.STREAM_TYPE,
+                                    AudioSystem.streamToString(mStream))
                             .record();
                     return;
                 case VOL_SET_AVRCP_VOL:
@@ -519,7 +522,8 @@ public class AudioServiceEvents {
                             .append(" gain dB:").append(mVal2)
                             .toString();
                 case VOL_SET_LE_AUDIO_VOL:
-                    return new StringBuilder("setLeAudioVolume:")
+                    return new StringBuilder("setLeAudioVolume(stream:")
+                            .append(AudioSystem.streamToString(mStream))
                             .append(" index:").append(mVal1)
                             .append(" maxIndex:").append(mVal2)
                             .toString();

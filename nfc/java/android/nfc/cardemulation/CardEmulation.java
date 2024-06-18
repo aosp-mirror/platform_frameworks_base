@@ -16,6 +16,7 @@
 
 package android.nfc.cardemulation;
 
+import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -23,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -40,6 +42,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -57,6 +60,7 @@ import java.util.regex.Pattern;
  */
 public final class CardEmulation {
     private static final Pattern AID_PATTERN = Pattern.compile("[0-9A-Fa-f]{10,32}\\*?\\#?");
+
     static final String TAG = "CardEmulation";
 
     /**
@@ -69,7 +73,12 @@ public final class CardEmulation {
      * specified in {@link #EXTRA_CATEGORY}. There is an optional
      * extra field using {@link Intent#EXTRA_USER} to specify
      * the {@link UserHandle} of the user that owns the app.
+     *
+     * @deprecated Please use {@link android.app.role.RoleManager#createRequestRoleIntent(String)}
+     * with {@link android.app.role.RoleManager#ROLE_WALLET} parameter
+     * and {@link Activity#startActivityForResult(Intent, int)} instead.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CHANGE_DEFAULT =
             "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
@@ -329,22 +338,66 @@ public final class CardEmulation {
         }
     }
     /**
-     * Sets whether the system should default to observe mode or not when
-     * the service is in the foreground or the default payment service.
+     * Sets whether when this service becomes the preferred service, if the NFC stack
+     * should enable observe mode or disable observe mode. The default is to not enable observe
+     * mode when a service either the foreground default service or the default payment service so
+     * not calling this method will preserve that behavior.
      *
      * @param service The component name of the service
-     * @param enable Whether the servic should default to observe mode or not
+     * @param enable Whether the service should default to observe mode or not
      * @return whether the change was successful.
      */
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
-    public boolean setServiceObserveModeDefault(@NonNull ComponentName service, boolean enable) {
+    public boolean setShouldDefaultToObserveModeForService(@NonNull ComponentName service,
+            boolean enable) {
         try {
-            return sService.setServiceObserveModeDefault(mContext.getUser().getIdentifier(),
-                    service, enable);
+            return sService.setShouldDefaultToObserveModeForService(
+                    mContext.getUser().getIdentifier(), service, enable);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to reach CardEmulationService.");
         }
         return  false;
+    }
+
+    /**
+     * Register a polling loop filter (PLF) for a HostApduService and indicate whether it should
+     * auto-transact or not.  The PLF can be sequence of an
+     * even number of at least 2 hexadecimal numbers (0-9, A-F or a-f), representing a series of
+     * bytes. When non-standard polling loop frame matches this sequence exactly, it may be
+     * delivered to {@link HostApduService#processPollingFrames(List)}. If auto-transact is set to
+     * true, then observe mode will also be disabled.  if this service is currently preferred or
+     * there are no other services registered for this filter.
+     * @param service The HostApduService to register the filter for
+     * @param pollingLoopFilter The filter to register
+     * @param autoTransact true to have the NFC stack automatically disable observe mode and allow
+     *         transactions to proceed when this filter matches, false otherwise
+     * @return true if the filter was registered, false otherwise
+     * @throws IllegalArgumentException if the passed in string doesn't parse to at least one byte
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public boolean registerPollingLoopFilterForService(@NonNull ComponentName service,
+            @NonNull String pollingLoopFilter, boolean autoTransact) {
+        pollingLoopFilter = validatePollingLoopFilter(pollingLoopFilter);
+
+        try {
+            return sService.registerPollingLoopFilterForService(mContext.getUser().getIdentifier(),
+                    service, pollingLoopFilter, autoTransact);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.registerPollingLoopFilterForService(
+                        mContext.getUser().getIdentifier(), service,
+                        pollingLoopFilter, autoTransact);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
     }
 
     /**
@@ -928,6 +981,23 @@ public final class CardEmulation {
     }
 
     /**
+     * Tests the validity of the polling loop filter.
+     * @param pollingLoopFilter The polling loop filter to test.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static @NonNull String validatePollingLoopFilter(@NonNull String pollingLoopFilter) {
+        // Verify hex characters
+        byte[] plfBytes = HexFormat.of().parseHex(pollingLoopFilter);
+        if (plfBytes.length == 0) {
+            throw new IllegalArgumentException(
+                "Polling loop filter must contain at least one byte.");
+        }
+        return HexFormat.of().withUpperCase().formatHex(plfBytes);
+    }
+
+    /**
      * A valid AID according to ISO/IEC 7816-4:
      * <ul>
      * <li>Has >= 5 bytes and <=16 bytes (>=10 hex chars and <= 32 hex chars)
@@ -1084,4 +1154,29 @@ public final class CardEmulation {
         sService = adapter.getCardEmulationService();
     }
 
+    /**
+     * Returns the value of {@link Settings.Secure#NFC_PAYMENT_DEFAULT_COMPONENT}.
+     *
+     * @param context A context
+     * @return A ComponentName for the setting value, or null.
+     *
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
+    @SuppressWarnings("AndroidFrameworkClientSidePermissionCheck")
+    @FlaggedApi(android.permission.flags.Flags.FLAG_WALLET_ROLE_ENABLED)
+    @Nullable
+    public static ComponentName getPreferredPaymentService(@NonNull Context context) {
+        context.checkCallingOrSelfPermission(Manifest.permission.NFC_PREFERRED_PAYMENT_INFO);
+        String defaultPaymentComponent = Settings.Secure.getString(context.getContentResolver(),
+                Constants.SETTINGS_SECURE_NFC_PAYMENT_DEFAULT_COMPONENT);
+
+        if (defaultPaymentComponent == null) {
+            return null;
+        }
+
+        return ComponentName.unflattenFromString(defaultPaymentComponent);
+    }
 }

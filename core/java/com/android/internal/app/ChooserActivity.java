@@ -24,7 +24,9 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CROS
 import static android.content.ContentProvider.getUserIdFromUri;
 import static android.stats.devicepolicy.DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL;
 import static android.stats.devicepolicy.DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_WORK;
+
 import static com.android.internal.util.LatencyTracker.ACTION_LOAD_SHARE_SHEET;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.Animator;
@@ -94,6 +96,7 @@ import android.provider.Downloads;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.service.chooser.ChooserTarget;
+import android.service.chooser.Flags;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.HashedStringCache;
@@ -2541,6 +2544,9 @@ public class ChooserActivity extends ResolverActivity implements
 
         @Override
         public boolean isComponentPinned(ComponentName name) {
+            if (Flags.legacyChooserPinningRemoval()) {
+                return false;
+            }
             return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
         }
 
@@ -2868,7 +2874,6 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     public void onListRebuilt(ResolverListAdapter listAdapter, boolean rebuildComplete) {
         setupScrollListener();
-        maybeSetupGlobalLayoutListener();
 
         ChooserListAdapter chooserListAdapter = (ChooserListAdapter) listAdapter;
         if (chooserListAdapter.getUserHandle()
@@ -2966,28 +2971,6 @@ public class ChooserActivity extends ResolverActivity implements
                         }
 
                         elevatedView.setElevation(defaultElevation);
-                    }
-                });
-    }
-
-    private void maybeSetupGlobalLayoutListener() {
-        if (shouldShowTabs()) {
-            return;
-        }
-        final View recyclerView = mChooserMultiProfilePagerAdapter.getActiveAdapterView();
-        recyclerView.getViewTreeObserver()
-                .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        // Fixes an issue were the accessibility border disappears on list creation.
-                        recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        final TextView titleView = findViewById(R.id.title);
-                        if (titleView != null) {
-                            titleView.setFocusable(true);
-                            titleView.setFocusableInTouchMode(true);
-                            titleView.requestFocus();
-                            titleView.requestAccessibilityFocus();
-                        }
                     }
                 });
     }
@@ -3168,6 +3151,10 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private boolean shouldShowTargetDetails(TargetInfo ti) {
+        if (Flags.legacyChooserPinningRemoval()) {
+            // Never show the long press menu if we've removed pinning.
+            return false;
+        }
         ComponentName nearbyShare = getNearbySharingComponent();
         //  Suppress target details for nearby share to hide pin/unpin action
         boolean isNearbyShare = nearbyShare != null && nearbyShare.equals(

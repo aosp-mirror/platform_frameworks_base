@@ -124,4 +124,9 @@ oneway interface IMagnificationConnection {
      * @param scale magnification scale.
      */
     void onUserMagnificationScaleChanged(int userId, int displayId, float scale);
+
+    /**
+     * Notify the changes of fullscreen magnification activation on the specified display
+     */
+    void onFullscreenMagnificationActivationChanged(int displayId, boolean activated);
 }

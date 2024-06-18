@@ -65,7 +65,7 @@ public class InfoMediaDeviceTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
 
-        mInfoMediaDevice = new InfoMediaDevice(mContext, mRouteInfo, TEST_PACKAGE_NAME);
+        mInfoMediaDevice = new InfoMediaDevice(mContext, mRouteInfo);
     }
 
     @Test

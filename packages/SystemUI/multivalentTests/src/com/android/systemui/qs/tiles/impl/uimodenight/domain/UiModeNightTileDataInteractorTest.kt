@@ -53,8 +53,9 @@ import org.mockito.Mockito.verify
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class UiModeNightTileDataInteractorTest : SysuiTestCase() {
-    private val configurationController: ConfigurationController =
+    private val configurationController: ConfigurationController by lazy {
         ConfigurationControllerImpl(context)
+    }
     private val batteryController = FakeBatteryController(LeakCheck())
     private val locationController = FakeLocationController(LeakCheck())
 

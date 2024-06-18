@@ -68,7 +68,7 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
     @Test
     fun testShouldInterceptTouch() =
         testScope.runTest {
-            createUdpfsOverlayInteractor()
+            createUdfpsOverlayInteractor()
 
             // When fingerprint enrolled and touch is within bounds
             verify(authController).addCallback(authControllerCallback.capture())
@@ -92,7 +92,7 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
     @Test
     fun testUdfpsOverlayParamsChange() =
         testScope.runTest {
-            createUdpfsOverlayInteractor()
+            createUdfpsOverlayInteractor()
             val udfpsOverlayParams = collectLastValue(underTest.udfpsOverlayParams)
             runCurrent()
 
@@ -105,9 +105,10 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
             assertThat(udfpsOverlayParams()).isEqualTo(firstParams)
         }
 
-    private fun createUdpfsOverlayInteractor() {
+    private fun createUdfpsOverlayInteractor() {
         underTest =
             UdfpsOverlayInteractor(
+                context,
                 authController,
                 selectedUserInteractor,
                 testScope.backgroundScope

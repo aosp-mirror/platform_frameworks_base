@@ -26,7 +26,8 @@ import java.lang.annotation.Retention;
 import javax.inject.Qualifier;
 
 /**
- * A {@link LogBuffer} for {@link com.android.systemui.media.controls.pipeline.MediaTimeoutLogger}
+ * A {@link LogBuffer} for
+ * {@link com.android.systemui.media.controls.domain.pipeline.MediaTimeoutLogger}
  */
 @Qualifier
 @Documented

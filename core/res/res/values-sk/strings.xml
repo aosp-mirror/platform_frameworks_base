@@ -155,6 +155,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> po <xliff:g id="TIME_DELAY">{2}</xliff:g> s"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepresmerované"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepresmerované"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Zabezpečenie mobilnej siete"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Kontrola nastavení"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Prístup k identifikátoru zariadenia"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Sieť v rámci pripojenia <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> zaznamenala v období od <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> do <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> jedinečný identifikátor (IMSI) vášho zariadenia <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g>-krát."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Šifrované pripojenie k sieti <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Teraz využívate pripojenie k lepšie zabezpečenej mobilnej sieti."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Nešifrované pripojenie k sieti <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Využívate pripojenie k nešifrovanej mobilnej sieti. Vaše hovory, správy aj údaje sú nedostatočne zabezpečené voči zachyteniu."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Nastavenia zabezpečenia v mobilnej sieti"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Ďalšie informácie"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Požiadavka zadaná pomocou kódu funkcie bola úspešne dokončená."</string>
     <string name="fcError" msgid="5325116502080221346">"Problém s pripojením alebo neplatný kód funkcie."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -372,6 +382,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Umožňuje aplikácii spojiť sa s modulom správ informačných služieb s cieľom preposielať prichádzajúce správy informačných služieb. Správy informačných služieb sa doručujú na určitých miestach a upozorňujú na tiesňové situácie. Škodlivé aplikácie môžu pri prijatí správy informačnej služby narušiť výkonnosť alebo prevádzku vášho zariadenia."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Správa prebiehajúcich hovorov"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Povolí aplikácii čítať podrobnosti o prebiehajúcich hovoroch v zariadení a ovládať ich."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Prístup poslednej známej mobilnej identite."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Umožní aplikácii prístup k poslednej známej mobilnej identite poskytnutej telefonickou službou."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"čítať správy informačných služieb"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Umožňuje aplikácii čítať správy informačných služieb prijaté vaším zariadením. Správy informačných služieb sa doručujú na určitých miestach a upozorňujú na tiesňové situácie. Škodlivé aplikácie môžu pri prijatí správy informačnej služby narušiť výkonnosť alebo prevádzku vášho zariadenia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"čítať odoberané informačné kanály"</string>
@@ -436,6 +448,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Umožňuje aplikácii využívať služby na popredí s typom dataSync systemExempted"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"spúšťať službu na popredí s typom remoteMessaging"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Umožňuje aplikácii využívať služby na popredí s typom fileManagement"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"spúšťať službu na popredí s typom mediaProcessing"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Umožňuje aplikácii využívať služby na popredí s typom mediaProcessing"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"spustiť službu na popredí s typom specialUse"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Umožňuje aplikácii využívať služby na popredí s typom specialUse"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"zistiť veľkosť ukladacieho priestoru aplikácie"</string>
@@ -541,6 +555,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Umožňuje aplikácii používať infračervený vysielač telefónu."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"nastaviť tapetu"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Umožňuje aplikácii nastaviť tapetu systému."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Prístup k skrytým profilom"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Umožňuje aplikácii získavať prístup k skrytým profilom."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"upraviť veľkosť tapety"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Umožňuje aplikácii nastaviť tipy pre veľkosť tapety systému."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"nastavenie časového pásma"</string>
@@ -634,7 +650,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použiť zámku obrazovky"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadaním zámky obrazovky"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevne pritlačte prst na senzor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Odtlačok prsta sa nedá rozpoznať. Skúste to znova."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Odtlačok prsta nebol rozpoznaný. Skúste to znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistite senzor odtlačkov prstov a skúste to znova"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistite senzor a skúste to znova"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevne pritlačte prst na senzor"</string>
@@ -652,18 +668,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Odtlačok prsta bol overený"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Tvár bola overená"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Tvár bola overená, stlačte tlačidlo potvrdenia"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardvér na snímanie odtlačku prsta nie je k dispozícii"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Hardvér na odtlačky prstov nie je k dispozícii"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Odtlačok prsta sa nedá nastaviť"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Nastavenie odtlačku prsta vypršalo. Skúste to znova."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operácia týkajúca sa odtlačku prsta bola zrušená"</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Overenie odtlačku prsta zrušil používateľ."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Operácia týkajúca sa odtlačku prsta bola zrušená"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Overenie odtlačku prsta zrušil používateľ"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Príliš veľa pokusov. Použite radšej zámku obrazovky."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Príliš veľa pokusov. Použite radšej zámku obrazovky."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Odtlačok prsta sa nedá spracovať. Skúste to znova."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Neregistrovali ste žiadne odtlačky prstov."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Toto zariadenie nemá senzor odtlačkov prstov."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Senzor je dočasne vypnutý."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Senzor odtlačkov prstov nie je možné používať. Navštívte poskytovateľa opráv."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Nie sú registrované žiadne odtlačky prstov"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Toto zariadenie nemá senzor odtlačkov prstov"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Senzor je dočasne vypnutý"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Senzor odtlačkov prstov nie je možné používať. Navštívte opravára."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Bol stlačený vypínač"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Prst: <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Použiť odtlačok prsta"</string>
@@ -698,7 +714,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nie je vidieť vašu tvár. Držte telefón na úrovni očí."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Priveľa pohybu. Nehýbte telefónom."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Znova zaregistrujte svoju tvár."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Tvár sa nedá rozpoznať. Skúste to znova."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Tvár nebola rozpoznaná. Skúste to znova."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Trocha zmeňte pozíciu hlavy"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Pozrite sa na telefón priamejšie"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Pozrite sa na telefón priamejšie"</string>
@@ -809,13 +825,15 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Umožňuje aplikácii vzorkovať dáta senzorov s frekvenciou vyššou ako 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"aktualizovať aplikáciu bez akcie používateľa"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Povolí vlastníkovi aktualizovať aplikáciu, ktorá bola nainštalovaná bez akcie používateľa"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"aktualizácia stavu overenia kľúčov ku kontaktom chránených šifrovaním end-to-end vlastnených inými aplikáciami"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Umožňuje aplikácii aktualizovať stav overenia kľúčov ku kontaktom chránených šifrovaním end-to-end vlastnených inými aplikáciami"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Nastavte dĺžku hesiel na odomknutie obrazovky aj kódov PIN a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Sledovať pokusy o odomknutie obrazovky"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť tablet alebo vymazať všetky údaje tabletu v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Sledovanie počtu nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknutie zariadenia Android TV alebo vymazanie všetkých jeho údajov."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a uzamknite palubný systém alebo vymažte všetky údaje v palubnom systéme v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť telefón alebo vymazať všetky údaje v telefóne v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Sleduje počet nesprávnych hesiel zadaných pri odomykaní obrazovky a uzamkne telefón alebo vymaže z telefónu všetky dáta, ak bolo zadaných príliš veľa nesprávnych hesiel."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite tablet alebo vymažte všetky údaje tohto používateľa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Sledovanie počtu nesprávnych hesiel zadaných pri odomykaní obrazovky a ak je ich zadaných príliš mnoho, uzamknutie zariadenia Android TV alebo vymazanie všetkých údajov tohto používateľa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite palubný systém alebo vymažte všetky údaje tohto profilu."</string>
@@ -828,7 +846,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Bez predchádzajúceho upozornenia vymazať všetky dáta obnovením výrobných nastavení tabletu."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Vymazanie údajov v zariadení Android TV bez upozornenia obnovením výrobných nastavení."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Vymažte údaje palubného systému bez upozornenia obnovením výrobných nastavení."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Bez predchádzajúceho upozornenia vymazať všetky dáta obnovením výrobných nastavení telefónu."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Bez predchádzajúceho upozornenia vymaže všetky dáta obnovením výrobných nastavení telefónu."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Vymazanie údajov profilu"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Vymazať údaje používateľa"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Vymažte bez upozornenia údaje tohto používateľa na tomto tablete."</string>
@@ -1151,7 +1169,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"Vybrať všetko"</string>
     <string name="cut" msgid="2561199725874745819">"Vystrihnúť"</string>
-    <string name="copy" msgid="5472512047143665218">"Kopírovať"</string>
+    <string name="copy" msgid="5472512047143665218">"Skopírovať"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Nepodarilo sa skopírovať do schránky"</string>
     <string name="paste" msgid="461843306215520225">"Prilepiť"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Prilepiť ako obyčajný text"</string>
@@ -1908,6 +1926,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Víkend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Udalosť"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Spánok"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Spravované aplikáciou <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Zapnuté"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Vypnuté"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vypína niektoré zvuky"</string>
@@ -1927,6 +1946,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Overené"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Rozbaliť"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Zbaliť"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Zbalené"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Rozbalené"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"prepnúť rozbalenie"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Port USB pre periférne zariadenia s Androidom"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1967,6 +1988,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušiť pozast. prac. aplikácií?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Zrušiť pozastavenie"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Tiesňová linka"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Nastavte zámku obrazovky"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Nastaviť zámku obrazovky"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ak chcete používať súkromný priestor, nastavte v tomto zariadení zámku obrazovky"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nie je k dispozícii"</string>
@@ -2343,8 +2367,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nedá sa zrkadliť do obrazovky"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Použite iný kábel a skúste znova"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Zariadenie je príliš horúce a nemôže zrkadliť na obrazovku, kým sa neochladí"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kábel nemusí podporovať obrazovky"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Kábel USB‑C sa nemusí dať správne pripojiť k obrazovkám"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Je zapnutá funkcia Dual Screen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> zobrazuje obsah na oboch obrazovkách"</string>
@@ -2368,4 +2390,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"3. pracovný"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Testovací"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Spoločný"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Automaticky pripojené k satelitu"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Správy môžete odosielať a prijímať bez mobilnej siete či siete Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvoriť Správy"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ako to funguje"</string>
 </resources>

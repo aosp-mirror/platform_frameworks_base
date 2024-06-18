@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.os.Parcel;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import org.junit.Rule;
@@ -30,28 +30,6 @@ import org.junit.Test;
 
 public class RavenwoodMockitoTest {
     @Rule public final RavenwoodRule mRavenwood = new RavenwoodRule();
-
-
-// Use this to mock static methods, which isn't supported by mockito 2.
-// Mockito supports static mocking since 3.4.0:
-// See: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#48
-
-//    private MockitoSession mMockingSession;
-//
-//    @Before
-//    public void setUp() {
-//        mMockingSession = mockitoSession()
-//                .strictness(Strictness.LENIENT)
-//                .mockStatic(RavenwoodMockitoTest.class)
-//                .startMocking();
-//    }
-//
-//    @After
-//    public void tearDown() {
-//        if (mMockingSession != null) {
-//            mMockingSession.finishMocking();
-//        }
-//    }
 
     @Test
     public void testMockJdkClass() {
@@ -62,31 +40,7 @@ public class RavenwoodMockitoTest {
         assertThat(object.exitValue()).isEqualTo(42);
     }
 
-    /*
- - Intent can't be mocked because of the dependency to `org.xmlpull.v1.XmlPullParser`.
-   (The error says "Mockito can only mock non-private & non-final classes", but that's likely a
-   red-herring.)
-
-STACKTRACE:
-org.mockito.exceptions.base.MockitoException:
-Mockito cannot mock this class: class android.content.Intent.
-
-  :
-
-Underlying exception : java.lang.IllegalArgumentException: Could not create type
-    at com.android.ravenwood.mockito.RavenwoodMockitoTest.testMockAndroidClass1
-    at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-
-  :
-
-Caused by: java.lang.ClassNotFoundException: org.xmlpull.v1.XmlPullParser
-    at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
-    at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
-    at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:520)
-    ... 54 more
-     */
     @Test
-    @IgnoreUnderRavenwood
     public void testMockAndroidClass1() {
         Intent object = mock(Intent.class);
 
@@ -102,5 +56,14 @@ Caused by: java.lang.ClassNotFoundException: org.xmlpull.v1.XmlPullParser
         when(object.getPackageName()).thenReturn("android");
 
         assertThat(object.getPackageName()).isEqualTo("android");
+    }
+
+    @Test
+    public void testMockFinalClass() {
+        var object = mock(Parcel.class);
+
+        when(object.readInt()).thenReturn(123);
+
+        assertThat(object.readInt()).isEqualTo(123);
     }
 }

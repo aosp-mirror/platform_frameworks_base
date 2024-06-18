@@ -35,6 +35,7 @@ import android.view.WindowInsetsController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -70,6 +71,8 @@ public final class AutomaticZenRule implements Parcelable {
     public static final int TYPE_SCHEDULE_CALENDAR = 2;
     /**
      * The type for rules triggered by bedtime/sleeping, like time of day, or snore detection.
+     *
+     * <p>Only the 'Wellbeing' app may own rules of this type.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int TYPE_BEDTIME = 3;
@@ -95,6 +98,8 @@ public final class AutomaticZenRule implements Parcelable {
     /**
      * The type for rules created and managed by a device owner. These rules may not be fully
      * editable by the device user.
+     *
+     * <p>Only a 'Device Owner' app may own rules of this type.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int TYPE_MANAGED = 7;
@@ -107,6 +112,28 @@ public final class AutomaticZenRule implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
+    /**
+     * Enum for the user-modifiable fields in this object.
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "FIELD_" }, value = {
+            FIELD_NAME,
+            FIELD_INTERRUPTION_FILTER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ModifiableField {}
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_NAME = 1 << 0;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_INTERRUPTION_FILTER = 1 << 1;
+
     private boolean enabled;
     private String name;
     private @InterruptionFilter int interruptionFilter;
@@ -116,9 +143,10 @@ public final class AutomaticZenRule implements Parcelable {
     private long creationTime;
     private ZenPolicy mZenPolicy;
     private ZenDeviceEffects mDeviceEffects;
+    // TODO: b/310620812 - Remove this once FLAG_MODES_API is inlined.
     private boolean mModified = false;
     private String mPkg;
-    private int mType = TYPE_UNKNOWN;
+    private int mType = Flags.modesApi() ? TYPE_UNKNOWN : 0;
     private int mIconResId;
     private String mTriggerDescription;
     private boolean mAllowManualInvocation;
@@ -274,6 +302,7 @@ public final class AutomaticZenRule implements Parcelable {
      * Returns whether this rule's name has been modified by the user.
      * @hide
      */
+    // TODO: b/310620812 - Consider removing completely. Seems not be used anywhere except tests.
     public boolean isModified() {
         return mModified;
     }
@@ -348,6 +377,9 @@ public final class AutomaticZenRule implements Parcelable {
      * Sets the {@link ZenDeviceEffects} associated to this rule. Device effects specify changes to
      * the device behavior that should apply while the rule is active, but are not directly related
      * to suppressing notifications (for example: disabling always-on display).
+     *
+     * <p>When updating an existing rule via {@link NotificationManager#updateAutomaticZenRule},
+     * a {@code null} value here means the previous set of effects is retained.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public void setDeviceEffects(@Nullable ZenDeviceEffects deviceEffects) {
@@ -458,6 +490,9 @@ public final class AutomaticZenRule implements Parcelable {
     public void validate() {
         if (Flags.modesApi()) {
             checkValidType(mType);
+            if (mDeviceEffects != null) {
+                mDeviceEffects.validate();
+            }
         }
     }
 
@@ -524,6 +559,18 @@ public final class AutomaticZenRule implements Parcelable {
         }
 
         return sb.append(']').toString();
+    }
+
+    /** @hide */
+    public static String fieldsToString(@ModifiableField int bitmask) {
+        ArrayList<String> modified = new ArrayList<>();
+        if ((bitmask & FIELD_NAME) != 0) {
+            modified.add("FIELD_NAME");
+        }
+        if ((bitmask & FIELD_INTERRUPTION_FILTER) != 0) {
+            modified.add("FIELD_INTERRUPTION_FILTER");
+        }
+        return "{" + String.join(",", modified) + "}";
     }
 
     @Override
@@ -645,8 +692,8 @@ public final class AutomaticZenRule implements Parcelable {
         }
 
         public Builder(@NonNull String name, @NonNull Uri conditionId) {
-            mName = name;
-            mConditionId = conditionId;
+            mName = Objects.requireNonNull(name);
+            mConditionId = Objects.requireNonNull(conditionId);
         }
 
         /**
@@ -658,7 +705,15 @@ public final class AutomaticZenRule implements Parcelable {
         }
 
         /**
-         * Sets the component (service or activity) that owns this rule.
+         * Sets the component name of the
+         * {@link android.service.notification.ConditionProviderService} that manages this rule
+         * (but note that {@link android.service.notification.ConditionProviderService} is
+         * deprecated in favor of using {@link NotificationManager#setAutomaticZenRuleState} to
+         * notify the system about the state of your rule).
+         *
+         * <p>This is exclusive with {@link #setConfigurationActivity}; rules where a configuration
+         * activity is set will not use the component set here to determine whether the rule
+         * should be active.
          */
         public @NonNull Builder setOwner(@Nullable ComponentName owner) {
             mOwner = owner;
@@ -696,6 +751,11 @@ public final class AutomaticZenRule implements Parcelable {
          * information about this rule and/or allows them to configure it. This is required to be
          * non-null for rules that are not backed by a
          * {@link android.service.notification.ConditionProviderService}.
+         *
+         * <p>This is exclusive with {@link #setOwner}; rules where a configuration
+         * activity is set will not use the
+         * {@link android.service.notification.ConditionProviderService} supplied there to determine
+         * whether the rule should be active.
          */
         public @NonNull Builder setConfigurationActivity(
                 @Nullable ComponentName configurationActivity) {
@@ -705,6 +765,9 @@ public final class AutomaticZenRule implements Parcelable {
 
         /**
          * Sets the zen policy.
+         *
+         * <p>When updating an existing rule via {@link NotificationManager#updateAutomaticZenRule},
+         * a {@code null} value here means the previous policy is retained.
          */
         public @NonNull Builder setZenPolicy(@Nullable ZenPolicy policy) {
             mPolicy = policy;
@@ -715,6 +778,9 @@ public final class AutomaticZenRule implements Parcelable {
          * Sets the {@link ZenDeviceEffects} associated to this rule. Device effects specify changes
          * to the device behavior that should apply while the rule is active, but are not directly
          * related to suppressing notifications (for example: disabling always-on display).
+         *
+         * <p>When updating an existing rule via {@link NotificationManager#updateAutomaticZenRule},
+         * a {@code null} value here means the previous set of effects is retained.
          */
         @NonNull
         public Builder setDeviceEffects(@Nullable ZenDeviceEffects deviceEffects) {

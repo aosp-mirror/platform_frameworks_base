@@ -24,8 +24,8 @@ import android.window.TransitionInfo;
 
 import androidx.annotation.NonNull;
 
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.TransitionUtil;
 
 /**
  * Observer used to identify tasks that are opening or moving to front. If a bubble activity is

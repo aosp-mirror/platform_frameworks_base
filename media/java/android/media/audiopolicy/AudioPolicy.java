@@ -16,6 +16,8 @@
 
 package android.media.audiopolicy;
 
+import static android.media.audiopolicy.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
+
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -34,6 +36,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
+import android.media.FadeManagerConfiguration;
 import android.media.IAudioService;
 import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
@@ -49,11 +52,13 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -332,7 +337,9 @@ public class AudioPolicy {
 
     /**
      * Update the current configuration of the set of audio mixes by adding new ones, while
-     * keeping the policy registered.
+     * keeping the policy registered. If any of the provided audio mixes is invalid then none of
+     * the passed mixes will be registered.
+     *
      * This method can only be called on a registered policy.
      * @param mixes the list of {@link AudioMix} to add
      * @return {@link AudioManager#SUCCESS} if the change was successful, {@link AudioManager#ERROR}
@@ -370,12 +377,15 @@ public class AudioPolicy {
     }
 
     /**
-     * Update the current configuration of the set of audio mixes by removing some, while
-     * keeping the policy registered.
-     * This method can only be called on a registered policy.
+     * Update the current configuration of the set of audio mixes for this audio policy by
+     * removing some, while keeping the policy registered. Will unregister all provided audio
+     * mixes, if possible.
+     *
+     * This method can only be called on a registered policy and only affects this current policy.
      * @param mixes the list of {@link AudioMix} to remove
      * @return {@link AudioManager#SUCCESS} if the change was successful, {@link AudioManager#ERROR}
-     *    otherwise.
+     *    otherwise. If only some of the provided audio mixes were detached but any one mix
+     *    failed to be detached, this method returns {@link AudioManager#ERROR}.
      */
     public int detachMixes(@NonNull List<AudioMix> mixes) {
         if (mixes == null) {
@@ -389,7 +399,6 @@ public class AudioPolicy {
             for (AudioMix mix : mixes) {
                 if (mix == null) {
                     throw new IllegalArgumentException("Illegal null AudioMix in detachMixes");
-                    // TODO also check mix is currently contained in list of mixes
                 } else {
                     zeMixes.add(mix);
                 }
@@ -593,6 +602,21 @@ public class AudioPolicy {
         setRegistration(null);
     }
 
+    /**
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @FlaggedApi(Flags.FLAG_AUDIO_MIX_TEST_API)
+    public List<AudioMix> getMixes() {
+        if (!Flags.audioMixTestApi()) {
+            return Collections.emptyList();
+        }
+        synchronized (mLock) {
+            return List.copyOf(mConfig.getMixes());
+        }
+    }
+
     public void setRegistration(String regId) {
         synchronized (mLock) {
             mRegistrationId = regId;
@@ -610,6 +634,110 @@ public class AudioPolicy {
     /**@hide*/
     public String getRegistration() {
         return mRegistrationId;
+    }
+
+    /**
+     * Sets a custom {@link FadeManagerConfiguration} to handle fade cycle of players during
+     * {@link android.media.AudioManager#AUDIOFOCUS_LOSS}
+     *
+     * @param fmcForFocusLoss custom {@link FadeManagerConfiguration}
+     * @return {@link AudioManager#SUCCESS} if the update was successful,
+     *     {@link AudioManager#ERROR} otherwise
+     * @throws IllegalStateException if the audio policy is not registered
+     * @hide
+     */
+    @FlaggedApi(FLAG_ENABLE_FADE_MANAGER_CONFIGURATION)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @SystemApi
+    public int setFadeManagerConfigurationForFocusLoss(
+            @NonNull FadeManagerConfiguration fmcForFocusLoss) {
+        Objects.requireNonNull(fmcForFocusLoss,
+                "FadeManagerConfiguration for focus loss cannot be null");
+
+        IAudioService service = getService();
+        synchronized (mLock) {
+            Preconditions.checkState(isAudioPolicyRegisteredLocked(),
+                    "Cannot set FadeManagerConfiguration with unregistered AudioPolicy");
+
+            try {
+                return service.setFadeManagerConfigurationForFocusLoss(fmcForFocusLoss);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Received remote exception for setFadeManagerConfigurationForFocusLoss:",
+                        e);
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Clear the current {@link FadeManagerConfiguration} set to handle fade cycles of players
+     * during {@link android.media.AudioManager#AUDIOFOCUS_LOSS}
+     *
+     * <p>In the absence of custom {@link FadeManagerConfiguration}, the default configurations will
+     * be used to handle fade cycles during audio focus loss.
+     *
+     * @return {@link AudioManager#SUCCESS} if the update was successful,
+     *     {@link AudioManager#ERROR} otherwise
+     * @throws IllegalStateException if the audio policy is not registered
+     * @see #setFadeManagerConfigurationForFocusLoss(FadeManagerConfiguration)
+     * @hide
+     */
+    @FlaggedApi(FLAG_ENABLE_FADE_MANAGER_CONFIGURATION)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @SystemApi
+    public int clearFadeManagerConfigurationForFocusLoss() {
+        IAudioService service = getService();
+        synchronized (mLock) {
+            Preconditions.checkState(isAudioPolicyRegisteredLocked(),
+                    "Cannot clear FadeManagerConfiguration from unregistered AudioPolicy");
+
+            try {
+                return service.clearFadeManagerConfigurationForFocusLoss();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Received remote exception for "
+                                + "clearFadeManagerConfigurationForFocusLoss:", e);
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Get the current fade manager configuration used for fade operations during
+     * {@link android.media.AudioManager#AUDIOFOCUS_LOSS}
+     *
+     * <p>If no custom {@link FadeManagerConfiguration} is set, the default configuration currently
+     * active will be returned.
+     *
+     * @return the active {@link FadeManagerConfiguration} used during audio focus loss
+     * @throws IllegalStateException if the audio policy is not registered
+     * @see #setFadeManagerConfigurationForFocusLoss(FadeManagerConfiguration)
+     * @see #clearFadeManagerConfigurationForFocusLoss()
+     * @hide
+     */
+    @FlaggedApi(FLAG_ENABLE_FADE_MANAGER_CONFIGURATION)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @SystemApi
+    @NonNull
+    public FadeManagerConfiguration getFadeManagerConfigurationForFocusLoss() {
+        IAudioService service = getService();
+        synchronized (mLock) {
+            Preconditions.checkState(isAudioPolicyRegisteredLocked(),
+                    "Cannot get FadeManagerConfiguration from unregistered AudioPolicy");
+
+            try {
+                return service.getFadeManagerConfigurationForFocusLoss();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Received remote exception for getFadeManagerConfigurationForFocusLoss:",
+                        e);
+                throw e.rethrowFromSystemServer();
+
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean isAudioPolicyRegisteredLocked() {
+        return mStatus == POLICY_STATUS_REGISTERED;
     }
 
     private boolean policyReadyToUse() {

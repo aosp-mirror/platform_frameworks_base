@@ -68,6 +68,9 @@ import android.graphics.RegionIterator;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -90,8 +93,10 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.FakeDisplayTracker;
@@ -120,10 +125,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @LargeTest
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner.class)
+@RequiresFlagsDisabled(Flags.FLAG_CREATE_WINDOWLESS_WINDOW_MAGNIFIER)
 public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    // NOTE: pass 'null' to allow this test advances time on the main thread.
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(null);
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int LAYOUT_CHANGE_TIMEOUT_MS = 5000;
     @Mock
@@ -159,6 +168,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     private View mSpyView;
     private View.OnTouchListener mTouchListener;
     private MotionEventHelper mMotionEventHelper = new MotionEventHelper();
+    private KosmosJavaAdapter mKosmos;
 
     /**
      *  return whether window magnification is supported for current test context.
@@ -170,6 +180,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mKosmos = new KosmosJavaAdapter(this);
         mContext = Mockito.spy(getContext());
         mHandler = new FakeHandler(TestableLooper.get(this).getLooper());
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
@@ -185,7 +196,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
             return null;
         }).when(mSfVsyncFrameProvider).postFrameCallback(
                 any(FrameCallback.class));
-        mSysUiState = new SysUiState(mDisplayTracker);
+        mSysUiState = new SysUiState(mDisplayTracker, mKosmos.getSceneContainerPlugin());
         mSysUiState.addCallback(Mockito.mock(SysUiState.SysUiStateCallback.class));
         when(mSecureSettings.getIntForUser(anyString(), anyInt(), anyInt())).then(
                 returnsSecondArg());
@@ -213,13 +224,14 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                         mContext,
                         mHandler,
                         mWindowMagnificationAnimationController,
-                        mSfVsyncFrameProvider,
                         mMirrorWindowControl,
                         mTransaction,
                         mWindowMagnifierCallback,
                         mSysUiState,
-                        () -> mWindowSessionSpy,
-                        mSecureSettings);
+                        mSecureSettings,
+                        /* scvhSupplier= */ () -> null,
+                        mSfVsyncFrameProvider,
+                        /* globalWindowSessionSupplier= */ () -> mWindowSessionSpy);
 
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));
@@ -267,7 +279,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         mInstrumentation.runOnMainSync(
                 () -> mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
                         Float.NaN, /* magnificationFrameOffsetRatioX= */ 0,
-                /* magnificationFrameOffsetRatioY= */ 0, null));
+                        /* magnificationFrameOffsetRatioY= */ 0, null));
 
         // Waits for the surface created
         verify(mWindowMagnifierCallback, timeout(LAYOUT_CHANGE_TIMEOUT_MS)).onSourceBoundsChanged(
@@ -1412,7 +1424,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     private MotionEvent obtainMotionEvent(long downTime, long eventTime, int action, float x,
-                                          float y) {
+            float y) {
         return mMotionEventHelper.obtainMotionEvent(downTime, eventTime, action, x, y);
     }
 

@@ -27,6 +27,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
@@ -39,6 +40,7 @@ import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChang
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.kotlin.BooleanFlowOperators;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
@@ -67,6 +69,7 @@ class FalsingCollectorImpl implements FalsingCollector {
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
     private final Lazy<ShadeInteractor> mShadeInteractorLazy;
+    private final Lazy<CommunalInteractor> mCommunalInteractorLazy;
     private final BatteryController mBatteryController;
     private final DockManager mDockManager;
     private final DelayableExecutor mMainExecutor;
@@ -76,6 +79,7 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     private int mState;
     private boolean mShowingAod;
+    private boolean mShowingCommunalHub;
     private boolean mScreenOn;
     private boolean mSessionStarted;
     private MotionEvent mPendingDownEvent;
@@ -145,7 +149,8 @@ class FalsingCollectorImpl implements FalsingCollector {
             @Main DelayableExecutor mainExecutor,
             JavaAdapter javaAdapter,
             SystemClock systemClock,
-            Lazy<SelectedUserInteractor> userInteractor) {
+            Lazy<SelectedUserInteractor> userInteractor,
+            Lazy<CommunalInteractor> communalInteractorLazy) {
         mFalsingDataProvider = falsingDataProvider;
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -160,6 +165,7 @@ class FalsingCollectorImpl implements FalsingCollector {
         mJavaAdapter = javaAdapter;
         mSystemClock = systemClock;
         mUserInteractor = userInteractor;
+        mCommunalInteractorLazy = communalInteractorLazy;
     }
 
     @Override
@@ -175,6 +181,13 @@ class FalsingCollectorImpl implements FalsingCollector {
         mJavaAdapter.alwaysCollectFlow(
                 mShadeInteractorLazy.get().isQsExpanded(),
                 this::onQsExpansionChanged
+        );
+        final CommunalInteractor communalInteractor = mCommunalInteractorLazy.get();
+        mJavaAdapter.alwaysCollectFlow(
+                BooleanFlowOperators.INSTANCE.and(
+                        communalInteractor.isCommunalEnabled(),
+                        communalInteractor.isCommunalShowing()),
+                this::onShowingCommunalHubChanged
         );
 
         mBatteryController.addCallback(mBatteryListener);
@@ -203,6 +216,12 @@ class FalsingCollectorImpl implements FalsingCollector {
         } else if (mSessionStarted) {
             registerSensors();
         }
+    }
+
+    private void onShowingCommunalHubChanged(boolean isShowing) {
+        logDebug("REAL: onShowingCommunalHubChanged(" + isShowing + ")");
+        mShowingCommunalHub = isShowing;
+        updateSessionActive();
     }
 
     @Override
@@ -333,7 +352,10 @@ class FalsingCollectorImpl implements FalsingCollector {
     }
 
     private boolean shouldSessionBeActive() {
-        return mScreenOn && (mState == StatusBarState.KEYGUARD) && !mShowingAod;
+        return mScreenOn
+                && (mState == StatusBarState.KEYGUARD)
+                && !mShowingAod
+                && !mShowingCommunalHub;
     }
 
     private void updateSessionActive() {

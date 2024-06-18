@@ -24,12 +24,12 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.systemui.Flags.centralizedStatusBarHeightFix
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCa
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 
@@ -53,7 +54,7 @@ constructor(
     ambientState: AmbientState,
     controller: NotificationStackScrollLayoutController,
     notificationStackSizeCalculator: NotificationStackSizeCalculator,
-    private val smartspaceViewModel: KeyguardSmartspaceViewModel,
+    private val largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
     @Main mainDispatcher: CoroutineDispatcher,
 ) :
     NotificationStackScrollLayoutSection(
@@ -69,22 +70,35 @@ constructor(
         mainDispatcher,
     ) {
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
         constraintSet.apply {
             val bottomMargin =
                 context.resources.getDimensionPixelSize(R.dimen.keyguard_status_view_bottom_margin)
-
             if (migrateClocksToBlueprint()) {
+                val useLargeScreenHeader =
+                    context.resources.getBoolean(R.bool.config_use_large_screen_shade_header)
+                val marginTopLargeScreen =
+                    if (centralizedStatusBarHeightFix()) {
+                        largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
+                    } else {
+                        context.resources.getDimensionPixelSize(
+                            R.dimen.large_screen_shade_header_height
+                        )
+                    }
                 connect(
                     R.id.nssl_placeholder,
                     TOP,
-                    smartspaceViewModel.smartspaceViewId,
+                    R.id.smart_space_barrier_bottom,
                     BOTTOM,
-                    bottomMargin
+                    bottomMargin +
+                        if (useLargeScreenHeader) {
+                            marginTopLargeScreen
+                        } else {
+                            0
+                        }
                 )
-                setGoneMargin(R.id.nssl_placeholder, TOP, bottomMargin)
             } else {
                 connect(R.id.nssl_placeholder, TOP, R.id.keyguard_status_view, BOTTOM, bottomMargin)
             }

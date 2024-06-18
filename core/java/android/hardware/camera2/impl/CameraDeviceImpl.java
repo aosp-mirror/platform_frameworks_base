@@ -19,6 +19,10 @@ package android.hardware.camera2.impl;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.ICameraService;
@@ -59,6 +63,8 @@ import android.util.Size;
 import android.util.SparseArray;
 import android.view.Surface;
 
+import com.android.internal.camera.flags.Flags;
+
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,9 +91,22 @@ public class CameraDeviceImpl extends CameraDevice
 
     private static final int REQUEST_ID_NONE = -1;
 
+    /**
+     * Starting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM},
+     * {@link #isSessionConfigurationSupported} also checks for compatibility of session parameters
+     * when supported by the HAL. This ChangeId guards enabling that functionality for apps
+     * that target {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long CHECK_PARAMS_IN_IS_SESSION_CONFIGURATION_SUPPORTED = 320741775;
+
     // TODO: guard every function with if (!mRemoteDevice) check (if it was closed)
     private ICameraDeviceUserWrapper mRemoteDevice;
     private boolean mRemoteDeviceInit = false;
+
+    // CameraDeviceSetup object to delegate some of the newer calls to.
+    @Nullable private final CameraDeviceSetup mCameraDeviceSetup;
 
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock = new Object(); // access from this class and Session only!
@@ -275,7 +294,8 @@ public class CameraDeviceImpl extends CameraDevice
                         CameraCharacteristics characteristics,
                         Map<String, CameraCharacteristics> physicalIdsToChars,
                         int appTargetSdkVersion,
-                        Context ctx) {
+                        Context ctx,
+                        @Nullable CameraDevice.CameraDeviceSetup cameraDeviceSetup) {
         if (cameraId == null || callback == null || executor == null || characteristics == null) {
             throw new IllegalArgumentException("Null argument given");
         }
@@ -286,6 +306,7 @@ public class CameraDeviceImpl extends CameraDevice
         mPhysicalIdsToChars = physicalIdsToChars;
         mAppTargetSdkVersion = appTargetSdkVersion;
         mContext = ctx;
+        mCameraDeviceSetup = cameraDeviceSetup;
 
         final int MAX_TAG_LEN = 23;
         String tag = String.format("CameraDevice-JV-%s", mCameraId);
@@ -781,20 +802,12 @@ public class CameraDeviceImpl extends CameraDevice
             UnsupportedOperationException, IllegalArgumentException {
         synchronized (mInterfaceLock) {
             checkIfCameraClosedOrInError();
-
+            if (CompatChanges.isChangeEnabled(CHECK_PARAMS_IN_IS_SESSION_CONFIGURATION_SUPPORTED)
+                    && Flags.cameraDeviceSetup()
+                    && mCameraDeviceSetup != null) {
+                return mCameraDeviceSetup.isSessionConfigurationSupported(sessionConfig);
+            }
             return mRemoteDevice.isSessionConfigurationSupported(sessionConfig);
-        }
-    }
-
-    @Override
-    public CameraCharacteristics getSessionCharacteristics(
-            @NonNull SessionConfiguration sessionConfig) throws CameraAccessException,
-            UnsupportedOperationException, IllegalArgumentException {
-        synchronized (mInterfaceLock) {
-            checkIfCameraClosedOrInError();
-            CameraMetadataNative info = mRemoteDevice.getSessionCharacteristics(sessionConfig);
-
-            return new CameraCharacteristics(info);
         }
     }
 
@@ -2559,13 +2572,16 @@ public class CameraDeviceImpl extends CameraDevice
         boolean initializationFailed = true;
         IBinder token = new Binder(TAG + " : " + mNextSessionId++);
         try {
-            boolean ret = CameraExtensionCharacteristics.registerClient(mContext, token);
+            boolean ret = CameraExtensionCharacteristics.registerClient(mContext, token,
+                    extensionConfiguration.getExtension(), mCameraId,
+                    CameraExtensionUtils.getCharacteristicsMapNative(characteristicsMap));
             if (!ret) {
                 token = null;
                 throw new UnsupportedOperationException("Unsupported extension!");
             }
 
-            if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported()) {
+            if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported(
+                        extensionConfiguration.getExtension())) {
                 mCurrentAdvancedExtensionSession =
                         CameraAdvancedExtensionSessionImpl.createCameraAdvancedExtensionSession(
                                 this, characteristicsMap, mContext, extensionConfiguration,
@@ -2580,7 +2596,8 @@ public class CameraDeviceImpl extends CameraDevice
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
         } finally {
             if (initializationFailed && (token != null)) {
-                CameraExtensionCharacteristics.unregisterClient(mContext, token);
+                CameraExtensionCharacteristics.unregisterClient(mContext, token,
+                        extensionConfiguration.getExtension());
             }
         }
     }

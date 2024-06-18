@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Slog;
 
 import com.android.internal.util.DataClass;
 
@@ -39,6 +40,7 @@ import java.util.Objects;
 @DataClass(genBuilder = false, genConstructor = false, genSetters = true)
 @FlaggedApi(Flags.FLAG_ARCHIVING)
 public final class ArchivedActivityInfo {
+    private static final String TAG = "ArchivedActivityInfo";
     /** The label for the activity. */
     private @NonNull CharSequence mLabel;
     /** The component name of this activity. */
@@ -91,26 +93,31 @@ public final class ArchivedActivityInfo {
      * @hide
      */
     public static Bitmap drawableToBitmap(Drawable drawable, int iconSize) {
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-
-        }
-
         Bitmap bitmap;
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            // Needed for drawables that are just a single color.
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        if (drawable instanceof BitmapDrawable) {
+            bitmap = ((BitmapDrawable) drawable).getBitmap();
         } else {
-            bitmap =
+            if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+                // Needed for drawables that are just a single color.
+                bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            } else {
+                bitmap =
                     Bitmap.createBitmap(
-                            drawable.getIntrinsicWidth(),
-                            drawable.getIntrinsicHeight(),
-                            Bitmap.Config.ARGB_8888);
+                        drawable.getIntrinsicWidth(),
+                        drawable.getIntrinsicHeight(),
+                        Bitmap.Config.ARGB_8888);
+            }
+
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
         }
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        if (iconSize > 0 && bitmap.getWidth() > iconSize * 2 || bitmap.getHeight() > iconSize * 2) {
+        if (iconSize <= 0) {
+            return bitmap;
+        }
+
+        if (bitmap.getWidth() < iconSize || bitmap.getHeight() < iconSize
+                || bitmap.getWidth() > iconSize * 2 || bitmap.getHeight() > iconSize * 2) {
             var scaledBitmap = Bitmap.createScaledBitmap(bitmap, iconSize, iconSize, true);
             if (scaledBitmap != bitmap) {
                 bitmap.recycle();
@@ -133,7 +140,8 @@ public final class ArchivedActivityInfo {
                 bitmap.getByteCount())) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
             return baos.toByteArray();
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to compress bitmap", e);
             return null;
         }
     }
@@ -235,10 +243,10 @@ public final class ArchivedActivityInfo {
     }
 
     @DataClass.Generated(
-            time = 1698789991876L,
+            time = 1708042076897L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/ArchivedActivityInfo.java",
-            inputSignatures = "private @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate @android.annotation.NonNull android.content.ComponentName mComponentName\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mIcon\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mMonochromeIcon\n @android.annotation.NonNull android.content.pm.ArchivedActivityParcel getParcel()\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable)\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable,int)\npublic static  byte[] bytesFromBitmap(android.graphics.Bitmap)\nprivate static  android.graphics.drawable.Drawable drawableFromCompressedBitmap(byte[])\nclass ArchivedActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=false, genConstructor=false, genSetters=true)")
+            inputSignatures = "private static final  java.lang.String TAG\nprivate @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate @android.annotation.NonNull android.content.ComponentName mComponentName\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mIcon\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mMonochromeIcon\n @android.annotation.NonNull android.content.pm.ArchivedActivityParcel getParcel()\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable)\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable,int)\npublic static  byte[] bytesFromBitmap(android.graphics.Bitmap)\nprivate static  android.graphics.drawable.Drawable drawableFromCompressedBitmap(byte[])\nclass ArchivedActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=false, genConstructor=false, genSetters=true)")
     @Deprecated
     private void __metadata() {}
 

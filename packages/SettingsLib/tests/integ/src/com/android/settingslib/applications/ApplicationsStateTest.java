@@ -22,20 +22,30 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.ApplicationInfo;
+import android.os.Flags;
+import android.os.UserManager;
+import android.platform.test.flag.junit.SetFlagsRule;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class ApplicationsStateTest {
+    private static final int APP_ENTRY_ID = 1;
     private ApplicationsState.AppEntry mEntry;
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
-        mEntry = mock(ApplicationsState.AppEntry.class);
-        mEntry.info = mock(ApplicationInfo.class);
+        mEntry = new ApplicationsState.AppEntry(
+                ApplicationProvider.getApplicationContext(),
+                mock(ApplicationInfo.class),
+                APP_ENTRY_ID);
     }
 
     @Test
@@ -297,11 +307,38 @@ public class ApplicationsStateTest {
     @Test
     public void testPersonalAndWorkFiltersDisplaysCorrectApps() {
         mEntry.showInPersonalTab = true;
+        mEntry.mProfileType = UserManager.USER_TYPE_FULL_SYSTEM;
         assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isTrue();
         assertThat(ApplicationsState.FILTER_WORK.filterApp(mEntry)).isFalse();
 
         mEntry.showInPersonalTab = false;
+        mEntry.mProfileType = UserManager.USER_TYPE_PROFILE_MANAGED;
         assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isFalse();
         assertThat(ApplicationsState.FILTER_WORK.filterApp(mEntry)).isTrue();
+    }
+
+    @Test
+    public void testPrivateProfileFilterDisplaysCorrectApps() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+
+        mEntry.showInPersonalTab = true;
+        mEntry.mProfileType = UserManager.USER_TYPE_FULL_SYSTEM;
+        assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isTrue();
+        assertThat(ApplicationsState.FILTER_PRIVATE_PROFILE.filterApp(mEntry)).isFalse();
+
+        mEntry.showInPersonalTab = false;
+        mEntry.mProfileType = UserManager.USER_TYPE_PROFILE_PRIVATE;
+        assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isFalse();
+        assertThat(ApplicationsState.FILTER_PRIVATE_PROFILE.filterApp(mEntry)).isTrue();
+    }
+
+    @Test
+    public void testPrivateProfileFilterDisplaysCorrectAppsWhenFlagDisabled() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+
+        mEntry.showInPersonalTab = false;
+        mEntry.mProfileType = UserManager.USER_TYPE_PROFILE_PRIVATE;
+        assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isFalse();
+        assertThat(ApplicationsState.FILTER_PRIVATE_PROFILE.filterApp(mEntry)).isFalse();
     }
 }

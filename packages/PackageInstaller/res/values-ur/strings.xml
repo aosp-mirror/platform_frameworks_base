@@ -44,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"یہ صارف نامعلوم ایپس کو انسٹال نہیں کر سکتا"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"اس صارف کو ایپس انسٹال کرنے کی اجازت نہیں ہے"</string>
     <string name="ok" msgid="7871959885003339302">"ٹھیک ہے"</string>
+    <string name="archive" msgid="4447791830199354721">"آرکائیو کریں"</string>
     <string name="update_anyway" msgid="8792432341346261969">"بہر حال اپ ڈیٹ کریں"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ایپس منظم کریں"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"جگہ نہیں ہے"</string>
@@ -58,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"اپ ڈیٹ اَن انسٹال کریں"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> درج ذیل ایپ کا حصہ ہے:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"کیا آپ اس ایپ کو اَن انسٹال کرنا چاہتے ہیں؟"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"آپ کا ذاتی ڈیٹا محفوظ ہو جائے گا"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"اس ایپ کو تمام صارفین کے لیے آرکائیو کریں؟ آپ کا ذاتی ڈیٹا محفوظ ہو جائے گا"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"اس ایپ کو اپنی دفتری پروفائل پر آرکائیو کریں؟ آپ کا ذاتی ڈیٹا محفوظ ہو جائے گا"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"<xliff:g id="USERNAME">%1$s</xliff:g> کے لیے اس ایپ کو آرکائیو کریں؟ آپ کا ذاتی ڈیٹا محفوظ ہو جائے گا"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"کیا آپ اس ایپ کو اپنی نجی جگہ سے آرکائیو کرنا چاہتے ہیں؟ آپ کا ذاتی ڈیٹا محفوظ ہو جائے گا"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"کیا آپ "<b>"سبھی"</b>" صارفین کیلئے اس ایپ کو اَن انسٹال کرنا چاہتے ہیں؟ ایپلیکیشن اور اس کا ڈیٹا آلہ پر موجود "<b>"سبھی"</b>" صارفین سے ہٹا دیا جائے گا۔"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"کیا آپ اس ایپ کو صارف <xliff:g id="USERNAME">%1$s</xliff:g> کیلئے اَن انسٹال کرنا چاہتے ہیں؟"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"کیا آپ اپنے دفتری پروفائل سے یہ ایپ اَن انسٹال کرنا چاہتے ہیں؟"</string>
@@ -86,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"صارفین کا نظم کریں"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> کو اَن انسٹال نہیں کیا جا سکا۔"</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"پیکیج کو پارس کرنے میں ایک مسئلہ تھا۔"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"‏\'انسٹال/اَن انسٹال کی کارروائیاں\' Wear پر تعاون یافتہ نہیں ہیں۔"</string>
     <string name="message_staging" msgid="8032722385658438567">"ایپ کی ٹیسٹنگ ہو رہی ہے…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"نامعلوم"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"آپ کی سیکیورٹی کی خاطر فی الحال آپ کے ٹیبلیٹ کو اس ماخذ سے نامعلوم ایپس انسٹال کرنے کی اجازت نہیں ہے۔ آپ ترتیبات میں اسے تبدیل کر سکتے ہیں۔"</string>
@@ -98,17 +102,18 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"آپ کے ٹیبلیٹ اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے ٹیبلیٹ کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"‏آپ کے TV اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے TV کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کلون"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کو آرکائیو کریں؟"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"جاری رکھیں"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ترتیبات"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"‏wear ایپس کو انسٹال/اَن انسٹال کرنا"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ایپ انسٹال ہونے کی اطلاع"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"کامیابی کے ساتھ انسٹال ہو گئی"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" کامیابی کے ساتھ انسٹال ہو گئی"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> کو <xliff:g id="INSTALLERNAME">%1$s</xliff:g> سے بحال کریں"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> کو <xliff:g id="INSTALLERNAME">%2$s</xliff:g> سے بحال کریں"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"یہ ایپ پس منظر میں ڈاؤن لوڈ ہونا شروع ہو جائے گی"</string>
     <string name="restore" msgid="8460854736328970444">"بحال کریں"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"آپ آف لائن ہیں"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"جب آپ انٹرنیٹ سے منسلک ہوں گے تو یہ ایپ خودکار طور پر بحال ہو جائے گی"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"اس ایپ کو بحال کرنے کے لیے، اپنا انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"کچھ غلط ہو گیا"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"اس ایپ کو بحال کرنے کی کوشش میں ایک مسئلہ تھا"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"کافی اسٹوریج نہیں ہے"</string>
@@ -116,8 +121,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"کارروائی درکار ہے"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"اس ایپ کو بحال کرنے کے لیے اگلے مراحل کی پیروی کریں"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> غیر فعال ہے"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"اس ایپ کو بحال کرنے کے لیے، ترتیبات میں <xliff:g id="INSTALLERNAME">%1$s</xliff:g> کو فعال کریں"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> اَن انسٹال ہو گیا ہے"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"اس ایپ کو بحال کرنے کے لیے، آپ کو <xliff:g id="INSTALLERNAME">%1$s</xliff:g> انسٹال کرنا ہوگا"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"جاری رکھیں"</string>

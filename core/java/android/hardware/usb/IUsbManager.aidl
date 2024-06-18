@@ -186,6 +186,10 @@ interface IUsbManager
     /* Gets the status of the specified USB port. */
     UsbPortStatus getPortStatus(in String portId);
 
+    /* Returns if the specified USB port supports mode change. */
+    @EnforcePermission("MANAGE_USB")
+    boolean isModeChangeSupported(in String portId);
+
     /* Sets the port's current role. */
     void setPortRoles(in String portId, int powerRole, int dataRole);
 

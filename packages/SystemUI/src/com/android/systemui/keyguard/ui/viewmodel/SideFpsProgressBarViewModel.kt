@@ -20,22 +20,31 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Point
 import androidx.annotation.VisibleForTesting
-import androidx.core.animation.doOnEnd
+import androidx.core.animation.addListener
 import com.android.systemui.Flags
+import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
+import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.DozeServiceHost
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,21 +52,32 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class SideFpsProgressBarViewModel
 @Inject
 constructor(
     private val context: Context,
-    private val fpAuthRepository: DeviceEntryFingerprintAuthRepository,
+    biometricStatusInteractor: BiometricStatusInteractor,
+    deviceEntryFingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
     private val sfpsSensorInteractor: SideFpsSensorInteractor,
+    // todo (b/317432075) Injecting DozeServiceHost directly instead of using it through
+    //  DozeInteractor as DozeServiceHost already depends on DozeInteractor.
+    private val dozeServiceHost: DozeServiceHost,
+    private val keyguardInteractor: KeyguardInteractor,
     displayStateInteractor: DisplayStateInteractor,
+    @Main private val mainDispatcher: CoroutineDispatcher,
     @Application private val applicationScope: CoroutineScope,
+    private val powerInteractor: PowerInteractor,
 ) {
     private val _progress = MutableStateFlow(0.0f)
     private val _visible = MutableStateFlow(false)
@@ -69,17 +89,29 @@ constructor(
         _progress.value = 0.0f
     }
 
-    private val additionalSensorLengthPadding =
-        context.resources.getDimension(R.dimen.sfps_progress_bar_length_extra_padding).toInt()
+    // Merged [FingerprintAuthenticationStatus] from BiometricPrompt acquired messages and
+    // device entry authentication messages
+    private val mergedFingerprintAuthenticationStatus =
+        merge(
+                biometricStatusInteractor.fingerprintAcquiredStatus,
+                deviceEntryFingerprintAuthInteractor.authenticationStatus
+            )
+            .filter {
+                if (it is AcquiredFingerprintAuthenticationStatus) {
+                    it.authenticationReason == AuthenticationReason.DeviceEntryAuthentication ||
+                        it.authenticationReason ==
+                            AuthenticationReason.BiometricPromptAuthentication
+                } else {
+                    true
+                }
+            }
 
     val isVisible: Flow<Boolean> = _visible.asStateFlow()
 
     val progress: Flow<Float> = _progress.asStateFlow()
 
     val progressBarLength: Flow<Int> =
-        sfpsSensorInteractor.sensorLocation
-            .map { it.length + additionalSensorLengthPadding }
-            .distinctUntilChanged()
+        sfpsSensorInteractor.sensorLocation.map { it.length }.distinctUntilChanged()
 
     val progressBarThickness =
         context.resources.getDimension(R.dimen.sfps_progress_bar_thickness).toInt()
@@ -91,7 +123,6 @@ constructor(
                     context.resources
                         .getDimension(R.dimen.sfps_progress_bar_padding_from_edge)
                         .toInt()
-                val lengthOfTheProgressBar = sensorLocation.length + additionalSensorLengthPadding
                 val viewLeftTop = Point(sensorLocation.left, sensorLocation.top)
                 val totalDistanceFromTheEdge = paddingFromEdge + progressBarThickness
 
@@ -102,7 +133,7 @@ constructor(
                     // Sensor is vertical to the current orientation, we rotate it 270 deg
                     // around the (left,top) point as the pivot. We need to push it down the
                     // length of the progress bar so that it is still aligned to the sensor
-                    viewLeftTop.y += lengthOfTheProgressBar
+                    viewLeftTop.y += sensorLocation.length
                     val isSensorOnTheNearEdge =
                         rotation == DisplayRotation.ROTATION_180 ||
                             rotation == DisplayRotation.ROTATION_90
@@ -127,13 +158,19 @@ constructor(
                         // We want to push it up from the bottom edge by the padding and
                         // the thickness of the progressbar.
                         viewLeftTop.y -= totalDistanceFromTheEdge
-                        viewLeftTop.x -= additionalSensorLengthPadding
                     }
                 }
                 viewLeftTop
             }
 
-    val isFingerprintAuthRunning: Flow<Boolean> = fpAuthRepository.isRunning
+    val isFingerprintAuthRunning: Flow<Boolean> =
+        combine(
+            deviceEntryFingerprintAuthInteractor.isRunning,
+            biometricStatusInteractor.sfpsAuthenticationReason
+        ) { deviceEntryAuthIsRunning, sfpsAuthReason ->
+            deviceEntryAuthIsRunning ||
+                sfpsAuthReason == AuthenticationReason.BiometricPromptAuthentication
+        }
 
     val rotation: Flow<Float> =
         combine(displayStateInteractor.currentRotation, sfpsSensorInteractor.sensorLocation, ::Pair)
@@ -168,47 +205,58 @@ constructor(
                     return@collectLatest
                 }
                 animatorJob =
-                    fpAuthRepository.authenticationStatus
-                        .onEach { authStatus ->
-                            when (authStatus) {
-                                is AcquiredFingerprintAuthenticationStatus -> {
-                                    if (authStatus.fingerprintCaptureStarted) {
-                                        _visible.value = true
-                                        _animator?.cancel()
-                                        _animator =
-                                            ValueAnimator.ofFloat(0.0f, 1.0f)
-                                                .setDuration(
-                                                    sfpsSensorInteractor.authenticationDuration
-                                                )
-                                                .apply {
-                                                    addUpdateListener {
-                                                        _progress.value = it.animatedValue as Float
-                                                    }
-                                                    addListener(
-                                                        doOnEnd {
-                                                            if (_progress.value == 0.0f) {
-                                                                _visible.value = false
-                                                            }
+                    sfpsSensorInteractor.authenticationDuration
+                        .flatMapLatest { authDuration ->
+                            _animator?.cancel()
+                            mergedFingerprintAuthenticationStatus.map {
+                                authStatus: FingerprintAuthenticationStatus ->
+                                when (authStatus) {
+                                    is AcquiredFingerprintAuthenticationStatus -> {
+                                        if (authStatus.fingerprintCaptureStarted) {
+                                            if (keyguardInteractor.isDozing.value) {
+                                                dozeServiceHost.fireSideFpsAcquisitionStarted()
+                                            } else {
+                                                powerInteractor
+                                                    .wakeUpForSideFingerprintAcquisition()
+                                            }
+                                            _animator?.cancel()
+                                            _animator =
+                                                ValueAnimator.ofFloat(0.0f, 1.0f)
+                                                    .setDuration(authDuration)
+                                                    .apply {
+                                                        addUpdateListener {
+                                                            _progress.value =
+                                                                it.animatedValue as Float
                                                         }
-                                                    )
-                                                }
-                                        _animator?.start()
-                                    } else if (authStatus.fingerprintCaptureCompleted) {
-                                        onFingerprintCaptureCompleted()
-                                    } else {
-                                        // Abandoned FP Auth attempt
-                                        _animator?.reverse()
+                                                        addListener(
+                                                            onEnd = {
+                                                                if (_progress.value == 0.0f) {
+                                                                    _visible.value = false
+                                                                }
+                                                            },
+                                                            onStart = { _visible.value = true },
+                                                            onCancel = { _visible.value = false }
+                                                        )
+                                                    }
+                                            _animator?.start()
+                                        } else if (authStatus.fingerprintCaptureCompleted) {
+                                            onFingerprintCaptureCompleted()
+                                        } else {
+                                            // Abandoned FP Auth attempt
+                                            _animator?.reverse()
+                                        }
                                     }
+                                    is ErrorFingerprintAuthenticationStatus ->
+                                        onFingerprintCaptureCompleted()
+                                    is FailFingerprintAuthenticationStatus ->
+                                        onFingerprintCaptureCompleted()
+                                    is SuccessFingerprintAuthenticationStatus ->
+                                        onFingerprintCaptureCompleted()
+                                    else -> Unit
                                 }
-                                is ErrorFingerprintAuthenticationStatus ->
-                                    onFingerprintCaptureCompleted()
-                                is FailFingerprintAuthenticationStatus ->
-                                    onFingerprintCaptureCompleted()
-                                is SuccessFingerprintAuthenticationStatus ->
-                                    onFingerprintCaptureCompleted()
-                                else -> Unit
                             }
                         }
+                        .flowOn(mainDispatcher)
                         .onCompletion { _animator?.cancel() }
                         .launchIn(applicationScope)
             }

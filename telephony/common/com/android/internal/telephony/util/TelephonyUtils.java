@@ -32,6 +32,8 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Telephony;
+import android.provider.Telephony.Carriers.EditStatus;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
@@ -223,6 +225,23 @@ public final class TelephonyUtils {
             default:
                 return "UNKNOWN(" + mobileDataPolicy + ")";
         }
+    }
+
+    /**
+     * Convert APN edited status to string.
+     *
+     * @param apnEditStatus APN edited status.
+     * @return APN edited status in string format.
+     */
+    public static @NonNull String apnEditedStatusToString(@EditStatus int apnEditStatus) {
+        return switch (apnEditStatus) {
+            case Telephony.Carriers.UNEDITED -> "UNEDITED";
+            case Telephony.Carriers.USER_EDITED -> "USER_EDITED";
+            case Telephony.Carriers.USER_DELETED -> "USER_DELETED";
+            case Telephony.Carriers.CARRIER_EDITED -> "CARRIER_EDITED";
+            case Telephony.Carriers.CARRIER_DELETED -> "CARRIER_DELETED";
+            default -> "UNKNOWN(" + apnEditStatus + ")";
+        };
     }
 
     /**

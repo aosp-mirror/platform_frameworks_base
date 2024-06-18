@@ -26,12 +26,11 @@ import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
-import android.credentials.ui.AuthenticationEntry;
-import android.credentials.ui.Entry;
-import android.credentials.ui.GetCredentialProviderData;
-import android.credentials.ui.ProviderPendingIntentResponse;
+import android.credentials.selection.AuthenticationEntry;
+import android.credentials.selection.Entry;
+import android.credentials.selection.GetCredentialProviderData;
+import android.credentials.selection.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
-import android.service.autofill.Flags;
 import android.service.credentials.Action;
 import android.service.credentials.BeginGetCredentialOption;
 import android.service.credentials.BeginGetCredentialRequest;
@@ -43,7 +42,6 @@ import android.service.credentials.GetCredentialRequest;
 import android.service.credentials.RemoteEntry;
 import android.util.Pair;
 import android.util.Slog;
-import android.view.autofill.AutofillId;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +74,6 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     @NonNull
     private final Map<String, CredentialOption> mBeginGetOptionToCredentialOptionMap;
 
-
     /** The complete request to be used in the second round. */
     private final android.credentials.GetCredentialRequest mCompleteRequest;
     private final CallingAppInfo mCallingAppInfo;
@@ -96,7 +93,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
                         getRequestSession.mClientRequest,
-                        providerInfo);
+                        providerInfo, getRequestSession.mHybridService);
         if (filteredRequest != null) {
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
                     new HashMap<>();
@@ -132,7 +129,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
                         getRequestSession.mClientRequest,
-                        providerInfo);
+                        providerInfo, getRequestSession.mHybridService);
         if (filteredRequest != null) {
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
                     new HashMap<>();
@@ -182,9 +179,19 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     private static android.credentials.GetCredentialRequest filterOptions(
             List<String> providerCapabilities,
             android.credentials.GetCredentialRequest clientRequest,
-            CredentialProviderInfo info
-    ) {
+            CredentialProviderInfo info,
+            String hybridService) {
         Slog.i(TAG, "Filtering request options for: " + info.getComponentName());
+        if (android.credentials.flags.Flags.hybridFilterFixEnabled()) {
+            ComponentName hybridComponentName = ComponentName.unflattenFromString(hybridService);
+            if (hybridComponentName != null && hybridComponentName
+                    .equals(info.getComponentName())) {
+                Slog.i(TAG, "Skipping filtering of options for hybrid service");
+                return clientRequest;
+            }
+            Slog.w(TAG, "Could not parse hybrid service while filtering options");
+        }
+
         List<CredentialOption> filteredOptions = new ArrayList<>();
         for (CredentialOption option : clientRequest.getCredentialOptions()) {
             if (providerCapabilities.contains(option.getType())
@@ -386,12 +393,6 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         if (credentialOption == null) {
             Slog.w(TAG, "Id from Credential Entry does not resolve to a valid option");
             return intent;
-        }
-        AutofillId autofillId = credentialOption
-                .getCandidateQueryData()
-                .getParcelable(CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId.class);
-        if (autofillId != null && Flags.autofillCredmanIntegration()) {
-            intent.putExtra(CredentialProviderService.EXTRA_AUTOFILL_ID, autofillId);
         }
         return intent.putExtra(
                 CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,

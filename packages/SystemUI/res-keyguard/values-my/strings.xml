@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အမြန်အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • နှေးကွေးစွာ အားသွင်းနေသည်"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ဘက်ထရီကာကွယ်ရန် အားသွင်းခြင်းကို အကောင်းဆုံးပြင်ဆင်ထားသည်"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းပစ္စည်းတွင် ပြဿနာရှိသည်"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ဘက်ထရီကို ကာကွယ်ရန် အားသွင်းခြင်းကို ခဏရပ်ထားသည်"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းပစ္စည်းကို စစ်ပါ"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ကွန်ရက်ကို လော့ခ်ချထားသည်"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ဆင်းမ်ကတ် မရှိပါ"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ဆင်းမ်ကတ်ကို သုံး၍မရပါ။"</string>
@@ -108,7 +108,7 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"စက်ကို ပြန်စပြီးနောက် ပုံဖော်ခြင်းလိုအပ်သည်"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"စက်ကို ပြန်စပြီးနောက် ပင်နံပါတ်လိုအပ်သည်"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"စက်ကို ပြန်စပြီးနောက် စကားဝှက်လိုအပ်သည်"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ၎င်းအစား ပုံစံသုံးပါ"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ပုံစံကို အစားထိုးသုံးပါ"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ၎င်းအစား ပင်နံပါတ်သုံးပါ"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ၎င်းအစား စကားဝှက်သုံးပါ"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"စက်ပစ္စည်းကို စီမံခန့်ခွဲသူက လော့ခ်ချထားပါသည်"</string>

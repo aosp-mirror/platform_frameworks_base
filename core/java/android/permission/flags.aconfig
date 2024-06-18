@@ -46,7 +46,8 @@ flag {
 }
 
 flag {
-    name: "enhanced_confirmation_mode_apis"
+    name: "enhanced_confirmation_mode_apis_enabled"
+    is_fixed_read_only: true
     namespace: "permissions"
     description: "enable enhanced confirmation mode apis"
     bug: "310220212"
@@ -67,6 +68,60 @@ flag {
 }
 
 flag {
+    name: "retail_demo_role_enabled"
+    namespace: "permissions"
+    description: "default retail demo role holder"
+    bug: "274132354"
+}
+
+flag {
+    name: "server_side_attribution_registration"
+    namespace: "permissions"
+    description: "controls whether the binder representing an AttributionSource is created in the system server, or client process"
+    bug: "310953959"
+}
+
+flag {
+    name: "wallet_role_enabled"
+    namespace: "wallet_integration"
+    description: "This flag is used to enabled the Wallet Role for all users on the device"
+    bug: "283989236"
+}
+
+flag {
+  name: "signature_permission_allowlist_enabled"
+  is_fixed_read_only: true
+  namespace: "permissions"
+  description: "Enable signature permission allowlist"
+  bug: "308573169"
+}
+
+flag {
+  name: "sensitive_notification_app_protection"
+  namespace: "permissions"
+  description: "This flag controls the sensitive notification app protections while screen sharing"
+  bug: "312784351"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "device_aware_permissions_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "When the flag is off no permissions can be device aware"
+    bug: "274852670"
+}
+
+flag {
+     name: "get_emergency_role_holder_api_enabled"
+     is_fixed_read_only: true
+     namespace: "permissions"
+     description: "Enables the getEmergencyRoleHolder API."
+     bug: "323157319"
+}
+
+flag {
     name: "new_permission_gid_enabled"
     is_fixed_read_only: true
     namespace: "permissions"
@@ -76,3 +131,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "ignore_process_text"
+    namespace: "permissions"
+    description: "Ignore activities that handle PROCESS_TEXT in TextView"
+    bug: "325356776"
+}
+

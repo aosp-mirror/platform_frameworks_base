@@ -16,29 +16,36 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import androidx.core.view.doOnDetach
-import androidx.lifecycle.lifecycleScope
-import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.statusbar.notification.stack.DisplaySwitchNotificationsHiderTracker
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted.Companion.Lazily
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
 /**
  * Binds a [NotificationStackScrollLayoutController] to its [view model][NotificationListViewModel].
  */
 object HideNotificationsBinder {
-    fun bindHideList(
+    fun CoroutineScope.bindHideList(
         viewController: NotificationStackScrollLayoutController,
-        viewModel: NotificationListViewModel
+        viewModel: NotificationListViewModel,
+        hiderTracker: DisplaySwitchNotificationsHiderTracker
     ) {
-        viewController.view.repeatWhenAttached {
-            lifecycleScope.launch {
-                viewModel.hideListViewModel.shouldHideListForPerformance.collect { shouldHide ->
-                    viewController.bindHideState(shouldHide)
-                }
+        viewController.view.doOnDetach { viewController.bindHideState(shouldHide = false) }
+
+        val hideListFlow = viewModel.hideListViewModel.shouldHideListForPerformance
+            .shareIn(this, started = Lazily)
+
+        launch {
+            hideListFlow.collect { shouldHide ->
+                viewController.bindHideState(shouldHide)
             }
         }
 
-        viewController.view.doOnDetach { viewController.bindHideState(shouldHide = false) }
+        launch { hiderTracker.trackNotificationHideTime(hideListFlow) }
+        launch { hiderTracker.trackNotificationHideTimeWhenVisible(hideListFlow) }
     }
 
     private fun NotificationStackScrollLayoutController.bindHideState(shouldHide: Boolean) {

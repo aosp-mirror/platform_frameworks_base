@@ -39,7 +39,6 @@ import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -82,7 +81,7 @@ class QSTileViewModelImpl<DATA_TYPE>(
     private val qsTileLogger: QSTileLogger,
     private val systemClock: SystemClock,
     private val backgroundDispatcher: CoroutineDispatcher,
-    private val tileScope: CoroutineScope = CoroutineScope(SupervisorJob()),
+    private val tileScope: CoroutineScope,
 ) : QSTileViewModel, Dumpable {
 
     private val users: MutableStateFlow<UserHandle> =

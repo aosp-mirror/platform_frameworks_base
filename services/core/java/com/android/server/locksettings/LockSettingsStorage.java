@@ -34,6 +34,7 @@ import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -587,6 +588,10 @@ class LockSettingsStorage {
         return mPersistentDataBlockManagerInternal;
     }
 
+    /**
+     * Writes main user credential handle to the persistent data block, to enable factory reset
+     * protection to be deactivated with the credential.
+     */
     public void writePersistentDataBlock(int persistentType, int userId, int qualityForUi,
             byte[] payload) {
         PersistentDataBlockManagerInternal persistentDataBlock = getPersistentDataBlockManager();
@@ -607,6 +612,31 @@ class LockSettingsStorage {
         } catch (IllegalStateException e) {
             Slog.e(TAG, "Error reading persistent data block", e);
             return PersistentData.NONE;
+        }
+    }
+
+    public void deactivateFactoryResetProtectionWithoutSecret() {
+        PersistentDataBlockManagerInternal persistentDataBlock = getPersistentDataBlockManager();
+        if (persistentDataBlock != null) {
+            persistentDataBlock.deactivateFactoryResetProtectionWithoutSecret();
+        } else {
+            Slog.wtf(TAG, "Failed to get PersistentDataBlockManagerInternal");
+        }
+    }
+
+    public boolean isFactoryResetProtectionActive() {
+        PersistentDataBlockManager persistentDataBlockManager =
+                mContext.getSystemService(PersistentDataBlockManager.class);
+        if (persistentDataBlockManager != null) {
+            return persistentDataBlockManager.isFactoryResetProtectionActive();
+        } else {
+            Slog.wtf(TAG, "Failed to get PersistentDataBlockManager");
+            // This should never happen, but in the event it does, let's not block the user.  This
+            // may be the wrong call, since if an attacker can find a way to prevent us from
+            // getting the PersistentDataBlockManager they can defeat FRP, but if they can block
+            // access to PersistentDataBlockManager they must have compromised the system and we've
+            // probably already lost this battle.
+            return false;
         }
     }
 

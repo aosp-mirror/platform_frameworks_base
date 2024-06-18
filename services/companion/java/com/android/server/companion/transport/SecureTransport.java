@@ -34,7 +34,7 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
 
     private volatile boolean mShouldProcessRequests = false;
 
-    private final BlockingQueue<byte[]> mRequestQueue = new ArrayBlockingQueue<>(100);
+    private final BlockingQueue<byte[]> mRequestQueue = new ArrayBlockingQueue<>(500);
 
     SecureTransport(int associationId, ParcelFileDescriptor fd, Context context) {
         super(associationId, fd, context);
@@ -151,5 +151,13 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
         if (mSecureChannel.isStopped()) {
             close();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "SecureTransport{"
+                + "mAssociationId=" + mAssociationId
+                + ", mSecureChannel=" + mSecureChannel
+                + '}';
     }
 }

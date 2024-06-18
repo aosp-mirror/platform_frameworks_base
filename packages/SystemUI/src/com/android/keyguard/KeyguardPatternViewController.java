@@ -331,6 +331,9 @@ public class KeyguardPatternViewController
             case PROMPT_REASON_TRUSTAGENT_EXPIRED:
                 resId = R.string.kg_prompt_reason_timeout_pattern;
                 break;
+            case PROMPT_REASON_ADAPTIVE_AUTH_REQUEST:
+                resId = R.string.kg_prompt_after_adaptive_auth_lock;
+                break;
             case PROMPT_REASON_NONE:
                 break;
             default:

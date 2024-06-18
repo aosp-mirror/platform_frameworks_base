@@ -520,7 +520,7 @@ final class AppBatteryExemptionTracker
         /**
          * Default value to {@link #mTrackerEnabled}.
          */
-        static final boolean DEFAULT_BG_BATTERY_EXEMPTION_ENABLED = true;
+        static final boolean DEFAULT_BG_BATTERY_EXEMPTION_ENABLED = false;
 
         AppBatteryExemptionPolicy(@NonNull Injector injector,
                 @NonNull AppBatteryExemptionTracker tracker) {

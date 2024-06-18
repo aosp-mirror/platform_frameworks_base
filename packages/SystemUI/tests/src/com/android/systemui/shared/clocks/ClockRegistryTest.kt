@@ -26,6 +26,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.TRANSIT_CLOCK
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
+import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockMetadata
 import com.android.systemui.plugins.clocks.ClockProviderPlugin
 import com.android.systemui.plugins.clocks.ClockSettings
@@ -34,6 +35,8 @@ import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.ThreadAssert
+import java.util.function.BiConsumer
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.fail
 import kotlinx.coroutines.CoroutineDispatcher
@@ -67,6 +70,7 @@ class ClockRegistryTest : SysuiTestCase() {
     @Mock private lateinit var mockDefaultClock: ClockController
     @Mock private lateinit var mockThumbnail: Drawable
     @Mock private lateinit var mockContentResolver: ContentResolver
+    @Mock private lateinit var mockThreadAssert: ThreadAssert
     private lateinit var fakeDefaultProvider: FakeClockPlugin
     private lateinit var pluginListener: PluginListener<ClockProviderPlugin>
     private lateinit var registry: ClockRegistry
@@ -99,10 +103,7 @@ class ClockRegistryTest : SysuiTestCase() {
         override fun toString() = "Manager[$tag]"
         override fun getPackage(): String = mComponentName.getPackageName()
         override fun getComponentName(): ComponentName = mComponentName
-
-        private var isDebug: Boolean = false
-        override fun getIsDebug(): Boolean = isDebug
-        override fun setIsDebug(value: Boolean) { isDebug = value }
+        override fun setLogFunc(func: BiConsumer<String, String>) { }
 
         override fun loadPlugin() {
             if (!mIsLoaded) {
@@ -128,6 +129,7 @@ class ClockRegistryTest : SysuiTestCase() {
         override fun createClock(settings: ClockSettings): ClockController =
             createCallbacks[settings.clockId!!]!!(settings.clockId!!)
         override fun getClockThumbnail(id: ClockId): Drawable? = thumbnailCallbacks[id]!!(id)
+        override fun initialize(buffers: ClockMessageBuffers?) { }
 
         fun addClock(
             id: ClockId,
@@ -163,14 +165,12 @@ class ClockRegistryTest : SysuiTestCase() {
             defaultClockProvider = fakeDefaultProvider,
             keepAllLoaded = false,
             subTag = "Test",
+            assert = mockThreadAssert,
         ) {
             override fun querySettings() { }
             override fun applySettings(value: ClockSettings?) {
                 settings = value
             }
-            // Unit Test does not validate threading
-            override fun assertMainThread() {}
-            override fun assertNotMainThread() {}
         }
         registry.registerListeners()
 

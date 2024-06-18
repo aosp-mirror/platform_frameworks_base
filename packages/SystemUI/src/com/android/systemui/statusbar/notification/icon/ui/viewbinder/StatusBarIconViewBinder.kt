@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import android.graphics.Rect
 import android.view.View
+import com.android.app.tracing.traceSection
 import com.android.internal.util.ContrastColorUtil
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
@@ -33,18 +34,18 @@ object StatusBarIconViewBinder {
     //  view-model (which, at the time of this writing, does not yet exist).
 
     suspend fun bindColor(view: StatusBarIconView, color: Flow<Int>) {
-        color.collect { color ->
+        color.collectTracingEach("SBIV#bindColor") { color ->
             view.staticDrawableColor = color
             view.setDecorColor(color)
         }
     }
 
     suspend fun bindTintAlpha(view: StatusBarIconView, tintAlpha: Flow<Float>) {
-        tintAlpha.collect { amt -> view.setTintAlpha(amt) }
+        tintAlpha.collectTracingEach("SBIV#bindTintAlpha") { amt -> view.setTintAlpha(amt) }
     }
 
     suspend fun bindAnimationsEnabled(view: StatusBarIconView, allowAnimation: Flow<Boolean>) {
-        allowAnimation.collect(view::setAllowAnimation)
+        allowAnimation.collectTracingEach("SBIV#bindAnimationsEnabled", view::setAllowAnimation)
     }
 
     suspend fun bindIconColors(
@@ -52,7 +53,7 @@ object StatusBarIconViewBinder {
         iconColors: Flow<NotificationIconColors>,
         contrastColorUtil: ContrastColorUtil,
     ) {
-        iconColors.collect { colors ->
+        iconColors.collectTracingEach("SBIV#bindIconColors") { colors ->
             val isPreL = java.lang.Boolean.TRUE == view.getTag(R.id.icon_is_pre_L)
             val isColorized = !isPreL || NotificationUtils.isGrayscale(view, contrastColorUtil)
             view.staticDrawableColor =
@@ -73,3 +74,8 @@ private val View.viewBounds: Rect
             /* bottom = */ top + height,
         )
     }
+
+private suspend inline fun <T> Flow<T>.collectTracingEach(
+    tag: String,
+    crossinline collector: (T) -> Unit,
+) = collect { traceSection(tag) { collector(it) } }

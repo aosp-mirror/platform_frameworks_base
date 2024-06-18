@@ -35,6 +35,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
+import com.android.systemui.Flags;
 import com.android.systemui.bluetooth.BluetoothLogger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -240,9 +241,21 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     @WorkerThread
     @Override
     public String getConnectedDeviceName() {
-        synchronized (mConnectedDevices) {
-            if (mConnectedDevices.size() == 1) {
-                return mConnectedDevices.get(0).getName();
+        if (Flags.getConnectedDeviceNameUnsynchronized()) {
+            CachedBluetoothDevice connectedDevice = null;
+            // Calling the getName() API for CachedBluetoothDevice outside the synchronized block
+            // so that the main thread is not blocked.
+            synchronized (mConnectedDevices) {
+                if (mConnectedDevices.size() == 1) {
+                    connectedDevice = mConnectedDevices.get(0);
+                }
+            }
+            return connectedDevice != null ? connectedDevice.getName() : null;
+        } else {
+            synchronized (mConnectedDevices) {
+                if (mConnectedDevices.size() == 1) {
+                    return mConnectedDevices.get(0).getName();
+                }
             }
         }
         return null;
@@ -436,6 +449,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     @Override
     public void onServiceDisconnected() {}
 
+    // IMPORTANT: This handler guarantees that any operations on the list of callbacks is
+    // sequential, so no concurrent exceptions
     private final class H extends Handler {
         private final ArrayList<BluetoothController.Callback> mCallbacks = new ArrayList<>();
 

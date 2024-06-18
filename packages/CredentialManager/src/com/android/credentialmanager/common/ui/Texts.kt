@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
+import com.android.compose.theme.LocalAndroidColorScheme
 
 /**
  * The headline for a screen. E.g. "Create a passkey for X", "Choose a saved sign-in for X".
@@ -37,7 +37,7 @@ fun HeadlineText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurface,
+        color = LocalAndroidColorScheme.current.onSurface,
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.headlineSmall,
     )
@@ -51,7 +51,7 @@ fun BodyMediumText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+        color = LocalAndroidColorScheme.current.onSurfaceVariant,
         style = MaterialTheme.typography.bodyMedium,
     )
 }
@@ -69,7 +69,7 @@ fun BodySmallText(
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+        color = LocalAndroidColorScheme.current.onSurfaceVariant,
         style = MaterialTheme.typography.bodySmall,
         overflow = TextOverflow.Ellipsis,
         maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE,
@@ -85,7 +85,7 @@ fun LargeTitleText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurface,
+        color = LocalAndroidColorScheme.current.onSurface,
         style = MaterialTheme.typography.titleLarge,
     )
 }
@@ -103,7 +103,7 @@ fun SmallTitleText(
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurface,
+        color = LocalAndroidColorScheme.current.onSurface,
         style = MaterialTheme.typography.titleSmall,
         overflow = TextOverflow.Ellipsis,
         maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE,
@@ -159,7 +159,7 @@ fun LargeLabelTextOnSurfaceVariant(text: String, modifier: Modifier = Modifier) 
         modifier = modifier.wrapContentSize(),
         text = text,
         textAlign = TextAlign.Center,
-        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+        color = LocalAndroidColorScheme.current.onSurfaceVariant,
         style = MaterialTheme.typography.labelLarge,
     )
 }

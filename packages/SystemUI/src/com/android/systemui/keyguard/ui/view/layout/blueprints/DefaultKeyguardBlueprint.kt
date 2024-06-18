@@ -31,18 +31,22 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopu
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultUdfpsAccessibilityOverlaySection
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule.Companion.KEYGUARD_AMBIENT_INDICATION_AREA_SECTION
+import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSliceViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.jvm.optionals.getOrNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Positions elements of the lockscreen to the default position.
  *
  * This will be the most common use case for phones in portrait mode.
  */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 @JvmSuppressWildcards
 class DefaultKeyguardBlueprint
@@ -62,6 +66,8 @@ constructor(
     communalTutorialIndicatorSection: CommunalTutorialIndicatorSection,
     clockSection: ClockSection,
     smartspaceSection: SmartspaceSection,
+    keyguardSliceViewSection: KeyguardSliceViewSection,
+    udfpsAccessibilityOverlaySection: DefaultUdfpsAccessibilityOverlaySection,
 ) : KeyguardBlueprint {
     override val id: String = DEFAULT
 
@@ -79,7 +85,9 @@ constructor(
             aodBurnInSection,
             communalTutorialIndicatorSection,
             clockSection,
-            defaultDeviceEntrySection, // Add LAST: Intentionally has z-order above other views.
+            keyguardSliceViewSection,
+            defaultDeviceEntrySection,
+            udfpsAccessibilityOverlaySection, // Add LAST: Intentionally has z-order above others
         )
 
     companion object {

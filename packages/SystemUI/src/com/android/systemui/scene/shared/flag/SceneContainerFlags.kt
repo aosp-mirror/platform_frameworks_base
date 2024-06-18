@@ -14,30 +14,95 @@
  * limitations under the License.
  */
 
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.android.systemui.scene.shared.flag
 
-import android.content.Context
-import androidx.annotation.VisibleForTesting
-import com.android.systemui.Flags as AConfigFlags
+import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
+import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
+import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.Flags.sceneContainer
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flag
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.ReleasedFlag
-import com.android.systemui.flags.ResourceBooleanFlag
-import com.android.systemui.flags.UnreleasedFlag
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
+import com.android.systemui.flags.FlagToken
+import com.android.systemui.flags.Flags.SCENE_CONTAINER_ENABLED
+import com.android.systemui.flags.RefactorFlagUtils
+import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.media.controls.util.MediaInSceneContainerFlag
-import com.android.systemui.res.R
 import dagger.Module
 import dagger.Provides
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+
+/** Helper for reading or using the scene container flag state. */
+object SceneContainerFlag {
+    /** The flag description -- not an aconfig flag name */
+    const val DESCRIPTION = "SceneContainerFlag"
+
+    @JvmStatic
+    inline val isEnabled
+        get() =
+            SCENE_CONTAINER_ENABLED && // mainStaticFlag
+            sceneContainer() && // mainAconfigFlag
+                keyguardBottomAreaRefactor() &&
+                migrateClocksToBlueprint() &&
+                ComposeLockscreen.isEnabled &&
+                MediaInSceneContainerFlag.isEnabled
+    // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
+
+    /**
+     * The main static flag, SCENE_CONTAINER_ENABLED. This is an explicit static flag check that
+     * helps with downstream optimizations (like unused code stripping) in builds where aconfig
+     * flags are still writable. Do not remove!
+     */
+    inline fun getMainStaticFlag() =
+        FlagToken("Flags.SCENE_CONTAINER_ENABLED", SCENE_CONTAINER_ENABLED)
+
+    /** The main aconfig flag. */
+    inline fun getMainAconfigFlag() = FlagToken(FLAG_SCENE_CONTAINER, sceneContainer())
+
+    /** The set of secondary flags which must be enabled for scene container to work properly */
+    inline fun getSecondaryFlags(): Sequence<FlagToken> =
+        sequenceOf(
+            FlagToken(FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR, keyguardBottomAreaRefactor()),
+            FlagToken(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT, migrateClocksToBlueprint()),
+            ComposeLockscreen.token,
+            MediaInSceneContainerFlag.token,
+            // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer
+        )
+
+    /** The full set of requirements for SceneContainer */
+    inline fun getAllRequirements(): Sequence<FlagToken> {
+        return sequenceOf(getMainStaticFlag(), getMainAconfigFlag()) + getSecondaryFlags()
+    }
+
+    /** Return all dependencies of this flag in pairs where [Pair.first] depends on [Pair.second] */
+    inline fun getFlagDependencies(): Sequence<Pair<FlagToken, FlagToken>> {
+        val mainStaticFlag = getMainStaticFlag()
+        val mainAconfigFlag = getMainAconfigFlag()
+        return sequence {
+            // The static and aconfig flags should be equal; make them co-dependent
+            yield(mainAconfigFlag to mainStaticFlag)
+            yield(mainStaticFlag to mainAconfigFlag)
+            // all other flags depend on the static flag for brevity
+        } + getSecondaryFlags().map { mainStaticFlag to it }
+    }
+
+    /**
+     * Called to ensure code is only run when the flag is enabled. This protects users from the
+     * unintended behaviors caused by accidentally running new logic, while also crashing on an eng
+     * build to ensure that the refactor author catches issues in testing.
+     */
+    @JvmStatic
+    inline fun isUnexpectedlyInLegacyMode() =
+        RefactorFlagUtils.isUnexpectedlyInLegacyMode(isEnabled, DESCRIPTION)
+
+    /**
+     * Called to ensure code is only run when the flag is disabled. This will throw an exception if
+     * the flag is enabled to ensure that the refactor author catches issues in testing.
+     */
+    @JvmStatic
+    inline fun assertInLegacyMode() = RefactorFlagUtils.assertInLegacyMode(isEnabled, DESCRIPTION)
+}
 
 /**
  * Defines interface for classes that can check whether the scene container framework feature is
@@ -52,133 +117,25 @@ interface SceneContainerFlags {
     fun requirementDescription(): String
 }
 
-class SceneContainerFlagsImpl
-@AssistedInject
-constructor(
-    @Application private val context: Context,
-    private val featureFlagsClassic: FeatureFlagsClassic,
-    @Assisted private val isComposeAvailable: Boolean,
-) : SceneContainerFlags {
-
-    companion object {
-        @VisibleForTesting
-        val classicFlagTokens: List<Flag<Boolean>> =
-            listOf(
-                Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW,
-            )
-    }
-
-    /** The list of requirements, all must be met for the feature to be enabled. */
-    private val requirements =
-        listOf(
-            AconfigFlagMustBeEnabled(
-                flagName = AConfigFlags.FLAG_SCENE_CONTAINER,
-                flagValue = sceneContainer(),
-            ),
-            AconfigFlagMustBeEnabled(
-                flagName = AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
-                flagValue = keyguardBottomAreaRefactor(),
-            ),
-            AconfigFlagMustBeEnabled(
-                flagName = KeyguardShadeMigrationNssl.FLAG_NAME,
-                flagValue = KeyguardShadeMigrationNssl.isEnabled,
-            ),
-            AconfigFlagMustBeEnabled(
-                flagName = MediaInSceneContainerFlag.FLAG_NAME,
-                flagValue = MediaInSceneContainerFlag.isEnabled,
-            ),
-        ) +
-            classicFlagTokens.map { flagToken -> FlagMustBeEnabled(flagToken) } +
-            listOf(
-                ComposeMustBeAvailable(),
-                CompileTimeFlagMustBeEnabled(),
-                ResourceConfigMustBeEnabled()
-            )
+class SceneContainerFlagsImpl : SceneContainerFlags {
 
     override fun isEnabled(): Boolean {
-        // SCENE_CONTAINER_ENABLED is an explicit static flag check that helps with downstream
-        // optimizations, e.g., unused code stripping. Do not remove!
-        return Flags.SCENE_CONTAINER_ENABLED && requirements.all { it.isMet() }
+        return SceneContainerFlag.isEnabled
     }
 
     override fun requirementDescription(): String {
         return buildString {
-            requirements.forEach { requirement ->
+            SceneContainerFlag.getAllRequirements().forEach { requirement ->
                 append('\n')
-                append(if (requirement.isMet()) "    [MET]" else "[NOT MET]")
+                append(if (requirement.isEnabled) "    [MET]" else "[NOT MET]")
                 append(" ${requirement.name}")
             }
         }
-    }
-
-    private interface Requirement {
-        val name: String
-
-        fun isMet(): Boolean
-    }
-
-    private inner class ComposeMustBeAvailable : Requirement {
-        override val name = "Jetpack Compose must be available"
-
-        override fun isMet(): Boolean {
-            return isComposeAvailable
-        }
-    }
-
-    private inner class CompileTimeFlagMustBeEnabled : Requirement {
-        override val name = "Flags.SCENE_CONTAINER_ENABLED must be enabled in code"
-
-        override fun isMet(): Boolean {
-            return Flags.SCENE_CONTAINER_ENABLED
-        }
-    }
-
-    private inner class FlagMustBeEnabled<FlagType : Flag<*>>(
-        private val flag: FlagType,
-    ) : Requirement {
-        override val name = "Flag ${flag.name} must be enabled"
-
-        override fun isMet(): Boolean {
-            return when (flag) {
-                is ResourceBooleanFlag -> featureFlagsClassic.isEnabled(flag)
-                is ReleasedFlag -> featureFlagsClassic.isEnabled(flag)
-                is UnreleasedFlag -> featureFlagsClassic.isEnabled(flag)
-                else -> error("Unsupported flag type ${flag.javaClass}")
-            }
-        }
-    }
-
-    private inner class AconfigFlagMustBeEnabled(
-        flagName: String,
-        private val flagValue: Boolean,
-    ) : Requirement {
-        override val name: String = "Aconfig flag $flagName must be enabled"
-
-        override fun isMet(): Boolean {
-            return flagValue
-        }
-    }
-
-    private inner class ResourceConfigMustBeEnabled : Requirement {
-        override val name: String = "R.bool.config_sceneContainerFrameworkEnabled must be true"
-
-        override fun isMet(): Boolean {
-            return context.resources.getBoolean(R.bool.config_sceneContainerFrameworkEnabled)
-        }
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(isComposeAvailable: Boolean): SceneContainerFlagsImpl
     }
 }
 
 @Module
 object SceneContainerFlagsModule {
 
-    @Provides
-    @SysUISingleton
-    fun impl(factory: SceneContainerFlagsImpl.Factory): SceneContainerFlags {
-        return factory.create(ComposeFacade.isComposeAvailable())
-    }
+    @Provides @SysUISingleton fun impl(): SceneContainerFlags = SceneContainerFlagsImpl()
 }

@@ -28,13 +28,16 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.phone.statusBarKeyguardViewManager
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.Mockito.verify
 
 @ExperimentalCoroutinesApi
 @RunWith(JUnit4::class)
@@ -47,9 +50,24 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
     private val underTest = kosmos.alternateBouncerViewModel
 
     @Test
+    fun showPrimaryBouncer() =
+        testScope.runTest {
+            underTest.showPrimaryBouncer()
+            verify(statusBarKeyguardViewManager).showPrimaryBouncer(any())
+        }
+
+    @Test
+    fun hideAlternateBouncer() =
+        testScope.runTest {
+            underTest.hideAlternateBouncer()
+            verify(statusBarKeyguardViewManager).hideAlternateBouncer(any())
+        }
+
+    @Test
     fun transitionToAlternateBouncer_scrimAlphaUpdate() =
         testScope.runTest {
             val scrimAlphas by collectValues(underTest.scrimAlpha)
+            runCurrent()
 
             transitionRepository.sendTransitionSteps(
                 listOf(
@@ -69,17 +87,17 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
     fun transitionFromAlternateBouncer_scrimAlphaUpdate() =
         testScope.runTest {
             val scrimAlphas by collectValues(underTest.scrimAlpha)
+            runCurrent()
 
             transitionRepository.sendTransitionSteps(
                 listOf(
-                    stepToAlternateBouncer(0f, TransitionState.STARTED),
-                    stepToAlternateBouncer(.4f),
-                    stepToAlternateBouncer(.6f),
-                    stepToAlternateBouncer(1f),
+                    stepFromAlternateBouncer(0f, TransitionState.STARTED),
+                    stepFromAlternateBouncer(.4f),
+                    stepFromAlternateBouncer(.6f),
+                    stepFromAlternateBouncer(1f),
                 ),
                 testScope,
             )
-
             assertThat(scrimAlphas.size).isEqualTo(4)
             scrimAlphas.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
         }

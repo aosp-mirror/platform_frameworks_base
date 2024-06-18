@@ -37,17 +37,7 @@ public class BubbleDebugConfig {
 
     // Default log tag for the Bubbles package.
     public static final String TAG_BUBBLES = "Bubbles";
-
-    static final boolean DEBUG_BUBBLE_CONTROLLER = false;
-    static final boolean DEBUG_BUBBLE_DATA = false;
-    static final boolean DEBUG_BUBBLE_STACK_VIEW = false;
-    static final boolean DEBUG_BUBBLE_EXPANDED_VIEW = false;
-    static final boolean DEBUG_EXPERIMENTS = true;
-    static final boolean DEBUG_OVERFLOW = false;
     public static final boolean DEBUG_USER_EDUCATION = false;
-    static final boolean DEBUG_POSITIONER = false;
-    public static final boolean DEBUG_COLLAPSE_ANIMATOR = false;
-    public static boolean DEBUG_EXPANDED_VIEW_DRAGGING = false;
 
     private static final boolean FORCE_SHOW_USER_EDUCATION = false;
     private static final String FORCE_SHOW_USER_EDUCATION_SETTING =

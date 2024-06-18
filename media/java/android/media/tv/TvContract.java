@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,6 +30,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.media.tv.flags.Flags;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -2540,9 +2542,9 @@ public final class TvContract {
          * <p>This is used to indicate the broadcast visibility type defined in the underlying
          * broadcast standard or country/operator profile, if applicable. For example,
          * {@code visible_service_flag} and {@code numeric_selection_flag} of
-         * {@code service_attribute_descriptor} in D-Book, {@code visible_service_flag} and
-         * {@code selectable_service_flag} of {@code ciplus_service_descriptor} in CI Plus 1.3
-         * specification.
+         * {@code service_attribute_descriptor} in D-Book, the specification for UK-based TV
+         * products, {@code visible_service_flag} and {@code selectable_service_flag} of
+         * {@code ciplus_service_descriptor} in the CI Plus 1.3 specification.
          *
          * <p>The value should match one of the following:
          * {@link #BROADCAST_VISIBILITY_TYPE_VISIBLE},
@@ -2553,8 +2555,8 @@ public final class TvContract {
          * by default.
          *
          * <p>Type: INTEGER
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_BROADCAST_VISIBILITY_TYPES)
         public static final String COLUMN_BROADCAST_VISIBILITY_TYPE = "broadcast_visibility_type";
 
         /** @hide */
@@ -2571,8 +2573,8 @@ public final class TvContract {
          * visible from users and selectable by users via normal service navigation mechanisms.
          *
          * @see #COLUMN_BROADCAST_VISIBILITY_TYPE
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_BROADCAST_VISIBILITY_TYPES)
         public static final int BROADCAST_VISIBILITY_TYPE_VISIBLE = 0;
 
         /**
@@ -2581,18 +2583,18 @@ public final class TvContract {
          * the logical channel number.
          *
          * @see #COLUMN_BROADCAST_VISIBILITY_TYPE
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_BROADCAST_VISIBILITY_TYPES)
         public static final int BROADCAST_VISIBILITY_TYPE_NUMERIC_SELECTABLE_ONLY = 1;
 
         /**
          * The broadcast visibility type for invisible services. Use this type when the service
-         * is invisible from users and unselectable by users via any of normal service navigation
-         * mechanisms.
+         * is invisible from users and not able to be selected by users via any of the normal
+         * service navigation mechanisms.
          *
          * @see #COLUMN_BROADCAST_VISIBILITY_TYPE
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_BROADCAST_VISIBILITY_TYPES)
         public static final int BROADCAST_VISIBILITY_TYPE_INVISIBLE = 2;
 
         private Channels() {}

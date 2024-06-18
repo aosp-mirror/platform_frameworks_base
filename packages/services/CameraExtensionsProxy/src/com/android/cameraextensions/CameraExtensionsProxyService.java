@@ -59,6 +59,7 @@ import android.hardware.camera2.extension.Request;
 import android.hardware.camera2.extension.SizeList;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
+import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Binder;
@@ -119,6 +120,7 @@ import com.android.internal.camera.flags.Flags;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,7 +133,7 @@ public class CameraExtensionsProxyService extends Service {
 
     private static final String CAMERA_EXTENSION_VERSION_NAME =
             "androidx.camera.extensions.impl.ExtensionVersionImpl";
-    private static final String LATEST_VERSION = "1.4.0";
+    private static final String LATEST_VERSION = "1.5.0";
     // No support for the init sequence
     private static final String NON_INIT_VERSION_PREFIX = "1.0";
     // Support advanced API and latency queries
@@ -141,11 +143,13 @@ public class CameraExtensionsProxyService extends Service {
     // Support for various latency improvements
     private static final String LATENCY_VERSION_PREFIX = "1.4";
     private static final String EFV_VERSION_PREFIX = "1.5";
+    private static final String GET_VERSION_PREFIX = "1.5";
     private static final String[] ADVANCED_VERSION_PREFIXES = {EFV_VERSION_PREFIX,
-            LATENCY_VERSION_PREFIX, ADVANCED_VERSION_PREFIX, RESULTS_VERSION_PREFIX };
+            LATENCY_VERSION_PREFIX, ADVANCED_VERSION_PREFIX, RESULTS_VERSION_PREFIX,
+            GET_VERSION_PREFIX};
     private static final String[] SUPPORTED_VERSION_PREFIXES = {EFV_VERSION_PREFIX,
             LATENCY_VERSION_PREFIX, RESULTS_VERSION_PREFIX, ADVANCED_VERSION_PREFIX, "1.1",
-            NON_INIT_VERSION_PREFIX};
+            NON_INIT_VERSION_PREFIX, GET_VERSION_PREFIX};
     private static final boolean EXTENSIONS_PRESENT = checkForExtensions();
     private static final String EXTENSIONS_VERSION = EXTENSIONS_PRESENT ?
             (new ExtensionVersionImpl()).checkApiVersion(LATEST_VERSION) : null;
@@ -155,6 +159,8 @@ public class CameraExtensionsProxyService extends Service {
                     (EXTENSIONS_VERSION.startsWith(EFV_VERSION_PREFIX)));
     private static final boolean EFV_SUPPORTED = EXTENSIONS_PRESENT &&
             (EXTENSIONS_VERSION.startsWith(EFV_VERSION_PREFIX));
+    private static final boolean GET_API_SUPPORTED = EXTENSIONS_PRESENT
+            && (EXTENSIONS_VERSION.startsWith(GET_VERSION_PREFIX));
     private static final boolean ADVANCED_API_SUPPORTED = checkForAdvancedAPI();
     private static final boolean INIT_API_SUPPORTED = EXTENSIONS_PRESENT &&
             (!EXTENSIONS_VERSION.startsWith(NON_INIT_VERSION_PREFIX));
@@ -776,6 +782,12 @@ public class CameraExtensionsProxyService extends Service {
                         public boolean isPostviewAvailable() {
                             return false;
                         }
+
+                        @Override
+                        public List<Pair<CameraCharacteristics.Key, Object>>
+                                getAvailableCharacteristicsKeyValues() {
+                            return Collections.emptyList();
+                        }
                     };
                 }
             }
@@ -1185,6 +1197,38 @@ public class CameraExtensionsProxyService extends Service {
 
             return false;
         }
+
+        @Override
+        public CameraMetadataNative getAvailableCharacteristicsKeyValues(String cameraId) {
+            if (GET_API_SUPPORTED) {
+                List<Pair<CameraCharacteristics.Key, Object>> entries =
+                        mAdvancedExtender.getAvailableCharacteristicsKeyValues();
+
+                if (entries == null || entries.isEmpty()) {
+                    throw new RuntimeException("A valid set of key/value pairs are required that "
+                            + "are supported by the extension.");
+                }
+
+                CameraMetadataNative ret = new CameraMetadataNative();
+                long vendorId = mMetadataVendorIdMap.containsKey(cameraId)
+                        ? mMetadataVendorIdMap.get(cameraId) : Long.MAX_VALUE;
+                ret.setVendorId(vendorId);
+                int[] characteristicsKeyTags = new int[entries.size()];
+                int i = 0;
+                for (Pair<CameraCharacteristics.Key, Object> entry : entries) {
+                    int tag = CameraMetadataNative.getTag(entry.first.getName(), vendorId);
+                    characteristicsKeyTags[i++] = tag;
+                    ret.set(entry.first, entry.second);
+                }
+                ret.set(CameraCharacteristics.REQUEST_AVAILABLE_CHARACTERISTICS_KEYS,
+                        characteristicsKeyTags);
+
+                return ret;
+            }
+
+            return null;
+        }
+
     }
 
     private class CaptureCallbackStub implements SessionProcessorImpl.CaptureCallback {
@@ -1228,6 +1272,20 @@ public class CameraExtensionsProxyService extends Service {
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to notify capture failure due to remote " +
                             "exception!");
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureFailed(int captureSequenceId, int reason) {
+            if (Flags.concertMode()) {
+                if (mCaptureCallback != null) {
+                    try {
+                        mCaptureCallback.onCaptureProcessFailed(captureSequenceId, reason);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Failed to notify capture failure due to remote " +
+                                "exception!");
+                    }
                 }
             }
         }
@@ -1691,11 +1749,20 @@ public class CameraExtensionsProxyService extends Service {
         private final Surface mSurface;
         private final Size mSize;
         private final int mImageFormat;
+        private final int mDataspace;
+        private final long mUsage;
 
         public OutputSurfaceImplStub(OutputSurface outputSurface) {
             mSurface = outputSurface.surface;
             mSize = new Size(outputSurface.size.width, outputSurface.size.height);
             mImageFormat = outputSurface.imageFormat;
+            if (mSurface != null) {
+                mDataspace = SurfaceUtils.getSurfaceDataspace(mSurface);
+                mUsage = SurfaceUtils.getSurfaceUsage(mSurface);
+            } else {
+                mDataspace = -1;
+                mUsage = 0;
+            }
         }
 
         @Override
@@ -1711,6 +1778,16 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public int getImageFormat() {
             return mImageFormat;
+        }
+
+        @Override
+        public int getDataspace() {
+            return mDataspace;
+        }
+
+        @Override
+        public long getUsage() {
+            return mUsage;
         }
     }
 
@@ -2459,6 +2536,11 @@ public class CameraExtensionsProxyService extends Service {
             ret.size.height = imageReaderOutputConfig.getSize().getHeight();
             ret.imageFormat = imageReaderOutputConfig.getImageFormat();
             ret.capacity = imageReaderOutputConfig.getMaxImages();
+            if (EFV_SUPPORTED) {
+                ret.usage = imageReaderOutputConfig.getUsage();
+            } else {
+                ret.usage = 0;
+            }
         } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
             MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
                     (MultiResolutionImageReaderOutputConfigImpl) output;

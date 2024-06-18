@@ -31,19 +31,23 @@ android_library {
         "src/**/*.aidl",
     ],
     static_libs: [
+        "PlatformAnimationLib",
         "PluginCoreLib",
-        "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUIUnfoldLib",
-        "androidx.dynamicanimation_dynamicanimation",
+        "kotlinx_coroutines",
+        "dagger2",
+        "jsr330",
+    ],
+    libs: [
+        // Keep android-specific libraries as libs instead of static_libs, so that they don't break
+        // things when included as transitive dependencies in robolectric targets.
         "androidx.concurrent_concurrent-futures",
+        "androidx.dynamicanimation_dynamicanimation",
         "androidx.lifecycle_lifecycle-runtime-ktx",
         "androidx.lifecycle_lifecycle-viewmodel-ktx",
         "androidx.recyclerview_recyclerview",
         "kotlinx_coroutines_android",
-        "kotlinx_coroutines",
-        "dagger2",
-        "jsr330",
     ],
     resource_dirs: [
         "res",

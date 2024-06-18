@@ -24,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.LEFT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
+import androidx.constraintlayout.widget.ConstraintSet.VISIBILITY_MODE_IGNORE
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
@@ -96,6 +97,11 @@ constructor(
             constrainHeight(R.id.end_button, height)
             connect(R.id.end_button, RIGHT, PARENT_ID, RIGHT, horizontalOffsetMargin)
             connect(R.id.end_button, BOTTOM, PARENT_ID, BOTTOM, verticalOffsetMargin)
+
+            // The constraint set visibility for start and end button are default visible, set to
+            // ignore so the view's own initial visibility (invisible) is used
+            setVisibilityMode(R.id.start_button, VISIBILITY_MODE_IGNORE)
+            setVisibilityMode(R.id.end_button, VISIBILITY_MODE_IGNORE)
         }
     }
 }

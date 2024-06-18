@@ -29,6 +29,7 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.multiuser.Flags;
 import android.os.Build;
 import android.os.PatternMatcher;
 import android.util.Slog;
@@ -126,6 +127,10 @@ public class ParsedProviderUtils {
                     .setFlags(provider.getFlags() | flag(ProviderInfo.FLAG_SINGLE_USER,
                             R.styleable.AndroidManifestProvider_singleUser, sa));
 
+            if (Flags.enableSystemUserOnlyForServicesAndProviders()) {
+                provider.setFlags(provider.getFlags() | flag(ProviderInfo.FLAG_SYSTEM_USER_ONLY,
+                        R.styleable.AndroidManifestProvider_systemUserOnly, sa));
+            }
             visibleToEphemeral = sa.getBoolean(
                     R.styleable.AndroidManifestProvider_visibleToInstantApps, false);
             if (visibleToEphemeral) {

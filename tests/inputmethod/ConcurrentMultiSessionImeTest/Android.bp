@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_input_method_framework",
     default_applicable_licenses: ["frameworks_base_license"],
 }
 

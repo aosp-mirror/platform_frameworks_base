@@ -25,6 +25,7 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
 import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Flags;
 import android.app.KeyguardManager;
@@ -167,7 +168,7 @@ public final class NotificationRecord {
     private boolean mPreChannelsNotification = true;
     private Uri mSound;
     private VibrationEffect mVibration;
-    private AudioAttributes mAttributes;
+    private @NonNull AudioAttributes mAttributes;
     private NotificationChannel mChannel;
     private ArrayList<String> mPeopleOverride;
     private ArrayList<SnoozeCriterion> mSnoozeCriteria;
@@ -307,34 +308,46 @@ public final class NotificationRecord {
         return light;
     }
 
+    private VibrationEffect getVibrationForChannel(
+            NotificationChannel channel, VibratorHelper helper, boolean insistent) {
+        if (!channel.shouldVibrate()) {
+            return null;
+        }
+
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            final VibrationEffect vibration = channel.getVibrationEffect();
+            if (vibration != null && helper.areEffectComponentsSupported(vibration)) {
+                // Adjust the vibration's repeat behavior based on the `insistent` property.
+                return vibration.applyRepeatingIndefinitely(insistent, /* loopDelayMs= */ 0);
+            }
+        }
+
+        final long[] vibrationPattern = channel.getVibrationPattern();
+        if (vibrationPattern == null) {
+            return helper.createDefaultVibration(insistent);
+        }
+        return helper.createWaveformVibration(vibrationPattern, insistent);
+    }
+
     private VibrationEffect calculateVibration() {
         VibratorHelper helper = new VibratorHelper(mContext);
         final Notification notification = getSbn().getNotification();
         final boolean insistent = (notification.flags & Notification.FLAG_INSISTENT) != 0;
-        VibrationEffect defaultVibration = helper.createDefaultVibration(insistent);
-        VibrationEffect vibration;
-        if (getChannel().shouldVibrate()) {
-            vibration = getChannel().getVibrationPattern() == null
-                    ? defaultVibration
-                    : helper.createWaveformVibration(getChannel().getVibrationPattern(), insistent);
-        } else {
-            vibration = null;
-        }
+
         if (mPreChannelsNotification
                 && (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_VIBRATION) == 0) {
             final boolean useDefaultVibrate =
                     (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
             if (useDefaultVibrate) {
-                vibration = defaultVibration;
-            } else {
-                vibration = helper.createWaveformVibration(notification.vibrate, insistent);
+                return helper.createDefaultVibration(insistent);
             }
+            return  helper.createWaveformVibration(notification.vibrate, insistent);
         }
-        return vibration;
+        return getVibrationForChannel(getChannel(), helper, insistent);
     }
 
-    private AudioAttributes calculateAttributes() {
+    private @NonNull AudioAttributes calculateAttributes() {
         final Notification n = getSbn().getNotification();
         AudioAttributes attributes = getChannel().getAudioAttributes();
         if (attributes == null) {
@@ -1003,7 +1016,7 @@ public final class NotificationRecord {
     }
 
     public boolean isAudioAttributesUsage(int usage) {
-        return mAttributes != null && mAttributes.getUsage() == usage;
+        return mAttributes.getUsage() == usage;
     }
 
     /**
@@ -1172,7 +1185,7 @@ public final class NotificationRecord {
         return mVibration;
     }
 
-    public AudioAttributes getAudioAttributes() {
+    public @NonNull AudioAttributes getAudioAttributes() {
         return mAttributes;
     }
 

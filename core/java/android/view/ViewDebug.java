@@ -7,7 +7,7 @@
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * Unless required by applicable law or agreed to in writing, softwareViewDebug
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -15,6 +15,8 @@
  */
 
 package android.view;
+
+import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,9 +36,12 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import libcore.util.HexEncoding;
 
@@ -54,9 +59,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -67,7 +74,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -76,6 +82,9 @@ import java.util.stream.Stream;
  * Various debugging/tracing tools related to {@link View} and the view hierarchy.
  */
 public class ViewDebug {
+
+    private static final String TAG = "ViewDebug";
+
     /**
      * @deprecated This flag is now unused
      */
@@ -425,6 +434,7 @@ public class ViewDebug {
     private static final String REMOTE_PROFILE = "PROFILE";
     private static final String REMOTE_COMMAND_CAPTURE_LAYERS = "CAPTURE_LAYERS";
     private static final String REMOTE_COMMAND_OUTPUT_DISPLAYLIST = "OUTPUT_DISPLAYLIST";
+    private static final String REMOTE_COMMAND_INVOKE_METHOD = "INVOKE_METHOD";
 
     private static HashMap<Class<?>, PropertyInfo<ExportedProperty, ?>[]> sExportProperties;
     private static HashMap<Class<?>, PropertyInfo<CapturedViewProperty, ?>[]>
@@ -555,6 +565,8 @@ public class ViewDebug {
                 requestLayout(view, params[0]);
             } else if (REMOTE_PROFILE.equalsIgnoreCase(command)) {
                 profile(view, clientStream, params[0]);
+            } else if (REMOTE_COMMAND_INVOKE_METHOD.equals(command)) {
+                invokeViewMethod(view, clientStream, params);
             }
         }
     }
@@ -1825,46 +1837,84 @@ public class ViewDebug {
         Log.d(tag, sb.toString());
     }
 
+    private static void invokeViewMethod(View root, OutputStream clientStream, String[] params)
+            throws IOException {
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(clientStream), 32 * 1024);
+        try {
+            if (params.length < 2) {
+                throw new IllegalArgumentException("Missing parameter");
+            }
+            View targetView = findView(root, params[0]);
+            if (targetView == null) {
+                throw new IllegalArgumentException("View not found: " + params[0]);
+            }
+            String method = params[1];
+            ByteBuffer args = ByteBuffer.wrap(params.length < 2
+                    ? new byte[0]
+                    : Base64.decode(params[2], Base64.NO_WRAP));
+            byte[] result = invokeViewMethod(targetView, method, args);
+            out.write("1");
+            out.newLine();
+            out.write(Base64.encodeToString(result, Base64.NO_WRAP));
+            out.newLine();
+        } catch (Exception e) {
+            out.write("-1");
+            out.newLine();
+            out.write(e.getMessage());
+            out.newLine();
+        } finally {
+            out.close();
+        }
+    }
+
     /**
      * Invoke a particular method on given view.
      * The given method is always invoked on the UI thread. The caller thread will stall until the
      * method invocation is complete. Returns an object equal to the result of the method
      * invocation, null if the method is declared to return void
+     * @param params all the method parameters encoded in a byteArray
      * @throws Exception if the method invocation caused any exception
      * @hide
      */
-    public static Object invokeViewMethod(final View view, final Method method,
-            final Object[] args) {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final AtomicReference<Object> result = new AtomicReference<Object>();
-        final AtomicReference<Throwable> exception = new AtomicReference<Throwable>();
+    public static byte[] invokeViewMethod(View targetView, String methodName, ByteBuffer params)
+            throws ViewMethodInvocationSerializationException {
+        Class<?>[] argTypes;
+        Object[] args;
+        if (!params.hasRemaining()) {
+            argTypes = new Class<?>[0];
+            args = new Object[0];
+        } else {
+            int nArgs = params.getInt();
+            argTypes = new Class<?>[nArgs];
+            args = new Object[nArgs];
 
-        view.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    result.set(method.invoke(view, args));
-                } catch (InvocationTargetException e) {
-                    exception.set(e.getCause());
-                } catch (Exception e) {
-                    exception.set(e);
-                }
+            deserializeMethodParameters(args, argTypes, params);
+        }
 
-                latch.countDown();
-            }
-        });
+        Method method;
+        try {
+            method = targetView.getClass().getMethod(methodName, argTypes);
+        } catch (NoSuchMethodException e) {
+            Log.e(TAG, "No such method: " + e.getMessage());
+            throw new ViewMethodInvocationSerializationException(
+                    "No such method: " + e.getMessage());
+        }
 
         try {
-            latch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            // Invoke the method on Views handler
+            FutureTask<Object> task = new FutureTask<>(() -> method.invoke(targetView, args));
+            targetView.post(task);
+            Object result = task.get();
+            Class<?> returnType = method.getReturnType();
+            return serializeReturnValue(returnType, returnType.cast(result));
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while invoking method: " + e.getCause().getMessage());
+            String msg = e.getCause().getMessage();
+            if (msg == null) {
+                msg = e.getCause().toString();
+            }
+            throw new RuntimeException(msg);
         }
-
-        if (exception.get() != null) {
-            throw new RuntimeException(exception.get());
-        }
-
-        return result.get();
     }
 
     /**
@@ -1960,5 +2010,176 @@ public class ViewDebug {
          * @return
          */
         Bitmap createBitmap();
+    }
+
+    /**
+     * Deserializes parameters according to the VUOP_INVOKE_VIEW_METHOD protocol the {@code in}
+     * buffer.
+     *
+     * The length of {@code args} determines how many arguments are read. The {@code argTypes} must
+     * be the same length, and will be set to the argument types of the data read.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static void deserializeMethodParameters(
+            Object[] args, Class<?>[] argTypes, ByteBuffer in) throws
+            ViewMethodInvocationSerializationException {
+        checkArgument(args.length == argTypes.length);
+
+        for (int i = 0; i < args.length; i++) {
+            char typeSignature = in.getChar();
+            boolean isArray = typeSignature == SIG_ARRAY;
+            if (isArray) {
+                char arrayType = in.getChar();
+                if (arrayType != SIG_BYTE) {
+                    // This implementation only supports byte-arrays for now.
+                    throw new ViewMethodInvocationSerializationException(
+                            "Unsupported array parameter type (" + typeSignature
+                                    + ") to invoke view method @argument " + i);
+                }
+
+                int arrayLength = in.getInt();
+                if (arrayLength > in.remaining()) {
+                    // The sender did not actually sent the specified amount of bytes. This
+                    // avoids a malformed packet to trigger an out-of-memory error.
+                    throw new BufferUnderflowException();
+                }
+
+                byte[] byteArray = new byte[arrayLength];
+                in.get(byteArray);
+
+                argTypes[i] = byte[].class;
+                args[i] = byteArray;
+            } else {
+                switch (typeSignature) {
+                    case SIG_BOOLEAN:
+                        argTypes[i] = boolean.class;
+                        args[i] = in.get() != 0;
+                        break;
+                    case SIG_BYTE:
+                        argTypes[i] = byte.class;
+                        args[i] = in.get();
+                        break;
+                    case SIG_CHAR:
+                        argTypes[i] = char.class;
+                        args[i] = in.getChar();
+                        break;
+                    case SIG_SHORT:
+                        argTypes[i] = short.class;
+                        args[i] = in.getShort();
+                        break;
+                    case SIG_INT:
+                        argTypes[i] = int.class;
+                        args[i] = in.getInt();
+                        break;
+                    case SIG_LONG:
+                        argTypes[i] = long.class;
+                        args[i] = in.getLong();
+                        break;
+                    case SIG_FLOAT:
+                        argTypes[i] = float.class;
+                        args[i] = in.getFloat();
+                        break;
+                    case SIG_DOUBLE:
+                        argTypes[i] = double.class;
+                        args[i] = in.getDouble();
+                        break;
+                    case SIG_STRING: {
+                        argTypes[i] = String.class;
+                        int stringUtf8ByteCount = Short.toUnsignedInt(in.getShort());
+                        byte[] rawStringBuffer = new byte[stringUtf8ByteCount];
+                        in.get(rawStringBuffer);
+                        args[i] = new String(rawStringBuffer, StandardCharsets.UTF_8);
+                        break;
+                    }
+                    default:
+                        Log.e(TAG, "arg " + i + ", unrecognized type: " + typeSignature);
+                        throw new ViewMethodInvocationSerializationException(
+                                "Unsupported parameter type (" + typeSignature
+                                        + ") to invoke view method.");
+                }
+            }
+
+        }
+    }
+
+    /**
+     * Serializes {@code value} to the wire protocol of VUOP_INVOKE_VIEW_METHOD.
+     * @hide
+     */
+    @VisibleForTesting
+    public static byte[] serializeReturnValue(Class<?> type, Object value)
+            throws ViewMethodInvocationSerializationException, IOException {
+        ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream(1024);
+        DataOutputStream dos = new DataOutputStream(byteOutStream);
+
+        if (type.isArray()) {
+            if (!type.equals(byte[].class)) {
+                // Only byte arrays are supported currently.
+                throw new ViewMethodInvocationSerializationException(
+                        "Unsupported array return type (" + type + ")");
+            }
+            byte[] byteArray = (byte[]) value;
+            dos.writeChar(SIG_ARRAY);
+            dos.writeChar(SIG_BYTE);
+            dos.writeInt(byteArray.length);
+            dos.write(byteArray);
+        } else if (boolean.class.equals(type)) {
+            dos.writeChar(SIG_BOOLEAN);
+            dos.write((boolean) value ? 1 : 0);
+        } else if (byte.class.equals(type)) {
+            dos.writeChar(SIG_BYTE);
+            dos.writeByte((byte) value);
+        } else if (char.class.equals(type)) {
+            dos.writeChar(SIG_CHAR);
+            dos.writeChar((char) value);
+        } else if (short.class.equals(type)) {
+            dos.writeChar(SIG_SHORT);
+            dos.writeShort((short) value);
+        } else if (int.class.equals(type)) {
+            dos.writeChar(SIG_INT);
+            dos.writeInt((int) value);
+        } else if (long.class.equals(type)) {
+            dos.writeChar(SIG_LONG);
+            dos.writeLong((long) value);
+        } else if (double.class.equals(type)) {
+            dos.writeChar(SIG_DOUBLE);
+            dos.writeDouble((double) value);
+        } else if (float.class.equals(type)) {
+            dos.writeChar(SIG_FLOAT);
+            dos.writeFloat((float) value);
+        } else if (String.class.equals(type)) {
+            dos.writeChar(SIG_STRING);
+            dos.writeUTF(value != null ? (String) value : "");
+        } else {
+            dos.writeChar(SIG_VOID);
+        }
+
+        return byteOutStream.toByteArray();
+    }
+
+    // Prefixes for simple primitives. These match the JNI definitions.
+    private static final char SIG_ARRAY = '[';
+    private static final char SIG_BOOLEAN = 'Z';
+    private static final char SIG_BYTE = 'B';
+    private static final char SIG_SHORT = 'S';
+    private static final char SIG_CHAR = 'C';
+    private static final char SIG_INT = 'I';
+    private static final char SIG_LONG = 'J';
+    private static final char SIG_FLOAT = 'F';
+    private static final char SIG_DOUBLE = 'D';
+    private static final char SIG_VOID = 'V';
+    // Prefixes for some commonly used objects
+    private static final char SIG_STRING = 'R';
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public static class ViewMethodInvocationSerializationException extends Exception {
+        ViewMethodInvocationSerializationException(String message) {
+            super(message);
+        }
     }
 }

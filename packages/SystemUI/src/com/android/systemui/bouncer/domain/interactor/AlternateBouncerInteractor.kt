@@ -29,9 +29,10 @@ import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business logic for interacting with the lock-screen alternate bouncer. */
 @SysUISingleton
@@ -52,19 +53,13 @@ constructor(
     private val alternateBouncerUiAvailableFromSource: HashSet<String> = HashSet()
     private val alternateBouncerSupported: StateFlow<Boolean> =
         if (DeviceEntryUdfpsRefactor.isEnabled) {
-            // The device entry udfps refactor doesn't currently support the alternate bouncer.
-            // TODO: Re-enable when b/287599719 is ready.
-            MutableStateFlow(false).asStateFlow()
-            //            fingerprintPropertyRepository.sensorType
-            //                .map { sensorType ->
-            //                    sensorType.isUdfps() || sensorType ==
-            // FingerprintSensorType.POWER_BUTTON
-            //                }
-            //                .stateIn(
-            //                    scope = scope,
-            //                    started = SharingStarted.Eagerly,
-            //                    initialValue = false,
-            //                )
+            fingerprintPropertyRepository.sensorType
+                .map { sensorType -> sensorType.isUdfps() || sensorType.isPowerButton() }
+                .stateIn(
+                    scope = scope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = false,
+                )
         } else {
             bouncerRepository.alternateBouncerUIAvailable
         }

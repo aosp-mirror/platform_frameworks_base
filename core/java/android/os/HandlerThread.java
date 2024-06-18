@@ -19,6 +19,8 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import java.util.concurrent.Executor;
+
 /**
  * A {@link Thread} that has a {@link Looper}.
  * The {@link Looper} can then be used to create {@link Handler}s.
@@ -30,11 +32,13 @@ public class HandlerThread extends Thread {
     int mPriority;
     int mTid = -1;
     Looper mLooper;
-    private @Nullable Handler mHandler;
+    private volatile @Nullable Handler mHandler;
+    private volatile @Nullable Executor mExecutor;
 
     public HandlerThread(String name) {
         super(name);
         mPriority = Process.THREAD_PRIORITY_DEFAULT;
+        onCreated();
     }
     
     /**
@@ -46,8 +50,21 @@ public class HandlerThread extends Thread {
     public HandlerThread(String name, int priority) {
         super(name);
         mPriority = priority;
+        onCreated();
     }
-    
+
+    /** @hide */
+    @android.ravenwood.annotation.RavenwoodReplace
+    protected void onCreated() {
+    }
+
+    /** @hide */
+    protected void onCreated$ravenwood() {
+        // Mark ourselves as daemon to enable tests to terminate quickly when finished, despite
+        // any HandlerThread instances that may be lingering around
+        setDaemon(true);
+    }
+
     /**
      * Call back method that can be explicitly overridden if needed to execute some
      * setup before Looper loops.
@@ -114,6 +131,18 @@ public class HandlerThread extends Thread {
             mHandler = new Handler(getLooper());
         }
         return mHandler;
+    }
+
+    /**
+     * @return a shared {@link Executor} associated with this thread
+     * @hide
+     */
+    @NonNull
+    public Executor getThreadExecutor() {
+        if (mExecutor == null) {
+            mExecutor = new HandlerExecutor(getThreadHandler());
+        }
+        return mExecutor;
     }
 
     /**

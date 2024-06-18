@@ -591,6 +591,16 @@ public class AppIdleHistory {
         if (idle) {
             newBucket = IDLE_BUCKET_CUTOFF;
             reason = REASON_MAIN_FORCED_BY_USER;
+            final AppUsageHistory appHistory = getAppUsageHistory(packageName, userId,
+                    elapsedRealtime);
+            // Wipe all expiry times that could raise the bucket on reevaluation.
+            if (appHistory.bucketExpiryTimesMs != null) {
+                for (int i = appHistory.bucketExpiryTimesMs.size() - 1; i >= 0; --i) {
+                    if (appHistory.bucketExpiryTimesMs.keyAt(i) < newBucket) {
+                        appHistory.bucketExpiryTimesMs.removeAt(i);
+                    }
+                }
+            }
         } else {
             newBucket = STANDBY_BUCKET_ACTIVE;
             // This is to pretend that the app was just used, don't freeze the state anymore.

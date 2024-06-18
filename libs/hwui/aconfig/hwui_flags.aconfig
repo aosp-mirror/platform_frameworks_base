@@ -2,6 +2,13 @@ package: "com.android.graphics.hwui.flags"
 container: "system"
 
 flag {
+  name: "clip_shader"
+  namespace: "core_graphics"
+  description: "API for canvas shader clipping operations"
+  bug: "280116960"
+}
+
+flag {
   name: "matrix_44"
   namespace: "core_graphics"
   description: "API for 4x4 matrix and related canvas functions"
@@ -13,6 +20,20 @@ flag {
   namespace: "core_graphics"
   description: "API to enable apps to restrict the amount of HDR headroom that is used"
   bug: "234181960"
+}
+
+flag {
+  name: "high_contrast_text_luminance"
+  namespace: "accessibility"
+  description: "Use luminance to determine how to make text more high contrast, instead of RGB heuristic"
+  bug: "186567103"
+}
+
+flag {
+  name: "high_contrast_text_small_text_rect"
+  namespace: "accessibility"
+  description: "Draw a solid rectangle background behind text instead of a stroke outline"
+  bug: "186567103"
 }
 
 flag {

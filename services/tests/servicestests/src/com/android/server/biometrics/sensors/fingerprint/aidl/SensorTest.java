@@ -32,14 +32,17 @@ import android.content.Context;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.common.CommonProps;
 import android.hardware.biometrics.face.SensorProps;
+import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
@@ -49,6 +52,7 @@ import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
+import com.android.server.biometrics.sensors.UserSwitchProvider;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import org.junit.Before;
@@ -75,6 +79,8 @@ public class SensorTest {
     @Mock
     private UserAwareBiometricScheduler.UserSwitchCallback mUserSwitchCallback;
     @Mock
+    private UserSwitchProvider<IFingerprint, ISession> mUserSwitchProvider;
+    @Mock
     private AidlResponseHandler.HardwareUnavailableCallback mHardwareUnavailableCallback;
     @Mock
     private LockoutResetDispatcher mLockoutResetDispatcher;
@@ -92,11 +98,13 @@ public class SensorTest {
     private AidlSession mCurrentSession;
     @Mock
     private BaseClientMonitor mClientMonitor;
+    @Mock
+    private HandlerThread mThread;
 
     private final TestLooper mLooper = new TestLooper();
     private final LockoutCache mLockoutCache = new LockoutCache();
 
-    private UserAwareBiometricScheduler mScheduler;
+    private BiometricScheduler<IFingerprint, ISession> mScheduler;
     private AidlResponseHandler mHalCallback;
 
     @Before
@@ -105,14 +113,26 @@ public class SensorTest {
 
         when(mContext.getSystemService(Context.BIOMETRIC_SERVICE)).thenReturn(mBiometricService);
         when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
+        when(mThread.getLooper()).thenReturn(mLooper.getLooper());
 
-        mScheduler = new UserAwareBiometricScheduler(TAG,
-                new Handler(mLooper.getLooper()),
-                BiometricScheduler.SENSOR_TYPE_FP_OTHER,
-                null /* gestureAvailabilityDispatcher */,
-                mBiometricService,
-                () -> USER_ID,
-                mUserSwitchCallback);
+        if (Flags.deHidl()) {
+            mScheduler = new BiometricScheduler<>(
+                    new Handler(mLooper.getLooper()),
+                    BiometricScheduler.SENSOR_TYPE_FP_OTHER,
+                    null /* gestureAvailabilityDispatcher */,
+                    mBiometricService,
+                    2 /* recentOperationsLimit */,
+                    () -> USER_ID,
+                    mUserSwitchProvider);
+        } else {
+            mScheduler = new UserAwareBiometricScheduler<>(TAG,
+                    new Handler(mLooper.getLooper()),
+                    BiometricScheduler.SENSOR_TYPE_FP_OTHER,
+                    null /* gestureAvailabilityDispatcher */,
+                    mBiometricService,
+                    () -> USER_ID,
+                    mUserSwitchCallback);
+        }
         mHalCallback = new AidlResponseHandler(mContext, mScheduler, SENSOR_ID, USER_ID,
                 mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
                 mHardwareUnavailableCallback);
@@ -153,18 +173,8 @@ public class SensorTest {
         when(mClientMonitor.getTargetUserId()).thenReturn(USER_ID);
         when(mClientMonitor.isInterruptable()).thenReturn(false);
 
-        final SensorProps sensorProps = new SensorProps();
-        sensorProps.commonProps = new CommonProps();
-        sensorProps.commonProps.sensorId = 1;
-        final FingerprintSensorPropertiesInternal internalProp = new
-                FingerprintSensorPropertiesInternal(
-                        sensorProps.commonProps.sensorId, sensorProps.commonProps.sensorStrength,
-                        sensorProps.commonProps.maxEnrollmentsPerUser, null,
-                        sensorProps.sensorType, false /* resetLockoutRequiresHardwareAuthToken */);
-        final Sensor sensor = new Sensor("SensorTest", mFingerprintProvider, mContext,
-                null /* handler */, internalProp, mLockoutResetDispatcher,
-                mGestureAvailabilityDispatcher, mBiometricContext, mCurrentSession);
-        mScheduler = (UserAwareBiometricScheduler) sensor.getScheduler();
+        final Sensor sensor = getSensor();
+        mScheduler = sensor.getScheduler();
         sensor.mCurrentSession = new AidlSession(0, mock(ISession.class),
                 USER_ID, mHalCallback);
 
@@ -183,5 +193,22 @@ public class SensorTest {
         assertEquals(LockoutTracker.LOCKOUT_NONE, mLockoutCache.getLockoutModeForUser(USER_ID));
         verify(mLockoutResetDispatcher).notifyLockoutResetCallbacks(eq(SENSOR_ID));
         verify(mAuthSessionCoordinator).resetLockoutFor(eq(USER_ID), anyInt(), anyLong());
+    }
+
+    private Sensor getSensor() {
+        final SensorProps sensorProps = new SensorProps();
+        sensorProps.commonProps = new CommonProps();
+        sensorProps.commonProps.sensorId = 1;
+        final FingerprintSensorPropertiesInternal internalProp = new
+                FingerprintSensorPropertiesInternal(
+                sensorProps.commonProps.sensorId, sensorProps.commonProps.sensorStrength,
+                sensorProps.commonProps.maxEnrollmentsPerUser, null,
+                sensorProps.sensorType, false /* resetLockoutRequiresHardwareAuthToken */);
+        final Sensor sensor = new Sensor(mFingerprintProvider, mContext,
+                null /* handler */, internalProp,
+                mBiometricContext, mCurrentSession);
+        sensor.init(mGestureAvailabilityDispatcher, mLockoutResetDispatcher);
+
+        return sensor;
     }
 }

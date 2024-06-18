@@ -24,6 +24,7 @@ import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,8 @@ public class PhoneCallStateHandler {
             SubscriptionManager subscriptionManager,
             TelephonyManager telephonyManager,
             Callback callback) {
-        mSubscriptionManager = Objects.requireNonNull(subscriptionManager);
+        mSubscriptionManager = Objects.requireNonNull(subscriptionManager)
+                .createForAllUserProfiles();
         mTelephonyManager = Objects.requireNonNull(telephonyManager);
         mCallback = Objects.requireNonNull(callback);
         mSubscriptionManager.addOnSubscriptionsChangedListener(
@@ -117,12 +119,28 @@ public class PhoneCallStateHandler {
     private boolean checkCallStatus() {
         List<SubscriptionInfo> infoList = mSubscriptionManager.getActiveSubscriptionInfoList();
         if (infoList == null) return false;
-        return infoList.stream()
-                .filter(s -> (s.getSubscriptionId() != SubscriptionManager.INVALID_SUBSCRIPTION_ID))
-                .anyMatch(s -> isCallOngoingFromState(
-                                        mTelephonyManager
-                                                .createForSubscriptionId(s.getSubscriptionId())
-                                                .getCallStateForSubscription()));
+        if (!Flags.enforceTelephonyFeatureMapping()) {
+            return infoList.stream()
+                    .filter(s -> (s.getSubscriptionId()
+                            != SubscriptionManager.INVALID_SUBSCRIPTION_ID))
+                    .anyMatch(s -> isCallOngoingFromState(
+                            mTelephonyManager
+                                    .createForSubscriptionId(s.getSubscriptionId())
+                                    .getCallStateForSubscription()));
+        } else {
+            return infoList.stream()
+                    .filter(s -> (s.getSubscriptionId()
+                            != SubscriptionManager.INVALID_SUBSCRIPTION_ID))
+                    .anyMatch(s -> {
+                        try {
+                            return isCallOngoingFromState(mTelephonyManager
+                                    .createForSubscriptionId(s.getSubscriptionId())
+                                    .getCallStateForSubscription());
+                        } catch (UnsupportedOperationException e) {
+                            return false;
+                        }
+                    });
+        }
     }
 
     private void updateTelephonyListeners() {

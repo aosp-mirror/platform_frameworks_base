@@ -29,6 +29,7 @@ import android.app.compat.CompatChanges;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -44,6 +45,7 @@ import android.window.DisplayWindowPolicyController;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.BlockedAppStreamingActivity;
+import com.android.modules.expresslog.Counter;
 
 import java.util.Set;
 
@@ -104,6 +106,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long ALLOW_SECURE_ACTIVITY_DISPLAY_ON_REMOTE_DEVICE = 201712607L;
     @NonNull
+    private final AttributionSource mAttributionSource;
+    @NonNull
     private final ArraySet<UserHandle> mAllowedUsers;
     @GuardedBy("mGenericWindowPolicyControllerLock")
     private boolean mActivityLaunchAllowedByDefault;
@@ -144,6 +148,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      *
      * @param windowFlags The window flags that this controller is interested in.
      * @param systemWindowFlags The system window flags that this controller is interested in.
+     * @param attributionSource The AttributionSource of the VirtualDevice owner application.
      * @param allowedUsers The set of users that are allowed to stream in this display.
      * @param activityLaunchAllowedByDefault Whether activities are default allowed to be launched
      *   or blocked.
@@ -169,6 +174,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     public GenericWindowPolicyController(
             int windowFlags,
             int systemWindowFlags,
+            AttributionSource attributionSource,
             @NonNull ArraySet<UserHandle> allowedUsers,
             boolean activityLaunchAllowedByDefault,
             @NonNull Set<ComponentName> activityPolicyExemptions,
@@ -184,6 +190,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             boolean showTasksInHostDeviceRecents,
             @Nullable ComponentName customHomeComponent) {
         super();
+        mAttributionSource = attributionSource;
         mAllowedUsers = allowedUsers;
         mActivityLaunchAllowedByDefault = activityLaunchAllowedByDefault;
         mActivityPolicyExemptions = activityPolicyExemptions;
@@ -288,15 +295,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         }
         final UserHandle activityUser =
                 UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid);
+        final ComponentName activityComponent = activityInfo.getComponentName();
+        if (BLOCKED_APP_STREAMING_COMPONENT.equals(activityComponent) && activityUser.isSystem()) {
+            // The error dialog alerting users that streaming is blocked is always allowed.
+            return true;
+        }
         if (!mAllowedUsers.contains(activityUser)) {
             Slog.d(TAG, "Virtual device launch disallowed from user " + activityUser);
             return false;
-        }
-
-        final ComponentName activityComponent = activityInfo.getComponentName();
-        if (BLOCKED_APP_STREAMING_COMPONENT.equals(activityComponent)) {
-            // The error dialog alerting users that streaming is blocked is always allowed.
-            return true;
         }
         if (!activityMatchesDisplayCategory(activityInfo)) {
             Slog.d(TAG, "The activity's required display category '"
@@ -437,6 +443,12 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         if (!mIsMirrorDisplay && mActivityBlockedCallback != null) {
             mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
         }
+        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+            Counter.logIncrementWithUid(
+                    "virtual_devices.value_activity_blocked_count",
+                    mAttributionSource.getUid());
+        }
+
     }
 
     private static boolean isAllowedByPolicy(boolean allowedByDefault,

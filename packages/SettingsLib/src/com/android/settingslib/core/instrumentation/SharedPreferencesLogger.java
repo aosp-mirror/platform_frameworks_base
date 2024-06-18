@@ -14,7 +14,6 @@
 
 package com.android.settingslib.core.instrumentation;
 
-import android.annotation.Nullable;
 import android.app.settings.SettingsEnums;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +23,7 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.Map;

@@ -20,6 +20,7 @@ import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
@@ -33,11 +34,15 @@ import android.content.Intent;
 import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricContextListener.FoldState;
+import android.hardware.biometrics.common.DisplayState;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
 import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.TestableContext;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -72,6 +77,9 @@ public class BiometricContextProviderTest {
     @Rule
     public TestableContext mContext = new TestableContext(
             InstrumentationRegistry.getInstrumentation().getContext());
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock
     private IStatusBarService mStatusBarService;
@@ -150,6 +158,15 @@ public class BiometricContextProviderTest {
 
             assertThat(mProvider.getDisplayState()).isEqualTo(state);
         }
+    }
+
+    @Test
+    public void testGetIsHardwareIgnoringTouches() throws RemoteException {
+        mListener.onHardwareIgnoreTouchesChanged(true);
+        assertThat(mProvider.isHardwareIgnoringTouches()).isTrue();
+
+        mListener.onHardwareIgnoreTouchesChanged(false);
+        assertThat(mProvider.isHardwareIgnoringTouches()).isFalse();
     }
 
     @Test
@@ -384,6 +401,37 @@ public class BiometricContextProviderTest {
 
             mSessionListener.onSessionEnded(type, InstanceId.fakeInstanceId(id));
         }
+    }
+
+    @Test
+    public void testSubscribe_thenStartHal() throws RemoteException {
+        Consumer<OperationContext> updateConsumer = mock(Consumer.class);
+        Consumer<OperationContext> startHalConsumer = mock(Consumer.class);
+        AuthenticateOptions options = new FingerprintAuthenticateOptions.Builder().build();
+        OperationContextExt context = mProvider.updateContext(mOpContext, false /* crypto */);
+
+        assertThat(context.getDisplayState()).isEqualTo(DisplayState.UNKNOWN);
+        assertThat(context.getFoldState()).isEqualTo(IBiometricContextListener.FoldState.UNKNOWN);
+
+        mListener.onDisplayStateChanged(DisplayState.LOCKSCREEN);
+        mListener.onFoldChanged(FoldState.FULLY_CLOSED);
+        mProvider.subscribe(context, startHalConsumer, updateConsumer, options);
+
+        assertThat(context.getDisplayState()).isEqualTo(DisplayState.LOCKSCREEN);
+        assertThat(context.getFoldState()).isEqualTo(FoldState.FULLY_CLOSED);
+        verify(updateConsumer, never()).accept(context.toAidlContext());
+        verify(startHalConsumer).accept(context.toAidlContext(options));
+    }
+
+    @Test
+    public void testSubscribe_withInvalidOptions() {
+        Consumer<OperationContext> updateConsumer = mock(Consumer.class);
+        Consumer<OperationContext> startHalConsumer = mock(Consumer.class);
+        AuthenticateOptions options = mock(AuthenticateOptions.class);
+        OperationContextExt context = mProvider.updateContext(mOpContext, false /* crypto */);
+
+        assertThrows(IllegalStateException.class, () -> mProvider.subscribe(
+                context, startHalConsumer, updateConsumer, options));
     }
 
     private static byte reason(int type) {

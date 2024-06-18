@@ -26,7 +26,6 @@ import static com.android.systemui.Flags.keyguardBottomAreaRefactor;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
-import static com.android.systemui.Flags.newAodTransition;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.annotation.SuppressLint;
@@ -64,6 +63,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -87,6 +87,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Controls when to show the LockIcon affordance (lock/unlocked icon or circle) on lock screen.
@@ -395,16 +397,6 @@ public class LockIconViewController implements Dumpable {
             mView.updateIcon(ICON_LOCK, true);
             mView.setContentDescription(mLockedLabel);
             mView.setVisibility(View.VISIBLE);
-        } else if (mIsDozing && newAodTransition()) {
-            mView.animate()
-                    .alpha(0f)
-                    .setDuration(FADE_OUT_DURATION_MS)
-                    .withEndAction(() -> {
-                        mView.clearIcon();
-                        mView.setVisibility(View.INVISIBLE);
-                        mView.setContentDescription(null);
-                    })
-                    .start();
         } else {
             mView.clearIcon();
             mView.setVisibility(View.INVISIBLE);
@@ -728,6 +720,7 @@ public class LockIconViewController implements Dumpable {
         return mDownDetected;
     }
 
+    @ExperimentalCoroutinesApi
     @VisibleForTesting
     protected void onLongPress() {
         cancelTouches();
@@ -738,7 +731,8 @@ public class LockIconViewController implements Dumpable {
 
         // pre-emptively set to true to hide view
         mIsBouncerShowing = true;
-        if (mUdfpsSupported && mShowUnlockIcon && mAuthRippleController != null) {
+        if (!DeviceEntryUdfpsRefactor.isEnabled()
+                && mUdfpsSupported && mShowUnlockIcon && mAuthRippleController != null) {
             mAuthRippleController.showUnlockRipple(FINGERPRINT);
         }
         updateVisibility();

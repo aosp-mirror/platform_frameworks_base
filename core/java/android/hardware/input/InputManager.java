@@ -16,9 +16,11 @@
 
 package android.hardware.input;
 
+import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
 import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -292,6 +294,23 @@ public final class InputManager {
     @Nullable
     public InputDevice getInputDevice(int id) {
         return mGlobal.getInputDevice(id);
+    }
+
+    /**
+     * Gets the {@link InputDevice.ViewBehavior} of the input device with a given {@code id}.
+     *
+     * <p>Use this API to query a fresh view behavior instance whenever the input device
+     * changes.
+     *
+     * @param deviceId the id of the input device whose view behavior is being requested.
+     * @return the view behavior of the input device with the provided id, or {@code null} if there
+     *      is not input device with the provided id.
+     */
+    @FlaggedApi(FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API)
+    @Nullable
+    public InputDevice.ViewBehavior getInputDeviceViewBehavior(int deviceId) {
+        InputDevice device = getInputDevice(deviceId);
+        return device == null ? null : device.getViewBehavior();
     }
 
     /**
@@ -765,10 +784,10 @@ public final class InputManager {
      *
      * @hide
      */
-    @Nullable
-    public String getKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
-            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @Nullable InputMethodSubtype imeSubtype) {
+    @NonNull
+    public KeyboardLayoutSelectionResult getKeyboardLayoutForInputDevice(
+            @NonNull InputDeviceIdentifier identifier, @UserIdInt int userId,
+            @NonNull InputMethodInfo imeInfo, @Nullable InputMethodSubtype imeSubtype) {
         try {
             return mIm.getKeyboardLayoutForInputDevice(identifier, userId, imeInfo, imeSubtype);
         } catch (RemoteException ex) {
@@ -1320,6 +1339,42 @@ public final class InputManager {
     }
 
     /**
+     * Registers a Sticky modifier state change listener to be notified about {@link
+     * StickyModifierState} changes.
+     *
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link StickyModifierStateListener}
+     * @throws IllegalArgumentException if {@code listener} has already been registered previously.
+     * @throws NullPointerException     if {@code listener} or {@code executor} is null.
+     * @hide
+     * @see #unregisterStickyModifierStateListener(StickyModifierStateListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    public void registerStickyModifierStateListener(@NonNull Executor executor,
+            @NonNull StickyModifierStateListener listener) throws IllegalArgumentException {
+        if (!InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
+            return;
+        }
+        mGlobal.registerStickyModifierStateListener(executor, listener);
+    }
+
+    /**
+     * Unregisters a previously added Sticky modifier state change listener.
+     *
+     * @param listener the {@link StickyModifierStateListener}
+     * @hide
+     * @see #registerStickyModifierStateListener(Executor, StickyModifierStateListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    public void unregisterStickyModifierStateListener(
+            @NonNull StickyModifierStateListener listener) {
+        if (!InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
+            return;
+        }
+        mGlobal.unregisterStickyModifierStateListener(listener);
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.
@@ -1400,5 +1455,24 @@ public final class InputManager {
          */
         void onKeyboardBacklightChanged(
                 int deviceId, @NonNull KeyboardBacklightState state, boolean isTriggeredByKeyPress);
+    }
+
+    /**
+     * A callback used to be notified about sticky modifier state changes when A11y Sticky keys
+     * feature is enabled.
+     *
+     * @see #registerStickyModifierStateListener(Executor, StickyModifierStateListener)
+     * @see #unregisterStickyModifierStateListener(StickyModifierStateListener)
+     * @hide
+     */
+    public interface StickyModifierStateListener {
+        /**
+         * Called when the sticky modifier state changes.
+         * This method will be called once after the listener is successfully registered to provide
+         * the initial modifier state.
+         *
+         * @param state the new sticky modifier state, never null.
+         */
+        void onStickyModifierStateChanged(@NonNull StickyModifierState state);
     }
 }

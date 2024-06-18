@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Ne îndreptăm spre un viitor fără parole, însă acestea sunt încă disponibile, alături de cheile de acces."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Alege unde dorești să salvezi <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selectează un manager de parole pentru a salva informațiile și a te conecta mai rapid data viitoare"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Creezi o cheie de acces pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Salvezi parola pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Creezi o cheie de acces pentru a te conecta la <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Salvezi parola pentru a te conecta la <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Salvezi informațiile de conectare pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"cheia de acces"</string>
     <string name="password" msgid="6738570945182936667">"parolă"</string>
@@ -88,8 +88,10 @@
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Atinge pentru a debloca"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Fără informații de conectare"</string>
     <string name="no_sign_in_info_in" msgid="2641118151920288356">"Nu există informații de conectare în contul <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
-    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Gestionează acreditările"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Gestionează conectările"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"De pe alt dispozitiv"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Folosește alt dispozitiv"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Solicitare anulată de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Opțiuni de conectare"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Mai multe"</string>
 </resources>

@@ -484,7 +484,9 @@ class ControlsUiControllerImpl @Inject constructor (
                     }
                 },
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-                null,
+                ActivityOptions.makeBasic()
+                    .setPendingIntentCreatorBackgroundActivityStartMode(
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle(),
                 userTracker.userHandle
         )
 

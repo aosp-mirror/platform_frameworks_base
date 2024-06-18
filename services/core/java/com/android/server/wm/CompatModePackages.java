@@ -19,14 +19,12 @@ package com.android.server.wm;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.CompatScaleProvider.COMPAT_SCALE_MODE_SYSTEM_FIRST;
 import static com.android.server.wm.CompatScaleProvider.COMPAT_SCALE_MODE_SYSTEM_LAST;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
-import android.app.GameManagerInternal;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
@@ -47,12 +45,12 @@ import android.util.AtomicFile;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.Xml;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
-import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -60,6 +58,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -344,9 +343,9 @@ public final class CompatModePackages {
     }
 
     private final ActivityTaskManagerService mService;
-    private GameManagerInternal mGameManager;
     private final AtomicFile mFile;
     private final HashMap<String, Integer> mPackages = new HashMap<>();
+    private final SparseBooleanArray mLegacyScreenCompatPackages = new SparseBooleanArray();
     private final CompatHandler mHandler;
 
     private final SparseArray<CompatScaleProvider> mProviders = new SparseArray<>();
@@ -427,6 +426,7 @@ public final class CompatModePackages {
             mPackages.remove(packageName);
             scheduleWrite();
         }
+        mLegacyScreenCompatPackages.delete(packageName.hashCode());
     }
 
     public void handlePackageAddedLocked(String packageName, boolean updated) {
@@ -458,6 +458,17 @@ public final class CompatModePackages {
         mHandler.sendMessageDelayed(msg, 10000);
     }
 
+    /**
+     * Returns {@code true} if the windows belonging to the package should be scaled with
+     * {@link DisplayContent#mCompatibleScreenScale}.
+     */
+    boolean useLegacyScreenCompatMode(String packageName) {
+        if (mLegacyScreenCompatPackages.size() == 0) {
+            return false;
+        }
+        return mLegacyScreenCompatPackages.get(packageName.hashCode());
+    }
+
     public CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
         final boolean forceCompat = getPackageCompatModeEnabledLocked(ai);
         final CompatScale compatScale = getCompatScaleFromProvider(ai.packageName, ai.uid);
@@ -466,8 +477,18 @@ public final class CompatModePackages {
                 : getCompatScale(ai.packageName, ai.uid, /* checkProvider= */ false);
         final float densityScale = compatScale != null ? compatScale.mDensityScaleFactor : appScale;
         final Configuration config = mService.getGlobalConfiguration();
-        return new CompatibilityInfo(ai, config.screenLayout, config.smallestScreenWidthDp,
-                forceCompat, appScale, densityScale);
+        final CompatibilityInfo info = new CompatibilityInfo(ai, config.screenLayout,
+                config.smallestScreenWidthDp, forceCompat, appScale, densityScale);
+        // Ignore invalid info which may be a placeholder of isolated process.
+        if (ai.flags != 0 && ai.sourceDir != null) {
+            if (!info.supportsScreen() && !"android".equals(ai.packageName)) {
+                Slog.i(TAG, "Use legacy screen compat mode: " + ai.packageName);
+                mLegacyScreenCompatPackages.put(ai.packageName.hashCode(), true);
+            } else if (mLegacyScreenCompatPackages.size() > 0) {
+                mLegacyScreenCompatPackages.delete(ai.packageName.hashCode());
+            }
+        }
+        return info;
     }
 
     float getCompatScale(String packageName, int uid) {
@@ -493,17 +514,6 @@ public final class CompatModePackages {
             }
         }
         final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
-        if (mGameManager == null) {
-            mGameManager = LocalServices.getService(GameManagerInternal.class);
-        }
-        if (mGameManager != null) {
-            final int userId = userHandle.getIdentifier();
-            final float scalingFactor = mGameManager.getResolutionScalingFactor(packageName,
-                    userId);
-            if (scalingFactor > 0) {
-                return 1f / scalingFactor;
-            }
-        }
 
         final boolean isDownscaledEnabled = CompatChanges.isChangeEnabled(
                 DOWNSCALED, packageName, userHandle);
@@ -718,14 +728,23 @@ public final class CompatModePackages {
 
             scheduleWrite();
 
-            final Task rootTask = mService.getTopDisplayFocusedRootTask();
-            ActivityRecord starting = rootTask.restartPackage(packageName);
-
+            final ArrayList<WindowProcessController> restartedApps = new ArrayList<>();
+            mService.mRootWindowContainer.forAllWindows(w -> {
+                final ActivityRecord ar = w.mActivityRecord;
+                if (ar != null) {
+                    if (ar.packageName.equals(packageName) && !restartedApps.contains(ar.app)) {
+                        ar.restartProcessIfVisible();
+                        restartedApps.add(ar.app);
+                    }
+                } else if (w.getProcess().mInfo.packageName.equals(packageName)) {
+                    w.updateGlobalScale();
+                }
+            }, true /* traverseTopToBottom */);
             // Tell all processes that loaded this package about the change.
             SparseArray<WindowProcessController> pidMap = mService.mProcessMap.getPidMap();
             for (int i = pidMap.size() - 1; i >= 0; i--) {
                 final WindowProcessController app = pidMap.valueAt(i);
-                if (!app.containsPackage(packageName)) {
+                if (!app.containsPackage(packageName) || restartedApps.contains(app)) {
                     continue;
                 }
                 try {
@@ -736,14 +755,6 @@ public final class CompatModePackages {
                     }
                 } catch (Exception e) {
                 }
-            }
-
-            if (starting != null) {
-                starting.ensureActivityConfiguration(0 /* globalChanges */,
-                        false /* preserveWindow */);
-                // And we need to make sure at this point that all other activities
-                // are made visible with the correct configuration.
-                rootTask.ensureActivitiesVisible(starting, 0, !PRESERVE_WINDOWS);
             }
         }
     }

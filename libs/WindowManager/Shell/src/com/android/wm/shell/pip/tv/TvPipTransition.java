@@ -25,10 +25,10 @@ import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.transitTypeToString;
 
+import static com.android.wm.shell.common.pip.PipMenuController.ALPHA_NO_CHANGE;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_REMOVE_STACK;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
-import static com.android.wm.shell.pip.PipMenuController.ALPHA_NO_CHANGE;
 import static com.android.wm.shell.pip.PipTransitionState.ENTERED_PIP;
 import static com.android.wm.shell.pip.PipTransitionState.ENTERING_PIP;
 import static com.android.wm.shell.pip.PipTransitionState.EXITING_PIP;
@@ -71,9 +71,9 @@ import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;

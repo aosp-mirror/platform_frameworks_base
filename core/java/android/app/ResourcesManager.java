@@ -550,7 +550,7 @@ public class ResourcesManager {
     @UnsupportedAppUsage
     protected @Nullable AssetManager createAssetManager(@NonNull final ResourcesKey key,
             @Nullable ApkAssetsSupplier apkSupplier) {
-        final AssetManager.Builder builder = new AssetManager.Builder();
+        final AssetManager.Builder builder = new AssetManager.Builder().setNoInit();
 
         final ArrayList<ApkKey> apkKeys = extractApkKeys(key);
         for (int i = 0, n = apkKeys.size(); i < n; i++) {
@@ -1555,7 +1555,7 @@ public class ResourcesManager {
         } else if(overlayPaths == null) {
             return ArrayUtils.cloneOrNull(resourceDirs);
         } else {
-            final ArrayList<String> paths = new ArrayList<>();
+            final var paths = new ArrayList<String>(overlayPaths.length + resourceDirs.length);
             for (final String path : overlayPaths) {
                 paths.add(path);
             }

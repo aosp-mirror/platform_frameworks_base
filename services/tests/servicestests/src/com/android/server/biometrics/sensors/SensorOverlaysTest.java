@@ -29,7 +29,7 @@ import android.hardware.biometrics.BiometricRequestConstants;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.filters.SmallTest;
 
@@ -43,10 +43,10 @@ import org.mockito.junit.MockitoRule;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequiresFlagsDisabled(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
 @Presubmit
 @SmallTest
 public class SensorOverlaysTest {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final int SENSOR_ID = 11;
     private static final long REQUEST_ID = 8;
@@ -59,6 +59,7 @@ public class SensorOverlaysTest {
 
     @Before
     public void setup() {
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
         when(mAcquisitionClient.getRequestId()).thenReturn(REQUEST_ID);
         when(mAcquisitionClient.hasRequestId()).thenReturn(true);
     }

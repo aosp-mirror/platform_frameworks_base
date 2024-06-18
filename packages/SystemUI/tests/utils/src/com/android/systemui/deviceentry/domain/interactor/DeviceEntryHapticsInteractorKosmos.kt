@@ -24,20 +24,20 @@ import com.android.systemui.keyevent.domain.interactor.keyEventInteractor
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.power.domain.interactor.powerInteractor
-import com.android.systemui.util.time.fakeSystemClock
+import com.android.systemui.util.time.systemClock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.deviceEntryHapticsInteractor by
     Kosmos.Fixture {
         DeviceEntryHapticsInteractor(
-            deviceEntryInteractor = deviceEntryInteractor,
+            deviceEntrySourceInteractor = deviceEntrySourceInteractor,
             deviceEntryFingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
             deviceEntryBiometricAuthInteractor = deviceEntryBiometricAuthInteractor,
             fingerprintPropertyRepository = fingerprintPropertyRepository,
             biometricSettingsRepository = biometricSettingsRepository,
             keyEventInteractor = keyEventInteractor,
             powerInteractor = powerInteractor,
-            systemClock = fakeSystemClock,
+            systemClock = systemClock,
             logger = biometricUnlockLogger,
         )
     }

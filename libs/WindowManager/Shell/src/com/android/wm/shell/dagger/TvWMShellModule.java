@@ -26,6 +26,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.LaunchAdjacentController;
+import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
@@ -83,19 +84,19 @@ public class TvWMShellModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            Optional<DragAndDropController> dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
+            MultiInstanceHelper multiInstanceHelper,
             @ShellMainThread ShellExecutor mainExecutor,
             Handler mainHandler,
             SystemWindows systemWindows) {
         return new TvSplitScreenController(context, shellInit, shellCommandHandler, shellController,
                 shellTaskOrganizer, syncQueue, rootTDAOrganizer, displayController,
-                displayImeController, displayInsetsController, dragAndDropController, transitions,
-                transactionPool, iconProvider, recentTasks, launchAdjacentController, mainExecutor,
-                mainHandler, systemWindows);
+                displayImeController, displayInsetsController, transitions, transactionPool,
+                iconProvider, recentTasks, launchAdjacentController, multiInstanceHelper,
+                mainExecutor, mainHandler, systemWindows);
     }
 }

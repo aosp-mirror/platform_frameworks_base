@@ -34,6 +34,7 @@ import java.util.List;
  *
  * {@hide}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class UserBatteryConsumer extends BatteryConsumer {
     static final int CONSUMER_TYPE_USER = 2;
 

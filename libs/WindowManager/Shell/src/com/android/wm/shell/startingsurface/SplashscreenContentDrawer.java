@@ -73,6 +73,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.palette.Palette;
 import com.android.internal.graphics.palette.Quantizer;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
+import com.android.internal.policy.PhoneWindow;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.IconProvider;
@@ -245,16 +246,19 @@ public class SplashscreenContentDrawer {
         } else {
             windowFlags |= WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         }
-        params.layoutInDisplayCutoutMode = a.getInt(
-                R.styleable.Window_windowLayoutInDisplayCutoutMode,
-                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS);
-        params.windowAnimations = a.getResourceId(R.styleable.Window_windowAnimationStyle, 0);
-        a.recycle();
 
         final ActivityManager.RunningTaskInfo taskInfo = windowInfo.taskInfo;
         final ActivityInfo activityInfo = windowInfo.targetActivityInfo != null
                 ? windowInfo.targetActivityInfo
                 : taskInfo.topActivityInfo;
+        params.layoutInDisplayCutoutMode = a.getInt(
+                R.styleable.Window_windowLayoutInDisplayCutoutMode,
+                PhoneWindow.isEdgeToEdgeEnforced(activityInfo.applicationInfo, false /* local */, a)
+                        ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                        : params.layoutInDisplayCutoutMode);
+        params.windowAnimations = a.getResourceId(R.styleable.Window_windowAnimationStyle, 0);
+        a.recycle();
+
         final int displayId = taskInfo.displayId;
         // Assumes it's safe to show starting windows of launched apps while
         // the keyguard is being hidden. This is okay because starting windows never show
@@ -277,11 +281,6 @@ public class SplashscreenContentDrawer {
         params.token = appToken;
         params.packageName = activityInfo.packageName;
         params.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
-
-        if (!context.getResources().getCompatibilityInfo().supportsScreen()) {
-            params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-        }
-
         params.setTitle("Splash Screen " + title);
         return params;
     }
@@ -418,7 +417,7 @@ public class SplashscreenContentDrawer {
         final SplashViewBuilder builder = new SplashViewBuilder(context, ai);
         final SplashScreenView view = builder
                 .setWindowBGColor(themeBGColor)
-                .chooseStyle(STARTING_WINDOW_TYPE_SPLASH_SCREEN)
+                .chooseStyle(STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN)
                 .build();
         view.setNotCopyable();
         return view;

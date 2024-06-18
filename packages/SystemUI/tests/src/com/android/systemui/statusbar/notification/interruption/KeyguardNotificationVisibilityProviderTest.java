@@ -431,7 +431,6 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void publicMode_settingsDisallow() {
-        mFeatureFlags.set(Flags.NOTIF_LS_BACKGROUND_THREAD, true);
         // GIVEN an 'unfiltered-keyguard-showing' state
         setupUnfilteredState(mEntry);
 
@@ -451,29 +450,23 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     }
 
     @Test
-    public void publicMode_settingsDisallow_mainThread() {
-        mFeatureFlags.set(Flags.NOTIF_LS_BACKGROUND_THREAD, false);
+    public void publicMode_nullChannel_allowed() {
         // GIVEN an 'unfiltered-keyguard-showing' state
         setupUnfilteredState(mEntry);
 
         // WHEN the notification's user is in public mode and settings are configured to disallow
         // notifications in public mode
-        when(mLockscreenUserManager.isLockscreenPublicMode(NOTIF_USER_ID)).thenReturn(true);
-        when(mLockscreenUserManager.userAllowsNotificationsInPublic(NOTIF_USER_ID))
-                .thenReturn(false);
-
+        when(mLockscreenUserManager.isLockscreenPublicMode(CURR_USER_ID)).thenReturn(true);
         mEntry.setRanking(new RankingBuilder()
-                .setChannel(new NotificationChannel("1", "1", 4))
-                .setVisibilityOverride(VISIBILITY_NO_OVERRIDE)
-                .setKey(mEntry.getKey()).build());
+                .setKey(mEntry.getKey())
+                .setVisibilityOverride(VISIBILITY_SECRET).build());
 
-        // THEN filter out the entry
-        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+        // THEN allow the entry
+        assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
     }
 
     @Test
     public void publicMode_notifDisallowed() {
-        mFeatureFlags.set(Flags.NOTIF_LS_BACKGROUND_THREAD, true);
         NotificationChannel channel = new NotificationChannel("1", "1", IMPORTANCE_HIGH);
         channel.setLockscreenVisibility(VISIBILITY_SECRET);
         // GIVEN an 'unfiltered-keyguard-showing' state
@@ -485,23 +478,6 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         mEntry.setRanking(new RankingBuilder()
                 .setKey(mEntry.getKey())
                 .setChannel(channel)
-                .setVisibilityOverride(VISIBILITY_SECRET).build());
-
-        // THEN filter out the entry
-        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
-    }
-
-    @Test
-    public void publicMode_notifDisallowed_mainThread() {
-        mFeatureFlags.set(Flags.NOTIF_LS_BACKGROUND_THREAD, false);
-        // GIVEN an 'unfiltered-keyguard-showing' state
-        setupUnfilteredState(mEntry);
-
-        // WHEN the notification's user is in public mode and settings are configured to disallow
-        // notifications in public mode
-        when(mLockscreenUserManager.isLockscreenPublicMode(CURR_USER_ID)).thenReturn(true);
-        mEntry.setRanking(new RankingBuilder()
-                .setKey(mEntry.getKey())
                 .setVisibilityOverride(VISIBILITY_SECRET).build());
 
         // THEN filter out the entry
@@ -562,7 +538,6 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void notificationChannelVisibilityNoOverride() {
-        mFeatureFlags.set(Flags.NOTIF_LS_BACKGROUND_THREAD, true);
         // GIVEN a VISIBILITY_PRIVATE notification
         NotificationEntryBuilder entryBuilder = new NotificationEntryBuilder()
                 .setUser(new UserHandle(NOTIF_USER_ID));
@@ -585,7 +560,6 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void notificationChannelVisibilitySecret() {
-        mFeatureFlags.set(Flags.NOTIF_LS_BACKGROUND_THREAD, true);
         // GIVEN a VISIBILITY_PRIVATE notification
         NotificationEntryBuilder entryBuilder = new NotificationEntryBuilder()
                 .setUser(new UserHandle(NOTIF_USER_ID));

@@ -21,7 +21,6 @@ import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.NETWORK_
 
 import android.annotation.IntDef;
 import android.annotation.MainThread;
-import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -58,6 +57,7 @@ import android.util.Pair;
 
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;

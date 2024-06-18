@@ -62,9 +62,11 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.globalactions.domain.interactor.GlobalActionsInteractor;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
@@ -134,12 +136,14 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private VibratorHelper mVibratorHelper;
     @Mock private ShadeController mShadeController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
 
     private TestableLooper mTestableLooper;
+    private KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private GlobalActionsInteractor mInteractor;
 
     @Before
     public void setUp() throws Exception {
@@ -154,6 +158,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
 
         mGlobalSettings = new FakeGlobalSettings();
         mSecureSettings = new FakeSettings();
+        mInteractor = mKosmos.getGlobalActionsInteractor();
 
         mGlobalActionsDialogLite = new GlobalActionsDialogLite(mContext,
                 mWindowManagerFuncs,
@@ -188,8 +193,9 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mPackageManager,
                 mShadeController,
                 mKeyguardUpdateMonitor,
-                mDialogLaunchAnimator,
-                mSelectedUserInteractor);
+                mDialogTransitionAnimator,
+                mSelectedUserInteractor,
+                mInteractor);
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
 
         ColorExtractor.GradientColors backdropColors = new ColorExtractor.GradientColors();
@@ -621,6 +627,18 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         GlobalActionsDialogLite.BugReportAction bugReportAction =
                 mGlobalActionsDialogLite.makeBugReportActionForTesting();
         assertThat(bugReportAction.showBeforeProvisioning()).isFalse();
+    }
+
+    @Test
+    public void testInteractor_onShow() {
+        mGlobalActionsDialogLite.onShow(null);
+        assertThat(mInteractor.isVisible().getValue()).isTrue();
+    }
+
+    @Test
+    public void testInteractor_onDismiss() {
+        mGlobalActionsDialogLite.onDismiss(mGlobalActionsDialogLite.mDialog);
+        assertThat(mInteractor.isVisible().getValue()).isFalse();
     }
 
     private UserInfo mockCurrentUser(int flags) {

@@ -110,6 +110,7 @@ public class PowerStatsExporter {
             mPowerStatsAggregator.aggregatePowerStats(maxEndTime, monotonicEndTime,
                     stats -> populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder, stats));
         }
+        mPowerStatsAggregator.reset();
     }
 
     private void populateBatteryUsageStatsBuilder(

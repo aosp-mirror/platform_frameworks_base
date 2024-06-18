@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"关闭"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"展开"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"设置"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"进入分屏模式"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"菜单"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"画中画菜单"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g>目前位于“画中画”中"</string>
@@ -57,7 +56,7 @@
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"如需退出，请从屏幕底部向上滑动，或点按应用上方的任意位置"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"启动单手模式"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"退出单手模式"</string>
-    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g>对话泡的设置"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g>消息气泡的设置"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"菜单"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"重新加入叠放"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g>：<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -69,22 +68,22 @@
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"展开“<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>”"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"收起“<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>”"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>设置"</string>
-    <string name="bubble_dismiss_text" msgid="8816558050659478158">"关闭对话泡"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"不以对话泡形式显示对话"</string>
-    <string name="bubbles_user_education_title" msgid="2112319053732691899">"使用对话泡聊天"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"新对话会以浮动图标或对话泡形式显示。点按即可打开对话泡。拖动即可移动对话泡。"</string>
-    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"随时控制对话泡"</string>
-    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"点按“管理”按钮，可关闭来自此应用的对话泡"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"关闭消息气泡"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"不以消息气泡形式显示对话"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"使用消息气泡聊天"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"新对话会以浮动图标或消息气泡形式显示。点按即可打开消息气泡。拖动即可移动消息气泡。"</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"随时控制消息气泡"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"点按“管理”按钮，可关闭来自此应用的消息气泡"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"知道了"</string>
-    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"最近没有对话泡"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"此处会显示最近的对话泡和已关闭的对话泡"</string>
-    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"使用对话泡聊天"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"最近没有消息气泡"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"此处会显示最近的消息气泡和已关闭的消息气泡"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"使用消息气泡聊天"</string>
     <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"新对话会以图标形式显示在屏幕底部的角落中。点按图标即可展开对话，拖动图标即可关闭对话。"</string>
-    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"随时控制对话泡"</string>
-    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"点按此处即可管理哪些应用和对话可以显示对话泡"</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"随时控制消息气泡"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"点按此处即可管理哪些应用和对话可以显示消息气泡"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"气泡"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
-    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已关闭对话泡。"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已关闭消息气泡。"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"点按即可重启此应用，获得更好的视觉体验"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"在“设置”中更改此应用的宽高比"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"更改高宽比"</string>

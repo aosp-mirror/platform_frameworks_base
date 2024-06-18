@@ -22,9 +22,9 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.android.app.tracing.TraceUtils.Companion.withContext
+import com.android.app.tracing.coroutines.withContext
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -56,6 +56,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -74,7 +75,7 @@ constructor(
     private val activityStarter: ActivityStarter,
     private val featureFlags: FeatureFlags,
     private val repository: Lazy<KeyguardQuickAffordanceRepository>,
-    private val launchAnimator: DialogLaunchAnimator,
+    private val launchAnimator: DialogTransitionAnimator,
     private val logger: KeyguardQuickAffordancesMetricsLogger,
     private val devicePolicyManager: DevicePolicyManager,
     private val dockManager: DockManager,
@@ -102,10 +103,10 @@ constructor(
             quickAffordanceAlwaysVisible(position),
             keyguardInteractor.isDozing,
             keyguardInteractor.isKeyguardShowing,
-            shadeInteractor.anyExpansion,
+            shadeInteractor.anyExpansion.map { it < 1.0f }.distinctUntilChanged(),
             biometricSettingsRepository.isCurrentUserInLockdown,
-        ) { affordance, isDozing, isKeyguardShowing, qsExpansion, isUserInLockdown ->
-            if (!isDozing && isKeyguardShowing && (qsExpansion < 1.0f) && !isUserInLockdown) {
+        ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible, isUserInLockdown ->
+            if (!isDozing && isKeyguardShowing && isQuickSettingsVisible && !isUserInLockdown) {
                 affordance
             } else {
                 KeyguardQuickAffordanceModel.Hidden
@@ -321,7 +322,7 @@ constructor(
     }
 
     private fun showDialog(dialog: AlertDialog, expandable: Expandable?) {
-        expandable?.dialogLaunchController()?.let { controller ->
+        expandable?.dialogTransitionController()?.let { controller ->
             SystemUIDialog.applyFlags(dialog)
             SystemUIDialog.setShowForAllUsers(dialog, true)
             SystemUIDialog.registerDismissListener(dialog)
@@ -349,13 +350,13 @@ constructor(
             activityStarter.postStartActivityDismissingKeyguard(
                 intent,
                 0 /* delay */,
-                expandable?.activityLaunchController(),
+                expandable?.activityTransitionController(),
             )
         } else {
             activityStarter.startActivity(
                 intent,
                 true /* dismissShade */,
-                expandable?.activityLaunchController(),
+                expandable?.activityTransitionController(),
                 true /* showOverLockscreenWhenLocked */,
             )
         }

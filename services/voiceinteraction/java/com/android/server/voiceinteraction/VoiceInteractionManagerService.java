@@ -16,16 +16,22 @@
 
 package com.android.server.voiceinteraction;
 
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
-import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AppGlobals;
-import android.app.AppOpsManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
@@ -42,6 +48,7 @@ import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.ModelParams;
@@ -60,7 +67,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.PermissionEnforcer;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
@@ -70,12 +76,12 @@ import android.os.SharedMemory;
 import android.os.ShellCallback;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.permission.flags.Flags;
 import android.provider.Settings;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
+import android.service.voice.VoiceInteractionManagerInternal.WearableHotwordDetectionCallback;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.service.voice.VoiceInteractionSession;
@@ -84,6 +90,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
+import android.window.ScreenCapture;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -91,6 +98,7 @@ import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.internal.app.IVisualQueryRecognitionStatusListener;
 import com.android.internal.app.IVoiceActionCheckCallback;
+import com.android.internal.app.IVoiceInteractionAccessibilitySettingsListener;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
@@ -109,7 +117,9 @@ import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.policy.AppOpsPolicy;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.wm.ActivityAssistInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -126,6 +136,19 @@ public class VoiceInteractionManagerService extends SystemService {
     static final String TAG = "VoiceInteractionManager";
     static final boolean DEBUG = false;
 
+    /** Static constants used by Contextual Search helper. */
+    private static final String CS_KEY_FLAG_SECURE_FOUND =
+            "com.android.contextualsearch.flag_secure_found";
+    private static final String CS_KEY_FLAG_SCREENSHOT =
+            "com.android.contextualsearch.screenshot";
+    private static final String CS_KEY_FLAG_IS_MANAGED_PROFILE_VISIBLE =
+            "com.android.contextualsearch.is_managed_profile_visible";
+    private static final String CS_KEY_FLAG_VISIBLE_PACKAGE_NAMES =
+            "com.android.contextualsearch.visible_package_names";
+    private static final String CS_INTENT_FILTER =
+            "com.android.contextualsearch.LAUNCH";
+
+
     final Context mContext;
     final ContentResolver mResolver;
     // Can be overridden for testing purposes
@@ -134,6 +157,8 @@ public class VoiceInteractionManagerService extends SystemService {
     final ActivityManagerInternal mAmInternal;
     final ActivityTaskManagerInternal mAtmInternal;
     final UserManagerInternal mUserManagerInternal;
+    final WindowManagerInternal mWmInternal;
+    final DevicePolicyManagerInternal mDpmInternal;
     final ArrayMap<Integer, VoiceInteractionManagerServiceStub.SoundTriggerSession>
             mLoadedKeyphraseIds = new ArrayMap<>();
     ShortcutServiceInternal mShortcutServiceInternal;
@@ -155,7 +180,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 LocalServices.getService(ActivityManagerInternal.class));
         mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
-
+        mWmInternal = LocalServices.getService(WindowManagerInternal.class);
+        mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         LegacyPermissionManagerInternal permissionManagerInternal = LocalServices.getService(
                 LegacyPermissionManagerInternal.class);
         permissionManagerInternal.setVoiceInteractionPackagesProvider(
@@ -320,6 +346,46 @@ public class VoiceInteractionManagerService extends SystemService {
                     userId);
             mServiceStub.mRoleObserver.onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT,
                                                 UserHandle.of(userId));
+        }
+
+        @Override
+        public void startListeningFromWearable(
+                ParcelFileDescriptor audioStreamFromWearable,
+                AudioFormat audioFormatFromWearable,
+                PersistableBundle options,
+                ComponentName targetVisComponentName,
+                int userId,
+                WearableHotwordDetectionCallback callback) {
+            Slog.d(TAG, "#startListeningFromWearable");
+            VoiceInteractionManagerServiceImpl impl = mServiceStub.mImpl;
+            if (impl == null) {
+                callback.onError(
+                        "Unable to start listening from wearable because the service impl is"
+                                + " null.");
+                return;
+            }
+            if (targetVisComponentName != null && !targetVisComponentName.equals(impl.mComponent)) {
+                callback.onError(
+                        TextUtils.formatSimple(
+                                "Unable to start listening from wearable because the target"
+                                    + " VoiceInteractionService %s is different from the current"
+                                    + " VoiceInteractionService %s",
+                                targetVisComponentName, impl.mComponent));
+                return;
+            }
+            if (userId != impl.mUser) {
+                callback.onError(
+                        TextUtils.formatSimple(
+                                "Unable to start listening from wearable because the target userId"
+                                    + " %s is different from the current"
+                                    + " VoiceInteractionManagerServiceImpl's userId %s",
+                                userId, impl.mUser));
+                return;
+            }
+            synchronized (mServiceStub) {
+                impl.startListeningFromWearableLocked(
+                        audioStreamFromWearable, audioFormatFromWearable, options, callback);
+            }
         }
     }
 
@@ -652,8 +718,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         private String getForceVoiceInteractionServicePackage(Resources res) {
-            String interactorPackage =
-                    res.getString(com.android.internal.R.string.config_forceVoiceInteractionServicePackage);
+            String interactorPackage = res.getString(
+                    com.android.internal.R.string.config_forceVoiceInteractionServicePackage);
             return TextUtils.isEmpty(interactorPackage) ? null : interactorPackage;
         }
 
@@ -978,6 +1044,58 @@ public class VoiceInteractionManagerService extends SystemService {
         public boolean showSessionFromSession(@NonNull IBinder token, @Nullable Bundle sessionArgs,
                 int flags, @Nullable String attributionTag) {
             synchronized (this) {
+                final String csKey = mContext.getResources()
+                        .getString(R.string.config_defaultContextualSearchKey);
+                final String csEnabledKey = mContext.getResources()
+                        .getString(R.string.config_defaultContextualSearchEnabled);
+
+                // If the request is for Contextual Search, process it differently
+                if (sessionArgs != null && sessionArgs.containsKey(csKey)) {
+                    if (sessionArgs.getBoolean(csEnabledKey, true)) {
+                        // If Contextual Search is enabled, try to follow that path.
+                        Intent launchIntent = getContextualSearchIntent(sessionArgs);
+                        if (launchIntent != null) {
+                            // Hand over to contextual search helper.
+                            Slog.d(TAG, "Handed over to contextual search helper.");
+                            final long caller = Binder.clearCallingIdentity();
+                            try {
+                                return startContextualSearch(launchIntent);
+                            } finally {
+                                Binder.restoreCallingIdentity(caller);
+                            }
+                        }
+                    }
+
+                    // Since we are here, Contextual Search helper couldn't handle the request.
+                    final String visEnabledKey = mContext.getResources()
+                            .getString(R.string.config_defaultContextualSearchLegacyEnabled);
+                    if (sessionArgs.getBoolean(visEnabledKey, true)) {
+                        // If visEnabledKey is set to true (or absent), we try following VIS path.
+                        String csPkgName = mContext.getResources()
+                                .getString(R.string.config_defaultContextualSearchPackageName);
+                        ComponentName currInteractor =
+                                getCurInteractor(Binder.getCallingUserHandle().getIdentifier());
+                        if (currInteractor == null
+                                || !csPkgName.equals(currInteractor.getPackageName())) {
+                            // Check if the interactor can handle Contextual Search.
+                            // If not, return failure.
+                            Slog.w(TAG, "Contextual Search not supported yet. Returning failure.");
+                            return false;
+                        }
+                    } else {
+                        // If visEnabledKey is set to false AND the request was for Contextual
+                        // Search, return false.
+                        return false;
+                    }
+                    // Given that we haven't returned yet, we can say that
+                    // - Contextual Search Helper couldn't handle the request
+                    // - VIS path for Contextual Search is enabled
+                    // - The current interactor supports Contextual Search.
+                    // Hence, we will proceed with the VIS path.
+                    Slog.d(TAG, "Contextual search not supported yet. Proceeding with VIS.");
+
+                }
+
                 if (mImpl == null) {
                     Slog.w(TAG, "showSessionFromSession without running voice interaction service");
                     return false;
@@ -1290,17 +1408,6 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        // Enforce permissions that are flag controlled. The flag value decides if the permission
-        // should be enforced.
-        private void initAndVerifyDetector_enforcePermissionWithFlags() {
-            PermissionEnforcer enforcer = mContext.getSystemService(PermissionEnforcer.class);
-            if (Flags.voiceActivationPermissionApis()) {
-                enforcer.enforcePermission(
-                        android.Manifest.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO,
-                        getCallingPid(), getCallingUid());
-            }
-        }
-
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
         @Override
         public void initAndVerifyDetector(
@@ -1310,13 +1417,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 @NonNull IBinder token,
                 IHotwordRecognitionStatusCallback callback,
                 int detectorType) {
-            // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
-            // {@link #initAndVerifyDetector(Identity,  PersistableBundle, ShareMemory, IBinder,
-            // IHotwordRecognitionStatusCallback, int)}
-            // and replace with the permission RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully
-            // launched.
             super.initAndVerifyDetector_enforcePermission();
-            initAndVerifyDetector_enforcePermissionWithFlags();
 
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
@@ -1544,57 +1645,6 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        @Override
-        @android.annotation.EnforcePermission(
-                android.Manifest.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT)
-        public void resetHotwordTrainingDataEgressCountForTest() {
-            super.resetHotwordTrainingDataEgressCountForTest_enforcePermission();
-            synchronized (this) {
-                enforceIsCurrentVoiceInteractionService();
-
-                if (mImpl == null) {
-                    Slog.w(TAG, "resetHotwordTrainingDataEgressCountForTest without running"
-                            + " voice interaction service");
-                    return;
-                }
-                final long caller = Binder.clearCallingIdentity();
-                try {
-                    mImpl.resetHotwordTrainingDataEgressCountForTest();
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
-                }
-
-            }
-        }
-
-        @Override
-        @EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
-        public void setShouldReceiveSandboxedTrainingData(boolean allowed) {
-            super.setShouldReceiveSandboxedTrainingData_enforcePermission();
-
-            synchronized (this) {
-                if (mImpl == null) {
-                    throw new IllegalStateException(
-                            "setShouldReceiveSandboxedTrainingData without running voice "
-                                    + "interaction service");
-                }
-
-                enforceIsCallerPreinstalledAssistant();
-
-                int callingUid = Binder.getCallingUid();
-                final long caller = Binder.clearCallingIdentity();
-                try {
-                    AppOpsManager appOpsManager = (AppOpsManager)
-                            mContext.getSystemService(Context.APP_OPS_SERVICE);
-                    appOpsManager.setUidMode(
-                            AppOpsManager.OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                            callingUid, allowed ? AppOpsManager.MODE_ALLOWED :
-                                    AppOpsManager.MODE_ERRORED);
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
-                }
-            }
-        }
 
       //----------------- Model management APIs --------------------------------//
 
@@ -1759,7 +1809,10 @@ public class VoiceInteractionManagerService extends SystemService {
                     if (keyphrase.equals(phrase.getText())) {
                         ArraySet<Locale> locales = new ArraySet<>();
                         locales.add(phrase.getLocale());
-                        return new KeyphraseMetadata(phrase.getId(), phrase.getText(), locales,
+                        return new KeyphraseMetadata(
+                                phrase.getId(),
+                                phrase.getText(),
+                                locales,
                                 phrase.getRecognitionModes());
                     }
                 }
@@ -1807,7 +1860,8 @@ public class VoiceInteractionManagerService extends SystemService {
                     enforceIsCurrentVoiceInteractionService();
 
                     if (callback == null || recognitionConfig == null || bcp47Locale == null) {
-                        throw new IllegalArgumentException("Illegal argument(s) in startRecognition");
+                        throw new IllegalArgumentException(
+                                "Illegal argument(s) in startRecognition");
                     }
                     if (runInBatterySaverMode) {
                         enforceCallingPermission(
@@ -2186,6 +2240,44 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        public boolean getAccessibilityDetectionEnabled() {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "registerAccessibilityDetectionSettingsListener called without"
+                            + " running voice interaction service");
+                    return false;
+                }
+                return mImpl.getAccessibilityDetectionEnabled();
+            }
+        }
+
+        @Override
+        public void registerAccessibilityDetectionSettingsListener(
+                IVoiceInteractionAccessibilitySettingsListener listener) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "registerAccessibilityDetectionSettingsListener called without"
+                            + " running voice interaction service");
+                    return;
+                }
+                mImpl.registerAccessibilityDetectionSettingsListenerLocked(listener);
+            }
+        }
+
+        @Override
+        public void unregisterAccessibilityDetectionSettingsListener(
+                IVoiceInteractionAccessibilitySettingsListener listener) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "unregisterAccessibilityDetectionSettingsListener called "
+                            + "without running voice interaction service");
+                    return;
+                }
+                mImpl.unregisterAccessibilityDetectionSettingsListenerLocked(listener);
+            }
+        }
+
+
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -2413,7 +2505,8 @@ public class VoiceInteractionManagerService extends SystemService {
                         UserHandle.USER_ALL);
             }
 
-            @Override public void onChange(boolean selfChange) {
+            @Override
+            public void onChange(boolean selfChange) {
                 synchronized (VoiceInteractionManagerServiceStub.this) {
                     switchImplementationIfNeededLocked(false);
                 }
@@ -2446,7 +2539,8 @@ public class VoiceInteractionManagerService extends SystemService {
         PackageMonitor mPackageMonitor = new PackageMonitor() {
 
             @Override
-            public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
+            public boolean onHandleForceStop(Intent intent, String[] packages, int uid,
+                    boolean doit) {
                 if (DEBUG) Slog.d(TAG, "onHandleForceStop uid=" + uid + " doit=" + doit);
 
                 int userHandle = UserHandle.getUserId(uid);
@@ -2548,7 +2642,6 @@ public class VoiceInteractionManagerService extends SystemService {
                         if (anyPackagesAppearing()) {
                             initRecognizer(userHandle);
                         }
-                        return;
                     }
 
                     if (curInteractor != null) {
@@ -2597,19 +2690,90 @@ public class VoiceInteractionManagerService extends SystemService {
                         }
                     }
 
-                    // There is no interactor, so just deal with a simple recognizer.
-                    int change = isPackageDisappearing(curRecognizer.getPackageName());
-                    if (change == PACKAGE_PERMANENT_CHANGE
-                            || change == PACKAGE_TEMPORARY_CHANGE) {
-                        setCurRecognizer(findAvailRecognizer(null, userHandle), userHandle);
+                    if (curRecognizer != null) {
+                        int change = isPackageDisappearing(curRecognizer.getPackageName());
+                        if (change == PACKAGE_PERMANENT_CHANGE
+                                || change == PACKAGE_TEMPORARY_CHANGE) {
+                            setCurRecognizer(findAvailRecognizer(null, userHandle), userHandle);
 
-                    } else if (isPackageModified(curRecognizer.getPackageName())) {
-                        setCurRecognizer(findAvailRecognizer(curRecognizer.getPackageName(),
-                                userHandle), userHandle);
+                        } else if (isPackageModified(curRecognizer.getPackageName())) {
+                            setCurRecognizer(findAvailRecognizer(curRecognizer.getPackageName(),
+                                    userHandle), userHandle);
+                        }
                     }
                 }
             }
         };
+
+        private Intent getContextualSearchIntent(Bundle args) {
+            String csPkgName = mContext.getResources()
+                    .getString(R.string.config_defaultContextualSearchPackageName);
+            if (csPkgName.isEmpty()) {
+                // Return null if csPackageName is not specified.
+                return null;
+            }
+            Intent launchIntent = new Intent(CS_INTENT_FILTER);
+            launchIntent.setPackage(csPkgName);
+            ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(
+                    launchIntent, PackageManager.MATCH_FACTORY_ONLY);
+            if (resolveInfo == null) {
+                return null;
+            }
+            launchIntent.setComponent(resolveInfo.getComponentInfo().getComponentName());
+            launchIntent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION
+                    | FLAG_ACTIVITY_NO_USER_ACTION | FLAG_ACTIVITY_CLEAR_TASK);
+            launchIntent.putExtras(args);
+            boolean isAssistDataAllowed = mAtmInternal.isAssistDataAllowed();
+            final List<ActivityAssistInfo> records = mAtmInternal.getTopVisibleActivities();
+            ArrayList<String> visiblePackageNames = new ArrayList<>();
+            boolean isManagedProfileVisible = false;
+            for (ActivityAssistInfo record: records) {
+                // Add the package name to the list only if assist data is allowed.
+                if (isAssistDataAllowed) {
+                    visiblePackageNames.add(record.getComponentName().getPackageName());
+                }
+                if (mDpmInternal != null
+                        && mDpmInternal.isUserOrganizationManaged(record.getUserId())) {
+                    isManagedProfileVisible = true;
+                }
+            }
+            final ScreenCapture.ScreenshotHardwareBuffer shb;
+            if (mWmInternal != null) {
+                shb = mWmInternal.takeAssistScreenshot();
+            } else {
+                shb = null;
+            }
+            final Bitmap bm = shb != null ? shb.asBitmap() : null;
+            // Now that everything is fetched, putting it in the launchIntent.
+            if (bm != null) {
+                launchIntent.putExtra(CS_KEY_FLAG_SECURE_FOUND, shb.containsSecureLayers());
+                // Only put the screenshot if assist data is allowed
+                if (isAssistDataAllowed) {
+                    launchIntent.putExtra(CS_KEY_FLAG_SCREENSHOT, bm.asShared());
+                }
+            }
+            launchIntent.putExtra(CS_KEY_FLAG_IS_MANAGED_PROFILE_VISIBLE, isManagedProfileVisible);
+            // Only put the list of visible package names if assist data is allowed
+            if (isAssistDataAllowed) {
+                launchIntent.putExtra(CS_KEY_FLAG_VISIBLE_PACKAGE_NAMES, visiblePackageNames);
+            }
+
+            return launchIntent;
+        }
+
+        @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
+        private boolean startContextualSearch(Intent launchIntent) {
+            // Contextual search starts with a frozen screen - so we launch without
+            // any system animations or starting window.
+            final ActivityOptions opts = ActivityOptions.makeCustomTaskAnimation(mContext,
+                    /* enterResId= */ 0, /* exitResId= */ 0, null, null, null);
+            opts.setDisableStartingWindow(true);
+            int resultCode = mAtmInternal.startActivityWithScreenshot(launchIntent,
+                    mContext.getPackageName(), Binder.getCallingUid(), Binder.getCallingPid(), null,
+                    opts.toBundle(), Binder.getCallingUserHandle().getIdentifier());
+            return resultCode == ActivityManager.START_SUCCESS;
+        }
+
     }
 
     /**
