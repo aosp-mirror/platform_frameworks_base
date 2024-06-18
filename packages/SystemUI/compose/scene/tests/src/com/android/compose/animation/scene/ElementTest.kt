@@ -729,7 +729,7 @@ class ElementTest {
                 onAnimatedFloat = { animatedFloat = it },
             )
 
-        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
         val transition = assertThat(state.transitionState).isTransition()
         assertThat(transition).isNotNull()
@@ -809,7 +809,7 @@ class ElementTest {
         }
 
         assertThat(state.transitionState).isIdle()
-        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
 
         // Swipe by half of verticalSwipeDistance.
@@ -929,7 +929,7 @@ class ElementTest {
                 onAnimatedFloat = { animatedFloat = it },
             )
 
-        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
         assertThat(animatedFloat).isEqualTo(100f)
 
@@ -985,7 +985,7 @@ class ElementTest {
                 onAnimatedFloat = { animatedFloat = it },
             )
 
-        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
         assertThat(animatedFloat).isEqualTo(100f)
 
