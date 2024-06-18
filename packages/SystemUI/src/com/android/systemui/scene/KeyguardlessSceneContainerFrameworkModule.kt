@@ -25,6 +25,7 @@ import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolverM
 import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolverModule
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.domain.startable.ScrimStartable
+import com.android.systemui.scene.domain.startable.StatusBarStartable
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shared.flag.DualShade
@@ -63,6 +64,11 @@ interface KeyguardlessSceneContainerFrameworkModule {
     @IntoMap
     @ClassKey(ScrimStartable::class)
     fun scrimStartable(impl: ScrimStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(StatusBarStartable::class)
+    fun statusBarStartable(impl: StatusBarStartable): CoreStartable
 
     @Binds
     @IntoMap
