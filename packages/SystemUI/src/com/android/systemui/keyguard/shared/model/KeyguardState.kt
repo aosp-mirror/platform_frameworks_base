@@ -157,6 +157,7 @@ enum class KeyguardState {
          * keyguard state.
          */
         fun deviceIsAwakeInState(state: KeyguardState): Boolean {
+            state.checkValidState()
             return when (state) {
                 OFF -> false
                 DOZING -> false
