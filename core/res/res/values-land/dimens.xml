@@ -69,7 +69,7 @@
     <dimen name="timepicker_left_side_width">250dip</dimen>
 
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
-    <dimen name="immersive_mode_cling_width">380dp</dimen>
+    <dimen name="immersive_mode_cling_width">500dp</dimen>
 
      <!-- Floating toolbar dimensions -->
      <dimen name="floating_toolbar_preferred_width">544dp</dimen>

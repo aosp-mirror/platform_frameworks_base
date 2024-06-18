@@ -30,6 +30,7 @@ import android.hardware.biometrics.BiometricPrompt
 import android.hardware.biometrics.Flags.customBiometricPrompt
 import android.hardware.biometrics.PromptContentView
 import android.os.UserHandle
+import android.text.TextPaint
 import android.util.Log
 import android.util.RotationUtils
 import android.view.HapticFeedbackConstants
@@ -52,6 +53,7 @@ import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.res.R
+import com.android.systemui.util.kotlin.combine
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -230,7 +232,6 @@ constructor(
     val fingerprintStartMode: Flow<FingerprintStartMode> = _fingerprintStartMode.asStateFlow()
 
     /** Whether a finger has been acquired by the sensor */
-    // TODO(b/331948073): Add support for detecting SFPS finger without authentication running
     val hasFingerBeenAcquired: Flow<Boolean> =
         combine(biometricStatusInteractor.fingerprintAcquiredStatus, modalities) {
                 status,
@@ -260,14 +261,19 @@ constructor(
     val position: Flow<PromptPosition> =
         combine(
                 _forceLargeSize,
+                promptKind,
                 displayStateInteractor.isLargeScreen,
-                displayStateInteractor.currentRotation
-            ) { forceLarge, isLargeScreen, rotation ->
+                displayStateInteractor.currentRotation,
+                modalities
+            ) { forceLarge, promptKind, isLargeScreen, rotation, modalities ->
                 when {
-                    forceLarge || isLargeScreen -> PromptPosition.Bottom
+                    forceLarge ||
+                        isLargeScreen ||
+                        promptKind.isOnePaneNoSensorLandscapeBiometric() -> PromptPosition.Bottom
                     rotation == DisplayRotation.ROTATION_90 -> PromptPosition.Right
                     rotation == DisplayRotation.ROTATION_270 -> PromptPosition.Left
-                    rotation == DisplayRotation.ROTATION_180 -> PromptPosition.Top
+                    rotation == DisplayRotation.ROTATION_180 && modalities.hasUdfps ->
+                        PromptPosition.Top
                     else -> PromptPosition.Bottom
                 }
             }
@@ -297,23 +303,23 @@ constructor(
     /** Prompt panel size padding */
     private val smallHorizontalGuidelinePadding =
         context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_small_horizontal_guideline_padding
+            R.dimen.biometric_prompt_land_small_horizontal_guideline_padding
         )
     private val udfpsHorizontalGuidelinePadding =
         context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_udfps_horizontal_guideline_padding
+            R.dimen.biometric_prompt_two_pane_udfps_horizontal_guideline_padding
         )
-    private val udfpsMidGuidelinePadding =
+    private val udfpsHorizontalShorterGuidelinePadding =
         context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_udfps_mid_guideline_padding
+            R.dimen.biometric_prompt_two_pane_udfps_shorter_horizontal_guideline_padding
+        )
+    private val mediumTopGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_one_pane_medium_top_guideline_padding
         )
     private val mediumHorizontalGuidelinePadding =
         context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_medium_horizontal_guideline_padding
-        )
-    private val mediumMidGuidelinePadding =
-        context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_medium_mid_guideline_padding
+            R.dimen.biometric_prompt_two_pane_medium_horizontal_guideline_padding
         )
 
     /** Rect for positioning biometric icon */
@@ -363,7 +369,14 @@ constructor(
                                 landscapeMediumBottomPadding
                             )
                         }
-                    PromptPosition.Top -> Rect()
+                    PromptPosition.Top ->
+                        if (size.isSmall) {
+                            Rect(0, 0, 0, portraitSmallBottomPadding)
+                        } else if (size.isMedium && modalities.hasUdfps) {
+                            Rect(0, 0, 0, sensorBounds.bottom)
+                        } else {
+                            Rect(0, 0, 0, portraitMediumBottomPadding)
+                        }
                 }
             }
             .distinctUntilChanged()
@@ -416,9 +429,9 @@ constructor(
      * asset to be loaded before determining the prompt size.
      */
     val isIconViewLoaded: Flow<Boolean> =
-        combine(modalities, _isIconViewLoaded.asStateFlow()) { modalities, isIconViewLoaded ->
-                val noIcon = modalities.isEmpty
-                noIcon || isIconViewLoaded
+        combine(hideSensorIcon, _isIconViewLoaded.asStateFlow()) { hideSensorIcon, isIconViewLoaded
+                ->
+                hideSensorIcon || isIconViewLoaded
             }
             .distinctUntilChanged()
 
@@ -440,48 +453,6 @@ constructor(
                 }
             }
         }
-
-    /**
-     * Rect for positioning prompt guidelines (left, top, right, mid)
-     *
-     * Negative values are used to signify that guideline measuring should be flipped, measuring
-     * from opposite side of the screen
-     */
-    val guidelineBounds: Flow<Rect> =
-        combine(iconPosition, size, position, modalities) { _, size, position, modalities ->
-                when (position) {
-                    PromptPosition.Bottom -> Rect(0, 0, 0, 0)
-                    PromptPosition.Right ->
-                        if (size.isSmall) {
-                            Rect(-smallHorizontalGuidelinePadding, 0, 0, 0)
-                        } else if (modalities.hasUdfps) {
-                            Rect(udfpsHorizontalGuidelinePadding, 0, 0, udfpsMidGuidelinePadding)
-                        } else if (modalities.isEmpty) {
-                            // TODO: Temporary fix until no biometric landscape layout is added
-                            Rect(-mediumHorizontalGuidelinePadding, 0, 0, 6)
-                        } else {
-                            Rect(-mediumHorizontalGuidelinePadding, 0, 0, mediumMidGuidelinePadding)
-                        }
-                    PromptPosition.Left ->
-                        if (size.isSmall) {
-                            Rect(0, 0, -smallHorizontalGuidelinePadding, 0)
-                        } else if (modalities.hasUdfps) {
-                            Rect(0, 0, udfpsHorizontalGuidelinePadding, -udfpsMidGuidelinePadding)
-                        } else if (modalities.isEmpty) {
-                            // TODO: Temporary fix until no biometric landscape layout is added
-                            Rect(0, 0, -mediumHorizontalGuidelinePadding, -6)
-                        } else {
-                            Rect(
-                                0,
-                                0,
-                                -mediumHorizontalGuidelinePadding,
-                                -mediumMidGuidelinePadding
-                            )
-                        }
-                    PromptPosition.Top -> Rect()
-                }
-            }
-            .distinctUntilChanged()
 
     /** Padding for prompt UI elements */
     val promptPadding: Flow<Rect> =
@@ -506,7 +477,6 @@ constructor(
             .map {
                 when {
                     !(customBiometricPrompt() && constraintBp()) || it == null -> null
-                    it.logoRes != -1 -> context.resources.getDrawable(it.logoRes, context.theme)
                     it.logoBitmap != null -> BitmapDrawable(context.resources, it.logoBitmap)
                     else -> context.getUserBadgedIcon(it, iconProvider, activityTaskManager)
                 }
@@ -550,6 +520,81 @@ constructor(
             if (contentView == null) description else ""
         }
 
+    private val hasOnlyOneLineTitle: Flow<Boolean> =
+        combine(title, subtitle, contentView, description) {
+            title,
+            subtitle,
+            contentView,
+            description ->
+            if (subtitle.isNotEmpty() || contentView != null || description.isNotEmpty()) {
+                false
+            } else {
+                val maxWidth =
+                    context.resources.getDimensionPixelSize(
+                        R.dimen.biometric_prompt_two_pane_udfps_shorter_content_width
+                    )
+                val attributes =
+                    context.obtainStyledAttributes(
+                        R.style.TextAppearance_AuthCredential_Title,
+                        intArrayOf(android.R.attr.textSize)
+                    )
+                val paint = TextPaint()
+                paint.textSize = attributes.getDimensionPixelSize(0, 0).toFloat()
+                val textWidth = paint.measureText(title)
+                attributes.recycle()
+                textWidth / maxWidth <= 1
+            }
+        }
+
+    /**
+     * Rect for positioning prompt guidelines (left, top, right, unused)
+     *
+     * Negative values are used to signify that guideline measuring should be flipped, measuring
+     * from opposite side of the screen
+     */
+    val guidelineBounds: Flow<Rect> =
+        combine(iconPosition, promptKind, size, position, modalities, hasOnlyOneLineTitle) {
+                _,
+                promptKind,
+                size,
+                position,
+                modalities,
+                hasOnlyOneLineTitle ->
+                var left = 0
+                var top = 0
+                var right = 0
+                when (position) {
+                    PromptPosition.Bottom -> {
+                        val noSensorLandscape = promptKind.isOnePaneNoSensorLandscapeBiometric()
+                        top = if (noSensorLandscape) 0 else mediumTopGuidelinePadding
+                    }
+                    PromptPosition.Right ->
+                        left = getHorizontalPadding(size, modalities, hasOnlyOneLineTitle)
+                    PromptPosition.Left ->
+                        right = getHorizontalPadding(size, modalities, hasOnlyOneLineTitle)
+                    PromptPosition.Top -> {}
+                }
+                Rect(left, top, right, 0)
+            }
+            .distinctUntilChanged()
+
+    private fun getHorizontalPadding(
+        size: PromptSize,
+        modalities: BiometricModalities,
+        hasOnlyOneLineTitle: Boolean
+    ) =
+        if (size.isSmall) {
+            -smallHorizontalGuidelinePadding
+        } else if (modalities.hasUdfps) {
+            if (hasOnlyOneLineTitle) {
+                -udfpsHorizontalShorterGuidelinePadding
+            } else {
+                udfpsHorizontalGuidelinePadding
+            }
+        } else {
+            -mediumHorizontalGuidelinePadding
+        }
+
     /** If the indicator (help, error) message should be shown. */
     val isIndicatorMessageVisible: Flow<Boolean> =
         combine(
@@ -571,7 +616,8 @@ constructor(
         }
 
     /** If the icon can be used as a confirmation button. */
-    val isIconConfirmButton: Flow<Boolean> = size.map { it.isNotSmall }.distinctUntilChanged()
+    val isIconConfirmButton: Flow<Boolean> =
+        combine(modalities, size) { modalities, size -> modalities.hasUdfps && size.isNotSmall }
 
     /** If the negative button should be shown. */
     val isNegativeButtonVisible: Flow<Boolean> =
@@ -654,6 +700,9 @@ constructor(
         failedModality: BiometricModality = BiometricModality.None,
     ) = coroutineScope {
         if (_isAuthenticated.value.isAuthenticated) {
+            if (_isAuthenticated.value.needsUserConfirmation && hapticFeedback) {
+                vibrateOnError()
+            }
             return@coroutineScope
         }
 
@@ -777,6 +826,14 @@ constructor(
         helpMessage: String = "",
     ) {
         if (_isAuthenticated.value.isAuthenticated) {
+            // Treat second authentication with a different modality as confirmation for the first
+            if (
+                _isAuthenticated.value.needsUserConfirmation &&
+                    modality != _isAuthenticated.value.authenticatedModality
+            ) {
+                confirmAuthenticated()
+                return
+            }
             // TODO(jbolinger): convert to go/tex-apc?
             Log.w(TAG, "Cannot show authenticated after authenticated")
             return

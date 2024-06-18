@@ -81,7 +81,7 @@ class LocalMediaRepositoryImpl(
                     localMediaManager.unregisterCallback(callback)
                 }
             }
-            .shareIn(coroutineScope, SharingStarted.WhileSubscribed(), replay = 0)
+            .shareIn(coroutineScope, SharingStarted.Eagerly, replay = 0)
 
     override val currentConnectedDevice: StateFlow<MediaDevice?> =
         merge(devicesChanges, mediaDevicesUpdates)
@@ -89,8 +89,8 @@ class LocalMediaRepositoryImpl(
             .onStart { emit(localMediaManager.currentConnectedDevice) }
             .stateIn(
                 coroutineScope,
-                SharingStarted.WhileSubscribed(),
-                localMediaManager.currentConnectedDevice
+                SharingStarted.Eagerly,
+                localMediaManager.currentConnectedDevice,
             )
 
     private sealed interface DevicesUpdate {

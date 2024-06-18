@@ -213,7 +213,7 @@ public final class DisplayInfo implements Parcelable {
 
     /**
      * The supported modes that will be exposed externally.
-     * Might have different set of modes that supportedModes for VRR displays
+     * Might have different set of modes than supportedModes for VRR displays
      */
     public Display.Mode[] appsSupportedModes = Display.Mode.EMPTY_ARRAY;
 

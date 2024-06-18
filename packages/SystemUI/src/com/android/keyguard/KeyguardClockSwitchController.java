@@ -308,14 +308,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mStatusArea = mView.findViewById(R.id.keyguard_status_area);
 
         mBgExecutor.execute(() -> {
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
                     false, /* notifyForDescendants */
                     mDoubleLineClockObserver,
                     UserHandle.USER_ALL
             );
 
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
                     false, /* notifyForDescendants */
                     mShowWeatherObserver,
@@ -372,8 +372,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         setClock(null);
 
         mBgExecutor.execute(() -> {
-            mSecureSettings.unregisterContentObserver(mDoubleLineClockObserver);
-            mSecureSettings.unregisterContentObserver(mShowWeatherObserver);
+            mSecureSettings.unregisterContentObserverSync(mDoubleLineClockObserver);
+            mSecureSettings.unregisterContentObserverSync(mShowWeatherObserver);
         });
 
         mKeyguardUnlockAnimationController.removeKeyguardUnlockAnimationListener(

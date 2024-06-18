@@ -1755,6 +1755,12 @@ public class ActivityManager {
         private int mNavigationBarColor;
         @Appearance
         private int mSystemBarsAppearance;
+        /**
+         * Similar to {@link TaskDescription#mSystemBarsAppearance}, but is taken from the topmost
+         * fully opaque (i.e. non transparent) activity in the task.
+         */
+        @Appearance
+        private int mTopOpaqueSystemBarsAppearance;
         private boolean mEnsureStatusBarContrastWhenTransparent;
         private boolean mEnsureNavigationBarContrastWhenTransparent;
         private int mResizeMode;
@@ -1855,7 +1861,7 @@ public class ActivityManager {
                 final Icon icon = mIconRes == Resources.ID_NULL ? null :
                         Icon.createWithResource(ActivityThread.currentPackageName(), mIconRes);
                 return new TaskDescription(mLabel, icon, mPrimaryColor, mBackgroundColor,
-                        mStatusBarColor, mNavigationBarColor, 0, false, false,
+                        mStatusBarColor, mNavigationBarColor, 0, 0, false, false,
                         RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             }
         }
@@ -1874,7 +1880,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, @DrawableRes int iconRes, int colorPrimary) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
-                    colorPrimary, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+                    colorPrimary, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1892,7 +1898,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, @DrawableRes int iconRes) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
-                    0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+                    0, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1904,7 +1910,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label) {
-            this(label, null, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+            this(label, null, 0, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1914,7 +1920,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription() {
-            this(null, null, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+            this(null, null, 0, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1930,7 +1936,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
             this(label, icon != null ? Icon.createWithBitmap(icon) : null, colorPrimary, 0, 0, 0,
-                    0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+                    0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1946,7 +1952,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon) {
-            this(label, icon != null ? Icon.createWithBitmap(icon) : null, 0, 0, 0, 0, 0, false,
+            this(label, icon != null ? Icon.createWithBitmap(icon) : null, 0, 0, 0, 0, 0, 0, false,
                     false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
@@ -1955,6 +1961,7 @@ public class ActivityManager {
                 int colorPrimary, int colorBackground,
                 int statusBarColor, int navigationBarColor,
                 @Appearance int systemBarsAppearance,
+                @Appearance int topOpaqueSystemBarsAppearance,
                 boolean ensureStatusBarContrastWhenTransparent,
                 boolean ensureNavigationBarContrastWhenTransparent, int resizeMode, int minWidth,
                 int minHeight, int colorBackgroundFloating) {
@@ -1965,6 +1972,7 @@ public class ActivityManager {
             mStatusBarColor = statusBarColor;
             mNavigationBarColor = navigationBarColor;
             mSystemBarsAppearance = systemBarsAppearance;
+            mTopOpaqueSystemBarsAppearance = topOpaqueSystemBarsAppearance;
             mEnsureStatusBarContrastWhenTransparent = ensureStatusBarContrastWhenTransparent;
             mEnsureNavigationBarContrastWhenTransparent =
                     ensureNavigationBarContrastWhenTransparent;
@@ -1994,6 +2002,7 @@ public class ActivityManager {
             mStatusBarColor = other.mStatusBarColor;
             mNavigationBarColor = other.mNavigationBarColor;
             mSystemBarsAppearance = other.mSystemBarsAppearance;
+            mTopOpaqueSystemBarsAppearance = other.mTopOpaqueSystemBarsAppearance;
             mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
             mEnsureNavigationBarContrastWhenTransparent =
                     other.mEnsureNavigationBarContrastWhenTransparent;
@@ -2025,6 +2034,9 @@ public class ActivityManager {
             }
             if (other.mSystemBarsAppearance != 0) {
                 mSystemBarsAppearance = other.mSystemBarsAppearance;
+            }
+            if (other.mTopOpaqueSystemBarsAppearance != 0) {
+                mTopOpaqueSystemBarsAppearance = other.mTopOpaqueSystemBarsAppearance;
             }
 
             mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
@@ -2305,6 +2317,14 @@ public class ActivityManager {
         /**
          * @hide
          */
+        @Appearance
+        public int getTopOpaqueSystemBarsAppearance() {
+            return mTopOpaqueSystemBarsAppearance;
+        }
+
+        /**
+         * @hide
+         */
         public void setEnsureStatusBarContrastWhenTransparent(
                 boolean ensureStatusBarContrastWhenTransparent) {
             mEnsureStatusBarContrastWhenTransparent = ensureStatusBarContrastWhenTransparent;
@@ -2315,6 +2335,13 @@ public class ActivityManager {
          */
         public void setSystemBarsAppearance(@Appearance int systemBarsAppearance) {
             mSystemBarsAppearance = systemBarsAppearance;
+        }
+
+        /**
+         * @hide
+         */
+        public void setTopOpaqueSystemBarsAppearance(int topOpaqueSystemBarsAppearance) {
+            mTopOpaqueSystemBarsAppearance = topOpaqueSystemBarsAppearance;
         }
 
         /**
@@ -2442,6 +2469,7 @@ public class ActivityManager {
             dest.writeInt(mStatusBarColor);
             dest.writeInt(mNavigationBarColor);
             dest.writeInt(mSystemBarsAppearance);
+            dest.writeInt(mTopOpaqueSystemBarsAppearance);
             dest.writeBoolean(mEnsureStatusBarContrastWhenTransparent);
             dest.writeBoolean(mEnsureNavigationBarContrastWhenTransparent);
             dest.writeInt(mResizeMode);
@@ -2466,6 +2494,7 @@ public class ActivityManager {
             mStatusBarColor = source.readInt();
             mNavigationBarColor = source.readInt();
             mSystemBarsAppearance = source.readInt();
+            mTopOpaqueSystemBarsAppearance = source.readInt();
             mEnsureStatusBarContrastWhenTransparent = source.readBoolean();
             mEnsureNavigationBarContrastWhenTransparent = source.readBoolean();
             mResizeMode = source.readInt();
@@ -2498,7 +2527,8 @@ public class ActivityManager {
                     + " resizeMode: " + ActivityInfo.resizeModeToString(mResizeMode)
                     + " minWidth: " + mMinWidth + " minHeight: " + mMinHeight
                     + " colorBackgrounFloating: " + mColorBackgroundFloating
-                    + " systemBarsAppearance: " + mSystemBarsAppearance;
+                    + " systemBarsAppearance: " + mSystemBarsAppearance
+                    + " topOpaqueSystemBarsAppearance: " + mTopOpaqueSystemBarsAppearance;
         }
 
         @Override
@@ -2519,6 +2549,7 @@ public class ActivityManager {
             result = result * 31 + mStatusBarColor;
             result = result * 31 + mNavigationBarColor;
             result = result * 31 + mSystemBarsAppearance;
+            result = result * 31 + mTopOpaqueSystemBarsAppearance;
             result = result * 31 + (mEnsureStatusBarContrastWhenTransparent ? 1 : 0);
             result = result * 31 + (mEnsureNavigationBarContrastWhenTransparent ? 1 : 0);
             result = result * 31 + mResizeMode;
@@ -2542,6 +2573,7 @@ public class ActivityManager {
                     && mStatusBarColor == other.mStatusBarColor
                     && mNavigationBarColor == other.mNavigationBarColor
                     && mSystemBarsAppearance == other.mSystemBarsAppearance
+                    && mTopOpaqueSystemBarsAppearance == other.mTopOpaqueSystemBarsAppearance
                     && mEnsureStatusBarContrastWhenTransparent
                             == other.mEnsureStatusBarContrastWhenTransparent
                     && mEnsureNavigationBarContrastWhenTransparent
@@ -4190,6 +4222,10 @@ public class ActivityManager {
      * Return a list of {@link ApplicationStartInfo} records containing the information about the
      * most recent app startups.
      *
+     * Records accessed using this path might include "incomplete" records such as in-progress app
+     * starts. Accessing in-progress starts using this method lets you access start information
+     * early to better optimize your startup path.
+     *
      * <p class="note"> Note: System stores this historical information in a ring buffer and only
      * the most recent records will be returned. </p>
      *
@@ -4216,6 +4252,9 @@ public class ActivityManager {
     /**
      * Return a list of {@link ApplicationStartInfo} records containing the information about the
      * most recent app startups.
+     *
+     * Records accessed using this path might include "incomplete" records such as in-progress app
+     * starts.
      *
      * <p class="note"> Note: System stores this historical information in a ring buffer and only
      * the most recent records will be returned. </p>
@@ -4262,17 +4301,19 @@ public class ActivityManager {
     }
 
     /**
-     * Adds a callback to be notified when the {@link ApplicationStartInfo} records of this startup
-     * are complete.
+     * Adds a callback that is notified when the {@link ApplicationStartInfo} record of this startup
+     * is complete. The startup is considered complete when the first frame is drawn.
      *
-     * <p class="note"> Note: callback will be removed automatically after being triggered.</p>
+     * The callback doesn't wait for {@link Activity#reportFullyDrawn} to occur. Retrieve a copy
+     * of {@link ApplicationStartInfo} after {@link Activity#reportFullyDrawn} is called (using this
+     * callback or {@link getHistoricalProcessStartReasons}) if you need the
+     * {@link ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN} timestamp.
      *
-     * <p class="note"> Note: callback will not wait for {@link Activity#reportFullyDrawn} to occur.
-     * Timestamp for fully drawn may be added after callback occurs. Set callback after invoking
-     * {@link Activity#reportFullyDrawn} if timestamp for fully drawn is required.</p>
+     * If the current start record has already been completed (that is, the process is not currently
+     * starting), the callback will be invoked immediately on the specified executor with the
+     * previously completed {@link ApplicationStartInfo} record.
      *
-     * <p class="note"> Note: if start records have already been retrieved, the callback will be
-     * invoked immediately on the specified executor with the previously resolved AppStartInfo.</p>
+     * Callback will be called at most once and removed automatically after being triggered.
      *
      * <p class="note"> Note: callback is asynchronous and should be made from a background thread.
      * </p>
@@ -4362,8 +4403,8 @@ public class ActivityManager {
      * Adds an optional developer supplied timestamp to the calling apps most recent
      * {@link ApplicationStartInfo}. This is in addition to system recorded timestamps.
      *
-     * <p class="note"> Note: timestamps added after {@link Activity#reportFullyDrawn} is called
-     * will be discarded.</p>
+     * <p class="note"> Note: any timestamps added after {@link Activity#reportFullyDrawn} is called
+     * are discarded.</p>
      *
      * <p class="note"> Note: will overwrite existing timestamp if called with same key.</p>
      *

@@ -64,4 +64,9 @@ public interface IProtoLogGroup {
      * returns name of the logging group.
      */
     String name();
+
+    /**
+     * returns the id of the logging group (unique for each group).
+     */
+    int getId();
 }

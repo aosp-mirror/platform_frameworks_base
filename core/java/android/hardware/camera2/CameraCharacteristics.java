@@ -1472,9 +1472,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.flash.info.strengthDefaultLevel", int.class);
 
     /**
-     * <p>Maximum flash brightness level for manual flash control in SINGLE mode.</p>
+     * <p>Maximum flash brightness level for manual flash control in <code>SINGLE</code> mode.</p>
      * <p>Maximum flash brightness level in camera capture mode and
-     * {@link CaptureRequest#FLASH_MODE android.flash.mode} set to SINGLE.
+     * {@link CaptureRequest#FLASH_MODE android.flash.mode} set to <code>SINGLE</code>.
      * Value will be &gt; 1 if the manual flash strength control feature is supported,
      * otherwise the value will be equal to 1.
      * Note that this level is just a number of supported levels (the granularity of control).
@@ -1490,12 +1490,14 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.flash.singleStrengthMaxLevel", int.class);
 
     /**
-     * <p>Default flash brightness level for manual flash control in SINGLE mode.</p>
+     * <p>Default flash brightness level for manual flash control in <code>SINGLE</code> mode.</p>
      * <p>If flash unit is available this will be greater than or equal to 1 and less
-     * or equal to <code>android.flash.info.singleStrengthMaxLevel</code>.
+     * or equal to {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel}.
      * Note for devices that do not support the manual flash strength control
      * feature, this level will always be equal to 1.</p>
      * <p>This key is available on all devices.</p>
+     *
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL
      */
     @PublicKey
     @NonNull
@@ -1504,20 +1506,22 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.flash.singleStrengthDefaultLevel", int.class);
 
     /**
-     * <p>Maximum flash brightness level for manual flash control in TORCH mode</p>
+     * <p>Maximum flash brightness level for manual flash control in <code>TORCH</code> mode</p>
      * <p>Maximum flash brightness level in camera capture mode and
-     * {@link CaptureRequest#FLASH_MODE android.flash.mode} set to TORCH.
+     * {@link CaptureRequest#FLASH_MODE android.flash.mode} set to <code>TORCH</code>.
      * Value will be &gt; 1 if the manual flash strength control feature is supported,
      * otherwise the value will be equal to 1.</p>
      * <p>Note that this level is just a number of supported levels(the granularity of control).
      * There is no actual physical power units tied to this level.
-     * There is no relation between android.flash.info.torchStrengthMaxLevel and
-     * android.flash.info.singleStrengthMaxLevel i.e. the ratio of
-     * android.flash.info.torchStrengthMaxLevel:android.flash.info.singleStrengthMaxLevel
+     * There is no relation between {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} and
+     * {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} i.e. the ratio of
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel}:{@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel}
      * is not guaranteed to be the ratio of actual brightness.</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#FLASH_MODE
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL
      */
     @PublicKey
     @NonNull
@@ -1526,12 +1530,14 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.flash.torchStrengthMaxLevel", int.class);
 
     /**
-     * <p>Default flash brightness level for manual flash control in TORCH mode</p>
+     * <p>Default flash brightness level for manual flash control in <code>TORCH</code> mode</p>
      * <p>If flash unit is available this will be greater than or equal to 1 and less
-     * or equal to android.flash.info.torchStrengthMaxLevel.
+     * or equal to {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel}.
      * Note for the devices that do not support the manual flash strength control feature,
      * this level will always be equal to 1.</p>
      * <p>This key is available on all devices.</p>
+     *
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL
      */
     @PublicKey
     @NonNull
@@ -4146,10 +4152,16 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Whether the RAW images output from this camera device are subject to
      * lens shading correction.</p>
-     * <p>If TRUE, all images produced by the camera device in the RAW image formats will
-     * have lens shading correction already applied to it. If FALSE, the images will
-     * not be adjusted for lens shading correction.
-     * See {@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_RAW android.request.maxNumOutputRaw} for a list of RAW image formats.</p>
+     * <p>If <code>true</code>, all images produced by the camera device in the <code>RAW</code> image formats will have
+     * at least some lens shading correction already applied to it. If <code>false</code>, the images will
+     * not be adjusted for lens shading correction.  See {@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_RAW android.request.maxNumOutputRaw} for a
+     * list of RAW image formats.</p>
+     * <p>When <code>true</code>, the <code>lensShadingCorrectionMap</code> key may still have values greater than 1.0,
+     * and those will need to be applied to any captured RAW frames for them to match the shading
+     * correction of processed buffers such as <code>YUV</code> or <code>JPEG</code> images. This may occur, for
+     * example, when some basic fixed lens shading correction is applied by hardware to RAW data,
+     * and additional correction is done dynamically in the camera processing pipeline after
+     * demosaicing.</p>
      * <p>This key will be <code>null</code> for all devices do not report this information.
      * Devices with RAW capability will always report this information in this key.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>

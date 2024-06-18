@@ -1,3 +1,5 @@
+# proto-file: build/make/tools/aconfig/aconfig_protos/protos/aconfig.proto
+
 package: "com.android.wm.shell"
 container: "system"
 
@@ -98,4 +100,24 @@ flag {
     namespace: "multitasking"
     description: "Enable UI affordances to put other content into a bubble"
     bug: "342245211"
+}
+
+flag {
+    name: "only_reuse_bubbled_task_when_launched_from_bubble"
+    namespace: "multitasking"
+    description: "Allow reusing bubbled tasks for new activities only when launching from bubbles"
+    bug: "328229865"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "animate_bubble_size_change"
+    namespace: "multitasking"
+    description: "Turns on the animation for bubble bar icons size change"
+    bug: "335575529"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

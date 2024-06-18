@@ -104,6 +104,12 @@ constructor(
         }
 
         scope.launch {
+            keyguardInteractor.isKeyguardGoingAway.collect {
+                logger.log(TAG, VERBOSE, "isKeyguardGoingAway", it)
+            }
+        }
+
+        scope.launch {
             keyguardInteractor.isKeyguardOccluded.collect {
                 logger.log(TAG, VERBOSE, "isOccluded", it)
             }

@@ -34,11 +34,11 @@ import com.android.credentialmanager.getflow.ProviderDisplayInfo
 import com.android.credentialmanager.getflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.generateDisplayTitleTextResCode
 import com.android.credentialmanager.model.BiometricRequestInfo
+import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.creation.CreateOptionInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.model.get.ProviderInfo
-import java.lang.Exception
 
 /**
  * Aggregates common display information used for the Biometric Flow.
@@ -121,11 +121,11 @@ fun runBiometricFlowForGet(
     getBiometricCancellationSignal: () -> CancellationSignal,
     getRequestDisplayInfo: RequestDisplayInfo? = null,
     getProviderInfoList: List<ProviderInfo>? = null,
-    getProviderDisplayInfo: ProviderDisplayInfo? = null,
-) {
+    getProviderDisplayInfo: ProviderDisplayInfo? = null
+): Boolean {
     if (getBiometricPromptState() != BiometricPromptState.INACTIVE) {
         // Screen is already up, do not re-launch
-        return
+        return false
     }
     onBiometricPromptStateChange(BiometricPromptState.PENDING)
     val biometricDisplayInfo = validateAndRetrieveBiometricGetDisplayInfo(
@@ -137,7 +137,7 @@ fun runBiometricFlowForGet(
 
     if (biometricDisplayInfo == null) {
         onBiometricFailureFallback(BiometricFlowType.GET)
-        return
+        return false
     }
 
     val callback: BiometricPrompt.AuthenticationCallback =
@@ -146,7 +146,7 @@ fun runBiometricFlowForGet(
             getBiometricPromptState)
 
     Log.d(TAG, "The BiometricPrompt API call begins for Get.")
-    runBiometricFlow(context, biometricDisplayInfo, callback, openMoreOptionsPage,
+    return runBiometricFlow(context, biometricDisplayInfo, callback, openMoreOptionsPage,
         onBiometricFailureFallback, BiometricFlowType.GET, onCancelFlowAndFinish,
         getBiometricCancellationSignal)
 }
@@ -169,11 +169,11 @@ fun runBiometricFlowForCreate(
     getBiometricCancellationSignal: () -> CancellationSignal,
     createRequestDisplayInfo: com.android.credentialmanager.createflow
     .RequestDisplayInfo? = null,
-    createProviderInfo: EnabledProviderInfo? = null,
-) {
+    createProviderInfo: EnabledProviderInfo? = null
+): Boolean {
     if (getBiometricPromptState() != BiometricPromptState.INACTIVE) {
         // Screen is already up, do not re-launch
-        return
+        return false
     }
     onBiometricPromptStateChange(BiometricPromptState.PENDING)
     val biometricDisplayInfo = validateAndRetrieveBiometricCreateDisplayInfo(
@@ -184,7 +184,7 @@ fun runBiometricFlowForCreate(
 
     if (biometricDisplayInfo == null) {
         onBiometricFailureFallback(BiometricFlowType.CREATE)
-        return
+        return false
     }
 
     val callback: BiometricPrompt.AuthenticationCallback =
@@ -193,7 +193,7 @@ fun runBiometricFlowForCreate(
             getBiometricPromptState)
 
     Log.d(TAG, "The BiometricPrompt API call begins for Create.")
-    runBiometricFlow(context, biometricDisplayInfo, callback, openMoreOptionsPage,
+    return runBiometricFlow(context, biometricDisplayInfo, callback, openMoreOptionsPage,
         onBiometricFailureFallback, BiometricFlowType.CREATE, onCancelFlowAndFinish,
         getBiometricCancellationSignal)
 }
@@ -206,19 +206,19 @@ fun runBiometricFlowForCreate(
  * only device credentials are requested.
  */
 private fun runBiometricFlow(
-    context: Context,
-    biometricDisplayInfo: BiometricDisplayInfo,
-    callback: BiometricPrompt.AuthenticationCallback,
-    openMoreOptionsPage: () -> Unit,
-    onBiometricFailureFallback: (BiometricFlowType) -> Unit,
-    biometricFlowType: BiometricFlowType,
-    onCancelFlowAndFinish: () -> Unit,
-    getBiometricCancellationSignal: () -> CancellationSignal,
-) {
+        context: Context,
+        biometricDisplayInfo: BiometricDisplayInfo,
+        callback: BiometricPrompt.AuthenticationCallback,
+        openMoreOptionsPage: () -> Unit,
+        onBiometricFailureFallback: (BiometricFlowType) -> Unit,
+        biometricFlowType: BiometricFlowType,
+        onCancelFlowAndFinish: () -> Unit,
+        getBiometricCancellationSignal: () -> CancellationSignal
+): Boolean {
     try {
         if (!canCallBiometricPrompt(biometricDisplayInfo, context)) {
             onBiometricFailureFallback(biometricFlowType)
-            return
+            return false
         }
 
         val biometricPrompt = setupBiometricPrompt(context, biometricDisplayInfo,
@@ -231,7 +231,7 @@ private fun runBiometricFlow(
         val cryptoOpId = getCryptoOpId(biometricDisplayInfo)
         if (cryptoOpId != null) {
             biometricPrompt.authenticate(
-                BiometricPrompt.CryptoObject(cryptoOpId.toLong()),
+                BiometricPrompt.CryptoObject(cryptoOpId),
                 cancellationSignal, executor, callback)
         } else {
             biometricPrompt.authenticate(cancellationSignal, executor, callback)
@@ -239,10 +239,12 @@ private fun runBiometricFlow(
     } catch (e: IllegalArgumentException) {
         Log.w(TAG, "Calling the biometric prompt API failed with: /n${e.localizedMessage}\n")
         onBiometricFailureFallback(biometricFlowType)
+        return false
     }
+    return true
 }
 
-private fun getCryptoOpId(biometricDisplayInfo: BiometricDisplayInfo): Int? {
+private fun getCryptoOpId(biometricDisplayInfo: BiometricDisplayInfo): Long? {
     return biometricDisplayInfo.biometricRequestInfo.opId
 }
 
@@ -475,7 +477,9 @@ private fun retrieveBiometricGetDisplayValues(
         return null
     }
     val singleEntryType = selectedEntry.credentialType
-    val username = selectedEntry.userName
+    val descriptionName = if (singleEntryType == CredentialType.PASSKEY &&
+        !selectedEntry.displayName.isNullOrBlank()) selectedEntry.displayName else
+        selectedEntry.userName
 
     // TODO(b/336362538) : In W, utilize updated localization strings
     displayTitleText = context.getString(
@@ -486,7 +490,7 @@ private fun retrieveBiometricGetDisplayValues(
     descriptionText = context.getString(
         R.string.get_dialog_description_single_tap,
         getRequestDisplayInfo.appName,
-        username
+        descriptionName
     )
 
     return BiometricDisplayInfo(providerIcon = icon, providerName = providerName,

@@ -2,13 +2,6 @@ package: "com.android.window.flags"
 container: "system"
 
 flag {
-  name: "disable_thin_letterboxing_reachability"
-  namespace: "large_screen_experiences_app_compat"
-  description: "Whether reachability is disabled in case of thin letterboxing"
-  bug: "334077350"
-}
-
-flag {
   name: "disable_thin_letterboxing_policy"
   namespace: "large_screen_experiences_app_compat"
   description: "Whether reachability is disabled in case of thin letterboxing"
@@ -77,6 +70,16 @@ flag {
   description: "Whether the font_scale is read from a device dependent configuration file"
   bug: "319808237"
   is_fixed_read_only: true
+}
+
+flag {
+  name: "immersive_app_repositioning"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Fix immersive apps changing size when repositioning"
+  bug: "334076352"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {

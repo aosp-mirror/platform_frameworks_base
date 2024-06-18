@@ -16,6 +16,7 @@
 
 package com.android.systemui.bouncer.ui.composable
 
+import android.platform.test.annotations.MotionTest
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -44,6 +45,7 @@ import platform.test.motion.golden.DataPointTypes
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
+@MotionTest
 class PatternBouncerTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 

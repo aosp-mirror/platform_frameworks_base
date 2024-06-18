@@ -172,11 +172,9 @@ public abstract class AppOpsManagerInternal {
          * @param virtualDeviceId the device for which to finish the op
          * @param superImpl
          */
-        default void finishOperation(IBinder clientId, int code, int uid, String packageName,
+        void finishOperation(IBinder clientId, int code, int uid, String packageName,
                 String attributionTag, int virtualDeviceId, @NonNull HexConsumer<IBinder, Integer,
-                        Integer, String, String, Integer> superImpl) {
-            superImpl.accept(clientId, code, uid, packageName, attributionTag, virtualDeviceId);
-        }
+                        Integer, String, String, Integer> superImpl);
 
         /**
          * Allows overriding finish proxy op.

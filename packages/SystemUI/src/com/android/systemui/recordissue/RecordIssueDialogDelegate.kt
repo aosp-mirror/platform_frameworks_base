@@ -17,8 +17,9 @@
 package com.android.systemui.recordissue
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
+import android.app.AlertDialog.BUTTON_POSITIVE
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -40,16 +41,16 @@ import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.SessionCreationSource
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate
-import com.android.systemui.qs.tiles.RecordIssueTile
+import com.android.systemui.recordissue.IssueRecordingState.Companion.ALL_ISSUE_TYPES
+import com.android.systemui.recordissue.IssueRecordingState.Companion.ISSUE_TYPE_NOT_SET
+import com.android.systemui.recordissue.IssueRecordingState.Companion.KEY_ISSUE_TYPE_RES
 import com.android.systemui.res.R
-import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.Executor
-import java.util.function.Consumer
 
 class RecordIssueDialogDelegate
 @AssistedInject
@@ -61,21 +62,20 @@ constructor(
     @Main private val mainExecutor: Executor,
     private val devicePolicyResolver: dagger.Lazy<ScreenCaptureDevicePolicyResolver>,
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
-    private val userFileManager: UserFileManager,
     private val screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate,
-    private val issueRecordingState: IssueRecordingState,
-    @Assisted private val onStarted: Consumer<IssueRecordingConfig>,
+    private val state: IssueRecordingState,
+    private val traceurMessageSender: TraceurMessageSender,
+    @Assisted private val onStarted: Runnable,
 ) : SystemUIDialog.Delegate {
 
     /** To inject dependencies and allow for easier testing */
     @AssistedFactory
     interface Factory {
         /** Create a dialog object */
-        fun create(onStarted: Consumer<IssueRecordingConfig>): RecordIssueDialogDelegate
+        fun create(onStarted: Runnable): RecordIssueDialogDelegate
     }
 
     @SuppressLint("UseSwitchCompatOrMaterialCode") private lateinit var screenRecordSwitch: Switch
-    @SuppressLint("UseSwitchCompatOrMaterialCode") private lateinit var bugReportSwitch: Switch
     private lateinit var issueTypeButton: Button
 
     @MainThread
@@ -84,22 +84,10 @@ constructor(
             setView(LayoutInflater.from(context).inflate(R.layout.record_issue_dialog, null))
             setTitle(context.getString(R.string.qs_record_issue_label))
             setIcon(R.drawable.qs_record_issue_icon_off)
-            setNegativeButton(R.string.cancel) { _, _ -> dismiss() }
-            setPositiveButton(
-                R.string.qs_record_issue_start,
-                { _, _ ->
-                    issueRecordingState.takeBugReport = bugReportSwitch.isChecked
-                    onStarted.accept(
-                        IssueRecordingConfig(
-                            screenRecordSwitch.isChecked,
-                            true /* TODO: Base this on issueType selected */
-                        )
-                    )
-                    dismiss()
-                },
-                false
-            )
+            setNegativeButton(R.string.cancel) { _, _ -> }
+            setPositiveButton(R.string.qs_record_issue_start) { _, _ -> onStarted.run() }
         }
+        bgExecutor.execute { traceurMessageSender.bindToTraceur(dialog.context) }
     }
 
     override fun createDialog(): SystemUIDialog = factory.create(this)
@@ -107,22 +95,39 @@ constructor(
     @MainThread
     override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
         dialog.apply {
-            window?.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
-            window?.setGravity(Gravity.CENTER)
+            window?.apply {
+                addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
+                setGravity(Gravity.CENTER)
+            }
 
-            screenRecordSwitch = requireViewById(R.id.screenrecord_switch)
-            screenRecordSwitch.setOnCheckedChangeListener { _, isEnabled ->
-                if (isEnabled) {
-                    bgExecutor.execute { onScreenRecordSwitchClicked() }
+            screenRecordSwitch =
+                requireViewById<Switch>(R.id.screenrecord_switch).apply {
+                    isChecked = state.recordScreen
+                    setOnCheckedChangeListener { _, isChecked ->
+                        state.recordScreen = isChecked
+                        if (isChecked) {
+                            bgExecutor.execute { onScreenRecordSwitchClicked() }
+                        }
+                    }
                 }
+
+            requireViewById<Switch>(R.id.bugreport_switch).apply {
+                isChecked = state.takeBugreport
+                setOnCheckedChangeListener { _, isChecked -> state.takeBugreport = isChecked }
             }
-            bugReportSwitch = requireViewById(R.id.bugreport_switch)
-            val startButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            issueTypeButton = requireViewById(R.id.issue_type_button)
-            issueTypeButton.setOnClickListener {
-                onIssueTypeClicked(context) { startButton.isEnabled = true }
-            }
-            startButton.isEnabled = false
+
+            issueTypeButton =
+                requireViewById<Button>(R.id.issue_type_button).apply {
+                    val startButton = dialog.getButton(BUTTON_POSITIVE)
+                    if (state.issueTypeRes != ISSUE_TYPE_NOT_SET) {
+                        setText(state.issueTypeRes)
+                    } else {
+                        startButton.isEnabled = false
+                    }
+                    setOnClickListener {
+                        onIssueTypeClicked(context) { startButton.isEnabled = true }
+                    }
+                }
         }
     }
 
@@ -146,19 +151,14 @@ constructor(
             SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER
         )
 
-        if (flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)) {
-            val prefs =
-                userFileManager.getSharedPreferences(
-                    RecordIssueTile.TILE_SPEC,
-                    Context.MODE_PRIVATE,
-                    userTracker.userId
-                )
-            if (!prefs.getBoolean(HAS_APPROVED_SCREEN_RECORDING, false)) {
-                mainExecutor.execute {
-                    ScreenCapturePermissionDialogDelegate(factory, prefs).createDialog().apply {
-                        setOnCancelListener { screenRecordSwitch.isChecked = false }
-                        show()
-                    }
+        if (
+            flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING) &&
+                !state.hasUserApprovedScreenRecording
+        ) {
+            mainExecutor.execute {
+                ScreenCapturePermissionDialogDelegate(factory, state).createDialog().apply {
+                    setOnCancelListener { screenRecordSwitch.isChecked = false }
+                    show()
                 }
             }
         }
@@ -166,20 +166,23 @@ constructor(
 
     @MainThread
     private fun onIssueTypeClicked(context: Context, onIssueTypeSelected: Runnable) {
-        val selectedCategory = issueTypeButton.text.toString()
         val popupMenu = PopupMenu(context, issueTypeButton)
 
-        context.resources.getStringArray(R.array.qs_record_issue_types).forEachIndexed { i, cat ->
-            popupMenu.menu.add(0, 0, i, cat).apply {
+        ALL_ISSUE_TYPES.keys.forEach {
+            popupMenu.menu.add(it).apply {
                 setIcon(R.drawable.arrow_pointing_down)
-                if (selectedCategory != cat) {
+                if (it != state.issueTypeRes) {
                     iconTintList = ColorStateList.valueOf(Color.TRANSPARENT)
                 }
+                intent = Intent().putExtra(KEY_ISSUE_TYPE_RES, it)
             }
         }
         popupMenu.apply {
             setOnMenuItemClickListener {
                 issueTypeButton.text = it.title
+                state.issueTypeRes =
+                    it.intent?.getIntExtra(KEY_ISSUE_TYPE_RES, ISSUE_TYPE_NOT_SET)
+                        ?: ISSUE_TYPE_NOT_SET
                 onIssueTypeSelected.run()
                 true
             }

@@ -19,6 +19,8 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
@@ -29,6 +31,7 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
@@ -38,6 +41,7 @@ import com.android.systemui.statusbar.notification.shared.NotificationIconContai
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.ui.SystemBarUtilsState
+import com.android.systemui.util.ui.value
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 
@@ -51,6 +55,7 @@ constructor(
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
     private val notificationIconAreaController: NotificationIconAreaController,
     private val systemBarUtilsState: SystemBarUtilsState,
+    private val rootViewModel: KeyguardRootViewModel,
 ) : KeyguardSection() {
 
     private var nicBindingDisposable: DisposableHandle? = null
@@ -101,20 +106,14 @@ constructor(
         if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
+
         val bottomMargin =
             context.resources.getDimensionPixelSize(R.dimen.keyguard_status_view_bottom_margin)
-
-        val useSplitShade = context.resources.getBoolean(R.bool.config_use_split_notification_shade)
-
-        val topAlignment =
-            if (useSplitShade) {
-                TOP
-            } else {
-                BOTTOM
-            }
+        val isVisible = rootViewModel.isNotifIconContainerVisible.value
         constraintSet.apply {
             connect(nicId, TOP, R.id.smart_space_barrier_bottom, BOTTOM, bottomMargin)
             setGoneMargin(nicId, BOTTOM, bottomMargin)
+            setVisibility(nicId, if (isVisible.value) VISIBLE else GONE)
 
             connect(
                 nicId,

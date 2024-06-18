@@ -953,6 +953,18 @@
     <string name="enable_verbose_vendor_logging">Enable verbose vendor logging</string>
     <!-- UI debug setting: enable verbose vendor logging summary [CHAR LIMIT=NONE] -->
     <string name="enable_verbose_vendor_logging_summary">Include additional device-specific vendor logs in bug reports, which may contain private information, use more battery, and/or use more storage.</string>
+    <!-- UI debug setting: checkbox text to disable verbose vendor logging after one day [CHAR LIMIT=50] -->
+    <string name="enable_verbose_vendor_logging_checkbox">Disable after one day</string>
+    <!-- UI debug setting: verbose vendor logging notification title [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_notification_title">Verbose vendor logging has ended</string>
+    <!-- UI debug setting: verbose vendor logging notification summary [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_notification_summary">Enabled for one day</string>
+    <!-- UI debug setting: verbose vendor logging notification action text [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_notification_action">Enable for one more day</string>
+    <!-- UI debug setting: verbose vendor logging preference summary for disabling after one day [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_preference_summary_will_disable">Disables after one day</string>
+    <!-- UI debug setting: verbose vendor logging preference summary for leaving setting enabled indefinitely [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_preference_summary_on">Enabled indefinitely</string>
 
     <!-- UI debug setting: scaling factor for window animations [CHAR LIMIT=25] -->
     <string name="window_animation_scale_title">Window animation scale</string>

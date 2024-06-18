@@ -146,11 +146,13 @@ public final class DisplayBrightnessController {
      */
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
-            int targetDisplayState) {
+            int targetDisplayState,
+            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
         DisplayBrightnessState state;
         synchronized (mLock) {
             mDisplayBrightnessStrategy = mDisplayBrightnessStrategySelector.selectStrategy(
-                    constructStrategySelectionRequest(displayPowerRequest, targetDisplayState));
+                    constructStrategySelectionRequest(displayPowerRequest, targetDisplayState,
+                            displayOffloadSession));
             state = mDisplayBrightnessStrategy
                         .updateBrightness(constructStrategyExecutionRequest(displayPowerRequest));
         }
@@ -203,6 +205,16 @@ public final class DisplayBrightnessController {
     /**
      * Returns a boolean flag indicating if the light sensor is to be used to decide the screen
      * brightness when dozing
+     */
+    public boolean isAllowAutoBrightnessWhileDozing() {
+        synchronized (mLock) {
+            return mDisplayBrightnessStrategySelector.isAllowAutoBrightnessWhileDozing();
+        }
+    }
+
+    /**
+     * Returns the config value indicating the auto brightness while dozing is to be
+     * allowed ot not. Note that this is a config value, but the actual status can differ from this.
      */
     public boolean isAllowAutoBrightnessWhileDozingConfig() {
         synchronized (mLock) {
@@ -587,19 +599,21 @@ public final class DisplayBrightnessController {
 
     private StrategySelectionRequest constructStrategySelectionRequest(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
-            int targetDisplayState) {
+            int targetDisplayState,
+            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
         boolean userSetBrightnessChanged = updateUserSetScreenBrightness();
         float lastUserSetScreenBrightness;
         synchronized (mLock) {
             lastUserSetScreenBrightness = mLastUserSetScreenBrightness;
         }
         return new StrategySelectionRequest(displayPowerRequest, targetDisplayState,
-                lastUserSetScreenBrightness, userSetBrightnessChanged);
+                lastUserSetScreenBrightness, userSetBrightnessChanged, displayOffloadSession);
     }
 
     private StrategyExecutionRequest constructStrategyExecutionRequest(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
         float currentScreenBrightness = getCurrentBrightness();
-        return new StrategyExecutionRequest(displayPowerRequest, currentScreenBrightness);
+        return new StrategyExecutionRequest(displayPowerRequest, currentScreenBrightness,
+                mUserSetScreenBrightnessUpdated);
     }
 }

@@ -70,8 +70,6 @@ import com.android.systemui.inputmethod.InputMethodModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyevent.data.repository.KeyEventRepositoryModule;
 import com.android.systemui.keyguard.ui.composable.LockscreenContent;
-import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule;
-import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.log.dagger.MonitorLog;
 import com.android.systemui.log.table.TableLogBuffer;
@@ -145,7 +143,6 @@ import com.android.systemui.statusbar.window.StatusBarWindowModule;
 import com.android.systemui.telephony.data.repository.TelephonyRepositoryModule;
 import com.android.systemui.temporarydisplay.dagger.TemporaryDisplayModule;
 import com.android.systemui.tuner.dagger.TunerModule;
-import com.android.systemui.unfold.SysUIUnfoldModule;
 import com.android.systemui.user.UserModule;
 import com.android.systemui.user.domain.UserDomainLayerModule;
 import com.android.systemui.util.EventLogModule;
@@ -222,8 +219,6 @@ import javax.inject.Named;
         InputMethodModule.class,
         KeyEventRepositoryModule.class,
         KeyboardModule.class,
-        KeyguardBlueprintModule.class,
-        KeyguardSectionsModule.class,
         LetterboxModule.class,
         LogModule.class,
         MediaProjectionActivitiesModule.class,
@@ -258,7 +253,7 @@ import javax.inject.Named;
         SystemPropertiesFlagsModule.class,
         SysUIConcurrencyModule.class,
         SysUICoroutinesModule.class,
-        SysUIUnfoldModule.class,
+        CommonSystemUIUnfoldModule.class,
         TelephonyRepositoryModule.class,
         TemporaryDisplayModule.class,
         TunerModule.class,

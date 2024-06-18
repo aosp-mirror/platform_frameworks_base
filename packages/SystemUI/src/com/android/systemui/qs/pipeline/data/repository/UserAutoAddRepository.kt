@@ -44,9 +44,8 @@ constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
 ) {
 
-    private val changeEvents = MutableSharedFlow<ChangeAction>(
-        extraBufferCapacity = CHANGES_BUFFER_SIZE
-    )
+    private val changeEvents =
+        MutableSharedFlow<ChangeAction>(extraBufferCapacity = CHANGES_BUFFER_SIZE)
 
     private lateinit var _autoAdded: StateFlow<Set<TileSpec>>
 
@@ -85,8 +84,8 @@ constructor(
                                     trySend(Unit)
                                 }
                             }
-                        secureSettings.registerContentObserverForUser(SETTING, observer, userId)
-                        awaitClose { secureSettings.unregisterContentObserver(observer) }
+                        secureSettings.registerContentObserverForUserSync(SETTING, observer, userId)
+                        awaitClose { secureSettings.unregisterContentObserverSync(observer) }
                     }
                     .map { load() }
                     .flowOn(bgDispatcher)

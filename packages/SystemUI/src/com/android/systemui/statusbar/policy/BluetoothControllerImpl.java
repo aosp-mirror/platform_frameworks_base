@@ -31,6 +31,7 @@ import androidx.annotation.WorkerThread;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.settingslib.bluetooth.BluetoothCallback;
+import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfile;
@@ -71,6 +72,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final UserManager mUserManager;
     private final int mCurrentUser;
+    private final Context mContext;
     @GuardedBy("mConnectedDevices")
     private final List<CachedBluetoothDevice> mConnectedDevices = new ArrayList<>();
 
@@ -99,6 +101,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
             @Main Looper mainLooper,
             @Nullable LocalBluetoothManager localBluetoothManager,
             @Nullable BluetoothAdapter bluetoothAdapter) {
+        mContext = context;
         mDumpManager = dumpManager;
         mLogger = logger;
         mBluetoothRepository = bluetoothRepository;
@@ -262,9 +265,21 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     private Collection<CachedBluetoothDevice> getDevices() {
-        return mLocalBluetoothManager != null
-                ? mLocalBluetoothManager.getCachedDeviceManager().getCachedDevicesCopy()
-                : Collections.emptyList();
+        Collection<CachedBluetoothDevice> devices =
+                mLocalBluetoothManager != null
+                        ? mLocalBluetoothManager.getCachedDeviceManager().getCachedDevicesCopy()
+                        : Collections.emptyList();
+        if (com.android.settingslib.flags.Flags.enableHideExclusivelyManagedBluetoothDevice()) {
+            // When the device is exclusively managed by its owner app it needs to be hidden.
+            devices =
+                    devices.stream()
+                            .filter(
+                                    device ->
+                                            !BluetoothUtils.isExclusivelyManagedBluetoothDevice(
+                                                    mContext, device.getDevice()))
+                            .toList();
+        }
+        return devices;
     }
 
     private void updateConnected() {

@@ -29,6 +29,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
@@ -63,6 +64,7 @@ public class AmbientState implements Dumpable {
      *  Used to read bouncer states.
      */
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private float mStackCutoff;
     private int mScrollY;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
@@ -344,6 +346,21 @@ public class AmbientState implements Dumpable {
      */
     public int getZDistanceBetweenElements() {
         return mZDistanceBetweenElements;
+    }
+
+    /**
+     * Y coordinate in view pixels above which the bottom of the notification stack / shelf / footer
+     * must be.
+     */
+    public float getStackCutoff() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mStackCutoff;
+    }
+
+    /** @see #getStackCutoff() */
+    public void setStackCutoff(float stackCutoff) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        this.mStackCutoff = stackCutoff;
     }
 
     public int getScrollY() {

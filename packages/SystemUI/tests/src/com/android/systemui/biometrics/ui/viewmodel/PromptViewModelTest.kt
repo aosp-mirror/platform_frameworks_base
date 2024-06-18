@@ -26,6 +26,7 @@ import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
@@ -48,6 +49,7 @@ import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.UdfpsUtils
+import com.android.systemui.biometrics.Utils.toBitmap
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
@@ -89,11 +91,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 private const val USER_ID = 4
 private const val REQUEST_ID = 4L
@@ -105,7 +108,7 @@ private const val OP_PACKAGE_NAME_CAN_NOT_BE_FOUND = "can.not.be.found"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCase() {
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
@@ -127,11 +130,32 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
     private val defaultLogoIconWithOverrides = context.getDrawable(R.drawable.ic_add)
     private val logoResFromApp = R.drawable.ic_cake
-    private val logoFromApp = context.getDrawable(logoResFromApp)
+    private val logoDrawableFromAppRes = context.getDrawable(logoResFromApp)
     private val logoBitmapFromApp = Bitmap.createBitmap(400, 400, Bitmap.Config.RGB_565)
     private val defaultLogoDescription = "Test Android App"
     private val logoDescriptionFromApp = "Test Cake App"
     private val packageNameForLogoWithOverrides = "should.use.overridden.logo"
+    /** Prompt panel size padding */
+    private val smallHorizontalGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_land_small_horizontal_guideline_padding
+        )
+    private val udfpsHorizontalGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_two_pane_udfps_horizontal_guideline_padding
+        )
+    private val udfpsHorizontalShorterGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_two_pane_udfps_shorter_horizontal_guideline_padding
+        )
+    private val mediumTopGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_one_pane_medium_top_guideline_padding
+        )
+    private val mediumHorizontalGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_two_pane_medium_horizontal_guideline_padding
+        )
 
     private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
     private lateinit var promptRepository: FakePromptRepository
@@ -221,7 +245,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         context.setMockPackageManager(packageManager)
         val resources = context.getOrCreateTestableResources()
-        resources.addOverride(logoResFromApp, logoFromApp)
+        resources.addOverride(logoResFromApp, logoDrawableFromAppRes)
         resources.addOverride(
             R.array.biometric_dialog_package_names_for_logo_with_overrides,
             arrayOf(packageNameForLogoWithOverrides)
@@ -823,6 +847,28 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.NO_HAPTICS)
     }
 
+    @Test
+    fun plays_haptic_on_error_after_auth_when_confirmation_needed() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+
+        viewModel.showTemporaryError(
+            "still sad",
+            messageAfterError = "",
+            authenticateAfterError = false,
+            hapticFeedback = true,
+        )
+
+        val haptics by collectLastValue(viewModel.hapticsToPlay)
+        if (expectConfirmation) {
+            assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
+            assertThat(haptics?.flag).isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+        } else {
+            assertThat(haptics?.hapticFeedbackConstant)
+                .isEqualTo(HapticFeedbackConstants.CONFIRM)
+        }
+    }
+
     private suspend fun TestScope.showTemporaryErrors(
         restart: Boolean,
         helpAfterError: String = "",
@@ -970,7 +1016,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun authenticated_at_most_once() = runGenericTest {
+    fun authenticated_at_most_once_same_modality() = runGenericTest {
         val authenticating by collectLastValue(viewModel.isAuthenticating)
         val authenticated by collectLastValue(viewModel.isAuthenticated)
 
@@ -1024,6 +1070,38 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             viewModel.confirmAuthenticated()
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertButtonsVisible()
+        }
+
+        assertThat(authenticating).isFalse()
+        assertThat(authenticated?.isAuthenticated).isTrue()
+        assertThat(canTryAgain).isFalse()
+    }
+
+    @Test
+    fun second_authentication_acts_as_confirmation() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+
+        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+
+        val authenticating by collectLastValue(viewModel.isAuthenticating)
+        val authenticated by collectLastValue(viewModel.isAuthenticated)
+        val message by collectLastValue(viewModel.message)
+        val size by collectLastValue(viewModel.size)
+        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+
+        assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
+        if (expectConfirmation) {
+            assertThat(size).isEqualTo(PromptSize.MEDIUM)
+            assertButtonsVisible(
+                cancel = true,
+                confirm = true,
+            )
+
+            if (testCase.modalities.hasSfps) {
+                viewModel.showAuthenticated(BiometricModality.Fingerprint, 0)
+                assertThat(message).isEqualTo(PromptMessage.Empty)
+                assertButtonsVisible()
+            }
         }
 
         assertThat(authenticating).isFalse()
@@ -1249,7 +1327,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Test
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun descriptionOverriddenByVerticalListContentView() =
-        runGenericTest(contentView = promptContentView, description = "test description") {
+        runGenericTest(description = "test description", contentView = promptContentView) {
             val contentView by collectLastValue(viewModel.contentView)
             val description by collectLastValue(viewModel.description)
 
@@ -1261,8 +1339,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun descriptionOverriddenByContentViewWithMoreOptionsButton() =
         runGenericTest(
-            contentView = promptContentViewWithMoreOptionsButton,
-            description = "test description"
+            description = "test description",
+            contentView = promptContentViewWithMoreOptionsButton
         ) {
             val contentView by collectLastValue(viewModel.contentView)
             val description by collectLastValue(viewModel.description)
@@ -1322,8 +1400,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
     fun logo_resSetByApp() =
         runGenericTest(logoRes = logoResFromApp) {
+            val expectedBitmap = context.getDrawable(logoResFromApp).toBitmap()
             val logo by collectLastValue(viewModel.logo)
-            assertThat(logo).isEqualTo(logoFromApp)
+            assertThat((logo as BitmapDrawable).bitmap.sameAs(expectedBitmap)).isTrue()
         }
 
     @Test
@@ -1366,6 +1445,142 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun position_bottom_rotation0() = runGenericTest {
+        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
+        val position by collectLastValue(viewModel.position)
+        assertThat(position).isEqualTo(PromptPosition.Bottom)
+    } // TODO(b/335278136): Add test for no sensor landscape
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun position_bottom_forceLarge() = runGenericTest {
+        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+        viewModel.onSwitchToCredential()
+        val position by collectLastValue(viewModel.position)
+        assertThat(position).isEqualTo(PromptPosition.Bottom)
+    }
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun position_bottom_largeScreen() = runGenericTest {
+        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+        displayStateRepository.setIsLargeScreen(true)
+        val position by collectLastValue(viewModel.position)
+        assertThat(position).isEqualTo(PromptPosition.Bottom)
+    }
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun position_right_rotation90() = runGenericTest {
+        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+        val position by collectLastValue(viewModel.position)
+        assertThat(position).isEqualTo(PromptPosition.Right)
+    }
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun position_left_rotation270() = runGenericTest {
+        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+        val position by collectLastValue(viewModel.position)
+        assertThat(position).isEqualTo(PromptPosition.Left)
+    }
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun position_top_rotation180() = runGenericTest {
+        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
+        val position by collectLastValue(viewModel.position)
+        if (testCase.modalities.hasUdfps) {
+            assertThat(position).isEqualTo(PromptPosition.Top)
+        } else {
+            assertThat(position).isEqualTo(PromptPosition.Bottom)
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun guideline_bottom() = runGenericTest {
+        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
+        val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+        assertThat(guidelineBounds).isEqualTo(Rect(0, mediumTopGuidelinePadding, 0, 0))
+    } // TODO(b/335278136): Add test for no sensor landscape
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun guideline_right() = runGenericTest {
+        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+
+        val isSmall = testCase.shouldStartAsImplicitFlow
+        val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+
+        if (isSmall) {
+            assertThat(guidelineBounds).isEqualTo(Rect(-smallHorizontalGuidelinePadding, 0, 0, 0))
+        } else if (testCase.modalities.hasUdfps) {
+            assertThat(guidelineBounds).isEqualTo(Rect(udfpsHorizontalGuidelinePadding, 0, 0, 0))
+        } else {
+            assertThat(guidelineBounds).isEqualTo(Rect(-mediumHorizontalGuidelinePadding, 0, 0, 0))
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun guideline_right_onlyShortTitle() =
+        runGenericTest(subtitle = "") {
+            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+
+            val isSmall = testCase.shouldStartAsImplicitFlow
+            val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+
+            if (!isSmall && testCase.modalities.hasUdfps) {
+                assertThat(guidelineBounds)
+                    .isEqualTo(Rect(-udfpsHorizontalShorterGuidelinePadding, 0, 0, 0))
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun guideline_left() = runGenericTest {
+        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+
+        val isSmall = testCase.shouldStartAsImplicitFlow
+        val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+
+        if (isSmall) {
+            assertThat(guidelineBounds).isEqualTo(Rect(0, 0, -smallHorizontalGuidelinePadding, 0))
+        } else if (testCase.modalities.hasUdfps) {
+            assertThat(guidelineBounds).isEqualTo(Rect(0, 0, udfpsHorizontalGuidelinePadding, 0))
+        } else {
+            assertThat(guidelineBounds).isEqualTo(Rect(0, 0, -mediumHorizontalGuidelinePadding, 0))
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun guideline_left_onlyShortTitle() =
+        runGenericTest(subtitle = "") {
+            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+
+            val isSmall = testCase.shouldStartAsImplicitFlow
+            val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+
+            if (!isSmall && testCase.modalities.hasUdfps) {
+                assertThat(guidelineBounds)
+                    .isEqualTo(Rect(0, 0, -udfpsHorizontalShorterGuidelinePadding, 0))
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_CONSTRAINT_BP)
+    fun guideline_top() = runGenericTest {
+        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
+        val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+        if (testCase.modalities.hasUdfps) {
+            assertThat(guidelineBounds).isEqualTo(Rect(0, 0, 0, 0))
+        }
+    }
+
+    @Test
     fun iconViewLoaded() = runGenericTest {
         val isIconViewLoaded by collectLastValue(viewModel.isIconViewLoaded)
         // TODO(b/328677869): Add test for noIcon logic.
@@ -1395,9 +1610,10 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private fun runGenericTest(
         doNotStart: Boolean = false,
         allowCredentialFallback: Boolean = false,
+        subtitle: String? = "s",
         description: String? = null,
         contentView: PromptContentView? = null,
-        logoRes: Int = -1,
+        logoRes: Int = 0,
         logoBitmap: Bitmap? = null,
         logoDescription: String? = null,
         packageName: String = OP_PACKAGE_NAME,
@@ -1407,7 +1623,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         runningTaskInfo.topActivity = topActivity
         whenever(activityTaskManager.getTasks(1)).thenReturn(listOf(runningTaskInfo))
         selector =
-            PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
+            PromptSelectorInteractorImpl(
+                fingerprintRepository,
+                displayStateInteractor,
+                promptRepository,
+                lockPatternUtils
+            )
         selector.resetPrompt(REQUEST_ID)
 
         viewModel =
@@ -1428,10 +1649,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             allowCredentialFallback = allowCredentialFallback,
             fingerprint = testCase.fingerprint,
             face = testCase.face,
+            subtitleFromApp = subtitle,
             descriptionFromApp = description,
             contentViewFromApp = contentView,
             logoResFromApp = logoRes,
-            logoBitmapFromApp = logoBitmap,
+            logoBitmapFromApp = if (logoRes != 0) logoDrawableFromAppRes.toBitmap() else logoBitmap,
             logoDescriptionFromApp = logoDescription,
             packageName = packageName,
         )
@@ -1471,7 +1693,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     companion object {
         @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         fun data(): Collection<TestCase> = singleModalityTestCases + coexTestCases
 
         private val singleModalityTestCases =
@@ -1615,26 +1837,28 @@ private fun PromptSelectorInteractor.initializePrompt(
     face: FaceSensorPropertiesInternal? = null,
     requireConfirmation: Boolean = false,
     allowCredentialFallback: Boolean = false,
+    subtitleFromApp: String? = "s",
     descriptionFromApp: String? = null,
     contentViewFromApp: PromptContentView? = null,
-    logoResFromApp: Int = -1,
+    logoResFromApp: Int = 0,
     logoBitmapFromApp: Bitmap? = null,
     logoDescriptionFromApp: String? = null,
     packageName: String = OP_PACKAGE_NAME,
 ) {
     val info =
         PromptInfo().apply {
-            logoRes = logoResFromApp
-            logoBitmap = logoBitmapFromApp
             logoDescription = logoDescriptionFromApp
             title = "t"
-            subtitle = "s"
+            subtitle = subtitleFromApp
             description = descriptionFromApp
             contentView = contentViewFromApp
             authenticators = listOf(face, fingerprint).extractAuthenticatorTypes()
             isDeviceCredentialAllowed = allowCredentialFallback
             isConfirmationRequested = requireConfirmation
         }
+    if (logoBitmapFromApp != null) {
+        info.setLogo(logoResFromApp, logoBitmapFromApp)
+    }
 
     setPrompt(
         info,
@@ -1643,7 +1867,8 @@ private fun PromptSelectorInteractor.initializePrompt(
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
         CHALLENGE,
         packageName,
-        false /*onUseDeviceCredential*/
+        onSwitchToCredential = false,
+        isLandscape = false,
     )
 }
 

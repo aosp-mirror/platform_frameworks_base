@@ -12,15 +12,22 @@ flag {
 flag {
     name: "enable_crashrecovery"
     is_exported: true
-    namespace: "crashrecovery"
+    namespace: "modularization"
     description: "Enables various dependencies of crashrecovery module"
     bug: "289203818"
 }
 
 flag {
     name: "allow_rescue_party_flag_resets"
-    namespace: "crashrecovery"
+    namespace: "modularization"
     description: "Enables rescue party flag resets"
     bug: "287618292"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "reenable_settings_resets"
+    namespace: "modularization"
+    description: "Re-enables settings resets only, deletes flag resets"
+    bug: "333847376"
 }

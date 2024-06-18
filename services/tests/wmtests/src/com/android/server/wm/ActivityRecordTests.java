@@ -1639,6 +1639,15 @@ public class ActivityRecordTests extends WindowTestsBase {
         clearInvocations(mDefaultDisplay);
     }
 
+    @Test
+    public void testCompleteResume_updateCompatDisplayInsets() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        doReturn(true).when(activity).shouldCreateCompatDisplayInsets();
+        activity.setState(RESUMED, "test");
+        activity.completeResumeLocked();
+        assertNotNull(activity.getCompatDisplayInsets());
+    }
+
     /**
      * Verify destroy activity request completes successfully.
      */
@@ -2723,6 +2732,19 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertHasStartingWindow(activity);
         activity.removeStartingWindow();
         waitUntilHandlersIdle();
+        assertNoStartingWindow(activity);
+    }
+
+    @Test
+    public void testPostCleanupStartingWindow() {
+        registerTestStartingWindowOrganizer();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity.addStartingWindow(mPackageName, android.R.style.Theme, null, true, true, false,
+                true, false, false, false);
+        waitUntilHandlersIdle();
+        assertHasStartingWindow(activity);
+        // Simulate Shell remove starting window actively.
+        activity.mStartingWindow.removeImmediately();
         assertNoStartingWindow(activity);
     }
 

@@ -237,7 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Profil seçin"</string>
     <string name="category_personal" msgid="6236798763159385225">"Kişisel"</string>
     <string name="category_work" msgid="4014193632325996115">"İş"</string>
-    <string name="category_private" msgid="4244892185452788977">"Gizli"</string>
+    <string name="category_private" msgid="4244892185452788977">"Özel"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klon"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Geliştirici seçenekleri"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Geliştirici seçeneklerini etkinleştir"</string>
@@ -492,9 +492,9 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - Tamamen şarj olmasına <xliff:g id="TIME">%2$s</xliff:g> kaldı"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Şarj işlemi optimize edildi"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ Şarj ediliyor"</string>
-    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g> içinde tamamen dolacak"</string>
-    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> içinde tamamen şarj olacak"</string>
-    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"<xliff:g id="TIME">%1$s</xliff:g> içinde tamamen şarj olacak"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Tamamen dolacağı zaman: <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Tamamen şarj olacağı zaman: <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Tamamen şarj olacağı zaman: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"<xliff:g id="TIME">%1$s</xliff:g> itibarıyla tamamen dolacak"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Bilinmiyor"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Şarj oluyor"</string>

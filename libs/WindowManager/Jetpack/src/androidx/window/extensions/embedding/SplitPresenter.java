@@ -186,8 +186,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         // Create new empty task fragment
         final int taskId = primaryContainer.getTaskId();
-        final TaskFragmentContainer secondaryContainer = mController.newContainer(
-                secondaryIntent, primaryActivity, taskId);
+        final TaskFragmentContainer secondaryContainer =
+                new TaskFragmentContainer.Builder(mController, taskId, primaryActivity)
+                        .setPendingAppearedIntent(secondaryIntent).build();
         final Rect secondaryRelBounds = getRelBoundsForPosition(POSITION_END, taskProperties,
                 splitAttributes);
         final int windowingMode = mController.getTaskContainer(taskId)
@@ -261,7 +262,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         TaskFragmentContainer container = mController.getContainerWithActivity(activity);
         final int taskId = container != null ? container.getTaskId() : activity.getTaskId();
         if (container == null || container == containerToAvoid) {
-            container = mController.newContainer(activity, taskId);
+            container = new TaskFragmentContainer.Builder(mController, taskId, activity)
+                    .setPendingAppearedActivity(activity).build();
             final int windowingMode = mController.getTaskContainer(taskId)
                     .getWindowingModeForTaskFragment(relBounds);
             final IBinder reparentActivityToken = activity.getActivityToken();
@@ -304,15 +306,19 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         TaskFragmentContainer primaryContainer = mController.getContainerWithActivity(
                 launchingActivity);
         if (primaryContainer == null) {
-            primaryContainer = mController.newContainer(launchingActivity,
-                    launchingActivity.getTaskId());
+            primaryContainer = new TaskFragmentContainer.Builder(mController,
+                    launchingActivity.getTaskId(), launchingActivity)
+                    .setPendingAppearedActivity(launchingActivity).build();
         }
 
         final int taskId = primaryContainer.getTaskId();
-        final TaskFragmentContainer secondaryContainer = mController.newContainer(activityIntent,
-                launchingActivity, taskId,
-                // Pass in the primary container to make sure it is added right above the primary.
-                primaryContainer);
+        final TaskFragmentContainer secondaryContainer =
+                new TaskFragmentContainer.Builder(mController, taskId, launchingActivity)
+                        .setPendingAppearedIntent(activityIntent)
+                        // Pass in the primary container to make sure it is added right above the
+                        // primary.
+                        .setPairedPrimaryContainer(primaryContainer)
+                        .build();
         final TaskContainer taskContainer = mController.getTaskContainer(taskId);
         final int windowingMode = taskContainer.getWindowingModeForTaskFragment(
                 primaryRelBounds);
@@ -652,27 +658,28 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     /**
-     * Returns the expanded bounds if the {@code bounds} violate minimum dimension or are not fully
-     * covered by the task bounds. Otherwise, returns {@code bounds}.
+     * Returns the expanded bounds if the {@code relBounds} violate minimum dimension or are not
+     * fully covered by the task bounds. Otherwise, returns {@code relBounds}.
      */
     @NonNull
-    static Rect sanitizeBounds(@NonNull Rect bounds, @Nullable Size minDimension,
+    static Rect sanitizeBounds(@NonNull Rect relBounds, @Nullable Size minDimension,
                         @NonNull TaskFragmentContainer container) {
-        if (bounds.isEmpty()) {
+        if (relBounds.isEmpty()) {
             // Don't need to check if the bounds follows the task bounds.
-            return bounds;
+            return relBounds;
         }
-        if (boundsSmallerThanMinDimensions(bounds, minDimension)) {
+        if (boundsSmallerThanMinDimensions(relBounds, minDimension)) {
             // Expand the bounds if the bounds are smaller than minimum dimensions.
             return new Rect();
         }
         final TaskContainer taskContainer = container.getTaskContainer();
-        final Rect taskBounds = taskContainer.getBounds();
-        if (!taskBounds.contains(bounds)) {
+        final Rect relTaskBounds = new Rect(taskContainer.getBounds());
+        relTaskBounds.offsetTo(0, 0);
+        if (!relTaskBounds.contains(relBounds)) {
             // Expand the bounds if the bounds exceed the task bounds.
             return new Rect();
         }
-        return bounds;
+        return relBounds;
     }
 
     @Override

@@ -25,7 +25,6 @@ import com.android.internal.logging.InstanceId
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.media.controls.data.repository.MediaDataRepository
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataCombineLatest
 import com.android.systemui.media.controls.domain.pipeline.MediaDataFilterImpl
@@ -36,8 +35,8 @@ import com.android.systemui.media.controls.domain.pipeline.MediaSessionBasedFilt
 import com.android.systemui.media.controls.domain.pipeline.MediaTimeoutListener
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
-import com.android.systemui.media.controls.util.MediaControlsRefactorFlag
 import com.android.systemui.media.controls.util.MediaFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +44,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business logic for media pipeline. */
@@ -55,7 +53,6 @@ class MediaCarouselInteractor
 @Inject
 constructor(
     @Application applicationScope: CoroutineScope,
-    private val mediaDataRepository: MediaDataRepository,
     private val mediaDataProcessor: MediaDataProcessor,
     private val mediaTimeoutListener: MediaTimeoutListener,
     private val mediaResumeListener: MediaResumeListener,
@@ -103,31 +100,11 @@ constructor(
                 initialValue = false,
             )
 
-    /** Are there any media notifications active, excluding the recommendations? */
-    val hasActiveMedia: StateFlow<Boolean> =
-        mediaFilterRepository.selectedUserEntries
-            .mapLatest { entries -> entries.any { it.value.active } }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
-
-    /** Are there any media notifications, excluding the recommendations? */
-    val hasAnyMedia: StateFlow<Boolean> =
-        mediaFilterRepository.selectedUserEntries
-            .mapLatest { entries -> entries.isNotEmpty() }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
-
     /** The current list for user media instances */
     val currentMedia: StateFlow<List<MediaCommonModel>> = mediaFilterRepository.currentMedia
 
     override fun start() {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (!mediaFlags.isSceneContainerEnabled()) {
             return
         }
 
@@ -235,11 +212,11 @@ constructor(
 
     override fun hasAnyMediaOrRecommendation() = hasAnyMediaOrRecommendation.value
 
-    override fun hasActiveMedia() = hasActiveMedia.value
+    override fun hasActiveMedia() = mediaFilterRepository.hasActiveMedia()
 
-    override fun hasAnyMedia() = hasAnyMedia.value
+    override fun hasAnyMedia() = mediaFilterRepository.hasAnyMedia()
 
-    override fun isRecommendationActive() = mediaDataRepository.smartspaceMediaData.value.isActive
+    override fun isRecommendationActive() = mediaFilterRepository.isRecommendationActive()
 
     fun reorderMedia() {
         mediaFilterRepository.setOrderedMedia()
@@ -256,8 +233,6 @@ constructor(
     companion object {
         val unsupported: Nothing
             get() =
-                error(
-                    "Code path not supported when ${MediaControlsRefactorFlag.FLAG_NAME} is enabled"
-                )
+                error("Code path not supported when ${SceneContainerFlag.DESCRIPTION} is enabled")
     }
 }

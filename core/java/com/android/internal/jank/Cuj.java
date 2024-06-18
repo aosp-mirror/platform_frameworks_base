@@ -137,9 +137,18 @@ public class Cuj {
     public static final int CUJ_LAUNCHER_PRIVATE_SPACE_LOCK = 102;
     public static final int CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK = 103;
 
+    /**
+     * Track maximize window interaction in desktop mode.
+     *
+     * <p>Tracking starts onClick of the maximize window button or option {@link
+     * com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel#onClick}
+     * and finishes when the window animation is ended {@link
+     * com.android.wm.shell.windowdecor.ToggleResizeDesktopTaskTransitionHandler#startAnimation}
+     */
+    public static final int CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW = 104;
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting
-    static final int LAST_CUJ = CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW;
 
     /** @hide */
     @IntDef({
@@ -234,11 +243,11 @@ public class Cuj {
             CUJ_LAUNCHER_WIDGET_PICKER_SEARCH_BACK,
             CUJ_LAUNCHER_WIDGET_BOTTOM_SHEET_CLOSE_BACK,
             CUJ_LAUNCHER_PRIVATE_SPACE_LOCK,
-            CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK
+            CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK,
+            CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface CujType {
-    }
+    public @interface CujType {}
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -341,6 +350,7 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_WIDGET_EDU_SHEET_CLOSE_BACK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_WIDGET_EDU_SHEET_CLOSE_BACK;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_PRIVATE_SPACE_LOCK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_PRIVATE_SPACE_LOCK;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_PRIVATE_SPACE_UNLOCK;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_MAXIMIZE_WINDOW;
     }
 
     private Cuj() {
@@ -543,6 +553,8 @@ public class Cuj {
                 return "LAUNCHER_PRIVATE_SPACE_LOCK";
             case CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK:
                 return "LAUNCHER_PRIVATE_SPACE_UNLOCK";
+            case CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW:
+                return "DESKTOP_MODE_MAXIMIZE_WINDOW";
         }
         return "UNKNOWN";
     }

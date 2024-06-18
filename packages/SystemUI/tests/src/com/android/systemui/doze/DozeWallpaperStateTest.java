@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import android.app.IWallpaperManager;
 import android.os.RemoteException;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -36,11 +37,10 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class DozeWallpaperStateTest extends SysuiTestCase {
 

@@ -2911,6 +2911,14 @@ class SettingsProtoDumpUtil {
         // Settings.System.NOTIFICATIONS_USE_RING_VOLUME intentionally excluded since it's deprecated.
         p.end(notificationToken);
 
+        final long pointerToken = p.start(SystemSettingsProto.POINTER);
+        dumpSetting(s, p,
+                Settings.System.POINTER_FILL_STYLE,
+                SystemSettingsProto.Pointer.POINTER_FILL_STYLE);
+        dumpSetting(s, p,
+                Settings.System.POINTER_SCALE,
+                SystemSettingsProto.Pointer.POINTER_SCALE);
+        p.end(pointerToken);
         dumpSetting(s, p,
                 Settings.System.POINTER_SPEED,
                 SystemSettingsProto.POINTER_SPEED);

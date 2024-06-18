@@ -166,7 +166,8 @@ fun GetCredentialScreen(
                                 onBiometricPromptStateChange =
                                 viewModel::onBiometricPromptStateChange,
                                 getBiometricCancellationSignal =
-                                viewModel::getBiometricCancellationSignal
+                                viewModel::getBiometricCancellationSignal,
+                                onLog = { viewModel.logUiEvent(it) },
                             )
                         } else if (credmanBiometricApiEnabled() &&
                                 getCredentialUiState.currentScreenState
@@ -260,12 +261,13 @@ internal fun BiometricSelectionPage(
     getBiometricPromptState: () -> BiometricPromptState,
     onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
     getBiometricCancellationSignal: () -> CancellationSignal,
+    onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     if (biometricEntry == null) {
         fallbackToOriginalFlow(BiometricFlowType.GET)
         return
     }
-    runBiometricFlowForGet(
+    val biometricFlowCalled = runBiometricFlowForGet(
         biometricEntry = biometricEntry,
         context = LocalContext.current,
         openMoreOptionsPage = onMoreOptionSelected,
@@ -280,6 +282,9 @@ internal fun BiometricSelectionPage(
         onBiometricFailureFallback = fallbackToOriginalFlow,
         getBiometricCancellationSignal = getBiometricCancellationSignal
     )
+    if (biometricFlowCalled) {
+        onLog(GetCredentialEvent.CREDMAN_GET_CRED_BIOMETRIC_FLOW_LAUNCHED)
+    }
 }
 
 /** Draws the primary credential selection page, used in Android U. */

@@ -68,9 +68,7 @@ fun VolumeSlider(
                     state.a11yClickDescription?.let {
                         customActions =
                             listOf(
-                                CustomAccessibilityAction(
-                                    it,
-                                ) {
+                                CustomAccessibilityAction(it) {
                                     onIconTapped()
                                     true
                                 }

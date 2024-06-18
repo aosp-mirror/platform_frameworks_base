@@ -35,7 +35,7 @@ public final class RowContentBindParams {
     /**
      * Content views that are out of date and need to be rebound.
      *
-     * TODO: This should go away once {@link NotificationContentInflater} is broken down into
+     * TODO: This should go away once {@link NotificationRowContentBinder} is broken down into
      * smaller stages as then the stage itself would be invalidated.
      */
     private @InflationFlag int mDirtyContentViews = mContentViews;

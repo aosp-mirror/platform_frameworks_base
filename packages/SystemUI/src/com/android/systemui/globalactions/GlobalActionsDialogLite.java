@@ -428,7 +428,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         // get notified of phone state changes
         mTelephonyListenerManager.addServiceStateListener(mPhoneStateListener);
-        mGlobalSettings.registerContentObserver(
+        mGlobalSettings.registerContentObserverSync(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
         mHasVibrator = vibrator.hasVibrator();
@@ -453,7 +453,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     public void destroy() {
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
         mTelephonyListenerManager.removeServiceStateListener(mPhoneStateListener);
-        mGlobalSettings.unregisterContentObserver(mAirplaneModeObserver);
+        mGlobalSettings.unregisterContentObserverSync(mAirplaneModeObserver);
         mConfigurationController.removeCallback(this);
     }
 

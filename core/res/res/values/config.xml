@@ -4200,13 +4200,6 @@
          automatically try to pair with it when the device exits tablet mode. -->
     <string translatable="false" name="config_packagedKeyboardName"></string>
 
-    <!-- The device supports freeform window management. Windows have title bars and can be moved
-         and resized. If you set this to true, you also need to add
-         PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT feature to your device specification.
-         The duplication is necessary, because this information is used before the features are
-         available to the system.-->
-    <bool name="config_freeformWindowManagement">false</bool>
-
     <!-- If set, this will force all windows to draw the status bar background, including the apps
          that have not requested doing so (via the WindowManager.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
          flag). -->
@@ -5814,6 +5807,9 @@
     <!-- The action name for the default profcollect report uploader app. -->
     <string name="config_defaultProfcollectReportUploaderAction" translatable="false"></string>
 
+    <!-- Names of packages excluded by Profcollect onCameraOpened observer. -->
+    <string-array name="config_profcollectOnCameraOpenedSkipPackages" translatable="false"></string-array>
+
     <!-- The default value used for RawContacts.ACCOUNT_NAME when contacts are inserted without this
          column set. These contacts are stored locally on the device and will not be removed even
          if no android.account.Account with this name exists. A null string will be used if the
@@ -6976,8 +6972,16 @@
          Note that, indefinitely repeating vibrations are not allowed as shutdown vibrations. -->
     <string name="config_defaultShutdownVibrationFile" />
 
-    <!-- Whether single finger panning is enabled when magnification is on -->
+    <!-- Whether single finger panning is enabled by default when magnification is on -->
     <bool name="config_enable_a11y_magnification_single_panning">false</bool>
+
+    <!-- Whether the overscroll handler is enabled when fullscreen magnification is on. When true,
+         the magnification will change the scale if the user pans the magnifier horizontally past
+         the edge of the screen, or delegate the touch events to the app if the user pans vertically
+         past the edge. When false, the magnification will delegate the touch events to the app only
+         when the users uses single finger to pan the magnifier past the edge of the screen,
+         otherwise there are no extra actions. -->
+    <bool name="config_enable_a11y_fullscreen_magnification_overscroll_handler">false</bool>
 
     <!-- The file path in which custom vibrations are provided for haptic feedbacks.
          If the device does not specify any such file path here, if the file path specified here
@@ -7037,6 +7041,13 @@
     <!-- Name of the starting activity for DisplayCompat host. specific to automotive.-->
     <string name="config_defaultDisplayCompatHostActivity" translatable="false"></string>
 
+    <!-- Name of the starting activity for launch on private display. specific to automotive.-->
+    <string name="config_defaultLaunchOnPrivateDisplayRouterActivity" translatable="false"></string>
+
+    <!-- Allowlisted activities for launch on a private display. specific to automotive.-->
+    <!--TODO(b/343733988): Remove this allowlisting when GMS is ready with the allowlisting mechanism.-->
+    <string-array name="config_defaultAllowlistLaunchOnPrivateDisplayPackages"></string-array>
+
     <!-- Whether to use file hashes cache in watchlist-->
     <bool name="config_watchlistUseFileHashesCache">false</bool>
 
@@ -7076,4 +7087,8 @@
 
     <!-- Whether the system uses auto-suspend mode. -->
     <bool name="config_useAutoSuspend">true</bool>
+
+    <!-- Whether to show GAIA education screen during account login of private space setup.
+         OEM/Partner can explicitly opt to disable the screen. -->
+    <bool name="config_enableGaiaEducationInPrivateSpace">true</bool>
 </resources>

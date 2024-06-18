@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.RectEvaluator
 import android.animation.ValueAnimator
+import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityOptions
 import android.app.ActivityOptions.SourceInfo
 import android.app.ActivityTaskManager.INVALID_TASK_ID
@@ -12,9 +13,11 @@ import android.app.PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT
 import android.app.PendingIntent.FLAG_MUTABLE
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
+import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FILL_IN_COMPONENT
+import android.graphics.PointF
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.IBinder
@@ -30,6 +33,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED
+import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -186,7 +190,7 @@ class DragToDesktopTransitionHandler(
      * outside the desktop drop zone and is instead dropped back into the status bar region that
      * means the user wants to remain in their current windowing mode.
      */
-    fun cancelDragToDesktopTransition() {
+    fun cancelDragToDesktopTransition(cancelState: CancelState) {
         if (!inProgress) {
             // Don't attempt to cancel a drag to desktop transition since there is no transition in
             // progress which means that the drag to desktop transition was never successfully
@@ -200,13 +204,32 @@ class DragToDesktopTransitionHandler(
             clearState()
             return
         }
-        state.cancelled = true
-        if (state.draggedTaskChange != null) {
+        state.cancelState = cancelState
+
+        if (state.draggedTaskChange != null && cancelState == CancelState.STANDARD_CANCEL) {
             // Regular case, transient launch of Home happened as is waiting for the cancel
             // transient to start and merge. Animate the cancellation (scale back to original
             // bounds) first before actually starting the cancel transition so that the wallpaper
             // is visible behind the animating task.
             startCancelAnimation()
+        } else if (
+            state.draggedTaskChange != null &&
+            (cancelState == CancelState.CANCEL_SPLIT_LEFT ||
+                    cancelState == CancelState.CANCEL_SPLIT_RIGHT)
+            ) {
+            // We have a valid dragged task, but the animation will be handled by
+            // SplitScreenController; request the transition here.
+            @SplitPosition val splitPosition = if (cancelState == CancelState.CANCEL_SPLIT_LEFT) {
+                SPLIT_POSITION_TOP_OR_LEFT
+            } else {
+                SPLIT_POSITION_BOTTOM_OR_RIGHT
+            }
+            val wct = WindowContainerTransaction()
+            restoreWindowOrder(wct, state)
+            state.startTransitionFinishTransaction?.apply()
+            state.startTransitionFinishCb?.onTransitionFinished(null /* wct */)
+            requestSplitFromScaledTask(splitPosition, wct)
+            clearState()
         } else {
             // There's no dragged task, this can happen when the "cancel" happened too quickly
             // before the "start" transition is even ready (like on a fling gesture). The
@@ -215,6 +238,54 @@ class DragToDesktopTransitionHandler(
             // enough info to restore the order. We'll check for the cancelled state flag when
             // the "start" animation is ready and cancel from #startAnimation instead.
         }
+    }
+
+    /** Calculate the bounds of a scaled task, then use those bounds to request split select. */
+    private fun requestSplitFromScaledTask(
+        @SplitPosition splitPosition: Int,
+        wct: WindowContainerTransaction
+    ) {
+        val state = requireTransitionState()
+        val taskInfo = state.draggedTaskChange?.taskInfo
+            ?: error("Expected non-null taskInfo")
+        val taskBounds = Rect(taskInfo.configuration.windowConfiguration.bounds)
+        val taskScale = state.dragAnimator.scale
+        val scaledWidth = taskBounds.width() * taskScale
+        val scaledHeight = taskBounds.height() * taskScale
+        val dragPosition = PointF(state.dragAnimator.position)
+        state.dragAnimator.cancelAnimator()
+        val animatedTaskBounds = Rect(
+            dragPosition.x.toInt(),
+            dragPosition.y.toInt(),
+            (dragPosition.x + scaledWidth).toInt(),
+            (dragPosition.y + scaledHeight).toInt()
+        )
+        requestSplitSelect(wct, taskInfo, splitPosition, animatedTaskBounds)
+    }
+
+    private fun requestSplitSelect(
+        wct: WindowContainerTransaction,
+        taskInfo: RunningTaskInfo,
+        @SplitPosition splitPosition: Int,
+        taskBounds: Rect = Rect(taskInfo.configuration.windowConfiguration.bounds)
+    ) {
+        // Prepare to exit split in order to enter split select.
+        if (taskInfo.windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+            splitScreenController.prepareExitSplitScreen(
+                wct,
+                splitScreenController.getStageOfTask(taskInfo.taskId),
+                SplitScreenController.EXIT_REASON_DESKTOP_MODE
+            )
+            splitScreenController.transitionHandler.onSplitToDesktop()
+        }
+        wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_MULTI_WINDOW)
+        wct.setDensityDpi(taskInfo.token, context.resources.displayMetrics.densityDpi)
+        splitScreenController.requestEnterSplitSelect(
+            taskInfo,
+            wct,
+            splitPosition,
+            taskBounds
+        )
     }
 
     override fun startAnimation(
@@ -261,7 +332,7 @@ class DragToDesktopTransitionHandler(
                     is TransitionState.FromSplit -> {
                         state.splitRootChange = change
                         val layer =
-                            if (!state.cancelled) {
+                            if (state.cancelState == CancelState.NO_CANCEL) {
                                 // Normal case, split root goes to the bottom behind everything
                                 // else.
                                 appLayers - i
@@ -311,8 +382,18 @@ class DragToDesktopTransitionHandler(
                 // Do not do this in the cancel-early case though, since in that case nothing should
                 // happen on screen so the layering will remain the same as if no transition
                 // occurred.
-                if (change.taskInfo?.taskId == state.draggedTaskId && !state.cancelled) {
+                if (
+                    change.taskInfo?.taskId == state.draggedTaskId &&
+                    state.cancelState != CancelState.STANDARD_CANCEL
+                ) {
+                    // We need access to the dragged task's change in both non-cancel and split
+                    // cancel cases.
                     state.draggedTaskChange = change
+                }
+                if (
+                    change.taskInfo?.taskId == state.draggedTaskId &&
+                    state.cancelState == CancelState.NO_CANCEL
+                    ) {
                     taskDisplayAreaOrganizer.reparentToDisplayArea(
                         change.endDisplayId,
                         change.leash,
@@ -331,11 +412,11 @@ class DragToDesktopTransitionHandler(
         state.startTransitionFinishTransaction = finishTransaction
         startTransaction.apply()
 
-        if (!state.cancelled) {
+        if (state.cancelState == CancelState.NO_CANCEL) {
             // Normal case, start animation to scale down the dragged task. It'll also be moved to
             // follow the finger and when released we'll start the next phase/transition.
             state.dragAnimator.startAnimation()
-        } else {
+        } else if (state.cancelState == CancelState.STANDARD_CANCEL) {
             // Cancel-early case, the state was flagged was cancelled already, which means the
             // gesture ended in the cancel region. This can happen even before the start transition
             // is ready/animate here when cancelling quickly like with a fling. There's no point
@@ -343,6 +424,26 @@ class DragToDesktopTransitionHandler(
             // directly into starting the cancel transition to restore WM order. Surfaces should
             // not move as if no transition happened.
             startCancelDragToDesktopTransition()
+        } else if (
+            state.cancelState == CancelState.CANCEL_SPLIT_LEFT ||
+            state.cancelState == CancelState.CANCEL_SPLIT_RIGHT
+            ){
+            // Cancel-early case for split-cancel. The state was flagged already as a cancel for
+            // requesting split select. Similar to the above, this can happen due to quick fling
+            // gestures. We can simply request split here without needing to calculate animated
+            // task bounds as the task has not shrunk at all.
+            val splitPosition = if (state.cancelState == CancelState.CANCEL_SPLIT_LEFT) {
+                SPLIT_POSITION_TOP_OR_LEFT
+            } else {
+                SPLIT_POSITION_BOTTOM_OR_RIGHT
+            }
+            val taskInfo = state.draggedTaskChange?.taskInfo
+                ?: error("Expected non-null task info.")
+            val wct = WindowContainerTransaction()
+            restoreWindowOrder(wct)
+            state.startTransitionFinishTransaction?.apply()
+            state.startTransitionFinishCb?.onTransitionFinished(null /* wct */)
+            requestSplitSelect(wct, taskInfo, splitPosition)
         }
         return true
     }
@@ -355,6 +456,12 @@ class DragToDesktopTransitionHandler(
         finishCallback: Transitions.TransitionFinishCallback
     ) {
         val state = requireTransitionState()
+        // We don't want to merge the split select animation if that's what we requested.
+        if (state.cancelState == CancelState.CANCEL_SPLIT_LEFT ||
+            state.cancelState == CancelState.CANCEL_SPLIT_RIGHT) {
+            clearState()
+            return
+        }
         val isCancelTransition =
             info.type == TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP &&
                 transition == state.cancelTransitionToken &&
@@ -552,6 +659,17 @@ class DragToDesktopTransitionHandler(
     private fun startCancelDragToDesktopTransition() {
         val state = requireTransitionState()
         val wct = WindowContainerTransaction()
+        restoreWindowOrder(wct, state)
+        state.cancelTransitionToken =
+            transitions.startTransition(
+                TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP, wct, this
+            )
+    }
+
+    private fun restoreWindowOrder(
+        wct: WindowContainerTransaction,
+        state: TransitionState = requireTransitionState()
+    ) {
         when (state) {
             is TransitionState.FromFullscreen -> {
                 // There may have been tasks sent behind home that are not the dragged task (like
@@ -580,9 +698,6 @@ class DragToDesktopTransitionHandler(
         }
         val homeWc = state.homeToken ?: error("Home task should be non-null before cancelling")
         wct.restoreTransientOrder(homeWc)
-
-        state.cancelTransitionToken =
-            transitions.startTransition(TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP, wct, this)
     }
 
     private fun clearState() {
@@ -624,7 +739,7 @@ class DragToDesktopTransitionHandler(
         abstract var cancelTransitionToken: IBinder?
         abstract var homeToken: WindowContainerToken?
         abstract var draggedTaskChange: Change?
-        abstract var cancelled: Boolean
+        abstract var cancelState: CancelState
         abstract var startAborted: Boolean
 
         data class FromFullscreen(
@@ -636,7 +751,7 @@ class DragToDesktopTransitionHandler(
             override var cancelTransitionToken: IBinder? = null,
             override var homeToken: WindowContainerToken? = null,
             override var draggedTaskChange: Change? = null,
-            override var cancelled: Boolean = false,
+            override var cancelState: CancelState = CancelState.NO_CANCEL,
             override var startAborted: Boolean = false,
             var otherRootChanges: MutableList<Change> = mutableListOf()
         ) : TransitionState()
@@ -650,11 +765,23 @@ class DragToDesktopTransitionHandler(
             override var cancelTransitionToken: IBinder? = null,
             override var homeToken: WindowContainerToken? = null,
             override var draggedTaskChange: Change? = null,
-            override var cancelled: Boolean = false,
+            override var cancelState: CancelState = CancelState.NO_CANCEL,
             override var startAborted: Boolean = false,
             var splitRootChange: Change? = null,
             var otherSplitTask: Int
         ) : TransitionState()
+    }
+
+    /** Enum to provide context on cancelling a drag to desktop event. */
+    enum class CancelState {
+        /** No cancel case; this drag is not flagged for a cancel event. */
+        NO_CANCEL,
+        /** A standard cancel event; should restore task to previous windowing mode. */
+        STANDARD_CANCEL,
+        /** A cancel event where the task will request to enter split on the left side. */
+        CANCEL_SPLIT_LEFT,
+        /** A cancel event where the task will request to enter split on the right side. */
+        CANCEL_SPLIT_RIGHT
     }
 
     companion object {

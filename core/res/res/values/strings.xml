@@ -5125,7 +5125,7 @@
     <string name="immersive_cling_title">Viewing full screen</string>
 
     <!-- Cling help message description when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
-    <string name="immersive_cling_description">To exit, swipe down from the top.</string>
+    <string name="immersive_cling_description">To exit, swipe down from the top of your screen</string>
 
     <!-- Cling help message confirmation button when hiding the navigation bar entering immersive mode [CHAR LIMIT=30] -->
     <string name="immersive_cling_positive">Got it</string>
@@ -5430,6 +5430,10 @@
     <string name="call_notification_screening_text">Screening an incoming call</string>
 
     <string name="default_notification_channel_label">Uncategorized</string>
+    <string name="promotional_notification_channel_label">Promotions</string>
+    <string name="social_notification_channel_label">Social</string>
+    <string name="news_notification_channel_label">News</string>
+    <string name="recs_notification_channel_label">Recommendations</string>
 
     <string name="importance_from_user">You set the importance of these notifications.</string>
     <string name="importance_from_person">This is important because of the people involved.</string>
@@ -5991,8 +5995,6 @@
     <string name="accessibility_system_action_dpad_right_label">Dpad Right</string>
     <!-- Label for Dpad center action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dpad_center_label">Dpad Center</string>
-    <!-- Accessibility description of caption view -->
-    <string name="accessibility_freeform_caption">Caption bar of <xliff:g id="app_name">%1$s</xliff:g>.</string>
 
     <!-- Text to tell the user that a package has been forced by themselves in the RESTRICTED bucket. [CHAR LIMIT=NONE] -->
     <string name="as_app_forced_to_restricted_bucket">
@@ -6474,6 +6476,9 @@ ul.</string>
     <string name="accessibility_label_clone_profile">Clone</string>
     <!-- Accessibility label for clone profile user type [CHAR LIMIT=30] -->
     <string name="accessibility_label_communal_profile">Communal</string>
+
+    <!-- Label for private space biometric prompt logo description [CHAR LIMIT=30] -->
+    <string name="private_space_biometric_prompt_title">Private space</string>
 
     <!-- Notification message used when a notification's normal message contains sensitive information [CHAR_LIMIT=NOTIF_BODY] -->
     <string name="redacted_notification_message">Sensitive notification content hidden</string>

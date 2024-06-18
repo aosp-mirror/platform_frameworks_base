@@ -34,6 +34,7 @@ import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_UNAVAI
 import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_UNKNOWN
 import android.telephony.satellite.SatelliteManager.SatelliteException
 import android.telephony.satellite.SatelliteModemStateCallback
+import android.telephony.satellite.SatelliteProvisionStateCallback
 import android.telephony.satellite.SatelliteSupportedStateCallback
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -326,6 +327,98 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun satelliteProvisioned_notSupported_defaultFalse() =
+        testScope.runTest {
+            // GIVEN satellite is not supported
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = false,
+            )
+
+            assertThat(underTest.isSatelliteProvisioned.value).isFalse()
+        }
+
+    @Test
+    fun satelliteProvisioned_supported_defaultFalse() =
+        testScope.runTest {
+            // GIVEN satellite is supported
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = true,
+            )
+
+            // THEN default provisioned state is false
+            assertThat(underTest.isSatelliteProvisioned.value).isFalse()
+        }
+
+    @Test
+    fun satelliteProvisioned_supported_tracksCallback() =
+        testScope.runTest {
+            // GIVEN satellite is not supported
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = true,
+            )
+
+            val provisioned by collectLastValue(underTest.isSatelliteProvisioned)
+            runCurrent()
+
+            val callback =
+                withArgCaptor<SatelliteProvisionStateCallback> {
+                    verify(satelliteManager).registerForProvisionStateChanged(any(), capture())
+                }
+
+            // WHEN provisioning state changes
+            callback.onSatelliteProvisionStateChanged(true)
+
+            // THEN the value is reflected in the repo
+            assertThat(provisioned).isTrue()
+        }
+
+    @Test
+    fun satelliteProvisioned_supported_tracksCallback_reRegistersOnCrash() =
+        testScope.runTest {
+            // GIVEN satellite is supported
+            setUpRepo(
+                uptime = MIN_UPTIME,
+                satMan = satelliteManager,
+                satelliteSupported = true,
+            )
+
+            val provisioned by collectLastValue(underTest.isSatelliteProvisioned)
+
+            runCurrent()
+
+            val callback =
+                withArgCaptor<SatelliteProvisionStateCallback> {
+                    verify(satelliteManager).registerForProvisionStateChanged(any(), capture())
+                }
+            val telephonyCallback =
+                MobileTelephonyHelpers.getTelephonyCallbackForType<
+                    TelephonyCallback.RadioPowerStateListener
+                >(
+                    telephonyManager
+                )
+
+            // GIVEN satellite is currently provisioned
+            callback.onSatelliteProvisionStateChanged(true)
+
+            assertThat(provisioned).isTrue()
+
+            // WHEN a crash event happens (detected by radio state change)
+            telephonyCallback.onRadioPowerStateChanged(TelephonyManager.RADIO_POWER_ON)
+            runCurrent()
+            telephonyCallback.onRadioPowerStateChanged(TelephonyManager.RADIO_POWER_OFF)
+            runCurrent()
+
+            // THEN listeners are re-registered
+            verify(satelliteManager, times(2)).registerForProvisionStateChanged(any(), any())
+        }
+
+    @Test
     fun satelliteNotSupported_listenersAreNotRegistered() =
         testScope.runTest {
             // GIVEN satellite is not supported
@@ -368,6 +461,22 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             runCurrent()
             // THEN the repo registers for state changes of satellite support
             verify(satelliteManager, times(1)).registerForSupportedStateChanged(any(), any())
+        }
+
+    @Test
+    fun satelliteSupportedStateChangedCallbackThrows_doesNotCrash() =
+        testScope.runTest {
+            // GIVEN, satellite manager throws when registering for supported state changes
+            whenever(satelliteManager.registerForSupportedStateChanged(any(), any()))
+                .thenThrow(IllegalStateException())
+
+            // GIVEN a supported satellite manager.
+            setupDefaultRepo()
+            runCurrent()
+
+            // THEN a listener for satellite supported changed can attempt to register,
+            // with no crash
+            verify(satelliteManager).registerForSupportedStateChanged(any(), any())
         }
 
     @Test

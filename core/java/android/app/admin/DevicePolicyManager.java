@@ -62,6 +62,7 @@ import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_PROVISION
 import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
+import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
 import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
@@ -13724,6 +13725,13 @@ public class DevicePolicyManager {
      * {@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters.
      * In that case the device owner's control will be limited to denying these permissions.
      * <p>
+     * When sensor-related permissions aren't grantable due to the above cases, calling this method
+     * to grant these permissions will silently fail, if device admins are built with
+     * {@code targetSdkVersion} &lt; {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}. If
+     * they are built with {@code targetSdkVersion} &gt;=
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, this method will throw a
+     * {@link SecurityException}.
+     * <p>
      * NOTE: On devices running {@link android.os.Build.VERSION_CODES#S} and above, control over
      * the following permissions are restricted for managed profile owners:
      * <ul>
@@ -17624,6 +17632,17 @@ public class DevicePolicyManager {
     @UnsupportedAppUsage
     public boolean isOnboardingBugreportV2FlagEnabled() {
         return onboardingBugreportV2Enabled();
+    }
+
+    // TODO(b/308755220): Remove once the build is finalised.
+    /**
+     * Returns true if the flag for consentless bugreports is enabled.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public boolean isOnboardingConsentlessBugreportFlagEnabled() {
+        return onboardingConsentlessBugreports();
     }
 
     /**

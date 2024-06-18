@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.ui.composable
 
 import android.app.AlertDialog
+import android.platform.test.annotations.MotionTest
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -55,6 +56,7 @@ import platform.test.screenshot.Displays.FoldableInner
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
+@MotionTest
 class BouncerContentTest : SysuiTestCase() {
     private val deviceSpec = DeviceEmulationSpec(FoldableInner)
     private val kosmos = testKosmos()
