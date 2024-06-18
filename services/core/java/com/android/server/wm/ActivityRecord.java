@@ -6563,7 +6563,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Schedule an idle timeout in case the app doesn't do it for us.
         mTaskSupervisor.scheduleIdleTimeout(this);
 
-        mTaskSupervisor.reportResumedActivityLocked(this);
+        mTaskSupervisor.mStoppingActivities.remove(this);
+        if (getDisplayArea().allResumedActivitiesComplete()) {
+            // Construct the compat environment at a relatively stable state if needed.
+            updateCompatDisplayInsets();
+            mRootWindowContainer.executeAppTransitionForAllDisplay();
+        }
 
         resumeKeyDispatchingLocked();
         final Task rootTask = getRootTask();
