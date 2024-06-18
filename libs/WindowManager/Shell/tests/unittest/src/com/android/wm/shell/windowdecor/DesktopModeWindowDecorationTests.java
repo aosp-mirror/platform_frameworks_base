@@ -89,6 +89,7 @@ import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -174,6 +175,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private HandleMenu mMockHandleMenu;
     @Mock
     private HandleMenuFactory mMockHandleMenuFactory;
+    private MultiInstanceHelper mMockMultiInstanceHelper;
     @Captor
     private ArgumentCaptor<Function1<Boolean, Unit>> mOnMaxMenuHoverChangeListener;
     @Captor
@@ -218,7 +220,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
         doReturn(mMockHandleMenu).when(mMockHandleMenuFactory).create(any(), anyInt(), any(), any(),
-                any(), any(), any(), any(), anyBoolean(), any(), anyInt(), anyInt(), anyInt());
+                any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(),
+                anyInt());
     }
 
     @After
@@ -775,7 +778,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
         verify(mMockHandleMenuFactory).create(any(), anyInt(), any(), any(), any(), any(), any(),
-                any(), anyBoolean(), eq(uri), anyInt(), anyInt(), anyInt());
+                any(), anyBoolean(), anyBoolean(), eq(uri), anyInt(), anyInt(), anyInt());
     }
 
     private void createMaximizeMenu(DesktopModeWindowDecoration decoration, MaximizeMenu menu) {
@@ -831,7 +834,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
                 mMockGenericLinksParser, SurfaceControl.Builder::new, mMockTransactionSupplier,
                 WindowContainerTransaction::new, SurfaceControl::new,
-                mMockSurfaceControlViewHostFactory, maximizeMenuFactory, mMockHandleMenuFactory);
+                mMockSurfaceControlViewHostFactory, maximizeMenuFactory, mMockHandleMenuFactory,
+                        mMockMultiInstanceHelper);
         windowDecor.setCaptionListeners(mMockTouchEventListener, mMockTouchEventListener,
                 mMockTouchEventListener, mMockTouchEventListener);
         windowDecor.setExclusionRegionListener(mMockExclusionRegionListener);

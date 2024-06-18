@@ -227,11 +227,11 @@ class HandleMenuTest : ShellTestCase() {
             else -> error("Invalid windowing mode")
         }
         val handleMenu = HandleMenu(mockDesktopWindowDecoration, layoutId,
-                onClickListener, onTouchListener, appIcon, appName, displayController,
-                splitScreenController, shouldShowWindowingPill = true,
-                null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
-                captionX = captionX
-        )
+            onClickListener, onTouchListener, appIcon, appName, displayController,
+            splitScreenController, shouldShowWindowingPill = true,
+            shouldShowNewWindowButton = true,
+            openInBrowserLink = null, captionWidth = HANDLE_WIDTH, captionHeight = 50,
+            captionX = captionX)
         handleMenu.show()
         return handleMenu
     }

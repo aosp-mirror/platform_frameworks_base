@@ -70,6 +70,7 @@ class HandleMenu(
     private val displayController: DisplayController,
     private val splitScreenController: SplitScreenController,
     private val shouldShowWindowingPill: Boolean,
+    private val shouldShowNewWindowButton: Boolean,
     val openInBrowserLink: Uri?,
     private val captionWidth: Int,
     private val captionHeight: Int,
@@ -245,13 +246,24 @@ class HandleMenu(
      * Set up interactive elements & height of handle menu's more actions pill
      */
     private fun setupMoreActionsPill(handleMenu: View, style: MenuStyle) {
-        val pill = handleMenu.requireViewById<View>(R.id.more_actions_pill).apply {
-            isGone = !SHOULD_SHOW_MORE_ACTIONS_PILL
-            background.colorFilter = BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
-        }
-        pill.requireViewById<Button>(R.id.screenshot_button).let { screenshotBtn ->
-            screenshotBtn.setTextColor(style.textColor)
-            screenshotBtn.compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
+        val moreActionsPill = handleMenu.findViewById<View>(R.id.more_actions_pill)
+        moreActionsPill.isGone = !shouldShowNewWindowButton && !SHOULD_SHOW_SCREENSHOT_BUTTON
+        if (!moreActionsPill.isGone) {
+            handleMenu.requireViewById<Button>(R.id.screenshot_button).apply {
+                isGone = !SHOULD_SHOW_SCREENSHOT_BUTTON
+                background.colorFilter =
+                    BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
+                setTextColor(style.textColor)
+                compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
+            }
+            handleMenu.findViewById<Button>(R.id.new_window_button).apply {
+                isGone = !shouldShowNewWindowButton
+                background.colorFilter =
+                    BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
+                setTextColor(style.textColor)
+                compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
+                if (!isGone) setOnClickListener(onClickListener)
+            }
         }
     }
 
@@ -439,9 +451,17 @@ class HandleMenu(
                 R.dimen.desktop_mode_handle_menu_windowing_pill_height)
             menuHeight -= pillTopMargin
         }
-        if (!SHOULD_SHOW_MORE_ACTIONS_PILL) {
+        if (!SHOULD_SHOW_SCREENSHOT_BUTTON) {
             menuHeight -= loadDimensionPixelSize(
-                R.dimen.desktop_mode_handle_menu_more_actions_pill_height)
+                R.dimen.desktop_mode_handle_menu_screenshot_height
+            )
+        }
+        if (!shouldShowNewWindowButton) {
+            menuHeight -= loadDimensionPixelSize(
+                R.dimen.desktop_mode_handle_menu_new_window_height
+            )
+        }
+        if (!SHOULD_SHOW_SCREENSHOT_BUTTON && !shouldShowNewWindowButton) {
             menuHeight -= pillTopMargin
         }
         if (!shouldShowBrowserPill) {
@@ -501,7 +521,7 @@ class HandleMenu(
 
     companion object {
         private const val TAG = "HandleMenu"
-        private const val SHOULD_SHOW_MORE_ACTIONS_PILL = false
+        private const val SHOULD_SHOW_SCREENSHOT_BUTTON = false
     }
 }
 
@@ -517,6 +537,7 @@ interface HandleMenuFactory {
         displayController: DisplayController,
         splitScreenController: SplitScreenController,
         shouldShowWindowingPill: Boolean,
+        shouldShowNewWindowButton: Boolean,
         openInBrowserLink: Uri?,
         captionWidth: Int,
         captionHeight: Int,
@@ -536,6 +557,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
         displayController: DisplayController,
         splitScreenController: SplitScreenController,
         shouldShowWindowingPill: Boolean,
+        shouldShowNewWindowButton: Boolean,
         openInBrowserLink: Uri?,
         captionWidth: Int,
         captionHeight: Int,
@@ -551,6 +573,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
             displayController,
             splitScreenController,
             shouldShowWindowingPill,
+            shouldShowNewWindowButton,
             openInBrowserLink,
             captionWidth,
             captionHeight,

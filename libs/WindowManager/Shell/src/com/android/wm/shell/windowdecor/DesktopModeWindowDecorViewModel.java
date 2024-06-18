@@ -93,6 +93,7 @@ import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
@@ -145,6 +146,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final DesktopTasksController mDesktopTasksController;
     private final InputManager mInputManager;
     private final InteractionJankMonitor mInteractionJankMonitor;
+    private final MultiInstanceHelper mMultiInstanceHelper;
     private boolean mTransitionDragActive;
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
@@ -204,7 +206,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Optional<DesktopTasksController> desktopTasksController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor,
-            AppToWebGenericLinksParser genericLinksParser
+            AppToWebGenericLinksParser genericLinksParser,
+            MultiInstanceHelper multiInstanceHelper
     ) {
         this(
                 context,
@@ -223,6 +226,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 transitions,
                 desktopTasksController,
                 genericLinksParser,
+                multiInstanceHelper,
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new,
@@ -249,6 +253,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
             AppToWebGenericLinksParser genericLinksParser,
+            MultiInstanceHelper multiInstanceHelper,
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
@@ -268,6 +273,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mSyncQueue = syncQueue;
         mTransitions = transitions;
         mDesktopTasksController = desktopTasksController.get();
+        mMultiInstanceHelper = multiInstanceHelper;
         mShellCommandHandler = shellCommandHandler;
         mWindowManager = windowManager;
         mDesktopModeWindowDecorFactory = desktopModeWindowDecorFactory;
@@ -536,6 +542,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 decoration.onOpenInBrowserClick();
             } else if (id == R.id.collapse_menu_button) {
                 decoration.closeHandleMenu();
+            } else if (id == R.id.new_window_button) {
+                decoration.closeHandleMenu();
+                mDesktopTasksController.openNewWindow(decoration.mTaskInfo);
             } else if (id == R.id.maximize_window) {
                 // TODO(b/346441962): move click detection logic into the decor's
                 //  {@link AppHeaderViewHolder}. Let it encapsulate the that and have it report
@@ -1161,7 +1170,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mMainChoreographer,
                         mSyncQueue,
                         mRootTaskDisplayAreaOrganizer,
-                        mGenericLinksParser);
+                        mGenericLinksParser,
+                        mMultiInstanceHelper);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final DragPositioningCallback dragPositioningCallback;
