@@ -1222,6 +1222,12 @@
     <string name="accessibility_action_label_remove_widget">remove widget</string>
     <!-- Label for accessibility action to place a widget in edit mode after selecting move widget. [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_label_place_widget">place selected widget</string>
+    <!-- Title shown above information regarding lock screen widgets. [CHAR LIMIT=50] -->
+    <string name="communal_widgets_disclaimer_title">Lock screen widgets</string>
+    <!-- Information about lock screen widgets presented to the user. [CHAR LIMIT=NONE] -->
+    <string name="communal_widgets_disclaimer_text">To open an app using a widget, you\u2019ll need to verify it\u2019s you. Also, keep in mind that anyone can view them, even when your tablet\u2019s locked. Some widgets may not have been intended for your lock screen and may be unsafe to add here.</string>
+    <!-- Button for user to verify they understand the information presented. [CHAR LIMIT=50] -->
+    <string name="communal_widgets_disclaimer_button">Got it</string>
 
     <!-- Related to user switcher --><skip/>
 
