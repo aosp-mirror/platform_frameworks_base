@@ -18,6 +18,8 @@ package com.android.systemui.shade;
 
 import static androidx.constraintlayout.core.widgets.Optimizer.OPTIMIZATION_GRAPH;
 
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
+
 import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -32,10 +34,9 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
-import com.android.systemui.res.R;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 
 import java.util.ArrayList;
@@ -73,6 +74,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setOptimizationLevel(getOptimizationLevel() | OPTIMIZATION_GRAPH);
     }
 
     @Override
@@ -180,10 +182,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         super.dispatchDraw(canvas);
     }
 
-    void enableGraphOptimization() {
-        setOptimizationLevel(getOptimizationLevel() | OPTIMIZATION_GRAPH);
-    }
-
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         return TouchLogger.logDispatchTouch("NotificationsQuickSettingsContainer", ev,
@@ -192,7 +190,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if (KeyguardShadeMigrationNssl.isEnabled()) {
+        if (migrateClocksToBlueprint()) {
             return super.drawChild(canvas, child, drawingTime);
         }
         int layoutIndex = mLayoutDrawingOrder.indexOf(child);

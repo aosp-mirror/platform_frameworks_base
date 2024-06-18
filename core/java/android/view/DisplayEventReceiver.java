@@ -287,6 +287,16 @@ public abstract class DisplayEventReceiver {
     }
 
     /**
+     * Called when a display hdcp levels change event is received.
+     *
+     * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
+     * @param connectedLevel the new connected HDCP level
+     * @param maxLevel the maximum HDCP level
+     */
+    public void onHdcpLevelsChanged(long physicalDisplayId, int connectedLevel, int maxLevel) {
+    }
+
+    /**
      * Represents a mapping between a UID and an override frame rate
      */
     public static class FrameRateOverride {
@@ -372,6 +382,13 @@ public abstract class DisplayEventReceiver {
     private void dispatchFrameRateOverrides(long timestampNanos, long physicalDisplayId,
             FrameRateOverride[] overrides) {
         onFrameRateOverridesChanged(timestampNanos, physicalDisplayId, overrides);
+    }
+
+    // Called from native code.
+    @SuppressWarnings("unused")
+    private void dispatchHdcpLevelsChanged(long physicalDisplayId, int connectedLevel,
+            int maxLevel) {
+        onHdcpLevelsChanged(physicalDisplayId, connectedLevel, maxLevel);
     }
 
 }

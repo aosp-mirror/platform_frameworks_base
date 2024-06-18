@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Fechar"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Abrir"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Configurações"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Dividir tela"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menu do picture-in-picture"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> está em picture-in-picture"</string>
@@ -53,10 +52,10 @@
     <string name="accessibility_split_right" msgid="8441001008181296837">"Dividir para a direita"</string>
     <string name="accessibility_split_top" msgid="2789329702027147146">"Dividir para cima"</string>
     <string name="accessibility_split_bottom" msgid="8694551025220868191">"Dividir para baixo"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Como usar o modo para uma mão"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Como usar o modo uma mão"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Para sair, deslize de baixo para cima na tela ou toque em qualquer lugar acima do app"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar o modo para uma mão"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Sair do modo para uma mão"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar o modo uma mão"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Sair do modo uma mão"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Configurações de balões do <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Menu flutuante"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Devolver à pilha"</string>

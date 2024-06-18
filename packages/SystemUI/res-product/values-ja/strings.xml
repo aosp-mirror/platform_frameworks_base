@@ -46,9 +46,9 @@
     <string name="thermal_shutdown_message" product="default" msgid="6685194547904051408">"お使いのスマートフォンは現在、正常に動作しています。\nタップして詳細を表示"</string>
     <string name="thermal_shutdown_message" product="device" msgid="3039675532521590478">"お使いのデバイスは現在、正常に動作しています。\nタップして詳細を表示"</string>
     <string name="thermal_shutdown_message" product="tablet" msgid="5285898074484811386">"お使いのタブレットは現在、正常に動作しています。\nタップして詳細を表示"</string>
-    <string name="thermal_shutdown_dialog_message" product="default" msgid="6145923570358574186">"スマートフォンが熱くなりすぎたため電源が OFF になりました。現在は正常に動作しています。\n\nスマートフォンは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
-    <string name="thermal_shutdown_dialog_message" product="device" msgid="3647879000909527365">"デバイスが熱くなりすぎたため電源が OFF になりました。現在は正常に動作しています。\n\nデバイスは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
-    <string name="thermal_shutdown_dialog_message" product="tablet" msgid="8274487811928782165">"タブレットが熱くなりすぎたため電源が OFF になりました。現在は正常に動作しています。\n\nタブレットは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
+    <string name="thermal_shutdown_dialog_message" product="default" msgid="6145923570358574186">"スマートフォンの温度上昇により電源が OFF になりました。現在は正常に動作しています。\n\nスマートフォンは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
+    <string name="thermal_shutdown_dialog_message" product="device" msgid="3647879000909527365">"デバイスの温度上昇により電源が OFF になりました。現在は正常に動作しています。\n\nデバイスは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
+    <string name="thermal_shutdown_dialog_message" product="tablet" msgid="8274487811928782165">"タブレットの温度上昇により電源が OFF になりました。現在は正常に動作しています。\n\nタブレットは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
     <string name="high_temp_title" product="default" msgid="5365000411304924115">"スマートフォンの温度が上昇中"</string>
     <string name="high_temp_title" product="device" msgid="6622009907401563664">"デバイスの温度が上昇中"</string>
     <string name="high_temp_title" product="tablet" msgid="9039733706606446616">"タブレットの温度が上昇中"</string>

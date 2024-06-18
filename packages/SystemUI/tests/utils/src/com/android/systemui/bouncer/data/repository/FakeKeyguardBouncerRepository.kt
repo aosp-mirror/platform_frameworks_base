@@ -2,6 +2,7 @@ package com.android.systemui.bouncer.data.repository
 
 import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
+import com.android.systemui.bouncer.shared.model.BouncerDismissActionModel
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
@@ -53,6 +54,7 @@ class FakeKeyguardBouncerRepository @Inject constructor() : KeyguardBouncerRepos
     override val alternateBouncerUIAvailable = _isAlternateBouncerUIAvailable.asStateFlow()
     private val _sideFpsShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val sideFpsShowing: StateFlow<Boolean> = _sideFpsShowing.asStateFlow()
+    override var bouncerDismissActionModel: BouncerDismissActionModel? = null
 
     override fun setPrimaryScrimmed(isScrimmed: Boolean) {
         _primaryBouncerScrimmed.value = isScrimmed

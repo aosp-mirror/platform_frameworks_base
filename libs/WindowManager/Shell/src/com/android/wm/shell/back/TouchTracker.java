@@ -24,6 +24,8 @@ import android.view.RemoteAnimationTarget;
 import android.window.BackEvent;
 import android.window.BackMotionEvent;
 
+import java.io.PrintWriter;
+
 /**
  * Helper class to record the touch location for gesture and generate back events.
  */
@@ -61,6 +63,10 @@ class TouchTracker {
         if ((touchX < mStartThresholdX && mSwipeEdge == BackEvent.EDGE_LEFT)
                 || (touchX > mStartThresholdX && mSwipeEdge == BackEvent.EDGE_RIGHT)) {
             mStartThresholdX = touchX;
+            if ((mSwipeEdge == BackEvent.EDGE_LEFT && mStartThresholdX < mInitTouchX)
+                    || (mSwipeEdge == BackEvent.EDGE_RIGHT && mStartThresholdX > mInitTouchX)) {
+                mInitTouchX = mStartThresholdX;
+            }
         }
         mLatestTouchX = touchX;
         mLatestTouchY = touchY;
@@ -129,6 +135,7 @@ class TouchTracker {
                 /* progress = */ 0,
                 /* velocityX = */ 0,
                 /* velocityY = */ 0,
+                /* triggerBack = */ mTriggerBack,
                 /* swipeEdge = */ mSwipeEdge,
                 /* departingAnimationTarget = */ target);
     }
@@ -204,6 +211,7 @@ class TouchTracker {
                 /* progress = */ progress,
                 /* velocityX = */ mLatestVelocityX,
                 /* velocityY = */ mLatestVelocityY,
+                /* triggerBack = */ mTriggerBack,
                 /* swipeEdge = */ mSwipeEdge,
                 /* departingAnimationTarget = */ null);
     }
@@ -217,6 +225,12 @@ class TouchTracker {
         }
         mMaxDistance = maxDistance;
         mNonLinearFactor = nonLinearFactor;
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "TouchTracker state:");
+        pw.println(prefix + "  mState=" + mState);
+        pw.println(prefix + "  mTriggerBack=" + mTriggerBack);
     }
 
     enum TouchTrackerState {

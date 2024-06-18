@@ -17,8 +17,10 @@
 <permissions>
     <privapp-permissions package="com.android.intentresolver">
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.LOG_COMPAT_CHANGE"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.QUERY_CLONED_APPS"/>
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
     </privapp-permissions>
 </permissions>

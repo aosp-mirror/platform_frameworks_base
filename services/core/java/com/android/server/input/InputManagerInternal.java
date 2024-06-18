@@ -61,20 +61,26 @@ public abstract class InputManagerInternal {
     public abstract void setPulseGestureEnabled(boolean enabled);
 
     /**
-     * Atomically transfers touch focus from one window to another as identified by
-     * their input channels.  It is possible for multiple windows to have
-     * touch focus if they support split touch dispatch
-     * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
-     * method only transfers touch focus of the specified window without affecting
-     * other windows that may also have touch focus at the same time.
+     * Atomically transfers an active touch gesture from one window to another, as identified by
+     * their input channels.
      *
-     * @param fromChannelToken The channel token of a window that currently has touch focus.
-     * @param toChannelToken The channel token of the window that should receive touch focus in
-     * place of the first.
-     * @return {@code true} if the transfer was successful. {@code false} if the window with the
-     * specified channel did not actually have touch focus at the time of the request.
+     * <p>Only the touch gesture that is currently being dispatched to a window associated with
+     * {@code fromChannelToken} will be effected. That window will no longer receive
+     * the touch gesture (i.e. it will receive {@link android.view.MotionEvent#ACTION_CANCEL}).
+     * A window associated with the {@code toChannelToken} will receive the rest of the gesture
+     * (i.e. beginning with {@link android.view.MotionEvent#ACTION_DOWN} or
+     * {@link android.view.MotionEvent#ACTION_POINTER_DOWN}).
+     *
+     * <p>Transferring touch gestures will have no impact on focused windows. If the {@code
+     * toChannelToken} window is focusable, this will not bring focus to that window.
+     *
+     * @param fromChannelToken The channel token of a window that has an active touch gesture.
+     * @param toChannelToken The channel token of the window that should receive the gesture in
+     *   place of the first.
+     * @return True if the transfer was successful. False if the specified windows don't exist, or
+     *   if the source window is not actively receiving a touch gesture at the time of the request.
      */
-    public abstract boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
+    public abstract boolean transferTouchGesture(@NonNull IBinder fromChannelToken,
             @NonNull IBinder toChannelToken);
 
     /**
@@ -87,12 +93,16 @@ public abstract class InputManagerInternal {
      * connected, the caller may be blocked for an arbitrary period of time.
      *
      * @return true if the pointer displayId was set successfully, or false if it fails.
+     *
+     * @deprecated TODO(b/293587049): Not needed - remove after Pointer Icon Refactor is complete.
      */
     public abstract boolean setVirtualMousePointerDisplayId(int pointerDisplayId);
 
     /**
      * Gets the display id that the MouseCursorController is being forced to target. Returns
      * {@link android.view.Display#INVALID_DISPLAY} if there is no override
+     *
+     * @deprecated TODO(b/293587049): Not needed - remove after Pointer Icon Refactor is complete.
      */
     public abstract int getVirtualMousePointerDisplayId();
 
@@ -101,13 +111,16 @@ public abstract class InputManagerInternal {
      *
      * Returns NaN-s as the coordinates if the cursor is not available.
      */
-    public abstract PointF getCursorPosition();
+    public abstract PointF getCursorPosition(int displayId);
 
     /**
-     * Sets the pointer acceleration.
-     * See {@code frameworks/native/include/input/VelocityControl.h#VelocityControlParameters}.
+     * Enables or disables pointer acceleration for mouse movements.
+     *
+     * Note that this only affects pointer movements from mice (that is, pointing devices which send
+     * relative motions, including trackballs and pointing sticks), not from other pointer devices
+     * such as touchpads and styluses.
      */
-    public abstract void setPointerAcceleration(float acceleration, int displayId);
+    public abstract void setMousePointerAccelerationEnabled(boolean enabled, int displayId);
 
     /**
      * Sets the eligibility of windows on a given display for pointer capture. If a display is

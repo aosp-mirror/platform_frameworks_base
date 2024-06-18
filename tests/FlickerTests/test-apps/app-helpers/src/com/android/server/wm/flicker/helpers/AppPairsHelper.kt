@@ -17,8 +17,8 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.traces.component.ComponentNameMatcher
 
 class AppPairsHelper(
     instrumentation: Instrumentation,

@@ -93,6 +93,12 @@ public class SurfaceControlTest {
     }
 
     @Test
+    public void testSurfaceControlFrameRateCategoryHighHint() throws InterruptedException {
+        GraphicsActivity activity = mActivityRule.getActivity();
+        activity.testSurfaceControlFrameRateCategory(Surface.FRAME_RATE_CATEGORY_HIGH_HINT);
+    }
+
+    @Test
     public void testSurfaceControlFrameRateCategoryNormal() throws InterruptedException {
         GraphicsActivity activity = mActivityRule.getActivity();
         activity.testSurfaceControlFrameRateCategory(Surface.FRAME_RATE_CATEGORY_NORMAL);

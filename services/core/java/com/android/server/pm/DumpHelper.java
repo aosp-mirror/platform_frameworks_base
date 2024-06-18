@@ -22,8 +22,8 @@ import static com.android.server.pm.KnownPackages.LAST_KNOWN_PACKAGE;
 import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
 
 import android.annotation.NonNull;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -162,7 +162,7 @@ final class DumpHelper {
                         PackageManager.VERSION_CODE_HIGHEST);
 
                 pw.println(mPermissionManager.checkPermission(
-                        pkg, perm, Context.DEVICE_ID_DEFAULT, user));
+                        pkg, perm, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, user));
                 return;
             } else if ("l".equals(cmd) || "libraries".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_LIBS);

@@ -86,6 +86,20 @@ public interface DreamTouchHandler {
     }
 
     /**
+     * Returns whether the handler is enabled to handle touch on dream.
+     * @return isEnabled state. By default it's true.
+     */
+    default Boolean isEnabled() {
+        return true;
+    }
+
+    /**
+     * Sets whether to enable the handler to handle touch on dream.
+     * @param enabled new value to be set whether to enable the handler.
+     */
+    default void setIsEnabled(Boolean enabled){}
+
+    /**
      * Returns the region the touch handler is interested in. By default, no region is specified,
      * indicating the entire screen should be considered.
      * @param region A {@link Region} that is passed in to the target entry touch region.

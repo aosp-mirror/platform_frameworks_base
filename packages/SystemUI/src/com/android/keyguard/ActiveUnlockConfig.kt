@@ -41,6 +41,7 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.settings.SecureSettings
 import java.io.PrintWriter
 import javax.inject.Inject
+import dagger.Lazy
 
 /**
  * Handles active unlock settings changes.
@@ -51,6 +52,7 @@ class ActiveUnlockConfig @Inject constructor(
     private val secureSettings: SecureSettings,
     private val contentResolver: ContentResolver,
     private val selectedUserInteractor: SelectedUserInteractor,
+    private val keyguardUpdateMonitor: Lazy<KeyguardUpdateMonitor>,
     dumpManager: DumpManager
 ) : Dumpable {
 
@@ -96,7 +98,6 @@ class ActiveUnlockConfig @Inject constructor(
         UNDER_DISPLAY_FINGERPRINT(3),
     }
 
-    var keyguardUpdateMonitor: KeyguardUpdateMonitor? = null
     private var requestActiveUnlockOnWakeup = false
     private var requestActiveUnlockOnUnlockIntent = false
     private var requestActiveUnlockOnBioFail = false
@@ -316,7 +317,7 @@ class ActiveUnlockConfig @Inject constructor(
             return false
         }
 
-        keyguardUpdateMonitor?.let {
+        keyguardUpdateMonitor.get().let {
             val anyFaceEnrolled = it.isFaceEnabledAndEnrolled
             val anyFingerprintEnrolled = it.isUnlockWithFingerprintPossible(
                     selectedUserInteractor.getSelectedUserId())
@@ -369,13 +370,13 @@ class ActiveUnlockConfig @Inject constructor(
         }")
 
         pw.println("Current state:")
-        keyguardUpdateMonitor?.let {
+        keyguardUpdateMonitor.get().let {
             pw.println("   shouldRequestActiveUnlockOnUnlockIntentFromBiometricEnrollment=" +
                     "${shouldRequestActiveUnlockOnUnlockIntentFromBiometricEnrollment()}")
             pw.println("   isFaceEnabledAndEnrolled=${it.isFaceEnabledAndEnrolled}")
             pw.println("   fpUnlockPossible=${
                 it.isUnlockWithFingerprintPossible(selectedUserInteractor.getSelectedUserId())}")
             pw.println("   udfpsEnrolled=${it.isUdfpsEnrolled}")
-        } ?: pw.println("   keyguardUpdateMonitor is uninitialized")
+        }
     }
 }

@@ -116,7 +116,10 @@ class AttributeBuilder {
   AttributeBuilder();
   AttributeBuilder& SetTypeMask(uint32_t typeMask);
   AttributeBuilder& SetWeak(bool weak);
+  AttributeBuilder& SetComment(android::StringPiece comment);
   AttributeBuilder& AddItem(android::StringPiece name, uint32_t value);
+  AttributeBuilder& AddItemWithComment(android::StringPiece name, uint32_t value,
+                                       android::StringPiece comment);
   std::unique_ptr<Attribute> Build();
 
  private:

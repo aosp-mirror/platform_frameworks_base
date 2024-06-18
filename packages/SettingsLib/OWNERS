@@ -5,8 +5,8 @@ cipson@google.com
 dsandler@android.com
 edgarwang@google.com
 evanlaird@google.com
+jiannan@google.com
 juliacr@google.com
-yantingyang@google.com
 ykhung@google.com
 
 # Exempt resource files (because they are in a flat directory and too hard to manage via OWNERS)

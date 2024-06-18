@@ -144,7 +144,7 @@ TEST(FabricatedOverlayTests, SerializeAndDeserialize) {
               "com.example.target:string/string1", Res_value::TYPE_STRING, "foobar", "")
           .Build();
   ASSERT_TRUE(overlay);
-  TemporaryFile tf;
+  TempFrroFile tf;
   std::ofstream out(tf.path);
   ASSERT_TRUE((*overlay).ToBinaryStream(out));
   out.close();

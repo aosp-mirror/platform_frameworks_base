@@ -26,6 +26,8 @@ import android.os.UserManager
 import androidx.annotation.WorkerThread
 import com.android.systemui.CoreStartable
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.common.shared.model.PackageChangeModel
+import com.android.systemui.common.domain.interactor.PackageChangeInteractor
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
@@ -33,8 +35,17 @@ import com.android.systemui.controls.panels.AuthorizedPanelsRepository
 import com.android.systemui.controls.panels.SelectedComponentRepository
 import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.settings.UserTracker
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -53,13 +64,16 @@ import javax.inject.Inject
 class ControlsStartable
 @Inject
 constructor(
-        @Background private val executor: Executor,
-        private val controlsComponent: ControlsComponent,
-        private val userTracker: UserTracker,
-        private val authorizedPanelsRepository: AuthorizedPanelsRepository,
-        private val selectedComponentRepository: SelectedComponentRepository,
-        private val userManager: UserManager,
-        private val broadcastDispatcher: BroadcastDispatcher,
+    @Application private val scope: CoroutineScope,
+    @Background private val bgDispatcher: CoroutineDispatcher,
+    @Background private val executor: Executor,
+    private val controlsComponent: ControlsComponent,
+    private val userTracker: UserTracker,
+    private val authorizedPanelsRepository: AuthorizedPanelsRepository,
+    private val selectedComponentRepository: SelectedComponentRepository,
+    private val packageChangeInteractor: PackageChangeInteractor,
+    private val userManager: UserManager,
+    private val broadcastDispatcher: BroadcastDispatcher,
 ) : CoreStartable {
 
     // These two controllers can only be accessed after `start` method once we've checked if the
@@ -78,6 +92,8 @@ constructor(
             }
         }
 
+    private var packageJob: Job? = null
+
     override fun start() {}
 
     override fun onBootCompleted() {
@@ -94,6 +110,22 @@ constructor(
         controlsListingController.forceReload()
         selectDefaultPanelIfNecessary()
         bindToPanel()
+        monitorPackageUninstall()
+    }
+
+    private fun monitorPackageUninstall() {
+        packageJob?.cancel()
+        packageJob = packageChangeInteractor.packageChanged(userTracker.userHandle)
+            .filterIsInstance<PackageChangeModel.Uninstalled>()
+            .filter {
+                val selectedPackage =
+                    selectedComponentRepository.getSelectedComponent()?.componentName?.packageName
+                // Selected package was uninstalled
+                it.packageName == selectedPackage
+            }
+            .onEach { selectedComponentRepository.removeSelectedComponent() }
+            .flowOn(bgDispatcher)
+            .launchIn(scope)
     }
 
     private fun selectDefaultPanelIfNecessary() {

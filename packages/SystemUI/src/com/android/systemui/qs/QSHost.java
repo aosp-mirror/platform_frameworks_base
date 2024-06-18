@@ -17,12 +17,10 @@ package com.android.systemui.qs;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.Build;
 import android.provider.Settings;
 
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.util.leak.GarbageMonitor;
+import com.android.systemui.res.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,10 +42,6 @@ public interface QSHost {
         final String defaultTileList = res.getString(R.string.quick_settings_tiles_default);
 
         tiles.addAll(Arrays.asList(defaultTileList.split(",")));
-        if (Build.IS_DEBUGGABLE
-                && GarbageMonitor.ADD_MEMORY_TILE_TO_DEFAULT_ON_DEBUGGABLE_BUILDS) {
-            tiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
-        }
         return tiles;
     }
 

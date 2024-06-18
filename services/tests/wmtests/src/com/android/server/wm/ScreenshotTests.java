@@ -16,12 +16,14 @@
 
 package com.android.server.wm;
 
+import static android.server.wm.CtsWindowInfoUtils.waitForStableWindowGeometry;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.statusBars;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -43,6 +45,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ServiceManager;
 import android.platform.test.annotations.Presubmit;
+import android.server.wm.BuildUtils;
 import android.view.IWindowManager;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
@@ -50,7 +53,6 @@ import android.view.cts.surfacevalidator.BitmapPixelChecker;
 import android.view.cts.surfacevalidator.SaveBitmapHelper;
 import android.window.ScreenCapture;
 import android.window.ScreenCapture.ScreenshotHardwareBuffer;
-import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
@@ -74,6 +76,7 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @Presubmit
 public class ScreenshotTests {
+    private static final long WAIT_TIME_S = 5L * BuildUtils.HW_TIMEOUT_MULTIPLIER;
     private static final int BUFFER_WIDTH = 100;
     private static final int BUFFER_HEIGHT = 100;
 
@@ -119,32 +122,61 @@ public class ScreenshotTests {
         canvas.drawColor(Color.RED);
         buffer.unlockCanvasAndPost(canvas);
 
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         t.show(secureSC)
                 .setBuffer(secureSC, HardwareBuffer.createFromGraphicBuffer(buffer))
                 .setDataSpace(secureSC, DataSpace.DATASPACE_SRGB)
-                .apply(true);
+                .addTransactionCommittedListener(Runnable::run, countDownLatch::countDown)
+                .apply();
+        assertTrue("Failed to wait for transaction to get committed",
+                countDownLatch.await(WAIT_TIME_S, TimeUnit.SECONDS));
+        assertTrue("Failed to wait for stable geometry",
+                waitForStableWindowGeometry(WAIT_TIME_S, TimeUnit.SECONDS));
 
         ScreenCapture.LayerCaptureArgs args = new ScreenCapture.LayerCaptureArgs.Builder(secureSC)
                 .setCaptureSecureLayers(true)
                 .setChildrenOnly(false)
                 .build();
-        ScreenCapture.ScreenshotHardwareBuffer hardwareBuffer = ScreenCapture.captureLayers(args);
-        assertNotNull(hardwareBuffer);
 
-        Bitmap screenshot = hardwareBuffer.asBitmap();
-        assertNotNull(screenshot);
+        ScreenshotHardwareBuffer[] screenCapture = new ScreenshotHardwareBuffer[1];
+        Bitmap screenshot = null;
+        Bitmap swBitmap = null;
+        try {
+            CountDownLatch screenshotComplete = new CountDownLatch(1);
+            ScreenCapture.captureLayers(args, new ScreenCapture.ScreenCaptureListener(
+                    (screenshotHardwareBuffer, result) -> {
+                        if (result == 0) {
+                            screenCapture[0] = screenshotHardwareBuffer;
+                        }
+                        screenshotComplete.countDown();
+                    }));
+            assertTrue("Failed to wait for screen capture",
+                    screenshotComplete.await(WAIT_TIME_S, TimeUnit.SECONDS));
+            assertNotNull("Screen capture buffer is null", screenCapture[0]);
 
-        Bitmap swBitmap = screenshot.copy(Bitmap.Config.ARGB_8888, false);
-        screenshot.recycle();
+            screenshot = screenCapture[0].asBitmap();
+            assertNotNull("Screenshot from bitmap is null", screenshot);
 
-        BitmapPixelChecker bitmapPixelChecker = new BitmapPixelChecker(Color.RED);
-        Rect bounds = new Rect(0, 0, swBitmap.getWidth(), swBitmap.getHeight());
-        int numMatchingPixels = bitmapPixelChecker.getNumMatchingPixels(swBitmap, bounds);
-        int sizeOfBitmap = bounds.width() * bounds.height();
-        boolean success = numMatchingPixels == sizeOfBitmap;
-        swBitmap.recycle();
+            swBitmap = screenshot.copy(Bitmap.Config.ARGB_8888, false);
 
-        assertTrue(success);
+            BitmapPixelChecker bitmapPixelChecker = new BitmapPixelChecker(Color.RED);
+            Rect bounds = new Rect(0, 0, swBitmap.getWidth(), swBitmap.getHeight());
+            int numMatchingPixels = bitmapPixelChecker.getNumMatchingPixels(swBitmap, bounds);
+            int sizeOfBitmap = bounds.width() * bounds.height();
+
+            assertEquals("numMatchingPixels=" + numMatchingPixels + " sizeOfBitmap=" + sizeOfBitmap,
+                    sizeOfBitmap, numMatchingPixels);
+        } finally {
+            if (screenshot != null) {
+                screenshot.recycle();
+            }
+            if (swBitmap != null) {
+                swBitmap.recycle();
+            }
+            if (screenCapture[0].getHardwareBuffer() != null) {
+                screenCapture[0].getHardwareBuffer().close();
+            }
+        }
     }
 
     @Test
@@ -169,36 +201,65 @@ public class ScreenshotTests {
         buffer.unlockCanvasAndPost(canvas);
 
         Point point = mActivity.getPositionBelowStatusBar();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         t.show(sc)
                 .setBuffer(sc, HardwareBuffer.createFromGraphicBuffer(buffer))
                 .setDataSpace(sc, DataSpace.DATASPACE_SRGB)
                 .setPosition(sc, point.x, point.y)
-                .apply(true);
+                .addTransactionCommittedListener(Runnable::run, countDownLatch::countDown)
+                .apply();
 
-        SynchronousScreenCaptureListener syncScreenCapture =
-                ScreenCapture.createSyncCaptureListener();
-        windowManager.captureDisplay(DEFAULT_DISPLAY, null, syncScreenCapture);
-        ScreenshotHardwareBuffer hardwareBuffer = syncScreenCapture.getBuffer();
-        assertNotNull(hardwareBuffer);
+        assertTrue("Failed to wait for transaction to get committed",
+                countDownLatch.await(WAIT_TIME_S, TimeUnit.SECONDS));
+        assertTrue("Failed to wait for stable geometry",
+                waitForStableWindowGeometry(WAIT_TIME_S, TimeUnit.SECONDS));
 
-        Bitmap screenshot = hardwareBuffer.asBitmap();
-        assertNotNull(screenshot);
+        ScreenshotHardwareBuffer[] screenCapture = new ScreenshotHardwareBuffer[1];
+        Bitmap screenshot = null;
+        Bitmap swBitmap = null;
+        try {
+            CountDownLatch screenshotComplete = new CountDownLatch(1);
+            windowManager.captureDisplay(DEFAULT_DISPLAY, null,
+                    new ScreenCapture.ScreenCaptureListener(
+                            (screenshotHardwareBuffer, result) -> {
+                                if (result == 0) {
+                                    screenCapture[0] = screenshotHardwareBuffer;
+                                }
+                                screenshotComplete.countDown();
+                            }));
+            assertTrue("Failed to wait for screen capture",
+                    screenshotComplete.await(WAIT_TIME_S, TimeUnit.SECONDS));
+            assertNotNull("Screen capture buffer is null", screenCapture[0]);
 
-        Bitmap swBitmap = screenshot.copy(Bitmap.Config.ARGB_8888, false);
-        screenshot.recycle();
+            screenshot = screenCapture[0].asBitmap();
+            assertNotNull("Screenshot from bitmap is null", screenshot);
 
-        BitmapPixelChecker bitmapPixelChecker = new BitmapPixelChecker(Color.RED);
-        Rect bounds = new Rect(point.x, point.y, BUFFER_WIDTH + point.x, BUFFER_HEIGHT + point.y);
-        int numMatchingPixels = bitmapPixelChecker.getNumMatchingPixels(swBitmap, bounds);
-        int pixelMatchSize = bounds.width() * bounds.height();
-        boolean success = numMatchingPixels == pixelMatchSize;
+            swBitmap = screenshot.copy(Bitmap.Config.ARGB_8888, false);
 
-        if (!success) {
-            SaveBitmapHelper.saveBitmap(swBitmap, getClass(), mTestName, "failedImage");
+            BitmapPixelChecker bitmapPixelChecker = new BitmapPixelChecker(Color.RED);
+            Rect bounds = new Rect(point.x, point.y, BUFFER_WIDTH + point.x,
+                    BUFFER_HEIGHT + point.y);
+            int numMatchingPixels = bitmapPixelChecker.getNumMatchingPixels(swBitmap, bounds);
+            int pixelMatchSize = bounds.width() * bounds.height();
+            boolean success = numMatchingPixels == pixelMatchSize;
+
+            if (!success) {
+                SaveBitmapHelper.saveBitmap(swBitmap, getClass(), mTestName, "failedImage");
+            }
+            assertTrue(
+                    "numMatchingPixels=" + numMatchingPixels + " pixelMatchSize=" + pixelMatchSize,
+                    success);
+        } finally {
+            if (screenshot != null) {
+                screenshot.recycle();
+            }
+            if (swBitmap != null) {
+                swBitmap.recycle();
+            }
+            if (screenCapture[0].getHardwareBuffer() != null) {
+                screenCapture[0].getHardwareBuffer().close();
+            }
         }
-        swBitmap.recycle();
-        assertTrue("numMatchingPixels=" + numMatchingPixels + " pixelMatchSize=" + pixelMatchSize,
-                success);
     }
 
     public static class ScreenshotActivity extends Activity {

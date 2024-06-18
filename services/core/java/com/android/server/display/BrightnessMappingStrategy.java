@@ -18,13 +18,19 @@ package com.android.server.display;
 
 import static android.text.TextUtils.formatSimple;
 
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
+
 import android.annotation.Nullable;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessCorrection;
 import android.os.PowerManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.LongArray;
 import android.util.MathUtils;
 import android.util.Pair;
@@ -32,7 +38,6 @@ import android.util.Slog;
 import android.util.Spline;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.display.BrightnessUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.display.utils.Plog;
@@ -57,8 +62,8 @@ import java.util.Objects;
 public abstract class BrightnessMappingStrategy {
     private static final String TAG = "BrightnessMappingStrategy";
 
-    public static final float NO_USER_LUX = -1;
-    public static final float NO_USER_BRIGHTNESS = -1;
+    public static final float INVALID_LUX = -1;
+    public static final float INVALID_NITS = -1;
 
     private static final float LUX_GRAD_SMOOTHING = 0.25f;
     private static final float MAX_GRAD = 1.0f;
@@ -74,82 +79,53 @@ public abstract class BrightnessMappingStrategy {
     private static final Plog PLOG = Plog.createSystemPlog(TAG);
 
     /**
-     * Creates a BrightnessMappingStrategy for active (normal) mode.
-     * @param resources
-     * @param displayDeviceConfig
-     * @param displayWhiteBalanceController
-     * @return the BrightnessMappingStrategy
-     */
-    @Nullable
-    public static BrightnessMappingStrategy create(Resources resources,
-            DisplayDeviceConfig displayDeviceConfig,
-            DisplayWhiteBalanceController displayWhiteBalanceController) {
-        return create(resources, displayDeviceConfig, /* isForIdleMode= */ false,
-                displayWhiteBalanceController);
-    }
-
-    /**
-     * Creates a BrightnessMappingStrategy for idle screen brightness mode.
-     * @param resources
-     * @param displayDeviceConfig
-     * @param displayWhiteBalanceController
-     * @return the BrightnessMappingStrategy
-     */
-    @Nullable
-    public static BrightnessMappingStrategy createForIdleMode(Resources resources,
-            DisplayDeviceConfig displayDeviceConfig, DisplayWhiteBalanceController
-            displayWhiteBalanceController) {
-        return create(resources, displayDeviceConfig, /* isForIdleMode= */ true,
-                displayWhiteBalanceController);
-    }
-
-    /**
-     * Creates a BrightnessMapping strategy for either active or idle screen brightness mode.
-     * We do not create a simple mapping strategy for idle mode.
+     * Creates a BrightnessMapping strategy. We do not create a simple mapping strategy for idle
+     * mode.
      *
-     * @param resources
+     * @param context
      * @param displayDeviceConfig
-     * @param isForIdleMode determines whether the configurations loaded are for idle screen
-     *                      brightness mode or active screen brightness mode.
+     * @param mode The auto-brightness mode. Different modes use different brightness curves
      * @param displayWhiteBalanceController
      * @return the BrightnessMappingStrategy
      */
     @Nullable
-    private static BrightnessMappingStrategy create(Resources resources,
-            DisplayDeviceConfig displayDeviceConfig, boolean isForIdleMode,
-            DisplayWhiteBalanceController displayWhiteBalanceController) {
+    static BrightnessMappingStrategy create(Context context,
+            DisplayDeviceConfig displayDeviceConfig,
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode,
+            @Nullable DisplayWhiteBalanceController displayWhiteBalanceController) {
 
         // Display independent, mode dependent values
-        float[] brightnessLevelsNits;
+        float[] brightnessLevelsNits = null;
         float[] brightnessLevels = null;
-        float[] luxLevels;
-        if (isForIdleMode) {
-            brightnessLevelsNits = getFloatArray(resources.obtainTypedArray(
-                    com.android.internal.R.array.config_autoBrightnessDisplayValuesNitsIdle));
-            luxLevels = getLuxLevels(resources.getIntArray(
-                    com.android.internal.R.array.config_autoBrightnessLevelsIdle));
-        } else {
-            brightnessLevelsNits = displayDeviceConfig.getAutoBrightnessBrighteningLevelsNits();
-            luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux();
-
-            brightnessLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevels();
-            if (brightnessLevels == null || brightnessLevels.length == 0) {
-                // Load the old configuration in the range [0, 255]. The values need to be
-                // normalized to the range [0, 1].
-                int[] brightnessLevelsInt = resources.getIntArray(
-                        com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
-                brightnessLevels = new float[brightnessLevelsInt.length];
-                for (int i = 0; i < brightnessLevels.length; i++) {
-                    brightnessLevels[i] = normalizeAbsoluteBrightness(brightnessLevelsInt[i]);
-                }
+        float[] luxLevels = null;
+        int preset = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
+                Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_NORMAL, UserHandle.USER_CURRENT);
+        switch (mode) {
+            case AUTO_BRIGHTNESS_MODE_DEFAULT -> {
+                brightnessLevelsNits = displayDeviceConfig.getAutoBrightnessBrighteningLevelsNits();
+                luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(mode, preset);
+                brightnessLevels =
+                        displayDeviceConfig.getAutoBrightnessBrighteningLevels(mode, preset);
+            }
+            case AUTO_BRIGHTNESS_MODE_IDLE -> {
+                brightnessLevelsNits = getFloatArray(context.getResources().obtainTypedArray(
+                        com.android.internal.R.array.config_autoBrightnessDisplayValuesNitsIdle));
+                luxLevels = getLuxLevels(context.getResources().getIntArray(
+                        com.android.internal.R.array.config_autoBrightnessLevelsIdle));
+            }
+            case AUTO_BRIGHTNESS_MODE_DOZE -> {
+                luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(mode, preset);
+                brightnessLevels =
+                        displayDeviceConfig.getAutoBrightnessBrighteningLevels(mode, preset);
             }
         }
 
         // Display independent, mode independent values
-        float autoBrightnessAdjustmentMaxGamma = resources.getFraction(
+        float autoBrightnessAdjustmentMaxGamma = context.getResources().getFraction(
                 com.android.internal.R.fraction.config_autoBrightnessAdjustmentMaxGamma,
                 1, 1);
-        long shortTermModelTimeout = resources.getInteger(
+        long shortTermModelTimeout = context.getResources().getInteger(
                 com.android.internal.R.integer.config_autoBrightnessShortTermModelTimeout);
 
         // Display dependent values - used for physical mapping strategy nits -> brightness
@@ -158,17 +134,16 @@ public abstract class BrightnessMappingStrategy {
 
         if (isValidMapping(nitsRange, brightnessRange)
                 && isValidMapping(luxLevels, brightnessLevelsNits)) {
-
             BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder(
                     luxLevels, brightnessLevelsNits);
             builder.setShortTermModelTimeoutMillis(shortTermModelTimeout);
             builder.setShortTermModelLowerLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             builder.setShortTermModelUpperLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, brightnessRange,
-                    autoBrightnessAdjustmentMaxGamma, isForIdleMode, displayWhiteBalanceController);
+                    autoBrightnessAdjustmentMaxGamma, mode, displayWhiteBalanceController);
         } else if (isValidMapping(luxLevels, brightnessLevels)) {
             return new SimpleMappingStrategy(luxLevels, brightnessLevels,
-                    autoBrightnessAdjustmentMaxGamma, shortTermModelTimeout);
+                    autoBrightnessAdjustmentMaxGamma, shortTermModelTimeout, mode);
         } else {
             return null;
         }
@@ -334,7 +309,7 @@ public abstract class BrightnessMappingStrategy {
     /**
      * Converts the provided brightness value to nits if possible.
      *
-     * Returns -1.0f if there's no available mapping for the brightness to nits.
+     * Returns {@link INVALID_NITS} if there's no available mapping for the brightness to nits.
      */
     public abstract float convertToNits(float brightness);
 
@@ -342,7 +317,7 @@ public abstract class BrightnessMappingStrategy {
      * Converts the provided brightness value to nits if possible. Adjustments, such as RBC are
      * applied.
      *
-     * Returns -1.0f if there's no available mapping for the brightness to nits.
+     * Returns {@link INVALID_NITS} if there's no available mapping for the brightness to nits.
      */
     public abstract float convertToAdjustedNits(float brightness);
 
@@ -352,7 +327,7 @@ public abstract class BrightnessMappingStrategy {
      * Returns {@link PowerManager.BRIGHTNESS_INVALID_FLOAT} if there's no available mapping for
      * the nits to float scale.
      */
-    public abstract float convertToFloatScale(float nits);
+    public abstract float getBrightnessFromNits(float nits);
 
     /**
      * Adds a user interaction data point to the brightness mapping.
@@ -407,15 +382,16 @@ public abstract class BrightnessMappingStrategy {
      */
     public abstract void dump(PrintWriter pw, float hbmTransition);
 
-    /**
-     * We can designate a mapping strategy to be used for idle screen brightness mode.
-     * @return whether this mapping strategy is to be used for idle screen brightness mode.
-     */
-    public abstract boolean isForIdleMode();
-
     abstract float getUserLux();
 
     abstract float getUserBrightness();
+
+    /**
+     * @return The auto-brightness mode of this mapping strategy. Different modes use different
+     * brightness curves.
+     */
+    @AutomaticBrightnessController.AutomaticBrightnessMode
+    abstract int getMode();
 
     /**
      * Check if the short term model should be reset given the anchor lux the last
@@ -448,11 +424,6 @@ public abstract class BrightnessMappingStrategy {
                     + "(" + minAmbientLux + ", " + maxAmbientLux + ")");
             return true;
         }
-    }
-
-    // Normalize entire brightness range to 0 - 1.
-    protected static float normalizeAbsoluteBrightness(int brightness) {
-        return BrightnessSynchronizer.brightnessIntToFloat(brightness);
     }
 
     private Pair<float[], float[]> insertControlPoint(
@@ -596,7 +567,7 @@ public abstract class BrightnessMappingStrategy {
         if (mLoggingEnabled) {
             PLOG.logCurve("gamma adjusted curve", newLux, newBrightness);
         }
-        if (userLux != -1) {
+        if (userLux != INVALID_LUX) {
             Pair<float[], float[]> curve = insertControlPoint(newLux, newBrightness, userLux,
                     userBrightness);
             newLux = curve.first;
@@ -624,6 +595,9 @@ public abstract class BrightnessMappingStrategy {
         // Brightness control points normalized to [0, 1]
         private final float[] mBrightness;
 
+        @AutomaticBrightnessController.AutomaticBrightnessMode
+        private final int mMode;
+
         private Spline mSpline;
         private float mMaxGamma;
         private float mAutoBrightnessAdjustment;
@@ -632,7 +606,7 @@ public abstract class BrightnessMappingStrategy {
         private long mShortTermModelTimeout;
 
         private SimpleMappingStrategy(float[] lux, float[] brightness, float maxGamma,
-                long timeout) {
+                long timeout, @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
             Preconditions.checkArgument(lux.length != 0 && brightness.length != 0,
                     "Lux and brightness arrays must not be empty!");
             Preconditions.checkArgument(lux.length == brightness.length,
@@ -651,13 +625,14 @@ public abstract class BrightnessMappingStrategy {
 
             mMaxGamma = maxGamma;
             mAutoBrightnessAdjustment = 0;
-            mUserLux = NO_USER_LUX;
-            mUserBrightness = NO_USER_BRIGHTNESS;
+            mUserLux = INVALID_LUX;
+            mUserBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             if (mLoggingEnabled) {
                 PLOG.start("simple mapping strategy");
             }
             computeSpline();
             mShortTermModelTimeout = timeout;
+            mMode = mode;
         }
 
         @Override
@@ -704,16 +679,16 @@ public abstract class BrightnessMappingStrategy {
 
         @Override
         public float convertToNits(float brightness) {
-            return -1.0f;
+            return INVALID_NITS;
         }
 
         @Override
         public float convertToAdjustedNits(float brightness) {
-            return -1.0f;
+            return INVALID_NITS;
         }
 
         @Override
-        public float convertToFloatScale(float nits) {
+        public float getBrightnessFromNits(float nits) {
             return PowerManager.BRIGHTNESS_INVALID_FLOAT;
         }
 
@@ -741,22 +716,22 @@ public abstract class BrightnessMappingStrategy {
 
         @Override
         public void clearUserDataPoints() {
-            if (mUserLux != -1) {
+            if (mUserLux != INVALID_LUX) {
                 if (mLoggingEnabled) {
                     Slog.d(TAG, "clearUserDataPoints: " + mAutoBrightnessAdjustment + " => 0");
                     PLOG.start("clear user data points")
                             .logPoint("user data point", mUserLux, mUserBrightness);
                 }
                 mAutoBrightnessAdjustment = 0;
-                mUserLux = -1;
-                mUserBrightness = -1;
+                mUserLux = INVALID_LUX;
+                mUserBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
                 computeSpline();
             }
         }
 
         @Override
         public boolean hasUserDataPoints() {
-            return mUserLux != -1;
+            return mUserLux != INVALID_LUX;
         }
 
         @Override
@@ -782,11 +757,12 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mAutoBrightnessAdjustment=" + mAutoBrightnessAdjustment);
             pw.println("  mUserLux=" + mUserLux);
             pw.println("  mUserBrightness=" + mUserBrightness);
+            pw.println("  mShortTermModelTimeout=" + mShortTermModelTimeout);
         }
 
         @Override
-        public boolean isForIdleMode() {
-            return false;
+        int getMode() {
+            return mMode;
         }
 
         @Override
@@ -854,8 +830,12 @@ public abstract class BrightnessMappingStrategy {
         private float mAutoBrightnessAdjustment;
         private float mUserLux;
         private float mUserBrightness;
-        private final boolean mIsForIdleMode;
+
+        @Nullable
         private final DisplayWhiteBalanceController mDisplayWhiteBalanceController;
+
+        @AutomaticBrightnessController.AutomaticBrightnessMode
+        private final int mMode;
 
         // Previous short-term models and the times that they were computed stored for debugging
         // purposes
@@ -865,8 +845,9 @@ public abstract class BrightnessMappingStrategy {
         private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
         public PhysicalMappingStrategy(BrightnessConfiguration config, float[] nits,
-                float[] brightness, float maxGamma, boolean isForIdleMode,
-                DisplayWhiteBalanceController displayWhiteBalanceController) {
+                float[] brightness, float maxGamma,
+                @AutomaticBrightnessController.AutomaticBrightnessMode int mode,
+                @Nullable DisplayWhiteBalanceController displayWhiteBalanceController) {
 
             Preconditions.checkArgument(nits.length != 0 && brightness.length != 0,
                     "Nits and brightness arrays must not be empty!");
@@ -878,11 +859,11 @@ public abstract class BrightnessMappingStrategy {
             Preconditions.checkArrayElementsInRange(brightness,
                     PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, "brightness");
 
-            mIsForIdleMode = isForIdleMode;
+            mMode = mode;
             mMaxGamma = maxGamma;
             mAutoBrightnessAdjustment = 0;
-            mUserLux = NO_USER_LUX;
-            mUserBrightness = NO_USER_BRIGHTNESS;
+            mUserLux = INVALID_LUX;
+            mUserBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             mDisplayWhiteBalanceController = displayWhiteBalanceController;
 
             mNits = nits;
@@ -982,7 +963,7 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
-        public float convertToFloatScale(float nits) {
+        public float getBrightnessFromNits(float nits) {
             return mNitsToBrightnessSpline.interpolate(nits);
         }
 
@@ -1024,15 +1005,15 @@ public abstract class BrightnessMappingStrategy {
                             .logPoint("user data point", mUserLux, mUserBrightness);
                 }
                 mAutoBrightnessAdjustment = 0;
-                mUserLux = -1;
-                mUserBrightness = -1;
+                mUserLux = INVALID_LUX;
+                mUserBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
                 computeSpline();
             }
         }
 
         @Override
         public boolean hasUserDataPoints() {
-            return mUserLux != -1;
+            return mUserLux != INVALID_LUX;
         }
 
         @Override
@@ -1072,6 +1053,7 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mUserBrightness=" + mUserBrightness);
             pw.println("  mDefaultConfig=" + mDefaultConfig);
             pw.println("  mBrightnessRangeAdjustmentApplied=" + mBrightnessRangeAdjustmentApplied);
+            pw.println("  shortTermModelTimeout=" + getShortTermModelTimeout());
 
             pw.println("  Previous short-term models (oldest to newest): ");
             for (int i = 0; i < mPreviousBrightnessSplines.size(); i++) {
@@ -1086,8 +1068,8 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
-        public boolean isForIdleMode() {
-            return mIsForIdleMode;
+        int getMode() {
+            return mMode;
         }
 
         @Override

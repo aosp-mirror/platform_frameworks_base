@@ -240,8 +240,26 @@ public final class PresentationStatsEventLogger {
         mEventInternal = Optional.of(new PresentationStatsEventInternal());
     }
 
+    /**
+     * Set request_id
+     */
     public void maybeSetRequestId(int requestId) {
         mEventInternal.ifPresent(event -> event.mRequestId = requestId);
+    }
+
+    /**
+     * Set is_credential_request
+     */
+    public void maybeSetIsCredentialRequest(boolean isCredentialRequest) {
+        mEventInternal.ifPresent(event -> event.mIsCredentialRequest = isCredentialRequest);
+    }
+
+    /**
+     * Set webview_requested_credential
+     */
+    public void maybeSetWebviewRequestedCredential(boolean webviewRequestedCredential) {
+        mEventInternal.ifPresent(event ->
+                event.mWebviewRequestedCredential = webviewRequestedCredential);
     }
 
     public void maybeSetNoPresentationEventReason(@NotShownReason int reason) {
@@ -567,7 +585,9 @@ public final class PresentationStatsEventLogger {
                     + " mSelectedDatasetPickedReason=" + event.mSelectedDatasetPickedReason
                     + " mDetectionPreference=" + event.mDetectionPreference
                     + " mFieldClassificationRequestId=" + event.mFieldClassificationRequestId
-                    + " mAppPackageUid=" + mCallingAppUid);
+                    + " mAppPackageUid=" + mCallingAppUid
+                    + " mIsCredentialRequest=" + event.mIsCredentialRequest
+                    + " mWebviewRequestedCredential=" + event.mWebviewRequestedCredential);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -606,7 +626,9 @@ public final class PresentationStatsEventLogger {
                 event.mSelectedDatasetPickedReason,
                 event.mDetectionPreference,
                 event.mFieldClassificationRequestId,
-                mCallingAppUid);
+                mCallingAppUid,
+                event.mIsCredentialRequest,
+                event.mWebviewRequestedCredential);
         mEventInternal = Optional.empty();
     }
 
@@ -640,6 +662,8 @@ public final class PresentationStatsEventLogger {
         @DatasetPickedReason int mSelectedDatasetPickedReason = PICK_REASON_UNKNOWN;
         @DetectionPreference int mDetectionPreference = DETECTION_PREFER_UNKNOWN;
         int mFieldClassificationRequestId = -1;
+        boolean mIsCredentialRequest = false;
+        boolean mWebviewRequestedCredential = false;
 
         PresentationStatsEventInternal() {}
     }

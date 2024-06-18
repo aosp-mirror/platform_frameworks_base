@@ -181,7 +181,7 @@ public class SatelliteImplBase extends SatelliteService {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
                             .sendSatelliteDatagram(datagram, isEmergency, resultCallback),
-                    "sendSatelliteDatagram");
+                    "sendDatagram");
         }
 
         @Override
@@ -201,7 +201,7 @@ public class SatelliteImplBase extends SatelliteService {
                     () -> SatelliteImplBase.this
                             .requestIsSatelliteCommunicationAllowedForCurrentLocation(
                                     resultCallback, callback),
-                    "requestIsSatelliteCommunicationAllowedForCurrentLocation");
+                    "requestIsCommunicationAllowedForCurrentLocation");
         }
 
         @Override
@@ -263,6 +263,14 @@ public class SatelliteImplBase extends SatelliteService {
             executeMethodAsync(
                     () -> SatelliteImplBase.this.stopSendingNtnSignalStrength(resultCallback),
                     "stopSendingNtnSignalStrength");
+        }
+
+        @Override
+        public void abortSendingSatelliteDatagrams(IIntegerConsumer resultCallback)
+                throws RemoteException {
+            executeMethodAsync(
+                    () -> SatelliteImplBase.this.abortSendingSatelliteDatagrams(resultCallback),
+                    "abortSendingSatelliteDatagrams");
         }
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
@@ -781,6 +789,15 @@ public class SatelliteImplBase extends SatelliteService {
      * @param resultCallback The {@link SatelliteError} result of the operation.
      */
     public void stopSendingNtnSignalStrength(@NonNull IIntegerConsumer resultCallback){
+        // stub implementation
+    }
+
+    /**
+     * Requests to abort sending satellite datagrams
+     *
+     * @param resultCallback The {@link SatelliteError} result of the operation.
+     */
+    public void abortSendingSatelliteDatagrams(@NonNull IIntegerConsumer resultCallback){
         // stub implementation
     }
 }

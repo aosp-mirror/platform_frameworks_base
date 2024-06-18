@@ -27,7 +27,6 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -59,6 +58,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.notification.NotificationContentDescription;
 import com.android.systemui.statusbar.notification.NotificationDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
@@ -323,9 +323,14 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      * Update the icon dimens and drawable with current resources
      */
     public void updateIconDimens() {
-        reloadDimens();
-        updateDrawable();
-        maybeUpdateIconScaleDimens();
+        Trace.beginSection("StatusBarIconView#updateIconDimens");
+        try {
+            reloadDimens();
+            updateDrawable();
+            maybeUpdateIconScaleDimens();
+        } finally {
+            Trace.endSection();
+        }
     }
 
     private void reloadDimens() {
@@ -350,9 +355,22 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     public void setNotification(StatusBarNotification notification) {
-        mNotification = notification;
+        CharSequence contentDescription = null;
         if (notification != null) {
-            setContentDescription(notification.getNotification());
+            contentDescription = NotificationContentDescription
+                    .contentDescForNotification(mContext, notification.getNotification());
+        }
+        setNotification(notification, contentDescription);
+    }
+
+    /**
+     * Sets the notification with a pre-set content description.
+     */
+    public void setNotification(@Nullable StatusBarNotification notification,
+            @Nullable CharSequence notificationContentDescription) {
+        mNotification = notification;
+        if (!TextUtils.isEmpty(notificationContentDescription)) {
+            setContentDescription(notificationContentDescription);
         }
         maybeUpdateIconScaleDimens();
     }
@@ -621,21 +639,16 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mNumberBackground.setBounds(w-dw, h-dh, w, h);
     }
 
-    private void setContentDescription(Notification notification) {
-        if (notification != null) {
-            String d = contentDescForNotification(mContext, notification);
-            if (!TextUtils.isEmpty(d)) {
-                setContentDescription(d);
-            }
-        }
-    }
-
     @Override
     public String toString() {
         return "StatusBarIconView("
                 + "slot='" + mSlot + "' alpha=" + getAlpha() + " icon=" + mIcon
                 + " visibleState=" + getVisibleStateString(getVisibleState())
                 + " iconColor=#" + Integer.toHexString(mIconColor)
+                + " staticDrawableColor=#" + Integer.toHexString(mDrawableColor)
+                + " decorColor=#" + Integer.toHexString(mDecorColor)
+                + " animationStartColor=#" + Integer.toHexString(mAnimationStartColor)
+                + " currentSetColor=#" + Integer.toHexString(mCurrentSetColor)
                 + " notification=" + mNotification + ')';
     }
 
@@ -645,35 +658,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
 
     public String getSlot() {
         return mSlot;
-    }
-
-
-    public static String contentDescForNotification(Context c, Notification n) {
-        String appName = "";
-        try {
-            Notification.Builder builder = Notification.Builder.recoverBuilder(c, n);
-            appName = builder.loadHeaderAppName();
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Unable to recover builder", e);
-            // Trying to get the app name from the app info instead.
-            ApplicationInfo appInfo = n.extras.getParcelable(
-                    Notification.EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
-            if (appInfo != null) {
-                appName = String.valueOf(appInfo.loadLabel(c.getPackageManager()));
-            }
-        }
-
-        CharSequence title = n.extras.getCharSequence(Notification.EXTRA_TITLE);
-        CharSequence text = n.extras.getCharSequence(Notification.EXTRA_TEXT);
-        CharSequence ticker = n.tickerText;
-
-        // Some apps just put the app name into the title
-        CharSequence titleOrText = TextUtils.equals(title, appName) ? text : title;
-
-        CharSequence desc = !TextUtils.isEmpty(titleOrText) ? titleOrText
-                : !TextUtils.isEmpty(ticker) ? ticker : "";
-
-        return c.getString(R.string.accessibility_desc_notification_icon, appName, desc);
     }
 
     /**

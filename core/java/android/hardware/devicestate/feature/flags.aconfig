@@ -1,0 +1,10 @@
+package: "android.hardware.devicestate.feature.flags"
+container: "system"
+
+flag {
+    name: "device_state_property_api"
+    namespace: "windowing_sdk"
+    description: "Updated DeviceState hasProperty API"
+    bug: "293636629"
+    is_fixed_read_only: true
+}

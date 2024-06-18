@@ -43,6 +43,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.display.BrightnessThrottler.Injector;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel;
+import com.android.server.display.config.SensorData;
 import com.android.server.display.mode.DisplayModeDirectorTest;
 
 import org.junit.Before;
@@ -56,6 +57,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -292,6 +294,53 @@ public class BrightnessThrottlerTest {
         assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE, throttler.getBrightnessMaxReason());
     }
 
+
+    @Test
+    public void testThermalThrottlingWithDisplaySensor() throws Exception {
+        final ThrottlingLevel level =
+                    new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL, 0.25f);
+        List<ThrottlingLevel> levels = new ArrayList<>(List.of(level));
+        final ThermalBrightnessThrottlingData data = ThermalBrightnessThrottlingData.create(levels);
+        final SensorData tempSensor = new SensorData("DISPLAY", "VIRTUAL-SKIN-DISPLAY");
+        final BrightnessThrottler throttler =
+                    createThrottlerSupportedWithTempSensor(data, tempSensor);
+        assertTrue(throttler.deviceSupportsThrottling());
+
+        verify(mThermalServiceMock)
+                    .registerThermalEventListenerWithType(
+                        mThermalEventListenerCaptor.capture(), eq(Temperature.TYPE_DISPLAY));
+        final IThermalEventListener listener = mThermalEventListenerCaptor.getValue();
+
+        // Set VIRTUAL-SKIN-DISPLAY tatus too low to verify no throttling.
+        listener.notifyThrottling(getDisplayTempWithName(tempSensor.name, level.thermalStatus - 1));
+        mTestLooper.dispatchAll();
+        assertEquals(PowerManager.BRIGHTNESS_MAX, throttler.getBrightnessCap(), 0f);
+        assertFalse(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE, throttler.getBrightnessMaxReason());
+
+        // Verify when skin sensor throttled, no brightness throttling triggered.
+        listener.notifyThrottling(getSkinTemp(level.thermalStatus + 1));
+        mTestLooper.dispatchAll();
+        assertEquals(PowerManager.BRIGHTNESS_MAX, throttler.getBrightnessCap(), 0f);
+        assertFalse(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE, throttler.getBrightnessMaxReason());
+
+        // Verify when display sensor of another name throttled, no brightness throttling triggered.
+        listener.notifyThrottling(getDisplayTempWithName("ANOTHER-NAME", level.thermalStatus + 1));
+        mTestLooper.dispatchAll();
+        assertEquals(PowerManager.BRIGHTNESS_MAX, throttler.getBrightnessCap(), 0f);
+        assertFalse(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE, throttler.getBrightnessMaxReason());
+
+        // Verify when display sensor of current name throttled, brightness throttling triggered.
+        listener.notifyThrottling(getDisplayTempWithName(tempSensor.name, level.thermalStatus + 1));
+        mTestLooper.dispatchAll();
+        assertEquals(level.brightness, throttler.getBrightnessCap(), 0f);
+        assertTrue(throttler.isThrottled());
+        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL,
+                throttler.getBrightnessMaxReason());
+    }
+
     @Test public void testUpdateThermalThrottlingData() throws Exception {
         // Initialise brightness throttling levels
         // Ensure that they are overridden by setting the data through device config.
@@ -476,18 +525,30 @@ public class BrightnessThrottlerTest {
         return new BrightnessThrottler(mInjectorMock, mHandler, mHandler,
                 /* throttlingChangeCallback= */ () -> {}, /* uniqueDisplayId= */ null,
                 /* thermalThrottlingDataId= */ null,
-                /* thermalThrottlingDataMap= */ new HashMap<>(1));
+                /* thermalThrottlingDataMap= */ new HashMap<>(1),
+                /* tempSensor= */ null);
     }
 
     private BrightnessThrottler createThrottlerSupported(ThermalBrightnessThrottlingData data) {
+        SensorData tempSensor = SensorData.loadTempSensorUnspecifiedConfig();
+        return createThrottlerSupportedWithTempSensor(data, tempSensor);
+    }
+    private BrightnessThrottler createThrottlerSupportedWithTempSensor(
+                ThermalBrightnessThrottlingData data, SensorData tempSensor) {
         assertNotNull(data);
-        HashMap<String, ThermalBrightnessThrottlingData> throttlingDataMap = new HashMap<>(1);
+        Map<String, ThermalBrightnessThrottlingData> throttlingDataMap = new HashMap<>(1);
         throttlingDataMap.put("default", data);
         return new BrightnessThrottler(mInjectorMock, mHandler, BackgroundThread.getHandler(),
-                () -> {}, "123", "default", throttlingDataMap);
+                    () -> {}, "123", "default", throttlingDataMap, tempSensor);
     }
 
     private Temperature getSkinTemp(@ThrottlingStatus int status) {
         return new Temperature(30.0f, Temperature.TYPE_SKIN, "test_skin_temp", status);
+    }
+
+    private Temperature getDisplayTempWithName(
+                String sensorName, @ThrottlingStatus int status) {
+        assertNotNull(sensorName);
+        return new Temperature(30.0f, Temperature.TYPE_DISPLAY, sensorName, status);
     }
 }

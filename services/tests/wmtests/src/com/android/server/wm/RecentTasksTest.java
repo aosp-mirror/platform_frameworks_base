@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -45,7 +46,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -72,6 +72,7 @@ import android.os.SystemClock;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.SparseBooleanArray;
 import android.view.Surface;
 import android.window.TaskSnapshot;
@@ -526,20 +527,20 @@ public class RecentTasksTest extends WindowTestsBase {
         mTaskPersister.mUserTaskIdsOverride.put(1, true);
         mTaskPersister.mUserTaskIdsOverride.put(2, true);
         mTaskPersister.mUserTasksOverride = new ArrayList<>();
-        mTaskPersister.mUserTasksOverride.add(createTaskBuilder(".UserTask1").build());
-        mTaskPersister.mUserTasksOverride.add(createTaskBuilder(".UserTask2").build());
+        mTaskPersister.mUserTasksOverride.add(mTasks.get(0));
+        mTaskPersister.mUserTasksOverride.add(mTasks.get(1));
 
         // Assert no user tasks are initially loaded
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).hasLength(0);
 
         // Load user 0 tasks
-        mRecentTasks.loadUserRecentsLocked(TEST_USER_0_ID);
+        mRecentTasks.loadRecentTasksIfNeeded(TEST_USER_0_ID);
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList().contains(TEST_USER_0_ID);
         assertTrue(mRecentTasks.containsTaskId(1, TEST_USER_0_ID));
         assertTrue(mRecentTasks.containsTaskId(2, TEST_USER_0_ID));
 
         // Load user 1 tasks
-        mRecentTasks.loadUserRecentsLocked(TEST_USER_1_ID);
+        mRecentTasks.loadRecentTasksIfNeeded(TEST_USER_1_ID);
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList().contains(TEST_USER_0_ID);
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList().contains(TEST_USER_1_ID);
         assertTrue(mRecentTasks.containsTaskId(1, TEST_USER_0_ID));
@@ -574,15 +575,15 @@ public class RecentTasksTest extends WindowTestsBase {
         mTaskPersister.mUserTaskIdsOverride.put(2, true);
         mTaskPersister.mUserTaskIdsOverride.put(3, true);
         mTaskPersister.mUserTasksOverride = new ArrayList<>();
-        mTaskPersister.mUserTasksOverride.add(createTaskBuilder(".UserTask1").build());
-        mTaskPersister.mUserTasksOverride.add(createTaskBuilder(".UserTask2").build());
-        mTaskPersister.mUserTasksOverride.add(createTaskBuilder(".UserTask3").build());
+        mTaskPersister.mUserTasksOverride.add(mTasks.get(0));
+        mTaskPersister.mUserTasksOverride.add(mTasks.get(1));
+        mTaskPersister.mUserTasksOverride.add(mTasks.get(2));
 
         // Assert no user tasks are initially loaded
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).hasLength(0);
 
         // Load tasks
-        mRecentTasks.loadUserRecentsLocked(TEST_USER_0_ID);
+        mRecentTasks.loadRecentTasksIfNeeded(TEST_USER_0_ID);
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList().contains(TEST_USER_0_ID);
 
         // Sort the time descendingly so the order should be in-sync with task recency (most
@@ -1207,6 +1208,31 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
+    public void addTask_tasksAreAddedAccordingToZOrder() {
+        final Task firstTask = new TaskBuilder(mSupervisor).setTaskId(1)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .setCreateActivity(true).build();
+        final Task secondTask = new TaskBuilder(mSupervisor).setTaskId(2)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .setCreateActivity(true).build();
+
+        assertEquals(-1, firstTask.compareTo(secondTask));
+
+        // initial addition when tasks are created
+        mRecentTasks.add(firstTask);
+        mRecentTasks.add(secondTask);
+
+        assertRecentTasksOrder(secondTask, firstTask);
+
+        // Tasks are added in a different order
+        mRecentTasks.add(secondTask);
+        mRecentTasks.add(firstTask);
+
+        // order in recents don't change as first task has lower z-order
+        assertRecentTasksOrder(secondTask, firstTask);
+    }
+
+    @Test
     public void removeTask_callsTaskNotificationController() {
         final Task task = createTaskBuilder(".Task").build();
 
@@ -1395,8 +1421,6 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     private List<RecentTaskInfo> getRecentTasks(int flags) {
-        doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
-        doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
         return mRecentTasks.getRecentTasks(MAX_VALUE, flags, true /* getTasksAllowed */,
                 TEST_USER_0_ID, 0 /* callingUid */).getList();
     }
@@ -1566,19 +1590,20 @@ public class RecentTasksTest extends WindowTestsBase {
         }
 
         @Override
-        SparseBooleanArray loadPersistedTaskIdsForUser(int userId) {
+        SparseBooleanArray readPersistedTaskIdsFromFileForUser(int userId) {
             if (mUserTaskIdsOverride != null) {
                 return mUserTaskIdsOverride;
             }
-            return super.loadPersistedTaskIdsForUser(userId);
+            return super.readPersistedTaskIdsFromFileForUser(userId);
         }
 
         @Override
-        List<Task> restoreTasksForUserLocked(int userId, SparseBooleanArray preaddedTasks) {
+        ArrayList<Task> restoreTasksForUserLocked(int userId, RecentTaskFiles recentTaskFiles,
+                IntArray existedTaskIds) {
             if (mUserTasksOverride != null) {
                 return mUserTasksOverride;
             }
-            return super.restoreTasksForUserLocked(userId, preaddedTasks);
+            return super.restoreTasksForUserLocked(userId, recentTaskFiles, existedTaskIds);
         }
     }
 

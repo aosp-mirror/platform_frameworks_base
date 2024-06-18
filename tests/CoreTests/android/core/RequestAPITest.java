@@ -19,9 +19,10 @@ package android.core;
 import android.net.http.RequestHandle;
 import android.net.http.RequestQueue;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 import android.webkit.CookieSyncManager;
+
+import androidx.test.filters.Suppress;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

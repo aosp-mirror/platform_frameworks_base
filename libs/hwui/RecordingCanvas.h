@@ -140,6 +140,7 @@ private:
     void translateZ(SkScalar);
 
     void clipPath(const SkPath&, SkClipOp, bool aa);
+    void clipShader(const sk_sp<SkShader>& shader, SkClipOp);
     void clipRect(const SkRect&, SkClipOp, bool aa);
     void clipRRect(const SkRRect&, SkClipOp, bool aa);
     void clipRegion(const SkRegion&, SkClipOp);
@@ -216,6 +217,7 @@ public:
     void onClipRect(const SkRect&, SkClipOp, ClipEdgeStyle) override;
     void onClipRRect(const SkRRect&, SkClipOp, ClipEdgeStyle) override;
     void onClipPath(const SkPath&, SkClipOp, ClipEdgeStyle) override;
+    void onClipShader(sk_sp<SkShader>, SkClipOp) override;
     void onClipRegion(const SkRegion&, SkClipOp) override;
     void onResetClip() override;
 

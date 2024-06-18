@@ -26,6 +26,8 @@ import androidx.annotation.StyleableRes;
 
 import com.android.internal.R;
 
+import java.util.Set;
+
 /**
  * Defines the string attribute length and child tag count restrictions for a xml element.
  *
@@ -37,7 +39,11 @@ public class Element {
     private static final int MAX_ATTR_LEN_URL_COMPONENT = 256;
     private static final int MAX_ATTR_LEN_PERMISSION_GROUP = 256;
     private static final int MAX_ATTR_LEN_PACKAGE = 256;
-    private static final int MAX_ATTR_LEN_MIMETYPE = 512;
+    /**
+     * The mime type max length restriction here should match the restriction that is also
+     * placed in {@link android.content.pm.PackageManager#setMimeGroup(String, Set)}
+     */
+    private static final int MAX_ATTR_LEN_MIMETYPE = 255;
     private static final int MAX_ATTR_LEN_NAME = 1024;
     private static final int MAX_ATTR_LEN_PATH = 4000;
     private static final int MAX_ATTR_LEN_VALUE = 32_768;
@@ -87,6 +93,7 @@ public class Element {
     protected static final String TAG_SUPPORTS_GL_TEXTURE = "supports-gl-texture";
     protected static final String TAG_SUPPORTS_INPUT = "supports-input";
     protected static final String TAG_SUPPORTS_SCREENS = "supports-screens";
+    protected static final String TAG_URI_RELATIVE_FILTER_GROUP = "uri-relative-filter-group";
     protected static final String TAG_USES_CONFIGURATION = "uses-configuration";
     protected static final String TAG_USES_FEATURE = "uses-feature";
     protected static final String TAG_USES_GL_TEXTURE = "uses-gl-texture";
@@ -100,9 +107,15 @@ public class Element {
 
     protected static final String TAG_ATTR_BACKUP_AGENT = "backupAgent";
     protected static final String TAG_ATTR_CATEGORY = "category";
+    protected static final String TAG_ATTR_FRAGMENT = "fragment";
+    protected static final String TAG_ATTR_FRAGMENT_ADVANCED_PATTERN = "fragmentAdvancedPattern";
+    protected static final String TAG_ATTR_FRAGMENT_PATTERN = "fragmentPattern";
+    protected static final String TAG_ATTR_FRAGMENT_PREFIX = "fragmentPrefix";
+    protected static final String TAG_ATTR_FRAGMENT_SUFFIX = "fragmentSuffix";
     protected static final String TAG_ATTR_HOST = "host";
     protected static final String TAG_ATTR_MANAGE_SPACE_ACTIVITY = "manageSpaceActivity";
     protected static final String TAG_ATTR_MIMETYPE = "mimeType";
+    protected static final String TAG_ATTR_MIMEGROUP = "mimeGroup";
     protected static final String TAG_ATTR_NAME = "name";
     protected static final String TAG_ATTR_PACKAGE = "package";
     protected static final String TAG_ATTR_PATH = "path";
@@ -115,6 +128,11 @@ public class Element {
     protected static final String TAG_ATTR_PERMISSION_GROUP = "permissionGroup";
     protected static final String TAG_ATTR_PORT = "port";
     protected static final String TAG_ATTR_PROCESS = "process";
+    protected static final String TAG_ATTR_QUERY = "query";
+    protected static final String TAG_ATTR_QUERY_ADVANCED_PATTERN = "queryAdvancedPattern";
+    protected static final String TAG_ATTR_QUERY_PATTERN = "queryPattern";
+    protected static final String TAG_ATTR_QUERY_PREFIX = "queryPrefix";
+    protected static final String TAG_ATTR_QUERY_SUFFIX = "querySuffix";
     protected static final String TAG_ATTR_READ_PERMISSION = "readPermission";
     protected static final String TAG_ATTR_REQUIRED_ACCOUNT_TYPE = "requiredAccountType";
     protected static final String TAG_ATTR_REQUIRED_SYSTEM_PROPERTY_NAME =
@@ -136,7 +154,7 @@ public class Element {
 
     // The length of mTagCounters corresponds to the number of tags defined in getCounterIdx. If new
     // tags are added then the size here should be increased to match.
-    private final TagCounter[] mTagCounters = new TagCounter[34];
+    private final TagCounter[] mTagCounters = new TagCounter[35];
 
     String mTag;
 
@@ -231,9 +249,11 @@ public class Element {
                 return 31;
             case TAG_INTENT:
                 return 32;
+            case TAG_URI_RELATIVE_FILTER_GROUP:
+                return 33;
             default:
                 // The size of the mTagCounters array should be equal to this value+1
-                return 33;
+                return 34;
         }
     }
 
@@ -269,6 +289,7 @@ public class Element {
             case TAG_SERVICE:
             case TAG_SUPPORTS_GL_TEXTURE:
             case TAG_SUPPORTS_SCREENS:
+            case TAG_URI_RELATIVE_FILTER_GROUP:
             case TAG_USES_CONFIGURATION:
             case TAG_USES_FEATURE:
             case TAG_USES_LIBRARY:
@@ -308,13 +329,14 @@ public class Element {
                 initializeCounter(TAG_USES_LIBRARY, 1000);
                 initializeCounter(TAG_ACTIVITY_ALIAS, 4000);
                 initializeCounter(TAG_PROVIDER, 8000);
-                initializeCounter(TAG_ACTIVITY, 40000);
+                initializeCounter(TAG_ACTIVITY, 30000);
                 break;
             case TAG_COMPATIBLE_SCREENS:
                 initializeCounter(TAG_SCREEN, 4000);
                 break;
             case TAG_INTENT:
             case TAG_INTENT_FILTER:
+                initializeCounter(TAG_URI_RELATIVE_FILTER_GROUP, 100);
                 initializeCounter(TAG_ACTION, 20000);
                 initializeCounter(TAG_CATEGORY, 40000);
                 initializeCounter(TAG_DATA, 40000);
@@ -347,6 +369,9 @@ public class Element {
                 initializeCounter(TAG_INTENT, 2000);
                 initializeCounter(TAG_PROVIDER, 8000);
                 break;
+            case TAG_URI_RELATIVE_FILTER_GROUP:
+                initializeCounter(TAG_DATA, 100);
+                break;
         }
     }
 
@@ -367,6 +392,7 @@ public class Element {
             case TAG_ATTR_BACKUP_AGENT:
             case TAG_ATTR_CATEGORY:
             case TAG_ATTR_MANAGE_SPACE_ACTIVITY:
+            case TAG_ATTR_MIMEGROUP:
             case TAG_ATTR_NAME:
             case TAG_ATTR_PARENT_ACTIVITY_NAME:
             case TAG_ATTR_PERMISSION:
@@ -383,11 +409,21 @@ public class Element {
             case TAG_ATTR_VERSION_NAME:
             case TAG_ATTR_ZYGOTE_PRELOAD_NAME:
                 return MAX_ATTR_LEN_NAME;
+            case TAG_ATTR_FRAGMENT:
+            case TAG_ATTR_FRAGMENT_ADVANCED_PATTERN:
+            case TAG_ATTR_FRAGMENT_PATTERN:
+            case TAG_ATTR_FRAGMENT_PREFIX:
+            case TAG_ATTR_FRAGMENT_SUFFIX:
             case TAG_ATTR_PATH:
             case TAG_ATTR_PATH_ADVANCED_PATTERN:
             case TAG_ATTR_PATH_PATTERN:
             case TAG_ATTR_PATH_PREFIX:
             case TAG_ATTR_PATH_SUFFIX:
+            case TAG_ATTR_QUERY:
+            case TAG_ATTR_QUERY_ADVANCED_PATTERN:
+            case TAG_ATTR_QUERY_PATTERN:
+            case TAG_ATTR_QUERY_PREFIX:
+            case TAG_ATTR_QUERY_SUFFIX:
                 return MAX_ATTR_LEN_PATH;
             case TAG_ATTR_VALUE:
                 return MAX_ATTR_LEN_VALUE;
@@ -520,11 +556,23 @@ public class Element {
                 return MAX_ATTR_LEN_URL_COMPONENT;
             case R.styleable.AndroidManifestData_mimeType:
                 return MAX_ATTR_LEN_MIMETYPE;
+            case R.styleable.AndroidManifestData_mimeGroup:
+                return MAX_ATTR_LEN_NAME;
             case R.styleable.AndroidManifestData_path:
             case R.styleable.AndroidManifestData_pathPattern:
             case R.styleable.AndroidManifestData_pathPrefix:
             case R.styleable.AndroidManifestData_pathSuffix:
             case R.styleable.AndroidManifestData_pathAdvancedPattern:
+            case R.styleable.AndroidManifestData_query:
+            case R.styleable.AndroidManifestData_queryPattern:
+            case R.styleable.AndroidManifestData_queryPrefix:
+            case R.styleable.AndroidManifestData_querySuffix:
+            case R.styleable.AndroidManifestData_queryAdvancedPattern:
+            case R.styleable.AndroidManifestData_fragment:
+            case R.styleable.AndroidManifestData_fragmentPattern:
+            case R.styleable.AndroidManifestData_fragmentPrefix:
+            case R.styleable.AndroidManifestData_fragmentSuffix:
+            case R.styleable.AndroidManifestData_fragmentAdvancedPattern:
                 return MAX_ATTR_LEN_PATH;
             default:
                 return DEFAULT_MAX_STRING_ATTR_LENGTH;

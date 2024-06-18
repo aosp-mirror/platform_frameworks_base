@@ -29,6 +29,7 @@ import java.io.IOException;
  * @hide
  */
 @SystemService(Context.SERIAL_SERVICE)
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SerialManager {
     private static final String TAG = "SerialManager";
 
@@ -69,6 +70,8 @@ public class SerialManager {
      * @return the serial port
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = ParcelFileDescriptor.class, reason =
+            "Needs socketpair() to offer accurate emulation")
     public SerialPort openSerialPort(String name, int speed) throws IOException {
         try {
             ParcelFileDescriptor pfd = mService.openSerialPort(name);

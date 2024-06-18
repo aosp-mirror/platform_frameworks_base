@@ -35,6 +35,7 @@ import android.os.Vibrator.VibrationIntensity;
 import android.util.IndentingPrintWriter;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * List of device-specific internal vibration configuration loaded from platform config.xml.
@@ -51,6 +52,8 @@ public class VibrationConfig {
     private final float mHapticChannelMaxVibrationAmplitude;
     private final int mRampStepDurationMs;
     private final int mRampDownDurationMs;
+    private final int mRequestVibrationParamsTimeoutMs;
+    private final int[] mRequestVibrationParamsForUsages;
 
     private final boolean mIgnoreVibrationsOnWirelessCharger;
 
@@ -67,6 +70,8 @@ public class VibrationConfig {
 
     private final boolean mDefaultKeyboardVibrationEnabled;
 
+    private final boolean mHasFixedKeyboardAmplitude;
+
     /** @hide */
     public VibrationConfig(@Nullable Resources resources) {
         mHapticChannelMaxVibrationAmplitude = loadFloat(resources,
@@ -75,11 +80,17 @@ public class VibrationConfig {
                 com.android.internal.R.integer.config_vibrationWaveformRampDownDuration, 0);
         mRampStepDurationMs = loadInteger(resources,
                 com.android.internal.R.integer.config_vibrationWaveformRampStepDuration, 0);
+        mRequestVibrationParamsTimeoutMs = loadInteger(resources,
+                com.android.internal.R.integer.config_requestVibrationParamsTimeout, 0);
+        mRequestVibrationParamsForUsages = loadIntArray(resources,
+                com.android.internal.R.array.config_requestVibrationParamsForUsages);
 
         mIgnoreVibrationsOnWirelessCharger = loadBoolean(resources,
                 com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger, false);
         mDefaultKeyboardVibrationEnabled = loadBoolean(resources,
                 com.android.internal.R.bool.config_defaultKeyboardVibrationEnabled, true);
+        mHasFixedKeyboardAmplitude = loadFloat(resources,
+                com.android.internal.R.dimen.config_keyboardHapticFeedbackFixedAmplitude, -1) > 0;
 
         mDefaultAlarmVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultAlarmVibrationIntensity);
@@ -115,6 +126,10 @@ public class VibrationConfig {
         return res != null ? res.getBoolean(resId) : defaultValue;
     }
 
+    private static int[] loadIntArray(@Nullable Resources res, int resId) {
+        return res != null ? res.getIntArray(resId) : new int[0];
+    }
+
     /**
      * Return the maximum amplitude the vibrator can play using the audio haptic channels.
      *
@@ -137,6 +152,23 @@ public class VibrationConfig {
             return 0;
         }
         return mRampDownDurationMs;
+    }
+
+    /**
+     * The duration, in milliseconds, that the vibrator control service will wait for new
+     * vibration params.
+     */
+    public int getRequestVibrationParamsTimeoutMs() {
+        return Math.max(mRequestVibrationParamsTimeoutMs, 0);
+    }
+
+    /**
+     * The list of usages that should request vibration params before they are played. These
+     * usages don't have strong latency requirements, e.g. ringtone and notification, and can be
+     * slightly delayed.
+     */
+    public int[] getRequestVibrationParamsForUsages() {
+        return mRequestVibrationParamsForUsages;
     }
 
     /**
@@ -169,6 +201,14 @@ public class VibrationConfig {
         return mDefaultKeyboardVibrationEnabled;
     }
 
+    /**
+     * Whether the device has a fixed amplitude for keyboard.
+     * @hide
+     */
+    public boolean hasFixedKeyboardAmplitude() {
+        return mHasFixedKeyboardAmplitude;
+    }
+
     /** Get the default vibration intensity for given usage. */
     @VibrationIntensity
     public int getDefaultVibrationIntensity(@VibrationAttributes.Usage int usage) {
@@ -196,14 +236,19 @@ public class VibrationConfig {
     @Override
     public String toString() {
         return "VibrationConfig{"
-                + "mHapticChannelMaxVibrationAmplitude=" + mHapticChannelMaxVibrationAmplitude
+                + "mIgnoreVibrationsOnWirelessCharger=" + mIgnoreVibrationsOnWirelessCharger
+                + ", mHapticChannelMaxVibrationAmplitude=" + mHapticChannelMaxVibrationAmplitude
                 + ", mRampStepDurationMs=" + mRampStepDurationMs
                 + ", mRampDownDurationMs=" + mRampDownDurationMs
+                + ", mRequestVibrationParamsForUsages="
+                + Arrays.toString(getRequestVibrationParamsForUsagesNames())
+                + ", mRequestVibrationParamsTimeoutMs=" + mRequestVibrationParamsTimeoutMs
                 + ", mDefaultAlarmIntensity=" + mDefaultAlarmVibrationIntensity
                 + ", mDefaultHapticFeedbackIntensity=" + mDefaultHapticFeedbackIntensity
                 + ", mDefaultMediaIntensity=" + mDefaultMediaVibrationIntensity
                 + ", mDefaultNotificationIntensity=" + mDefaultNotificationVibrationIntensity
                 + ", mDefaultRingIntensity=" + mDefaultRingVibrationIntensity
+                + ", mDefaultKeyboardVibrationEnabled=" + mDefaultKeyboardVibrationEnabled
                 + "}";
     }
 
@@ -215,9 +260,23 @@ public class VibrationConfig {
     public void dumpWithoutDefaultSettings(IndentingPrintWriter pw) {
         pw.println("VibrationConfig:");
         pw.increaseIndent();
+        pw.println("ignoreVibrationsOnWirelessCharger = " + mIgnoreVibrationsOnWirelessCharger);
         pw.println("hapticChannelMaxAmplitude = " + mHapticChannelMaxVibrationAmplitude);
         pw.println("rampStepDurationMs = " + mRampStepDurationMs);
         pw.println("rampDownDurationMs = " + mRampDownDurationMs);
+        pw.println("requestVibrationParamsForUsages = "
+                + Arrays.toString(getRequestVibrationParamsForUsagesNames()));
+        pw.println("requestVibrationParamsTimeoutMs = " + mRequestVibrationParamsTimeoutMs);
         pw.decreaseIndent();
+    }
+
+    private String[] getRequestVibrationParamsForUsagesNames() {
+        int usagesCount = mRequestVibrationParamsForUsages.length;
+        String[] names = new String[usagesCount];
+        for (int i = 0; i < usagesCount; i++) {
+            names[i] = VibrationAttributes.usageToString(mRequestVibrationParamsForUsages[i]);
+        }
+
+        return names;
     }
 }

@@ -25,6 +25,7 @@ import android.os.Process;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
 import android.os.UserHandle;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -36,6 +37,11 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class UserPowerCalculatorTest {
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     public static final int USER1 = 0;
     public static final int USER2 = 1625;
 
@@ -43,7 +49,7 @@ public class UserPowerCalculatorTest {
     private static final int APP_UID2 = Process.FIRST_APPLICATION_UID + 272;
     private static final int APP_UID3 = Process.FIRST_APPLICATION_UID + 314;
 
-    @Rule
+    @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule();
 
     @Test

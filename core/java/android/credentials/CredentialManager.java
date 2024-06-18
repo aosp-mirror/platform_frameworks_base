@@ -23,15 +23,20 @@ import android.annotation.Hide;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.RemoteException;
@@ -54,8 +59,12 @@ import java.util.concurrent.Executor;
  * to authenticate to the app.
  */
 @SystemService(Context.CREDENTIAL_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_CREDENTIALS)
 public final class CredentialManager {
     private static final String TAG = "CredentialManager";
+    private static final Bundle OPTIONS_SENDER_BAL_OPTIN = ActivityOptions.makeBasic()
+            .setPendingIntentBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
 
     /** @hide */
     @IntDef(
@@ -135,7 +144,8 @@ public final class CredentialManager {
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<GetCandidateCredentialsResponse,
-                    GetCandidateCredentialsException> callback
+                    GetCandidateCredentialsException> callback,
+            @NonNull IBinder clientCallback
     ) {
         requireNonNull(request, "request must not be null");
         requireNonNull(callingPackage, "callingPackage must not be null");
@@ -153,6 +163,7 @@ public final class CredentialManager {
                     mService.getCandidateCredentials(
                             request,
                             new GetCandidateCredentialsTransport(executor, callback),
+                            clientCallback,
                             callingPackage);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -752,7 +763,8 @@ public final class CredentialManager {
         @Override
         public void onPendingIntent(PendingIntent pendingIntent) {
             try {
-                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0,
+                        OPTIONS_SENDER_BAL_OPTIN);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(
                         TAG,
@@ -810,7 +822,8 @@ public final class CredentialManager {
         @Override
         public void onPendingIntent(PendingIntent pendingIntent) {
             try {
-                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0,
+                        OPTIONS_SENDER_BAL_OPTIN);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(
                         TAG,

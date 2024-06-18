@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Kamera"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Quloqchin"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Kiritish qurilmasi"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"Eshitish moslamalari"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi o‘chiq."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi o‘chiq."</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Ranglarni tuzatishning foydasi:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Ranglar yanada aniqroq koʻrinadi&lt;/li&gt; &lt;li&gt;&amp;nbsp;Diqqatni qaratish uchun ortiqcha ranglarni olib tashlash imkonini beradi&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> bilan almashtirildi"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - Batareyani himoyalash uchun quvvatlash toʻxtatildi"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> – Quvvatlash aksessuarini tekshiring"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Quvvati tugashiga taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Toʻlishiga <xliff:g id="TIME">%1$s</xliff:g> qoldi"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Toʻlishiga <xliff:g id="TIME">%2$s</xliff:g> qoldi"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvatlash optimallashtirildi"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvatlash optimallashtirildi"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvatlanmoqda"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Noma’lum"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Tezkor quvvat olmoqda"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Simsiz quvvat olmoqda"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Quvvat olmoqda"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Quvvat olmayapti"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Ulangan, quvvat olmayapti"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Ulangan, lekin quvvat olmayapti"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Quvvat oldi"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Toʻliq quvvatlandi"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Quvvatlash toʻxtatildi"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Administrator tomonidan boshqariladi"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Cheklangan sozlama tomonidan boshqariladi"</string>
     <string name="disabled" msgid="8017887509554714950">"Oʻchiq"</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Har safar so‘ralsin"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Rejimdan chiqilgunicha"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Hozir"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Shu telefon"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Shu planshet"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Shu telefon"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Shu planshet"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dok-stansiyali karnay"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Tashqi qurilma"</string>
@@ -605,7 +609,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Qo‘shish"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Yangi foydalanuvchi"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Yangi profil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Foydalanuvchi ma‘lumoti"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Foydalanuvchi haqida"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profil haqida axborot"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Cheklangan profil yaratish uchun, shaxsiy ilovlar va ma‘lumotlarni himoyalash maqsadida avval ekran qulfini yaratish lozim."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Qulf o‘rnatish"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Yangi foydalanuvchi yaratilmadi"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Yangi mehmon yaratilmadi"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nik"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"Ismingiz va rasmingiz ushbu qurilmadan foydalanadigan har bir kishiga koʻrinadi."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Foydalanuvchi kiritish"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Mehmon kiritish"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Mehmonni olib tashlash"</string>

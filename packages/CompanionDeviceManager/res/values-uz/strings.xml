@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Chaqiruvlar jurnali"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Atrofdagi qurilmalar"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Media chiqishini tanlash"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Suratlar va media"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Bildirishnomalar"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Bildirishnomalar"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Ilovalar"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Striming"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Telefon chaqiruvlarini bajarishi va boshqarishi mumkin"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Telefon chaqiruvlari jurnalini koʻrishi va oʻzgartirishi mumkin"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS xabarlarni koʻrishi va yuborishi mumkin"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Kontaktlarga ruxsati bor"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Taqvimga ruxsati bor"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Audio yozib olish mumkin"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Atrofdagi qurilmalarni qidirishi, joylashuvini aniqlashi va ularga ulanishi mumkin"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Barcha bildirishnomalarni, jumladan, kontaktlar, xabarlar va suratlarni oʻqishi mumkin"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Telefon qilish va chaqiruvlarni boshqarish"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Telefon chaqiruvlari jurnalini koʻrish va oʻzgartirish"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS yuborish va ularni oʻqish"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Kontaktlar bilan ishlash"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Taqvim bilan ishlash"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Audio yozib olish"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Atrofdagi qurilmalarni qidirish, joylashuvini aniqlash va ularga ulanish"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Barcha bildirishnomalarni, jumladan, kontaktlar, xabarlar va suratlarni oʻqish"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Barcha bildirishnomalarni, jumladan, kontaktlar, xabarlar va suratlarni oʻqish&lt;br/&gt;• Bildirishnoma yuborish&lt;br/&gt;&lt;br/&gt;Ilovaning bildirishnomalarga ruxsatini istalgan vaqt Sozlamalar > Bildirishnomalar orqali boshqarish mumkin."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Telefondagi ilovalarni translatsiya qilish"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Telefoningizdan ilovalar va tizim funksiyalarini translatsiya qilish"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Mavjud qurilmalar roʻyxatini olish va qaysi biri boshqa ilovalarga audio yoki video uzatishini boshqarish"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefon"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"planshet"</string>
 </resources>

@@ -279,6 +279,10 @@ public class MeasuredText {
          * offset is zero. After the style is applied the internal offset is moved to {@code offset
          * + length}, and next call will start from this new position.
          *
+         * <p>
+         * {@link Paint#TEXT_RUN_FLAG_RIGHT_EDGE} and {@link Paint#TEXT_RUN_FLAG_LEFT_EDGE} are
+         * ignored and treated as both of them are set.
+         *
          * @param paint a paint
          * @param length a length to be applied with a given paint, can not exceed the length of the
          *               text

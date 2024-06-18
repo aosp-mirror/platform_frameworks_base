@@ -1,5 +1,6 @@
 package: "android.service.notification"
 container: "system"
+container: "system"
 
 flag {
   name: "ranking_update_ashmem"
@@ -9,10 +10,17 @@ flag {
 }
 
 flag {
-  name: "notification_lifetime_extension_refactor"
-    namespace: "systemui"
-    description: "Enables moving notification lifetime extension management from SystemUI to "
-        "Notification Manager Service"
-    bug: "299448097"
+  name: "redact_sensitive_notifications_from_untrusted_listeners"
+  namespace: "systemui"
+  description: "This flag controls the redacting of sensitive notifications from untrusted NotificationListenerServices"
+  bug: "306271190"
+  is_exported: true
 }
 
+flag {
+  name: "callstyle_callback_api"
+  namespace: "systemui"
+  description: "Guards the new CallStyleNotificationEventsCallback"
+  bug: "305095040"
+  is_fixed_read_only: true
+}

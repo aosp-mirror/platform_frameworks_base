@@ -54,12 +54,18 @@ final class HalVibration extends Vibration {
     /** Vibration status. */
     private Vibration.Status mStatus;
 
+    /** Reported scale values applied to the vibration effects. */
+    private int mScaleLevel;
+    private float mAdaptiveScale;
+
     HalVibration(@NonNull IBinder token, @NonNull CombinedVibration effect,
             @NonNull CallerInfo callerInfo) {
         super(token, callerInfo);
         mOriginalEffect = effect;
         mEffectToPlay = effect;
         mStatus = Vibration.Status.RUNNING;
+        mScaleLevel = VibrationScaler.SCALE_NONE;
+        mAdaptiveScale = VibrationScaler.ADAPTIVE_SCALE_NONE;
     }
 
     /**
@@ -102,20 +108,41 @@ final class HalVibration extends Vibration {
     }
 
     /**
-     * Scales the {@link #getEffectToPlay()} and each fallback effect with a scaling transformation.
+     * Resolves the default vibration amplitude of {@link #getEffectToPlay()} and each fallback.
      *
-     * @param scaler A {@link VibrationEffect.Transformation<Integer>} that takes one of the
-     *               {@code VibrationAttributes.USAGE_*} as the modifier to scale the effect
-     *               based on the user settings.
+     * @param defaultAmplitude An integer in [1,255] representing the device default amplitude to
+     *                        replace the {@link VibrationEffect#DEFAULT_AMPLITUDE}.
      */
-    public void scaleEffects(VibrationEffect.Transformation<Integer> scaler) {
-        int vibrationUsage = callerInfo.attrs.getUsage();
-        CombinedVibration newEffect = mEffectToPlay.transform(scaler, vibrationUsage);
+    public void resolveEffects(int defaultAmplitude) {
+        CombinedVibration newEffect =
+                mEffectToPlay.transform(VibrationEffect::resolve, defaultAmplitude);
         if (!Objects.equals(mEffectToPlay, newEffect)) {
             mEffectToPlay = newEffect;
         }
         for (int i = 0; i < mFallbacks.size(); i++) {
-            mFallbacks.setValueAt(i, scaler.transform(mFallbacks.valueAt(i), vibrationUsage));
+            mFallbacks.setValueAt(i, mFallbacks.valueAt(i).resolve(defaultAmplitude));
+        }
+    }
+
+    /**
+     * Scales the {@link #getEffectToPlay()} and each fallback effect based on the vibration usage.
+     */
+    public void scaleEffects(VibrationScaler scaler) {
+        int vibrationUsage = callerInfo.attrs.getUsage();
+
+        // Save scale values for debugging purposes.
+        mScaleLevel = scaler.getScaleLevel(vibrationUsage);
+        mAdaptiveScale = scaler.getAdaptiveHapticsScale(vibrationUsage);
+
+        // Scale all VibrationEffect instances in given CombinedVibration.
+        CombinedVibration newEffect = mEffectToPlay.transform(scaler::scale, vibrationUsage);
+        if (!Objects.equals(mEffectToPlay, newEffect)) {
+            mEffectToPlay = newEffect;
+        }
+
+        // Scale all fallback VibrationEffect instances that can be used by VibrationThread.
+        for (int i = 0; i < mFallbacks.size(); i++) {
+            mFallbacks.setValueAt(i, scaler.scale(mFallbacks.valueAt(i), vibrationUsage));
         }
     }
 
@@ -154,7 +181,7 @@ final class HalVibration extends Vibration {
         CombinedVibration originalEffect =
                 Objects.equals(mOriginalEffect, mEffectToPlay) ? null : mOriginalEffect;
         return new Vibration.DebugInfo(mStatus, stats, mEffectToPlay, originalEffect,
-                /* scale= */ 0, callerInfo);
+                mScaleLevel, mAdaptiveScale, callerInfo);
     }
 
     /** Return {@link VibrationStats.StatsInfo} with read-only metrics about this vibration. */

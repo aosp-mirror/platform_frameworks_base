@@ -25,6 +25,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.platform.test.annotations.Presubmit;
+import android.server.wm.BuildUtils;
 import android.view.SurfaceControl;
 import android.window.SurfaceSyncGroup;
 
@@ -370,6 +371,7 @@ public class SurfaceSyncGroupTest {
         assertEquals(0, finishedLatch.getCount());
     }
 
+    @Test
     public void testSurfaceSyncGroupTimeout() throws InterruptedException {
         final CountDownLatch finishedLatch = new CountDownLatch(1);
         SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(TAG);
@@ -386,7 +388,7 @@ public class SurfaceSyncGroupTest {
 
         // Never finish syncTarget2 so it forces the timeout. Timeout is 1 second so wait a little
         // over 1 second to make sure it completes.
-        finishedLatch.await(1100, TimeUnit.MILLISECONDS);
+        finishedLatch.await(1100L * BuildUtils.HW_TIMEOUT_MULTIPLIER, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch.getCount());
     }
 }

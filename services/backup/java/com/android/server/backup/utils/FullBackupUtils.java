@@ -21,7 +21,7 @@ import static com.android.server.backup.BackupManagerService.TAG;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
-import com.android.server.backup.BackupAndRestoreFeatureFlags;
+import com.android.server.backup.Flags;
 
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -46,8 +46,11 @@ public class FullBackupUtils {
         // We do not take close() responsibility for the pipe FD
         FileInputStream raw = new FileInputStream(inPipe.getFileDescriptor());
         DataInputStream in = new DataInputStream(raw);
-        final int chunkSizeInBytes =
-                BackupAndRestoreFeatureFlags.getFullBackupUtilsRouteBufferSizeBytes();
+        int chunkSizeInBytes = 32 * 1024; // 32KB
+        if (Flags.enableMaxSizeWritesToPipes()) {
+            // Linux pipe capacity (buffer size) is 16 pages where each page is 4KB
+            chunkSizeInBytes = 64 * 1024; // 64KB
+        }
         byte[] buffer = new byte[chunkSizeInBytes];
         int chunkTotal;
         while ((chunkTotal = in.readInt()) > 0) {

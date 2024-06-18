@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
+import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.accounts.IAccountManager;
@@ -106,6 +107,7 @@ import android.system.Os;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -269,6 +271,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGetInstallLocation();
                 case "install-add-session":
                     return runInstallAddSession();
+                case "install-set-pre-verified-domains":
+                    return runInstallSetPreVerifiedDomains();
+                case "install-get-pre-verified-domains":
+                    return runInstallGetPreVerifiedDomains();
                 case "move-package":
                     return runMovePackage();
                 case "move-primary-storage":
@@ -297,6 +303,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetHiddenSetting(true);
                 case "unhide":
                     return runSetHiddenSetting(false);
+                case "unstop":
+                    return runSetStoppedState(false);
                 case "suspend":
                     return runSuspend(true, 0);
                 case "suspend-quarantine":
@@ -388,6 +396,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runArchive();
                 case "request-unarchive":
                     return runUnarchive();
+                case "get-domain-verification-agent":
+                    return runGetDomainVerificationAgent();
                 default: {
                     if (ART_SERVICE_COMMANDS.contains(cmd)) {
                         if (DexOptHelper.useArtService()) {
@@ -1085,8 +1095,14 @@ class PackageManagerShellCommand extends ShellCommand {
         // the sdk or package name along with optional additional information based on opt.
         final Map<String, List<String>> out = new HashMap<>();
         for (int userId : userIds) {
-            final int translatedUserId =
+            final int translatedUserId;
+            try {
+                translatedUserId =
                     translateUserId(userId, UserHandle.USER_SYSTEM, "runListPackages");
+            } catch (RuntimeException ex) {
+                getErrPrintWriter().println("Error: " + ex.toString());
+                continue;
+            }
             @SuppressWarnings("unchecked") final ParceledListSlice<PackageInfo> slice =
                     mInterface.getInstalledPackages(getFlags, translatedUserId);
             final List<PackageInfo> packages = slice.getList();
@@ -1799,6 +1815,41 @@ class PackageManagerShellCommand extends ShellCommand {
                 true /*logSuccess*/);
     }
 
+    private int runInstallSetPreVerifiedDomains() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final int sessionId = Integer.parseInt(getNextArg());
+        final String preVerifiedDomainsStr = getNextArg();
+        final String[] preVerifiedDomains = preVerifiedDomainsStr.split(",");
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(
+                    mInterface.getPackageInstaller().openSession(sessionId));
+            session.setPreVerifiedDomains(new ArraySet<>(preVerifiedDomains));
+        } finally {
+            IoUtils.closeQuietly(session);
+        }
+        return 0;
+    }
+
+    private int runInstallGetPreVerifiedDomains() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final int sessionId = Integer.parseInt(getNextArg());
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(
+                    mInterface.getPackageInstaller().openSession(sessionId));
+            Set<String> preVerifiedDomains = session.getPreVerifiedDomains();
+            if (preVerifiedDomains.isEmpty()) {
+                pw.println("The session doesn't have any pre-verified domains specified.");
+            } else {
+                pw.println(String.join(",", preVerifiedDomains));
+            }
+        } finally {
+            IoUtils.closeQuietly(session);
+        }
+        return 0;
+    }
+
     private int runInstallRemove() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
 
@@ -2341,7 +2392,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 Streams.copy(inStream, outStream);
             }
             // Give read permissions to the other group.
-            Os.chmod(outputProfilePath, /*mode*/ 0644 );
+            Os.chmod(outputProfilePath, /*mode*/ DEFAULT_FILE_ACCESS_MODE);
         } catch (IOException | ErrnoException e) {
             pw.println("Error when reading the profile fd: " + e.getMessage());
             e.printStackTrace(pw);
@@ -2653,6 +2704,26 @@ class PackageManagerShellCommand extends ShellCommand {
         mInterface.setApplicationHiddenSettingAsUser(pkg, state, translatedUserId);
         getOutPrintWriter().println("Package " + pkg + " new hidden state: "
                 + mInterface.getApplicationHiddenSettingAsUser(pkg, translatedUserId));
+        return 0;
+    }
+
+    private int runSetStoppedState(boolean state) throws RemoteException {
+        int userId = UserHandle.USER_SYSTEM;
+        String option = getNextOption();
+        if (option != null && option.equals("--user")) {
+            userId = UserHandle.parseUserArg(getNextArgRequired());
+        }
+
+        String pkg = getNextArg();
+        if (pkg == null) {
+            getErrPrintWriter().println("Error: no package specified");
+            return 1;
+        }
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runSetStoppedState");
+        mInterface.setPackageStoppedState(pkg, state, translatedUserId);
+        getOutPrintWriter().println("Package " + pkg + " new stopped state: "
+                + mInterface.isPackageStoppedForUser(pkg, translatedUserId));
         return 0;
     }
 
@@ -3688,7 +3759,19 @@ class PackageManagerShellCommand extends ShellCommand {
                         // remember to set it themselves.
                         params.installerPackageName = "com.android.shell";
                     }
-                    sessionParams.installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
+                    int rollbackStrategy = PackageManager.ROLLBACK_DATA_POLICY_RESTORE;
+                    try {
+                        rollbackStrategy = Integer.parseInt(peekNextArg());
+                        if (rollbackStrategy < PackageManager.ROLLBACK_DATA_POLICY_RESTORE
+                                || rollbackStrategy > PackageManager.ROLLBACK_DATA_POLICY_RETAIN) {
+                            throw new IllegalArgumentException(
+                                    rollbackStrategy + " is not a valid rollback data policy.");
+                        }
+                        getNextArg(); // pop the argument
+                    } catch (NumberFormatException e) {
+                        // not followed by a number assume ROLLBACK_DATA_POLICY_RESTORE.
+                    }
+                    sessionParams.setEnableRollback(true, rollbackStrategy);
                     break;
                 case "--staged-ready-timeout":
                     params.stagedReadyTimeoutMs = Long.parseLong(getNextArgRequired());
@@ -3722,6 +3805,11 @@ class PackageManagerShellCommand extends ShellCommand {
                     PackageManager.INSTALL_DEVELOPMENT_FORCE_NON_STAGED_APEX_UPDATE;
         } else if (staged) {
             sessionParams.setStaged();
+        }
+        if ((sessionParams.installFlags & PackageManager.INSTALL_APEX) != 0
+                && (sessionParams.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0
+                && sessionParams.rollbackDataPolicy == PackageManager.ROLLBACK_DATA_POLICY_WIPE) {
+            throw new IllegalArgumentException("Data policy 'wipe' is not supported for apex.");
         }
         return params;
     }
@@ -4605,6 +4693,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runArchive() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
+        int flags = 0;
         int userId = UserHandle.USER_ALL;
 
         String opt;
@@ -4632,14 +4721,17 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
+        if (userId == UserHandle.USER_ALL) {
+            flags |= PackageManager.DELETE_ALL_USERS;
+        }
         final int translatedUserId =
                 translateUserId(userId, UserHandle.USER_SYSTEM, "runArchive");
         final LocalIntentReceiver receiver = new LocalIntentReceiver();
 
         try {
             mInterface.getPackageInstaller().requestArchive(packageName,
-                    /* callerPackageName= */ "", receiver.getIntentSender(),
-                    new UserHandle(translatedUserId), 0);
+                    /* callerPackageName= */ "", flags, receiver.getIntentSender(),
+                    new UserHandle(translatedUserId));
         } catch (Exception e) {
             pw.println("Failure [" + e.getMessage() + "]");
             return 1;
@@ -4701,6 +4793,19 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         pw.println("Success");
+        return 0;
+    }
+
+    private int runGetDomainVerificationAgent() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        try {
+            final ComponentName domainVerificationAgent = mInterface.getDomainVerificationAgent();
+            pw.println(domainVerificationAgent == null
+                    ? "No Domain Verifier available!" : domainVerificationAgent.flattenToString());
+        } catch (Exception e) {
+            pw.println("Failure [" + e.getMessage() + "]");
+            return 1;
+        }
         return 0;
     }
 
@@ -4801,7 +4906,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--install-reason 0/1/2/3/4] [--originating-uri URI]");
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instant] [--full] [--dont-kill]");
-        pw.println("       [--enable-rollback]");
+        pw.println("       [--enable-rollback [0/1/2]]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
         pw.println("       [--apex] [--non-staged] [--force-non-staged]");
         pw.println("       [--staged-ready-timeout TIMEOUT] [--ignore-dexopt-profile]");
@@ -4825,6 +4930,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --abi: override the default ABI of the platform");
         pw.println("      --instant: cause the app to be installed as an ephemeral install app");
         pw.println("      --full: cause the app to be installed as a non-ephemeral full app");
+        pw.println("      --enable-rollback: enable rollbacks for the upgrade.");
+        pw.println("          0=restore (default), 1=wipe, 2=retain");
         pw.println("      --install-location: force the install location:");
         pw.println("          0=auto, 1=internal only, 2=prefer external");
         pw.println("      --install-reason: indicates why the app is being installed:");
@@ -4882,6 +4989,13 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  install-add-session MULTI_PACKAGE_SESSION_ID CHILD_SESSION_IDs");
         pw.println("    Add one or more session IDs to a multi-package session.");
         pw.println("");
+        pw.println("  install-set-pre-verified-domains SESSION_ID PRE_VERIFIED_DOMAIN... ");
+        pw.println("    Specify a comma separated list of pre-verified domains for a session.");
+        pw.println("");
+        pw.println("  install-get-pre-verified-domains SESSION_ID");
+        pw.println("    List all the pre-verified domains that are specified in a session.");
+        pw.println("    The result list is comma separated.");
+        pw.println("");
         pw.println("  install-commit SESSION_ID");
         pw.println("    Commit the given active install session, installing the app.");
         pw.println("");
@@ -4927,6 +5041,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  hide [--user USER_ID] PACKAGE_OR_COMPONENT");
         pw.println("  unhide [--user USER_ID] PACKAGE_OR_COMPONENT");
+        pw.println("");
+        pw.println("  unstop [--user USER_ID] PACKAGE");
         pw.println("");
         pw.println("  suspend [--user USER_ID] PACKAGE [PACKAGE...]");
         pw.println("    Suspends the specified package(s) (as user).");
@@ -5092,6 +5208,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Requests to unarchive a currently archived package by sending a request");
         pw.println("    to unarchive an app to the responsible installer. Options are:");
         pw.println("      --user: request unarchival of the app from the given user.");
+        pw.println("");
+        pw.println("  get-domain-verification-agent");
+        pw.println("    Displays the component name of the domain verification agent on device.");
         pw.println("");
         if (DexOptHelper.useArtService()) {
             printArtServiceHelp();

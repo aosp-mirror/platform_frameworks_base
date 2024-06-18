@@ -109,8 +109,8 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -334,6 +334,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         boolean isDisplayRotationAnimationStarted = false;
         final boolean isDreamTransition = isDreamTransition(info);
         final boolean isOnlyTranslucent = isOnlyTranslucent(info);
+        final boolean isActivityLevel = isActivityLevelOnly(info);
 
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
@@ -470,10 +471,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 }
 
                 final float cornerRadius;
-                if (a.hasRoundedCorners() && isTask) {
-                    // hasRoundedCorners is currently only enabled for tasks
+                if (a.hasRoundedCorners()) {
+                    final int displayId = isTask ? change.getTaskInfo().displayId
+                            : info.getRoot(TransitionUtil.rootIndexFor(change, info))
+                                    .getDisplayId();
                     final Context displayContext =
-                            mDisplayController.getDisplayContext(change.getTaskInfo().displayId);
+                            mDisplayController.getDisplayContext(displayId);
                     cornerRadius = displayContext == null ? 0
                             : ScreenDecorationsUtils.getWindowCornerRadius(displayContext);
                 } else {
@@ -500,8 +503,35 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         : new Rect(change.getEndAbsBounds());
                 clipRect.offsetTo(0, 0);
 
+                final TransitionInfo.Root animRoot = TransitionUtil.getRootFor(change, info);
+                final Point animRelOffset = new Point(
+                        change.getEndAbsBounds().left - animRoot.getOffset().x,
+                        change.getEndAbsBounds().top - animRoot.getOffset().y);
+                if (change.getActivityComponent() != null && !isActivityLevel) {
+                    // At this point, this is an independent activity change in a non-activity
+                    // transition. This means that an activity transition got erroneously combined
+                    // with another ongoing transition. This then means that the animation root may
+                    // not tightly fit the activities, so we have to put them in a separate crop.
+                    final int layer = Transitions.calculateAnimLayer(change, i,
+                            info.getChanges().size(), info.getType());
+                    final SurfaceControl leash = new SurfaceControl.Builder()
+                            .setName("Transition ActivityWrap: "
+                                    + change.getActivityComponent().toShortString())
+                            .setParent(animRoot.getLeash())
+                            .setContainerLayer().build();
+                    startTransaction.setCrop(leash, clipRect);
+                    startTransaction.setPosition(leash, animRelOffset.x, animRelOffset.y);
+                    startTransaction.setLayer(leash, layer);
+                    startTransaction.show(leash);
+                    startTransaction.reparent(change.getLeash(), leash);
+                    startTransaction.setPosition(change.getLeash(), 0, 0);
+                    animRelOffset.set(0, 0);
+                    finishTransaction.reparent(leash, null);
+                    leash.release();
+                }
+
                 buildSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
-                        mTransactionPool, mMainExecutor, change.getEndRelOffset(), cornerRadius,
+                        mTransactionPool, mMainExecutor, animRelOffset, cornerRadius,
                         clipRect);
 
                 if (info.getAnimationOptions() != null) {
@@ -608,6 +638,18 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             }
         }
         return (translucentOpen + translucentClose) > 0;
+    }
+
+    /**
+     * Does `info` only contain activity-level changes? This kinda assumes that if so, they are
+     * all in one task.
+     */
+    private static boolean isActivityLevelOnly(@NonNull TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getActivityComponent() == null) return false;
+        }
+        return true;
     }
 
     @Override

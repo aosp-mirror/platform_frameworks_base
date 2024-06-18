@@ -20,6 +20,7 @@ import static android.os.BatteryManager.CHARGING_POLICY_ADAPTIVE_LONGLIFE;
 import static android.os.BatteryManager.CHARGING_POLICY_DEFAULT;
 import static android.os.BatteryManager.EXTRA_CHARGING_STATUS;
 import static android.os.BatteryManager.EXTRA_PRESENT;
+
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_QS;
 import static com.android.systemui.util.DumpUtilsKt.asIndenting;
 
@@ -61,6 +62,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import javax.annotation.concurrent.GuardedBy;
 
@@ -448,50 +450,38 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         firePowerSaveChanged();
     }
 
+    protected final void dispatchSafeChange(Consumer<BatteryStateChangeCallback> action) {
+        ArrayList<BatteryStateChangeCallback> copy;
+        synchronized (mChangeCallbacks) {
+            copy = new ArrayList<>(mChangeCallbacks);
+        }
+        final int n = copy.size();
+        for (int i = 0; i < n; i++) {
+            action.accept(copy.get(i));
+        }
+    }
+
     protected void fireBatteryLevelChanged() {
         mLogger.logBatteryLevelChangedCallback(mLevel, mPluggedIn, mCharging);
-        synchronized (mChangeCallbacks) {
-            final int N = mChangeCallbacks.size();
-            for (int i = 0; i < N; i++) {
-                mChangeCallbacks.get(i).onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
-            }
-        }
+        dispatchSafeChange(
+                (callback) -> callback.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging));
     }
 
     private void fireBatteryUnknownStateChanged() {
-        synchronized (mChangeCallbacks) {
-            final int n = mChangeCallbacks.size();
-            for (int i = 0; i < n; i++) {
-                mChangeCallbacks.get(i).onBatteryUnknownStateChanged(mStateUnknown);
-            }
-        }
+        dispatchSafeChange((callback) -> callback.onBatteryUnknownStateChanged(mStateUnknown));
     }
 
     private void firePowerSaveChanged() {
-        synchronized (mChangeCallbacks) {
-            final int N = mChangeCallbacks.size();
-            for (int i = 0; i < N; i++) {
-                mChangeCallbacks.get(i).onPowerSaveChanged(mPowerSave);
-            }
-        }
+        dispatchSafeChange((callback) -> callback.onPowerSaveChanged(mPowerSave));
     }
 
     private void fireIsBatteryDefenderChanged() {
-        synchronized (mChangeCallbacks) {
-            final int n = mChangeCallbacks.size();
-            for (int i = 0; i < n; i++) {
-                mChangeCallbacks.get(i).onIsBatteryDefenderChanged(mIsBatteryDefender);
-            }
-        }
+        dispatchSafeChange((callback) -> callback.onIsBatteryDefenderChanged(mIsBatteryDefender));
     }
 
     private void fireIsIncompatibleChargingChanged() {
-        synchronized (mChangeCallbacks) {
-            final int n = mChangeCallbacks.size();
-            for (int i = 0; i < n; i++) {
-                mChangeCallbacks.get(i).onIsIncompatibleChargingChanged(mIsIncompatibleCharging);
-            }
-        }
+        dispatchSafeChange(
+                (callback) -> callback.onIsIncompatibleChargingChanged(mIsIncompatibleCharging));
     }
 
     @Override

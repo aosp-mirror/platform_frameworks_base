@@ -19,6 +19,7 @@ package android.service.euicc;
 import android.service.euicc.IDeleteSubscriptionCallback;
 import android.service.euicc.IDownloadSubscriptionCallback;
 import android.service.euicc.IEraseSubscriptionsCallback;
+import android.service.euicc.IGetAvailableMemoryInBytesCallback;
 import android.service.euicc.IGetDefaultDownloadableSubscriptionListCallback;
 import android.service.euicc.IGetDownloadableSubscriptionMetadataCallback;
 import android.service.euicc.IGetEidCallback;
@@ -60,4 +61,5 @@ oneway interface IEuiccService {
     void retainSubscriptionsForFactoryReset(
             int slotId, in IRetainSubscriptionsForFactoryResetCallback callback);
     void dump(in IEuiccServiceDumpResultCallback callback);
+    void getAvailableMemoryInBytes(int slotId, in IGetAvailableMemoryInBytesCallback callback);
 }

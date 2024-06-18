@@ -38,6 +38,7 @@ import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
+import android.view.inputmethod.ImeTracker;
 
 import androidx.test.filters.SmallTest;
 
@@ -51,6 +52,12 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.Executor;
 
+/**
+ * Tests for the display IME controller.
+ *
+ * <p> Build/Install/Run:
+ *  atest WMShellUnitTests:DisplayImeControllerTest
+ */
 @SmallTest
 public class DisplayImeControllerTest extends ShellTestCase {
 
@@ -99,13 +106,13 @@ public class DisplayImeControllerTest extends ShellTestCase {
 
     @Test
     public void showInsets_schedulesNoWorkOnExecutor() {
-        mPerDisplay.showInsets(ime(), true /* fromIme */, null /* statsToken */);
+        mPerDisplay.showInsets(ime(), true /* fromIme */, ImeTracker.Token.empty());
         verifyZeroInteractions(mExecutor);
     }
 
     @Test
     public void hideInsets_schedulesNoWorkOnExecutor() {
-        mPerDisplay.hideInsets(ime(), true /* fromIme */, null /* statsToken */);
+        mPerDisplay.hideInsets(ime(), true /* fromIme */, ImeTracker.Token.empty());
         verifyZeroInteractions(mExecutor);
     }
 

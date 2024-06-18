@@ -67,11 +67,11 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -112,7 +112,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
     private final UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
     @Before
     public void setUp() throws Exception {
@@ -447,6 +447,35 @@ public class RemoteInputViewTest extends SysuiTestCase {
         // assert that RemoteInputView is no longer visible
         assertEquals(View.GONE, view.getVisibility());
         assertEquals(1f, fadeInView.getAlpha());
+    }
+
+    @Test
+    public void testUnanimatedFocusAfterDefocusAnimation() throws Exception {
+        mFeatureFlags.set(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION, true);
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+        bindController(view, row.getEntry());
+
+        FrameLayout parent = new FrameLayout(mContext);
+        parent.addView(view);
+
+        // Play defocus animation
+        view.onDefocus(true /* animate */, false /* logClose */, null /* doAfterDefocus */);
+        mAnimatorTestRule.advanceTimeBy(ANIMATION_DURATION_STANDARD);
+
+        // assert that RemoteInputView is no longer visible, but alpha is reset to 1f
+        assertEquals(View.GONE, view.getVisibility());
+        assertEquals(1f, view.getAlpha());
+
+        // focus RemoteInputView without an animation
+        view.focus();
+        // assert that RemoteInputView is visible, and alpha is 1f
+        assertEquals(View.VISIBLE, view.getVisibility());
+        assertEquals(1f, view.getAlpha());
     }
 
     // NOTE: because we're refactoring the RemoteInputView and moving logic into the

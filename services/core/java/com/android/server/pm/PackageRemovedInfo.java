@@ -43,7 +43,7 @@ final class PackageRemovedInfo {
     // of package changes
     SparseArray<int[]> mBroadcastAllowList;
     // Clean up resources deleted packages.
-    InstallArgs mArgs = null;
+    CleanUpArgs mArgs = null;
     private static final int[] EMPTY_INT_ARRAY = new int[0];
 
     public void populateBroadcastUsers(PackageSetting deletedPackageSetting) {

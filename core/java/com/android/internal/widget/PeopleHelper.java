@@ -22,6 +22,8 @@ import static com.android.internal.widget.MessagingPropertyAnimator.ALPHA_OUT;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
+import android.app.Person;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -219,6 +221,72 @@ public class PeopleHelper {
             }
         }
         return uniqueNames;
+    }
+
+    /**
+     * A class that represents a map from unique sender names in the groups to the string 1- or
+     * 2-character prefix strings for the names. This class uses the String value of the
+     * CharSequence Names as the key.
+     */
+    public class NameToPrefixMap {
+        Map<String, String> mMap;
+        NameToPrefixMap(Map<String, String> map) {
+            this.mMap = map;
+        }
+
+        /**
+         * @param name the name
+         * @return the prefix of the given name
+         */
+        public String getPrefix(CharSequence name) {
+            return mMap.get(name.toString());
+        }
+    }
+
+    /**
+     * Same functionality as mapUniqueNamesToPrefix, but takes list-represented message groups as
+     * the input. This method is better when inflating MessagingGroup from the UI thread is not
+     * an option.
+     * @param groups message groups represented by lists. A message group is some consecutive
+     *               messages (>=3) from the same sender in a conversation.
+     */
+    public NameToPrefixMap mapUniqueNamesToPrefixWithGroupList(
+            List<List<Notification.MessagingStyle.Message>> groups) {
+        // Map of unique names to their prefix
+        ArrayMap<String, String> uniqueNames = new ArrayMap<>();
+        // Map of single-character string prefix to the only name which uses it, or null if multiple
+        ArrayMap<String, CharSequence> uniqueCharacters = new ArrayMap<>();
+        for (int i = 0; i < groups.size(); i++) {
+            List<Notification.MessagingStyle.Message> group = groups.get(i);
+            if (group.isEmpty()) continue;
+            Person sender = group.get(0).getSenderPerson();
+            if (sender == null) continue;
+            CharSequence senderName = sender.getName();
+            if (sender.getIcon() != null || TextUtils.isEmpty(senderName)) {
+                continue;
+            }
+            String senderNameString = senderName.toString();
+            if (!uniqueNames.containsKey(senderNameString)) {
+                String charPrefix = findNamePrefix(senderName, null);
+                if (charPrefix == null) {
+                    continue;
+                }
+                if (uniqueCharacters.containsKey(charPrefix)) {
+                    // this character was already used, lets make it more unique. We first need to
+                    // resolve the existing character if it exists
+                    CharSequence existingName = uniqueCharacters.get(charPrefix);
+                    if (existingName != null) {
+                        uniqueNames.put(existingName.toString(), findNameSplit(existingName));
+                        uniqueCharacters.put(charPrefix, null);
+                    }
+                    uniqueNames.put(senderNameString, findNameSplit(senderName));
+                } else {
+                    uniqueNames.put(senderNameString, charPrefix);
+                    uniqueCharacters.put(charPrefix, senderName);
+                }
+            }
+        }
+        return new NameToPrefixMap(uniqueNames);
     }
 
     /**

@@ -23,6 +23,7 @@ import static android.companion.virtual.VirtualDeviceParams.ACTIVITY_POLICY_DEFA
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
@@ -75,6 +76,9 @@ import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualStylusButtonEvent;
+import android.hardware.input.VirtualStylusConfig;
+import android.hardware.input.VirtualStylusMotionEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.os.Binder;
@@ -100,6 +104,7 @@ import android.widget.Toast;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.BlockedAppStreamingActivity;
+import com.android.modules.expresslog.Counter;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.GenericWindowPolicyController.RunningAppsChangedListener;
 import com.android.server.companion.virtual.audio.VirtualAudioController;
@@ -148,6 +153,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final int mOwnerUid;
     private final VirtualDeviceLog mVirtualDeviceLog;
     private final String mOwnerPackageName;
+    @NonNull
+    private final AttributionSource mAttributionSource;
     private final int mDeviceId;
     @Nullable
     private final String mPersistentDeviceId;
@@ -258,7 +265,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 runningAppsChangedCallback,
                 params,
                 DisplayManagerGlobal.getInstance(),
-                Flags.virtualCamera() ? new VirtualCameraController() : null);
+                Flags.virtualCamera()
+                        ? new VirtualCameraController(params.getDevicePolicy(POLICY_TYPE_CAMERA))
+                        : null);
     }
 
     @VisibleForTesting
@@ -282,6 +291,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         super(PermissionEnforcer.fromContext(context));
         mVirtualDeviceLog = virtualDeviceLog;
         mOwnerPackageName = attributionSource.getPackageName();
+        mAttributionSource = attributionSource;
         UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(attributionSource.getUid());
         mContext = context.createContextAsUser(ownerUserHandle, 0);
         mAssociationInfo = associationInfo;
@@ -301,11 +311,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if (inputController == null) {
             mInputController = new InputController(
                     context.getMainThreadHandler(),
-                    context.getSystemService(WindowManager.class));
+                    context.getSystemService(WindowManager.class), mAttributionSource);
         } else {
             mInputController = inputController;
         }
-        mSensorController = new SensorController(this, mDeviceId,
+        mSensorController = new SensorController(this, mDeviceId, mAttributionSource,
                 mParams.getVirtualSensorCallback(), mParams.getVirtualSensorConfigs());
         mCameraAccessController = cameraAccessController;
         if (mCameraAccessController != null) {
@@ -614,7 +624,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
 
             if (mVirtualAudioController == null) {
-                mVirtualAudioController = new VirtualAudioController(mContext);
+                mVirtualAudioController = new VirtualAudioController(mContext, mAttributionSource);
                 GenericWindowPolicyController gwpc = mVirtualDisplays.get(
                         displayId).getWindowPolicyController();
                 mVirtualAudioController.startListening(gwpc, routingCallback,
@@ -776,6 +786,26 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void createVirtualStylus(@NonNull VirtualStylusConfig config,
+            @NonNull IBinder deviceToken) {
+        super.createVirtualStylus_enforcePermission();
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(deviceToken);
+        checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInputController.createStylus(config.getInputDeviceName(), config.getVendorId(),
+                    config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
+                    config.getHeight(), config.getWidth());
+        } catch (InputController.DeviceCreationException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void unregisterInputDevice(IBinder token) {
         super.unregisterInputDevice_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
@@ -881,6 +911,36 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public boolean sendStylusMotionEvent(@NonNull IBinder token,
+            @NonNull VirtualStylusMotionEvent event) {
+        super.sendStylusMotionEvent_enforcePermission();
+        Objects.requireNonNull(token);
+        Objects.requireNonNull(event);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mInputController.sendStylusMotionEvent(token, event);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public boolean sendStylusButtonEvent(@NonNull IBinder token,
+            @NonNull VirtualStylusButtonEvent event) {
+        super.sendStylusButtonEvent_enforcePermission();
+        Objects.requireNonNull(token);
+        Objects.requireNonNull(event);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mInputController.sendStylusButtonEvent(token, event);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void setShowPointerIcon(boolean showPointerIcon) {
         super.setShowPointerIcon_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
@@ -972,7 +1032,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if (mVirtualCameraController == null) {
             throw new UnsupportedOperationException("Virtual camera controller is not available");
         }
-        mVirtualCameraController.registerCamera(cameraConfig);
+        mVirtualCameraController.registerCamera(cameraConfig, mAttributionSource);
     }
 
     @Override // Binder call
@@ -1054,6 +1114,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final GenericWindowPolicyController gwpc = new GenericWindowPolicyController(
                 FLAG_SECURE,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                mAttributionSource,
                 getAllowedUserHandles(),
                 activityLaunchAllowedByDefault,
                 mActivityPolicyExemptions,
@@ -1110,7 +1171,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             mInputController.setShowPointerIcon(showPointer, displayId);
-            mInputController.setPointerAcceleration(1f, displayId);
+            mInputController.setMousePointerAccelerationEnabled(false, displayId);
             mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
                     displayId);
             // WM throws a SecurityException if the display is untrusted.
@@ -1123,6 +1184,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             Binder.restoreCallingIdentity(token);
         }
 
+        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+            Counter.logIncrementWithUid(
+                    "virtual_devices.value_virtual_display_created_count",
+                    mAttributionSource.getUid());
+        }
         return displayId;
     }
 
@@ -1147,7 +1213,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mContext.startActivityAsUser(
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
                 ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle(),
-                mContext.getUser());
+                UserHandle.SYSTEM);
     }
 
     private void onSecureWindowShown(int displayId, int uid) {
@@ -1164,6 +1230,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if ((display.getFlags() & FLAG_SECURE) == 0) {
             showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_secure_window,
                     Toast.LENGTH_LONG, mContext.getMainLooper());
+
+            if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+                Counter.logIncrementWithUid(
+                        "virtual_devices.value_secure_window_blocked_count",
+                        mAttributionSource.getUid());
+            }
         }
     }
 
@@ -1335,6 +1407,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         synchronized (mVirtualDeviceLock) {
             return mVirtualDisplays.contains(displayId);
         }
+    }
+
+    boolean isInputDeviceOwnedByVirtualDevice(int inputDeviceId) {
+        return mInputController.getInputDeviceDescriptors().values().stream().anyMatch(
+                inputDeviceDescriptor -> inputDeviceDescriptor.getInputDeviceId() == inputDeviceId);
     }
 
     void onEnteringPipBlocked(int uid) {

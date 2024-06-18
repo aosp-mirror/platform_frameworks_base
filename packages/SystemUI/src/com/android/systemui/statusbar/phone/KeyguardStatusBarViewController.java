@@ -20,6 +20,7 @@ import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.Flags.updateUserSwitcherBackground;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -43,6 +44,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.battery.BatteryMeterViewController;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -122,6 +124,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final SecureSettings mSecureSettings;
     private final CommandQueue mCommandQueue;
     private final Executor mMainExecutor;
+    private final Executor mBackgroundExecutor;
     private final Object mLock = new Object();
     private final KeyguardLogger mLogger;
 
@@ -296,6 +299,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             SecureSettings secureSettings,
             CommandQueue commandQueue,
             @Main Executor mainExecutor,
+            @Background Executor backgroundExecutor,
             KeyguardLogger logger,
             NotificationMediaManager notificationMediaManager,
             StatusOverlayHoverListenerFactory statusOverlayHoverListenerFactory
@@ -323,6 +327,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mSecureSettings = secureSettings;
         mCommandQueue = commandQueue;
         mMainExecutor = mainExecutor;
+        mBackgroundExecutor = backgroundExecutor;
         mLogger = logger;
 
         mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
@@ -607,8 +612,18 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
      * Updates visibility of the user switcher button based on {@link android.os.UserManager} state.
      */
     private void updateUserSwitcher() {
-        mView.setUserSwitcherEnabled(mUserManager.isUserSwitcherEnabled(getResources().getBoolean(
-                R.bool.qs_show_user_switcher_for_single_user)));
+        if (updateUserSwitcherBackground()) {
+            mBackgroundExecutor.execute(() -> {
+                final boolean isUserSwitcherEnabled = mUserManager.isUserSwitcherEnabled(
+                        getResources().getBoolean(R.bool.qs_show_user_switcher_for_single_user));
+                mMainExecutor.execute(() -> {
+                    mView.setUserSwitcherEnabled(isUserSwitcherEnabled);
+                });
+            });
+        } else {
+            mView.setUserSwitcherEnabled(mUserManager.isUserSwitcherEnabled(
+                    getResources().getBoolean(R.bool.qs_show_user_switcher_for_single_user)));
+        }
     }
 
     @VisibleForTesting

@@ -16,22 +16,32 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.inputmethod.domain.interactor.InputMethodInteractor
 import com.android.systemui.res.R
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
+import com.android.systemui.util.kotlin.onSubscriberAdded
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the password bouncer UI. */
 class PasswordBouncerViewModel(
     viewModelScope: CoroutineScope,
-    interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
+    interactor: BouncerInteractor,
+    private val inputMethodInteractor: InputMethodInteractor,
+    private val selectedUserInteractor: SelectedUserInteractor,
 ) :
     AuthMethodBouncerViewModel(
         viewModelScope = viewModelScope,
@@ -48,26 +58,23 @@ class PasswordBouncerViewModel(
 
     override val lockoutMessageId = R.string.kg_too_many_failed_password_attempts_dialog_message
 
-    /** Whether the input method editor (for example, the software keyboard) is visible. */
-    private var isImeVisible: Boolean = false
+    /** Informs the UI whether the input method switcher button should be visible. */
+    val isImeSwitcherButtonVisible: StateFlow<Boolean> = imeSwitcherRefreshingFlow()
 
     /** Whether the text field element currently has focus. */
     private val isTextFieldFocused = MutableStateFlow(false)
 
     /** Whether the UI should request focus on the text field element. */
     val isTextFieldFocusRequested =
-        combine(interactor.lockout, isTextFieldFocused) { throttling, hasFocus ->
-                throttling == null && !hasFocus
-            }
+        combine(isInputEnabled, isTextFieldFocused) { hasInput, hasFocus -> hasInput && !hasFocus }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = interactor.lockout.value == null && !isTextFieldFocused.value,
+                initialValue = isInputEnabled.value && !isTextFieldFocused.value,
             )
 
     override fun onHidden() {
         super.onHidden()
-        isImeVisible = false
         isTextFieldFocused.value = false
     }
 
@@ -92,6 +99,13 @@ class PasswordBouncerViewModel(
         _password.value = newPassword
     }
 
+    /** Notifies that the user clicked the button to change the input method. */
+    fun onImeSwitcherButtonClicked(displayId: Int) {
+        viewModelScope.launch {
+            inputMethodInteractor.showInputMethodPicker(displayId, showAuxiliarySubtypes = false)
+        }
+    }
+
     /** Notifies that the user has pressed the key for attempting to authenticate the password. */
     fun onAuthenticateKeyPressed() {
         if (_password.value.isNotEmpty()) {
@@ -99,20 +113,44 @@ class PasswordBouncerViewModel(
         }
     }
 
-    /**
-     * Notifies that the input method editor (for example, the software keyboard) has been shown or
-     * hidden.
-     */
-    suspend fun onImeVisibilityChanged(isVisible: Boolean) {
-        if (isImeVisible && !isVisible && interactor.lockout.value == null) {
-            interactor.onImeHiddenByUser()
-        }
-
-        isImeVisible = isVisible
+    /** Notifies that the user has dismissed the software keyboard (IME). */
+    fun onImeDismissed() {
+        viewModelScope.launch { interactor.onImeHiddenByUser() }
     }
 
     /** Notifies that the password text field has gained or lost focus. */
     fun onTextFieldFocusChanged(isFocused: Boolean) {
         isTextFieldFocused.value = isFocused
+    }
+
+    /**
+     * Whether the input method switcher button should be displayed in the password bouncer UI. The
+     * value may be stale at the moment of subscription to this flow, but it is guaranteed to be
+     * shortly updated with a fresh value.
+     *
+     * Note: Each added subscription triggers an IPC call in the background, so this should only be
+     * subscribed to by the UI once in its lifecycle (i.e. when the bouncer is shown).
+     */
+    private fun imeSwitcherRefreshingFlow(): StateFlow<Boolean> {
+        val isImeSwitcherButtonVisible = MutableStateFlow(value = false)
+        viewModelScope.launch {
+            // Re-fetch the currently-enabled IMEs whenever the selected user changes, and whenever
+            // the UI subscribes to the `isImeSwitcherButtonVisible` flow.
+            combine(
+                    // InputMethodManagerService sometimes takes some time to update its internal
+                    // state when the selected user changes. As a workaround, delay fetching the IME
+                    // info.
+                    selectedUserInteractor.selectedUser.onEach { delay(DELAY_TO_FETCH_IMES) },
+                    isImeSwitcherButtonVisible.onSubscriberAdded()
+                ) { selectedUserId, _ ->
+                    inputMethodInteractor.hasMultipleEnabledImesOrSubtypes(selectedUserId)
+                }
+                .collect { isImeSwitcherButtonVisible.value = it }
+        }
+        return isImeSwitcherButtonVisible.asStateFlow()
+    }
+
+    companion object {
+        @VisibleForTesting val DELAY_TO_FETCH_IMES = 300.milliseconds
     }
 }

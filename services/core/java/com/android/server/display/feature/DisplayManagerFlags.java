@@ -37,6 +37,9 @@ public class DisplayManagerFlags {
     // 'adb shell setprop persist.log.tag.DisplayManagerFlags DEBUG && adb reboot'
     private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
+    private final FlagState mPortInDisplayLayoutFlagState = new FlagState(
+            Flags.FLAG_ENABLE_PORT_IN_DISPLAY_LAYOUT,
+            Flags::enablePortInDisplayLayout);
 
     private final FlagState mConnectedDisplayManagementFlagState = new FlagState(
             Flags.FLAG_ENABLE_CONNECTED_DISPLAY_MANAGEMENT,
@@ -93,6 +96,14 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_EXTERNAL_VSYNC_PROXIMITY_VOTE,
             Flags::enableExternalVsyncProximityVote);
 
+    private final FlagState mVsyncLowPowerVote = new FlagState(
+            Flags.FLAG_ENABLE_VSYNC_LOW_POWER_VOTE,
+            Flags::enableVsyncLowPowerVote);
+
+    private final FlagState mVsyncLowLightVote = new FlagState(
+            Flags.FLAG_ENABLE_VSYNC_LOW_LIGHT_VOTE,
+            Flags::enableVsyncLowLightVote);
+
     private final FlagState mBrightnessWearBedtimeModeClamperFlagState = new FlagState(
             Flags.FLAG_BRIGHTNESS_WEAR_BEDTIME_MODE_CLAMPER,
             Flags::brightnessWearBedtimeModeClamper);
@@ -104,6 +115,23 @@ public class DisplayManagerFlags {
     private final FlagState mFastHdrTransitions = new FlagState(
             Flags.FLAG_FAST_HDR_TRANSITIONS,
             Flags::fastHdrTransitions);
+
+    private final FlagState mRefreshRateVotingTelemetry = new FlagState(
+            Flags.FLAG_REFRESH_RATE_VOTING_TELEMETRY,
+            Flags::refreshRateVotingTelemetry
+    );
+
+    private final FlagState mSensorBasedBrightnessThrottling = new FlagState(
+            Flags.FLAG_SENSOR_BASED_BRIGHTNESS_THROTTLING,
+            Flags::sensorBasedBrightnessThrottling
+    );
+
+    /**
+     * @return {@code true} if 'port' is allowed in display layout configuration file.
+     */
+    public boolean isPortInDisplayLayoutEnabled() {
+        return mPortInDisplayLayoutFlagState.isEnabled();
+    }
 
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
@@ -124,7 +152,6 @@ public class DisplayManagerFlags {
     public boolean isPowerThrottlingClamperEnabled() {
         return mPowerThrottlingClamperFlagState.isEnabled();
     }
-
 
     /**
      * Returns whether adaptive tone improvements are enabled
@@ -198,6 +225,14 @@ public class DisplayManagerFlags {
         return mVsyncProximityVote.isEnabled();
     }
 
+    public boolean isVsyncLowPowerVoteEnabled() {
+        return mVsyncLowPowerVote.isEnabled();
+    }
+
+    public boolean isVsyncLowLightVoteEnabled() {
+        return mVsyncLowLightVote.isEnabled();
+    }
+
     public boolean isBrightnessWearBedtimeModeClamperEnabled() {
         return mBrightnessWearBedtimeModeClamperFlagState.isEnabled();
     }
@@ -211,6 +246,14 @@ public class DisplayManagerFlags {
 
     public boolean isFastHdrTransitionsEnabled() {
         return mFastHdrTransitions.isEnabled();
+    }
+
+    public boolean isRefreshRateVotingTelemetryEnabled() {
+        return mRefreshRateVotingTelemetry.isEnabled();
+    }
+
+    public boolean isSensorBasedBrightnessThrottlingEnabled() {
+        return mSensorBasedBrightnessThrottling.isEnabled();
     }
 
     /**
@@ -235,6 +278,8 @@ public class DisplayManagerFlags {
         pw.println(" " + mBrightnessWearBedtimeModeClamperFlagState);
         pw.println(" " + mAutoBrightnessModesFlagState);
         pw.println(" " + mFastHdrTransitions);
+        pw.println(" " + mRefreshRateVotingTelemetry);
+        pw.println(" " + mSensorBasedBrightnessThrottling);
     }
 
     private static class FlagState {

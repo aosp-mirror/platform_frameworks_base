@@ -17,12 +17,17 @@
 package com.android.systemui.statusbar.notification.row.shared
 
 import com.android.systemui.Flags
+import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading or using the async hybrid view inflation flag state. */
 @Suppress("NOTHING_TO_INLINE")
 object AsyncHybridViewInflation {
     const val FLAG_NAME = Flags.FLAG_NOTIFICATION_ASYNC_HYBRID_VIEW_INFLATION
+
+    /** A token used for dependency declaration */
+    val token: FlagToken
+        get() = FlagToken(FLAG_NAME, isEnabled)
 
     /** Is async hybrid (single-line) view inflation enabled */
     @JvmStatic

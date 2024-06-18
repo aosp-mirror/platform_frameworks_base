@@ -107,7 +107,8 @@ final class ContentRecorder implements WindowContainerListener {
 
     ContentRecorder(@NonNull DisplayContent displayContent) {
         this(displayContent, new RemoteMediaProjectionManagerWrapper(displayContent.mDisplayId),
-                new DisplayManagerFlags().isConnectedDisplayManagementEnabled());
+                new DisplayManagerFlags().isConnectedDisplayManagementEnabled()
+                        && displayContent.getDisplayInfo().type == Display.TYPE_EXTERNAL);
     }
 
     @VisibleForTesting
@@ -650,6 +651,14 @@ final class ContentRecorder implements WindowContainerListener {
         if (isCurrentlyRecording() && mLastRecordedBounds != null) {
             mMediaProjectionManager.notifyActiveProjectionCapturedContentVisibilityChanged(
                     isVisibleRequested);
+
+            if (mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK) {
+                // If capturing a task, then the toggle visibility of the recorded surface to match
+                // visibility of the task, so we don't capture any mid-transition frames
+                mRecordedWindowContainer.getSyncTransaction()
+                        .setVisibility(mRecordedSurface, isVisibleRequested);
+                mRecordedWindowContainer.scheduleAnimation();
+            }
         }
     }
 

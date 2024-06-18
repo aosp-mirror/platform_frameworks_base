@@ -171,12 +171,14 @@ public class DimmerAnimationHelper {
 
         mLocalAnimationAdapter.startAnimation(dim.mDimSurface, t,
                 ANIMATION_TYPE_DIMMER, /* finishCallback */ (type, animator) -> {
-                    setAlphaBlur(dim.mDimSurface, targetAlpha, targetBlur, t);
-                    if (targetAlpha == 0f && !dim.isDimming()) {
-                        dim.remove(t);
+                    synchronized (dim.mHostContainer.mWmService.mGlobalLock) {
+                        setAlphaBlur(dim.mDimSurface, targetAlpha, targetBlur, t);
+                        if (targetAlpha == 0f && !dim.isDimming()) {
+                            dim.remove(t);
+                        }
+                        mLocalAnimationAdapter = null;
+                        mAlphaAnimationSpec = null;
                     }
-                    mLocalAnimationAdapter = null;
-                    mAlphaAnimationSpec = null;
                 });
     }
 

@@ -28,27 +28,26 @@ import javax.inject.Inject
 /**
  * Factory to create dialogs for consenting to show app panels for specific apps.
  *
- * [internalDialogFactory] is for facilitating testing.
+ * [dialogFactory] is for facilitating testing.
  */
-class PanelConfirmationDialogFactory(
-    private val internalDialogFactory: (Context) -> SystemUIDialog
+class PanelConfirmationDialogFactory @Inject constructor(
+        private val dialogFactory: SystemUIDialog.Factory
 ) {
-    @Inject constructor() : this({ SystemUIDialog(it) })
 
     /**
      * Creates a dialog to show to the user. [response] will be true if an only if the user responds
      * affirmatively.
      */
     fun createConfirmationDialog(
-        context: Context,
-        appName: CharSequence,
-        response: Consumer<Boolean>
+            context: Context,
+            appName: CharSequence,
+            response: Consumer<Boolean>
     ): Dialog {
         val listener =
             DialogInterface.OnClickListener { _, which ->
                 response.accept(which == DialogInterface.BUTTON_POSITIVE)
             }
-        return internalDialogFactory(context).apply {
+        return dialogFactory.create(context).apply {
             setTitle(this.context.getString(R.string.controls_panel_authorization_title, appName))
             setMessage(this.context.getString(R.string.controls_panel_authorization, appName))
             setCanceledOnTouchOutside(true)

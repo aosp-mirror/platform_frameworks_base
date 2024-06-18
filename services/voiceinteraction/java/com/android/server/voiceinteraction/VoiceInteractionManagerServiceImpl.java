@@ -36,6 +36,7 @@ import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -45,10 +46,12 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
+import android.database.ContentObserver;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
 import android.media.permission.Identity;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -60,12 +63,13 @@ import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.voice.HotwordDetector;
-import android.service.voice.HotwordTrainingDataLimitEnforcer;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.VoiceInteractionManagerInternal.WearableHotwordDetectionCallback;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.system.OsConstants;
@@ -74,10 +78,10 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.internal.app.IVoiceActionCheckCallback;
+import com.android.internal.app.IVoiceInteractionAccessibilitySettingsListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -200,6 +204,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     };
 
+    final ArrayList<
+            IVoiceInteractionAccessibilitySettingsListener> mAccessibilitySettingsListeners =
+            new ArrayList<IVoiceInteractionAccessibilitySettingsListener>();
+
     VoiceInteractionManagerServiceImpl(Context context, Handler handler,
             VoiceInteractionManagerService.VoiceInteractionManagerServiceStub stub,
             int userHandle, ComponentName service) {
@@ -251,6 +259,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mContext.registerReceiver(mBroadcastReceiver, filter, null, handler,
                 Context.RECEIVER_EXPORTED);
+        new AccessibilitySettingsContentObserver().register(mContext.getContentResolver());
     }
 
     public void grantImplicitAccessLocked(int grantRecipientUid, @Nullable Intent intent) {
@@ -746,6 +755,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                                     + "exception occurred.");
                         }
                     });
+            registerAccessibilityDetectionSettingsListenerLocked(
+                    mHotwordDetectionConnection.mAccessibilitySettingsListener);
         } else if (detectorType != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
             // TODO: Logger events should be handled in session instead. Temporary adding the
             //  checking to prevent confusion so VisualQueryDetection events won't be logged if the
@@ -783,6 +794,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             return;
         }
         mHotwordDetectionConnection.cancelLocked();
+        unregisterAccessibilityDetectionSettingsListenerLocked(
+                mHotwordDetectionConnection.mAccessibilitySettingsListener);
         mHotwordDetectionConnection = null;
     }
 
@@ -857,6 +870,24 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
         mHotwordDetectionConnection.startListeningFromExternalSourceLocked(audioStream, audioFormat,
                 options, token, callback);
+    }
+
+    public void startListeningFromWearableLocked(
+            ParcelFileDescriptor audioStream,
+            AudioFormat audioFormat,
+            PersistableBundle options,
+            WearableHotwordDetectionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromWearable");
+        }
+        if (mHotwordDetectionConnection == null) {
+            callback.onError(
+                    "Unable to start listening from wearable because the hotword detection"
+                            + " connection is null.");
+            return;
+        }
+        mHotwordDetectionConnection.startListeningFromWearableLocked(
+                audioStream, audioFormat, options, callback);
     }
 
     public void stopListeningFromMicLocked() {
@@ -957,6 +988,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             return;
         }
         mHotwordDetectionConnection.cancelLocked();
+        unregisterAccessibilityDetectionSettingsListenerLocked(
+                mHotwordDetectionConnection.mAccessibilitySettingsListener);
         mHotwordDetectionConnection = null;
     }
 
@@ -998,10 +1031,27 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     }
 
-    @VisibleForTesting
-    void resetHotwordTrainingDataEgressCountForTest() {
-        HotwordTrainingDataLimitEnforcer.getInstance(mContext.getApplicationContext())
-                        .resetTrainingDataEgressCount();
+    boolean getAccessibilityDetectionEnabled() {
+        return Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED, 0,
+                mUser) == 1;
+    }
+
+    void registerAccessibilityDetectionSettingsListenerLocked(
+            IVoiceInteractionAccessibilitySettingsListener listener) {
+        if (DEBUG) {
+            Slog.d(TAG, "registerAccessibilityDetectionSettingsListener");
+        }
+        mAccessibilitySettingsListeners.add(listener);
+    }
+
+    void unregisterAccessibilityDetectionSettingsListenerLocked(
+            IVoiceInteractionAccessibilitySettingsListener listener) {
+        if (DEBUG) {
+            Slog.d(TAG, "unregisterAccessibilityDetectionSettingsListener");
+        }
+        mAccessibilitySettingsListeners.remove(listener);
     }
 
     void startLocked() {
@@ -1044,6 +1094,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
         if (mHotwordDetectionConnection != null) {
             mHotwordDetectionConnection.cancelLocked();
+            unregisterAccessibilityDetectionSettingsListenerLocked(
+                    mHotwordDetectionConnection.mAccessibilitySettingsListener);
             mHotwordDetectionConnection = null;
         }
         if (mBound) {
@@ -1089,5 +1141,42 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     interface DetectorRemoteExceptionListener {
         void onDetectorRemoteException(@NonNull IBinder token, int detectorType);
+    }
+
+    private final class AccessibilitySettingsContentObserver extends ContentObserver {
+        private Uri mAccessibilitySettingsEnabledUri = Settings.Secure.getUriFor(
+                Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED);
+
+        AccessibilitySettingsContentObserver() {
+            super(null);
+        }
+
+        public void register(ContentResolver contentResolver) {
+            contentResolver.registerContentObserver(
+                    mAccessibilitySettingsEnabledUri, false, this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            Slog.i(TAG, "OnChange called with uri:" + uri);
+            if (mAccessibilitySettingsEnabledUri.equals(uri)) {
+                    boolean enable = Settings.Secure.getIntForUser(
+                            mContext.getContentResolver(),
+                            Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED, 0,
+                            mUser) == 1;
+                    Slog.i(TAG, "Notifying listeners with Accessibility setting set to "
+                            + enable);
+                    mAccessibilitySettingsListeners.forEach(
+                            listener -> {
+                                try {
+                                    listener.onAccessibilityDetectionChanged(enable);
+                                } catch (RemoteException e) {
+                                    e.rethrowFromSystemServer();
+                                }
+                            }
+                    );
+
+            }
+        }
     }
 }

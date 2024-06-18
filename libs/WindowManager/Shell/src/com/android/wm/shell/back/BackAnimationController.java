@@ -17,7 +17,7 @@
 package com.android.wm.shell.back;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_HOME;
-import static com.android.window.flags.Flags.predictiveBackSystemAnimations;
+import static com.android.window.flags.Flags.predictiveBackSystemAnims;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
@@ -70,9 +70,11 @@ import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
+import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -112,6 +114,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     /** Tracks if we should start the back gesture on the next motion move event */
     private boolean mShouldStartOnNextMoveEvent = false;
     private boolean mOnBackStartDispatched = false;
+    private boolean mPointerPilfered = false;
 
     private final FlingAnimationUtils mFlingAnimationUtils;
 
@@ -124,6 +127,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private final ShellController mShellController;
+    private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mShellExecutor;
     private final Handler mBgHandler;
 
@@ -173,6 +177,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private StatusBarCustomizer mCustomizer;
     private boolean mTrackingLatency;
 
+    // Keep previous navigation type before remove mBackNavigationInfo.
+    @BackNavigationInfo.BackTargetType
+    private int mPreviousNavigationType;
+
     public BackAnimationController(
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
@@ -180,7 +188,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull @ShellBackgroundThread Handler backgroundHandler,
             Context context,
             @NonNull BackAnimationBackground backAnimationBackground,
-            ShellBackAnimationRegistry shellBackAnimationRegistry) {
+            ShellBackAnimationRegistry shellBackAnimationRegistry,
+            ShellCommandHandler shellCommandHandler) {
         this(
                 shellInit,
                 shellController,
@@ -190,7 +199,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 context,
                 context.getContentResolver(),
                 backAnimationBackground,
-                shellBackAnimationRegistry);
+                shellBackAnimationRegistry,
+                shellCommandHandler);
     }
 
     @VisibleForTesting
@@ -203,7 +213,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             Context context,
             ContentResolver contentResolver,
             @NonNull BackAnimationBackground backAnimationBackground,
-            ShellBackAnimationRegistry shellBackAnimationRegistry) {
+            ShellBackAnimationRegistry shellBackAnimationRegistry,
+            ShellCommandHandler shellCommandHandler) {
         mShellController = shellController;
         mShellExecutor = shellExecutor;
         mActivityTaskManager = activityTaskManager;
@@ -219,6 +230,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 .build();
         mShellBackAnimationRegistry = shellBackAnimationRegistry;
         mLatencyTracker = LatencyTracker.getInstance(mContext);
+        mShellCommandHandler = shellCommandHandler;
     }
 
     private void onInit() {
@@ -227,12 +239,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         createAdapter();
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_BACK_ANIMATION,
                 this::createExternalInterface, this);
+        mShellCommandHandler.addDumpCallback(this::dump, this);
     }
 
     private void setupAnimationDeveloperSettingsObserver(
             @NonNull ContentResolver contentResolver,
             @NonNull @ShellBackgroundThread final Handler backgroundHandler) {
-        if (predictiveBackSystemAnimations()) {
+        if (predictiveBackSystemAnims()) {
             ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Back animation aconfig flag is enabled, therefore "
                     + "developer settings flag is ignored and no content observer registered");
             return;
@@ -255,7 +268,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      */
     @ShellBackgroundThread
     private void updateEnableAnimationFromFlags() {
-        boolean isEnabled = predictiveBackSystemAnimations() || isDeveloperSettingEnabled();
+        boolean isEnabled = predictiveBackSystemAnims() || isDeveloperSettingEnabled();
         mEnableAnimations.set(isEnabled);
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Back animation enabled=%s", isEnabled);
     }
@@ -392,10 +405,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     @VisibleForTesting
     void onPilferPointers() {
-        mCurrentTracker.updateStartLocation();
+        mPointerPilfered = true;
         // Dispatch onBackStarted, only to app callbacks.
         // System callbacks will receive onBackStarted when the remote animation starts.
-        if (!shouldDispatchToAnimator()) {
+        if (!shouldDispatchToAnimator() && mActiveCallback != null) {
+            mCurrentTracker.updateStartLocation();
             tryDispatchOnBackStarted(mActiveCallback, mCurrentTracker.createStartEvent(null));
         }
     }
@@ -543,9 +557,19 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 && mBackNavigationInfo.isPrepareRemoteAnimation();
     }
 
-    private void tryDispatchOnBackStarted(IOnBackInvokedCallback callback,
+    private void tryDispatchOnBackStarted(
+            IOnBackInvokedCallback callback,
             BackMotionEvent backEvent) {
-        if (callback == null || mOnBackStartDispatched) {
+        if (mOnBackStartDispatched || callback == null || !mPointerPilfered) {
+            return;
+        }
+        dispatchOnBackStarted(callback, backEvent);
+    }
+
+    private void dispatchOnBackStarted(
+            IOnBackInvokedCallback callback,
+            BackMotionEvent backEvent) {
+        if (callback == null) {
             return;
         }
         try {
@@ -850,9 +874,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mActiveCallback = null;
         mShouldStartOnNextMoveEvent = false;
         mOnBackStartDispatched = false;
+        mPointerPilfered = false;
         mShellBackAnimationRegistry.resetDefaultCrossActivity();
         cancelLatencyTracking();
         if (mBackNavigationInfo != null) {
+            mPreviousNavigationType = mBackNavigationInfo.getType();
             mBackNavigationInfo.onBackNavigationFinished(triggerBack);
             mBackNavigationInfo = null;
         }
@@ -932,9 +958,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
                                     if (apps.length >= 1) {
                                         mCurrentTracker.updateStartLocation();
-                                        tryDispatchOnBackStarted(
-                                                mActiveCallback,
-                                                mCurrentTracker.createStartEvent(apps[0]));
+                                        BackMotionEvent startEvent =
+                                                mCurrentTracker.createStartEvent(apps[0]);
+                                        dispatchOnBackStarted(mActiveCallback, startEvent);
                                     }
 
                                     // Dispatch the first progress after animation start for
@@ -957,7 +983,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         mShellExecutor.execute(
                                 () -> {
                                     if (!mShellBackAnimationRegistry.cancel(
-                                            mBackNavigationInfo.getType())) {
+                                            mBackNavigationInfo != null
+                                                    ? mBackNavigationInfo.getType()
+                                                    : mPreviousNavigationType)) {
                                         return;
                                     }
                                     if (!mBackGestureStarted) {
@@ -968,4 +996,20 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 };
         mBackAnimationAdapter = new BackAnimationAdapter(runner);
     }
+
+    /**
+     * Description of current BackAnimationController state.
+     */
+    private void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "BackAnimationController state:");
+        pw.println(prefix + "  mEnableAnimations=" + mEnableAnimations.get());
+        pw.println(prefix + "  mBackGestureStarted=" + mBackGestureStarted);
+        pw.println(prefix + "  mPostCommitAnimationInProgress=" + mPostCommitAnimationInProgress);
+        pw.println(prefix + "  mShouldStartOnNextMoveEvent=" + mShouldStartOnNextMoveEvent);
+        pw.println(prefix + "  mCurrentTracker state:");
+        mCurrentTracker.dump(pw, prefix + "    ");
+        pw.println(prefix + "  mQueuedTracker state:");
+        mQueuedTracker.dump(pw, prefix + "    ");
+    }
+
 }

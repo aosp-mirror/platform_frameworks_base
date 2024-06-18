@@ -50,6 +50,7 @@ import android.provider.Settings;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -83,6 +84,8 @@ public class PackageInstallerActivity extends Activity {
     static final String EXTRA_ORIGINAL_SOURCE_INFO = "EXTRA_ORIGINAL_SOURCE_INFO";
     static final String EXTRA_STAGED_SESSION_ID = "EXTRA_STAGED_SESSION_ID";
     static final String EXTRA_APP_SNIPPET = "EXTRA_APP_SNIPPET";
+    static final String EXTRA_ORIGINATING_UID_FROM_SESSION_INFO =
+        "EXTRA_ORIGINATING_UID_FROM_SESSION_INFO";
     private static final String ALLOW_UNKNOWN_SOURCES_KEY =
             PackageInstallerActivity.class.getName() + "ALLOW_UNKNOWN_SOURCES_KEY";
 
@@ -91,7 +94,14 @@ public class PackageInstallerActivity extends Activity {
     private Uri mOriginatingURI;
     private Uri mReferrerURI;
     private int mOriginatingUid = Process.INVALID_UID;
-    private String mOriginatingPackage; // The package name corresponding to #mOriginatingUid
+    /**
+     * The package name corresponding to #mOriginatingUid
+     */
+    private String mOriginatingPackage;
+    /**
+     * The package name corresponding to the app updater in the update-ownership confirmation dialog
+     */
+    private String mOriginatingPackageFromSessionInfo;
     private int mActivityResultCode = Activity.RESULT_CANCELED;
     private int mPendingUserActionReason = -1;
 
@@ -144,7 +154,8 @@ public class PackageInstallerActivity extends Activity {
             viewToEnable = mDialog.requireViewById(R.id.install_confirm_question_update);
 
             final CharSequence existingUpdateOwnerLabel = getExistingUpdateOwnerLabel();
-            final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mCallingPackage);
+            final CharSequence requestedUpdateOwnerLabel =
+                getApplicationLabel(mOriginatingPackageFromSessionInfo);
             if (!TextUtils.isEmpty(existingUpdateOwnerLabel)
                     && mPendingUserActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP) {
                 String updateOwnerString =
@@ -163,6 +174,7 @@ public class PackageInstallerActivity extends Activity {
         }
 
         viewToEnable.setVisibility(View.VISIBLE);
+        viewToEnable.setMovementMethod(new ScrollingMovementMethod());
 
         mEnableOk = true;
         mOk.setEnabled(true);
@@ -308,7 +320,6 @@ public class PackageInstallerActivity extends Activity {
     }
 
     private void initiateInstall() {
-        bindUi();
         String pkgName = mPkgInfo.packageName;
         // Check if there is already a package on the device with this name
         // but it has been renamed to something else.
@@ -377,6 +388,11 @@ public class PackageInstallerActivity extends Activity {
                 Process.INVALID_UID);
         mOriginatingPackage = (mOriginatingUid != Process.INVALID_UID)
                 ? getPackageNameForUid(mOriginatingUid) : null;
+        int originatingUidFromSessionInfo =
+            intent.getIntExtra(EXTRA_ORIGINATING_UID_FROM_SESSION_INFO, Process.INVALID_UID);
+        mOriginatingPackageFromSessionInfo = (originatingUidFromSessionInfo != Process.INVALID_UID)
+            ? getPackageNameForUid(originatingUidFromSessionInfo) : mCallingPackage;
+
 
         final Object packageSource;
         if (PackageInstaller.ACTION_CONFIRM_INSTALL.equals(action)) {
@@ -448,6 +464,7 @@ public class PackageInstallerActivity extends Activity {
         if (mAppSnippet != null) {
             // load placeholder layout with OK button disabled until we override this layout in
             // startInstallConfirm
+            bindUi();
             checkIfAllowedAndInitiateInstall();
         }
 

@@ -1221,7 +1221,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     public void testTransitionGoodToGoForTaskFragments_detachedApp() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final ITaskFragmentOrganizer iOrganizer = getITaskFragmentOrganizer(organizer);
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
+        registerTaskFragmentOrganizer(iOrganizer);
         final Task task = createTask(mDisplayContent);
         final TaskFragment changeTaskFragment =
                 createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -1265,7 +1265,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CLOSE, adapter);
         definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, adapter);
         definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_CLOSE, adapter);
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
+        registerTaskFragmentOrganizer(iOrganizer);
         mAtm.mTaskFragmentOrganizerController.registerRemoteAnimations(iOrganizer, definition);
     }
 

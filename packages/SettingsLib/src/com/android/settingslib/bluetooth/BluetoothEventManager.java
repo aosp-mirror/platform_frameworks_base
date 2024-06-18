@@ -16,6 +16,8 @@
 
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.flags.Flags.enableCachedBluetoothDeviceDedup;
+
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothCsipSetCoordinator;
@@ -375,6 +377,10 @@ public class BluetoothEventManager {
                 Log.w(TAG, "Got bonding state changed for " + device +
                         ", but we have no record of that device.");
                 cachedDevice = mDeviceManager.addDevice(device);
+            }
+
+            if (enableCachedBluetoothDeviceDedup() && bondState == BluetoothDevice.BOND_BONDED) {
+                mDeviceManager.removeDuplicateInstanceForIdentityAddress(device);
             }
 
             for (BluetoothCallback callback : mCallbacks) {

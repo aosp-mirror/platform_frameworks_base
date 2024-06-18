@@ -16,36 +16,33 @@
 
 package com.android.mediaframeworktest.performance;
 
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.MediaFrameworkPerfTestRunner;
-import com.android.mediaframeworktest.MediaNames;
-import com.android.mediaframeworktest.MediaTestUtil;
-
-import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.media.CamcorderProfile;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.media.EncoderCapabilities.VideoEncoderCap;
 import android.os.ConditionVariable;
 import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-import java.util.List;
+import androidx.test.filters.LargeTest;
+
+import com.android.mediaframeworktest.MediaFrameworkPerfTestRunner;
+import com.android.mediaframeworktest.MediaFrameworkTest;
+import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.MediaProfileReader;
+import com.android.mediaframeworktest.MediaTestUtil;
+
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-
-import com.android.mediaframeworktest.MediaProfileReader;
 
 /**
  * Junit / Instrumentation - performance measurement for media player and

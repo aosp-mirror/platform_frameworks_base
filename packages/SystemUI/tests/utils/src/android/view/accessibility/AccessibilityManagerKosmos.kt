@@ -18,6 +18,11 @@ package android.view.accessibility
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.util.mockito.mock
 
 var Kosmos.accessibilityManager by Fixture { mock<AccessibilityManager>() }
+
+var Kosmos.accessibilityManagerWrapper by Fixture {
+    AccessibilityManagerWrapper(accessibilityManager)
+}

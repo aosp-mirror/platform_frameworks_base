@@ -44,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"यह उपयोगकर्ता अनजान ऐप्लिकेशन इंस्टॉल नहीं कर सकता"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"इस उपयोगकर्ता को ऐप्लिकेशन इंस्टॉल करने की अनुमति नहीं है"</string>
     <string name="ok" msgid="7871959885003339302">"ठीक है"</string>
+    <string name="archive" msgid="4447791830199354721">"संग्रहित करें"</string>
     <string name="update_anyway" msgid="8792432341346261969">"फिर भी अपडेट करें"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ऐप्लिकेशन प्रबंधित करें"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"जगह नहीं है"</string>
@@ -58,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"अपडेट अनइंस्‍टॉल करें"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> इस ऐप्लिकेशन का भाग है:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"क्‍या आपको इस ऐप्लिकेशन को अनइंस्‍टॉल करना है?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"आपका निजी डेटा सेव किया जाएगा"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"क्या इस ऐप्लिकेशन को सभी के लिए संग्रहित करना है? आपका निजी डेटा सेव किया जाएगा"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"क्या आपको अपनी वर्क प्रोफ़ाइल से यह ऐप्लिकेशन संग्रहित करना है? आपका निजी डेटा सेव किया जाएगा"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"क्या <xliff:g id="USERNAME">%1$s</xliff:g> के लिए यह ऐप्लिकेशन संग्रहित करना है? आपका निजी डेटा सेव किया जाएगा"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"क्या आपको अपने प्राइवेट स्पेस से यह ऐप्लिकेशन संग्रहित करना है? आपका निजी डेटा सेव किया जाएगा"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"क्या आप इस ऐप्लिकेशन को "<b>"सभी"</b>" उपयोगकर्ताओं के लिए अनइंस्टॉल करना चाहते हैं? ऐप्लिकेशन और उसके डेटा को डिवाइस पर "<b>"सभी"</b>" उपयोगकर्ताओं से हटा दिया जाएगा."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"क्या आप उपयोगकर्ता <xliff:g id="USERNAME">%1$s</xliff:g> के लिए इस ऐप्लिकेशन को अनइंस्टॉल करना चाहते हैं?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"क्या अपनी वर्क प्रोफ़ाइल से इस ऐप्लिकेशन को अनइंस्टॉल करना है?"</string>
@@ -86,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"उपयोगकर्ताओं को मैनेज करें"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> को अनइंस्‍टॉल नहीं किया जा सका."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"पैकेज को पार्स करने में कोई समस्‍या थी."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear पर ऐप्लिकेशन इंस्टॉल या अनइंस्टॉल नहीं किए जा सकते."</string>
     <string name="message_staging" msgid="8032722385658438567">"ऐप्लिकेशन तैयार किया जा रहा है…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"अनजान"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"आपकी सुरक्षा के लिए, आपके टैबलेट को फ़िलहाल इस स्रोत से अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति नहीं है. आप \'सेटिंग\' में जाकर इसे बदल सकते हैं."</string>
@@ -98,17 +102,18 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"आपका टैबलेट और निजी डेटा अनजान ऐप्लिकेशन के हमले को लेकर ज़्यादा संवेदनशील हैं. इस ऐप्लिकेशन को इंस्टॉल करके, आप सहमति देते हैं कि इसके इस्तेमाल के चलते आपके टैबलेट को होने वाले किसी भी नुकसान या डेटा के मिट जाने पर, आप ज़िम्मेदार होंगे."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"आपका टीवी और निजी डेटा अनजान ऐप्लिकेशन के हमले को लेकर ज़्यादा संवेदनशील हैं. इस ऐप्लिकेशन को इंस्टॉल करके, आप सहमति देते हैं कि इसके इस्तेमाल के चलते आपके टीवी को होने वाले किसी भी नुकसान या डेटा के मिट जाने पर, आप ज़िम्मेदार होंगे."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> का क्लोन"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"क्या <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> संग्रहित करना है?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"जारी रखें"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"सेटिंग"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear ऐप्लिकेशन इंस्टॉल/अनइंस्टॉल हो रहे हैं"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ऐप्लिकेशन इंस्टॉल होने की सूचना"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"पूरी तरह से इंस्टॉल हो गया है"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"“<xliff:g id="APPNAME">%1$s</xliff:g>” पूरी तरह से इंस्टॉल हो गया है"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> को <xliff:g id="INSTALLERNAME">%1$s</xliff:g> से वापस लाएं?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> को <xliff:g id="INSTALLERNAME">%2$s</xliff:g> से वापस लाएं?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"यह ऐप्लिकेशन, बैकग्राउंड में डाउनलोड होना शुरू हो जाएगा"</string>
     <string name="restore" msgid="8460854736328970444">"वापस लाएं"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"आप ऑफ़लाइन हैं"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"इंटरनेट कनेक्शन होने पर, यह ऐप्लिकेशन अपने-आप वापस आ जाएगा"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"इस ऐप्लिकेशन को वापस लाने के लिए, अपने इंटरनेट कनेक्शन की जांच करें और फिर से कोशिश करें"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"कोई गड़बड़ी हुई"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"इस ऐप्लिकेशन को वापस लाने में समस्या हुई"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"डिवाइस का स्टोरेज ज़रूरत से कम है"</string>
@@ -116,8 +121,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"कार्रवाई ज़रूरी है"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"इस ऐप्लिकेशन को वापस लाने के लिए, दिया गया तरीका अपनाएं"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> बंद है"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"इस ऐप्लिकेशन को वापस लाने के लिए, Settings में जाकर <xliff:g id="INSTALLERNAME">%1$s</xliff:g> को चालू करें"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> अनइंस्टॉल है"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"इस ऐप्लिकेशन को वापस लाने के लिए, आपको <xliff:g id="INSTALLERNAME">%1$s</xliff:g> इंस्टॉल करना होगा"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"जारी रखें"</string>

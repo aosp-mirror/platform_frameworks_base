@@ -1,2 +1,0 @@
-# Haptics team also works on Ringtone
-per-file *Ringtone* = file:/services/core/java/com/android/server/vibrator/OWNERS

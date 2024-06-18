@@ -32,54 +32,6 @@ license {
     ],
 }
 
-// Opt-in configuration for code depending on Jetpack Compose.
-soong_config_module_type {
-    name: "systemui_compose_java_defaults",
-    module_type: "java_defaults",
-    config_namespace: "ANDROID",
-    bool_variables: ["SYSTEMUI_USE_COMPOSE"],
-    properties: [
-        "srcs",
-        "static_libs",
-    ],
-}
-
-systemui_compose_java_defaults {
-    name: "SystemUI_compose_defaults",
-    soong_config_variables: {
-        SYSTEMUI_USE_COMPOSE: {
-            // Because files in compose/features/ depend on SystemUI
-            // code, we compile those files when compiling SystemUI-core.
-            // We also compile the ComposeFacade in
-            // compose/facade/enabled/.
-            srcs: [
-                "compose/features/src/**/*.kt",
-                "compose/facade/enabled/src/**/*.kt",
-            ],
-
-            // The dependencies needed by SystemUIComposeFeatures,
-            // except for SystemUI-core.
-            // Copied from compose/features/Android.bp.
-            static_libs: [
-                "PlatformComposeCore",
-                "PlatformComposeSceneTransitionLayout",
-
-                "androidx.compose.runtime_runtime",
-                "androidx.compose.material3_material3",
-                "androidx.activity_activity-compose",
-                "androidx.compose.animation_animation-graphics",
-            ],
-
-            // By default, Compose is disabled and we compile the ComposeFacade
-            // in compose/facade/disabled/.
-            conditions_default: {
-                srcs: ["compose/facade/disabled/src/**/*.kt"],
-                static_libs: [],
-            },
-        },
-    },
-}
-
 java_library {
     name: "SystemUI-proto",
 
@@ -137,14 +89,13 @@ android_library {
 
 android_library {
     name: "SystemUI-core",
-    defaults: [
-        "SystemUI_compose_defaults",
-    ],
     srcs: [
         "src/**/*.kt",
         "src/**/*.java",
         "src/**/I*.aidl",
         ":ReleaseJavaFiles",
+        "compose/features/src/**/*.kt",
+        "compose/facade/enabled/src/**/*.kt",
     ],
     product_variables: {
         debuggable: {
@@ -157,7 +108,7 @@ android_library {
         "SystemUI-res",
         "WifiTrackerLib",
         "WindowManager-Shell",
-        "SystemUIAnimationLib",
+        "PlatformAnimationLib",
         "SystemUICommon",
         "SystemUICustomizationLib",
         "SystemUILogLib",
@@ -206,6 +157,13 @@ android_library {
         "LowLightDreamLib",
         "motion_tool_lib",
         "notification_flags_lib",
+        "PlatformComposeCore",
+        "PlatformComposeSceneTransitionLayout",
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.material3_material3",
+        "androidx.compose.material_material-icons-extended",
+        "androidx.activity_activity-compose",
+        "androidx.compose.animation_animation-graphics",
     ],
     libs: [
         "keepanno-annotations",
@@ -229,6 +187,7 @@ android_library {
         extra_check_modules: ["SystemUILintChecker"],
         warning_checks: ["MissingApacheLicenseDetector"],
     },
+    skip_jarjar_repackage: true,
 }
 
 filegroup {
@@ -276,10 +235,11 @@ android_library {
     static_libs: [
         "SystemUI-res",
         "WifiTrackerLib",
-        "SystemUIAnimationLib",
+        "PlatformAnimationLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SystemUICustomizationLib",
+        "SystemUICustomizationTestUtils",
         "SystemUI-statsd",
         "SettingsLib",
         "com_android_systemui_flags_lib",
@@ -331,17 +291,22 @@ android_library {
         "androidx.core_core-animation-testing",
         "androidx.compose.ui_ui",
         "flag-junit",
+        "ravenwood-junit",
         "platform-test-annotations",
         "notification_flags_lib",
+        "PlatformComposeCore",
+        "PlatformComposeSceneTransitionLayout",
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.material3_material3",
+        "androidx.compose.material_material-icons-extended",
+        "androidx.activity_activity-compose",
+        "androidx.compose.animation_animation-graphics",
     ],
 }
 
 android_library {
     name: "SystemUI-tests",
     use_resource_processor: true,
-    defaults: [
-        "SystemUI_compose_defaults",
-    ],
     manifest: "tests/AndroidManifest-base.xml",
     resource_dirs: [],
     additional_manifests: ["tests/AndroidManifest.xml"],
@@ -354,6 +319,8 @@ android_library {
         ":ReleaseJavaFiles",
         ":SystemUI-tests-multivalent",
         ":SystemUI-tests-utils",
+        "compose/features/src/**/*.kt",
+        "compose/facade/enabled/src/**/*.kt",
     ],
     static_libs: [
         "SystemUI-tests-base",
@@ -363,6 +330,8 @@ android_library {
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
         "kotlin-test",
+        "SystemUICustomizationTestUtils",
+        "androidx.compose.runtime_runtime",
     ],
     libs: [
         "android.test.runner",
@@ -387,11 +356,11 @@ android_library {
 
 android_app {
     name: "SystemUIRobo-stub",
-    use_resource_processor: true,
+    // SystemUiRavenTests references the .aapt.srcjar
+    use_resource_processor: false,
     defaults: [
         "platform_app_defaults",
         "SystemUI_optimized_defaults",
-        "SystemUI_compose_defaults",
     ],
     manifest: "tests/AndroidManifest-base.xml",
 
@@ -400,9 +369,12 @@ android_app {
         "src/**/*.java",
         "src/**/I*.aidl",
         ":ReleaseJavaFiles",
+        "compose/features/src/**/*.kt",
+        "compose/facade/enabled/src/**/*.kt",
     ],
     static_libs: [
         "SystemUI-tests-base",
+        "androidx.compose.runtime_runtime",
     ],
     libs: [
         "keepanno-annotations",
@@ -420,6 +392,7 @@ android_app {
     kotlincflags: ["-Xjvm-default=all"],
     optimize: {
         shrink_resources: false,
+        optimized_shrink_resources: false,
         proguard_flags_files: ["proguard.flags"],
     },
 
@@ -440,6 +413,8 @@ android_robolectric_test {
         "androidx.core_core-animation-testing",
         "androidx.test.ext.junit",
         "inline-mockito-robolectric-prebuilt",
+        "platform-parametric-runner-lib",
+        "SystemUICustomizationTestUtils",
     ],
     libs: [
         "android.test.runner",
@@ -452,6 +427,36 @@ android_robolectric_test {
 
     instrumentation_for: "SystemUIRobo-stub",
     java_resource_dirs: ["tests/robolectric/config"],
+    plugins: [
+        "dagger2-compiler",
+    ],
+
+    strict_mode: false,
+}
+
+android_ravenwood_test {
+    name: "SystemUiRavenTests",
+    srcs: [
+        ":SystemUI-tests-utils",
+        ":SystemUI-tests-multivalent",
+        // TODO(b/294256649): pivot to using {.aapt.jar} and re-enable
+        // use_resource_processor: true when better supported by soong
+        ":SystemUIRobo-stub{.aapt.srcjar}",
+    ],
+    static_libs: [
+        "SystemUI-core",
+        "SystemUI-res",
+        "SystemUI-tests-base",
+        "androidx.test.uiautomator_uiautomator",
+        "androidx.core_core-animation-testing",
+        "androidx.test.ext.junit",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
+    auto_gen_config: true,
     plugins: [
         "dagger2-compiler",
     ],
@@ -477,6 +482,7 @@ systemui_optimized_java_defaults {
                 optimize: true,
                 shrink: true,
                 shrink_resources: true,
+                optimized_shrink_resources: true,
                 ignore_warnings: false,
                 proguard_compatibility: false,
             },
@@ -516,5 +522,6 @@ android_app {
     required: [
         "privapp_whitelist_com.android.systemui",
         "wmshell.protolog.json.gz",
+        "wmshell.protolog.pb",
     ],
 }

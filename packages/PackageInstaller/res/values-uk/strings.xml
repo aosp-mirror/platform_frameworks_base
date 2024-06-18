@@ -44,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Цей користувач не може встановлювати невідомі додатки"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Цей користувач не може встановлювати додатки"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="archive" msgid="4447791830199354721">"Архівувати"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Усе одно оновити"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Керувати додатками"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Недостат. місця"</string>
@@ -58,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Видалити оновлення"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"Дія <xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> є частиною такої програми:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Видалити цей додаток?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"Ваші особисті дані буде збережено"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Архівувати цей додаток для всіх користувачів? Ваші особисті дані буде збережено"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Архівувати цей додаток у вашому робочому профілі? Ваші особисті дані буде збережено"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Архівувати цей додаток для користувача <xliff:g id="USERNAME">%1$s</xliff:g>? Ваші особисті дані буде збережено"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Архівувати цей додаток із вашого приватного простору? Ваші особисті дані буде збережено"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Хочете видалити цю програму для "<b>"всіх"</b>" користувачів? Програму та її дані буде видалено для "<b>"всіх"</b>" користувачів цього пристрою."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Видалити цей додаток для користувача <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Видалити цей додаток із вашого робочого профілю?"</string>
@@ -86,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"Керувати користувачами"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Програму <xliff:g id="APP_NAME">%1$s</xliff:g> неможливо видалити."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Під час аналізу пакету виникла помилка."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Встановлення й видалення не підтримуються на пристроях Android Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Підготовка додатка…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Невідомо"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"З міркувань безпеки на вашому планшеті зараз заборонено встановлювати невідомі додатки з цього джерела. Ви можете змінити це в налаштуваннях."</string>
@@ -98,17 +102,18 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Ваш планшет і особисті дані більш уразливі до атак невідомих додатків. Установлюючи цей додаток, ви берете на себе відповідальність за пошкодження планшета чи втрату даних унаслідок використання додатка."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Ваш телевізор і особисті дані більш уразливі до атак невідомих додатків. Установлюючи цей додаток, ви берете на себе відповідальність за пошкодження телевізора чи втрату даних унаслідок використання додатка."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Копія додатка <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"Архівувати додаток <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Продовжити"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Налаштування"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Встановлення або видалення додатків Wear"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Сповіщення: додаток установлено"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Установлено"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"Додаток <xliff:g id="APPNAME">%1$s</xliff:g> установлено"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"Відновити додаток <xliff:g id="APPNAME">%1$s</xliff:g> з <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Відновити додаток <xliff:g id="APPNAME">%1$s</xliff:g> з <xliff:g id="INSTALLERNAME">%2$s</xliff:g>?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"Цей додаток почне завантажуватись у фоновому режимі"</string>
     <string name="restore" msgid="8460854736328970444">"Відновити"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Пристрій не в мережі"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Додаток автоматично відновиться, коли пристрій підключиться до Інтернету"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"Щоб відновити цей додаток, перевірте інтернет-з\'єднання й повторіть спробу"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Помилка"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Під час спроби відновити цей додаток сталася помилка"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Недостатньо пам’яті"</string>
@@ -116,8 +121,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Потрібна дія"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Виконайте подальші вказівки, щоб відновити цей додаток"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> вимкнено"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Щоб відновити цей додаток, увімкніть <xliff:g id="INSTALLERNAME">%1$s</xliff:g> у налаштуваннях"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> видалено"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Щоб відновити цей додаток, установіть <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Продовжити"</string>

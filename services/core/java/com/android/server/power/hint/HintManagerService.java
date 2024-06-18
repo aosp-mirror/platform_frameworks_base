@@ -481,6 +481,11 @@ public final class HintManagerService extends SystemService {
         protected long mTargetDurationNanos;
         protected boolean mUpdateAllowed;
         protected int[] mNewThreadIds;
+        protected boolean mPowerEfficient;
+
+        private enum SessionModes {
+            POWER_EFFICIENCY,
+        };
 
         protected AppHintSession(
                 int uid, int pid, int[] threadIds, IBinder token,
@@ -492,6 +497,7 @@ public final class HintManagerService extends SystemService {
             mHalSessionPtr = halSessionPtr;
             mTargetDurationNanos = durationNanos;
             mUpdateAllowed = true;
+            mPowerEfficient = false;
             final boolean allowed = mUidObserver.isUidForeground(mUid);
             updateHintAllowed(allowed);
             try {
@@ -634,6 +640,9 @@ public final class HintManagerService extends SystemService {
                 }
                 Preconditions.checkArgument(mode >= 0, "the mode Id value should be"
                         + " greater than zero.");
+                if (mode == SessionModes.POWER_EFFICIENCY.ordinal()) {
+                    mPowerEfficient = enabled;
+                }
                 mNativeWrapper.halSetMode(mHalSessionPtr, mode, enabled);
             }
         }
@@ -650,6 +659,12 @@ public final class HintManagerService extends SystemService {
                     validateWorkDuration(workDuration);
                 }
                 mNativeWrapper.halReportActualWorkDuration(mHalSessionPtr, workDurations);
+            }
+        }
+
+        public boolean isPowerEfficient() {
+            synchronized (this) {
+                return mPowerEfficient;
             }
         }
 
@@ -676,15 +691,25 @@ public final class HintManagerService extends SystemService {
                     TextUtils.formatSimple("Actual total duration (%d) should be greater than 0",
                             workDuration.getActualTotalDurationNanos()));
             }
-            if (workDuration.getActualCpuDurationNanos() <= 0) {
+            if (workDuration.getActualCpuDurationNanos() < 0) {
                 throw new IllegalArgumentException(
-                    TextUtils.formatSimple("Actual CPU duration (%d) should be greater than 0",
+                    TextUtils.formatSimple(
+                        "Actual CPU duration (%d) should be greater than or equal to 0",
                             workDuration.getActualCpuDurationNanos()));
             }
             if (workDuration.getActualGpuDurationNanos() < 0) {
                 throw new IllegalArgumentException(
-                    TextUtils.formatSimple("Actual GPU duration (%d) should be non negative",
+                    TextUtils.formatSimple(
+                        "Actual GPU duration (%d) should greater than or equal to 0",
                             workDuration.getActualGpuDurationNanos()));
+            }
+            if (workDuration.getActualCpuDurationNanos()
+                    + workDuration.getActualGpuDurationNanos() <= 0) {
+                throw new IllegalArgumentException(
+                    TextUtils.formatSimple(
+                        "The actual CPU duration (%d) and the actual GPU duration (%d)"
+                        + " should not both be 0", workDuration.getActualCpuDurationNanos(),
+                        workDuration.getActualGpuDurationNanos()));
             }
         }
 
@@ -718,6 +743,7 @@ public final class HintManagerService extends SystemService {
                 pw.println(prefix + "SessionTIDs: " + Arrays.toString(mThreadIds));
                 pw.println(prefix + "SessionTargetDurationNanos: " + mTargetDurationNanos);
                 pw.println(prefix + "SessionAllowed: " + mUpdateAllowed);
+                pw.println(prefix + "PowerEfficient: " + (mPowerEfficient ? "true" : "false"));
             }
         }
 

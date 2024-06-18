@@ -16,10 +16,13 @@
 
 package com.android.systemui.communal.domain.model
 
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetProviderInfo
+import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
+import android.content.pm.ApplicationInfo
 import android.widget.RemoteViews
 import com.android.systemui.communal.shared.model.CommunalContentSize
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
+import java.util.UUID
 
 /** Encapsulates data for a communal content. */
 sealed interface CommunalContentModel {
@@ -29,39 +32,124 @@ sealed interface CommunalContentModel {
     /** Size to be rendered in the grid. */
     val size: CommunalContentSize
 
-    class Widget(
-        val appWidgetId: Int,
-        val providerInfo: AppWidgetProviderInfo,
-        val appWidgetHost: AppWidgetHost,
-    ) : CommunalContentModel {
-        override val key = "widget_$appWidgetId"
-        // Widget size is always half.
+    /**
+     * A type of communal content is ongoing / live / ephemeral, and can be sized and ordered
+     * dynamically.
+     */
+    sealed interface Ongoing : CommunalContentModel {
+        override var size: CommunalContentSize
+
+        /** Timestamp in milliseconds of when the content was created. */
+        val createdTimestampMillis: Long
+    }
+
+    sealed interface WidgetContent : CommunalContentModel {
+        val appWidgetId: Int
+        val providerInfo: AppWidgetProviderInfo
+
+        data class Widget(
+            override val appWidgetId: Int,
+            override val providerInfo: AppWidgetProviderInfo,
+            val appWidgetHost: CommunalAppWidgetHost,
+        ) : WidgetContent {
+            override val key = KEY.widget(appWidgetId)
+            // Widget size is always half.
+            override val size = CommunalContentSize.HALF
+
+            /** Whether this widget can be reconfigured after it has already been added. */
+            val reconfigurable: Boolean
+                get() =
+                    (providerInfo.widgetFeatures and WIDGET_FEATURE_RECONFIGURABLE != 0) &&
+                        providerInfo.configure != null
+        }
+
+        data class DisabledWidget(
+            override val appWidgetId: Int,
+            override val providerInfo: AppWidgetProviderInfo
+        ) : WidgetContent {
+            override val key = KEY.disabledWidget(appWidgetId)
+            // Widget size is always half.
+            override val size = CommunalContentSize.HALF
+
+            val appInfo: ApplicationInfo?
+                get() = providerInfo.providerInfo?.applicationInfo
+        }
+    }
+
+    /** A placeholder item representing a new widget being added */
+    class WidgetPlaceholder : CommunalContentModel {
+        override val key: String = KEY.widgetPlaceholder()
+        // Same as widget size.
+        override val size = CommunalContentSize.HALF
+    }
+
+    /** A CTA tile in the glanceable hub view mode which can be dismissed. */
+    class CtaTileInViewMode : CommunalContentModel {
+        override val key: String = KEY.CTA_TILE_IN_VIEW_MODE_KEY
+        // Same as widget size.
+        override val size = CommunalContentSize.HALF
+    }
+
+    /** A CTA tile in the glanceable hub edit model which remains visible in the grid. */
+    class CtaTileInEditMode : CommunalContentModel {
+        override val key: String = KEY.CTA_TILE_IN_EDIT_MODE_KEY
+        // Same as widget size.
         override val size = CommunalContentSize.HALF
     }
 
     class Tutorial(
         id: Int,
-        override val size: CommunalContentSize,
+        override var size: CommunalContentSize,
     ) : CommunalContentModel {
-        override val key = "tutorial_$id"
+        override val key = KEY.tutorial(id)
     }
 
     class Smartspace(
         smartspaceTargetId: String,
         val remoteViews: RemoteViews,
-        override val size: CommunalContentSize,
-    ) : CommunalContentModel {
-        override val key = "smartspace_$smartspaceTargetId"
+        override val createdTimestampMillis: Long,
+        override var size: CommunalContentSize = CommunalContentSize.HALF,
+    ) : Ongoing {
+        override val key = KEY.smartspace(smartspaceTargetId)
     }
 
     class Umo(
-        override val size: CommunalContentSize,
-    ) : CommunalContentModel {
-        override val key = UMO_KEY
+        override val createdTimestampMillis: Long,
+        override var size: CommunalContentSize = CommunalContentSize.HALF,
+    ) : Ongoing {
+        override val key = KEY.umo()
     }
 
-    companion object {
-        /** Key for the [Umo] in CommunalContentModel. There should only ever be one UMO. */
-        const val UMO_KEY = "umo"
+    class KEY {
+        companion object {
+            const val CTA_TILE_IN_VIEW_MODE_KEY = "cta_tile_in_view_mode"
+            const val CTA_TILE_IN_EDIT_MODE_KEY = "cta_tile_in_edit_mode"
+
+            fun widget(id: Int): String {
+                return "widget_$id"
+            }
+
+            fun disabledWidget(id: Int): String {
+                return "disabled_widget_$id"
+            }
+
+            fun widgetPlaceholder(): String {
+                return "widget_placeholder_${UUID.randomUUID()}"
+            }
+
+            fun tutorial(id: Int): String {
+                return "tutorial_$id"
+            }
+
+            fun smartspace(id: String): String {
+                return "smartspace_$id"
+            }
+
+            fun umo(): String {
+                return "umo"
+            }
+        }
     }
+
+    fun isWidgetContent() = this is WidgetContent
 }

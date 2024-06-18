@@ -155,6 +155,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> через <xliff:g id="TIME_DELAY">{2}</xliff:g> с."</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не переадресовано"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не переадресовано"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Безопасность мобильной сети"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Проверить настройки"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Зарегистрирован доступ к идентификатору устройства"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Сеть (подключение <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>) записывала номер IMSI вашего устройства несколько раз (всего <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g>) в период с <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> до <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Зашифрованное подключение к сети \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\""</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Сейчас вы подключены к более безопасной мобильной сети."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Незашифрованное подключение к сети \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\""</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Вы подключены к незашифрованной мобильной сети. Ваши звонки, сообщения и данные уязвимы для перехвата."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Настройки безопасности мобильной сети"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Подробнее"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Код функции выполнен."</string>
     <string name="fcError" msgid="5325116502080221346">"Неполадки подключения или неверный код функции."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ОК"</string>
@@ -372,6 +382,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Приложение сможет выполнить привязку к модулю оповещения населения, чтобы пересылать сообщения широковещательных SMS-служб сразу после их получения. В некоторых странах эти сообщения используются для информирования об экстренных ситуациях. Вредоносное ПО может помешать работе устройства, на которое поступают такие сообщения."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Управление текущими звонками"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Приложение сможет управлять текущими звонками на вашем устройстве, а также получит доступ к сведениям о них"</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Доступ к последнему известному идентификатору вышки мобильной связи"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Приложение сможет получать доступ к последнему известному идентификатору вышки мобильной связи, предоставленному системами телефонии."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"Читать сообщения массовой рассылки"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Приложение получит доступ к сообщениям широковещательных SMS-служб, которые в некоторых странах используются для информирования населения об экстренных ситуациях. Вредоносные программы могут помешать работе устройства, на которое поступают такие сообщения."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"Просмотр фидов пользователя"</string>
@@ -436,6 +448,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Разрешить приложению использовать активные службы с типом systemExempted"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"Запуск активных служб с типом fileManagement"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Приложение сможет использовать активные службы с типом fileManagement."</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"запускать активные службы с типом mediaProcessing"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Приложение сможет использовать активные службы с типом mediaProcessing."</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"запускать активные службы с типом specialUse"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Разрешить приложению использовать активные службы с типом specialUse"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"Вычисление объема памяти приложений"</string>
@@ -541,6 +555,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Приложение сможет использовать инфракрасный передатчик телефона."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"Установка обоев"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Приложение сможет устанавливать системные обои."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Доступ к скрытым профилям"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Приложение сможет получать доступ к скрытым профилям."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"Изменение размера обоев"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Приложение сможет устанавливать подсказки по размеру системных обоев."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"Настройка часового пояса"</string>
@@ -634,7 +650,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Использовать блокировку экрана"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Чтобы продолжить, разблокируйте экран."</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Плотно прижмите палец к сканеру"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Не удалось распознать отпечаток. Повторите попытку."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Отпечаток пальца не распознан. Повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Очистите сканер отпечатков пальцев и повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Очистите сканер и повторите попытку."</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Плотно прижмите палец к сканеру."</string>
@@ -652,18 +668,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечаток пальца проверен"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Лицо распознано"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Лицо распознано, нажмите кнопку \"Подтвердить\""</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Сканер недоступен"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Сканер отпечатков пальцев недоступен."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Не удалось сохранить отпечаток."</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Время настройки отпечатка пальца истекло. Повторите попытку."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Операция с отпечатком отменена."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Операция с отпечатком пальца отменена пользователем."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Операция с отпечатком пальца отменена."</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Пользователь отменил операцию с отпечатком пальца."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Слишком много попыток. Используйте другой способ разблокировки экрана."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Слишком много попыток. Используйте другой способ разблокировки экрана."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Не удалось распознать отпечаток пальца. Повторите попытку."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Нет отсканированных отпечатков пальцев"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На этом устройстве нет сканера отпечатков пальцев."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сканер отпечатков пальцев временно отключен."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Невозможно использовать сканер отпечатков пальцев. Обратитесь в сервисный центр."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Отпечатки пальцев не добавлены."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"На этом устройстве нет сканера отпечатков пальцев"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Сканер временно отключен."</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Невозможно использовать сканер отпечатков пальцев. Обратитесь в сервисный центр."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Нажата кнопка питания."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Отпечаток <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Использовать отпечаток пальца"</string>
@@ -698,7 +714,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Вашего лица не видно. Держите телефон на уровне глаз"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Не перемещайте устройство. Держите его неподвижно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Повторите попытку."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Не удалось распознать лицо. Повторите попытку."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Лицо не распознано. Повторите попытку."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Немного измените положение головы"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Смотрите прямо на телефон"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Смотрите прямо на телефон"</string>
@@ -809,13 +825,15 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Приложение сможет считывать данные датчиков на частоте более 200 Гц."</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"Обновление приложений без действий со стороны пользователя"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Позволяет обновлять ранее установленные приложения без действий со стороны пользователя."</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"обновление статусов проверки защищенных сквозным шифрованием и принадлежащих другим приложениям ключей контактов"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Приложение сможет обновлять статусы проверки защищенных сквозным шифрованием и принадлежащих другим приложениям ключей контактов."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Настройка правил для паролей"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролировать длину и символы при вводе пароля и PIN-кода."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Отслеживание попыток разблокировать экран"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует планшетный ПК или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Блокировать устройство Android TV или удалять с него все ваши данные при слишком большом количестве неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Блокировать информационно-развлекательную систему или удалять из нее все данные, если совершено слишком много неудачных попыток ввести пароль для разблокировки экрана."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует телефон или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Отслеживать попытки ввода пароля при разблокировке экрана и блокировать телефон или удалять с него все данные, если было сделано слишком много таких попыток."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать планшет или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Блокировать устройство Android TV или удалять с него все данные этого пользователя при слишком большом количестве неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Блокировать информационно-развлекательную систему или удалять все данные профиля, если совершено слишком много неудачных попыток ввести пароль для разблокировки экрана."</string>
@@ -1265,7 +1283,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Запуск приложений."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Окончание загрузки..."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Вы нажали кнопку питания. Обычно это приводит к отключению экрана.\n\nПри добавлении отпечатка пальца слегка прикоснитесь к кнопке."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Для завершения нужно отключить экран"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Для завершения нужно отключить экран."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Отключить"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Продолжить сканирование отпечатка?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Вы нажали кнопку питания. Обычно это приводит к отключению экрана.\n\nЧтобы отсканировать отпечаток пальца, слегка прикоснитесь к кнопке."</string>
@@ -1908,6 +1926,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Выходные"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Мероприятие"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Время сна"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Под управлением приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Включено"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Отключено"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> приглушает некоторые звуки."</string>
@@ -1927,6 +1946,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Подтверждено"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Развернуть"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Скрыть"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Свернуто"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Развернуто"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"Свернуть или развернуть"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Внешний USB-порт Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1967,6 +1988,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Включить рабочие приложения?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Включить"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Экстренный вызов"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Настройте блокировку экрана"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Настроить блокировку экрана"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Чтобы использовать личное пространство, настройте блокировку экрана на этом устройстве."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Приложение недоступно"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" сейчас недоступно."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -2340,11 +2364,9 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Сопутствующее приложение сможет запускать активные службы из фонового режима."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон доступен."</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон заблокирован."</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Не удается дублировать на экран"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Не удается дублировать экран"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Используйте другой кабель или повторите попытку."</string>
-    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Ваше устройство слишком сильно нагрелось. Когда оно остынет, вы снова сможете передавать изображение на другой экран."</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Кабель может не подходить для подключения к дисплеям"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Возможно, подключение дисплеев с помощью этого кабеля USB-C не поддерживается."</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Устройство слишком нагрелось и не может дублировать экран. Подождите, пока оно остынет."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Функция Dual Screen включена"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> использует оба экрана."</string>
@@ -2368,4 +2390,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Рабочий 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Тестовый"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Совместный"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Автоматически подключено к системам спутниковой связи"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Вы можете отправлять и получать сообщения без доступа к мобильной сети или Wi-Fi."</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Открыть Сообщения"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Узнать принцип работы"</string>
 </resources>

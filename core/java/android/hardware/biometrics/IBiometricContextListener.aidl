@@ -38,4 +38,8 @@ oneway interface IBiometricContextListener {
     // Called when the display state of the device changes.
     // Where `displayState` is defined in AuthenticateOptions.DisplayState
     void onDisplayStateChanged(int displayState);
+
+    // Called when the HAL ignoring touches state changes.
+    // When true, the HAL ignores touches on the sensor.
+    void onHardwareIgnoreTouchesChanged(boolean shouldIgnore);
 }

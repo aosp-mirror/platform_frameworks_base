@@ -167,6 +167,20 @@ class IconManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testUpdateIcons_sensitiveImportantConversation() {
+        val entry =
+            notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = false)
+        entry?.setSensitive(true, true)
+        entry?.channel?.isImportantConversation = true
+        entry?.let { iconManager.createIcons(it) }
+        // Updating the icons after creation shouldn't break anything
+        entry?.let { iconManager.updateIcons(it) }
+        assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(shortcutIc)
+        assertThat(entry?.icons?.shelfIcon?.sourceIcon).isEqualTo(smallIc)
+        assertThat(entry?.icons?.aodIcon?.sourceIcon).isEqualTo(smallIc)
+    }
+
+    @Test
     fun testUpdateIcons_sensitivityChange() {
         val entry =
             notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = false)

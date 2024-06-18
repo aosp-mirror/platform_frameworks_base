@@ -1,4 +1,5 @@
 package {
+    default_team: "trendy_team_haptics_framework",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -31,13 +32,13 @@ android_test {
         "frameworks-base-testutils",
         "frameworks-services-vibrator-testutils",
         "junit",
-        "mockito-target-minus-junit4",
+        "mockito-target-inline-minus-junit4",
         "platform-test-annotations",
         "service-permission.stubs.system_server",
         "services.core",
         "flag-junit",
     ],
-
+    jni_libs: ["libdexmakerjvmtiagent"],
     platform_apis: true,
     certificate: "platform",
     dxflags: ["--multi-dex"],

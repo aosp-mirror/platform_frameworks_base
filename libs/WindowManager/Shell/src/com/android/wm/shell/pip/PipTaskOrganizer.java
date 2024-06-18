@@ -25,7 +25,6 @@ import static android.util.RotationUtils.rotateBounds;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
@@ -64,6 +63,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.util.Rational;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.Surface;
@@ -86,6 +86,8 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipMenuController;
+import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
@@ -111,7 +113,7 @@ import java.util.function.IntConsumer;
  * see also {@link PipMotionHelper}.
  */
 public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
-        DisplayController.OnDisplaysChangedListener, ShellTaskOrganizer.FocusListener {
+        DisplayController.OnDisplaysChangedListener {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
 
     /**
@@ -124,6 +126,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private static final int EXTRA_CONTENT_OVERLAY_FADE_OUT_DELAY_MS =
             SystemProperties.getInt(
                     "persist.wm.debug.extra_content_overlay_fade_out_delay_ms", 400);
+
+    private static final float PIP_ASPECT_RATIO_MISMATCH_THRESHOLD = 0.005f;
 
     private final Context mContext;
     private final SyncTransactionQueue mSyncTransactionQueue;
@@ -140,6 +144,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final int mCrossFadeAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Optional<SplitScreenController> mSplitScreenOptional;
+    @Nullable private final PipPerfHintController mPipPerfHintController;
     protected final ShellTaskOrganizer mTaskOrganizer;
     protected final ShellExecutor mMainExecutor;
 
@@ -157,10 +162,30 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
                 private boolean mIsCancelled;
+                @Nullable private PipPerfHintController.PipHighPerfSession mPipHighPerfSession;
+
+                private void onHighPerfSessionTimeout(
+                        PipPerfHintController.PipHighPerfSession session) {}
+
+                private void cleanUpHighPerfSessionMaybe() {
+                    if (mPipHighPerfSession != null) {
+                        // Close the high perf session once pointer interactions are over;
+                        mPipHighPerfSession.close();
+                        mPipHighPerfSession = null;
+                    }
+                }
+
 
                 @Override
                 public void onPipAnimationStart(TaskInfo taskInfo,
                         PipAnimationController.PipTransitionAnimator animator) {
+                    if (mPipPerfHintController != null) {
+                        // Start a high perf session with a timeout callback.
+                        mPipHighPerfSession = mPipPerfHintController.startSession(
+                                this::onHighPerfSessionTimeout,
+                                "PipTaskOrganizer::mPipAnimationCallback");
+                    }
+
                     final int direction = animator.getTransitionDirection();
                     mIsCancelled = false;
                     sendOnPipTransitionStarted(direction);
@@ -169,6 +194,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 @Override
                 public void onPipAnimationEnd(TaskInfo taskInfo, SurfaceControl.Transaction tx,
                         PipAnimationController.PipTransitionAnimator animator) {
+                    // Close the high perf session if needed.
+                    cleanUpHighPerfSessionMaybe();
+
                     final int direction = animator.getTransitionDirection();
                     if (mIsCancelled) {
                         sendOnPipTransitionFinished(direction);
@@ -334,6 +362,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     @Nullable
     SurfaceControl mPipOverlay;
 
+    /**
+     * The app bounds used for the buffer size of the
+     * {@link com.android.wm.shell.pip.PipContentOverlay.PipAppIconOverlay}.
+     *
+     * Note that this is empty if the overlay is removed or if it's some other type of overlay
+     * defined in {@link PipContentOverlay}.
+     */
+    @NonNull
+    final Rect mAppBounds = new Rect();
+
     public PipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
             @NonNull PipTransitionState pipTransitionState,
@@ -346,6 +384,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @NonNull PipTransitionController pipTransitionController,
             @NonNull PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<SplitScreenController> splitScreenOptional,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
@@ -371,6 +410,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceControlTransactionFactory =
                 new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
         mSplitScreenOptional = splitScreenOptional;
+        mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
         mTaskOrganizer = shellTaskOrganizer;
         mMainExecutor = mainExecutor;
 
@@ -379,7 +419,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mMainExecutor.execute(() -> {
                 mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_PIP);
             });
-            mTaskOrganizer.addFocusListener(this);
             mPipTransitionController.setPipOrganizer(this);
             displayController.addDisplayWindowListener(this);
             pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
@@ -464,15 +503,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Expect {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)} afterwards.
      */
     public void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
-            SurfaceControl overlay) {
+            SurfaceControl overlay, Rect appBounds) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "stopSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
+                "stopSwipePipToHome: %s, stat=%s", componentName, mPipTransitionState);
         // do nothing if there is no startSwipePipToHome being called before
         if (!mPipTransitionState.getInSwipePipToHomeTransition()) {
             return;
         }
         mPipBoundsState.setBounds(destinationBounds);
-        mPipOverlay = overlay;
+        setContentOverlay(overlay, appBounds);
         if (ENABLE_SHELL_TRANSITIONS && overlay != null) {
             // With Shell transition, the overlay was attached to the remote transition leash, which
             // will be removed when the current transition is finished, so we need to reparent it
@@ -589,9 +628,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             if (requestEnterSplit && mSplitScreenOptional.isPresent()) {
                 wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
-                mSplitScreenOptional.get().prepareEnterSplitScreen(wct, mTaskInfo,
-                        isPipToTopLeft()
-                                ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT);
+                mSplitScreenOptional.get().onPipExpandToSplit(wct, mTaskInfo);
                 mPipTransitionController.startExitTransition(
                         TRANSIT_EXIT_PIP_TO_SPLIT, wct, destinationBounds);
                 return;
@@ -733,6 +770,37 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     mPictureInPictureParams.getTitle());
             mPipParamsChangedForwarder.notifySubtitleChanged(
                     mPictureInPictureParams.getSubtitle());
+
+            if (mPictureInPictureParams.hasSourceBoundsHint()
+                    && mPictureInPictureParams.hasSetAspectRatio()) {
+                Rational sourceRectHintAspectRatio = new Rational(
+                        mPictureInPictureParams.getSourceRectHint().width(),
+                        mPictureInPictureParams.getSourceRectHint().height());
+                if (sourceRectHintAspectRatio.compareTo(
+                        mPictureInPictureParams.getAspectRatio()) != 0) {
+                    ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                            "Aspect ratio of source rect hint (%d/%d) does not match the provided "
+                                    + "aspect ratio value (%d/%d). Consider matching them for "
+                                    + "improved animation. Future releases might override the "
+                                    + "value to match.",
+                            mPictureInPictureParams.getSourceRectHint().width(),
+                            mPictureInPictureParams.getSourceRectHint().height(),
+                            mPictureInPictureParams.getAspectRatio().getNumerator(),
+                            mPictureInPictureParams.getAspectRatio().getDenominator());
+                }
+                if (Math.abs(sourceRectHintAspectRatio.floatValue()
+                        - mPictureInPictureParams.getAspectRatioFloat())
+                        > PIP_ASPECT_RATIO_MISMATCH_THRESHOLD) {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                            "Aspect ratio of source rect hint (%f) does not match the provided "
+                                    + "aspect ratio value (%f) and is above threshold of %f. "
+                                    + "Consider matching them for improved animation. Future "
+                                    + "releases might override the value to match.",
+                            sourceRectHintAspectRatio.floatValue(),
+                            mPictureInPictureParams.getAspectRatioFloat(),
+                            PIP_ASPECT_RATIO_MISMATCH_THRESHOLD);
+                }
+            }
         }
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
@@ -1014,11 +1082,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         applyNewPictureInPictureParams(newParams);
         mPictureInPictureParams = newParams;
-    }
-
-    @Override
-    public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        mPipMenuController.onFocusTaskChanged(taskInfo);
     }
 
     @Override
@@ -1305,7 +1368,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Handles all changes to the PictureInPictureParams.
      */
     protected void applyNewPictureInPictureParams(@NonNull PictureInPictureParams params) {
-        if (mDeferredTaskInfo != null || PipUtils.aspectRatioChanged(params.getAspectRatioFloat(),
+        if (PipUtils.aspectRatioChanged(params.getAspectRatioFloat(),
                 mPictureInPictureParams.getAspectRatioFloat())) {
             if (mPipBoundsAlgorithm.isValidPictureInPictureAspectRatio(
                     params.getAspectRatioFloat())) {
@@ -1318,8 +1381,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                         TAG, params.hasSetAspectRatio(), params.getAspectRatioFloat());
             }
         }
-        if (mDeferredTaskInfo != null
-                || PipUtils.remoteActionsChanged(params.getActions(),
+        if (PipUtils.remoteActionsChanged(params.getActions(),
                 mPictureInPictureParams.getActions())
                 || !PipUtils.remoteActionsMatch(params.getCloseAction(),
                 mPictureInPictureParams.getCloseAction())) {
@@ -1882,13 +1944,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private void removeContentOverlay(SurfaceControl surface, Runnable callback) {
+        ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "removeContentOverlay: %s, state=%s, surface=%s",
+                mTaskInfo, mPipTransitionState, surface);
         if (mPipOverlay != null) {
             if (mPipOverlay != surface) {
                 ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                         "%s: trying to remove overlay (%s) which is not local reference (%s)",
                         TAG, surface, mPipOverlay);
             }
-            mPipOverlay = null;
+            clearContentOverlay();
         }
         if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
             // Avoid double removal, which is fatal.
@@ -1903,6 +1968,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         tx.remove(surface);
         tx.apply();
         if (callback != null) callback.run();
+    }
+
+    void clearContentOverlay() {
+        mPipOverlay = null;
+        mAppBounds.setEmpty();
+    }
+
+    void setContentOverlay(@Nullable SurfaceControl leash, @NonNull Rect appBounds) {
+        mPipOverlay = leash;
+        if (mPipOverlay != null) {
+            mAppBounds.set(appBounds);
+        } else {
+            mAppBounds.setEmpty();
+        }
     }
 
     private void resetShadowRadius() {
@@ -1950,9 +2029,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         pw.println(innerPrefix + "mToken=" + mToken
                 + " binder=" + (mToken != null ? mToken.asBinder() : null));
         pw.println(innerPrefix + "mLeash=" + mLeash);
+        pw.println(innerPrefix + "mPipOverlay=" + mPipOverlay);
         pw.println(innerPrefix + "mState=" + mPipTransitionState.getTransitionState());
         pw.println(innerPrefix + "mPictureInPictureParams=" + mPictureInPictureParams);
         mPipTransitionController.dump(pw, innerPrefix);
+        if (mPipPerfHintController != null) {
+            mPipPerfHintController.dump(pw, innerPrefix);
+        }
     }
 
     @Override

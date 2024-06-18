@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ચાર્જિંગ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ઝડપથી ચાર્જિંગ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ધીમેથી ચાર્જિંગ"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • બૅટરીની સુરક્ષા કરવા માટે, ચાર્જિંગ ઑપ્ટિમાઇઝ કરવામાં આવ્યું છે"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ચાર્જિંગ ઍક્સેસરીમાં સમસ્યા"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • બૅટરીને સુરક્ષિત રાખવા માટે, ચાર્જિંગ હોલ્ડ પર રાખવામાં આવ્યું છે"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ચાર્જિંગ ઍક્સેસરી ચેક કરો"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"નેટવર્ક લૉક થયું"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"કોઈ સિમ કાર્ડ નથી"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ઉપયોગમાં ન લઈ શકાતું સિમ કાર્ડ."</string>

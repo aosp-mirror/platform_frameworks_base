@@ -439,7 +439,7 @@ public class AppTransitionTests extends WindowTestsBase {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final ITaskFragmentOrganizer iOrganizer =
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
+        registerTaskFragmentOrganizer(iOrganizer);
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
                 .setOrganizer(organizer)

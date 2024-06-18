@@ -314,7 +314,8 @@ static void NativeDestroy(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
 }
 
 static void NativeSetApkAssets(JNIEnv* env, jclass /*clazz*/, jlong ptr,
-                               jobjectArray apk_assets_array, jboolean invalidate_caches) {
+                               jobjectArray apk_assets_array, jboolean invalidate_caches,
+                               jboolean preset) {
   ATRACE_NAME("AssetManager::SetApkAssets");
 
   const jsize apk_assets_len = env->GetArrayLength(apk_assets_array);
@@ -343,7 +344,11 @@ static void NativeSetApkAssets(JNIEnv* env, jclass /*clazz*/, jlong ptr,
   }
 
   auto assetmanager = LockAndStartAssetManager(ptr);
-  assetmanager->SetApkAssets(apk_assets, invalidate_caches);
+  if (preset) {
+    assetmanager->PresetApkAssets(apk_assets);
+  } else {
+    assetmanager->SetApkAssets(apk_assets, invalidate_caches);
+  }
 }
 
 static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jint mcc, jint mnc,
@@ -353,7 +358,7 @@ static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
                                    jint screen_height, jint smallest_screen_width_dp,
                                    jint screen_width_dp, jint screen_height_dp, jint screen_layout,
                                    jint ui_mode, jint color_mode, jint grammatical_gender,
-                                   jint major_version) {
+                                   jint major_version, jboolean force_refresh) {
   ATRACE_NAME("AssetManager::SetConfiguration");
 
   const jsize locale_count = (locales == NULL) ? 0 : env->GetArrayLength(locales);
@@ -413,7 +418,7 @@ static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
   }
 
   auto assetmanager = LockAndStartAssetManager(ptr);
-  assetmanager->SetConfigurations(configs);
+  assetmanager->SetConfigurations(std::move(configs), force_refresh != JNI_FALSE);
   assetmanager->SetDefaultLocale(default_locale_int);
 }
 
@@ -1522,8 +1527,8 @@ static const JNINativeMethod gAssetManagerMethods[] = {
         // AssetManager setup methods.
         {"nativeCreate", "()J", (void*)NativeCreate},
         {"nativeDestroy", "(J)V", (void*)NativeDestroy},
-        {"nativeSetApkAssets", "(J[Landroid/content/res/ApkAssets;Z)V", (void*)NativeSetApkAssets},
-        {"nativeSetConfiguration", "(JIILjava/lang/String;[Ljava/lang/String;IIIIIIIIIIIIIIII)V",
+        {"nativeSetApkAssets", "(J[Landroid/content/res/ApkAssets;ZZ)V", (void*)NativeSetApkAssets},
+        {"nativeSetConfiguration", "(JIILjava/lang/String;[Ljava/lang/String;IIIIIIIIIIIIIIIIZ)V",
          (void*)NativeSetConfiguration},
         {"nativeGetAssignedPackageIdentifiers", "(JZZ)Landroid/util/SparseArray;",
          (void*)NativeGetAssignedPackageIdentifiers},

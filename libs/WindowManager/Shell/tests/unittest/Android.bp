@@ -19,11 +19,15 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
+    default_team: "trendy_team_multitasking_windowing",
 }
 
 android_test {
     name: "WMShellUnitTests",
-
+    defaults: [
+        // For ExtendedMockito dependencies.
+        "modules-utils-testable-device-config-defaults",
+    ],
     srcs: [
         "**/*.java",
         "**/*.kt",

@@ -378,10 +378,17 @@ static FormatInfo determineFormat(const SkBitmap& skBitmap, bool usingGL) {
             break;
         case kAlpha_8_SkColorType:
             formatInfo.isSupported = HardwareBitmapUploader::hasAlpha8Support();
-            formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8_UNORM;
-            formatInfo.format = GL_R8;
-            formatInfo.type = GL_UNSIGNED_BYTE;
-            formatInfo.vkFormat = VK_FORMAT_R8_UNORM;
+            if (formatInfo.isSupported) {
+                formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8_UNORM;
+                formatInfo.format = GL_RED;
+                formatInfo.type = GL_UNSIGNED_BYTE;
+                formatInfo.vkFormat = VK_FORMAT_R8_UNORM;
+            } else {
+                formatInfo.type = GL_UNSIGNED_BYTE;
+                formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+                formatInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
+                formatInfo.format = GL_RGBA;
+            }
             break;
         default:
             ALOGW("unable to create hardware bitmap of colortype: %d", skBitmap.info().colorType());

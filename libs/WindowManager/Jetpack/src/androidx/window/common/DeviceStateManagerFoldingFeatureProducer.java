@@ -36,6 +36,7 @@ import androidx.window.util.BaseDataProducer;
 import com.android.internal.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -78,7 +79,9 @@ public final class DeviceStateManagerFoldingFeatureProducer
     private int mCurrentBaseDeviceState = INVALID_DEVICE_STATE;
 
     @NonNull
-    private final BaseDataProducer<String> mRawFoldSupplier;
+    private final RawFoldingFeatureProducer mRawFoldSupplier;
+
+    private final boolean mIsHalfOpenedSupported;
 
     private final DeviceStateCallback mDeviceStateCallback = new DeviceStateCallback() {
         @Override
@@ -101,10 +104,12 @@ public final class DeviceStateManagerFoldingFeatureProducer
     };
 
     public DeviceStateManagerFoldingFeatureProducer(@NonNull Context context,
-            @NonNull BaseDataProducer<String> rawFoldSupplier) {
+            @NonNull RawFoldingFeatureProducer rawFoldSupplier,
+            @NonNull DeviceStateManager deviceStateManager) {
         mRawFoldSupplier = rawFoldSupplier;
         String[] deviceStatePosturePairs = context.getResources()
                 .getStringArray(R.array.config_device_state_postures);
+        boolean isHalfOpenedSupported = false;
         for (String deviceStatePosturePair : deviceStatePosturePairs) {
             String[] deviceStatePostureMapping = deviceStatePosturePair.split(":");
             if (deviceStatePostureMapping.length != 2) {
@@ -128,12 +133,13 @@ public final class DeviceStateManagerFoldingFeatureProducer
                 }
                 continue;
             }
-
+            isHalfOpenedSupported = isHalfOpenedSupported
+                    || posture == CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
             mDeviceStateToPostureMap.put(deviceState, posture);
         }
-
+        mIsHalfOpenedSupported = isHalfOpenedSupported;
         if (mDeviceStateToPostureMap.size() > 0) {
-            Objects.requireNonNull(context.getSystemService(DeviceStateManager.class))
+            Objects.requireNonNull(deviceStateManager)
                     .registerCallback(context.getMainExecutor(), mDeviceStateCallback);
         }
     }
@@ -185,6 +191,31 @@ public final class DeviceStateManagerFoldingFeatureProducer
         } else {
             return displayFeaturesString.map(this::calculateFoldingFeature);
         }
+    }
+
+    /**
+     * Returns a {@link List} of all the {@link CommonFoldingFeature} with the state set to
+     * {@link CommonFoldingFeature#COMMON_STATE_UNKNOWN}. This method parses a {@link String} so a
+     * caller should consider caching the value or the derived value.
+     */
+    @NonNull
+    public List<CommonFoldingFeature> getFoldsWithUnknownState() {
+        Optional<String> optionalFoldingFeatureString = mRawFoldSupplier.getCurrentData();
+
+        if (optionalFoldingFeatureString.isPresent()) {
+            return CommonFoldingFeature.parseListFromString(
+                    optionalFoldingFeatureString.get(), CommonFoldingFeature.COMMON_STATE_UNKNOWN
+            );
+        }
+        return Collections.emptyList();
+    }
+
+
+    /**
+     * Returns {@code true} if the device supports half-opened mode, {@code false} otherwise.
+     */
+    public boolean isHalfOpenedSupported() {
+        return mIsHalfOpenedSupported;
     }
 
     /**

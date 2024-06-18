@@ -28,12 +28,13 @@ public class UnarchiveFragment extends DialogFragment implements
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         String appTitle = getArguments().getString(UnarchiveActivity.APP_TITLE);
+        String installerTitle = getArguments().getString(UnarchiveActivity.INSTALLER_TITLE);
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 
         dialogBuilder.setTitle(
                 String.format(getContext().getString(R.string.unarchive_application_title),
-                        appTitle));
+                        appTitle, installerTitle));
         dialogBuilder.setMessage(R.string.unarchive_body_text);
 
         dialogBuilder.setPositiveButton(R.string.restore, this);

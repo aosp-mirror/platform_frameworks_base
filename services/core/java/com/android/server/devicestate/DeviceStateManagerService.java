@@ -19,11 +19,11 @@ package com.android.server.devicestate;
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.hardware.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
-import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
-import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER;
+import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
 
-import static com.android.server.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
 import static com.android.server.devicestate.OverrideRequest.OVERRIDE_REQUEST_TYPE_BASE_STATE;
 import static com.android.server.devicestate.OverrideRequest.OVERRIDE_REQUEST_TYPE_EMULATED_STATE;
 import static com.android.server.devicestate.OverrideRequestController.FLAG_POWER_SAVE_ENABLED;
@@ -40,6 +40,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IProcessObserver;
 import android.content.Context;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManagerInternal;
@@ -202,6 +203,10 @@ public final class DeviceStateManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public void onProcessStarted(int pid, int processUid, int packageUid, String packageName,
+                String processName) {}
 
         @Override
         public void onProcessDied(int pid, int uid) {}
@@ -910,6 +915,9 @@ public final class DeviceStateManagerService extends SystemService {
             }
 
             mOverrideRequestController.dumpInternal(pw);
+            pw.println();
+
+            mDeviceStatePolicy.dump(pw, /* args= */ null);
         }
     }
 
@@ -1057,7 +1065,8 @@ public final class DeviceStateManagerService extends SystemService {
     }
 
     private final class DeviceStateProviderListener implements DeviceStateProvider.Listener {
-        @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int mCurrentBaseState;
+        @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to = MAXIMUM_DEVICE_STATE_IDENTIFIER)
+        int mCurrentBaseState;
 
         @Override
         public void onSupportedDeviceStatesChanged(DeviceState[] newDeviceStates,
@@ -1070,8 +1079,10 @@ public final class DeviceStateManagerService extends SystemService {
 
         @Override
         public void onStateChanged(
-                @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier) {
-            if (identifier < MINIMUM_DEVICE_STATE || identifier > MAXIMUM_DEVICE_STATE) {
+                @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
+                        MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier) {
+            if (identifier < MINIMUM_DEVICE_STATE_IDENTIFIER
+                    || identifier > MAXIMUM_DEVICE_STATE_IDENTIFIER) {
                 throw new IllegalArgumentException("Invalid identifier: " + identifier);
             }
 

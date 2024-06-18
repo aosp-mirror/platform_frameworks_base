@@ -18,23 +18,26 @@ package com.android.server.vibrator;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.os.RemoteException;
+import android.os.test.TestLooper;
 
 import org.junit.Before;
 import org.junit.Test;
 
 public class VibratorControllerHolderTest {
 
-    private final FakeVibratorController mFakeVibratorController = new FakeVibratorController();
+    private TestLooper mTestLooper;
+    private FakeVibratorController mFakeVibratorController;
     private VibratorControllerHolder mVibratorControllerHolder;
 
     @Before
     public void setUp() throws Exception {
+        mTestLooper = new TestLooper();
+        mFakeVibratorController = new FakeVibratorController(mTestLooper.getLooper());
         mVibratorControllerHolder = new VibratorControllerHolder();
     }
 
     @Test
-    public void testSetVibratorController_linksVibratorControllerToDeath() throws RemoteException {
+    public void testSetVibratorController_linksVibratorControllerToDeath() {
         mVibratorControllerHolder.setVibratorController(mFakeVibratorController);
         assertThat(mVibratorControllerHolder.getVibratorController())
                 .isEqualTo(mFakeVibratorController);
@@ -42,8 +45,7 @@ public class VibratorControllerHolderTest {
     }
 
     @Test
-    public void testSetVibratorController_setControllerToNull_unlinksVibratorControllerToDeath()
-            throws RemoteException {
+    public void testSetVibratorController_setControllerToNull_unlinksVibratorControllerToDeath() {
         mVibratorControllerHolder.setVibratorController(mFakeVibratorController);
         mVibratorControllerHolder.setVibratorController(null);
         assertThat(mFakeVibratorController.isLinkedToDeath).isFalse();
@@ -51,8 +53,7 @@ public class VibratorControllerHolderTest {
     }
 
     @Test
-    public void testBinderDied_withValidController_unlinksVibratorControllerToDeath()
-            throws RemoteException {
+    public void testBinderDied_withValidController_unlinksVibratorControllerToDeath() {
         mVibratorControllerHolder.setVibratorController(mFakeVibratorController);
         mVibratorControllerHolder.binderDied(mFakeVibratorController);
         assertThat(mFakeVibratorController.isLinkedToDeath).isFalse();
@@ -60,10 +61,10 @@ public class VibratorControllerHolderTest {
     }
 
     @Test
-    public void testBinderDied_withInvalidController_ignoresRequest()
-            throws RemoteException {
+    public void testBinderDied_withInvalidController_ignoresRequest() {
         mVibratorControllerHolder.setVibratorController(mFakeVibratorController);
-        FakeVibratorController imposterVibratorController = new FakeVibratorController();
+        FakeVibratorController imposterVibratorController =
+                new FakeVibratorController(mTestLooper.getLooper());
         mVibratorControllerHolder.binderDied(imposterVibratorController);
         assertThat(mFakeVibratorController.isLinkedToDeath).isTrue();
         assertThat(mVibratorControllerHolder.getVibratorController())

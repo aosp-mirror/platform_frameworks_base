@@ -25,6 +25,7 @@ import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
 import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.CallSuper;
@@ -44,6 +45,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -175,6 +177,9 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskAppeared: task=%d taskParent=%d rootTask=%d",
+                taskInfo.taskId, taskInfo.parentTaskId,
+                mRootTaskInfo != null ? mRootTaskInfo.taskId : -1);
         if (mRootTaskInfo == null) {
             mRootLeash = leash;
             mRootTaskInfo = taskInfo;
@@ -225,6 +230,9 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                     || !ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
                     || !ArrayUtils.contains(CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
                     taskInfo.getWindowingMode())) {
+                ProtoLog.d(WM_SHELL_SPLIT_SCREEN,
+                        "onTaskInfoChanged: task=%d no longer supports multiwindow",
+                        taskInfo.taskId);
                 // Leave split screen if the task no longer supports multi window or have
                 // uncontrolled task.
                 mCallbacks.onNoLongerSupportMultiWindow(taskInfo);
@@ -251,6 +259,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskVanished: task=%d", taskInfo.taskId);
         final int taskId = taskInfo.taskId;
         if (mRootTaskInfo.taskId == taskId) {
             mCallbacks.onRootTaskVanished();
@@ -333,6 +342,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     void addTask(ActivityManager.RunningTaskInfo task, WindowContainerTransaction wct) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "addTask: task=%d", task.taskId);
         // Clear overridden bounds and windowing mode to make sure the child task can inherit
         // windowing mode and bounds from split root.
         wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
@@ -342,6 +352,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     void reorderChild(int taskId, boolean onTop, WindowContainerTransaction wct) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "reorderChild: task=%d onTop=%b", taskId, onTop);
         if (!containsTask(taskId)) {
             return;
         }
@@ -357,6 +368,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     /** Collects all the current child tasks and prepares transaction to evict them to display. */
     void evictAllChildren(WindowContainerTransaction wct) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evicting all children");
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
             wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
@@ -367,11 +379,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
             if (taskId == taskInfo.taskId) continue;
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict other child: task=%d", taskId);
             wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
         }
     }
 
     void evictNonOpeningChildren(RemoteAnimationTarget[] apps, WindowContainerTransaction wct) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "evictNonOpeningChildren");
         final SparseArray<ActivityManager.RunningTaskInfo> toBeEvict = mChildrenTaskInfo.clone();
         for (int i = 0; i < apps.length; i++) {
             if (apps[i].mode == MODE_OPENING) {
@@ -380,6 +394,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
         for (int i = toBeEvict.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = toBeEvict.valueAt(i);
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict non-opening child: task=%d", taskInfo.taskId);
             wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
         }
     }
@@ -388,12 +403,15 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
             if (!taskInfo.isVisible) {
+                ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict invisible child: task=%d",
+                        taskInfo.taskId);
                 wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
             }
         }
     }
 
     void evictChildren(WindowContainerTransaction wct, int taskId) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict child: task=%d", taskId);
         final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.get(taskId);
         if (taskInfo != null) {
             wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);

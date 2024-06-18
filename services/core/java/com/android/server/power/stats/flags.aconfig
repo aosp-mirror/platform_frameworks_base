@@ -14,3 +14,18 @@ flag {
     description: "Feature flag for streamlined battery stats"
     bug: "285646152"
 }
+
+flag {
+    name: "disable_system_service_power_attr"
+    namespace: "backstage_power"
+    description: "Deprecation of system service power re-attribution"
+    bug: "311793616"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "streamlined_connectivity_battery_stats"
+    namespace: "backstage_power"
+    description: "Feature flag for streamlined connectivity battery stats"
+    bug: "323970018"
+}

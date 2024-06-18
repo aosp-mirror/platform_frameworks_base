@@ -3706,13 +3706,15 @@ final public class MediaCodec {
         }
 
         /**
-         * Set a harware graphic buffer to this queue request. Exactly one buffer must
+         * Set a hardware graphic buffer to this queue request. Exactly one buffer must
          * be set for a queue request before calling {@link #queue}.
          * <p>
          * Note: buffers should have format {@link HardwareBuffer#YCBCR_420_888},
          * a single layer, and an appropriate usage ({@link HardwareBuffer#USAGE_CPU_READ_OFTEN}
          * for software codecs and {@link HardwareBuffer#USAGE_VIDEO_ENCODE} for hardware)
-         * for codecs to recognize.  Codecs may throw exception if the buffer is not recognizable.
+         * for codecs to recognize. Format {@link ImageFormat#PRIVATE} together with
+         * usage {@link HardwareBuffer#USAGE_VIDEO_ENCODE} will also work for hardware codecs.
+         * Codecs may throw exception if the buffer is not recognizable.
          *
          * @param buffer The hardware graphic buffer object
          * @return this object

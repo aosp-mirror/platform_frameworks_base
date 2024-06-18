@@ -48,20 +48,25 @@ import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.usb.UsbServiceDumpProto;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FgThread;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
@@ -147,6 +152,8 @@ public class UsbService extends IUsbManager.Stub {
     private final UsbSettingsManager mSettingsManager;
     private final UsbPermissionManager mPermissionManager;
 
+    static final int PACKAGE_MONITOR_OPERATION_ID = 1;
+    static final int STRONG_AUTH_OPERATION_ID = 2;
     /**
      * The user id of the current user. There might be several profiles (with separate user ids)
      * per user.
@@ -155,6 +162,10 @@ public class UsbService extends IUsbManager.Stub {
     private @UserIdInt int mCurrentUserId;
 
     private final Object mLock = new Object();
+
+    // Key: USB port id
+    // Value: A set of UIDs of requesters who request disabling usb data
+    private final ArrayMap<String, ArraySet<Integer>> mUsbDisableRequesters = new ArrayMap<>();
 
     /**
      * @return the {@link UsbUserSettingsManager} for the given userId
@@ -260,6 +271,14 @@ public class UsbService extends IUsbManager.Stub {
     public void bootCompleted() {
         if (mDeviceManager != null) {
             mDeviceManager.bootCompleted();
+        }
+        if (android.hardware.usb.flags.Flags.enableUsbDataSignalStaking()) {
+            new PackageUninstallMonitor()
+                    .register(mContext, UserHandle.ALL, BackgroundThread.getHandler());
+
+            new LockPatternUtils(mContext)
+                    .registerStrongAuthTracker(new StrongAuthTracker(mContext,
+                            BackgroundThread.getHandler().getLooper()));
         }
     }
 
@@ -781,6 +800,20 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
+    @Override
+    public boolean isModeChangeSupported(String portId) {
+        isModeChangeSupported_enforcePermission();
+        Objects.requireNonNull(portId, "portId must not be null");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mPortManager != null ? mPortManager.isModeChangeSupported(portId) : false;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     @Override
     public void setPortRoles(String portId, int powerRole, int dataRole) {
         Objects.requireNonNull(portId, "portId must not be null");
@@ -859,6 +892,11 @@ public class UsbService extends IUsbManager.Stub {
         Objects.requireNonNull(callback, "enableUsbData: callback must not be null. opId:"
                 + operationId);
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        if (android.hardware.usb.flags.Flags.enableUsbDataSignalStaking()) {
+            if (!shouldUpdateUsbSignaling(portId, enable, Binder.getCallingUid())) return false;
+        }
+
         final long ident = Binder.clearCallingIdentity();
         boolean wait;
         try {
@@ -876,6 +914,31 @@ public class UsbService extends IUsbManager.Stub {
             Binder.restoreCallingIdentity(ident);
         }
         return wait;
+    }
+
+    /**
+     * If enable = true, exclude UID from update list.
+     * If enable = false, include UID in update list.
+     * Return false if enable = true and the list is empty (no updates).
+     * Return true otherwise (let downstream decide on updates).
+     */
+    private boolean shouldUpdateUsbSignaling(String portId, boolean enable, int uid) {
+        synchronized (mUsbDisableRequesters) {
+            if (!mUsbDisableRequesters.containsKey(portId)) {
+                mUsbDisableRequesters.put(portId, new ArraySet<>());
+            }
+
+            ArraySet<Integer> uidsOfDisableRequesters = mUsbDisableRequesters.get(portId);
+
+            if (enable) {
+                uidsOfDisableRequesters.remove(uid);
+                // re-enable USB port (return true) if there are no other disable requesters
+                return uidsOfDisableRequesters.isEmpty();
+            } else {
+                uidsOfDisableRequesters.add(uid);
+            }
+        }
+        return true;
     }
 
     @Override
@@ -1329,5 +1392,56 @@ public class UsbService extends IUsbManager.Stub {
 
     private static String removeLastChar(String value) {
         return value.substring(0, value.length() - 1);
+    }
+
+    /**
+     * Upon app removal, clear associated UIDs from the mUsbDisableRequesters list
+     * and re-enable USB data signaling if no remaining apps require USB disabling.
+     */
+    private class PackageUninstallMonitor extends PackageMonitor {
+        @Override
+        public void onUidRemoved(int uid) {
+            synchronized (mUsbDisableRequesters) {
+                for (String portId : mUsbDisableRequesters.keySet()) {
+                    ArraySet<Integer> disabledUid = mUsbDisableRequesters.get(portId);
+                    if (disabledUid != null) {
+                        disabledUid.remove(uid);
+                        if (disabledUid.isEmpty()) {
+                            enableUsbData(portId, true, PACKAGE_MONITOR_OPERATION_ID,
+                                    new IUsbOperationInternal.Default());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Implements a callback within StrongAuthTracker to disable USB data signaling
+     * when the device enters lockdown mode. This likely involves updating a state
+     * that controls USB data behavior.
+     */
+    private class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+        private boolean mLockdownModeStatus;
+
+        StrongAuthTracker(Context context, Looper looper) {
+            super(context, looper);
+        }
+
+        @Override
+        public synchronized void onStrongAuthRequiredChanged(int userId) {
+
+            boolean lockDownTriggeredByUser = (getStrongAuthForUser(userId)
+                    & STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN) != 0;
+            //if it goes into the same lockdown status, no change is needed
+            if (mLockdownModeStatus == lockDownTriggeredByUser) {
+                return;
+            }
+            mLockdownModeStatus = lockDownTriggeredByUser;
+            for (UsbPort port: mPortManager.getPorts()) {
+                enableUsbData(port.getId(), !lockDownTriggeredByUser, STRONG_AUTH_OPERATION_ID,
+                        new IUsbOperationInternal.Default());
+            }
+        }
     }
 }

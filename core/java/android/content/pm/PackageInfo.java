@@ -499,6 +499,16 @@ public class PackageInfo implements Parcelable {
      */
     public boolean isActiveApex;
 
+    /**
+     * If the package is an APEX package (i.e. the value of {@link #isApex}
+     * is true), this field is the package name of the APEX. If the package
+     * is one APK-in-APEX app, this field is the package name of the parent
+     * APEX that contains the app. If the package is not one of the above
+     * two cases, this field is {@code null}.
+     */
+    @Nullable
+    private String mApexPackageName;
+
     public PackageInfo() {
     }
 
@@ -533,6 +543,26 @@ public class PackageInfo implements Parcelable {
      */
     public void setArchiveTimeMillis(@CurrentTimeMillisLong long value) {
         mArchiveTimeMillis = value;
+    }
+
+    /**
+     * If the package is an APEX package (i.e. the value of {@link #isApex}
+     * is true), returns the package name of the APEX. If the package
+     * is one APK-in-APEX app, returns the package name of the parent
+     * APEX that contains the app. If the package is not one of the above
+     * two cases, returns {@code null}.
+     */
+    @Nullable
+    @FlaggedApi(android.content.pm.Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
+    public String getApexPackageName() {
+        return mApexPackageName;
+    }
+
+    /**
+     * @hide
+     */
+    public void setApexPackageName(@Nullable String apexPackageName) {
+        mApexPackageName = apexPackageName;
     }
 
     @Override
@@ -603,6 +633,12 @@ public class PackageInfo implements Parcelable {
         dest.writeBoolean(isApex);
         dest.writeBoolean(isActiveApex);
         dest.writeLong(mArchiveTimeMillis);
+        if (mApexPackageName != null) {
+            dest.writeInt(1);
+            dest.writeString8(mApexPackageName);
+        } else {
+            dest.writeInt(0);
+        }
         dest.restoreAllowSquashing(prevAllowSquashing);
     }
 
@@ -669,5 +705,9 @@ public class PackageInfo implements Parcelable {
         isApex = source.readBoolean();
         isActiveApex = source.readBoolean();
         mArchiveTimeMillis = source.readLong();
+        int hasApexPackageName = source.readInt();
+        if (hasApexPackageName != 0) {
+            mApexPackageName = source.readString8();
+        }
     }
 }

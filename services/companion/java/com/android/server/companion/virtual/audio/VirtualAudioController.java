@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
@@ -35,6 +36,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Counter;
 import com.android.server.companion.virtual.GenericWindowPolicyController;
 import com.android.server.companion.virtual.GenericWindowPolicyController.RunningAppsChangedListener;
 import com.android.server.companion.virtual.audio.AudioPlaybackDetector.AudioPlaybackCallback;
@@ -70,10 +72,16 @@ public final class VirtualAudioController implements AudioPlaybackCallback,
     @GuardedBy("mCallbackLock")
     private IAudioConfigChangedCallback mConfigChangedCallback;
 
-    public VirtualAudioController(Context context) {
+    public VirtualAudioController(Context context, AttributionSource attributionSource) {
         mContext = context;
         mAudioPlaybackDetector = new AudioPlaybackDetector(context);
         mAudioRecordingDetector = new AudioRecordingDetector(context);
+
+        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+            Counter.logIncrementWithUid(
+                    "virtual_devices.value_virtual_audio_created_count",
+                    attributionSource.getUid());
+        }
     }
 
     /**

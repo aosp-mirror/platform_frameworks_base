@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 
 import android.annotation.CallSuper;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -44,8 +45,10 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
+import android.media.tv.flags.Flags;
 import android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback;
 import android.net.Uri;
+import android.net.http.SslCertificate;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -112,7 +115,8 @@ public abstract class TvInteractiveAppService extends Service {
             PLAYBACK_COMMAND_TYPE_TUNE_PREV,
             PLAYBACK_COMMAND_TYPE_STOP,
             PLAYBACK_COMMAND_TYPE_SET_STREAM_VOLUME,
-            PLAYBACK_COMMAND_TYPE_SELECT_TRACK
+            PLAYBACK_COMMAND_TYPE_SELECT_TRACK,
+            PLAYBACK_COMMAND_TYPE_FREEZE
     })
     public @interface PlaybackCommandType {}
 
@@ -142,8 +146,11 @@ public abstract class TvInteractiveAppService extends Service {
      * Playback command type: select the given track.
      */
     public static final String PLAYBACK_COMMAND_TYPE_SELECT_TRACK = "select_track";
-
-
+    /**
+     * Playback command type: freeze the video playback on the current frame.
+     * @hide
+     */
+    public static final String PLAYBACK_COMMAND_TYPE_FREEZE = "freeze";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -730,6 +737,17 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Receives the requested Certificate
+         *
+         * @param host the host name of the SSL authentication server.
+         * @param port the port of the SSL authentication server. E.g., 443
+         * @param cert the SSL certificate received.
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onCertificate(@NonNull String host, int port, @NonNull SslCertificate cert) {
+        }
+
+        /**
          * Called when the application sends information of an error.
          *
          * @param errMsg the message of the error.
@@ -855,6 +873,9 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Called when the corresponding TV input selected to a track.
+         *
+         * If the track is deselected and no track is currently selected,
+         * trackId is an empty string.
          */
         public void onTrackSelected(@TvTrackInfo.Type int type, @NonNull String trackId) {
         }
@@ -876,6 +897,15 @@ public abstract class TvInteractiveAppService extends Service {
          */
         public void onVideoUnavailable(@TvInputManager.VideoUnavailableReason int reason) {
         }
+
+        /**
+         * Called when video becomes frozen or unfrozen. Audio playback will continue while video
+         * will be frozen to the last frame if {@code true}.
+         *
+         * @param isFrozen Whether or not the video is frozen.
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onVideoFreezeUpdated(boolean isFrozen) {}
 
         /**
          * Called when content is allowed.
@@ -930,6 +960,20 @@ public abstract class TvInteractiveAppService extends Service {
          */
         public void onTvMessage(@TvInputManager.TvMessageType int type,
                 @NonNull Bundle data) {
+        }
+
+        /**
+         * Called when the TV App sends the selected track info as a response to
+         * {@link #requestSelectedTrackInfo()}.
+         *
+         * <p> When a selected track changes as a result of a new selection,
+         * {@link #onTrackSelected(int, String)} should be used instead to communicate the specific
+         * track selection.
+         *
+         * @param tracks A list of {@link TvTrackInfo} that are currently selected
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onSelectedTrackInfo(@NonNull List<TvTrackInfo> tracks) {
         }
 
         @Override
@@ -1338,6 +1382,32 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests a list of the currently selected {@link TvTrackInfo} from the TV App.
+         *
+         * <p> Normally, track info cannot be synchronized until the channel has
+         * been changed. This is used when the session of the {@link TvInteractiveAppService}
+         * is newly created and the normal synchronization has not happened yet.
+         *
+         * <p> The track info will be returned in {@link #onSelectedTrackInfo(List)}
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        @CallSuper
+        public void requestSelectedTrackInfo() {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestSelectedTrackInfo");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onRequestSelectedTrackInfo();
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in requestSelectedTrackInfo", e);
+                }
+            });
+        }
+
+        /**
          * Requests starting of recording
          *
          * <p> This is used to request the active {@link android.media.tv.TvRecordingClient} to
@@ -1586,6 +1656,77 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests signing of the given data.
+         *
+         * <p>This is used when the corresponding server of the broadcast-independent interactive
+         * app requires signing during handshaking, and the interactive app service doesn't have
+         * the built-in private key. The private key is provided by the content providers and
+         * pre-built in the related app, such as TV app.
+         *
+         * @param signingId the ID to identify the request. When a result is received, this ID can
+         *                  be used to correlate the result with the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc. The name is from standards like
+         *                  FIPS PUB 186-4 and PKCS #1.
+         * @param host the host of the SSL client authentication server.
+         * @param port the port of the SSL client authentication server.
+         * @param data the original bytes to be signed.
+         *
+         * @see #onSigningResult(String, byte[])
+         * @see TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
+         * @see TvInteractiveAppView#BI_INTERACTIVE_APP_KEY_ALIAS
+         */
+        @CallSuper
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void requestSigning(@NonNull String signingId, @NonNull String algorithm,
+                @NonNull String host, int port, @NonNull byte[] data) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestSigning");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestSigning2(signingId, algorithm,
+                                    host, port, data);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestSigning", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Requests a SSL certificate for client validation.
+         *
+         * @param host the host name of the SSL authentication server.
+         * @param port the port of the SSL authentication server. E.g., 443
+         */
+        @CallSuper
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void requestCertificate(@NonNull String host, int port) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestCertificate");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestCertificate(host, port);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestCertificate", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Sends an advertisement request to be processed by the related TV input.
          *
          * @param request The advertisement request
@@ -1678,6 +1819,11 @@ public abstract class TvInteractiveAppService extends Service {
             onSigningResult(signingId, result);
         }
 
+        void sendCertificate(String host, int port, Bundle certBundle) {
+            SslCertificate cert = SslCertificate.restoreState(certBundle);
+            onCertificate(host, port, cert);
+        }
+
         void notifyError(String errMsg, Bundle params) {
             onError(errMsg, params);
         }
@@ -1708,6 +1854,10 @@ public abstract class TvInteractiveAppService extends Service {
             if (DEBUG) {
                 Log.d(TAG, "notifyTrackSelected (type=" + type + "trackId=" + trackId + ")");
             }
+            // TvInputService accepts a Null String, but onTrackSelected expects NonNull.
+            if (trackId == null) {
+                trackId = "";
+            }
             onTrackSelected(type, trackId);
         }
 
@@ -1730,6 +1880,13 @@ public abstract class TvInteractiveAppService extends Service {
                 Log.d(TAG, "notifyVideoAvailable (reason=" + reason + ")");
             }
             onVideoUnavailable(reason);
+        }
+
+        void notifyVideoFreezeUpdated(boolean isFrozen) {
+            if (DEBUG) {
+                Log.d(TAG, "notifyVideoFreezeUpdated (isFrozen=" + isFrozen + ")");
+            }
+            onVideoFreezeUpdated(isFrozen);
         }
 
         void notifyContentAllowed() {
@@ -1779,6 +1936,13 @@ public abstract class TvInteractiveAppService extends Service {
                 Log.d(TAG, "notifyTvMessage (type=" + type + ", data= " + data + ")");
             }
             onTvMessage(type, data);
+        }
+
+        void sendSelectedTrackInfo(List<TvTrackInfo> tracks) {
+            if (DEBUG) {
+                Log.d(TAG, "notifySelectedTrackInfo (tracks= " + tracks + ")");
+            }
+            onSelectedTrackInfo(tracks);
         }
 
         /**

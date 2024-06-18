@@ -222,7 +222,7 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
         // Ensure that the current activity supports assist data
         boolean isAssistDataAllowed = false;
         try {
-            isAssistDataAllowed = mActivityTaskManager.isAssistDataAllowedOnCurrentActivity();
+            isAssistDataAllowed = mActivityTaskManager.isAssistDataAllowed();
         } catch (RemoteException e) {
             // Should never happen
         }

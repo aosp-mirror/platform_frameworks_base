@@ -30,7 +30,9 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintSensorConfigurations;
 import java.util.List;
 
 /**
@@ -97,7 +99,7 @@ interface IFingerprintService {
     // Start fingerprint enrollment
     @EnforcePermission("MANAGE_FINGERPRINT")
     long enroll(IBinder token, in byte [] hardwareAuthToken, int userId, IFingerprintServiceReceiver receiver,
-            String opPackageName, int enrollReason);
+            String opPackageName, int enrollReason, in FingerprintEnrollOptions options);
 
     // Cancel enrollment in progress
     @EnforcePermission("MANAGE_FINGERPRINT")
@@ -172,6 +174,10 @@ interface IFingerprintService {
     // Removes a callback set by addClientActiveCallback
     @EnforcePermission("MANAGE_FINGERPRINT")
     void removeClientActiveCallback(IFingerprintClientActiveCallback callback);
+
+    //Register all available fingerprint sensors.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void registerAuthenticatorsLegacy(in FingerprintSensorConfigurations fingerprintSensorConfigurations);
 
     // Registers all HIDL and AIDL sensors. Only HIDL sensor properties need to be provided, because
     // AIDL sensor properties are retrieved directly from the available HALs. If no HIDL HALs exist,

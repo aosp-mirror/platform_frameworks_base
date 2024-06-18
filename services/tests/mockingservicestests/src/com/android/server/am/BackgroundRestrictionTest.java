@@ -113,6 +113,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.role.RoleManager;
 import android.app.usage.AppStandbyInfo;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -2439,7 +2440,8 @@ public final class BackgroundRestrictionTest {
         doReturn(granted ? PERMISSION_GRANTED : PERMISSION_DENIED)
                 .when(mPermissionManagerServiceInternal)
                 .checkPermission(
-                        packageName, perm, Context.DEVICE_ID_DEFAULT, UserHandle.getUserId(uid));
+                        packageName, perm, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
+                        UserHandle.getUserId(uid));
         try {
             doReturn(granted ? PERMISSION_GRANTED : PERMISSION_DENIED)
                     .when(mIActivityManager)

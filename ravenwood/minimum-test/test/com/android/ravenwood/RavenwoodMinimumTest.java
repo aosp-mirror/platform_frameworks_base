@@ -18,7 +18,7 @@ package com.android.ravenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class RavenwoodMinimumTest {
     @Rule
-    public RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
             .setProcessApp()
             .build();
 
@@ -40,6 +40,11 @@ public class RavenwoodMinimumTest {
     @Test
     @IgnoreUnderRavenwood
     public void testIgnored() {
+        throw new RuntimeException("Shouldn't be executed under ravenwood");
+    }
+
+    @Test
+    public void testIgnored$noRavenwood() {
         throw new RuntimeException("Shouldn't be executed under ravenwood");
     }
 }

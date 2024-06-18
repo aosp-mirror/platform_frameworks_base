@@ -51,6 +51,10 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
+import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_NO_TEXT_RECOGNIZED;
+import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_OTHER;
+import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
+import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -58,6 +62,7 @@ import android.annotation.AnyThread;
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -89,6 +94,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -97,6 +103,7 @@ import android.provider.Settings;
 import android.text.InputType;
 import android.text.Layout;
 import android.text.Spannable;
+import android.text.TextUtils;
 import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -123,10 +130,12 @@ import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.ConnectionlessHandwritingCallback;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
@@ -150,6 +159,7 @@ import android.window.WindowMetricsHelper;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethod;
@@ -173,6 +183,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalInt;
+import java.util.concurrent.Executor;
 
 /**
  * InputMethodService provides a standard implementation of an InputMethod,
@@ -388,6 +399,9 @@ public class InputMethodService extends AbstractInputMethodService {
     private long mStylusHwSessionsTimeout = STYLUS_HANDWRITING_IDLE_TIMEOUT_MS;
     private Runnable mStylusWindowIdleTimeoutRunnable;
     private long mStylusWindowIdleTimeoutForTest;
+    /** Tracks last {@link MotionEvent#getToolType(int)} used for {@link MotionEvent#ACTION_DOWN}.
+     **/
+    private int mLastUsedToolType;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -661,6 +675,12 @@ public class InputMethodService extends AbstractInputMethodService {
     /** Stylus handwriting Ink window. */
     private InkWindow mInkWindow;
 
+    private IConnectionlessHandwritingCallback mConnectionlessHandwritingCallback;
+    private boolean mIsConnectionlessHandwritingForDelegation;
+    // Holds the recognized text from a connectionless handwriting session which can later be
+    // committed by commitHandwritingDelegationTextIfAvailable().
+    private CharSequence mHandwritingDelegationText;
+
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
      * The original app window token is passed from client app window.
@@ -681,7 +701,13 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     private IBinder mCurHideInputToken;
 
-    /** The token tracking the current IME request or {@code null} otherwise. */
+    /**
+     * The token tracking the current IME request.
+     *
+     * <p> This exists as a workaround to changing the signatures of public methods. It will get
+     * set to a {@code non-null} value before every call that uses it, stored locally inside the
+     * callee, and immediately after reset to {@code null} from the callee.
+     */
     @Nullable
     private ImeTracker.Token mCurStatsToken;
 
@@ -887,14 +913,13 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-                IBinder hideInputToken, @Nullable ImeTracker.Token statsToken) {
+                IBinder hideInputToken, @NonNull ImeTracker.Token statsToken) {
             mSystemCallingHideSoftInput = true;
             mCurHideInputToken = hideInputToken;
             mCurStatsToken = statsToken;
             try {
                 hideSoftInput(flags, resultReceiver);
             } finally {
-                mCurStatsToken = null;
                 mCurHideInputToken = null;
                 mSystemCallingHideSoftInput = false;
             }
@@ -906,23 +931,33 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
-            ImeTracker.forLogging().onProgress(
-                    mCurStatsToken, ImeTracker.PHASE_IME_HIDE_SOFT_INPUT);
             if (DEBUG) Log.v(TAG, "hideSoftInput()");
+
+            final var statsToken = mCurStatsToken != null ? mCurStatsToken
+                    : createStatsToken(false /* show */,
+                            SoftInputShowHideReason.HIDE_SOFT_INPUT_LEGACY_DIRECT,
+                            ImeTracker.isFromUser(mRootView));
+            mCurStatsToken = null;
+
+            // TODO(b/148086656): Disallow IME developers from calling InputMethodImpl methods.
             if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R
                     && !mSystemCallingHideSoftInput) {
                 Log.e(TAG, "IME shouldn't call hideSoftInput on itself."
                         + " Use requestHideSelf(int) itself");
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_IME_HIDE_SOFT_INPUT);
                 return;
             }
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_HIDE_SOFT_INPUT);
+
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.hideSoftInput");
             ImeTracing.getInstance().triggerServiceDump(
                     "InputMethodService.InputMethodImpl#hideSoftInput", mDumper,
                     null /* icProto */);
             final boolean wasVisible = isInputViewShown();
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.hideSoftInput");
 
             mShowInputFlags = 0;
             mShowInputRequested = false;
+            mCurStatsToken = statsToken;
             hideWindow();
             final boolean isVisible = isInputViewShown();
             final boolean visibilityChanged = isVisible != wasVisible;
@@ -943,14 +978,13 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void showSoftInputWithToken(@InputMethod.ShowFlags int flags,
                 ResultReceiver resultReceiver, IBinder showInputToken,
-                @Nullable ImeTracker.Token statsToken) {
+                @NonNull ImeTracker.Token statsToken) {
             mSystemCallingShowSoftInput = true;
             mCurShowInputToken = showInputToken;
             mCurStatsToken = statsToken;
             try {
                 showSoftInput(flags, resultReceiver);
             } finally {
-                mCurStatsToken = null;
                 mCurShowInputToken = null;
                 mSystemCallingShowSoftInput = false;
             }
@@ -962,16 +996,23 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void showSoftInput(@InputMethod.ShowFlags int flags, ResultReceiver resultReceiver) {
-            ImeTracker.forLogging().onProgress(
-                    mCurStatsToken, ImeTracker.PHASE_IME_SHOW_SOFT_INPUT);
             if (DEBUG) Log.v(TAG, "showSoftInput()");
+
+            final var statsToken = mCurStatsToken != null ? mCurStatsToken
+                    : createStatsToken(true /* show */,
+                            SoftInputShowHideReason.SHOW_SOFT_INPUT_LEGACY_DIRECT,
+                            ImeTracker.isFromUser(mRootView));
+            mCurStatsToken = null;
+
             // TODO(b/148086656): Disallow IME developers from calling InputMethodImpl methods.
             if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R
                     && !mSystemCallingShowSoftInput) {
-                Log.e(TAG," IME shouldn't call showSoftInput on itself."
+                Log.e(TAG, "IME shouldn't call showSoftInput on itself."
                         + " Use requestShowSelf(int) itself");
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_IME_SHOW_SOFT_INPUT);
                 return;
             }
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_SHOW_SOFT_INPUT);
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showSoftInput");
             ImeTracing.getInstance().triggerServiceDump(
@@ -979,11 +1020,12 @@ public class InputMethodService extends AbstractInputMethodService {
                     null /* icProto */);
             final boolean wasVisible = isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
-                ImeTracker.forLogging().onProgress(mCurStatsToken,
+                ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE);
-                showWindow(true);
+                mCurStatsToken = statsToken;
+                showWindow(true /* showInput */);
             } else {
-                ImeTracker.forLogging().onFailed(mCurStatsToken,
+                ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE);
             }
             setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
@@ -1005,7 +1047,7 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @Override
         public void updateEditorToolType(@ToolType int toolType) {
-            onUpdateEditorToolType(toolType);
+            updateEditorToolTypeInternal(toolType);
         }
 
         /**
@@ -1013,7 +1055,10 @@ public class InputMethodService extends AbstractInputMethodService {
          * @hide
          */
         @Override
-        public void canStartStylusHandwriting(int requestId) {
+        public void canStartStylusHandwriting(int requestId,
+                @Nullable IConnectionlessHandwritingCallback connectionlessCallback,
+                @Nullable CursorAnchorInfo cursorAnchorInfo,
+                boolean isConnectionlessForDelegation) {
             if (DEBUG) Log.v(TAG, "canStartStylusHandwriting()");
             if (mHandwritingRequestId.isPresent()) {
                 Log.d(TAG, "There is an ongoing Handwriting session. ignoring.");
@@ -1030,7 +1075,24 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             // reset flag as it's not relevant after onStartStylusHandwriting().
             mOnPreparedStylusHwCalled = false;
-            if (onStartStylusHandwriting()) {
+            if (connectionlessCallback != null) {
+                if (onStartConnectionlessStylusHandwriting(
+                        InputType.TYPE_CLASS_TEXT, cursorAnchorInfo)) {
+                    mConnectionlessHandwritingCallback = connectionlessCallback;
+                    mIsConnectionlessHandwritingForDelegation = isConnectionlessForDelegation;
+                    cancelStylusWindowIdleTimeout();
+                    mPrivOps.onStylusHandwritingReady(requestId, Process.myPid());
+                } else {
+                    Log.i(TAG, "IME is not ready "
+                            + "or doesn't currently support connectionless handwriting");
+                    try {
+                        connectionlessCallback.onError(
+                                CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Couldn't send connectionless handwriting error result", e);
+                    }
+                }
+            } else if (onStartStylusHandwriting()) {
                 cancelStylusWindowIdleTimeout();
                 mPrivOps.onStylusHandwritingReady(requestId, Process.myPid());
             } else {
@@ -1082,6 +1144,24 @@ public class InputMethodService extends AbstractInputMethodService {
                 }
             };
             scheduleHandwritingSessionTimeout();
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void commitHandwritingDelegationTextIfAvailable() {
+            InputMethodService.this.commitHandwritingDelegationTextIfAvailable();
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void discardHandwritingDelegationText() {
+            InputMethodService.this.discardHandwritingDelegationText();
         }
 
         /**
@@ -1247,6 +1327,16 @@ public class InputMethodService extends AbstractInputMethodService {
                 rootView.getWidth(),
                 rootView.getHeight()));
         rootView.setSystemGestureExclusionRects(exclusionRects);
+    }
+
+    private void updateEditorToolTypeInternal(int toolType) {
+        if (Flags.useHandwritingListenerForTooltype()) {
+            mLastUsedToolType = toolType;
+            if (mInputEditorInfo != null) {
+                mInputEditorInfo.setInitialToolType(toolType);
+            }
+        }
+        onUpdateEditorToolType(toolType);
     }
 
     /**
@@ -1827,21 +1917,23 @@ public class InputMethodService extends AbstractInputMethodService {
             if (showingInput) {
                 // If we were last showing the soft keyboard, try to do so again.
                 if (dispatchOnShowInputRequested(showFlags, true)) {
-                    showWindow(true);
+                    showWindowWithToken(true /* showInput */,
+                            SoftInputShowHideReason.RESET_NEW_CONFIGURATION);
                     if (completions != null) {
                         mCurCompletions = completions;
                         onDisplayCompletions(completions);
                     }
                 } else {
-                    hideWindow();
+                    hideWindowWithToken(SoftInputShowHideReason.RESET_NEW_CONFIGURATION);
                 }
             } else if (mCandidatesVisibility == View.VISIBLE) {
                 // If the candidates are currently visible, make sure the
                 // window is shown for them.
-                showWindow(false);
+                showWindowWithToken(false /* showInput */,
+                        SoftInputShowHideReason.RESET_NEW_CONFIGURATION);
             } else {
                 // Otherwise hide the window.
-                hideWindow();
+                hideWindowWithToken(SoftInputShowHideReason.RESET_NEW_CONFIGURATION);
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
@@ -2300,13 +2392,15 @@ public class InputMethodService extends AbstractInputMethodService {
             // has not asked for the input view to be shown, then we need
             // to update whether the window is shown.
             if (shown) {
-                showWindow(false);
+                showWindowWithToken(false /* showInput */,
+                        SoftInputShowHideReason.UPDATE_CANDIDATES_VIEW_VISIBILITY);
             } else {
-                hideWindow();
+                hideWindowWithToken(
+                        SoftInputShowHideReason.UPDATE_CANDIDATES_VIEW_VISIBILITY);
             }
         }
     }
-    
+
     void updateCandidatesVisibility(boolean shown) {
         int vis = shown ? View.VISIBLE : getCandidatesHiddenVisibility();
         if (mCandidatesVisibility != vis) {
@@ -2567,6 +2661,32 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
+     * Called when an app requests to start a connectionless stylus handwriting session using one of
+     * {@link InputMethodManager#startConnectionlessStylusHandwriting(View, CursorAnchorInfo,
+     * Executor, ConnectionlessHandwritingCallback)}, {@link
+     * InputMethodManager#startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo,
+     * Executor, ConnectionlessHandwritingCallback)}, or {@link
+     * InputMethodManager#startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo,
+     * String, Executor, ConnectionlessHandwritingCallback)}.
+     *
+     * <p>A connectionless stylus handwriting session differs from a regular session in that an
+     * input connection is not used to communicate with a text editor. Instead, the recognised text
+     * is delivered when the IME finishes the connectionless session using {@link
+     * #finishConnectionlessStylusHandwriting(CharSequence)}.
+     *
+     * <p>If the IME can start the connectionless handwriting session, it should return {@code
+     * true}, ensure its inking views are attached to the {@link #getStylusHandwritingWindow()}, and
+     * handle stylus input received from {@link #onStylusHandwritingMotionEvent(MotionEvent)} on the
+     * {@link #getStylusHandwritingWindow()}.
+     */
+    @FlaggedApi(FLAG_CONNECTIONLESS_HANDWRITING)
+    public boolean onStartConnectionlessStylusHandwriting(
+            int inputType, @Nullable CursorAnchorInfo cursorAnchorInfo) {
+        // Intentionally empty
+        return false;
+    }
+
+    /**
      * Called after {@link #onStartStylusHandwriting()} returns {@code true} for every Stylus
      * {@link MotionEvent}.
      * By default, this method forwards all {@link MotionEvent}s to the
@@ -2633,16 +2753,19 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * Finish the current stylus handwriting session.
      *
-     * This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
+     * <p>This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
      * stylus {@code MotionEvent}s.
      *
-     * Note for IME developers: Call this method at any time to finish current handwriting session.
-     * Generally, this should be invoked after a short timeout, giving the user enough time
+     * <p>Note for IME developers: Call this method at any time to finish the current handwriting
+     * session. Generally, this should be invoked after a short timeout, giving the user enough time
      * to start the next stylus stroke, if any. By default, system will time-out after few seconds.
      * To override default timeout, use {@link #setStylusHandwritingSessionTimeout(Duration)}.
      *
-     * Handwriting session will be finished by framework on next {@link #onFinishInput()}.
+     * <p>Handwriting session will be finished by framework on next {@link #onFinishInput()}.
      */
+    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
+    // <p>Connectionless handwriting sessions should be finished using {@link
+    // #finishConnectionlessStylusHandwriting(CharSequence)}.
     public final void finishStylusHandwriting() {
         if (DEBUG) Log.v(TAG, "finishStylusHandwriting()");
         if (mInkWindow == null) {
@@ -2663,9 +2786,68 @@ public class InputMethodService extends AbstractInputMethodService {
         mHandwritingEventReceiver = null;
         mInkWindow.hide(false /* remove */);
 
+        if (mConnectionlessHandwritingCallback != null) {
+            Log.i(TAG, "Connectionless handwriting session did not complete successfully");
+            try {
+                mConnectionlessHandwritingCallback.onError(CONNECTIONLESS_HANDWRITING_ERROR_OTHER);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Couldn't send connectionless handwriting error result", e);
+            }
+            mConnectionlessHandwritingCallback = null;
+        }
+        mIsConnectionlessHandwritingForDelegation = false;
+
         mPrivOps.resetStylusHandwriting(requestId);
         mOnPreparedStylusHwCalled = false;
         onFinishStylusHandwriting();
+    }
+
+    /**
+     * Finishes the current connectionless stylus handwriting session and delivers the result.
+     *
+     * <p>This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
+     * stylus {@code MotionEvent}s.
+     *
+     * <p>Note for IME developers: Call this method at any time to finish the current handwriting
+     * session. Generally, this should be invoked after a short timeout, giving the user enough time
+     * to start the next stylus stroke, if any. By default, system will time-out after few seconds.
+     * To override default timeout, use {@link #setStylusHandwritingSessionTimeout(Duration)}.
+     */
+    @FlaggedApi(FLAG_CONNECTIONLESS_HANDWRITING)
+    public final void finishConnectionlessStylusHandwriting(@Nullable CharSequence text) {
+        if (DEBUG) Log.v(TAG, "finishConnectionlessStylusHandwriting()");
+        if (mConnectionlessHandwritingCallback != null) {
+            try {
+                if (!TextUtils.isEmpty(text)) {
+                    mConnectionlessHandwritingCallback.onResult(text);
+                    if (mIsConnectionlessHandwritingForDelegation) {
+                        mHandwritingDelegationText = text;
+                    }
+                } else {
+                    mConnectionlessHandwritingCallback.onError(
+                            CONNECTIONLESS_HANDWRITING_ERROR_NO_TEXT_RECOGNIZED);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Couldn't send connectionless handwriting result", e);
+            }
+            mConnectionlessHandwritingCallback = null;
+        }
+        finishStylusHandwriting();
+    }
+
+    private void commitHandwritingDelegationTextIfAvailable() {
+        if (!TextUtils.isEmpty(mHandwritingDelegationText)) {
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                // Place cursor after inserted text.
+                ic.commitText(mHandwritingDelegationText, /* newCursorPosition= */ 1);
+            }
+        }
+        mHandwritingDelegationText = null;
+    }
+
+    private void discardHandwritingDelegationText() {
+        mHandwritingDelegationText = null;
     }
 
     /**
@@ -2853,6 +3035,19 @@ public class InputMethodService extends AbstractInputMethodService {
         return result;
     }
 
+    /**
+     * Utility function that creates an IME request tracking token before
+     * calling {@link #showWindow}.
+     *
+     * @param showInput whether the input window should be shown.
+     * @param reason the reason why the IME request was created.
+     */
+    private void showWindowWithToken(boolean showInput, @SoftInputShowHideReason int reason) {
+        mCurStatsToken = createStatsToken(true /* show */, reason,
+                ImeTracker.isFromUser(mRootView));
+        showWindow(showInput);
+    }
+
     public void showWindow(boolean showInput) {
         if (DEBUG) Log.v(TAG, "Showing window: showInput=" + showInput
                 + " mShowInputRequested=" + mShowInputRequested
@@ -2862,10 +3057,19 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " mInputStarted=" + mInputStarted
                 + " mShowInputFlags=" + mShowInputFlags);
 
+        final var statsToken = mCurStatsToken != null ? mCurStatsToken
+                : createStatsToken(true /* show */,
+                        SoftInputShowHideReason.SHOW_WINDOW_LEGACY_DIRECT,
+                        ImeTracker.isFromUser(mRootView));
+        mCurStatsToken = null;
+
         if (mInShowWindow) {
             Log.w(TAG, "Re-entrance in to showWindow");
+            ImeTracker.forLogging().onCancelled(statsToken, ImeTracker.PHASE_IME_SHOW_WINDOW);
             return;
         }
+
+        ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_SHOW_WINDOW);
 
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#showWindow", mDumper,
                 null /* icProto */);
@@ -2890,7 +3094,7 @@ public class InputMethodService extends AbstractInputMethodService {
         if (DEBUG) Log.v(TAG, "showWindow: draw decorView!");
         mWindow.show();
         mDecorViewWasVisible = true;
-        applyVisibilityInInsetsConsumerIfNecessary(true);
+        applyVisibilityInInsetsConsumerIfNecessary(true /* setVisible */, statsToken);
         cancelImeSurfaceRemoval();
         mInShowWindow = false;
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -2981,13 +3185,15 @@ public class InputMethodService extends AbstractInputMethodService {
      * Applies the IME visibility in {@link android.view.ImeInsetsSourceConsumer}.
      *
      * @param setVisible {@code true} to make it visible, false to hide it.
+     * @param statsToken the token tracking the current IME request.
      */
-    private void applyVisibilityInInsetsConsumerIfNecessary(boolean setVisible) {
+    private void applyVisibilityInInsetsConsumerIfNecessary(boolean setVisible,
+            @NonNull ImeTracker.Token statsToken) {
         ImeTracing.getInstance().triggerServiceDump(
                 "InputMethodService#applyVisibilityInInsetsConsumerIfNecessary", mDumper,
                 null /* icProto */);
         mPrivOps.applyImeVisibilityAsync(setVisible
-                ? mCurShowInputToken : mCurHideInputToken, setVisible, mCurStatsToken);
+                ? mCurShowInputToken : mCurHideInputToken, setVisible, statsToken);
     }
 
     private void finishViews(boolean finishingInput) {
@@ -3003,12 +3209,35 @@ public class InputMethodService extends AbstractInputMethodService {
         mCandidatesViewStarted = false;
     }
 
+    /**
+     * Utility function that creates an IME request tracking token before
+     * calling {@link #hideWindow}.
+     *
+     * @param reason the reason why the IME request was created.
+     */
+    private void hideWindowWithToken(@SoftInputShowHideReason int reason) {
+        // TODO(b/303041796): this should be handled by ImeTracker.isFromUser after fixing it
+        //  to work with onClickListeners
+        final boolean isFromUser = ImeTracker.isFromUser(mRootView)
+                || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY;
+        mCurStatsToken = createStatsToken(false /* show */, reason, isFromUser);
+        hideWindow();
+    }
+
     public void hideWindow() {
         if (DEBUG) Log.v(TAG, "CALL: hideWindow");
+
+        final var statsToken = mCurStatsToken != null ? mCurStatsToken
+                : createStatsToken(false /* show */,
+                        SoftInputShowHideReason.HIDE_WINDOW_LEGACY_DIRECT,
+                        ImeTracker.isFromUser(mRootView));
+        mCurStatsToken = null;
+
+        ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_HIDE_WINDOW);
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", mDumper,
                 null /* icProto */);
         setImeWindowStatus(0, mBackDisposition);
-        applyVisibilityInInsetsConsumerIfNecessary(false);
+        applyVisibilityInInsetsConsumerIfNecessary(false /* setVisible */, statsToken);
         mWindowVisible = false;
         finishViews(false /* finishingInput */);
         if (mDecorViewVisible) {
@@ -3110,6 +3339,9 @@ public class InputMethodService extends AbstractInputMethodService {
                 null /* icProto */);
         mInputStarted = true;
         mStartedInputConnection = ic;
+        if (Flags.useHandwritingListenerForTooltype()) {
+            editorInfo.setInitialToolType(mLastUsedToolType);
+        }
         mInputEditorInfo = editorInfo;
         initialize();
         mInlineSuggestionSessionController.notifyOnStartInput(
@@ -3281,9 +3513,14 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private void requestHideSelf(@InputMethodManager.HideFlags int flags,
             @SoftInputShowHideReason int reason) {
+        // TODO(b/303041796): this should be handled by ImeTracker.isFromUser after fixing it
+        //  to work with onClickListeners
+        final boolean isFromUser = ImeTracker.isFromUser(mRootView)
+                || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY;
+        final var statsToken = createStatsToken(false /* show */, reason, isFromUser);
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestHideSelf", mDumper,
                 null /* icProto */);
-        mPrivOps.hideMySoftInput(flags, reason);
+        mPrivOps.hideMySoftInput(statsToken, flags, reason);
     }
 
     /**
@@ -3291,9 +3528,16 @@ public class InputMethodService extends AbstractInputMethodService {
      * interact with it.
      */
     public final void requestShowSelf(@InputMethodManager.ShowFlags int flags) {
+        requestShowSelf(flags, SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME);
+    }
+
+    private void requestShowSelf(@InputMethodManager.ShowFlags int flags,
+            @SoftInputShowHideReason int reason) {
+        final var statsToken = createStatsToken(true /* show */, reason,
+                ImeTracker.isFromUser(mRootView));
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestShowSelf", mDumper,
                 null /* icProto */);
-        mPrivOps.showMySoftInput(flags);
+        mPrivOps.showMySoftInput(statsToken, flags, reason);
     }
 
     private boolean handleBack(boolean doIt) {
@@ -3313,7 +3557,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 // If we have the window visible for some other reason --
                 // most likely to show candidates -- then just get rid
                 // of it.  This really shouldn't happen, but just in case...
-                if (doIt) hideWindow();
+                if (doIt) hideWindowWithToken(SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY);
             }
             return true;
         }
@@ -3354,6 +3598,10 @@ public class InputMethodService extends AbstractInputMethodService {
      *         had not seen the event at all.
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (Flags.useHandwritingListenerForTooltype()) {
+            // any KeyEvent keyDown should reset last toolType.
+            updateEditorToolTypeInternal(MotionEvent.TOOL_TYPE_UNKNOWN);
+        }
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
             final ExtractEditText eet = getExtractEditTextIfVisible();
             if (eet != null && eet.handleBackInTextActionModeIfNeeded(event)) {
@@ -3464,10 +3712,11 @@ public class InputMethodService extends AbstractInputMethodService {
             @InputMethodManager.HideFlags int hideFlags) {
         if (DEBUG) Log.v(TAG, "toggleSoftInput()");
         if (isInputViewShown()) {
-            requestHideSelf(
-                    hideFlags, SoftInputShowHideReason.HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT);
+            requestHideSelf(hideFlags,
+                    SoftInputShowHideReason.HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT);
         } else {
-            requestShowSelf(showFlags);
+            requestShowSelf(showFlags,
+                    SoftInputShowHideReason.SHOW_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT);
         }
     }
     
@@ -4106,6 +4355,20 @@ public class InputMethodService extends AbstractInputMethodService {
     private int mapToImeWindowStatus() {
         return IME_ACTIVE
                 | (isInputViewShown() ? IME_VISIBLE : 0);
+    }
+
+    /**
+     * Creates an IME request tracking token.
+     *
+     * @param show whether this is a show or a hide request.
+     * @param reason the reason why the IME request was created.
+     * @param isFromUser whether this request was created directly from user interaction.
+     */
+    @NonNull
+    private ImeTracker.Token createStatsToken(boolean show, @SoftInputShowHideReason int reason,
+            boolean isFromUser) {
+        return ImeTracker.forLogging().onStart(show ? ImeTracker.TYPE_SHOW : ImeTracker.TYPE_HIDE,
+                ImeTracker.ORIGIN_IME, reason, isFromUser);
     }
 
     /**

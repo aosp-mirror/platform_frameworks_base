@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
@@ -33,7 +34,6 @@ import com.android.compose.animation.scene.TestScenes
 import com.android.compose.animation.scene.inScene
 import com.android.compose.animation.scene.testTransition
 import com.android.compose.test.assertSizeIsEqualTo
-import com.android.compose.test.onEach
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,28 +63,34 @@ class SharedElementTest {
                 onElement(TestElements.Foo).assertSizeIsEqualTo(20.dp, 80.dp)
             }
             at(0) {
-                onSharedElement(TestElements.Foo).onEach {
-                    assertPositionInRootIsEqualTo(10.dp, 50.dp)
-                    assertSizeIsEqualTo(20.dp, 80.dp)
-                }
+                // Shared elements are by default placed and drawn only in the scene with highest
+                // zIndex.
+                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
+
+                onElement(TestElements.Foo, TestScenes.SceneB)
+                    .assertPositionInRootIsEqualTo(10.dp, 50.dp)
+                    .assertSizeIsEqualTo(20.dp, 80.dp)
             }
             at(16) {
-                onSharedElement(TestElements.Foo).onEach {
-                    assertPositionInRootIsEqualTo(20.dp, 55.dp)
-                    assertSizeIsEqualTo(17.5.dp, 70.dp)
-                }
+                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
+
+                onElement(TestElements.Foo, TestScenes.SceneB)
+                    .assertPositionInRootIsEqualTo(20.dp, 55.dp)
+                    .assertSizeIsEqualTo(17.5.dp, 70.dp)
             }
             at(32) {
-                onSharedElement(TestElements.Foo).onEach {
-                    assertPositionInRootIsEqualTo(30.dp, 60.dp)
-                    assertSizeIsEqualTo(15.dp, 60.dp)
-                }
+                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
+
+                onElement(TestElements.Foo, TestScenes.SceneB)
+                    .assertPositionInRootIsEqualTo(30.dp, 60.dp)
+                    .assertSizeIsEqualTo(15.dp, 60.dp)
             }
             at(48) {
-                onSharedElement(TestElements.Foo).onEach {
-                    assertPositionInRootIsEqualTo(40.dp, 65.dp)
-                    assertSizeIsEqualTo(12.5.dp, 50.dp)
-                }
+                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
+
+                onElement(TestElements.Foo, TestScenes.SceneB)
+                    .assertPositionInRootIsEqualTo(40.dp, 65.dp)
+                    .assertSizeIsEqualTo(12.5.dp, 50.dp)
             }
             after {
                 onElement(TestElements.Foo).assertPositionInRootIsEqualTo(50.dp, 70.dp)

@@ -29,5 +29,5 @@ enum class SliderEventType {
     /* The slider has stopped tracking touch events. */
     STOPPED_TRACKING_TOUCH,
     /* The external (not touch) stimulus that was modifying the slider progress has stopped. */
-    EXTERNAL_STIMULUS_RELEASE,
+    ARROW_UP,
 }

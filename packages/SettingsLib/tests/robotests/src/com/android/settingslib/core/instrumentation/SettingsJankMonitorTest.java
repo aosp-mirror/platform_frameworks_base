@@ -27,9 +27,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceGroupAdapter;
 import androidx.preference.SwitchPreference;
 import androidx.recyclerview.widget.RecyclerView;

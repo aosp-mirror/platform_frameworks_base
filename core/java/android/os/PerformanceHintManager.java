@@ -149,13 +149,48 @@ public final class PerformanceHintManager {
         @TestApi
         public static final int CPU_LOAD_RESUME = 3;
 
+        /**
+         * This hint indicates an increase in GPU workload intensity. It means that
+         * this hint session needs extra GPU resources to meet the target duration.
+         * This hint must be sent before reporting the actual duration to the session.
+         *
+         * @hide
+         */
+        @TestApi
+        @FlaggedApi(Flags.FLAG_ADPF_GPU_REPORT_ACTUAL_WORK_DURATION)
+        public static final int GPU_LOAD_UP = 5;
+
+        /**
+         * This hint indicates a decrease in GPU workload intensity. It means that
+         * this hint session can reduce GPU resources and still meet the target duration.
+         *
+         * @hide
+         */
+        @TestApi
+        @FlaggedApi(Flags.FLAG_ADPF_GPU_REPORT_ACTUAL_WORK_DURATION)
+        public static final int GPU_LOAD_DOWN = 6;
+
+        /**
+        * This hint indicates an upcoming GPU workload that is completely changed and
+        * unknown. It means that the hint session should reset GPU resources to a known
+        * baseline to prepare for an arbitrary load, and must wake up if inactive.
+         *
+         * @hide
+         */
+        @TestApi
+        @FlaggedApi(Flags.FLAG_ADPF_GPU_REPORT_ACTUAL_WORK_DURATION)
+        public static final int GPU_LOAD_RESET = 7;
+
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(prefix = {"CPU_LOAD_"}, value = {
+        @IntDef(prefix = {"CPU_LOAD_", "GPU_LOAD_"}, value = {
             CPU_LOAD_UP,
             CPU_LOAD_DOWN,
             CPU_LOAD_RESET,
-            CPU_LOAD_RESUME
+            CPU_LOAD_RESUME,
+            GPU_LOAD_UP,
+            GPU_LOAD_DOWN,
+            GPU_LOAD_RESET
         })
         public @interface Hint {}
 
@@ -170,7 +205,7 @@ public final class PerformanceHintManager {
         }
 
         /**
-         * Updates this session's target duration for each cycle of work.
+         * Updates this session's target total duration for each cycle of work.
          *
          * @param targetDurationNanos the new desired duration in nanoseconds
          */
@@ -278,25 +313,33 @@ public final class PerformanceHintManager {
          * close to the target duration.
          *
          * @param workDuration the work duration of each component.
-         * @throws IllegalArgumentException if work period start timestamp is not positive, or
-         *         actual total duration is not positive, or actual CPU duration is not positive,
-         *         or actual GPU duration is negative.
+         * @throws IllegalArgumentException if
+         * the work period start timestamp or the total duration are less than or equal to zero,
+         * if either the actual CPU duration or actual GPU duration is less than zero,
+         * or if both the CPU and GPU durations are zero.
          */
         @FlaggedApi(Flags.FLAG_ADPF_GPU_REPORT_ACTUAL_WORK_DURATION)
         public void reportActualWorkDuration(@NonNull WorkDuration workDuration) {
             if (workDuration.mWorkPeriodStartTimestampNanos <= 0) {
                 throw new IllegalArgumentException(
-                    "the work period start timestamp should be positive.");
+                    "the work period start timestamp should be greater than zero.");
             }
             if (workDuration.mActualTotalDurationNanos <= 0) {
-                throw new IllegalArgumentException("the actual total duration should be positive.");
+                throw new IllegalArgumentException(
+                    "the actual total duration should be greater than zero.");
             }
-            if (workDuration.mActualCpuDurationNanos <= 0) {
-                throw new IllegalArgumentException("the actual CPU duration should be positive.");
+            if (workDuration.mActualCpuDurationNanos < 0) {
+                throw new IllegalArgumentException(
+                    "the actual CPU duration should be greater than or equal to zero.");
             }
             if (workDuration.mActualGpuDurationNanos < 0) {
                 throw new IllegalArgumentException(
-                    "the actual GPU duration should be non negative.");
+                    "the actual GPU duration should be greater than or equal to zero.");
+            }
+            if (workDuration.mActualCpuDurationNanos + workDuration.mActualGpuDurationNanos <= 0) {
+                throw new IllegalArgumentException(
+                    "either the actual CPU duration or the actual GPU duration should be greater"
+                    + "than zero.");
             }
             nativeReportActualWorkDuration(mNativeSessionPtr,
                     workDuration.mWorkPeriodStartTimestampNanos,

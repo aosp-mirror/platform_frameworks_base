@@ -22,6 +22,8 @@ import android.os.Binder
 import android.os.IBinder
 import android.os.UserHandle
 import android.view.ContentRecordingSession
+import android.window.WindowContainerToken
+import com.android.systemui.mediaprojection.MediaProjectionServiceHelper
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -29,6 +31,7 @@ import com.android.systemui.util.mockito.whenever
 class FakeMediaProjectionManager {
 
     val mediaProjectionManager = mock<MediaProjectionManager>()
+    val helper = mock<MediaProjectionServiceHelper>()
 
     private val callbacks = mutableListOf<MediaProjectionManager.Callback>()
 
@@ -40,6 +43,11 @@ class FakeMediaProjectionManager {
         whenever(mediaProjectionManager.removeCallback(any())).thenAnswer {
             callbacks -= it.arguments[0] as MediaProjectionManager.Callback
             return@thenAnswer Unit
+        }
+        whenever(helper.updateTaskRecordingSession(any())).thenAnswer {
+            val token = it.arguments[0] as WindowContainerToken
+            dispatchOnSessionSet(session = createSingleTaskSession(token.asBinder()))
+            return@thenAnswer true
         }
     }
 
@@ -61,11 +69,17 @@ class FakeMediaProjectionManager {
     companion object {
         fun createDisplaySession(): ContentRecordingSession =
             ContentRecordingSession.createDisplaySession(/* displayToMirror = */ 123)
+
         fun createSingleTaskSession(token: IBinder = Binder()): ContentRecordingSession =
             ContentRecordingSession.createTaskSession(token)
 
         private const val DEFAULT_PACKAGE_NAME = "com.media.projection.test"
         private val DEFAULT_USER_HANDLE = UserHandle.getUserHandleForUid(UserHandle.myUserId())
-        private val DEFAULT_INFO = MediaProjectionInfo(DEFAULT_PACKAGE_NAME, DEFAULT_USER_HANDLE)
+        private val DEFAULT_INFO =
+            MediaProjectionInfo(
+                DEFAULT_PACKAGE_NAME,
+                DEFAULT_USER_HANDLE,
+                /* launchCookie = */ null
+            )
     }
 }

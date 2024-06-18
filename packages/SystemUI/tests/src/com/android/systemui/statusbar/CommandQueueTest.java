@@ -25,6 +25,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
@@ -32,11 +33,14 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.view.KeyEvent;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
+import android.view.accessibility.Flags;
 
 import androidx.test.filters.SmallTest;
 
@@ -365,11 +369,47 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAddQsTile() {
+    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void addQsTile_withA11yQsShortcutFlagOff() {
         ComponentName c = new ComponentName("testpkg", "testcls");
+
         mCommandQueue.addQsTile(c);
         waitForIdleSync();
+
         verify(mCallbacks).addQsTile(eq(c));
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void addQsTileToFrontOrEnd_withA11yQsShortcutFlagOff_doNothing() {
+        ComponentName c = new ComponentName("testpkg", "testcls");
+
+        mCommandQueue.addQsTileToFrontOrEnd(c, true);
+        waitForIdleSync();
+
+        verifyZeroInteractions(mCallbacks);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void addQsTile_withA11yQsShortcutFlagOn() {
+        ComponentName c = new ComponentName("testpkg", "testcls");
+
+        mCommandQueue.addQsTile(c);
+        waitForIdleSync();
+
+        verify(mCallbacks).addQsTileToFrontOrEnd(eq(c), eq(false));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void addQsTileAtTheEnd_withA11yQsShortcutFlagOn() {
+        ComponentName c = new ComponentName("testpkg", "testcls");
+
+        mCommandQueue.addQsTileToFrontOrEnd(c, true);
+        waitForIdleSync();
+
+        verify(mCallbacks).addQsTileToFrontOrEnd(eq(c), eq(true));
     }
 
     @Test

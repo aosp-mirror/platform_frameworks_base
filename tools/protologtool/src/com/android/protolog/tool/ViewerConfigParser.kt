@@ -63,12 +63,12 @@ open class ViewerConfigParser {
         return GroupEntry(tag)
     }
 
-    fun parseMessages(jsonReader: JsonReader): Map<Int, MessageEntry> {
-        val config: MutableMap<Int, MessageEntry> = mutableMapOf()
+    fun parseMessages(jsonReader: JsonReader): Map<Long, MessageEntry> {
+        val config: MutableMap<Long, MessageEntry> = mutableMapOf()
         jsonReader.beginObject()
         while (jsonReader.hasNext()) {
             val key = jsonReader.nextName()
-            val hash = key.toIntOrNull()
+            val hash = key.toLongOrNull()
                     ?: throw InvalidViewerConfigException("Invalid key in messages viewer config")
             config[hash] = parseMessage(jsonReader)
         }
@@ -89,8 +89,8 @@ open class ViewerConfigParser {
 
     data class ConfigEntry(val messageString: String, val level: String, val tag: String)
 
-    open fun parseConfig(jsonReader: JsonReader): Map<Int, ConfigEntry> {
-        var messages: Map<Int, MessageEntry>? = null
+    open fun parseConfig(jsonReader: JsonReader): Map<Long, ConfigEntry> {
+        var messages: Map<Long, MessageEntry>? = null
         var groups: Map<String, GroupEntry>? = null
         var version: String? = null
 

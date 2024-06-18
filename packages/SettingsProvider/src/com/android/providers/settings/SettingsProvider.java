@@ -406,7 +406,7 @@ public class SettingsProvider extends ContentProvider {
                     Process.THREAD_PRIORITY_BACKGROUND);
             mHandlerThread.start();
             mHandler = new Handler(mHandlerThread.getLooper());
-            mSettingsRegistry = new SettingsRegistry();
+            mSettingsRegistry = new SettingsRegistry(mHandlerThread.getLooper());
         }
         SettingsState.cacheSystemPackageNamesAndSystemSignature(getContext());
         synchronized (mLock) {
@@ -1348,6 +1348,26 @@ public class SettingsProvider extends ContentProvider {
 
             final int nameCount = names.size();
             HashMap<String, String> flagsToValues = new HashMap<>(names.size());
+
+            if (Flags.loadAconfigDefaults()) {
+                Map<String, Map<String, String>> allDefaults =
+                        settingsState.getAconfigDefaultValues();
+
+                if (allDefaults != null) {
+                    if (prefix != null) {
+                        String namespace = prefix.substring(0, prefix.length() - 1);
+
+                        Map<String, String> namespaceDefaults = allDefaults.get(namespace);
+                        if (namespaceDefaults != null) {
+                            flagsToValues.putAll(namespaceDefaults);
+                        }
+                    } else {
+                        for (Map<String, String> namespaceDefaults : allDefaults.values()) {
+                            flagsToValues.putAll(namespaceDefaults);
+                        }
+                    }
+                }
+            }
 
             for (int i = 0; i < nameCount; i++) {
                 String name = names.get(i);
@@ -2876,8 +2896,8 @@ public class SettingsProvider extends ContentProvider {
 
         private String mSettingsCreationBuildId;
 
-        public SettingsRegistry() {
-            mHandler = new MyHandler(getContext().getMainLooper());
+        SettingsRegistry(Looper looper) {
+            mHandler = new MyHandler(looper);
             mGenerationRegistry = new GenerationRegistry(UserManager.getMaxSupportedUsers());
             mBackupManager = new BackupManager(getContext());
         }
@@ -3792,7 +3812,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 224;
+            private static final int SETTINGS_VERSION = 226;
 
             private final int mUserId;
 
@@ -5984,6 +6004,35 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 224;
                 }
 
+                // Version 224: Update the default font scale depending on the
+                //              R.dimen.def_device_font_scale configuration property.
+                if (currentVersion == 224) {
+                    handleDefaultFontScale(getSystemSettingsLocked(userId));
+                    currentVersion = 225;
+                }
+
+                // Version 225: Set the System#KEYBOARD_VIBRATION_ENABLED based on touch
+                // feedback enabled state.
+                if (currentVersion == 225) {
+                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
+                    final Setting touchFeedbackSettings = systemSettings
+                            .getSettingLocked(Settings.System.HAPTIC_FEEDBACK_ENABLED);
+                    final Setting keyboardVibrationSettings = systemSettings
+                            .getSettingLocked(Settings.System.KEYBOARD_VIBRATION_ENABLED);
+                    if (keyboardVibrationSettings.isNull()) {
+                        if (!touchFeedbackSettings.isNull()) {
+                            // Use touch feedback settings.
+                            systemSettings.insertSettingOverrideableByRestoreLocked(
+                                    Settings.System.KEYBOARD_VIBRATION_ENABLED,
+                                    touchFeedbackSettings.getValue(),
+                                    touchFeedbackSettings.getTag(),
+                                    touchFeedbackSettings.isDefaultFromSystem(),
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 226;
+                }
+
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {
@@ -5999,6 +6048,32 @@ public class SettingsProvider extends ContentProvider {
 
                 // Return the current version.
                 return currentVersion;
+            }
+
+            @SuppressWarnings("GuardedBy")
+            @GuardedBy("mLock")
+            private void handleDefaultFontScale(@NonNull SettingsState systemSettings) {
+                final float defaultFontScale = getContext().getResources()
+                        .getFloat(R.dimen.def_device_font_scale);
+                // Persist the value for future use (e.g. Reset Settings option)
+                systemSettings.insertSettingLocked(
+                        Settings.System.DEFAULT_DEVICE_FONT_SCALE,
+                        String.valueOf(defaultFontScale),
+                        /* tag= */ null,
+                        /* makeDefault= */ false,
+                        SettingsState.SYSTEM_PACKAGE_NAME);
+                // We verify if there is a pre existing value for font_scale.
+                final Setting existingFontScale = systemSettings.getSettingLocked(
+                        Settings.System.FONT_SCALE);
+                if (existingFontScale == null || existingFontScale.isNull()) {
+                    // Set the default value only if it didn't exist before
+                    systemSettings.insertSettingLocked(
+                            Settings.System.FONT_SCALE,
+                            String.valueOf(defaultFontScale),
+                            /* tag= */ null,
+                            /* makeDefault= */ false,
+                            SettingsState.SYSTEM_PACKAGE_NAME);
+                }
             }
 
             @GuardedBy("mLock")

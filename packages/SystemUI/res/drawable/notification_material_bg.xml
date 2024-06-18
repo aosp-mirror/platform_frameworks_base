@@ -25,7 +25,7 @@
     </item>
     <item>
         <shape>
-            <solid android:color="@color/notification_overlay_color" />
+            <solid android:color="@color/notification_state_color_default" />
         </shape>
     </item>
 </layer-list>

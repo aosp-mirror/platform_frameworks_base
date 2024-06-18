@@ -17,10 +17,13 @@
 package com.android.systemui.statusbar.notification.footer.ui.view;
 
 import static com.android.systemui.log.LogAssertKt.assertLogsWtf;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -95,6 +98,7 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void setHistoryShown() {
         mView.showHistory(true);
         assertTrue(mView.isHistoryShown());
@@ -103,6 +107,7 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void setHistoryNotShown() {
         mView.showHistory(false);
         assertFalse(mView.isHistoryShown());
@@ -124,6 +129,62 @@ public class FooterViewTest extends SysuiTestCase {
         assertFalse(mView.isClearAllButtonVisible());
 
         mView.setClearAllButtonVisible(true /* visible */, true /* animate */);
+    }
+
+    @Test
+    @EnableFlags(FooterViewRefactor.FLAG_NAME)
+    public void testSetManageOrHistoryButtonText_resourceOnlyFetchedOnce() {
+        int resId = R.string.manage_notifications_history_text;
+        mView.setManageOrHistoryButtonText(resId);
+        verify(mSpyContext).getString(eq(resId));
+
+        clearInvocations(mSpyContext);
+
+        assertThat(((TextView) mView.findViewById(R.id.manage_text))
+                .getText().toString()).contains("History");
+
+        // Set it a few more times, it shouldn't lead to the resource being fetched again
+        mView.setManageOrHistoryButtonText(resId);
+        mView.setManageOrHistoryButtonText(resId);
+
+        verify(mSpyContext, never()).getString(anyInt());
+    }
+
+    @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    public void testSetManageOrHistoryButtonText_expectsFlagEnabled() {
+        clearInvocations(mSpyContext);
+        int resId = R.string.manage_notifications_history_text;
+        assertLogsWtf(() -> mView.setManageOrHistoryButtonText(resId));
+        verify(mSpyContext, never()).getString(anyInt());
+    }
+
+    @Test
+    @EnableFlags(FooterViewRefactor.FLAG_NAME)
+    public void testSetManageOrHistoryButtonDescription_resourceOnlyFetchedOnce() {
+        int resId = R.string.manage_notifications_history_text;
+        mView.setManageOrHistoryButtonDescription(resId);
+        verify(mSpyContext).getString(eq(resId));
+
+        clearInvocations(mSpyContext);
+
+        assertThat(((TextView) mView.findViewById(R.id.manage_text))
+                .getContentDescription().toString()).contains("History");
+
+        // Set it a few more times, it shouldn't lead to the resource being fetched again
+        mView.setManageOrHistoryButtonDescription(resId);
+        mView.setManageOrHistoryButtonDescription(resId);
+
+        verify(mSpyContext, never()).getString(anyInt());
+    }
+
+    @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    public void testSetManageOrHistoryButtonDescription_expectsFlagEnabled() {
+        clearInvocations(mSpyContext);
+        int resId = R.string.accessibility_clear_all;
+        assertLogsWtf(() -> mView.setManageOrHistoryButtonDescription(resId));
+        verify(mSpyContext, never()).getString(anyInt());
     }
 
     @Test
@@ -150,7 +211,7 @@ public class FooterViewTest extends SysuiTestCase {
     public void testSetClearAllButtonText_expectsFlagEnabled() {
         clearInvocations(mSpyContext);
         int resId = R.string.clear_all_notifications_text;
-        assertLogsWtf(()-> mView.setClearAllButtonText(resId));
+        assertLogsWtf(() -> mView.setClearAllButtonText(resId));
         verify(mSpyContext, never()).getString(anyInt());
     }
 
@@ -178,7 +239,7 @@ public class FooterViewTest extends SysuiTestCase {
     public void testSetClearAllButtonDescription_expectsFlagEnabled() {
         clearInvocations(mSpyContext);
         int resId = R.string.accessibility_clear_all;
-        assertLogsWtf(()-> mView.setClearAllButtonDescription(resId));
+        assertLogsWtf(() -> mView.setClearAllButtonDescription(resId));
         verify(mSpyContext, never()).getString(anyInt());
     }
 
@@ -206,7 +267,7 @@ public class FooterViewTest extends SysuiTestCase {
     public void testSetMessageString_expectsFlagEnabled() {
         clearInvocations(mSpyContext);
         int resId = R.string.unlock_to_see_notif_text;
-        assertLogsWtf(()-> mView.setMessageString(resId));
+        assertLogsWtf(() -> mView.setMessageString(resId));
         verify(mSpyContext, never()).getString(anyInt());
     }
 
@@ -231,7 +292,7 @@ public class FooterViewTest extends SysuiTestCase {
     public void testSetMessageIcon_expectsFlagEnabled() {
         clearInvocations(mSpyContext);
         int resId = R.drawable.ic_friction_lock_closed;
-        assertLogsWtf(()-> mView.setMessageIcon(resId));
+        assertLogsWtf(() -> mView.setMessageIcon(resId));
         verify(mSpyContext, never()).getDrawable(anyInt());
     }
 

@@ -58,10 +58,15 @@ class NotificationShadeWindowState(
     @JvmField var dreaming: Boolean = false,
     @JvmField var scrimsVisibility: Int = 0,
     @JvmField var backgroundBlurRadius: Int = 0,
+    @JvmField var communalVisible: Boolean = false,
 ) {
 
     fun isKeyguardShowingAndNotOccluded(): Boolean {
         return keyguardShowing && !keyguardOccluded
+    }
+
+    fun isCommunalVisibleAndNotOccluded(): Boolean {
+        return communalVisible && !keyguardOccluded
     }
 
     /** List of [String] to be used as a [Row] with [DumpsysTableLogger]. */
@@ -93,7 +98,8 @@ class NotificationShadeWindowState(
             forcePluginOpen.toString(),
             dozing.toString(),
             scrimsVisibility.toString(),
-            backgroundBlurRadius.toString()
+            backgroundBlurRadius.toString(),
+            communalVisible.toString(),
         )
     }
 
@@ -134,6 +140,7 @@ class NotificationShadeWindowState(
             dozing: Boolean,
             scrimsVisibility: Int,
             backgroundBlurRadius: Int,
+            communalVisible: Boolean,
         ) {
             buffer.advance().apply {
                 this.keyguardShowing = keyguardShowing
@@ -165,6 +172,7 @@ class NotificationShadeWindowState(
                 this.dozing = dozing
                 this.scrimsVisibility = scrimsVisibility
                 this.backgroundBlurRadius = backgroundBlurRadius
+                this.communalVisible = communalVisible
             }
         }
 
@@ -209,7 +217,8 @@ class NotificationShadeWindowState(
                 "forcePluginOpen",
                 "dozing",
                 "scrimsVisibility",
-                "backgroundBlurRadius"
+                "backgroundBlurRadius",
+                "communalVisible"
             )
     }
 }

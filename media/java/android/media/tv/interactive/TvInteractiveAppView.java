@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -30,10 +31,12 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
+import android.media.tv.flags.Flags;
 import android.media.tv.interactive.TvInteractiveAppManager.Session;
 import android.media.tv.interactive.TvInteractiveAppManager.Session.FinishedInputEventCallback;
 import android.media.tv.interactive.TvInteractiveAppManager.SessionCallback;
 import android.net.Uri;
+import android.net.http.SslCertificate;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -582,6 +585,22 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
+     * Sends the currently selected track info to the TV Interactive App in response to a
+     * {@link TvInteractiveAppCallback#onRequestSelectedTrackInfo(String)} request.
+     *
+     * @param tracks list of {@link TvTrackInfo} of the currently selected track(s)
+     */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+    public void sendSelectedTrackInfo(@Nullable List<TvTrackInfo> tracks) {
+        if (DEBUG) {
+            Log.d(TAG, "sendSelectedTrackInfo");
+        }
+        if (mSession != null) {
+            mSession.sendSelectedTrackInfo(tracks);
+        }
+    }
+
+    /**
      * Sends current TV input ID to related TV interactive app.
      *
      * @param inputId The current TV input ID whose channel is tuned. {@code null} if no channel is
@@ -705,6 +724,22 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
+     * Alerts the TV Interactive app that the video freeze state has been updated. If {@code true},
+     * the video is frozen on the last frame while audio playback continues.
+     *
+     * @param isFrozen Whether the video is frozen.
+     */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+    public void notifyVideoFreezeUpdated(boolean isFrozen) {
+        if (DEBUG) {
+            Log.d(TAG, "notifyVideoFreezeUpdated");
+        }
+        if (mSession != null) {
+            mSession.notifyVideoFreezeUpdated(isFrozen);
+        }
+    }
+
+    /**
      * Sends signing result to related TV interactive app.
      *
      * <p>This is used when the corresponding server of the broadcast-independent interactive
@@ -722,6 +757,22 @@ public class TvInteractiveAppView extends ViewGroup {
         }
         if (mSession != null) {
             mSession.sendSigningResult(signingId, result);
+        }
+    }
+
+    /**
+     * Sends the requested SSL certificate to the TV Interactive App
+     * @param host the host name of the SSL authentication server.
+     * @param port the port of the SSL authentication server. E.g., 443
+     * @param cert the SSL certificate requested
+     */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+    public void sendCertificate(@NonNull String host, int port, @NonNull SslCertificate cert) {
+        if (DEBUG) {
+            Log.d(TAG, "sendCertificate");
+        }
+        if (mSession != null) {
+            mSession.sendCertificate(host, port, cert);
         }
     }
 
@@ -1197,6 +1248,16 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
+         * This is called when {@link TvInteractiveAppService.Session#requestSelectedTrackInfo()} is
+         * called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onRequestSelectedTrackInfo(@NonNull String iAppServiceId) {
+        }
+
+        /**
          * This is called when {@link TvInteractiveAppService.Session#requestCurrentTvInputId()} is
          * called.
          *
@@ -1327,6 +1388,37 @@ public class TvInteractiveAppView extends ViewGroup {
          */
         public void onRequestSigning(@NonNull String iAppServiceId, @NonNull String signingId,
                 @NonNull String algorithm, @NonNull String alias, @NonNull byte[] data) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestSigning(String, String, String, int, byte[])}
+         * is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param signingId the ID to identify the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc.
+         * @param host The hostname of the SSL authentication server.
+         * @param port The port of the SSL authentication server.
+         * @param data the original bytes to be signed.
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onRequestSigning(@NonNull String iAppServiceId, @NonNull String signingId,
+                @NonNull String algorithm, @NonNull String host, int port, @NonNull byte[] data) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestCertificate(String, int)} is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param host The hostname of the SSL authentication server.
+         * @param port The port of the SSL authentication server.
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onRequestCertificate(@NonNull String iAppServiceId, @NonNull String host,
+                int port) {
         }
 
         /**
@@ -1714,6 +1806,28 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         @Override
+        public void onRequestSelectedTrackInfo(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestSelectedTrackInfo");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestSelectedTrackInfo - session not created");
+                return;
+            }
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onRequestSelectedTrackInfo(mIAppServiceId);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        @Override
         public void onRequestCurrentTvInputId(Session session) {
             if (DEBUG) {
                 Log.d(TAG, "onRequestCurrentTvInputId");
@@ -1873,6 +1987,35 @@ public class TvInteractiveAppView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onRequestSigning(mIAppServiceId, id, algorithm, alias, data);
+            }
+        }
+
+        @Override
+        public void onRequestSigning(
+                Session session, String id, String algorithm, String host, int port, byte[] data) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestSigning");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestSigning - session not created");
+                return;
+            }
+            if (mCallback != null && Flags.tiafVApis()) {
+                mCallback.onRequestSigning(mIAppServiceId, id, algorithm, host, port, data);
+            }
+        }
+
+        @Override
+        public void onRequestCertificate(Session session, String host, int port) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestCertificate");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestCertificate - session not created");
+                return;
+            }
+            if (mCallback != null && Flags.tiafVApis()) {
+                mCallback.onRequestCertificate(mIAppServiceId, host, port);
             }
         }
     }

@@ -19,6 +19,7 @@ package com.android.server.display;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -87,5 +88,13 @@ public class DisplayOffloadSessionImplTest {
         mSession.updateBrightness(brightness);
 
         verify(mDisplayPowerController).setBrightnessFromOffload(brightness);
+    }
+
+    @Test
+    public void testBlockScreenOn() {
+        Runnable unblocker = () -> {};
+        mSession.blockScreenOn(unblocker);
+
+        verify(mDisplayOffloader).onBlockingScreenOn(eq(unblocker));
     }
 }

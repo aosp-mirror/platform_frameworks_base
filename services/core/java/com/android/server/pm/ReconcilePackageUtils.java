@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.SigningDetails.CapabilityMergeRule.MERGE_RESTRICTED_CAPABILITY;
 
@@ -25,6 +26,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
 import static com.android.server.pm.PackageManagerService.TAG;
 
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
@@ -36,6 +38,7 @@ import android.util.Slog;
 
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.SystemConfig;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.utils.WatchedLongSparseArray;
 
@@ -53,14 +56,17 @@ import java.util.Map;
  * as install) led to the request.
  */
 final class ReconcilePackageUtils {
-    private static final boolean ALLOW_NON_PRELOADS_SYSTEM_SIGNATURE = Build.IS_DEBUGGABLE || true;
+    // TODO(b/308573259): with allow-list, we should be able to disallow such installs even in
+    // debuggable builds.
+    private static final boolean ALLOW_NON_PRELOADS_SYSTEM_SHAREDUIDS = Build.IS_DEBUGGABLE
+            || !Flags.restrictNonpreloadsSystemShareduids();
 
     public static List<ReconciledPackage> reconcilePackages(
             List<InstallRequest> installRequests,
             Map<String, AndroidPackage> allPackages,
             Map<String, Settings.VersionInfo> versionInfos,
             SharedLibrariesImpl sharedLibraries,
-            KeySetManagerService ksms, Settings settings)
+            KeySetManagerService ksms, Settings settings, SystemConfig systemConfig)
             throws ReconcileFailure {
         final List<ReconciledPackage> result = new ArrayList<>(installRequests.size());
 
@@ -179,18 +185,27 @@ final class ReconcilePackageUtils {
                         removeAppKeySetData = true;
                     }
 
-                    if (!isSystemPackage && !isApex && signingDetails != null
+                    if (!installRequest.isInstallSystem() && !isSystemPackage && !isApex
+                            && signingDetails != null
                             && systemPackage != null && systemPackage.getSigningDetails() != null
                             && systemPackage.getSigningDetails().checkCapability(
                                     signingDetails,
                                     SigningDetails.CertCapabilities.PERMISSION)) {
                         Slog.d(TAG, "Non-preload app associated with system signature: "
                                 + signatureCheckPs.getPackageName());
-                        if (!ALLOW_NON_PRELOADS_SYSTEM_SIGNATURE) {
-                            throw new ReconcileFailure(
-                                    INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                                    "Non-preload app associated with system signature: "
-                                            + signatureCheckPs.getPackageName());
+                        if (sharedUserSetting != null && !ALLOW_NON_PRELOADS_SYSTEM_SHAREDUIDS) {
+                            // Check the allow-list.
+                            var allowList = systemConfig.getPackageToSharedUidAllowList();
+                            var sharedUidName = allowList.get(signatureCheckPs.getPackageName());
+                            if (sharedUidName == null
+                                    || !sharedUserSetting.name.equals(sharedUidName)) {
+                                var msg = "Non-preload app " + signatureCheckPs.getPackageName()
+                                        + " signed with platform signature and joining shared uid: "
+                                        + sharedUserSetting.name;
+                                Slog.e(TAG, msg + ", allowList: " + allowList);
+                                throw new ReconcileFailure(
+                                        INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID, msg);
+                            }
                         }
                     }
 

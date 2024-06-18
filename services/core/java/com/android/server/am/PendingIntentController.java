@@ -30,6 +30,7 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.app.PendingIntentStats;
+import android.app.compat.CompatChanges;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.os.Binder;
@@ -136,6 +137,11 @@ public class PendingIntentController {
                         + "intent creator ("
                         + packageName
                         + ") because this option is meant for the pending intent sender");
+                if (CompatChanges.isChangeEnabled(PendingIntent.PENDING_INTENT_OPTIONS_CHECK,
+                        callingUid)) {
+                    throw new IllegalArgumentException("pendingIntentBackgroundActivityStartMode "
+                            + "must not be set when creating a PendingIntent");
+                }
                 opts.setPendingIntentBackgroundActivityStartMode(
                         ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
             }

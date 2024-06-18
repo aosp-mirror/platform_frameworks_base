@@ -108,13 +108,13 @@ final class AdditionalSubtypeUtils {
      * multiple threads are not calling this method at the same time for the same {@code userId}.
      * </p>
      *
-     * @param allSubtypes {@link ArrayMap} from IME ID to additional subtype list. Passing an empty
-     *                    map deletes the file.
+     * @param allSubtypes {@link AdditionalSubtypeMap} from IME ID to additional subtype list.
+     *                    Passing an empty map deletes the file.
      * @param methodMap   {@link ArrayMap} from IME ID to {@link InputMethodInfo}.
      * @param userId      The user ID to be associated with.
      */
-    static void save(ArrayMap<String, List<InputMethodSubtype>> allSubtypes,
-            ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId) {
+    static void save(AdditionalSubtypeMap allSubtypes,
+            InputMethodMap methodMap, @UserIdInt int userId) {
         final File inputMethodDir = getInputMethodDir(userId);
 
         if (allSubtypes.isEmpty()) {
@@ -142,8 +142,8 @@ final class AdditionalSubtypeUtils {
     }
 
     @VisibleForTesting
-    static void saveToFile(ArrayMap<String, List<InputMethodSubtype>> allSubtypes,
-            ArrayMap<String, InputMethodInfo> methodMap, AtomicFile subtypesFile) {
+    static void saveToFile(AdditionalSubtypeMap allSubtypes,
+            InputMethodMap methodMap, AtomicFile subtypesFile) {
         // Safety net for the case that this function is called before methodMap is set.
         final boolean isSetMethodMap = methodMap != null && methodMap.size() > 0;
         FileOutputStream fos = null;
@@ -212,24 +212,21 @@ final class AdditionalSubtypeUtils {
      * multiple threads are not calling this method at the same time for the same {@code userId}.
      * </p>
      *
-     * @param allSubtypes {@link ArrayMap} from IME ID to additional subtype list. This parameter
-     *                    will be used to return the result.
-     * @param userId      The user ID to be associated with.
+     * @param userId The user ID to be associated with.
+     * @return {@link AdditionalSubtypeMap} that contains the additional {@link InputMethodSubtype}.
      */
-    static void load(@NonNull ArrayMap<String, List<InputMethodSubtype>> allSubtypes,
-            @UserIdInt int userId) {
-        allSubtypes.clear();
-
+    static AdditionalSubtypeMap load(@UserIdInt int userId) {
         final AtomicFile subtypesFile = getAdditionalSubtypeFile(getInputMethodDir(userId));
         // Not having the file means there is no additional subtype.
         if (subtypesFile.exists()) {
-            loadFromFile(allSubtypes, subtypesFile);
+            return loadFromFile(subtypesFile);
         }
+        return AdditionalSubtypeMap.EMPTY_MAP;
     }
 
     @VisibleForTesting
-    static void loadFromFile(@NonNull ArrayMap<String, List<InputMethodSubtype>> allSubtypes,
-            AtomicFile subtypesFile) {
+    static AdditionalSubtypeMap loadFromFile(AtomicFile subtypesFile) {
+        final ArrayMap<String, List<InputMethodSubtype>> allSubtypes = new ArrayMap<>();
         try (FileInputStream fis = subtypesFile.openRead()) {
             final TypedXmlPullParser parser = Xml.resolvePullParser(fis);
             int type = parser.next();
@@ -310,5 +307,6 @@ final class AdditionalSubtypeUtils {
         } catch (XmlPullParserException | IOException | NumberFormatException e) {
             Slog.w(TAG, "Error reading subtypes", e);
         }
+        return AdditionalSubtypeMap.of(allSubtypes);
     }
 }

@@ -26,6 +26,8 @@ import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.server.backup.Flags;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
@@ -56,7 +58,7 @@ public final class BackupRestoreEventLogger {
      *
      * @hide
      */
-    public static final int DATA_TYPES_ALLOWED = 15;
+    public static final int DATA_TYPES_ALLOWED = 150;
 
     /**
      * Denotes that the annotated element identifies a data type as required by the logging methods
@@ -299,7 +301,7 @@ public final class BackupRestoreEventLogger {
         }
 
         if (!mResults.containsKey(dataType)) {
-            if (mResults.keySet().size() == DATA_TYPES_ALLOWED) {
+            if (mResults.keySet().size() == getDataTypesAllowed()) {
                 // This is a new data type and we're already at capacity.
                 Slog.d(TAG, "Logger is full, ignoring new data type");
                 return null;
@@ -313,6 +315,14 @@ public final class BackupRestoreEventLogger {
 
     private byte[] getMetaDataHash(String metaData) {
         return mHashDigest.digest(metaData.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private int getDataTypesAllowed(){
+        if (Flags.enableIncreaseDatatypesForAgentLogging()) {
+            return DATA_TYPES_ALLOWED;
+        } else {
+            return 15;
+        }
     }
 
     /**

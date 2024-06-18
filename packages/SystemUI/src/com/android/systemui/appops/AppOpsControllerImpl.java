@@ -229,6 +229,9 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
 
     private void fetchCurrentActiveOps() {
         List<AppOpsManager.PackageOps> packageOps = mAppOps.getPackagesForOps(OPS);
+        if (packageOps == null) {
+            return;
+        }
         for (AppOpsManager.PackageOps op : packageOps) {
             for (AppOpsManager.OpEntry entry : op.getOps()) {
                 for (Map.Entry<String, AppOpsManager.AttributedOpEntry> attributedOpEntry :

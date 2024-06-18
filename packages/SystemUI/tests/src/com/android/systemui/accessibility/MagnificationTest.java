@@ -124,7 +124,7 @@ public class MagnificationTest extends SysuiTestCase {
                 getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
                 mSysUiState, mOverviewProxyService, mSecureSettings, mDisplayTracker,
                 getContext().getSystemService(DisplayManager.class), mA11yLogger);
-        mMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
+        mMagnification.mWindowMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mWindowMagnificationController);
         mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
                 mContext.getSystemService(DisplayManager.class), mMagnificationSettingsController);
@@ -325,9 +325,9 @@ public class MagnificationTest extends SysuiTestCase {
     @Test
     public void overviewProxyIsConnected_controllerIsAvailable_updateSysUiStateFlag() {
         final WindowMagnificationController mController = mock(WindowMagnificationController.class);
-        mMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
+        mMagnification.mWindowMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mController);
-        mMagnification.mMagnificationControllerSupplier.get(TEST_DISPLAY);
+        mMagnification.mWindowMagnificationControllerSupplier.get(TEST_DISPLAY);
 
         mOverviewProxyListener.onConnectionChanged(true);
 

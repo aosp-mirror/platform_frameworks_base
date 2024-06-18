@@ -17,10 +17,13 @@
 package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.data.repository.PrivacyChipRepository
+import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorEmptyImpl
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorEmptyImpl
 import dagger.Binds
@@ -32,6 +35,16 @@ abstract class ShadeEmptyImplModule {
     @Binds
     @SysUISingleton
     abstract fun bindsShadeViewController(svc: ShadeViewControllerEmptyImpl): ShadeViewController
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeBack(sbai: ShadeViewControllerEmptyImpl): ShadeBackActionInteractor
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeLockscreenInteractor(
+        slsi: ShadeViewControllerEmptyImpl
+    ): ShadeLockscreenInteractor
 
     @Binds
     @SysUISingleton
@@ -50,4 +63,8 @@ abstract class ShadeEmptyImplModule {
     abstract fun bindsShadeAnimationInteractor(
         sai: ShadeAnimationInteractorEmptyImpl
     ): ShadeAnimationInteractor
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsPrivacyChipRepository(impl: PrivacyChipRepositoryImpl): PrivacyChipRepository
 }

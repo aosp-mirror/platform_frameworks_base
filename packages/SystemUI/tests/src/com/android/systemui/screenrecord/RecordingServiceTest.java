@@ -28,10 +28,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityOptions.LaunchCookie;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -146,7 +146,7 @@ public class RecordingServiceTest extends SysuiTestCase {
 
     @Test
     public void testLogStartPartialRecording() {
-        MediaProjectionCaptureTarget target = new MediaProjectionCaptureTarget(new Binder());
+        MediaProjectionCaptureTarget target = new MediaProjectionCaptureTarget(new LaunchCookie());
         Intent startIntent = RecordingService.getStartIntent(mContext, 0, 0, false, target);
         mRecordingService.onStartCommand(startIntent, 0, 0);
 
@@ -166,7 +166,7 @@ public class RecordingServiceTest extends SysuiTestCase {
 
     @Test
     public void testLogStopFromNotificationIntent() {
-        Intent stopIntent = RecordingService.getNotificationIntent(mContext);
+        Intent stopIntent = mRecordingService.getNotificationIntent(mContext);
         mRecordingService.onStartCommand(stopIntent, 0, 0);
 
         // Verify that we log the correct event

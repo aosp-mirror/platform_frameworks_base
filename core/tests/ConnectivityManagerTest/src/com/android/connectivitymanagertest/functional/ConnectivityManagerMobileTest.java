@@ -22,7 +22,8 @@ import android.net.NetworkInfo.State;
 import android.net.wifi.WifiManager;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.test.suitebuilder.annotation.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
 import com.android.connectivitymanagertest.ConnectivityManagerTestRunner;

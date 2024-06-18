@@ -32,6 +32,7 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
@@ -55,6 +56,11 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @SuppressWarnings("GuardedBy")
 public class CpuPowerCalculatorTest {
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private static final double PRECISION = 0.00001;
 
     private static final int APP_UID1 = Process.FIRST_APPLICATION_UID + 42;
@@ -62,7 +68,7 @@ public class CpuPowerCalculatorTest {
 
     private static final int NUM_CPU_FREQS = 2 + 2;  // 2 clusters * 2 freqs each
 
-    @Rule
+    @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
             .setAveragePower(PowerProfile.POWER_CPU_ACTIVE, 720)
             .setCpuScalingPolicy(0, new int[]{0, 1}, new int[]{100, 200})
@@ -93,14 +99,13 @@ public class CpuPowerCalculatorTest {
     private SystemServerCpuThreadReader mMockSystemServerCpuThreadReader;
     @Mock
     private KernelSingleUidTimeReader mMockKernelSingleUidTimeReader;
+    private boolean[] mSupportedPowerBuckets;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        final boolean[] supportedPowerBuckets =
-                new boolean[EnergyConsumerStats.NUMBER_STANDARD_POWER_BUCKETS];
-        supportedPowerBuckets[EnergyConsumerStats.POWER_BUCKET_CPU] = true;
+        mSupportedPowerBuckets = new boolean[EnergyConsumerStats.NUMBER_STANDARD_POWER_BUCKETS];
 
         when(mMockCpuUidFreqTimeReader.isFastCpuTimesReader()).thenReturn(true);
 
@@ -112,8 +117,7 @@ public class CpuPowerCalculatorTest {
                 .setKernelCpuUidUserSysTimeReader(mMockKernelCpuUidUserSysTimeReader)
                 .setKernelCpuUidActiveTimeReader(mMockKerneCpuUidActiveTimeReader)
                 .setKernelSingleUidTimeReader(mMockKernelSingleUidTimeReader)
-                .setSystemServerCpuThreadReader(mMockSystemServerCpuThreadReader)
-                .initEnergyConsumerStatsLocked(supportedPowerBuckets, new String[0]);
+                .setSystemServerCpuThreadReader(mMockSystemServerCpuThreadReader);
     }
 
     @Test
@@ -216,6 +220,10 @@ public class CpuPowerCalculatorTest {
 
     @Test
     public void testMeasuredEnergyBasedModel() {
+        mSupportedPowerBuckets[EnergyConsumerStats.POWER_BUCKET_CPU] = true;
+        mStatsRule.getBatteryStats().initEnergyConsumerStatsLocked(mSupportedPowerBuckets,
+                new String[0]);
+
         when(mMockUserInfoProvider.exists(anyInt())).thenReturn(true);
 
         when(mMockKernelCpuSpeedReaders[0].readDelta()).thenReturn(new long[]{1000, 2000});
@@ -397,6 +405,10 @@ public class CpuPowerCalculatorTest {
 
     @Test
     public void testMeasuredEnergyBasedModel_perProcessState() {
+        mSupportedPowerBuckets[EnergyConsumerStats.POWER_BUCKET_CPU] = true;
+        mStatsRule.getBatteryStats().initEnergyConsumerStatsLocked(mSupportedPowerBuckets,
+                new String[0]);
+
         when(mMockUserInfoProvider.exists(anyInt())).thenReturn(true);
 
         when(mMockKernelCpuSpeedReaders[0].readDelta()).thenReturn(new long[]{1000, 2000});

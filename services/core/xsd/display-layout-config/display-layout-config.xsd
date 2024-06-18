@@ -49,7 +49,7 @@
 
     <xs:complexType name="display">
         <xs:sequence>
-            <xs:element name="address" type="xs:nonNegativeInteger"/>
+            <xs:group ref="displayReference" minOccurs="1" maxOccurs="1"/>
             <xs:element name="position" type="xs:string" minOccurs="0" maxOccurs="1" />
             <xs:element name="brightnessThrottlingMapId" type="xs:string" minOccurs="0" maxOccurs="1" />
             <xs:element name="powerThrottlingMapId" type="xs:string" minOccurs="0" maxOccurs="1" />
@@ -67,4 +67,11 @@
             </xs:simpleType>
         </xs:attribute>
     </xs:complexType>
+
+    <xs:group name="displayReference">
+        <xs:choice>
+            <xs:element name="address" type="xs:nonNegativeInteger" minOccurs="0"/>
+            <xs:element name="port" type="xs:nonNegativeInteger" minOccurs="0"/>
+        </xs:choice>
+    </xs:group>
 </xs:schema>

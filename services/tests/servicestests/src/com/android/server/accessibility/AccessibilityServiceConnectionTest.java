@@ -16,22 +16,32 @@
 
 package com.android.server.accessibility;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
+import android.accessibilityservice.BrailleDisplayController;
 import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.accessibilityservice.IBrailleDisplayConnection;
+import android.accessibilityservice.IBrailleDisplayController;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +50,9 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.hardware.display.DisplayManager;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -59,7 +72,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
@@ -88,21 +103,33 @@ public class AccessibilityServiceConnectionTest {
 
     @Mock AccessibilityUserState mMockUserState;
     @Mock Context mMockContext;
-    @Mock AccessibilityServiceInfo mMockServiceInfo;
+    AccessibilityServiceInfo mServiceInfo;
     @Mock ResolveInfo mMockResolveInfo;
     @Mock AccessibilitySecurityPolicy mMockSecurityPolicy;
-    @Mock AccessibilityWindowManager mMockA11yWindowManager;
-    @Mock ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
-    @Mock AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
-    @Mock AccessibilityTrace mMockA11yTrace;
-    @Mock WindowManagerInternal mMockWindowManagerInternal;
-    @Mock SystemActionPerformer mMockSystemActionPerformer;
-    @Mock KeyEventDispatcher mMockKeyEventDispatcher;
+    @Mock
+    AccessibilityWindowManager mMockA11yWindowManager;
+    @Mock
+    ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
+    @Mock
+    AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
+    @Mock
+    AccessibilityTrace mMockA11yTrace;
+    @Mock
+    WindowManagerInternal mMockWindowManagerInternal;
+    @Mock
+    SystemActionPerformer mMockSystemActionPerformer;
+    @Mock
+    KeyEventDispatcher mMockKeyEventDispatcher;
     @Mock
     MagnificationProcessor mMockMagnificationProcessor;
-    @Mock IBinder mMockIBinder;
-    @Mock IAccessibilityServiceClient mMockServiceClient;
-    @Mock MotionEventInjector mMockMotionEventInjector;
+    @Mock
+    IBinder mMockIBinder;
+    @Mock
+    IAccessibilityServiceClient mMockServiceClient;
+    @Mock
+    IBrailleDisplayController mMockBrailleDisplayController;
+    @Mock
+    MotionEventInjector mMockMotionEventInjector;
 
     MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
 
@@ -115,7 +142,8 @@ public class AccessibilityServiceConnectionTest {
         when(mMockSystemSupport.getMotionEventInjectorForDisplayLocked(
                 Display.DEFAULT_DISPLAY)).thenReturn(mMockMotionEventInjector);
 
-        when(mMockServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
+        mServiceInfo = spy(new AccessibilityServiceInfo());
+        when(mServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
         mMockResolveInfo.serviceInfo = mock(ServiceInfo.class);
         mMockResolveInfo.serviceInfo.applicationInfo = mock(ApplicationInfo.class);
 
@@ -125,11 +153,12 @@ public class AccessibilityServiceConnectionTest {
                 .thenReturn(new DisplayManager(mMockContext));
 
         mConnection = new AccessibilityServiceConnection(mMockUserState, mMockContext,
-                COMPONENT_NAME, mMockServiceInfo, SERVICE_ID, mHandler, new Object(),
+                COMPONENT_NAME, mServiceInfo, SERVICE_ID, mHandler, new Object(),
                 mMockSecurityPolicy, mMockSystemSupport, mMockA11yTrace,
                 mMockWindowManagerInternal, mMockSystemActionPerformer,
                 mMockA11yWindowManager, mMockActivityTaskManagerInternal);
         when(mMockSecurityPolicy.canPerformGestures(mConnection)).thenReturn(true);
+        when(mMockSecurityPolicy.checkAccessibilityAccess(mConnection)).thenReturn(true);
     }
 
     @After
@@ -286,4 +315,135 @@ public class AccessibilityServiceConnectionTest {
         verify(mMockMagnificationProcessor).resetAllIfNeeded(anyInt());
     }
 
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    public void connectBluetoothBrailleDisplay() throws Exception {
+        final String macAddress = "00:11:22:33:AA:BB";
+        final byte[] descriptor = {0x05, 0x41};
+        Bundle bd = new Bundle();
+        bd.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_HIDRAW_PATH, "/dev/null");
+        bd.putByteArray(BrailleDisplayController.TEST_BRAILLE_DISPLAY_DESCRIPTOR, descriptor);
+        bd.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_UNIQUE_ID, macAddress);
+        bd.putBoolean(BrailleDisplayController.TEST_BRAILLE_DISPLAY_BUS_BLUETOOTH, true);
+        mConnection.setTestBrailleDisplayData(List.of(bd));
+
+        mConnection.connectBluetoothBrailleDisplay(macAddress, mMockBrailleDisplayController);
+
+        ArgumentCaptor<IBrailleDisplayConnection> connection =
+                ArgumentCaptor.forClass(IBrailleDisplayConnection.class);
+        verify(mMockBrailleDisplayController).onConnected(connection.capture(), eq(descriptor));
+        // Cleanup the connection.
+        connection.getValue().disconnect();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    public void connectBluetoothBrailleDisplay_throwsForMissingBluetoothConnectPermission() {
+        doThrow(SecurityException.class).when(mMockContext)
+                .enforceCallingPermission(eq(Manifest.permission.BLUETOOTH_CONNECT), any());
+
+        assertThrows(SecurityException.class,
+                () -> mConnection.connectBluetoothBrailleDisplay("unused",
+                        mMockBrailleDisplayController));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    public void connectBluetoothBrailleDisplay_throwsForNullMacAddress() {
+        assertThrows(NullPointerException.class,
+                () -> mConnection.connectBluetoothBrailleDisplay(null,
+                        mMockBrailleDisplayController));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    public void connectBluetoothBrailleDisplay_throwsForMisformattedMacAddress() {
+        assertThrows(IllegalArgumentException.class,
+                () -> mConnection.connectBluetoothBrailleDisplay("12:34",
+                        mMockBrailleDisplayController));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    public void connectUsbBrailleDisplay() throws Exception {
+        final String serialNumber = "myUsbDevice";
+        final byte[] descriptor = {0x05, 0x41};
+        Bundle bd = new Bundle();
+        bd.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_HIDRAW_PATH, "/dev/null");
+        bd.putByteArray(BrailleDisplayController.TEST_BRAILLE_DISPLAY_DESCRIPTOR, descriptor);
+        bd.putString(BrailleDisplayController.TEST_BRAILLE_DISPLAY_UNIQUE_ID, serialNumber);
+        bd.putBoolean(BrailleDisplayController.TEST_BRAILLE_DISPLAY_BUS_BLUETOOTH, false);
+        mConnection.setTestBrailleDisplayData(List.of(bd));
+        UsbDevice usbDevice = Mockito.mock(UsbDevice.class);
+        when(usbDevice.getSerialNumber()).thenReturn(serialNumber);
+        UsbManager usbManager = Mockito.mock(UsbManager.class);
+        when(mMockContext.getSystemService(Context.USB_SERVICE)).thenReturn(usbManager);
+        when(usbManager.hasPermission(eq(usbDevice), eq(COMPONENT_NAME.getPackageName()),
+                anyInt(), anyInt())).thenReturn(true);
+
+        mConnection.connectUsbBrailleDisplay(usbDevice, mMockBrailleDisplayController);
+
+        ArgumentCaptor<IBrailleDisplayConnection> connection =
+                ArgumentCaptor.forClass(IBrailleDisplayConnection.class);
+        verify(mMockBrailleDisplayController).onConnected(connection.capture(), eq(descriptor));
+        // Cleanup the connection.
+        connection.getValue().disconnect();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    public void connectUsbBrailleDisplay_throwsForMissingUsbPermission() {
+        UsbManager usbManager = Mockito.mock(UsbManager.class);
+        when(mMockContext.getSystemService(Context.USB_SERVICE)).thenReturn(usbManager);
+        when(usbManager.hasPermission(notNull(), eq(COMPONENT_NAME.getPackageName()),
+                anyInt(), anyInt())).thenReturn(false);
+
+        assertThrows(SecurityException.class,
+                () -> mConnection.connectUsbBrailleDisplay(Mockito.mock(UsbDevice.class),
+                        mMockBrailleDisplayController));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    public void connectUsbBrailleDisplay_throwsForNullDevice() {
+        assertThrows(NullPointerException.class,
+                () -> mConnection.connectUsbBrailleDisplay(null, mMockBrailleDisplayController));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    public void connectUsbBrailleDisplay_callsOnConnectionFailedForEmptySerialNumber()
+            throws Exception {
+        UsbManager usbManager = Mockito.mock(UsbManager.class);
+        when(mMockContext.getSystemService(Context.USB_SERVICE)).thenReturn(usbManager);
+        when(usbManager.hasPermission(notNull(), eq(COMPONENT_NAME.getPackageName()),
+                anyInt(), anyInt())).thenReturn(true);
+        UsbDevice usbDevice = Mockito.mock(UsbDevice.class);
+        when(usbDevice.getSerialNumber()).thenReturn("");
+
+        mConnection.connectUsbBrailleDisplay(usbDevice, mMockBrailleDisplayController);
+
+        verify(mMockBrailleDisplayController).onConnectionFailed(
+                BrailleDisplayController.BrailleDisplayCallback
+                        .FLAG_ERROR_BRAILLE_DISPLAY_NOT_FOUND);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_RESETTABLE_DYNAMIC_PROPERTIES)
+    public void binderDied_resetA11yServiceInfo() {
+        final int flag = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
+        AccessibilityServiceInfo info = mConnection.getServiceInfo();
+        assertThat(info.flags & flag).isEqualTo(0);
+
+        info = mConnection.getServiceInfo();
+        info.flags |= flag;
+        mConnection.setServiceInfo(info);
+        assertThat(mConnection.getServiceInfo().flags & flag).isEqualTo(flag);
+
+        mConnection.binderDied();
+        assertThat(mConnection.getServiceInfo().flags & flag).isEqualTo(0);
+    }
 }

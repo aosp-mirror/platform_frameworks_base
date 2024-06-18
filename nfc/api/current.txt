@@ -64,23 +64,25 @@ package android.nfc {
   }
 
   public final class NfcAdapter {
-    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean allowTransaction();
     method public void disableForegroundDispatch(android.app.Activity);
     method public void disableReaderMode(android.app.Activity);
-    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean disallowTransaction();
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]);
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method @Nullable public android.nfc.NfcAntennaInfo getNfcAntennaInfo();
+    method @FlaggedApi("android.nfc.enable_nfc_charging") @Nullable public android.nfc.WlcListenerDeviceInfo getWlcListenerDeviceInfo();
     method public boolean ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler);
     method public boolean isEnabled();
+    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean isObserveModeEnabled();
     method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean isObserveModeSupported();
     method @FlaggedApi("android.nfc.enable_nfc_reader_option") public boolean isReaderOptionEnabled();
     method @FlaggedApi("android.nfc.enable_nfc_reader_option") public boolean isReaderOptionSupported();
     method public boolean isSecureNfcEnabled();
     method public boolean isSecureNfcSupported();
+    method @FlaggedApi("android.nfc.enable_nfc_charging") public boolean isWlcEnabled();
     method @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public void resetDiscoveryTechnology(@NonNull android.app.Activity);
     method @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public void setDiscoveryTechnology(@NonNull android.app.Activity, int, int);
+    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean setObserveModeEnabled(boolean);
     field public static final String ACTION_ADAPTER_STATE_CHANGED = "android.nfc.action.ADAPTER_STATE_CHANGED";
     field public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
     field @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static final String ACTION_PREFERRED_PAYMENT_CHANGED = "android.nfc.action.PREFERRED_PAYMENT_CHANGED";
@@ -173,6 +175,20 @@ package android.nfc {
     ctor public TagLostException(String);
   }
 
+  @FlaggedApi("android.nfc.enable_nfc_charging") public final class WlcListenerDeviceInfo implements android.os.Parcelable {
+    ctor public WlcListenerDeviceInfo(int, double, double, int);
+    method public int describeContents();
+    method @FloatRange(from=0.0, to=100.0) public double getBatteryLevel();
+    method public int getProductId();
+    method public int getState();
+    method public double getTemperature();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.WlcListenerDeviceInfo> CREATOR;
+    field public static final int STATE_CONNECTED_CHARGING = 2; // 0x2
+    field public static final int STATE_CONNECTED_DISCHARGING = 3; // 0x3
+    field public static final int STATE_DISCONNECTED = 1; // 0x1
+  }
+
 }
 
 package android.nfc.cardemulation {
@@ -188,14 +204,15 @@ package android.nfc.cardemulation {
     method public boolean isDefaultServiceForAid(android.content.ComponentName, String);
     method public boolean isDefaultServiceForCategory(android.content.ComponentName, String);
     method public boolean registerAidsForService(android.content.ComponentName, String, java.util.List<java.lang.String>);
+    method @FlaggedApi("android.nfc.nfc_read_polling_loop") public boolean registerPollingLoopFilterForService(@NonNull android.content.ComponentName, @NonNull String, boolean);
     method public boolean removeAidsForService(android.content.ComponentName, String);
     method @NonNull @RequiresPermission(android.Manifest.permission.NFC) public boolean setOffHostForService(@NonNull android.content.ComponentName, @NonNull String);
     method public boolean setPreferredService(android.app.Activity, android.content.ComponentName);
-    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean setServiceObserveModeDefault(@NonNull android.content.ComponentName, boolean);
+    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean setShouldDefaultToObserveModeForService(@NonNull android.content.ComponentName, boolean);
     method public boolean supportsAidPrefixRegistration();
     method @NonNull @RequiresPermission(android.Manifest.permission.NFC) public boolean unsetOffHostForService(@NonNull android.content.ComponentName);
     method public boolean unsetPreferredService(android.app.Activity);
-    field public static final String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
+    field @Deprecated public static final String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
     field public static final String CATEGORY_OTHER = "other";
     field public static final String CATEGORY_PAYMENT = "payment";
     field public static final String EXTRA_CATEGORY = "category";
@@ -211,20 +228,10 @@ package android.nfc.cardemulation {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onDeactivated(int);
     method public abstract byte[] processCommandApdu(byte[], android.os.Bundle);
-    method @FlaggedApi("android.nfc.nfc_read_polling_loop") public void processPollingFrames(@NonNull java.util.List<android.os.Bundle>);
+    method @FlaggedApi("android.nfc.nfc_read_polling_loop") public void processPollingFrames(@NonNull java.util.List<android.nfc.cardemulation.PollingFrame>);
     method public final void sendResponseApdu(byte[]);
     field public static final int DEACTIVATION_DESELECTED = 1; // 0x1
     field public static final int DEACTIVATION_LINK_LOSS = 0; // 0x0
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String POLLING_LOOP_DATA_KEY = "android.nfc.cardemulation.DATA";
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String POLLING_LOOP_GAIN_KEY = "android.nfc.cardemulation.GAIN";
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String POLLING_LOOP_TIMESTAMP_KEY = "android.nfc.cardemulation.TIMESTAMP";
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_A = 65; // 0x0041 'A'
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_B = 66; // 0x0042 'B'
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_F = 70; // 0x0046 'F'
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String POLLING_LOOP_TYPE_KEY = "android.nfc.cardemulation.TYPE";
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_OFF = 88; // 0x0058 'X'
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_ON = 79; // 0x004f 'O'
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_UNKNOWN = 85; // 0x0055 'U'
     field public static final String SERVICE_INTERFACE = "android.nfc.cardemulation.action.HOST_APDU_SERVICE";
     field public static final String SERVICE_META_DATA = "android.nfc.cardemulation.host_apdu_service";
   }
@@ -255,6 +262,23 @@ package android.nfc.cardemulation {
     ctor public OffHostApduService();
     field public static final String SERVICE_INTERFACE = "android.nfc.cardemulation.action.OFF_HOST_APDU_SERVICE";
     field public static final String SERVICE_META_DATA = "android.nfc.cardemulation.off_host_apdu_service";
+  }
+
+  @FlaggedApi("android.nfc.nfc_read_polling_loop") public final class PollingFrame implements android.os.Parcelable {
+    ctor public PollingFrame(int, @Nullable byte[], int, int);
+    method public int describeContents();
+    method @NonNull public byte[] getData();
+    method public int getGain();
+    method public int getTimestamp();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.PollingFrame> CREATOR;
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final int POLLING_LOOP_TYPE_A = 65; // 0x41
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final int POLLING_LOOP_TYPE_B = 66; // 0x42
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final int POLLING_LOOP_TYPE_F = 70; // 0x46
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final int POLLING_LOOP_TYPE_OFF = 88; // 0x58
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final int POLLING_LOOP_TYPE_ON = 79; // 0x4f
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final int POLLING_LOOP_TYPE_UNKNOWN = 85; // 0x55
   }
 
 }

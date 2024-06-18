@@ -174,11 +174,12 @@ public abstract class BaseTvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehav
                 eq(AudioManager.ADJUST_MUTE), anyInt());
         clearInvocations(mAudioManager);
 
-        // New volume only: sets volume only
+        // New volume only: sets both volume and mute.
+        // Volume changes can affect mute status; we need to set mute afterwards to undo this.
         receiveReportAudioStatus(32, true);
         verify(mAudioManager).setStreamVolume(eq(AudioManager.STREAM_MUSIC), eq(8),
                 anyInt());
-        verify(mAudioManager, never()).adjustStreamVolume(eq(AudioManager.STREAM_MUSIC),
+        verify(mAudioManager).adjustStreamVolume(eq(AudioManager.STREAM_MUSIC),
                 eq(AudioManager.ADJUST_MUTE), anyInt());
         clearInvocations(mAudioManager);
 
@@ -190,11 +191,11 @@ public abstract class BaseTvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehav
                 eq(AudioManager.ADJUST_UNMUTE), anyInt());
         clearInvocations(mAudioManager);
 
-        // Repeat of earlier message: sets volume only (to ensure volume UI is shown)
+        // Repeat of earlier message: sets mute only (to ensure volume UI is shown)
         receiveReportAudioStatus(32, false);
-        verify(mAudioManager).setStreamVolume(eq(AudioManager.STREAM_MUSIC), eq(8),
+        verify(mAudioManager, never()).setStreamVolume(eq(AudioManager.STREAM_MUSIC), eq(8),
                 anyInt());
-        verify(mAudioManager, never()).adjustStreamVolume(eq(AudioManager.STREAM_MUSIC),
+        verify(mAudioManager).adjustStreamVolume(eq(AudioManager.STREAM_MUSIC),
                 eq(AudioManager.ADJUST_UNMUTE), anyInt());
         clearInvocations(mAudioManager);
 
@@ -392,18 +393,18 @@ public abstract class BaseTvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehav
                 INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getMute()));
         mTestLooper.dispatchAll();
 
-        // HdmiControlService calls setStreamVolume to trigger volume UI
-        verify(mAudioManager).setStreamVolume(
+        // HdmiControlService calls adjustStreamVolume to trigger volume UI
+        verify(mAudioManager).adjustStreamVolume(
+                eq(AudioManager.STREAM_MUSIC),
+                eq(AudioManager.ADJUST_UNMUTE),
+                eq(AudioManager.FLAG_ABSOLUTE_VOLUME | AudioManager.FLAG_SHOW_UI));
+        // setStreamVolume is not called because volume didn't change,
+        // and adjustStreamVolume is sufficient to show volume UI
+        verify(mAudioManager, never()).setStreamVolume(
                 eq(AudioManager.STREAM_MUSIC),
                 // Volume level is rescaled to the max volume of STREAM_MUSIC
                 eq(INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getVolume()
                         * STREAM_MUSIC_MAX_VOLUME / AudioStatus.MAX_VOLUME),
-                eq(AudioManager.FLAG_ABSOLUTE_VOLUME | AudioManager.FLAG_SHOW_UI));
-        // adjustStreamVolume is not called because mute status didn't change,
-        // and setStreamVolume is sufficient to show volume UI
-        verify(mAudioManager, never()).adjustStreamVolume(
-                eq(AudioManager.STREAM_MUSIC),
-                eq(AudioManager.ADJUST_UNMUTE),
                 eq(AudioManager.FLAG_ABSOLUTE_VOLUME | AudioManager.FLAG_SHOW_UI));
     }
 }

@@ -20,6 +20,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
+import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationSpec.createShowSnapshotForClosingAnimation;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackgroundToTransition;
@@ -45,7 +46,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationAdapter.SnapshotAdapter;
 import com.android.wm.shell.common.ScreenshotUtils;
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -328,6 +329,11 @@ class ActivityEmbeddingAnimationRunner {
         for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
             final Animation animation = adapter.mAnimation;
             if (!animation.hasExtension()) {
+                continue;
+            }
+            if (adapter.mChange.hasFlags(FLAG_TRANSLUCENT)
+                    && adapter.mChange.getActivityComponent() != null) {
+                // Skip edge extension for translucent activity.
                 continue;
             }
             final TransitionInfo.Change change = adapter.mChange;

@@ -18,7 +18,8 @@ package com.android.connectivitymanagertest.functional;
 
 import android.net.wifi.WifiConfiguration;
 import android.os.SystemClock;
-import android.test.suitebuilder.annotation.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
 import com.android.connectivitymanagertest.WifiConfigurationHelper;

@@ -4,6 +4,14 @@ container: "system"
 # Important: Flags must be accessed through DisplayManagerFlags.
 
 flag {
+    name: "enable_port_in_display_layout"
+    namespace: "display_manager"
+    description: "Allows refering to displays by port in display layout"
+    bug: "303058435"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_connected_display_management"
     namespace: "display_manager"
     description: "Feature flag for Connected Display management"
@@ -102,7 +110,7 @@ flag {
     name: "back_up_smooth_display_and_force_peak_refresh_rate"
     namespace: "display_manager"
     description: "Feature flag for backing up Smooth Display and Force Peak Refresh Rate"
-    bug: "211737588"
+    bug: "299552529"
     is_fixed_read_only: true
 }
 
@@ -118,7 +126,7 @@ flag {
     name: "brightness_int_range_user_perception"
     namespace: "display_manager"
     description: "Feature flag for converting the brightness integer range to the user perception scale"
-    bug: "183655602"
+    bug: "319236956"
     is_fixed_read_only: true
 }
 
@@ -127,6 +135,22 @@ flag {
     namespace: "display_manager"
     description: "Feature flag for external vsync proximity vote"
     bug: "284866750"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_vsync_low_power_vote"
+    namespace: "display_manager"
+    description: "Feature flag for vsync low power vote"
+    bug: "314920284"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_vsync_low_light_vote"
+    namespace: "display_manager"
+    description: "Feature flag for vsync low light vote"
+    bug: "314921657"
     is_fixed_read_only: true
 }
 
@@ -154,3 +178,18 @@ flag {
     is_fixed_read_only: true
 }
 
+flag {
+    name: "refresh_rate_voting_telemetry"
+    namespace: "display_manager"
+    description: "Feature flag for enabling telemetry for refresh rate voting in DisplayManager"
+    bug: "310029108"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "sensor_based_brightness_throttling"
+    namespace: "display_manager"
+    description: "Feature flag for enabling brightness throttling using sensor from config."
+    bug: "294900859"
+    is_fixed_read_only: true
+}

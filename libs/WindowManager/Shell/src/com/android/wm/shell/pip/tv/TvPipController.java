@@ -223,10 +223,9 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mShellController = shellController;
         mDisplayController = displayController;
 
-        DisplayLayout layout = new DisplayLayout(context, context.getDisplay());
-
         mTvPipBoundsState = tvPipBoundsState;
 
+        DisplayLayout layout = new DisplayLayout(context, context.getDisplay());
         mPipDisplayLayoutState = pipDisplayLayoutState;
         mPipDisplayLayoutState.setDisplayLayout(layout);
         mPipDisplayLayoutState.setDisplayId(context.getDisplayId());
@@ -291,12 +290,31 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mPipNotificationController.onConfigurationChanged();
         mTvPipBoundsAlgorithm.onConfigurationChanged(mContext);
         mTvPipBoundsState.onConfigurationChanged();
+        mPipDisplayLayoutState.onConfigurationChanged();
 
         int defaultGravityX = mTvPipBoundsState.getDefaultGravity()
                 & Gravity.HORIZONTAL_GRAVITY_MASK;
         if (isPipShown() && previousDefaultGravityX != defaultGravityX) {
             movePipToOppositeSide();
         }
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: onDensityOrFontScaleChanged()", TAG);
+        updatePinnedStackBounds();
+        mTvPipMenuController.reloadMenu();
+    }
+
+    @Override
+    public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: onDisplayConfigurationChanged(), displayId %d, saved display id %d",
+                TAG, displayId, mPipDisplayLayoutState.getDisplayId());
+        mPipDisplayLayoutState.setDisplayLayout(
+                new DisplayLayout(mContext, mContext.getDisplay()));
+        mPipDisplayLayoutState.setDisplayId(mContext.getDisplayId());
     }
 
     private void reloadResources() {

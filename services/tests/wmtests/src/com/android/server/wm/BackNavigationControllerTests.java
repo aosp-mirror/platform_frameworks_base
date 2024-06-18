@@ -69,6 +69,7 @@ import android.window.TaskSnapshot;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.server.LocalServices;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,6 +82,12 @@ import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Tests for the {@link BackNavigationController} class.
+ *
+ * Build/Install/Run:
+ *  atest WmTests:BackNavigationControllerTests
+ */
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class BackNavigationControllerTests extends WindowTestsBase {
@@ -464,9 +471,10 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         // Simulate ActivityOptions#makeSceneTransitionAnimation
         final Bundle myBundle = new Bundle();
         myBundle.putInt(ActivityOptions.KEY_ANIM_TYPE, ANIM_SCENE_TRANSITION);
-        myBundle.putParcelable("android:activity.transitionCompleteListener",
-                mock(android.os.ResultReceiver.class));
         final ActivityOptions options = new ActivityOptions(myBundle);
+        final ActivityOptions.SceneTransitionInfo info = new ActivityOptions.SceneTransitionInfo();
+        info.setResultReceiver(mock(android.os.ResultReceiver.class));
+        options.setSceneTransitionInfo(info);
 
         final ActivityRecord testActivity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
@@ -622,6 +630,22 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 0, navigationObserver.getCount());
     }
 
+    @Test
+    public void testAdjacentFocusInActivityEmbedding() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_EMBEDDED_ACTIVITY_BACK_NAV_FLAG);
+        Task task = createTask(mDefaultDisplay);
+        TaskFragment primary = createTaskFragmentWithActivity(task);
+        TaskFragment secondary = createTaskFragmentWithActivity(task);
+        primary.setAdjacentTaskFragment(secondary);
+        secondary.setAdjacentTaskFragment(primary);
+
+        WindowState windowState = mock(WindowState.class);
+        doReturn(windowState).when(mWm).getFocusedWindowLocked();
+        doReturn(primary).when(windowState).getTaskFragment();
+
+        startBackNavigation();
+        verify(mWm).moveFocusToActivity(any());
+    }
 
     /**
      * Test with
@@ -741,7 +765,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         MockitoSession mockitoSession = mockitoSession().mockStatic(BackNavigationController.class)
                 .strictness(Strictness.LENIENT).startMocking();
-        doReturn(taskSnapshot).when(() -> BackNavigationController.getSnapshot(any()));
+        doReturn(taskSnapshot).when(() -> BackNavigationController.getSnapshot(any(), any()));
         when(resourcesSpy.getBoolean(
                 com.android.internal.R.bool.config_predictShowStartingSurface))
                 .thenReturn(preferWindowlessSurface);

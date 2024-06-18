@@ -38,9 +38,9 @@ import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DialogCuj;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
@@ -83,7 +83,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final CastController mController;
     private final KeyguardStateController mKeyguard;
     private final NetworkController mNetworkController;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final Callback mCallback = new Callback();
     private final TileJavaAdapter mJavaAdapter;
     private final FeatureFlags mFeatureFlags;
@@ -105,7 +105,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
             KeyguardStateController keyguardStateController,
             NetworkController networkController,
             HotspotController hotspotController,
-            DialogLaunchAnimator dialogLaunchAnimator,
+            DialogTransitionAnimator dialogTransitionAnimator,
             ConnectivityRepository connectivityRepository,
             TileJavaAdapter javaAdapter,
             FeatureFlags featureFlags
@@ -115,7 +115,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
         mController = castController;
         mKeyguard = keyguardStateController;
         mNetworkController = networkController;
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mJavaAdapter = javaAdapter;
         mFeatureFlags = featureFlags;
         mController.observe(this, mCallback);
@@ -222,8 +222,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
                     mContext,
                     ROUTE_TYPE_REMOTE_DISPLAY,
                     v -> {
-                        ActivityLaunchAnimator.Controller controller =
-                                mDialogLaunchAnimator.createActivityLaunchController(v);
+                        ActivityTransitionAnimator.Controller controller =
+                                mDialogTransitionAnimator.createActivityTransitionController(v);
 
                         if (controller == null) {
                             holder.mDialog.dismiss();
@@ -241,7 +241,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
 
             mUiHandler.post(() -> {
                 if (view != null) {
-                    mDialogLaunchAnimator.showFromView(dialog, view,
+                    mDialogTransitionAnimator.showFromView(dialog, view,
                             new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
                                     INTERACTION_JANK_TAG));
                 } else {

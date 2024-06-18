@@ -25,6 +25,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 
 import android.annotation.Nullable;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
@@ -48,8 +49,10 @@ import java.util.Map;
 @RunWith(AndroidJUnit4.class)
 public final class OverrideRequestControllerTest {
 
-    private static final DeviceState TEST_DEVICE_STATE_ZERO = new DeviceState(0, "TEST_STATE", 0);
-    private static final DeviceState TEST_DEVICE_STATE_ONE = new DeviceState(1, "TEST_STATE", 0);
+    private static final DeviceState
+            TEST_DEVICE_STATE_ZERO = new DeviceState(0, "TEST_STATE", 0);
+    private static final DeviceState
+            TEST_DEVICE_STATE_ONE = new DeviceState(1, "TEST_STATE", 0);
 
     private TestStatusChangeListener mStatusListener;
     private OverrideRequestController mController;

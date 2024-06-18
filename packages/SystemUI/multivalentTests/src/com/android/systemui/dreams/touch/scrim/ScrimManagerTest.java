@@ -39,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@android.platform.test.annotations.EnabledOnRavenwood
 public class ScrimManagerTest extends SysuiTestCase {
     @Mock
     ScrimController mBouncerlessScrimController;

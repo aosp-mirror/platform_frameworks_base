@@ -64,7 +64,8 @@ constructor(
             fun maybeSend(profiles: List<UserInfo>) {
                 if (profiles.any { it.id == userId }) {
                     // We are looking at the profiles of the correct user.
-                    if (profiles.any { it.isManagedProfile }) {
+                    // They need to be a managed enabled profile.
+                    if (profiles.any { it.isManagedProfile && it.isEnabled }) {
                         trySend(
                             AutoAddSignal.Add(
                                 spec,

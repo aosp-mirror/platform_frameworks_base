@@ -33,10 +33,20 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
  * {@link com.android.systemui.keyguard.KeyguardViewMediator} and others.
  */
 public interface ShadeController extends CoreStartable {
-    /** True if the shade UI is enabled on this particular Android variant and false otherwise. */
+    /**
+     * True if the shade UI is enabled on this particular Android variant and false otherwise.
+     *
+     * @deprecated use ShadeInteractor instead
+     */
+    @Deprecated
     boolean isShadeEnabled();
 
-    /** Make our window larger and the shade expanded */
+    /**
+     * Make our window larger and the shade expanded
+     *
+     * @deprecated will no longer be needed when keyguard is a sibling view to the shade
+     */
+    @Deprecated
     void instantExpandShade();
 
     /** Collapse the shade instantly with no animation. */
@@ -68,19 +78,42 @@ public interface ShadeController extends CoreStartable {
      */
     void animateCollapseShade(int flags, boolean force, boolean delayed, float speedUpFactor);
 
+    /**
+     * Collapses the shade with an animation duration in milliseconds.
+     *
+     * @deprecated use animateCollapseShade with a speed up factor instead
+     */
+    @Deprecated
+    void collapseWithDuration(int animationDuration);
+
     /** Expand the shade with an animation. */
     void animateExpandShade();
 
     /** Expand the shade with quick settings expanded with an animation. */
     void animateExpandQs();
 
-    /** Posts a request to collapse the shade. */
+    /**
+     * Posts a request to collapse the shade.
+     *
+     * @deprecated use #animateCollapseShade
+     */
+    @Deprecated
     void postAnimateCollapseShade();
 
-    /** Posts a request to force collapse the shade. */
+    /**
+     * Posts a request to force collapse the shade.
+     *
+     * @deprecated use #animateForceCollapseShade
+     */
+    @Deprecated
     void postAnimateForceCollapseShade();
 
-    /** Posts a request to expand the shade to quick settings. */
+    /**
+     * Posts a request to expand the shade to quick settings.
+     *
+     * @deprecated use #animateExpandQs
+     */
+    @Deprecated
     void postAnimateExpandQs();
 
     /** Cancels any ongoing expansion touch handling and collapses the shade. */
@@ -90,13 +123,10 @@ public interface ShadeController extends CoreStartable {
      * If the shade is not fully expanded, collapse it animated.
      *
      * @return Seems to always return false
+     * @deprecated use {@link #collapseShade()} instead
      */
+    @Deprecated
     boolean closeShadeIfOpen();
-
-    /**
-     * Returns whether the shade state is the keyguard or not.
-     */
-    boolean isKeyguard();
 
     /**
      * Returns whether the shade is currently open.
@@ -104,12 +134,18 @@ public interface ShadeController extends CoreStartable {
      * method makes distinction between shade being truly open and plain keyguard state:
      * - if QS and notifications are visible on the screen, return true
      * - for any other state, including keyguard, return false
+     *
+     * @deprecated will be replaced by ShadeInteractor once scene container launches
      */
+    @Deprecated
     boolean isShadeFullyOpen();
 
     /**
      * Returns whether shade or QS are currently opening or collapsing.
+     *
+     * @deprecated will be replaced by ShadeInteractor once scene container launches
      */
+    @Deprecated
     boolean isExpandingOrCollapsing();
 
     /**
@@ -127,37 +163,67 @@ public interface ShadeController extends CoreStartable {
      */
     void addPostCollapseAction(Runnable action);
 
-    /** Run all of the runnables added by {@link #addPostCollapseAction}. */
-    void runPostCollapseRunnables();
-
     /**
      * Close the shade if it was open
      *
      * @return true if the shade was open, else false
      */
-    boolean collapseShade();
+    void collapseShade();
 
     /**
      * If animate is true, does the same as {@link #collapseShade()}. Otherwise, instantly collapse
      * the shade. Post collapse runnables will be executed
      *
      * @param animate true to animate the collapse, false for instantaneous collapse
+     * @deprecated call either #animateCollapseShade or #instantCollapseShade
      */
+    @Deprecated
     void collapseShade(boolean animate);
 
-    /** Calls #collapseShade if already on the main thread. If not, posts a call to it. */
+    /**
+     * Calls #collapseShade if already on the main thread. If not, posts a call to it.
+     * @deprecated call #collapseShade
+     */
+    @Deprecated
     void collapseOnMainThread();
 
-    /** Makes shade expanded but not visible. */
+    /**
+     *  If necessary, instantly collapses the shade for an activity start, otherwise runs the
+     *  post-collapse runnables. Instant collapse is ok here, because the purpose is to have the
+     *  shade collapsed when the user returns to SysUI from the launched activity.
+     */
+    void collapseShadeForActivityStart();
+
+    /**
+     * Makes shade expanded but not visible.
+     *
+     * @deprecated no longer needed once keyguard is a sibling view to the shade
+     */
+    @Deprecated
     void makeExpandedInvisible();
 
-    /** Makes shade expanded and visible. */
+    /**
+     * Makes shade expanded and visible.
+     *
+     * @deprecated no longer needed once keyguard is a sibling view to the shade
+     */
+    @Deprecated
     void makeExpandedVisible(boolean force);
 
-    /** Returns whether the shade is expanded and visible. */
+    /**
+     * Returns whether the shade is expanded and visible.
+     *
+     * @deprecated no longer needed once keyguard is a sibling view to the shade
+     */
+    @Deprecated
     boolean isExpandedVisible();
 
-    /** Handle status bar touch event. */
+    /**
+     * Handle status bar touch event.
+     *
+     * @deprecated only called by CentralSurfaces, which is being deleted
+     */
+    @Deprecated
     void onStatusBarTouch(MotionEvent event);
 
     /** Called when a launch animation was cancelled. */

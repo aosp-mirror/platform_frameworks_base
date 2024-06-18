@@ -62,6 +62,8 @@ import java.util.function.Consumer;
  */
 class InsetsSourceProvider {
 
+    private static final Rect EMPTY_RECT = new Rect();
+
     protected final DisplayContent mDisplayContent;
     protected final @NonNull InsetsSource mSource;
     protected WindowContainer mWindowContainer;
@@ -176,6 +178,7 @@ class InsetsSourceProvider {
             mWindowContainer.cancelAnimation();
             mWindowContainer.getInsetsSourceProviders().remove(mSource.getId());
             mSeamlessRotating = false;
+            mHasPendingPosition = false;
         }
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "InsetsSource setWin %s for type %s",
                 windowContainer, WindowInsets.Type.toString(mSource.getType()));
@@ -286,12 +289,15 @@ class InsetsSourceProvider {
 
     private void updateSourceFrameForServerVisibility() {
         // Make sure we set the valid source frame only when server visible is true, because the
-        // frame may not yet determined that server side doesn't think the window is ready to
+        // frame may not yet be determined that server side doesn't think the window is ready to
         // visible. (i.e. No surface, pending insets that were given during layout, etc..)
-        if (mServerVisible) {
-            mSource.setFrame(mSourceFrame);
-        } else {
-            mSource.setFrame(0, 0, 0, 0);
+        final Rect frame = mServerVisible ? mSourceFrame : EMPTY_RECT;
+        if (mSource.getFrame().equals(frame)) {
+            return;
+        }
+        mSource.setFrame(frame);
+        if (mWindowContainer != null) {
+            mSource.updateSideHint(mWindowContainer.getBounds());
         }
     }
 
@@ -631,7 +637,7 @@ class InsetsSourceProvider {
         }
         pw.print(prefix);
         pw.print("mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);
-        pw.print("mHasPendingPosition="); pw.print(mHasPendingPosition);
+        pw.print(" mHasPendingPosition="); pw.print(mHasPendingPosition);
         pw.println();
         if (mWindowContainer != null) {
             pw.print(prefix + "mWindowContainer=");

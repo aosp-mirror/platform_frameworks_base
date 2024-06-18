@@ -17,6 +17,7 @@
 package android.graphics;
 
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
+import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
 
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
@@ -133,7 +134,9 @@ public class Paint {
             FAKE_BOLD_TEXT_FLAG,
             LINEAR_TEXT_FLAG,
             SUBPIXEL_TEXT_FLAG,
-            EMBEDDED_BITMAP_TEXT_FLAG
+            EMBEDDED_BITMAP_TEXT_FLAG,
+            TEXT_RUN_FLAG_LEFT_EDGE,
+            TEXT_RUN_FLAG_RIGHT_EDGE
     })
     public @interface PaintFlag{}
 
@@ -263,6 +266,66 @@ public class Paint {
     public static final int AUTO_HINTING_TEXT_FLAG = 0x800;
     /** @hide bit mask for the flag enabling vertical rendering for text */
     public static final int VERTICAL_TEXT_FLAG = 0x1000;
+
+    /**
+     * A text run flag that indicates the run is located the visually most left segment of the line.
+     * <p>
+     * This flag is used for telling the underlying text layout engine that the text is located at
+     * the most left of the line. This flag is used for controlling the amount letter spacing
+     * added. If the text is in the middle of the line, the text layout engine assigns additional
+     * letter spacing to the both side of each letter. On the other hand, the letter spacing should
+     * not be added to the visually most left and right of the line. By setting this flag, text
+     * layout engine calculates the layout as it is located at the most visually left of the line
+     * and doesn't add letter spacing to the left of this run.
+     * <p>
+     * Note that the caller must resolve BiDi runs and reorder them visually and set this flag only
+     * if the target run is located visually most left position. This left does not always mean the
+     * beginning of the text.
+     * <p>
+     * If the run covers entire line, caller should set {@link #TEXT_RUN_FLAG_RIGHT_EDGE} as well.
+     * <p>
+     * Note that this flag is only effective for run based APIs. For example, this flag works for
+     * {@link Canvas#drawTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)}
+     * and
+     * {@link Paint#getRunCharacterAdvance(char[], int, int, int, int, boolean, int, float[], int)}.
+     * However, this doesn't work for
+     * {@link Canvas#drawText(CharSequence, int, int, float, float, Paint)} or
+     * {@link Paint#measureText(CharSequence, int, int)}. The non-run based APIs works as both
+     * {@link #TEXT_RUN_FLAG_LEFT_EDGE} and {@link #TEXT_RUN_FLAG_RIGHT_EDGE} are specified.
+     */
+    @FlaggedApi(FLAG_LETTER_SPACING_JUSTIFICATION)
+    public static final int TEXT_RUN_FLAG_LEFT_EDGE = 0x2000;
+
+
+    /**
+     * A text run flag that indicates the run is located the visually most right segment of the
+     * line.
+     * <p>
+     * This flag is used for telling the underlying text layout engine that the text is located at
+     * the most right of the line. This flag is used for controlling the amount letter spacing
+     * added. If the text is in the middle of the line, the text layout engine assigns additional
+     * letter spacing to the both side of each letter. On the other hand, the letter spacing should
+     * not be added to the visually most left and right of the line. By setting this flag, text
+     * layout engine calculates the layout as it is located at the most visually left of the line
+     * and doesn't add letter spacing to the left of this run.
+     * <p>
+     * Note that the caller must resolve BiDi runs and reorder them visually and set this flag only
+     * if the target run is located visually most right position. This right does not always mean
+     * the end of the text.
+     * <p>
+     * If the run covers entire line, caller should set {@link #TEXT_RUN_FLAG_LEFT_EDGE} as well.
+     * <p>
+     * Note that this flag is only effective for run based APIs. For example, this flag works for
+     * {@link Canvas#drawTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)}
+     * and
+     * {@link Paint#getRunCharacterAdvance(char[], int, int, int, int, boolean, int, float[], int)}.
+     * However, this doesn't work for
+     * {@link Canvas#drawText(CharSequence, int, int, float, float, Paint)} or
+     * {@link Paint#measureText(CharSequence, int, int)}. The non-run based APIs works as both
+     * {@link #TEXT_RUN_FLAG_LEFT_EDGE} and {@link #TEXT_RUN_FLAG_RIGHT_EDGE} are specified.
+     */
+    @FlaggedApi(FLAG_LETTER_SPACING_JUSTIFICATION)
+    public static final int TEXT_RUN_FLAG_RIGHT_EDGE = 0x4000;
 
     // These flags are always set on a new/reset paint, even if flags 0 is passed.
     static final int HIDDEN_DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG
@@ -2474,6 +2537,19 @@ public class Paint {
         nGetFontMetricsInt(mNativePaint, metrics, true);
     }
 
+    /** @hide */
+    public static final class RunInfo {
+        private int mClusterCount = 0;
+
+        public int getClusterCount() {
+            return mClusterCount;
+        }
+
+        public void setClusterCount(int clusterCount) {
+            mClusterCount = clusterCount;
+        }
+    }
+
     /**
      * Return the recommend line spacing based on the current typeface and
      * text size.
@@ -2507,17 +2583,24 @@ public class Paint {
         if (text.length == 0 || count == 0) {
             return 0f;
         }
-        if (!mHasCompatScaling) {
-            return (float) Math.ceil(nGetTextAdvances(mNativePaint, text,
-                    index, count, index, count, mBidiFlags, null, 0));
-        }
+        int oldFlag = getFlags();
+        setFlags(getFlags() | (TEXT_RUN_FLAG_LEFT_EDGE | TEXT_RUN_FLAG_RIGHT_EDGE));
+        try {
 
-        final float oldSize = getTextSize();
-        setTextSize(oldSize * mCompatScaling);
-        final float w = nGetTextAdvances(mNativePaint, text, index, count, index, count,
-                mBidiFlags, null, 0);
-        setTextSize(oldSize);
-        return (float) Math.ceil(w*mInvCompatScaling);
+            if (!mHasCompatScaling) {
+                return (float) Math.ceil(nGetTextAdvances(mNativePaint, text,
+                        index, count, index, count, mBidiFlags, null, 0));
+            }
+
+            final float oldSize = getTextSize();
+            setTextSize(oldSize * mCompatScaling);
+            final float w = nGetTextAdvances(mNativePaint, text, index, count, index, count,
+                    mBidiFlags, null, 0);
+            setTextSize(oldSize);
+            return (float) Math.ceil(w * mInvCompatScaling);
+        } finally {
+            setFlags(oldFlag);
+        }
     }
 
     /**
@@ -2539,16 +2622,22 @@ public class Paint {
         if (text.length() == 0 || start == end) {
             return 0f;
         }
-        if (!mHasCompatScaling) {
-            return (float) Math.ceil(nGetTextAdvances(mNativePaint, text,
-                    start, end, start, end, mBidiFlags, null, 0));
+        int oldFlag = getFlags();
+        setFlags(getFlags() | (TEXT_RUN_FLAG_LEFT_EDGE | TEXT_RUN_FLAG_RIGHT_EDGE));
+        try {
+            if (!mHasCompatScaling) {
+                return (float) Math.ceil(nGetTextAdvances(mNativePaint, text,
+                        start, end, start, end, mBidiFlags, null, 0));
+            }
+            final float oldSize = getTextSize();
+            setTextSize(oldSize * mCompatScaling);
+            final float w = nGetTextAdvances(mNativePaint, text, start, end, start, end, mBidiFlags,
+                    null, 0);
+            setTextSize(oldSize);
+            return (float) Math.ceil(w * mInvCompatScaling);
+        } finally {
+            setFlags(oldFlag);
         }
-        final float oldSize = getTextSize();
-        setTextSize(oldSize * mCompatScaling);
-        final float w = nGetTextAdvances(mNativePaint, text, start, end, start, end, mBidiFlags,
-                null, 0);
-        setTextSize(oldSize);
-        return (float) Math.ceil(w * mInvCompatScaling);
     }
 
     /**
@@ -2753,19 +2842,26 @@ public class Paint {
         if (text.length == 0 || count == 0) {
             return 0;
         }
-        if (!mHasCompatScaling) {
-            nGetTextAdvances(mNativePaint, text, index, count, index, count, mBidiFlags, widths, 0);
-            return count;
-        }
+        int oldFlag = getFlags();
+        setFlags(getFlags() | (TEXT_RUN_FLAG_LEFT_EDGE | TEXT_RUN_FLAG_RIGHT_EDGE));
+        try {
+            if (!mHasCompatScaling) {
+                nGetTextAdvances(mNativePaint, text, index, count, index, count, mBidiFlags, widths,
+                        0);
+                return count;
+            }
 
-        final float oldSize = getTextSize();
-        setTextSize(oldSize * mCompatScaling);
-        nGetTextAdvances(mNativePaint, text, index, count, index, count, mBidiFlags, widths, 0);
-        setTextSize(oldSize);
-        for (int i = 0; i < count; i++) {
-            widths[i] *= mInvCompatScaling;
+            final float oldSize = getTextSize();
+            setTextSize(oldSize * mCompatScaling);
+            nGetTextAdvances(mNativePaint, text, index, count, index, count, mBidiFlags, widths, 0);
+            setTextSize(oldSize);
+            for (int i = 0; i < count; i++) {
+                widths[i] *= mInvCompatScaling;
+            }
+            return count;
+        } finally {
+            setFlags(oldFlag);
         }
-        return count;
     }
 
     /**
@@ -2836,19 +2932,25 @@ public class Paint {
         if (text.length() == 0 || start == end) {
             return 0;
         }
-        if (!mHasCompatScaling) {
-            nGetTextAdvances(mNativePaint, text, start, end, start, end, mBidiFlags, widths, 0);
-            return end - start;
-        }
+        int oldFlag = getFlags();
+        setFlags(getFlags() | (TEXT_RUN_FLAG_LEFT_EDGE | TEXT_RUN_FLAG_RIGHT_EDGE));
+        try {
+            if (!mHasCompatScaling) {
+                nGetTextAdvances(mNativePaint, text, start, end, start, end, mBidiFlags, widths, 0);
+                return end - start;
+            }
 
-        final float oldSize = getTextSize();
-        setTextSize(oldSize * mCompatScaling);
-        nGetTextAdvances(mNativePaint, text, start, end, start, end, mBidiFlags, widths, 0);
-        setTextSize(oldSize);
-        for (int i = 0; i < end - start; i++) {
-            widths[i] *= mInvCompatScaling;
+            final float oldSize = getTextSize();
+            setTextSize(oldSize * mCompatScaling);
+            nGetTextAdvances(mNativePaint, text, start, end, start, end, mBidiFlags, widths, 0);
+            setTextSize(oldSize);
+            for (int i = 0; i < end - start; i++) {
+                widths[i] *= mInvCompatScaling;
+            }
+            return end - start;
+        } finally {
+            setFlags(oldFlag);
         }
-        return end - start;
     }
 
     /**
@@ -3320,7 +3422,7 @@ public class Paint {
             int contextEnd, boolean isRtl, int offset,
             @Nullable float[] advances, int advancesIndex) {
         return getRunCharacterAdvance(text, start, end, contextStart, contextEnd, isRtl, offset,
-                advances, advancesIndex, null);
+                advances, advancesIndex, null, null);
     }
 
     /**
@@ -3339,12 +3441,14 @@ public class Paint {
      * @param advances the array that receives the computed character advances
      * @param advancesIndex the start index from which the advances array is filled
      * @param drawBounds the output parameter for the bounding box of drawing text, optional
+     * @param runInfo the output parameter for storing run information.
      * @return width measurement between start and offset
-     * @hide
+     * @hide TODO: Reorganize APIs
      */
     public float getRunCharacterAdvance(@NonNull char[] text, int start, int end, int contextStart,
             int contextEnd, boolean isRtl, int offset,
-            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds) {
+            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds,
+            @Nullable RunInfo runInfo) {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -3370,11 +3474,14 @@ public class Paint {
         }
 
         if (end == start) {
+            if (runInfo != null) {
+                runInfo.setClusterCount(0);
+            }
             return 0.0f;
         }
 
         return nGetRunCharacterAdvance(mNativePaint, text, start, end, contextStart, contextEnd,
-                isRtl, offset, advances, advancesIndex, drawBounds);
+                isRtl, offset, advances, advancesIndex, drawBounds, runInfo);
     }
 
     /**
@@ -3402,7 +3509,7 @@ public class Paint {
             int contextStart, int contextEnd, boolean isRtl, int offset,
             @Nullable float[] advances, int advancesIndex) {
         return getRunCharacterAdvance(text, start, end, contextStart, contextEnd, isRtl, offset,
-                advances, advancesIndex, null);
+                advances, advancesIndex, null, null);
     }
 
     /**
@@ -3418,12 +3525,14 @@ public class Paint {
      * @param advances the array that receives the computed character advances
      * @param advancesIndex the start index from which the advances array is filled
      * @param drawBounds the output parameter for the bounding box of drawing text, optional
+     * @param runInfo an optional output parameter for filling run information.
      * @return width measurement between start and offset
-     * @hide
+     * @hide  TODO: Reorganize APIs
      */
     public float getRunCharacterAdvance(@NonNull CharSequence text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, int offset,
-            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds) {
+            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds,
+            @Nullable RunInfo runInfo) {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -3456,7 +3565,7 @@ public class Paint {
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
         final float result = getRunCharacterAdvance(buf, start - contextStart, end - contextStart,
                 0, contextEnd - contextStart, isRtl, offset - contextStart,
-                advances, advancesIndex, drawBounds);
+                advances, advancesIndex, drawBounds, runInfo);
         TemporaryBuffer.recycle(buf);
         return result;
     }
@@ -3574,7 +3683,7 @@ public class Paint {
             int contextStart, int contextEnd, boolean isRtl, int offset);
     private static native float nGetRunCharacterAdvance(long paintPtr, char[] text, int start,
             int end, int contextStart, int contextEnd, boolean isRtl, int offset, float[] advances,
-            int advancesIndex, RectF drawingBounds);
+            int advancesIndex, RectF drawingBounds, RunInfo runInfo);
     private static native int nGetOffsetForAdvance(long paintPtr, char[] text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, float advance);
     private static native void nGetFontMetricsIntForText(long paintPtr, char[] text,
@@ -3729,4 +3838,11 @@ public class Paint {
     private static native void nSetTextSize(long paintPtr, float textSize);
     @CriticalNative
     private static native boolean nEqualsForTextMeasurement(long leftPaintPtr, long rightPaintPtr);
+
+
+    // Following Native methods are kept for old Robolectric JNI signature used by
+    // SystemUIGoogleRoboRNGTests
+    private static native float nGetRunCharacterAdvance(long paintPtr, char[] text,
+            int start, int end, int contextStart, int contextEnd, boolean isRtl, int offset,
+            float[] advances, int advancesIndex, RectF drawingBounds);
 }

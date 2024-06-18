@@ -1,55 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="5" by="lint 4.1.0" client="cli" variant="all" version="4.1.0">
+<issues format="6" by="lint 8.4.0-alpha01" type="baseline" client="" dependencies="true" name="" variant="all" version="8.4.0-alpha01">
 
     <issue
         id="NewApi"
-        message="Call requires API level 24 (current min is 21): `java.lang.Iterable#forEach`"
-        errorLine1="        controllers.forEach(controller -&gt; {"
-        errorLine2="                    ~~~~~~~">
-        <location
-            file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/SwitchesProvider.java"
-            line="79"
-            column="21"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 23 (current min is 21): `android.graphics.drawable.Icon#createWithResource`">
+        message="Call requires API level 29 (current min is 21): `android.os.Parcel#writeBoolean`"
+        errorLine1="        dest.writeBoolean(this instanceof ProviderTile);"
+        errorLine2="             ~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/Tile.java"
-            line="312"/>
+            line="114"
+            column="14"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 23 (current min is 21): `android.graphics.drawable.Icon#setTint`">
+        message="Call requires API level 23 (current min is 21): `android.graphics.drawable.Icon#createWithResource`"
+        errorLine1="            final Icon icon = Icon.createWithResource(componentInfo.packageName, iconResId);"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/Tile.java"
-            line="318"/>
+            line="326"
+            column="36"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 29 (current min is 21): `android.os.Parcel#readBoolean`">
+        message="Call requires API level 23 (current min is 21): `android.graphics.drawable.Icon#setTint`"
+        errorLine1="                icon.setTint(tintColor);"
+        errorLine2="                     ~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/Tile.java"
-            line="373"/>
+            line="332"
+            column="22"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 29 (current min is 21): `android.os.Parcel#writeBoolean`">
+        message="Call requires API level 29 (current min is 21): `android.os.Parcel#readBoolean`"
+        errorLine1="            final boolean isProviderTile = source.readBoolean();"
+        errorLine2="                                                  ~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/Tile.java"
-            line="108"/>
+            line="387"
+            column="51"/>
     </issue>
 
     <issue
         id="NewApi"
-        message="Call requires API level 31 (current min is 21): `android.content.Context#getAttributionSource`">
+        message="Call requires API level 31 (current min is 21): `android.content.Context#getAttributionSource`"
+        errorLine1="            return provider.call(context.getAttributionSource(),"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/TileUtils.java"
-            line="565"/>
+            line="601"
+            column="42"/>
     </issue>
 
 </issues>

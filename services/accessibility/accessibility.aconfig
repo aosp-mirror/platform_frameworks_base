@@ -11,10 +11,24 @@ flag {
 }
 
 flag {
+    name: "resettable_dynamic_properties"
+    namespace: "accessibility"
+    description: "Maintains initial copies of a11yServiceInfo dynamic properties so they can reset on disconnect."
+    bug: "312386990"
+}
+
+flag {
     name: "cleanup_a11y_overlays"
     namespace: "accessibility"
     description: "Removes all attached accessibility overlays when a service is removed."
     bug: "271490102"
+}
+
+flag {
+    name: "compute_window_changes_on_a11y"
+    namespace: "accessibility"
+    description: "Computes accessibility window changes in accessibility instead of wm package."
+    bug: "322444245"
 }
 
 flag {
@@ -46,6 +60,30 @@ flag {
 }
 
 flag {
+    name: "fix_drag_pointer_when_ending_drag"
+    namespace: "accessibility"
+    description: "Send the correct pointer id when transitioning from dragging to delegating states."
+    bug: "300002193"
+}
+
+flag {
+    name: "fullscreen_fling_gesture"
+    namespace: "accessibility"
+    description: "When true, adds a fling gesture animation for fullscreen magnification"
+    bug: "319175022"
+}
+
+flag {
+    name: "handle_multi_device_input"
+    namespace: "accessibility"
+    description: "Select a single active device when a multi-device stream is received by AccessibilityInputFilter"
+    bug: "310014874"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "pinch_zoom_zero_min_span"
     namespace: "accessibility"
     description: "Whether to set min span of ScaleGestureDetector to zero."
@@ -60,10 +98,13 @@ flag {
 }
 
 flag {
-    name: "reduce_touch_exploration_sensitivity"
+    name: "reset_hover_event_timer_on_action_up"
     namespace: "accessibility"
-    description: "Reduces touch exploration sensitivity by only sending a hover event when the ifnger has moved the amount of pixels defined by the system's touch slop."
-    bug: "303677860"
+    description: "Reset the timer for sending hover events on receiving ACTION_UP to guarantee the correct amount of time is available between taps."
+    bug: "326260351"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

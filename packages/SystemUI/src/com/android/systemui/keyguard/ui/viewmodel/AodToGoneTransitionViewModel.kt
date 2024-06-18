@@ -16,14 +16,16 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 
 /** Breaks down AOD->GONE transition into discrete steps for corresponding views to consume. */
 @ExperimentalCoroutinesApi
@@ -31,15 +33,25 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class AodToGoneTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromAodTransitionInteractor.TO_GONE_DURATION,
-            stepFlow = interactor.transition(KeyguardState.AOD, KeyguardState.GONE),
+            from = KeyguardState.AOD,
+            to = KeyguardState.GONE,
         )
+
+    fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        return transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStart = { startAlpha = viewState.alpha() },
+            onStep = { MathUtils.lerp(startAlpha, 0f, it) },
+            onFinish = { 0f },
+        )
+    }
 
     override val deviceEntryParentViewAlpha = transitionAnimation.immediatelyTransitionTo(0f)
 }

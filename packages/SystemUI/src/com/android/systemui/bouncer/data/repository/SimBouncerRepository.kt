@@ -92,7 +92,7 @@ constructor(
     keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val subscriptionManager: SubscriptionManagerProxy,
     broadcastDispatcher: BroadcastDispatcher,
-    euiccManager: EuiccManager,
+    euiccManager: EuiccManager?,
 ) : SimBouncerRepository {
     private val isPukScreenAvailable: Boolean =
         resources.getBoolean(com.android.internal.R.bool.config_enable_puk_unlock_screen)
@@ -163,7 +163,9 @@ constructor(
     @SuppressLint("MissingPermission")
     override val isLockedEsim: StateFlow<Boolean?> =
         activeSubscriptionInfo
-            .map { info -> info?.let { euiccManager.isEnabled && info.isEmbedded } }
+            .map { info ->
+                info?.let { euiccManager != null && euiccManager.isEnabled && info.isEmbedded }
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,

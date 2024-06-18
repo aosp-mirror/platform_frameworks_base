@@ -32,6 +32,7 @@ android_library {
         "unsupportedappusage",
     ],
     static_libs: [
+        "aconfig_demo_flags_java_lib",
         "device_config_service_flags_java",
         "libaconfig_java_proto_lite",
         "SettingsLibDeviceStateRotationLock",
@@ -59,10 +60,11 @@ android_test {
         // Note we statically link SettingsProviderLib to do some unit tests.  It's not accessible otherwise
         // because this test is not an instrumentation test. (because the target runs in the system process.)
         "SettingsProviderLib",
-
         "androidx.test.rules",
+        "device_config_service_flags_java",
         "flag-junit",
         "junit",
+        "libaconfig_java_proto_lite",
         "mockito-target-minus-junit4",
         "platform-test-annotations",
         "truth",

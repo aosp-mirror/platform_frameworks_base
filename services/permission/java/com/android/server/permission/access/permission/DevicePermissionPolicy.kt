@@ -94,7 +94,9 @@ class DevicePermissionPolicy : SchemePolicy() {
         isSystemUpdated: Boolean
     ) {
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]!!
+            // The package may still be removed even if it was once notified as installed.
+            val packageState =
+                newState.externalState.packageStates[packageName] ?: return@forEachIndexed
             trimPermissionStates(packageState.appId)
         }
     }
@@ -127,7 +129,10 @@ class DevicePermissionPolicy : SchemePolicy() {
         val packageState = newState.externalState.packageStates[packageName] ?: return
         val androidPackage = packageState.androidPackage ?: return
         val appId = packageState.appId
-        val appIdPermissionFlags = newState.userStates[userId]!!.appIdDevicePermissionFlags
+        // The user may happen removed due to DeletePackageHelper.removeUnusedPackagesLPw() calling
+        // deletePackageX() asynchronously.
+        val userState = newState.userStates[userId] ?: return
+        val devicePermissionFlags = userState.appIdDevicePermissionFlags[appId] ?: return
         androidPackage.requestedPermissions.forEach { permissionName ->
             val isRequestedByOtherPackages =
                 anyPackageInAppId(appId) {
@@ -137,7 +142,7 @@ class DevicePermissionPolicy : SchemePolicy() {
             if (isRequestedByOtherPackages) {
                 return@forEach
             }
-            appIdPermissionFlags[appId]?.forEachIndexed { _, deviceId, _ ->
+            devicePermissionFlags.forEachIndexed { _, deviceId, _ ->
                 setPermissionFlags(appId, deviceId, userId, permissionName, 0)
             }
         }
@@ -221,6 +226,16 @@ class DevicePermissionPolicy : SchemePolicy() {
         return flags
     }
 
+    fun GetStateScope.getAllPermissionFlags(
+        appId: Int,
+        persistentDeviceId: String,
+        userId: Int
+    ): IndexedMap<String, Int>? =
+        state.userStates[userId]
+            ?.appIdDevicePermissionFlags
+            ?.get(appId)
+            ?.get(persistentDeviceId)
+
     fun MutateStateScope.setPermissionFlags(
         appId: Int,
         deviceId: String,
@@ -245,6 +260,13 @@ class DevicePermissionPolicy : SchemePolicy() {
         flagMask: Int,
         flagValues: Int
     ): Boolean {
+        if (userId !in newState.userStates) {
+            // Despite that we check UserManagerInternal.exists() in PermissionService, we may still
+            // sometimes get race conditions between that check and the actual mutateState() call.
+            // This should rarely happen but at least we should not crash.
+            Slog.e(LOG_TAG, "Unable to update permission flags for missing user $userId")
+            return false
+        }
         val oldFlags =
             newState.userStates[userId]!!
                 .appIdDevicePermissionFlags[appId]

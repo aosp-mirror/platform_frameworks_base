@@ -16,6 +16,8 @@
 
 package com.android.internal.display;
 
+import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
+
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.util.Log;
@@ -33,13 +35,14 @@ public class RefreshRateSettingsUtils {
     /**
      * Find the highest refresh rate among all the modes of the default display.
      *
+     * This method will acquire DisplayManager.mLock, so calling it while holding other locks
+     * should be done with care.
      * @param context The context
      * @return The highest refresh rate
      */
     public static float findHighestRefreshRateForDefaultDisplay(Context context) {
         final DisplayManager dm = context.getSystemService(DisplayManager.class);
         final Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
-
         if (display == null) {
             Log.w(TAG, "No valid default display device");
             return DEFAULT_REFRESH_RATE;
@@ -49,6 +52,33 @@ public class RefreshRateSettingsUtils {
         for (Display.Mode mode : display.getSupportedModes()) {
             if (mode.getRefreshRate() > maxRefreshRate) {
                 maxRefreshRate = mode.getRefreshRate();
+            }
+        }
+        return maxRefreshRate;
+    }
+
+    /**
+     * Find the highest refresh rate among all the modes of all the displays.
+     *
+     * This method will acquire DisplayManager.mLock, so calling it while holding other locks
+     * should be done with care.
+     * @param context The context
+     * @return The highest refresh rate
+     */
+    public static float findHighestRefreshRateAmongAllDisplays(Context context) {
+        final DisplayManager dm = context.getSystemService(DisplayManager.class);
+        final Display[] displays = dm.getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
+        if (displays.length == 0) {
+            Log.w(TAG, "No valid display devices");
+            return DEFAULT_REFRESH_RATE;
+        }
+
+        float maxRefreshRate = DEFAULT_REFRESH_RATE;
+        for (Display display : displays) {
+            for (Display.Mode mode : display.getSupportedModes()) {
+                if (mode.getRefreshRate() > maxRefreshRate) {
+                    maxRefreshRate = mode.getRefreshRate();
+                }
             }
         }
         return maxRefreshRate;

@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.server.wm.CtsWindowInfoUtils.dumpWindowsOnScreen;
+import static android.server.wm.CtsWindowInfoUtils.assertAndDumpWindowState;
 import static android.server.wm.CtsWindowInfoUtils.waitForWindowFocus;
 import static android.server.wm.CtsWindowInfoUtils.waitForWindowVisible;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -27,7 +27,6 @@ import android.app.Instrumentation;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.server.wm.BuildUtils;
@@ -43,6 +42,7 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowlessWindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.window.InputTransferToken;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
@@ -110,7 +110,7 @@ public class SurfaceControlViewHostTests {
         mInstrumentation.runOnMainSync(() -> {
             TestWindowlessWindowManager wwm = new TestWindowlessWindowManager(
                     mActivity.getResources().getConfiguration(), sc,
-                    mSurfaceView.getHostToken());
+                    mSurfaceView.getViewRootImpl().getInputTransferToken());
 
             mScvh1 = new SurfaceControlViewHost(mActivity, mActivity.getDisplay(),
                     wwm, "requestFocusWithMultipleWindows");
@@ -129,45 +129,30 @@ public class SurfaceControlViewHostTests {
             mScvh2.setView(mView2, lp2);
         });
 
-        boolean wasVisible = waitForWindowVisible(mView1);
-        if (!wasVisible) {
-            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows");
-        }
-        assertTrue("Failed to wait for view1", wasVisible);
-
-        wasVisible = waitForWindowVisible(mView2);
-        if (!wasVisible) {
-            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-not visible");
-        }
-        assertTrue("Failed to wait for view2", wasVisible);
+        assertAndDumpWindowState(TAG, "Failed to wait for view1", waitForWindowVisible(mView1));
+        assertAndDumpWindowState(TAG, "Failed to wait for view2", waitForWindowVisible(mView2));
 
         IWindow window = IWindow.Stub.asInterface(mSurfaceView.getWindowToken());
 
         WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
                 mScvh1.getInputTransferToken(), true);
 
-        boolean gainedFocus = waitForWindowFocus(mView1, true);
-        if (!gainedFocus) {
-            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-view1 not focus");
-        }
-        assertTrue("Failed to gain focus for view1", gainedFocus);
+        assertAndDumpWindowState(TAG, "Failed to wait for view1 focus",
+                waitForWindowFocus(mView1, true));
 
         WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
                 mScvh2.getInputTransferToken(), true);
 
-        gainedFocus = waitForWindowFocus(mView2, true);
-        if (!gainedFocus) {
-            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-view2 not focus");
-        }
-        assertTrue("Failed to gain focus for view2", gainedFocus);
+        assertAndDumpWindowState(TAG, "Failed to wait for view2 focus",
+                waitForWindowFocus(mView2, true));
     }
 
     private static class TestWindowlessWindowManager extends WindowlessWindowManager {
         private final SurfaceControl mRoot;
 
         TestWindowlessWindowManager(Configuration c, SurfaceControl rootSurface,
-                IBinder hostInputToken) {
-            super(c, rootSurface, hostInputToken);
+                InputTransferToken inputTransferToken) {
+            super(c, rootSurface, inputTransferToken);
             mRoot = rootSurface;
         }
 

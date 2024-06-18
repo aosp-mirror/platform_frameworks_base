@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Selvom vi nærmer os en fremtid, hvor adgangskoder er mindre fremtrædende, kan de stadig bruges i samspil med adgangsnøgler."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Vælg, hvor du vil gemme dine <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Vælg en adgangskodeadministrator for at gemme dine oplysninger, så du kan logge ind hurtigere næste gang"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vil du oprette en adgangsnøgle til <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Vil du gemme adgangskoden til <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Vil du oprette en adgangsnøgle for at logge ind på <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Vil du gemme adgangskoden for at logge ind på <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vil du gemme loginoplysningerne til <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"adgangsnøgle"</string>
     <string name="password" msgid="6738570945182936667">"adgangskode"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Fra en anden enhed"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Brug en anden enhed"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Anmodningen blev annulleret af <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Valgmuligheder for login"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Mere"</string>
 </resources>

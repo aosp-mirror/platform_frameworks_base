@@ -387,6 +387,11 @@ public class BiometricSchedulerOperation {
         return isAuthentication || isDetection;
     }
 
+    /** If this operation is {@link StartUserClient}. */
+    public boolean isStartUserOperation() {
+        return mClientMonitor instanceof StartUserClient<?, ?>;
+    }
+
     /** If this operation performs acquisition {@link AcquisitionClient}. */
     public boolean isAcquisitionOperation() {
         return mClientMonitor instanceof AcquisitionClient;

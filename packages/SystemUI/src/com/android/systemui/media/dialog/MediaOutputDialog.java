@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.dialog;
 
+import static com.android.settingslib.flags.Flags.legacyLeAudioSharing;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.util.FeatureFlagUtils;
@@ -27,7 +29,7 @@ import androidx.core.graphics.drawable.IconCompat;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.res.R;
@@ -37,7 +39,7 @@ import com.android.systemui.res.R;
  */
 @SysUISingleton
 public class MediaOutputDialog extends MediaOutputBaseDialog {
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final UiEventLogger mUiEventLogger;
 
     MediaOutputDialog(
@@ -45,11 +47,11 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             boolean aboveStatusbar,
             BroadcastSender broadcastSender,
             MediaOutputController mediaOutputController,
-            DialogLaunchAnimator dialogLaunchAnimator,
+            DialogTransitionAnimator dialogTransitionAnimator,
             UiEventLogger uiEventLogger,
             boolean includePlaybackAndAppMetadata) {
         super(context, broadcastSender, mediaOutputController, includePlaybackAndAppMetadata);
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mUiEventLogger = uiEventLogger;
         mAdapter = new MediaOutputAdapter(mMediaOutputController);
         if (!aboveStatusbar) {
@@ -108,6 +110,7 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     public boolean isBroadcastSupported() {
+        if (!legacyLeAudioSharing()) return false;
         boolean isBluetoothLeDevice = false;
         boolean isBroadcastEnabled = false;
         if (FeatureFlagUtils.isEnabled(mContext,
@@ -153,7 +156,7 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             }
         } else {
             mMediaOutputController.releaseSession();
-            mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
+            mDialogTransitionAnimator.disableAllCurrentDialogsExitAnimations();
             dismiss();
         }
     }

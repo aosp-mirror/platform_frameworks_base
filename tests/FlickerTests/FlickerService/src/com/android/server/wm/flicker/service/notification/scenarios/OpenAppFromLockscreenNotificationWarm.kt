@@ -17,10 +17,10 @@
 package com.android.server.wm.flicker.service.notification.scenarios
 
 import android.app.Instrumentation
-import android.tools.common.NavBar
-import android.tools.common.Rotation
-import android.tools.device.helpers.wakeUpAndGoToHomeScreen
-import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.NavBar
+import android.tools.Rotation
+import android.tools.helpers.wakeUpAndGoToHomeScreen
+import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation

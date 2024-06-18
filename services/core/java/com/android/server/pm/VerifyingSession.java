@@ -47,6 +47,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.DataLoaderType;
+import android.content.pm.Flags;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -356,6 +357,12 @@ final class VerifyingSession {
         if (verifierUser == UserHandle.ALL) {
             verifierUser = UserHandle.of(mPm.mUserManager.getCurrentUserId());
         }
+        // TODO(b/300965895): Remove when inconsistencies loading classpaths from apex for
+        // user > 1 are fixed. Tests should cover verifiers from apex classpaths run on
+        // primary user, secondary user and work profile.
+        if (pkgLite.isSdkLibrary) {
+            verifierUser = UserHandle.SYSTEM;
+        }
         final int verifierUserId = verifierUser.getIdentifier();
 
         List<String> requiredVerifierPackages = new ArrayList<>(
@@ -535,7 +542,12 @@ final class VerifyingSession {
         }
 
         final int verificationCodeAtTimeout;
-        if (getDefaultVerificationResponse() == PackageManager.VERIFICATION_ALLOW) {
+        // Allows package verification to continue in the event the app being updated is verifying
+        // itself and fails to respond
+        if (Flags.emergencyInstallPermission() && requiredVerifierPackages.contains(
+                pkgLite.packageName)) {
+            verificationCodeAtTimeout = PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT;
+        } else if (getDefaultVerificationResponse() == PackageManager.VERIFICATION_ALLOW) {
             verificationCodeAtTimeout = PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT;
         } else {
             verificationCodeAtTimeout = PackageManager.VERIFICATION_REJECT;

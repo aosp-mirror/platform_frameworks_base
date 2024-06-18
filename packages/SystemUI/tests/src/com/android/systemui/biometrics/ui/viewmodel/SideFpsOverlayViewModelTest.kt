@@ -16,7 +16,6 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
-import android.app.ActivityTaskManager
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Color
@@ -39,10 +38,10 @@ import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
-import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
-import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractorImpl
+import com.android.systemui.biometrics.data.repository.biometricStatusRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
+import com.android.systemui.biometrics.domain.interactor.biometricStatusInteractor
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
@@ -55,20 +54,28 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
 import com.android.systemui.display.data.repository.FakeDisplayRepository
-import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.DeviceEntrySideFpsOverlayInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.SideFpsProgressBarViewModel
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.log.SideFpsLogger
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
+import com.android.systemui.statusbar.phone.dozeServiceHost
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -97,10 +104,10 @@ import org.mockito.junit.MockitoRule
 @SmallTest
 @RunWith(JUnit4::class)
 class SideFpsOverlayViewModelTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
     @JvmField @Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
 
-    @Mock private lateinit var activityTaskManager: ActivityTaskManager
-    @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
+    @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
     @Mock
     private lateinit var fingerprintInteractiveToAuthProvider: FingerprintInteractiveToAuthProvider
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
@@ -137,7 +144,6 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
         context.getColor(com.android.settingslib.color.R.color.settingslib_color_blue400)
 
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
-    private lateinit var biometricStatusInteractor: BiometricStatusInteractor
     private lateinit var deviceEntrySideFpsOverlayInteractor: DeviceEntrySideFpsOverlayInteractor
     private lateinit var displayStateInteractor: DisplayStateInteractorImpl
     private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
@@ -174,6 +180,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             .thenReturn(
                 Display(mock(DisplayManagerGlobal::class.java), 1, contextDisplayInfo, resources)
             )
+        kosmos.biometricStatusRepository = biometricStatusRepository
 
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
@@ -186,9 +193,6 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
                 keyguardUpdateMonitor,
                 testScope.backgroundScope,
             )
-
-        biometricStatusInteractor =
-            BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository)
 
         displayStateInteractor =
             DisplayStateInteractorImpl(
@@ -220,6 +224,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
 
         deviceEntrySideFpsOverlayInteractor =
             DeviceEntrySideFpsOverlayInteractor(
+                testScope.backgroundScope,
                 mContext,
                 deviceEntryFingerprintAuthRepository,
                 primaryBouncerInteractor,
@@ -237,22 +242,29 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
                 windowManager,
                 displayStateInteractor,
                 Optional.of(fingerprintInteractiveToAuthProvider),
+                kosmos.biometricSettingsRepository,
+                kosmos.keyguardTransitionInteractor,
                 SideFpsLogger(logcatLogBuffer("SfpsLogger"))
             )
 
         sideFpsProgressBarViewModel =
             SideFpsProgressBarViewModel(
                 mContext,
-                deviceEntryFingerprintAuthRepository,
+                kosmos.biometricStatusInteractor,
+                kosmos.deviceEntryFingerprintAuthInteractor,
                 sfpsSensorInteractor,
+                kosmos.dozeServiceHost,
+                kosmos.keyguardInteractor,
                 displayStateInteractor,
+                kosmos.testDispatcher,
                 testScope.backgroundScope,
+                kosmos.powerInteractor
             )
 
         underTest =
             SideFpsOverlayViewModel(
                 mContext,
-                biometricStatusInteractor,
+                kosmos.biometricStatusInteractor,
                 deviceEntrySideFpsOverlayInteractor,
                 displayStateInteractor,
                 sfpsSensorInteractor,

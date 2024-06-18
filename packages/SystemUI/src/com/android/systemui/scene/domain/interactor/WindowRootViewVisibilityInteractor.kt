@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene.domain.interactor
 
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -23,14 +24,21 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.NotificationPresenter
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.init.NotificationsController
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -44,6 +52,9 @@ constructor(
     private val keyguardRepository: KeyguardRepository,
     private val headsUpManager: HeadsUpManager,
     private val powerInteractor: PowerInteractor,
+    private val activeNotificationsInteractor: ActiveNotificationsInteractor,
+    sceneContainerFlags: SceneContainerFlags,
+    sceneInteractorProvider: Provider<SceneInteractor>,
 ) : CoreStartable {
 
     private var notificationPresenter: NotificationPresenter? = null
@@ -55,11 +66,28 @@ constructor(
     /**
      * True if lockscreen (including AOD) or the shade is visible and false otherwise. Notably,
      * false if the bouncer is visible.
-     *
-     * TODO(b/297080059): Use [SceneInteractor] as the source of truth if the scene flag is on.
      */
     val isLockscreenOrShadeVisible: StateFlow<Boolean> =
-        windowRootViewVisibilityRepository.isLockscreenOrShadeVisible
+        if (!sceneContainerFlags.isEnabled()) {
+            windowRootViewVisibilityRepository.isLockscreenOrShadeVisible
+        } else {
+            sceneInteractorProvider
+                .get()
+                .transitionState
+                .map { state ->
+                    when (state) {
+                        is ObservableTransitionState.Idle ->
+                            state.scene == Scenes.Shade || state.scene == Scenes.Lockscreen
+                        is ObservableTransitionState.Transition ->
+                            state.toScene == Scenes.Shade ||
+                                state.toScene == Scenes.Lockscreen ||
+                                state.fromScene == Scenes.Shade ||
+                                state.fromScene == Scenes.Lockscreen
+                    }
+                }
+                .distinctUntilChanged()
+                .stateIn(scope, SharingStarted.Eagerly, false)
+        }
 
     /**
      * True if lockscreen (including AOD) or the shade is visible **and** the user is currently
@@ -116,6 +144,14 @@ constructor(
     private fun getNotificationLoad(): Int {
         return if (headsUpManager.hasPinnedHeadsUp() && isNotifPresenterFullyCollapsed) {
             1
+        } else {
+            getActiveNotificationsCount()
+        }
+    }
+
+    private fun getActiveNotificationsCount(): Int {
+        return if (NotificationsLiveDataStoreRefactor.isEnabled) {
+            activeNotificationsInteractor.allNotificationsCountValue
         } else {
             notificationsController?.getActiveNotificationsCount() ?: 0
         }

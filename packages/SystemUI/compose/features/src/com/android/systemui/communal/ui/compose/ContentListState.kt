@@ -16,22 +16,32 @@
 
 package com.android.systemui.communal.ui.compose
 
+import android.content.ComponentName
+import android.os.UserHandle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.widgets.WidgetConfigurator
 
 @Composable
 fun rememberContentListState(
+    widgetConfigurator: WidgetConfigurator?,
     communalContent: List<CommunalContentModel>,
-    viewModel: CommunalEditModeViewModel,
+    viewModel: BaseCommunalViewModel,
 ): ContentListState {
     return remember(communalContent) {
         ContentListState(
             communalContent,
+            { componentName, user, priority ->
+                viewModel.onAddWidget(
+                    componentName,
+                    user,
+                    priority,
+                    widgetConfigurator,
+                )
+            },
             viewModel::onDeleteWidget,
             viewModel::onReorderWidgets,
         )
@@ -46,30 +56,64 @@ fun rememberContentListState(
 class ContentListState
 internal constructor(
     communalContent: List<CommunalContentModel>,
+    private val onAddWidget:
+        (componentName: ComponentName, user: UserHandle, priority: Int) -> Unit,
     private val onDeleteWidget: (id: Int) -> Unit,
-    private val onReorderWidgets: (ids: List<Int>) -> Unit,
+    private val onReorderWidgets: (widgetIdToPriorityMap: Map<Int, Int>) -> Unit,
 ) {
-    var list by mutableStateOf(communalContent)
+    var list = communalContent.toMutableStateList()
         private set
 
     /** Move item to a new position in the list. */
     fun onMove(fromIndex: Int, toIndex: Int) {
-        list = list.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+        list.apply { add(toIndex, removeAt(fromIndex)) }
     }
 
     /** Remove widget from the list and the database. */
     fun onRemove(indexToRemove: Int) {
-        if (list[indexToRemove] is CommunalContentModel.Widget) {
-            val widget = list[indexToRemove] as CommunalContentModel.Widget
-            list = list.toMutableList().apply { removeAt(indexToRemove) }
+        if (list[indexToRemove].isWidgetContent()) {
+            val widget = list[indexToRemove] as CommunalContentModel.WidgetContent
+            list.apply { removeAt(indexToRemove) }
             onDeleteWidget(widget.appWidgetId)
         }
     }
 
-    /** Persist the new order with all the movements happened during dragging. */
-    fun onSaveList() {
-        val widgetIds: List<Int> =
-            list.filterIsInstance<CommunalContentModel.Widget>().map { it.appWidgetId }
-        onReorderWidgets(widgetIds)
+    /**
+     * Persists the new order with all the movements happened during drag operations & the new
+     * widget drop (if applicable).
+     *
+     * @param newItemComponentName name of the new widget that was dropped into the list; null if no
+     *   new widget was added.
+     * @param newItemUser user profile associated with the new widget that was dropped into the
+     *   list; null if no new widget was added.
+     * @param newItemIndex index at which the a new widget was dropped into the list; null if no new
+     *   widget was dropped.
+     */
+    fun onSaveList(
+        newItemComponentName: ComponentName? = null,
+        newItemUser: UserHandle? = null,
+        newItemIndex: Int? = null
+    ) {
+        // filters placeholder, but, maintains the indices of the widgets as if the placeholder was
+        // in the list. When persisted in DB, this leaves space for the new item (to be added) at
+        // the correct priority.
+        val widgetIdToPriorityMap: Map<Int, Int> =
+            list
+                .mapIndexedNotNull { index, item ->
+                    if (item is CommunalContentModel.WidgetContent) {
+                        item.appWidgetId to list.size - index
+                    } else {
+                        null
+                    }
+                }
+                .toMap()
+        // reorder and then add the new widget
+        onReorderWidgets(widgetIdToPriorityMap)
+        if (newItemComponentName != null && newItemUser != null && newItemIndex != null) {
+            onAddWidget(newItemComponentName, newItemUser, /*priority=*/ list.size - newItemIndex)
+        }
     }
+
+    /** Returns true if the item at given index is editable. */
+    fun isItemEditable(index: Int) = list[index].isWidgetContent()
 }
