@@ -23,20 +23,12 @@ import org.w3c.dom.Element;
 
 import java.util.List;
 
-/** TransparencyInfo representation containing {@link DeveloperInfo} and {@link AppInfo} */
+/** TransparencyInfo representation containing {@link AppInfo} */
 public class TransparencyInfo implements AslMarshallable {
-
-    private final DeveloperInfo mDeveloperInfo;
     private final AppInfo mAppInfo;
 
-    public TransparencyInfo(DeveloperInfo developerInfo, AppInfo appInfo) {
-        this.mDeveloperInfo = developerInfo;
+    public TransparencyInfo(AppInfo appInfo) {
         this.mAppInfo = appInfo;
-    }
-
-    /** Gets the {@link DeveloperInfo} of the {@link TransparencyInfo}. */
-    public DeveloperInfo getDeveloperInfo() {
-        return mDeveloperInfo;
     }
 
     /** Gets the {@link AppInfo} of the {@link TransparencyInfo}. */
@@ -49,9 +41,6 @@ public class TransparencyInfo implements AslMarshallable {
     public List<Element> toOdDomElements(Document doc) {
         Element transparencyInfoEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_TRANSPARENCY_INFO);
-        if (mDeveloperInfo != null) {
-            XmlUtils.appendChildren(transparencyInfoEle, mDeveloperInfo.toOdDomElements(doc));
-        }
         if (mAppInfo != null) {
             XmlUtils.appendChildren(transparencyInfoEle, mAppInfo.toOdDomElements(doc));
         }
@@ -62,9 +51,6 @@ public class TransparencyInfo implements AslMarshallable {
     @Override
     public List<Element> toHrDomElements(Document doc) {
         Element transparencyInfoEle = doc.createElement(XmlUtils.HR_TAG_TRANSPARENCY_INFO);
-        if (mDeveloperInfo != null) {
-            XmlUtils.appendChildren(transparencyInfoEle, mDeveloperInfo.toHrDomElements(doc));
-        }
         if (mAppInfo != null) {
             XmlUtils.appendChildren(transparencyInfoEle, mAppInfo.toHrDomElements(doc));
         }
