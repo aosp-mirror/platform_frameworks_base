@@ -1276,7 +1276,7 @@ public class KeyguardIndicationController {
             mPowerPluggedInWired = status.isPluggedInWired() && isChargingOrFull;
             mPowerPluggedInWireless = status.isPluggedInWireless() && isChargingOrFull;
             mPowerPluggedInDock = status.isPluggedInDock() && isChargingOrFull;
-            mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
+            mPowerPluggedIn = isPowerPluggedIn(status, isChargingOrFull);
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mContext);
@@ -1560,6 +1560,11 @@ public class KeyguardIndicationController {
     /** Return true if the device is under the battery defender mode. */
     protected boolean isBatteryDefender(BatteryStatus status) {
         return status.isBatteryDefender();
+    }
+
+    /** Return true if the device has power plugged in. */
+    protected boolean isPowerPluggedIn(BatteryStatus status, boolean isChargingOrFull) {
+        return status.isPluggedIn() && isChargingOrFull;
     }
 
     private boolean isCurrentUser(int userId) {
