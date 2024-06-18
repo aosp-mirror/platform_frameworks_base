@@ -1250,6 +1250,81 @@ public class ViewRootImplTest {
         });
     }
 
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_FUNCTION_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY})
+    public void votePreferredFrameRate_infrequentLayer_smallView_voteForLow() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+        final long delay = 200L;
+
+        mView = new View(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+        wmlp.width = 1;
+        wmlp.height = 1;
+
+        // The view is a small view, and it should vote for category low only.
+        int expected = FRAME_RATE_CATEGORY_LOW;
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            wm.addView(mView, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        mViewRootImpl = mView.getViewRootImpl();
+        waitForFrameRateCategoryToSettle(mView);
+
+        // In transition from frequent update to infrequent update
+        Thread.sleep(delay);
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(expected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
+
+        // In transition from frequent update to infrequent update
+        Thread.sleep(delay);
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(expected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+
+        // Infrequent update
+        Thread.sleep(delay);
+
+        // The view is small, the expected category is still low for intermittent.
+        int intermittentExpected = FRAME_RATE_CATEGORY_LOW;
+
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(intermittentExpected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
+
+        // When the View vote, it's still considered as intermittent update state
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(intermittentExpected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
+
+        // Becomes frequent update state
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(expected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+    }
+
     /**
      * Test the IsFrameRatePowerSavingsBalanced values are properly set
      */
