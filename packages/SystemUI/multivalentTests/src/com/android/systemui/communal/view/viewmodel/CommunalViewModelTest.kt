@@ -69,6 +69,11 @@ import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.Transition
+import com.android.systemui.scene.data.repository.setTransition
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.shade.ShadeTestUtil
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -492,13 +497,16 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
             )
             // Transitioned to Glanceable hub.
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GLANCEABLE_HUB,
-                testScope = testScope,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.GLANCEABLE_HUB,
+                    )
             )
             // Shade not expanded.
-            shadeTestUtil.setLockscreenShadeExpansion(0f)
+            if (!SceneContainerFlag.isEnabled) shadeTestUtil.setLockscreenShadeExpansion(0f)
 
             assertThat(isFocusable).isEqualTo(true)
         }
@@ -541,10 +549,13 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setKeyguardOccluded(true)
 
             // And on hub
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.DREAMING,
-                to = KeyguardState.GLANCEABLE_HUB,
-                testScope = testScope,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        from = KeyguardState.DREAMING,
+                        to = KeyguardState.GLANCEABLE_HUB,
+                    )
             )
 
             // Then flow is not frozen
@@ -558,10 +569,13 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(isCommunalContentFlowFrozen).isEqualTo(true)
 
             // 3. When transitioned to OCCLUDED and activity shows
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.GLANCEABLE_HUB,
-                to = KeyguardState.OCCLUDED,
-                testScope = testScope,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Lockscreen),
+                stateTransition =
+                    TransitionStep(
+                        from = KeyguardState.GLANCEABLE_HUB,
+                        to = KeyguardState.OCCLUDED,
+                    )
             )
 
             // Then flow is not frozen
@@ -579,10 +593,13 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setKeyguardOccluded(false)
 
             // And transitioned to hub
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GLANCEABLE_HUB,
-                testScope = testScope,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.GLANCEABLE_HUB,
+                    )
             )
 
             // Then flow is not frozen
@@ -593,30 +610,30 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             runCurrent()
 
             // And transitioning to occluded
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.GLANCEABLE_HUB,
-                    to = KeyguardState.OCCLUDED,
-                    transitionState = TransitionState.STARTED,
-                )
-            )
-
-            keyguardTransitionRepository.sendTransitionStep(
-                from = KeyguardState.GLANCEABLE_HUB,
-                to = KeyguardState.OCCLUDED,
-                transitionState = TransitionState.RUNNING,
-                value = 0.5f,
+            kosmos.setTransition(
+                sceneTransition = Transition(from = Scenes.Communal, to = Scenes.Lockscreen),
+                stateTransition =
+                    TransitionStep(
+                        from = KeyguardState.GLANCEABLE_HUB,
+                        to = KeyguardState.OCCLUDED,
+                        transitionState = TransitionState.STARTED,
+                        value = 0f,
+                    )
             )
 
             // Then flow is frozen
             assertThat(isCommunalContentFlowFrozen).isEqualTo(true)
 
             // 3. When transition is finished
-            keyguardTransitionRepository.sendTransitionStep(
-                from = KeyguardState.GLANCEABLE_HUB,
-                to = KeyguardState.OCCLUDED,
-                transitionState = TransitionState.FINISHED,
-                value = 1f,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Lockscreen),
+                stateTransition =
+                    TransitionStep(
+                        from = KeyguardState.GLANCEABLE_HUB,
+                        to = KeyguardState.OCCLUDED,
+                        transitionState = TransitionState.FINISHED,
+                        value = 1f,
+                    )
             )
 
             // Then flow is not frozen
@@ -639,10 +656,13 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setKeyguardOccluded(true)
 
             // And transitioned to hub
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.DREAMING,
-                to = KeyguardState.GLANCEABLE_HUB,
-                testScope = testScope,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        from = KeyguardState.DREAMING,
+                        to = KeyguardState.GLANCEABLE_HUB,
+                    )
             )
 
             // Widgets available

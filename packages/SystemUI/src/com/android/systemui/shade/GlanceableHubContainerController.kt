@@ -151,7 +151,8 @@ constructor(
      * True if either the primary or alternate bouncer are open, meaning the hub should not receive
      * any touch input.
      *
-     * Tracks [KeyguardTransitionInteractor.isFinishedInState] for [KeyguardState.isBouncerState].
+     * Tracks [KeyguardTransitionInteractor.isFinishedInStateWhere] for
+     * [KeyguardState.isBouncerState].
      */
     private var anyBouncerShowing = false
 

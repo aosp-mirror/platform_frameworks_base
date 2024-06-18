@@ -143,7 +143,7 @@ constructor(
 
     private val isOnLockscreen: Flow<Boolean> =
         combine(
-                keyguardTransitionInteractor.isFinishedInState(LOCKSCREEN).onStart { emit(false) },
+                keyguardTransitionInteractor.isFinishedIn(LOCKSCREEN).onStart { emit(false) },
                 anyOf(
                     keyguardTransitionInteractor.isInTransition(Edge.create(to = LOCKSCREEN)),
                     keyguardTransitionInteractor.isInTransition(Edge.create(from = LOCKSCREEN)),

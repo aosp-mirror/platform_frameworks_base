@@ -525,7 +525,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
 
         if (themeOverlayControllerWakefulnessDeprecation()) {
             mJavaAdapter.alwaysCollectFlow(
-                    mKeyguardTransitionInteractor.isFinishedInState(KeyguardState.DOZING),
+                    mKeyguardTransitionInteractor.isFinishedIn(KeyguardState.DOZING),
                     isFinishedInDozing -> {
                         if (isFinishedInDozing) whenAsleepHandler.run();
                     });

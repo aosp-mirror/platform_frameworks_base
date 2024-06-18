@@ -15,7 +15,9 @@
  */
 package com.android.systemui.keyguard.shared.model
 
+import android.util.Log
 import com.android.compose.animation.scene.SceneKey
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 
 /** List of all possible states to transition to/from */
@@ -86,6 +88,22 @@ enum class KeyguardState {
     UNDEFINED,
     /** An activity is displaying over the keyguard. */
     OCCLUDED;
+
+    fun checkValidState() {
+        val isStateValid: Boolean
+        val isEnabled: String
+        if (SceneContainerFlag.isEnabled) {
+            isStateValid = this === mapToSceneContainerState()
+            isEnabled = "enabled"
+        } else {
+            isStateValid = this !== UNDEFINED
+            isEnabled = "disabled"
+        }
+
+        if (!isStateValid) {
+            Log.e("KeyguardState", "$this is not a valid state when scene container is $isEnabled")
+        }
+    }
 
     fun mapToSceneContainerState(): KeyguardState {
         return when (this) {
