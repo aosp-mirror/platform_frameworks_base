@@ -21,11 +21,14 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResourcesManager
 import android.content.SharedPreferences
 import android.os.UserManager
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.telecom.TelecomManager
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
@@ -39,6 +42,7 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.policy.BluetoothController
 import com.android.systemui.statusbar.policy.CastController
+import com.android.systemui.statusbar.policy.CastDevice
 import com.android.systemui.statusbar.policy.DataSaverController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HotspotController
@@ -54,6 +58,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.DateFormatUtil
 import com.android.systemui.util.time.FakeSystemClock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -78,6 +83,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.argumentCaptor
 
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
@@ -87,6 +93,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
     companion object {
         private const val ALARM_SLOT = "alarm"
+        private const val CAST_SLOT = "cast"
+        private const val SCREEN_RECORD_SLOT = "screen_record"
         private const val CONNECTED_DISPLAY_SLOT = "connected_display"
         private const val MANAGED_PROFILE_SLOT = "managed_profile"
     }
@@ -271,6 +279,101 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, true)
         }
 
+    @Test
+    @DisableFlags(Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+    fun cast_chipsFlagOff_iconShown() {
+        statusBarPolicy.init()
+        clearInvocations(iconController)
+
+        val callbackCaptor = argumentCaptor<CastController.Callback>()
+        verify(castController).addCallback(callbackCaptor.capture())
+
+        whenever(castController.castDevices)
+            .thenReturn(
+                listOf(
+                    CastDevice(
+                        "id",
+                        "name",
+                        "description",
+                        CastDevice.CastState.Connected,
+                        CastDevice.CastOrigin.MediaProjection,
+                    )
+                )
+            )
+        callbackCaptor.firstValue.onCastDevicesChanged()
+
+        verify(iconController).setIconVisibility(CAST_SLOT, true)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+    fun cast_chipsFlagOn_noCallbackRegistered() {
+        statusBarPolicy.init()
+
+        verify(castController, never()).addCallback(any())
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+    fun screenRecord_chipsFlagOff_iconShown_forAllStates() {
+        statusBarPolicy.init()
+        clearInvocations(iconController)
+
+        val callbackCaptor = argumentCaptor<RecordingController.RecordingStateChangeCallback>()
+        verify(recordingController).addCallback(callbackCaptor.capture())
+
+        callbackCaptor.firstValue.onCountdown(3000)
+        testableLooper.processAllMessages()
+        verify(iconController).setIconVisibility(SCREEN_RECORD_SLOT, true)
+        clearInvocations(iconController)
+
+        callbackCaptor.firstValue.onCountdownEnd()
+        testableLooper.processAllMessages()
+        verify(iconController).setIconVisibility(SCREEN_RECORD_SLOT, false)
+        clearInvocations(iconController)
+
+        callbackCaptor.firstValue.onRecordingStart()
+        testableLooper.processAllMessages()
+        verify(iconController).setIconVisibility(SCREEN_RECORD_SLOT, true)
+        clearInvocations(iconController)
+
+        callbackCaptor.firstValue.onRecordingEnd()
+        testableLooper.processAllMessages()
+        verify(iconController).setIconVisibility(SCREEN_RECORD_SLOT, false)
+        clearInvocations(iconController)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+    fun screenRecord_chipsFlagOn_noCallbackRegistered() {
+        statusBarPolicy.init()
+
+        verify(recordingController, never()).addCallback(any())
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+    fun screenRecord_chipsFlagOn_methodsDoNothing() {
+        statusBarPolicy.init()
+        clearInvocations(iconController)
+
+        statusBarPolicy.onCountdown(3000)
+        testableLooper.processAllMessages()
+        verify(iconController, never()).setIconVisibility(eq(SCREEN_RECORD_SLOT), any())
+
+        statusBarPolicy.onCountdownEnd()
+        testableLooper.processAllMessages()
+        verify(iconController, never()).setIconVisibility(eq(SCREEN_RECORD_SLOT), any())
+
+        statusBarPolicy.onRecordingStart()
+        testableLooper.processAllMessages()
+        verify(iconController, never()).setIconVisibility(eq(SCREEN_RECORD_SLOT), any())
+
+        statusBarPolicy.onRecordingEnd()
+        testableLooper.processAllMessages()
+        verify(iconController, never()).setIconVisibility(eq(SCREEN_RECORD_SLOT), any())
+    }
+
     private fun createAlarmInfo(): AlarmManager.AlarmClockInfo {
         return AlarmManager.AlarmClockInfo(10L, null)
     }
@@ -315,13 +418,18 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
     private class FakeConnectedDisplayStateProvider : ConnectedDisplayInteractor {
         private val flow = MutableSharedFlow<State>()
+
         suspend fun emit(value: State) = flow.emit(value)
+
         override val connectedDisplayState: Flow<State>
             get() = flow
+
         override val connectedDisplayAddition: Flow<Unit>
             get() = TODO("Not yet implemented")
+
         override val pendingDisplay: Flow<PendingDisplay?>
             get() = TODO("Not yet implemented")
+
         override val concurrentDisplaysInProgress: Flow<Boolean>
             get() = TODO("Not yet implemented")
     }

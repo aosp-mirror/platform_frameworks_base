@@ -44,6 +44,7 @@ import android.view.View;
 
 import androidx.lifecycle.Observer;
 
+import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -355,7 +356,11 @@ public class PhoneStatusBarPolicy
         mProvisionedController.addCallback(this);
         mCurrentUserSetup = mProvisionedController.isCurrentUserSetup();
         mZenController.addCallback(this);
-        mCast.addCallback(mCastCallback);
+        if (!Flags.statusBarScreenSharingChips()) {
+            // If the flag is enabled, the cast icon is handled in the new screen sharing chips
+            // instead of here so we don't need to listen for events here.
+            mCast.addCallback(mCastCallback);
+        }
         mHotspot.addCallback(mHotspotCallback);
         mNextAlarmController.addCallback(mNextAlarmCallback);
         mDataSaver.addCallback(this);
@@ -363,7 +368,11 @@ public class PhoneStatusBarPolicy
         mPrivacyItemController.addCallback(this);
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
-        mRecordingController.addCallback(this);
+        if (!Flags.statusBarScreenSharingChips()) {
+            // If the flag is enabled, the screen record icon is handled in the new screen sharing
+            // chips instead of here so we don't need to listen for events here.
+            mRecordingController.addCallback(this);
+        }
         mJavaAdapter.alwaysCollectFlow(mConnectedDisplayInteractor.getConnectedDisplayState(),
                 this::onConnectedDisplayAvailabilityChanged);
 
@@ -520,6 +529,11 @@ public class PhoneStatusBarPolicy
     }
 
     private void updateCast() {
+        if (Flags.statusBarScreenSharingChips()) {
+            // The cast icon is handled in the new screen sharing chips instead of here.
+            return;
+        }
+
         boolean isCasting = false;
         for (CastDevice device : mCast.getCastDevices()) {
             if (device.isCasting()) {
@@ -789,6 +803,10 @@ public class PhoneStatusBarPolicy
     private Runnable mRemoveCastIconRunnable = new Runnable() {
         @Override
         public void run() {
+            if (Flags.statusBarScreenSharingChips()) {
+                // The cast icon is handled in the new screen sharing chips instead of here.
+                return;
+            }
             if (DEBUG) Log.v(TAG, "updateCast: hiding icon NOW");
             mIconController.setIconVisibility(mSlotCast, false);
         }
@@ -797,6 +815,10 @@ public class PhoneStatusBarPolicy
     // Screen Recording
     @Override
     public void onCountdown(long millisUntilFinished) {
+        if (Flags.statusBarScreenSharingChips()) {
+            // The screen record icon is handled in the new screen sharing chips instead of here.
+            return;
+        }
         if (DEBUG) Log.d(TAG, "screenrecord: countdown " + millisUntilFinished);
         int countdown =
                 (int) ScreenRecordModel.Starting.Companion.toCountdownSeconds(millisUntilFinished);
@@ -822,6 +844,10 @@ public class PhoneStatusBarPolicy
 
     @Override
     public void onCountdownEnd() {
+        if (Flags.statusBarScreenSharingChips()) {
+            // The screen record icon is handled in the new screen sharing chips instead of here.
+            return;
+        }
         if (DEBUG) Log.d(TAG, "screenrecord: hiding icon during countdown");
         mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
         // Reset talkback priority
@@ -831,6 +857,10 @@ public class PhoneStatusBarPolicy
 
     @Override
     public void onRecordingStart() {
+        if (Flags.statusBarScreenSharingChips()) {
+            // The screen record icon is handled in the new screen sharing chips instead of here.
+            return;
+        }
         if (DEBUG) Log.d(TAG, "screenrecord: showing icon");
         mIconController.setIcon(mSlotScreenRecord,
                 R.drawable.stat_sys_screen_record,
@@ -840,6 +870,10 @@ public class PhoneStatusBarPolicy
 
     @Override
     public void onRecordingEnd() {
+        if (Flags.statusBarScreenSharingChips()) {
+            // The screen record icon is handled in the new screen sharing chips instead of here.
+            return;
+        }
         // Ensure this is on the main thread
         if (DEBUG) Log.d(TAG, "screenrecord: hiding icon");
         mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
