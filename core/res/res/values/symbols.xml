@@ -2298,9 +2298,6 @@
   <java-symbol type="array" name="config_disabledDreamComponents" />
   <java-symbol type="bool" name="config_dismissDreamOnActivityStart" />
   <java-symbol type="bool" name="config_resetScreenTimeoutOnUnexpectedDreamExit" />
-  <java-symbol type="integer" name="config_dreamOverlayReconnectTimeoutMs" />
-  <java-symbol type="integer" name="config_dreamOverlayMaxReconnectAttempts" />
-  <java-symbol type="integer" name="config_minDreamOverlayDurationMs" />
   <java-symbol type="array" name="config_loggable_dream_prefixes" />
   <java-symbol type="string" name="config_dozeComponent" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />

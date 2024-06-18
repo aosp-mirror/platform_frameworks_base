@@ -567,14 +567,6 @@
          It has been updated to affect other plug types. -->
     <bool name="config_keepDreamingWhenUnplugging">false</bool>
 
-    <!-- The timeout (in ms) to wait before attempting to reconnect to the dream overlay service if
-         it becomes disconnected -->
-    <integer name="config_dreamOverlayReconnectTimeoutMs">1000</integer> <!-- 1 second -->
-    <!-- The maximum number of times to attempt reconnecting to the dream overlay service -->
-    <integer name="config_dreamOverlayMaxReconnectAttempts">3</integer>
-    <!-- The duration after which the dream overlay connection should be considered stable -->
-    <integer name="config_minDreamOverlayDurationMs">10000</integer> <!-- 10 seconds -->
-
     <!-- Auto-rotation behavior -->
 
     <!-- If true, enables auto-rotation features using the accelerometer.
