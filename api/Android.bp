@@ -370,7 +370,6 @@ stubs_defaults {
     high_mem: true, // Lots of sources => high memory use, see b/170701554
     installable: false,
     annotations_enabled: true,
-    previous_api: ":android.api.public.latest",
     merge_annotations_dirs: ["metalava-manual"],
     defaults_visibility: ["//frameworks/base/api"],
     visibility: [
