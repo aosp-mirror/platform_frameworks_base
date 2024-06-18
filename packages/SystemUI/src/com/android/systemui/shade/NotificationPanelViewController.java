@@ -3390,7 +3390,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         /** Updates the views to the initial state for the fold to AOD animation. */
         @Override
         public void prepareFoldToAodAnimation() {
-            if (!MigrateClocksToBlueprint.isEnabled()) {
+            if (MigrateClocksToBlueprint.isEnabled()) {
+                setDozing(true /* dozing */, false /* animate */);
+            } else {
                 // Force show AOD UI even if we are not locked
                 showAodUi();
             }
