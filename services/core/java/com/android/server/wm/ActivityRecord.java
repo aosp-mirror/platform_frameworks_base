@@ -6245,12 +6245,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Check if there are any activities with different UID over the activity that is embedded
-        // in untrusted mode. Traverse bottom to top with boundary so that it will only check
-        // activities above this activity.
+        // Check if there are any activities with different UID occluding partially the activity
+        // that is embedded in untrusted mode. Traverse bottom to top with boundary so that it will
+        // only check activities above this activity.
         final ActivityRecord differentUidOverlayActivity = getTask().getActivity(
-                a -> !a.finishing && a.getUid() != getUid(), this /* boundary */,
-                false /* includeBoundary */, false /* traverseTopToBottom */);
+                a -> !a.finishing && a.getUid() != getUid() && Rect.intersects(a.getBounds(),
+                        getBounds()), this /* boundary */, false /* includeBoundary */,
+                false /* traverseTopToBottom */);
         return differentUidOverlayActivity != null;
     }
 
