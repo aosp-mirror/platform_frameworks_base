@@ -48,8 +48,9 @@ class AppCompatCameraPolicy {
         // without the need to restart the device.
         final boolean needsDisplayRotationCompatPolicy =
                 wmService.mAppCompatConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
-        final boolean needsCameraCompatFreeformPolicy = Flags.cameraCompatForFreeform()
-                && DesktopModeHelper.canEnterDesktopMode(wmService.mContext);
+        final boolean needsCameraCompatFreeformPolicy =
+                Flags.enableCameraCompatForDesktopWindowing()
+                        && DesktopModeHelper.canEnterDesktopMode(wmService.mContext);
         if (needsDisplayRotationCompatPolicy || needsCameraCompatFreeformPolicy) {
             mCameraStateMonitor = new CameraStateMonitor(displayContent, wmService.mH);
             mActivityRefresher = new ActivityRefresher(wmService, wmService.mH);
