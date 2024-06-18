@@ -16307,6 +16307,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             String[] excludedPackages, int appOp, Bundle bOptions,
             boolean serialized, boolean sticky, int userId) {
         enforceNotIsolatedCaller("broadcastIntent");
+
         synchronized(this) {
             intent = verifyBroadcastLocked(intent);
 
@@ -16320,6 +16321,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Permission regimes around sender-supplied broadcast options.
             enforceBroadcastOptionPermissionsInternal(bOptions, callingUid);
 
+            final ComponentName cn = intent.getComponent();
+
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "broadcastIntent:" + (cn != null ? cn.toString() : intent.getAction()));
+
             final long origId = Binder.clearCallingIdentity();
             try {
                 return broadcastIntentLocked(callerApp,
@@ -16330,6 +16337,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         callingPid, userId, BackgroundStartPrivileges.NONE, null, null);
             } finally {
                 Binder.restoreCallingIdentity(origId);
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
     }
