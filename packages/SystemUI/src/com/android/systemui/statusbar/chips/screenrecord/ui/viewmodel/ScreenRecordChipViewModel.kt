@@ -76,7 +76,8 @@ constructor(
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            // See b/347726238.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden)
 
     private fun createDelegate(
         recordedTask: ActivityManager.RunningTaskInfo?
