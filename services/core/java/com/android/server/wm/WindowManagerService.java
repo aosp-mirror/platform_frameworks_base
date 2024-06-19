@@ -3743,6 +3743,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         null /* trigger */, null /* remote */, null /* disp */);
             }
             mCurrentUserId = newUserId;
+            mDisplayWindowSettingsProvider.setOverrideSettingsForUser(newUserId);
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettings(mRoot);
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
 
@@ -5479,6 +5481,9 @@ public class WindowManagerService extends IWindowManager.Stub
             // DisplayWindowSettings are applied. In addition, wide-color/hdr/isTouchDevice also
             // affect the Configuration.
             mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
+            // Per-user display settings may leave outdated settings after user switches, especially
+            // during reboots starting with the default user without setCurrentUser called.
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettings(mRoot);
         }
     }
 
