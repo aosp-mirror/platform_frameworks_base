@@ -202,7 +202,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     private int mLastLayer = 0;
     private SurfaceControl mLastRelativeToLayer = null;
 
-    private Transaction mPendingTransaction;
+    // TODO(b/132320879): Remove this from WindowContainers except DisplayContent.
+    private final Transaction mPendingTransaction;
 
     /**
      * Windows that clients are waiting to have drawn.
@@ -357,6 +358,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
         mTransitionController = mWmService.mAtmService.getTransitionController();
+        mPendingTransaction = wms.mTransactionFactory.get();
         mSyncTransaction = wms.mTransactionFactory.get();
         mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
         mSurfaceFreezer = new SurfaceFreezer(this, wms);
@@ -578,10 +580,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         super.onConfigurationChanged(newParentConfig);
-        if (mParent == null) {
-            // Avoid unnecessary surface operation before attaching to a parent.
-            return;
-        }
         updateSurfacePositionNonOrganized();
         scheduleAnimation();
         if (mOverlayHost != null) {
@@ -1076,9 +1074,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         mDisplayContent = dc;
-        if (dc != null && dc != this && mPendingTransaction != null) {
+        if (dc != null && dc != this) {
             dc.getPendingTransaction().merge(mPendingTransaction);
-            mPendingTransaction = null;
         }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
@@ -2925,17 +2922,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     @Override
     public Transaction getPendingTransaction() {
-        final WindowContainer<?> dc = mDisplayContent;
-        if (dc != null && dc.mPendingTransaction != null) {
-            return dc.mPendingTransaction;
+        final DisplayContent displayContent = getDisplayContent();
+        if (displayContent != null && displayContent != this) {
+            return displayContent.getPendingTransaction();
         }
         // This WindowContainer has not attached to a display yet or this is a DisplayContent, so we
         // let the caller to save the surface operations within the local mPendingTransaction.
         // If this is not a DisplayContent, we will merge it to the pending transaction of its
         // display once it attaches to it.
-        if (mPendingTransaction == null) {
-            mPendingTransaction = mWmService.mTransactionFactory.get();
-        }
         return mPendingTransaction;
     }
 

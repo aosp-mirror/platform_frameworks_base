@@ -50,7 +50,6 @@ import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityMetricsLaunchObserverRegistry;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
-import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -379,15 +378,10 @@ public final class ProfcollectForwardingService extends SystemService {
             @Override
             public void onCameraOpened(String cameraId, String packageId) {
                 Log.d(LOG_TAG, "Received camera open event from: " + packageId);
-                // Skip face auth since it triggers way too often.
-                if (packageId.startsWith("client.pid")) {
-                    return;
-                }
-                // Additional vendor specific list of apps to skip.
-                String[] cameraSkipPackages =
-                    getContext().getResources().getStringArray(
-                        R.array.config_profcollectOnCameraOpenedSkipPackages);
-                if (Arrays.asList(cameraSkipPackages).contains(packageId)) {
+                // Skip face auth and Android System Intelligence, since they trigger way too
+                // often.
+                if (packageId.startsWith("client.pid")
+                        || packageId.equals("com.google.android.as")) {
                     return;
                 }
                 // Sample for a fraction of camera events.

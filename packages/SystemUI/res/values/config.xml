@@ -1049,7 +1049,4 @@
 
     <!-- The width of the shortcut helper container, as a fraction of the screen's width. -->
     <item name="shortcut_helper_screen_width_fraction" format="float" type="dimen">1.0</item>
-
-    <!-- Only applicable for dual shade - Allow Notifications/QS shade to anchor to the bottom. -->
-    <bool name="config_dualShadeAlignedToBottom">false</bool>
 </resources>

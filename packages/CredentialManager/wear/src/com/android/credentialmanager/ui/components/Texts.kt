@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,6 +57,7 @@ fun WearUsernameText(
     text: String,
     textAlign: TextAlign = TextAlign.Center,
     modifier: Modifier = Modifier,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     Text(
         modifier = modifier.padding(start = 8.dp, end = 8.dp).wrapContentSize(),
@@ -65,6 +67,7 @@ fun WearUsernameText(
         overflow = TextOverflow.Ellipsis,
         textAlign = textAlign,
         maxLines = 2,
+        onTextLayout = onTextLayout,
     )
 }
 
@@ -76,6 +79,7 @@ fun WearButtonText(
     maxLines: Int = 1,
     modifier: Modifier = Modifier,
     color: Color = WearMaterialTheme.colors.onSurface,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     Text(
         modifier = modifier.wrapContentSize(),
@@ -85,6 +89,7 @@ fun WearButtonText(
         overflow = TextOverflow.Ellipsis,
         textAlign = textAlign,
         maxLines = maxLines,
+        onTextLayout = onTextLayout,
     )
 }
 
@@ -92,6 +97,7 @@ fun WearButtonText(
 fun WearSecondaryLabel(
     text: String,
     modifier: Modifier = Modifier,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     Text(
         modifier = modifier.wrapContentSize(),
@@ -101,5 +107,6 @@ fun WearSecondaryLabel(
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Start,
         maxLines = 1,
+        onTextLayout = onTextLayout,
     )
 }

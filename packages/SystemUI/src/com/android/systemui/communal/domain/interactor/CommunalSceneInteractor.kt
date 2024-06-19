@@ -22,7 +22,6 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.communal.data.repository.CommunalSceneRepository
 import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -61,14 +60,14 @@ constructor(
         communalSceneRepository.snapToScene(newScene, delayMillis)
     }
 
-    /** Changes to Blank scene when starting an activity after dismissing keyguard. */
-    fun changeSceneForActivityStartOnDismissKeyguard() {
+    /** Immediately snaps to the new scene when activity is started. */
+    fun snapToSceneForActivityStart(newScene: SceneKey, delayMillis: Long = 0) {
         // skip if we're starting edit mode activity, as it will be handled later by changeScene
         // with transition key [CommunalTransitionKeys.ToEditMode].
         if (_editModeState.value == EditModeState.STARTING) {
             return
         }
-        changeScene(CommunalScenes.Blank, CommunalTransitionKeys.SimpleFade)
+        snapToScene(newScene, delayMillis)
     }
 
     /**
@@ -145,14 +144,8 @@ constructor(
      *
      * This flow will be true during any transition and when idle on the communal scene.
      */
-    val isCommunalVisible: StateFlow<Boolean> =
-        transitionState
-            .map {
-                !(it is ObservableTransitionState.Idle && it.currentScene == CommunalScenes.Blank)
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
+    val isCommunalVisible: Flow<Boolean> =
+        transitionState.map {
+            !(it is ObservableTransitionState.Idle && it.currentScene == CommunalScenes.Blank)
+        }
 }

@@ -41,7 +41,6 @@ cc_defaults {
         "-Wextra",
         "-Wunused",
         "-Wunreachable-code",
-        "-Wthread-safety",
     ],
 }
 

@@ -16,9 +16,16 @@
 
 package com.android.server.power.stats;
 
-class BinaryStatePowerStatsLayout extends EnergyConsumerPowerStatsLayout {
+class BinaryStatePowerStatsLayout extends PowerStatsLayout {
     BinaryStatePowerStatsLayout() {
         addDeviceSectionUsageDuration();
+        // Add a section for consumed energy, even if the specific device does not
+        // have support EnergyConsumers.  This is done to guarantee format compatibility between
+        // PowerStats created by a PowerStatsCollector and those produced by a PowerStatsProcessor.
+        addDeviceSectionEnergyConsumers(1);
+        addDeviceSectionPowerEstimate();
+
         addUidSectionUsageDuration();
+        addUidSectionPowerEstimate();
     }
 }

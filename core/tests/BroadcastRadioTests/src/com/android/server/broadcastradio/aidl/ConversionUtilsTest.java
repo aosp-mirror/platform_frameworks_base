@@ -255,17 +255,6 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void throwOnError_withUnknownErrorCode() {
-        int invalidErrorCode = 100;
-        ServiceSpecificException halException = new ServiceSpecificException(invalidErrorCode);
-
-        RuntimeException thrown = ConversionUtils.throwOnError(halException, "seek");
-
-        expect.withMessage("Exception thrown for unknown error code")
-                .that(thrown).hasMessageThat().contains("seek: unknown error");
-    }
-
-    @Test
     public void propertiesFromHalProperties_idsMatch() {
         expect.withMessage("Properties id")
                 .that(MODULE_PROPERTIES.getId()).isEqualTo(TEST_ID);
@@ -307,7 +296,7 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
         Map<String, Integer> dabTableExpected = Map.of(DAB_ENTRY_LABEL_1, DAB_ENTRY_FREQUENCY_1,
                 DAB_ENTRY_LABEL_2, DAB_ENTRY_FREQUENCY_2);
 
-        expect.withMessage("DAB frequency table")
+        expect.withMessage("Supported program types")
                 .that(MODULE_PROPERTIES.getDabFrequencyTable())
                 .containsExactlyEntriesIn(dabTableExpected);
     }
@@ -632,7 +621,7 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void programInfoMeetsSdkVersionRequirement_withLowerVersionIdForRelatedContent() {
         RadioManager.ProgramInfo dabProgramInfo = new RadioManager.ProgramInfo(
-                TEST_DAB_SELECTOR_LEGACY, TEST_DAB_SID_EXT_LEGACY_ID, TEST_DAB_FREQUENCY_ID,
+                TEST_DAB_SELECTOR_LEGACY, TEST_DAB_SID_EXT_ID, TEST_DAB_FREQUENCY_ID,
                 List.of(TEST_DAB_SID_EXT_ID), /* infoFlags= */ 0, TEST_SIGNAL_QUALITY,
                 new RadioMetadata.Builder().build(), new ArrayMap<>());
 

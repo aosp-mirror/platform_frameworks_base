@@ -321,10 +321,6 @@ constructor(
     @Deprecated("Use the relevant TransitionViewModel")
     val keyguardAlpha: Flow<Float> = repository.keyguardAlpha
 
-    /** Temporary shim for fading out content when the brightness slider is used */
-    @Deprecated("SceneContainer uses NotificationStackAppearanceInteractor")
-    val panelAlpha: StateFlow<Float> = repository.panelAlpha.asStateFlow()
-
     /**
      * When the lockscreen can be dismissed, emit an alpha value as the user swipes up. This is
      * useful just before the code commits to moving to GONE.
@@ -460,10 +456,6 @@ constructor(
 
     fun setAlpha(alpha: Float) {
         repository.setKeyguardAlpha(alpha)
-    }
-
-    fun setPanelAlpha(alpha: Float) {
-        repository.setPanelAlpha(alpha)
     }
 
     fun setAnimateDozingTransitions(animate: Boolean) {

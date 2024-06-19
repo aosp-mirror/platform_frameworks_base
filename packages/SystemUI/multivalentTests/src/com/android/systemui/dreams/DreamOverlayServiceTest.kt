@@ -778,7 +778,6 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             DREAM_COMPONENT,
             false /*shouldShowComplication*/
         )
-        testScope.runCurrent()
         mMainExecutor.runAllReady()
         assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.STARTED)
     }

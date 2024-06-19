@@ -79,8 +79,6 @@ public class PowerStatsExporterTest {
     private BatteryStatsHistory mHistory;
     private CpuPowerStatsLayout mCpuStatsArrayLayout;
     private PowerStats.Descriptor mPowerStatsDescriptor;
-    private final EnergyConsumerPowerStatsLayout mEnergyConsumerPowerStatsLayout =
-            new EnergyConsumerPowerStatsLayout();
 
     @Before
     public void setup() throws IOException {
@@ -89,24 +87,14 @@ public class PowerStatsExporterTest {
 
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CPU)
-                .trackDeviceStates(
-                        AggregatedPowerStatsConfig.STATE_POWER,
+                .trackDeviceStates(AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN)
-                .trackUidStates(
-                        AggregatedPowerStatsConfig.STATE_POWER,
+                .trackUidStates(AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessor(
                         new CpuPowerStatsProcessor(mStatsRule.getPowerProfile(),
                                 mStatsRule.getCpuScalingPolicies()));
-        config.trackCustomPowerComponents(CustomEnergyConsumerPowerStatsProcessor::new)
-                .trackDeviceStates(
-                        AggregatedPowerStatsConfig.STATE_POWER,
-                        AggregatedPowerStatsConfig.STATE_SCREEN)
-                .trackUidStates(
-                        AggregatedPowerStatsConfig.STATE_POWER,
-                        AggregatedPowerStatsConfig.STATE_SCREEN,
-                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
 
         mPowerStatsStore = new PowerStatsStore(storeDirectory, new TestHandler(), config);
         mHistory = new BatteryStatsHistory(Parcel.obtain(), storeDirectory, 0, 10000,
@@ -132,25 +120,15 @@ public class PowerStatsExporterTest {
     @Test
     public void breakdownByProcState_fullRange() throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                new String[]{"cu570m"}, /* includePowerModels */ false,
+                new String[0], /* includePowerModels */ false,
                 /* includeProcessStateData */ true, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 1000, 10000);
 
         BatteryUsageStats actual = builder.build();
         String message = "Actual BatteryUsageStats: " + actual;
 
-        assertAggregatedPowerEstimate(message, actual,
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE,
-                BatteryConsumer.POWER_COMPONENT_CPU, 7.51016);
-        assertAggregatedPowerEstimate(message, actual,
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS,
-                BatteryConsumer.POWER_COMPONENT_CPU, 7.51016);
-        assertAggregatedPowerEstimate(message, actual,
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE,
-                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 3.60);
-        assertAggregatedPowerEstimate(message, actual,
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS,
-                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 0.360);
+        assertDevicePowerEstimate(message, actual, BatteryConsumer.POWER_COMPONENT_CPU, 7.51016);
+        assertAllAppsPowerEstimate(message, actual, BatteryConsumer.POWER_COMPONENT_CPU, 7.51016);
 
         assertUidPowerEstimate(message, actual, APP_UID1, BatteryConsumer.POWER_COMPONENT_CPU,
                 BatteryConsumer.PROCESS_STATE_ANY, 3.97099);
@@ -158,17 +136,11 @@ public class PowerStatsExporterTest {
                 BatteryConsumer.PROCESS_STATE_FOREGROUND, 2.198082);
         assertUidPowerEstimate(message, actual, APP_UID1, BatteryConsumer.POWER_COMPONENT_CPU,
                 BatteryConsumer.PROCESS_STATE_BACKGROUND, 1.772916);
-        assertUidPowerEstimate(message, actual, APP_UID1,
-                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
-                BatteryConsumer.PROCESS_STATE_ANY, 0.360);
 
         assertUidPowerEstimate(message, actual, APP_UID2, BatteryConsumer.POWER_COMPONENT_CPU,
                 BatteryConsumer.PROCESS_STATE_ANY, 3.538999);
         assertUidPowerEstimate(message, actual, APP_UID2, BatteryConsumer.POWER_COMPONENT_CPU,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE, 3.538999);
-        assertUidPowerEstimate(message, actual, APP_UID2,
-                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
-                BatteryConsumer.PROCESS_STATE_ANY, 0);
 
         actual.close();
     }
@@ -176,19 +148,15 @@ public class PowerStatsExporterTest {
     @Test
     public void breakdownByProcState_subRange() throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                new String[]{"cu570m"}, /* includePowerModels */ false,
+                new String[0], /* includePowerModels */ false,
                 /* includeProcessStateData */ true, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 3700, 6700);
 
         BatteryUsageStats actual = builder.build();
         String message = "Actual BatteryUsageStats: " + actual;
 
-        assertAggregatedPowerEstimate(message, actual,
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE,
-                BatteryConsumer.POWER_COMPONENT_CPU, 4.526749);
-        assertAggregatedPowerEstimate(message, actual,
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS,
-                BatteryConsumer.POWER_COMPONENT_CPU, 4.526749);
+        assertDevicePowerEstimate(message, actual, BatteryConsumer.POWER_COMPONENT_CPU, 4.526749);
+        assertAllAppsPowerEstimate(message, actual, BatteryConsumer.POWER_COMPONENT_CPU, 4.526749);
 
         assertUidPowerEstimate(message, actual, APP_UID1, BatteryConsumer.POWER_COMPONENT_CPU,
                 BatteryConsumer.PROCESS_STATE_ANY, 1.193332);
@@ -208,19 +176,15 @@ public class PowerStatsExporterTest {
     @Test
     public void combinedProcessStates() throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                new String[]{"cu570m"}, /* includePowerModels */ false,
+                new String[0], /* includePowerModels */ false,
                 /* includeProcessStateData */ false, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 1000, 10000);
 
         BatteryUsageStats actual = builder.build();
         String message = "Actual BatteryUsageStats: " + actual;
 
-        assertAggregatedPowerEstimate(message, actual,
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE,
-                BatteryConsumer.POWER_COMPONENT_CPU, 7.51016);
-        assertAggregatedPowerEstimate(message, actual,
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS,
-                BatteryConsumer.POWER_COMPONENT_CPU, 7.51016);
+        assertDevicePowerEstimate(message, actual, BatteryConsumer.POWER_COMPONENT_CPU, 7.51016);
+        assertAllAppsPowerEstimate(message, actual, BatteryConsumer.POWER_COMPONENT_CPU, 7.51016);
 
         assertUidPowerEstimate(message, actual, APP_UID1, BatteryConsumer.POWER_COMPONENT_CPU,
                 BatteryConsumer.PROCESS_STATE_ANY, 3.97099);
@@ -246,19 +210,10 @@ public class PowerStatsExporterTest {
         long[] uidStats2 = new long[mCpuStatsArrayLayout.getUidStatsArrayLength()];
         powerStats.uidStats.put(APP_UID2, uidStats2);
 
-        PowerStats customPowerStats = new PowerStats(
-                new PowerStats.Descriptor(BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
-                        "cu570m", mEnergyConsumerPowerStatsLayout.getDeviceStatsArrayLength(),
-                        null, 0, mEnergyConsumerPowerStatsLayout.getUidStatsArrayLength(),
-                        new PersistableBundle()));
-        long[] customUidStats = new long[mEnergyConsumerPowerStatsLayout.getUidStatsArrayLength()];
-        customPowerStats.uidStats.put(APP_UID1, customUidStats);
-
         mHistory.forceRecordAllHistory();
 
         mHistory.startRecordingHistory(1000, 1000, false);
         mHistory.recordPowerStats(1000, 1000, powerStats);
-        mHistory.recordPowerStats(1000, 1000, customPowerStats);
         mHistory.recordBatteryState(1000, 1000, 70, /* plugged */ false);
         mHistory.recordStateStartEvent(1000, 1000, BatteryStats.HistoryItem.STATE_SCREEN_ON_FLAG);
         mHistory.recordProcessStateChange(1000, 1000, APP_UID1,
@@ -290,10 +245,6 @@ public class PowerStatsExporterTest {
         mCpuStatsArrayLayout.setUidTimeByPowerBracket(uidStats2, 0, 40000);
         mHistory.recordPowerStats(6000, 6000, powerStats);
 
-        mEnergyConsumerPowerStatsLayout.setConsumedEnergy(customPowerStats.stats, 0, 3_600_000);
-        mEnergyConsumerPowerStatsLayout.setUidConsumedEnergy(customUidStats, 0, 360_000);
-        mHistory.recordPowerStats(6010, 6010, customPowerStats);
-
         mPowerStatsAggregator.aggregatePowerStats(3500, 6500, stats -> {
             mPowerStatsStore.storeAggregatedPowerStats(stats);
         });
@@ -320,13 +271,20 @@ public class PowerStatsExporterTest {
         exporter.exportAggregatedPowerStats(builder, monotonicStartTime, monotonicEndTime);
     }
 
-    private void assertAggregatedPowerEstimate(String message, BatteryUsageStats bus, int scope,
-            int componentId, double expected) {
-        AggregateBatteryConsumer consumer = bus.getAggregateBatteryConsumer(scope);
-        double actual = componentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
-                ? consumer.getConsumedPower(componentId)
-                : consumer.getConsumedPowerForCustomComponent(componentId);
-        assertWithMessage(message).that(actual).isWithin(TOLERANCE).of(expected);
+    private void assertDevicePowerEstimate(String message, BatteryUsageStats bus, int componentId,
+            double expected) {
+        AggregateBatteryConsumer consumer = bus.getAggregateBatteryConsumer(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+        assertWithMessage(message).that(consumer.getConsumedPower(componentId))
+                .isWithin(TOLERANCE).of(expected);
+    }
+
+    private void assertAllAppsPowerEstimate(String message, BatteryUsageStats bus, int componentId,
+            double expected) {
+        AggregateBatteryConsumer consumer = bus.getAggregateBatteryConsumer(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
+        assertWithMessage(message).that(consumer.getConsumedPower(componentId))
+                .isWithin(TOLERANCE).of(expected);
     }
 
     private void assertUidPowerEstimate(String message, BatteryUsageStats bus, int uid,
@@ -335,11 +293,9 @@ public class PowerStatsExporterTest {
         final UidBatteryConsumer uidScope = uidScopes.stream()
                 .filter(us -> us.getUid() == uid).findFirst().orElse(null);
         assertWithMessage(message).that(uidScope).isNotNull();
-        double actual = componentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
-                ? uidScope.getConsumedPower(
-                        new BatteryConsumer.Dimensions(componentId, processState))
-                : uidScope.getConsumedPowerForCustomComponent(componentId);
-        assertWithMessage(message).that(actual).isWithin(TOLERANCE).of(expected);
+        assertWithMessage(message).that(uidScope.getConsumedPower(
+                new BatteryConsumer.Dimensions(componentId, processState)))
+                .isWithin(TOLERANCE).of(expected);
     }
 
     private void clearDirectory(File dir) {

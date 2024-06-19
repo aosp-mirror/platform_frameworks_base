@@ -72,7 +72,6 @@ class MenuAnimationController {
     private final Handler mHandler;
     private boolean mIsFadeEffectEnabled;
     private Runnable mSpringAnimationsEndAction;
-    private PointF mAnimationEndPosition = new PointF();
 
     // Cache the animations state of {@link DynamicAnimation.TRANSLATION_X} and {@link
     // DynamicAnimation.TRANSLATION_Y} to be well controlled by the touch handler
@@ -105,12 +104,10 @@ class MenuAnimationController {
                     @Override
                     public void onRadiiAnimationStop() {}
                 });
-        mAnimationEndPosition = mMenuView.getMenuPosition();
     }
 
     void moveToPosition(PointF position) {
         moveToPosition(position, /* animateMovement = */ false);
-        mAnimationEndPosition = position;
     }
 
     /* Moves position without updating underlying percentage position. Can be animated. */
@@ -132,7 +129,6 @@ class MenuAnimationController {
         } else {
             DynamicAnimation.TRANSLATION_X.setValue(mMenuView, positionX);
         }
-        mAnimationEndPosition.x = positionX;
     }
 
     void moveToPositionY(float positionY) {
@@ -148,7 +144,6 @@ class MenuAnimationController {
         } else {
             DynamicAnimation.TRANSLATION_Y.setValue(mMenuView, positionY);
         }
-        mAnimationEndPosition.y = positionY;
     }
 
     void moveToPositionYIfNeeded(float positionY) {
@@ -264,9 +259,6 @@ class MenuAnimationController {
 
         cancelAnimation(property);
         mPositionAnimations.put(property, flingAnimation);
-        if (finalPosition != null) {
-            setAnimationEndPosition(property, finalPosition);
-        }
         flingAnimation.start();
     }
 
@@ -300,7 +292,6 @@ class MenuAnimationController {
 
         cancelAnimation(property);
         mPositionAnimations.put(property, springAnimation);
-        setAnimationEndPosition(property, finalPosition);
         springAnimation.animateToFinalPosition(finalPosition);
     }
 
@@ -392,21 +383,6 @@ class MenuAnimationController {
         }
 
         mPositionAnimations.get(property).cancel();
-    }
-
-    private void setAnimationEndPosition(
-            DynamicAnimation.ViewProperty property, Float endPosition) {
-        if (property.equals(DynamicAnimation.TRANSLATION_X)) {
-            mAnimationEndPosition.x = endPosition;
-        }
-        if (property.equals(DynamicAnimation.TRANSLATION_Y)) {
-            mAnimationEndPosition.y = endPosition;
-        }
-    }
-
-    void skipAnimations() {
-        cancelAnimations();
-        moveToPosition(mAnimationEndPosition, false);
     }
 
     @VisibleForTesting

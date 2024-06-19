@@ -55,8 +55,6 @@ class AodBurnInViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var burnInInteractor: BurnInInteractor
     @Mock private lateinit var goneToAodTransitionViewModel: GoneToAodTransitionViewModel
-    @Mock
-    private lateinit var lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var clockController: ClockController
 
     private val kosmos = testKosmos()
@@ -78,12 +76,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         kosmos.burnInInteractor = burnInInteractor
         whenever(goneToAodTransitionViewModel.enterFromTopTranslationY(anyInt()))
             .thenReturn(emptyFlow())
-        whenever(goneToAodTransitionViewModel.enterFromSideTranslationX(anyInt()))
-            .thenReturn(emptyFlow())
-        whenever(lockscreenToAodTransitionViewModel.enterFromSideTranslationX(anyInt()))
-            .thenReturn(emptyFlow())
         kosmos.goneToAodTransitionViewModel = goneToAodTransitionViewModel
-        kosmos.lockscreenToAodTransitionViewModel = lockscreenToAodTransitionViewModel
         kosmos.fakeKeyguardClockRepository.setCurrentClock(clockController)
 
         underTest = kosmos.aodBurnInViewModel

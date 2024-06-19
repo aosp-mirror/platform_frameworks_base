@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.activityembedding;
 
-import static android.view.WindowManager.TRANSIT_NONE;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
@@ -32,7 +31,6 @@ import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 
@@ -84,27 +82,11 @@ abstract class ActivityEmbeddingAnimationTestBase extends ShellTestCase {
         spyOn(mFinishCallback);
     }
 
-    /**
-     * Creates a mock {@link TransitionInfo.Change}.
-     *
-     * @param flags the {@link TransitionInfo.ChangeFlags} of the change
-     */
+    /** Creates a mock {@link TransitionInfo.Change}. */
     static TransitionInfo.Change createChange(@TransitionInfo.ChangeFlags int flags) {
-        return createChange(flags, TRANSIT_NONE);
-    }
-
-    /**
-     * Creates a mock {@link TransitionInfo.Change}.
-     *
-     * @param flags the {@link TransitionInfo.ChangeFlags} of the change
-     * @param mode the transition mode of the change
-     */
-    static TransitionInfo.Change createChange(@TransitionInfo.ChangeFlags int flags,
-            @WindowManager.TransitionType int mode) {
         TransitionInfo.Change c = new TransitionInfo.Change(mock(WindowContainerToken.class),
                 mock(SurfaceControl.class));
         c.setFlags(flags);
-        c.setMode(mode);
         return c;
     }
 

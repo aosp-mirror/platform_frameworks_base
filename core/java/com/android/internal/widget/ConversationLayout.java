@@ -16,8 +16,6 @@
 
 package com.android.internal.widget;
 
-import static android.widget.flags.Flags.conversationLayoutUseMaximumChildHeight;
-
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_EXTERNAL;
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_INLINE;
 
@@ -1405,38 +1403,6 @@ public class ConversationLayout extends FrameLayout
                 group.setVisibility(VISIBLE);
             } else if (visibleChildren == 0 && group.getVisibility() != GONE) {
                 group.setVisibility(GONE);
-            }
-        }
-    }
-
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-        // ConversationLayout needs to set its height to its biggest child to show the content
-        // properly.
-        // FrameLayout measures its match_parent children twice when any of FLs dimension is not
-        // specified. However, its sets its own dimensions before the second measurement pass.
-        // Content CutOff happens when children have bigger height on its second measurement.
-        if (conversationLayoutUseMaximumChildHeight()) {
-            int maxHeight = getMeasuredHeight();
-            final int count = getChildCount();
-
-            for (int i = 0; i < count; i++) {
-                final View child = getChildAt(i);
-                if (child == null || child.getVisibility() == GONE) {
-                    continue;
-                }
-
-                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                maxHeight = Math.max(maxHeight,
-                        child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
-            }
-
-            maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
-            if (maxHeight != getMeasuredHeight()) {
-                setMeasuredDimension(getMeasuredWidth(), maxHeight);
             }
         }
     }

@@ -27534,7 +27534,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return a view with given ID if found, or {@code null} otherwise
      * @see View#requireViewById(int)
      */
-    /* TODO(b/347672184): Re-add @Nullable */
+    @Nullable
     public final <T extends View> T findViewById(@IdRes int id) {
         if (id == NO_ID) {
             return null;

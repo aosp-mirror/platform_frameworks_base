@@ -32,8 +32,6 @@ public class PowerStatsLayout {
     private static final String EXTRA_DEVICE_ENERGY_CONSUMERS_POSITION = "de";
     private static final String EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT = "dec";
     private static final String EXTRA_UID_DURATION_POSITION = "ud";
-    private static final String EXTRA_UID_ENERGY_CONSUMERS_POSITION = "ue";
-    private static final String EXTRA_UID_ENERGY_CONSUMERS_COUNT = "uec";
     private static final String EXTRA_UID_POWER_POSITION = "up";
 
     protected static final int UNSUPPORTED = -1;
@@ -55,8 +53,6 @@ public class PowerStatsLayout {
     private int mDeviceEnergyConsumerCount;
     private int mDevicePowerEstimatePosition = UNSUPPORTED;
     private int mUidDurationPosition = UNSUPPORTED;
-    private int mUidEnergyConsumerPosition = UNSUPPORTED;
-    private int mUidEnergyConsumerCount;
     private int mUidPowerEstimatePosition = UNSUPPORTED;
 
     public PowerStatsLayout() {
@@ -248,36 +244,6 @@ public class PowerStatsLayout {
     }
 
     /**
-     * Declares that the UID stats array has a section capturing EnergyConsumer data from
-     * PowerStatsService.
-     */
-    public void addUidSectionEnergyConsumers(int energyConsumerCount) {
-        mUidEnergyConsumerPosition = addUidSection(energyConsumerCount, "energy",
-                FLAG_OPTIONAL);
-        mUidEnergyConsumerCount = energyConsumerCount;
-    }
-
-    public int getUidEnergyConsumerCount() {
-        return mUidEnergyConsumerCount;
-    }
-
-    /**
-     * Saves the accumulated energy for the specified rail the corresponding
-     * <code>stats</code> element.
-     */
-    public void setUidConsumedEnergy(long[] stats, int index, long energy) {
-        stats[mUidEnergyConsumerPosition + index] = energy;
-    }
-
-    /**
-     * Extracts the EnergyConsumer data from a uid stats array for the specified
-     * EnergyConsumer.
-     */
-    public long getUidConsumedEnergy(long[] stats, int index) {
-        return stats[mUidEnergyConsumerPosition + index];
-    }
-
-    /**
      * Converts the supplied mAh power estimate to a long and saves it in the corresponding
      * element of <code>stats</code>.
      */
@@ -303,8 +269,6 @@ public class PowerStatsLayout {
                 mDeviceEnergyConsumerCount);
         extras.putInt(EXTRA_DEVICE_POWER_POSITION, mDevicePowerEstimatePosition);
         extras.putInt(EXTRA_UID_DURATION_POSITION, mUidDurationPosition);
-        extras.putInt(EXTRA_UID_ENERGY_CONSUMERS_POSITION, mUidEnergyConsumerPosition);
-        extras.putInt(EXTRA_UID_ENERGY_CONSUMERS_COUNT, mUidEnergyConsumerCount);
         extras.putInt(EXTRA_UID_POWER_POSITION, mUidPowerEstimatePosition);
         extras.putString(PowerStats.Descriptor.EXTRA_DEVICE_STATS_FORMAT, mDeviceFormat.toString());
         extras.putString(PowerStats.Descriptor.EXTRA_STATE_STATS_FORMAT, mStateFormat.toString());
@@ -320,8 +284,6 @@ public class PowerStatsLayout {
         mDeviceEnergyConsumerCount = extras.getInt(EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT);
         mDevicePowerEstimatePosition = extras.getInt(EXTRA_DEVICE_POWER_POSITION);
         mUidDurationPosition = extras.getInt(EXTRA_UID_DURATION_POSITION);
-        mUidEnergyConsumerPosition = extras.getInt(EXTRA_UID_ENERGY_CONSUMERS_POSITION);
-        mUidEnergyConsumerCount = extras.getInt(EXTRA_UID_ENERGY_CONSUMERS_COUNT);
         mUidPowerEstimatePosition = extras.getInt(EXTRA_UID_POWER_POSITION);
     }
 

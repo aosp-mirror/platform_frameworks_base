@@ -31,7 +31,6 @@ import static com.android.wm.shell.transition.Transitions.TRANSIT_TASK_FRAGMENT_
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArraySet;
@@ -46,7 +45,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationAdapter.SnapshotAdapter;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.shared.TransitionUtil;
@@ -400,15 +398,7 @@ class ActivityEmbeddingAnimationRunner {
         // This is because the TaskFragment surface/change won't contain the Activity's before its
         // reparent.
         Animation changeAnimation = null;
-        final Rect parentBounds = new Rect();
-        // We use a single boolean value to record the backdrop override because the override used
-        // for overlay and we restrict to single overlay animation. We should fix the assumption
-        // if we allow multiple overlay transitions.
-        // The backdrop logic is mainly for animations of split animations. The backdrop should be
-        // disabled if there is any open/close target in the same transition as the change target.
-        // However, the overlay change animation usually contains one change target, and shows
-        // backdrop unexpectedly.
-        Boolean overrideShowBackdrop = null;
+        Rect parentBounds = new Rect();
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.getMode() != TRANSIT_CHANGE
                     || change.getStartAbsBounds().equals(change.getEndAbsBounds())) {
@@ -431,17 +421,17 @@ class ActivityEmbeddingAnimationRunner {
                 }
             }
 
-            final TransitionInfo.AnimationOptions options = boundsAnimationChange
-                    .getAnimationOptions();
-            if (options != null) {
-                final Animation overrideAnimation = mAnimationSpec.loadCustomAnimationFromOptions(
-                        options, TRANSIT_CHANGE);
-                if (overrideAnimation != null) {
-                    overrideShowBackdrop = overrideAnimation.getShowBackdrop();
-                }
+            // The TaskFragment may be enter/exit split, so we take the union of both as the parent
+            // size.
+            parentBounds.union(boundsAnimationChange.getStartAbsBounds());
+            parentBounds.union(boundsAnimationChange.getEndAbsBounds());
+            if (boundsAnimationChange != change) {
+                // Union the change starting bounds in case the activity is resized and reparented
+                // to a TaskFragment. In that case, the TaskFragment may not cover the activity's
+                // starting bounds.
+                parentBounds.union(change.getStartAbsBounds());
             }
 
-            calculateParentBounds(change, boundsAnimationChange, parentBounds);
             // There are two animations in the array. The first one is for the start leash
             // (snapshot), and the second one is for the end leash (TaskFragment).
             final Animation[] animations = mAnimationSpec.createChangeBoundsChangeAnimations(change,
@@ -476,7 +466,7 @@ class ActivityEmbeddingAnimationRunner {
 
         // If there is no corresponding open/close window with the change, we should show background
         // color to cover the empty part of the screen.
-        boolean shouldShowBackgroundColor = true;
+        boolean shouldShouldBackgroundColor = true;
         // Handle the other windows that don't have bounds change in the same transition.
         for (TransitionInfo.Change change : info.getChanges()) {
             if (handledChanges.contains(change)) {
@@ -493,57 +483,22 @@ class ActivityEmbeddingAnimationRunner {
                 animation = ActivityEmbeddingAnimationSpec.createNoopAnimation(change);
             } else if (TransitionUtil.isClosingType(change.getMode())) {
                 animation = mAnimationSpec.createChangeBoundsCloseAnimation(change, parentBounds);
-                shouldShowBackgroundColor = false;
+                shouldShouldBackgroundColor = false;
             } else {
                 animation = mAnimationSpec.createChangeBoundsOpenAnimation(change, parentBounds);
-                shouldShowBackgroundColor = false;
+                shouldShouldBackgroundColor = false;
             }
             adapters.add(new ActivityEmbeddingAnimationAdapter(animation, change,
                     TransitionUtil.getRootFor(change, info)));
         }
 
-        shouldShowBackgroundColor = overrideShowBackdrop != null
-                ? overrideShowBackdrop : shouldShowBackgroundColor;
-        if (shouldShowBackgroundColor && changeAnimation != null) {
+        if (shouldShouldBackgroundColor && changeAnimation != null) {
             // Change animation may leave part of the screen empty. Show background color to cover
             // that.
             changeAnimation.setShowBackdrop(true);
         }
 
         return adapters;
-    }
-
-    /**
-     * Calculates parent bounds of the animation target by {@code change}.
-     */
-    @VisibleForTesting
-    static void calculateParentBounds(@NonNull TransitionInfo.Change change,
-              @NonNull TransitionInfo.Change boundsAnimationChange, @NonNull Rect outParentBounds) {
-        if (Flags.activityEmbeddingOverlayPresentationFlag()) {
-            final Point endParentSize = change.getEndParentSize();
-            if (endParentSize.equals(0, 0)) {
-                return;
-            }
-            final Point endRelPosition = change.getEndRelOffset();
-            final Point endAbsPosition = new Point(change.getEndAbsBounds().left,
-                    change.getEndAbsBounds().top);
-            final Point parentEndAbsPosition = new Point(endAbsPosition.x - endRelPosition.x,
-                    endAbsPosition.y - endRelPosition.y);
-            outParentBounds.set(parentEndAbsPosition.x, parentEndAbsPosition.y,
-                    parentEndAbsPosition.x + endParentSize.x,
-                    parentEndAbsPosition.y + endParentSize.y);
-        } else {
-            // The TaskFragment may be enter/exit split, so we take the union of both as
-            // the parent size.
-            outParentBounds.union(boundsAnimationChange.getStartAbsBounds());
-            outParentBounds.union(boundsAnimationChange.getEndAbsBounds());
-            if (boundsAnimationChange != change) {
-                // Union the change starting bounds in case the activity is resized and
-                // reparented to a TaskFragment. In that case, the TaskFragment may not cover
-                // the activity's starting bounds.
-                outParentBounds.union(change.getStartAbsBounds());
-            }
-        }
     }
 
     /**

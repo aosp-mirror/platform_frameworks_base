@@ -159,24 +159,13 @@ class DesktopModeEventLogger {
     }
 
     companion object {
-        /**
-         * Describes a task position and dimensions.
-         *
-         * @property instanceId instance id of the task
-         * @property uid uid of the app associated with the task
-         * @property taskHeight height of the task in px
-         * @property taskWidth width of the task in px
-         * @property taskX x-coordinate of the top-left corner
-         * @property taskY y-coordinate of the top-left corner
-         *
-         */
         data class TaskUpdate(
             val instanceId: Int,
             val uid: Int,
-            val taskHeight: Int,
-            val taskWidth: Int,
-            val taskX: Int,
-            val taskY: Int,
+            val taskHeight: Int = Int.MIN_VALUE,
+            val taskWidth: Int = Int.MIN_VALUE,
+            val taskX: Int = Int.MIN_VALUE,
+            val taskY: Int = Int.MIN_VALUE,
         )
 
         /**

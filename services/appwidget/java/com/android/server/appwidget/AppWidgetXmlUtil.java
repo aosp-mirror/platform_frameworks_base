@@ -22,24 +22,17 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.ArraySet;
-import android.util.Log;
 import android.util.SizeF;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -72,16 +65,6 @@ public class AppWidgetXmlUtil {
     private static final String ATTR_DESCRIPTION_RES = "description_res";
     private static final String ATTR_PROVIDER_INHERITANCE = "provider_inheritance";
     private static final String ATTR_OS_FINGERPRINT = "os_fingerprint";
-    static final String TAG_BACKUP_RESTORE_CONTROLLER_STATE = "br";
-    private static final String TAG_PRUNED_APPS = "pruned_apps";
-    private static final String ATTR_TAG = "tag";
-    private static final String ATTR_PACKAGE_NAMES = "pkgs";
-    private static final String TAG_PROVIDER_UPDATES = "provider_updates";
-    private static final String TAG_HOST_UPDATES = "host_updates";
-    private static final String TAG_RECORD = "record";
-    private static final String ATTR_OLD_ID = "old_id";
-    private static final String ATTR_NEW_ID = "new_id";
-    private static final String ATTR_NOTIFIED = "notified";
     private static final String SIZE_SEPARATOR = ",";
 
     /**
@@ -181,169 +164,5 @@ public class AppWidgetXmlUtil {
             Slog.e(TAG, "Error parsing widget sizes", e);
             return null;
         }
-    }
-
-    /**
-     * Persists {@link AppWidgetServiceImpl.BackupRestoreController.State} to disk as XML.
-     * See {@link #readBackupRestoreControllerState(TypedXmlPullParser)} for example XML.
-     *
-     * @param out XML serializer
-     * @param state {@link AppWidgetServiceImpl.BackupRestoreController.State} of
-     *      intermediate states to be persisted as xml to resume restore after reboot.
-     */
-    static void writeBackupRestoreControllerState(
-            @NonNull final TypedXmlSerializer out,
-            @NonNull final AppWidgetServiceImpl.BackupRestoreController.State state)
-            throws IOException {
-        Objects.requireNonNull(out);
-        Objects.requireNonNull(state);
-        out.startTag(null, TAG_BACKUP_RESTORE_CONTROLLER_STATE);
-        final Set<String> prunedApps = state.getPrunedApps();
-        if (prunedApps != null && !prunedApps.isEmpty()) {
-            out.startTag(null, TAG_PRUNED_APPS);
-            out.attribute(null, ATTR_PACKAGE_NAMES, String.join(",", prunedApps));
-            out.endTag(null, TAG_PRUNED_APPS);
-        }
-        final SparseArray<List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>>
-                updatesByProvider = state.getUpdatesByProvider();
-        if (updatesByProvider != null) {
-            writeUpdateRecords(out, TAG_PROVIDER_UPDATES, updatesByProvider);
-        }
-        final SparseArray<List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>>
-                updatesByHost = state.getUpdatesByHost();
-        if (updatesByHost != null) {
-            writeUpdateRecords(out, TAG_HOST_UPDATES, updatesByHost);
-        }
-        out.endTag(null, TAG_BACKUP_RESTORE_CONTROLLER_STATE);
-    }
-
-    private static void writeUpdateRecords(@NonNull final TypedXmlSerializer out,
-            @NonNull final String outerTag, @NonNull final SparseArray<List<
-                    AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>> records)
-            throws IOException {
-        for (int i = 0; i < records.size(); i++) {
-            final int tag = records.keyAt(i);
-            out.startTag(null, outerTag);
-            out.attributeInt(null, ATTR_TAG, tag);
-            final List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord> entries =
-                    records.get(tag);
-            for (AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord entry : entries) {
-                out.startTag(null, TAG_RECORD);
-                out.attributeInt(null, ATTR_OLD_ID, entry.oldId);
-                out.attributeInt(null, ATTR_NEW_ID, entry.newId);
-                out.attributeBoolean(null, ATTR_NOTIFIED, entry.notified);
-                out.endTag(null, TAG_RECORD);
-            }
-            out.endTag(null, outerTag);
-        }
-    }
-
-    /**
-     * Parses {@link AppWidgetServiceImpl.BackupRestoreController.State} from xml.
-     *
-     * <pre>
-     * {@code
-     *     <?xml version="1.0"?>
-     *     <br>
-     *         <pruned_apps pkgs="com.example.app1,com.example.app2,com.example.app3" />
-     *         <provider_updates tag="0">
-     *             <record old_id="10" new_id="0" notified="false" />
-     *         </provider_updates>
-     *         <provider_updates tag="1">
-     *             <record old_id="9" new_id="1" notified="true" />
-     *         </provider_updates>
-     *         <provider_updates tag="2">
-     *             <record old_id="8" new_id="2" notified="false" />
-     *         </provider_updates>
-     *         <host_updates tag="0">
-     *             <record old_id="10" new_id="0" notified="false" />
-     *         </host_updates>
-     *         <host_updates tag="1">
-     *             <record old_id="9" new_id="1" notified="true" />
-     *         </host_updates>
-     *         <host_updates tag="2">
-     *             <record old_id="8" new_id="2" notified="false" />
-     *         </host_updates>
-     *     </br>
-     * }
-     * </pre>
-     *
-     * @param parser XML parser
-     * @return {@link AppWidgetServiceImpl.BackupRestoreController.State} of intermediate states
-     * in {@link AppWidgetServiceImpl.BackupRestoreController}, so that backup & restore can be
-     * resumed after reboot.
-     */
-    @Nullable
-    static AppWidgetServiceImpl.BackupRestoreController.State
-            readBackupRestoreControllerState(@NonNull final TypedXmlPullParser parser) {
-        Objects.requireNonNull(parser);
-        int type;
-        String tag = null;
-        final Set<String> prunedApps = new ArraySet<>(1);
-        final SparseArray<List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>>
-                updatesByProviders = new SparseArray<>();
-        final SparseArray<List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>>
-                updatesByHosts = new SparseArray<>();
-
-        try {
-            do {
-                type = parser.next();
-                if (type != XmlPullParser.START_TAG) {
-                    continue;
-                }
-                tag = parser.getName();
-                switch (tag) {
-                    case TAG_PRUNED_APPS:
-                        final String packages =
-                                parser.getAttributeValue(null, ATTR_PACKAGE_NAMES);
-                        prunedApps.addAll(Arrays.asList(packages.split(",")));
-                        break;
-                    case TAG_PROVIDER_UPDATES:
-                        updatesByProviders.put(parser.getAttributeInt(null, ATTR_TAG),
-                                parseRestoreUpdateRecords(parser));
-                        break;
-                    case TAG_HOST_UPDATES:
-                        updatesByHosts.put(parser.getAttributeInt(null, ATTR_TAG),
-                                parseRestoreUpdateRecords(parser));
-                        break;
-                    default:
-                        break;
-                }
-            } while (type != XmlPullParser.END_DOCUMENT
-                    && (!TAG_BACKUP_RESTORE_CONTROLLER_STATE.equals(tag)
-                            || type != XmlPullParser.END_TAG));
-        } catch (IOException | XmlPullParserException e) {
-            Log.e(TAG, "error parsing state", e);
-            return null;
-        }
-        return new AppWidgetServiceImpl.BackupRestoreController.State(
-                prunedApps, updatesByProviders, updatesByHosts);
-    }
-
-    @NonNull
-    private static List<
-            AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord
-            > parseRestoreUpdateRecords(@NonNull final TypedXmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        int type;
-        String tag;
-        final List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord> ret =
-                new ArrayList<>();
-        do {
-            type = parser.next();
-            tag = parser.getName();
-            if (tag.equals(TAG_RECORD) && type == XmlPullParser.START_TAG) {
-                final int oldId = parser.getAttributeInt(null, ATTR_OLD_ID);
-                final int newId = parser.getAttributeInt(null, ATTR_NEW_ID);
-                final boolean notified = parser.getAttributeBoolean(
-                        null, ATTR_NOTIFIED);
-                final AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord record =
-                        new AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord(
-                                oldId, newId);
-                record.notified = notified;
-                ret.add(record);
-            }
-        } while (tag.equals(TAG_RECORD));
-        return ret;
     }
 }

@@ -42,7 +42,6 @@ import java.text.ParseException;
 @SmallTest
 public class AggregatedPowerStatsTest {
     private static final int TEST_POWER_COMPONENT = 1077;
-    private static final int CUSTOM_POWER_COMPONENT = 1042;
     private static final int APP_1 = 27;
     private static final int APP_2 = 42;
     private static final int COMPONENT_STATE_0 = 0;
@@ -64,20 +63,6 @@ public class AggregatedPowerStatsTest {
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
 
-        mAggregatedPowerStatsConfig.trackCustomPowerComponents(
-                        () -> new PowerStatsProcessor() {
-                            @Override
-                            void finish(PowerComponentAggregatedPowerStats stats,
-                                    long timestampMs) {
-                            }
-                        })
-                .trackDeviceStates(
-                        AggregatedPowerStatsConfig.STATE_POWER,
-                        AggregatedPowerStatsConfig.STATE_SCREEN)
-                .trackUidStates(
-                        AggregatedPowerStatsConfig.STATE_POWER,
-                        AggregatedPowerStatsConfig.STATE_SCREEN,
-                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
         SparseArray<String> stateLabels = new SparseArray<>();
         stateLabels.put(COMPONENT_STATE_1, "one");
         mPowerComponentDescriptor = new PowerStats.Descriptor(TEST_POWER_COMPONENT, "fan", 2,
@@ -152,13 +137,6 @@ public class AggregatedPowerStatsTest {
         ps.uidStats.put(APP_2, new long[]{100, 200, 300});
 
         stats.addPowerStats(ps, 5000);
-
-        PowerStats custom = new PowerStats(
-                new PowerStats.Descriptor(CUSTOM_POWER_COMPONENT, "cu570m", 1, null, 0, 2,
-                        new PersistableBundle()));
-        custom.stats = new long[]{123};
-        custom.uidStats.put(APP_1, new long[]{500, 600});
-        stats.addPowerStats(custom, 6000);
         return stats;
     }
 
@@ -171,12 +149,12 @@ public class AggregatedPowerStatsTest {
         assertThat(descriptor.uidStatsArrayLength).isEqualTo(3);
         assertThat(descriptor.extras.getString("speed")).isEqualTo("fast");
 
-        assertThat(getDeviceStats(stats, TEST_POWER_COMPONENT,
+        assertThat(getDeviceStats(stats,
                 AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
                 AggregatedPowerStatsConfig.SCREEN_STATE_ON))
                 .isEqualTo(new long[]{322, 987});
 
-        assertThat(getDeviceStats(stats, TEST_POWER_COMPONENT,
+        assertThat(getDeviceStats(stats,
                 AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
                 AggregatedPowerStatsConfig.SCREEN_STATE_OTHER))
                 .isEqualTo(new long[]{222, 0});
@@ -207,79 +185,51 @@ public class AggregatedPowerStatsTest {
                 .isEqualTo(new long[]{4500});
 
         assertThat(getUidDeviceStats(stats,
-                TEST_POWER_COMPONENT, APP_1,
+                APP_1,
                 AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
                 AggregatedPowerStatsConfig.SCREEN_STATE_ON,
                 BatteryConsumer.PROCESS_STATE_UNSPECIFIED))
                 .isEqualTo(new long[]{259, 0, 492});
 
         assertThat(getUidDeviceStats(stats,
-                TEST_POWER_COMPONENT, APP_1,
+                APP_1,
                 AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
                 AggregatedPowerStatsConfig.SCREEN_STATE_ON,
                 BatteryConsumer.PROCESS_STATE_CACHED))
                 .isEqualTo(new long[]{129, 0, 446});
 
         assertThat(getUidDeviceStats(stats,
-                TEST_POWER_COMPONENT, APP_1,
+                APP_1,
                 AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
                 AggregatedPowerStatsConfig.SCREEN_STATE_OTHER,
                 BatteryConsumer.PROCESS_STATE_CACHED))
                 .isEqualTo(new long[]{0, 0, 200});
 
         assertThat(getUidDeviceStats(stats,
-                TEST_POWER_COMPONENT, APP_2,
+                APP_2,
                 AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
                 AggregatedPowerStatsConfig.SCREEN_STATE_ON,
                 BatteryConsumer.PROCESS_STATE_UNSPECIFIED))
                 .isEqualTo(new long[]{185, 209, 418});
 
         assertThat(getUidDeviceStats(stats,
-                TEST_POWER_COMPONENT, APP_2,
+                APP_2,
                 AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
                 AggregatedPowerStatsConfig.SCREEN_STATE_ON,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND))
                 .isEqualTo(new long[]{142, 204, 359});
 
         assertThat(getUidDeviceStats(stats,
-                TEST_POWER_COMPONENT, APP_2,
+                APP_2,
                 AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
                 AggregatedPowerStatsConfig.SCREEN_STATE_OTHER,
                 BatteryConsumer.PROCESS_STATE_BACKGROUND))
                 .isEqualTo(new long[]{50, 100, 150});
-
-        descriptor = stats.getPowerComponentStats(CUSTOM_POWER_COMPONENT)
-                .getPowerStatsDescriptor();
-        assertThat(descriptor.powerComponentId).isEqualTo(CUSTOM_POWER_COMPONENT);
-        assertThat(descriptor.statsArrayLength).isEqualTo(1);
-        assertThat(descriptor.uidStatsArrayLength).isEqualTo(2);
-
-        assertThat(getDeviceStats(stats, CUSTOM_POWER_COMPONENT,
-                AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
-                AggregatedPowerStatsConfig.SCREEN_STATE_ON))
-                .isEqualTo(new long[]{61});
-        assertThat(getDeviceStats(stats, CUSTOM_POWER_COMPONENT,
-                AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
-                AggregatedPowerStatsConfig.SCREEN_STATE_OTHER))
-                .isEqualTo(new long[]{61});
-        assertThat(getUidDeviceStats(stats,
-                CUSTOM_POWER_COMPONENT, APP_1,
-                AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
-                AggregatedPowerStatsConfig.SCREEN_STATE_ON,
-                BatteryConsumer.PROCESS_STATE_CACHED))
-                .isEqualTo(new long[]{250, 300});
-        assertThat(getUidDeviceStats(stats,
-                CUSTOM_POWER_COMPONENT, APP_1,
-                AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
-                AggregatedPowerStatsConfig.SCREEN_STATE_OTHER,
-                BatteryConsumer.PROCESS_STATE_CACHED))
-                .isEqualTo(new long[]{250, 300});
     }
 
-    private static long[] getDeviceStats(AggregatedPowerStats stats, int powerComponentId,
-            int... states) {
+    private static long[] getDeviceStats(AggregatedPowerStats stats, int... states) {
         PowerComponentAggregatedPowerStats powerComponentStats =
-                stats.getPowerComponentStats(powerComponentId);
+                stats.getPowerComponentStats(TEST_POWER_COMPONENT);
         long[] out = new long[powerComponentStats.getPowerStatsDescriptor().statsArrayLength];
         powerComponentStats.getDeviceStats(out, states);
         return out;
@@ -293,10 +243,9 @@ public class AggregatedPowerStatsTest {
         return out;
     }
 
-    private static long[] getUidDeviceStats(AggregatedPowerStats stats, int powerComponentId,
-            int uid, int... states) {
+    private static long[] getUidDeviceStats(AggregatedPowerStats stats, int uid, int... states) {
         PowerComponentAggregatedPowerStats powerComponentStats =
-                stats.getPowerComponentStats(powerComponentId);
+                stats.getPowerComponentStats(TEST_POWER_COMPONENT);
         long[] out = new long[powerComponentStats.getPowerStatsDescriptor().uidStatsArrayLength];
         powerComponentStats.getUidStats(out, uid, states);
         return out;

@@ -26,18 +26,14 @@ android_test {
     platform_apis: true,
     srcs: [
         "src/**/*.java",
-        "src/**/*.kt",
         "src/**/I*.aidl",
     ],
     resource_dirs: ["res"],
     static_libs: [
-        "androidx.core_core-animation",
-        "androidx.core_core-ktx",
         "androidx.test.rules",
         "hamcrest-library",
         "mockito-target-inline-minus-junit4",
         "testables",
-        "truth",
     ],
     compile_multilib: "both",
     jni_libs: [

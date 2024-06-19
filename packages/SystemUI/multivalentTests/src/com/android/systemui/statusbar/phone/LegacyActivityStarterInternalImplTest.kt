@@ -60,7 +60,6 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -133,7 +132,6 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
                 communalSceneInteractor = communalSceneInteractor,
             )
         whenever(userTracker.userHandle).thenReturn(UserHandle.OWNER)
-        whenever(communalSceneInteractor.isIdleOnCommunal).thenReturn(MutableStateFlow(false))
     }
 
     @Test

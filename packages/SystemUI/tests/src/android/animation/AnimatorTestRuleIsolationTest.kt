@@ -19,6 +19,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.core.animation.doOnEnd
 import androidx.test.filters.SmallTest
+import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -31,7 +32,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 @RunWithLooper
-class AnimatorTestRuleIsolationTest {
+class AnimatorTestRuleIsolationTest : SysuiTestCase() {
 
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
@@ -40,7 +41,7 @@ class AnimatorTestRuleIsolationTest {
         // GIVEN global state is reset at the start of the test
         didTouchA = false
         didTouchB = false
-        // WHEN starting 2 animations of different durations, and setting didTouch{A,B} at the end
+        // WHEN starting 2 animations of different durations, and setting didTouchA at the end
         ObjectAnimator.ofFloat(0f, 1f).apply {
             duration = 100
             doOnEnd { didTouchA = true }
@@ -48,7 +49,7 @@ class AnimatorTestRuleIsolationTest {
         }
         ObjectAnimator.ofFloat(0f, 1f).apply {
             duration = 150
-            doOnEnd { didTouchB = true }
+            doOnEnd { didTouchA = true }
             start()
         }
         // WHEN when you advance time so that only one of the animations has ended
@@ -64,7 +65,7 @@ class AnimatorTestRuleIsolationTest {
         // GIVEN global state is reset at the start of the test
         didTouchA = false
         didTouchB = false
-        // WHEN starting 2 animations of different durations, and setting didTouch{A,B} at the end
+        // WHEN starting 2 animations of different durations, and setting didTouchB at the end
         ObjectAnimator.ofFloat(0f, 1f).apply {
             duration = 100
             doOnEnd { didTouchB = true }
@@ -72,7 +73,7 @@ class AnimatorTestRuleIsolationTest {
         }
         ObjectAnimator.ofFloat(0f, 1f).apply {
             duration = 150
-            doOnEnd { didTouchA = true }
+            doOnEnd { didTouchB = true }
             start()
         }
         animatorTestRule.advanceTimeBy(100)

@@ -6245,13 +6245,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Check if there are any activities with different UID occluding partially the activity
-        // that is embedded in untrusted mode. Traverse bottom to top with boundary so that it will
-        // only check activities above this activity.
+        // Check if there are any activities with different UID over the activity that is embedded
+        // in untrusted mode. Traverse bottom to top with boundary so that it will only check
+        // activities above this activity.
         final ActivityRecord differentUidOverlayActivity = getTask().getActivity(
-                a -> !a.finishing && a.getUid() != getUid() && Rect.intersects(a.getBounds(),
-                        getBounds()), this /* boundary */, false /* includeBoundary */,
-                false /* traverseTopToBottom */);
+                a -> !a.finishing && a.getUid() != getUid(), this /* boundary */,
+                false /* includeBoundary */, false /* traverseTopToBottom */);
         return differentUidOverlayActivity != null;
     }
 
@@ -6564,12 +6563,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Schedule an idle timeout in case the app doesn't do it for us.
         mTaskSupervisor.scheduleIdleTimeout(this);
 
-        mTaskSupervisor.mStoppingActivities.remove(this);
-        if (getDisplayArea().allResumedActivitiesComplete()) {
-            // Construct the compat environment at a relatively stable state if needed.
-            updateCompatDisplayInsets();
-            mRootWindowContainer.executeAppTransitionForAllDisplay();
-        }
+        mTaskSupervisor.reportResumedActivityLocked(this);
 
         resumeKeyDispatchingLocked();
         final Task rootTask = getRootTask();
@@ -10308,7 +10302,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (rootTask != null && rootTask.mTranslucentActivityWaiting == this) {
             rootTask.checkTranslucentActivityWaiting(null);
         }
-        final boolean andResume = isState(RESUMED) || shouldBeResumed(null /*activeActivity*/);
+        final boolean andResume = shouldBeResumed(null /*activeActivity*/);
         List<ResultInfo> pendingResults = null;
         List<ReferrerIntent> pendingNewIntents = null;
         if (andResume) {

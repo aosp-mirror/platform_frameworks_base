@@ -22,14 +22,11 @@ import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
-import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
 import static android.os.UserHandle.USER_SYSTEM;
-import static android.service.notification.Flags.notificationClassification;
-
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
@@ -517,10 +514,6 @@ public class PreferencesHelper implements RankingConfig {
                 Slog.e(TAG, "createDefaultChannelIfNeededLocked - Exception: " + e);
             }
 
-            if (notificationClassification()) {
-                addReservedChannelsLocked(r);
-            }
-
             if (r.uid == UNKNOWN_UID) {
                 if (Flags.persistIncompleteRestoreData()) {
                     r.userId = userId;
@@ -608,40 +601,6 @@ public class PreferencesHelper implements RankingConfig {
         r.channels.put(channel.getId(), channel);
 
         return true;
-    }
-
-    private void addReservedChannelsLocked(PackagePreferences p) {
-        if (!p.channels.containsKey(NotificationChannel.PROMOTIONS_ID)) {
-            NotificationChannel channel = new NotificationChannel(
-                    NotificationChannel.PROMOTIONS_ID,
-                    mContext.getString(R.string.promotional_notification_channel_label),
-                    IMPORTANCE_LOW);
-            p.channels.put(channel.getId(), channel);
-        }
-
-        if (!p.channels.containsKey(NotificationChannel.RECS_ID)) {
-            NotificationChannel channel = new NotificationChannel(
-                    NotificationChannel.RECS_ID,
-                    mContext.getString(R.string.recs_notification_channel_label),
-                    IMPORTANCE_LOW);
-            p.channels.put(channel.getId(), channel);
-        }
-
-        if (!p.channels.containsKey(NotificationChannel.NEWS_ID)) {
-            NotificationChannel channel = new NotificationChannel(
-                    NotificationChannel.NEWS_ID,
-                    mContext.getString(R.string.news_notification_channel_label),
-                    IMPORTANCE_LOW);
-            p.channels.put(channel.getId(), channel);
-        }
-
-        if (!p.channels.containsKey(NotificationChannel.SOCIAL_MEDIA_ID)) {
-            NotificationChannel channel = new NotificationChannel(
-                    NotificationChannel.SOCIAL_MEDIA_ID,
-                    mContext.getString(R.string.social_notification_channel_label),
-                    IMPORTANCE_LOW);
-            p.channels.put(channel.getId(), channel);
-        }
     }
 
     public void writeXml(TypedXmlSerializer out, boolean forBackup, int userId) throws IOException {
@@ -1842,7 +1801,7 @@ public class PreferencesHelper implements RankingConfig {
     public boolean onlyHasDefaultChannel(String pkg, int uid) {
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
-            if (r.channels.size() == (notificationClassification() ? 5 : 1)
+            if (r.channels.size() == 1
                     && r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
                 return true;
             }
@@ -2652,7 +2611,6 @@ public class PreferencesHelper implements RankingConfig {
                                 context.getResources().getString(
                                         R.string.default_notification_channel_label));
                     }
-                    // TODO (b/346396459): Localize all reserved channels
                 }
             }
         }

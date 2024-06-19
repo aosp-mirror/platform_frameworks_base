@@ -129,23 +129,17 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
-    <skip />
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
-    <skip />
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
@@ -388,7 +382,7 @@
     <string name="qs_record_issue_start" msgid="2979831312582567056">"शुरू करें"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"रोकें"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"गड़बड़ी की रिपोर्ट"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"आपके डिवाइस की किस सुविधा में समस्या आ रही थी?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"आपके डिवाइस की कौनसी सुविधा पर असर पड़ा था?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"समस्या का टाइप चुनें"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"स्क्रीन रिकॉर्डर"</string>
     <string name="performance" msgid="6552785217174378320">"परफ़ॉर्मेंस"</string>
@@ -399,7 +393,7 @@
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"ऐक्टिव"</string>
     <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"डिसकनेक्ट हो गया"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"कान की मशीनें"</string>
-    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"कान की नई मशीन जोड़ें"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"नया डिवाइस जोड़ें"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"नया डिवाइस जोड़ने के लिए क्लिक करें"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"प्रीसेट अपडेट नहीं किया जा सका"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"प्रीसेट"</string>
@@ -1203,8 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ज़्यादा जानकारी के लिए टैप करें"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"कोई अलार्म सेट नहीं है"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"स्क्रीन लॉक डालें"</string>
-    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
-    <skip />
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"फ़िंगरप्रिंट सेंसर"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"पुष्टि करें"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"डिवाइस की होम स्क्रीन पर जाएं"</string>

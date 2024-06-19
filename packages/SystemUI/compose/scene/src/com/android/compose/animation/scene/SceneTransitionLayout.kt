@@ -461,7 +461,7 @@ data class UserActionResult(
     val transitionKey: TransitionKey? = null,
 )
 
-fun interface UserActionDistance {
+interface UserActionDistance {
     /**
      * Return the **absolute** distance of the user action given the size of the scene we are
      * animating from and the [orientation].

@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.compose.theme.PlatformTheme
+import com.android.systemui.touchpad.tutorial.ui.BackGestureTutorialViewModel
 import com.android.systemui.touchpad.tutorial.ui.GestureViewModelFactory
 import com.android.systemui.touchpad.tutorial.ui.HomeGestureTutorialViewModel
 import com.android.systemui.touchpad.tutorial.ui.Screen.BACK_GESTURE
@@ -62,13 +63,14 @@ fun TouchpadTutorialScreen(viewModelFactory: ViewModelProvider.Factory, closeTut
                 onActionKeyTutorialClicked = {},
                 onDoneButtonClicked = closeTutorial
             )
-        BACK_GESTURE ->
-            BackGestureTutorialScreen(
-                onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
-                onBack = { vm.goTo(TUTORIAL_SELECTION) }
-            )
+        BACK_GESTURE -> BackGestureTutorialScreen()
         HOME_GESTURE -> HomeGestureTutorialScreen()
     }
+}
+
+@Composable
+fun BackGestureTutorialScreen() {
+    val vm = viewModel<BackGestureTutorialViewModel>(factory = GestureViewModelFactory())
 }
 
 @Composable

@@ -47,9 +47,7 @@ import android.content.pm.ShortcutServiceInternal;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.test.InstrumentationTestCase;
-import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.SparseArray;
 import android.util.Xml;
 import android.widget.RemoteViews;
 
@@ -69,12 +67,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -392,93 +388,6 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         assertThat(target.previewLayout).isEqualTo(original.previewLayout);
     }
 
-    public void testBackupRestoreControllerStatePersistence() throws IOException {
-        // Setup mock data
-        final Set<String> mockPrunedApps = getMockPrunedApps();
-        final SparseArray<
-                List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>
-                > mockUpdatesByProvider = getMockUpdates();
-        final  SparseArray<
-                List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>
-                > mockUpdatesByHost = getMockUpdates();
-        final AppWidgetServiceImpl.BackupRestoreController.State state =
-                new AppWidgetServiceImpl.BackupRestoreController.State(
-                        mockPrunedApps, mockUpdatesByProvider, mockUpdatesByHost);
-
-        final File file = new File(mTestContext.getDataDir(), "state.xml");
-        saveBackupRestoreControllerState(file, state);
-        final AppWidgetServiceImpl.BackupRestoreController.State target =
-                loadStateLocked(file);
-        assertNotNull(target);
-        final SparseArray<List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>>
-                actualUpdatesByProvider = target.getUpdatesByProvider();
-        assertNotNull(actualUpdatesByProvider);
-        final SparseArray<List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>>
-                actualUpdatesByHost = target.getUpdatesByHost();
-        assertNotNull(actualUpdatesByHost);
-
-        assertEquals(mockPrunedApps, target.getPrunedApps());
-        for (int i = 0; i < mockUpdatesByProvider.size(); i++) {
-            final int key = mockUpdatesByProvider.keyAt(i);
-            verifyRestoreUpdateRecord(
-                    actualUpdatesByProvider.get(key), mockUpdatesByProvider.get(key));
-        }
-        for (int i = 0; i < mockUpdatesByHost.size(); i++) {
-            final int key = mockUpdatesByHost.keyAt(i);
-            verifyRestoreUpdateRecord(
-                    actualUpdatesByHost.get(key), mockUpdatesByHost.get(key));
-        }
-    }
-
-    private void verifyRestoreUpdateRecord(
-            @NonNull final List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>
-                    actualUpdates,
-            @NonNull final List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>
-                    expectedUpdates) {
-        assertEquals(expectedUpdates.size(), actualUpdates.size());
-        for (int i = 0; i < expectedUpdates.size(); i++) {
-            final AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord expected =
-                    expectedUpdates.get(i);
-            final AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord actual =
-                    actualUpdates.get(i);
-            assertEquals(expected.oldId, actual.oldId);
-            assertEquals(expected.newId, actual.newId);
-            assertEquals(expected.notified, actual.notified);
-        }
-    }
-
-    @NonNull
-    private static Set<String> getMockPrunedApps() {
-        final Set<String> mockPrunedApps = new ArraySet<>(10);
-        for (int i = 0; i < 10; i++) {
-            mockPrunedApps.add("com.example.app" + i);
-        }
-        return mockPrunedApps;
-    }
-
-    @NonNull
-    private static SparseArray<
-            List<AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>
-            > getMockUpdates() {
-        final SparseArray<List<
-                AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord>> ret =
-                new SparseArray<>(4);
-        ret.put(0, new ArrayList<>());
-        for (int i = 0; i < 5; i++) {
-            final AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord record =
-                    new AppWidgetServiceImpl.BackupRestoreController.RestoreUpdateRecord(
-                            5 - i, i);
-            record.notified = (i % 2 == 1);
-            final int key = (i < 3) ? 1 : 2;
-            if (!ret.contains(key)) {
-                ret.put(key, new ArrayList<>());
-            }
-            ret.get(key).add(record);
-        }
-        ret.put(3, new ArrayList<>());
-        return ret;
-    }
-
     private int setupHostAndWidget() {
         List<PendingHostUpdate> updates = mService.startListening(
                 mMockHost, mPkgName, HOST_ID, new int[0]).getList();
@@ -507,40 +416,6 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
 
     private int getIntegerResource(int resId) {
         return mTestContext.getResources().getInteger(resId);
-    }
-
-    private static void saveBackupRestoreControllerState(
-            @NonNull final File dst,
-            @Nullable final AppWidgetServiceImpl.BackupRestoreController.State state)
-            throws IOException {
-        Objects.requireNonNull(dst);
-        if (state == null) {
-            return;
-        }
-        final AtomicFile file = new AtomicFile(dst);
-        final FileOutputStream stream = file.startWrite();
-        final TypedXmlSerializer out = Xml.resolveSerializer(stream);
-        out.startDocument(null, true);
-        AppWidgetXmlUtil.writeBackupRestoreControllerState(out, state);
-        out.endDocument();
-        file.finishWrite(stream);
-    }
-
-    private static AppWidgetServiceImpl.BackupRestoreController.State loadStateLocked(
-            @NonNull final File dst) {
-        Objects.requireNonNull(dst);
-        final AtomicFile file = new AtomicFile(dst);
-        try (FileInputStream stream = file.openRead()) {
-            final TypedXmlPullParser parser = Xml.resolvePullParser(stream);
-            int type;
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                    && type != XmlPullParser.START_TAG) {
-                // drain whitespace, comments, etc.
-            }
-            return AppWidgetXmlUtil.readBackupRestoreControllerState(parser);
-        } catch (IOException | XmlPullParserException e) {
-            return null;
-        }
     }
 
     private static void saveWidgetProviderInfoLocked(@NonNull final File dst,

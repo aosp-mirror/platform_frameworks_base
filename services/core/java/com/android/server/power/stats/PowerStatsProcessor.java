@@ -43,7 +43,7 @@ import java.util.List;
  * 2. For each UID, compute the proportion of the combined estimates in each state
  * and attribute the corresponding portion of the total power estimate in that state to the UID.
  */
-public abstract class PowerStatsProcessor {
+abstract class PowerStatsProcessor {
     private static final String TAG = "PowerStatsProcessor";
 
     private static final double MILLIAMPHOUR_PER_MICROCOULOMB = 1.0 / 1000.0 / 60.0 / 60.0;

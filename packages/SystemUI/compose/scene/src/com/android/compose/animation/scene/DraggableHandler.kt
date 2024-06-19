@@ -543,8 +543,7 @@ private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
             _toScene = old._toScene,
             userActionDistanceScope = old.userActionDistanceScope,
             orientation = old.orientation,
-            isUpOrLeft = old.isUpOrLeft,
-            lastDistance = old.lastDistance,
+            isUpOrLeft = old.isUpOrLeft
         )
         .apply {
             _currentScene = old._currentScene
@@ -562,7 +561,6 @@ private class SwipeTransition(
     val userActionDistanceScope: UserActionDistanceScope,
     override val orientation: Orientation,
     override val isUpOrLeft: Boolean,
-    var lastDistance: Float = DistanceUnspecified,
 ) :
     TransitionState.Transition(_fromScene.key, _toScene.key),
     TransitionState.HasOverscrollProperties {
@@ -621,6 +619,8 @@ private class SwipeTransition(
             override val absoluteDistance: Float
                 get() = distance().absoluteValue
         }
+
+    private var lastDistance = DistanceUnspecified
 
     /** Whether [TransitionState.Transition.finish] was called on this transition. */
     var isFinishing = false

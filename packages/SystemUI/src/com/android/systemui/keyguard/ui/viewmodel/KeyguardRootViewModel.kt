@@ -251,7 +251,6 @@ constructor(
                         goneToDreamingTransitionViewModel.lockscreenAlpha,
                         goneToLockscreenTransitionViewModel.lockscreenAlpha,
                         lockscreenToAodTransitionViewModel.lockscreenAlpha(viewState),
-                        lockscreenToAodTransitionViewModel.lockscreenAlphaOnFold,
                         lockscreenToDozingTransitionViewModel.lockscreenAlpha,
                         lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
                         lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,

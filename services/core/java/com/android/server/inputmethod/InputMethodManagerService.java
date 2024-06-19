@@ -1300,8 +1300,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
 
-            mSwitchingController = new InputMethodSubtypeSwitchingController(context,
-                    settings.getMethodMap(), settings.getUserId());
+            mSwitchingController =
+                    InputMethodSubtypeSwitchingController.createInstanceLocked(context,
+                            settings.getMethodMap(), settings.getUserId());
             mHardwareKeyboardShortcutController =
                     new HardwareKeyboardShortcutController(settings.getMethodMap(),
                             settings.getUserId());
@@ -3048,8 +3049,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (userId == mSwitchingController.getUserId()) {
             mSwitchingController.resetCircularListLocked(settings.getMethodMap());
         } else {
-            mSwitchingController = new InputMethodSubtypeSwitchingController(mContext,
-                    settings.getMethodMap(), userId);
+            mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
+                    mContext, settings.getMethodMap(), userId);
         }
         // TODO: Instantiate mHardwareKeyboardShortcutController for each user.
         if (userId == mHardwareKeyboardShortcutController.getUserId()) {
@@ -5319,8 +5320,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (userId == mSwitchingController.getUserId()) {
             mSwitchingController.resetCircularListLocked(settings.getMethodMap());
         } else {
-            mSwitchingController = new InputMethodSubtypeSwitchingController(mContext,
-                    settings.getMethodMap(), mCurrentUserId);
+            mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
+                    mContext, settings.getMethodMap(), mCurrentUserId);
         }
         // TODO: Instantiate mHardwareKeyboardShortcutController for each user.
         if (userId == mHardwareKeyboardShortcutController.getUserId()) {

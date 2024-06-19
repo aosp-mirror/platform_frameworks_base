@@ -96,8 +96,7 @@ constructor(
                                 run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
                             }
                         }
-                    }
-                        ?: run { Log.w(TAG, "No data in result.") }
+                    } ?: run { Log.w(TAG, "No data in result.") }
                 }
                 else ->
                     Log.w(
@@ -128,7 +127,7 @@ constructor(
                 Box(
                     modifier =
                         Modifier.fillMaxSize()
-                            .background(LocalAndroidColorScheme.current.onSecondaryFixed),
+                            .background(LocalAndroidColorScheme.current.outlineVariant),
                 ) {
                     CommunalHub(
                         viewModel = communalViewModel,

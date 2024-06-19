@@ -17,7 +17,6 @@
 package com.android.systemui.shade.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -47,5 +46,4 @@ class ShadeInteractorEmptyImpl @Inject constructor() : ShadeInteractor {
     override val isShadeTouchable: Flow<Boolean> = inactiveFlowBoolean
     override val isExpandToQsEnabled: Flow<Boolean> = inactiveFlowBoolean
     override val shadeMode: StateFlow<ShadeMode> = MutableStateFlow(ShadeMode.Single)
-    override val shadeAlignment: ShadeAlignment = ShadeAlignment.Top
 }

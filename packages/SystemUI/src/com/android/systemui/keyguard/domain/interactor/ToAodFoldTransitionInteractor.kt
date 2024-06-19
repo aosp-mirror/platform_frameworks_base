@@ -16,17 +16,30 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.animation.ValueAnimator
 import android.view.ViewGroup
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.shade.ShadeFoldAnimator
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @SysUISingleton
 class ToAodFoldTransitionInteractor
 @Inject
 constructor(
     private val keyguardClockInteractor: KeyguardClockInteractor,
+    private val transitionInteractor: KeyguardTransitionInteractor,
+    private val transitionRepository: KeyguardTransitionRepository,
+    @Application private val mainScope: CoroutineScope,
+    @Main private val mainDispatcher: CoroutineDispatcher,
 ) {
     private var parentAnimator: NotificationPanelViewController.ShadeFoldAnimatorImpl? = null
 
@@ -37,6 +50,7 @@ constructor(
                 get() = throw NotImplementedError("Deprecated. Do not call.")
 
             override fun prepareFoldToAodAnimation() {
+                forceToAod()
                 parentAnimator?.prepareFoldToAodAnimation()
             }
 
@@ -62,6 +76,21 @@ constructor(
     fun initialize(parentAnimator: ShadeFoldAnimator) {
         this.parentAnimator =
             parentAnimator as? NotificationPanelViewController.ShadeFoldAnimatorImpl?
+    }
+
+    /** Forces the keyguard into AOD or Doze */
+    private fun forceToAod() {
+        mainScope.launch(mainDispatcher) {
+            transitionRepository.startTransition(
+                TransitionInfo(
+                    "$TAG (Fold transition triggered)",
+                    transitionInteractor.getCurrentState(),
+                    transitionInteractor.asleepKeyguardState.value,
+                    ValueAnimator().apply { duration = 0 },
+                    TransitionModeOnCanceled.LAST_VALUE,
+                )
+            )
+        }
     }
 
     companion object {

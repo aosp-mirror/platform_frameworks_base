@@ -97,15 +97,14 @@ constructor(
             State.IDLE -> {
                 setState(State.TIMEOUT_WAIT)
             }
-            State.RUNNING_BACKWARDS_FROM_UP,
-            State.RUNNING_BACKWARDS_FROM_CANCEL -> callback?.onCancelAnimator()
+            State.RUNNING_BACKWARDS -> callback?.onCancelAnimator()
             else -> {}
         }
     }
 
     fun handleActionUp() {
         if (state == State.RUNNING_FORWARD) {
-            setState(State.RUNNING_BACKWARDS_FROM_UP)
+            setState(State.RUNNING_BACKWARDS)
             callback?.onReverseAnimator()
         }
     }
@@ -114,7 +113,7 @@ constructor(
         when (state) {
             State.TIMEOUT_WAIT -> setState(State.IDLE)
             State.RUNNING_FORWARD -> {
-                setState(State.RUNNING_BACKWARDS_FROM_CANCEL)
+                setState(State.RUNNING_BACKWARDS)
                 callback?.onReverseAnimator()
             }
             else -> {}
@@ -128,24 +127,20 @@ constructor(
 
     /** This function is called both when an animator completes or gets cancelled */
     fun handleAnimationComplete() {
-        when (state) {
-            State.RUNNING_FORWARD -> {
-                setState(State.IDLE)
-                vibrate(snapEffect)
-                if (keyguardStateController.isUnlocked) {
-                    qsTile?.longClick(expandable)
-                } else {
-                    callback?.onResetProperties()
-                    qsTile?.longClick(expandable)
-                }
+        if (state == State.RUNNING_FORWARD) {
+            setState(State.IDLE)
+            vibrate(snapEffect)
+            if (keyguardStateController.isUnlocked) {
+                callback?.onPrepareForLaunch()
+                qsTile?.longClick(expandable)
+            } else {
+                callback?.onResetProperties()
+                qsTile?.longClick(expandable)
             }
-            State.RUNNING_BACKWARDS_FROM_UP -> {
-                setState(State.IDLE)
-                callback?.onEffectFinishedReversing()
-                qsTile?.click(expandable)
-            }
-            State.RUNNING_BACKWARDS_FROM_CANCEL -> setState(State.IDLE)
-            else -> {}
+        }
+        if (state != State.TIMEOUT_WAIT) {
+            // This will happen if the animator did not finish by being cancelled
+            setState(State.IDLE)
         }
     }
 
@@ -196,22 +191,19 @@ constructor(
 
     enum class State {
         IDLE, /* The effect is idle waiting for touch input */
-        TIMEOUT_WAIT, /* The effect is waiting for a tap timeout period */
+        TIMEOUT_WAIT, /* The effect is waiting for a [PRESSED_TIMEOUT] period */
         RUNNING_FORWARD, /* The effect is running normally */
-        /* The effect was interrupted by an ACTION_UP and is now running backwards */
-        RUNNING_BACKWARDS_FROM_UP,
-        /* The effect was interrupted by an ACTION_CANCEL and is now running backwards */
-        RUNNING_BACKWARDS_FROM_CANCEL,
+        RUNNING_BACKWARDS, /* The effect was interrupted and is now running backwards */
     }
 
     /** Callbacks to notify view and animator actions */
     interface Callback {
 
+        /** Prepare for an activity launch */
+        fun onPrepareForLaunch()
+
         /** Reset the tile visual properties */
         fun onResetProperties()
-
-        /** Event where the effect completed by being reversed */
-        fun onEffectFinishedReversing()
 
         /** Start the effect animator */
         fun onStartAnimator()

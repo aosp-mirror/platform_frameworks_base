@@ -1195,23 +1195,4 @@ class DraggableHandlerTest {
         assertThat(transition).hasProgress(0f)
         assertThat(transition).hasOverscrollSpec()
     }
-
-    @Test
-    fun interceptingTransitionKeepsDistance() = runGestureTest {
-        var swipeDistance = 75f
-        layoutState.transitions = transitions {
-            from(SceneA, to = SceneB) { distance = UserActionDistance { _, _ -> swipeDistance } }
-        }
-
-        // Start transition.
-        val controller = onDragStarted(overSlop = -50f)
-        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 50f / 75f)
-
-        // Intercept the transition and change the swipe distance. The original distance and
-        // progress should be the same.
-        swipeDistance = 50f
-        controller.onDragStopped(0f)
-        onDragStartedImmediately()
-        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 50f / 75f)
-    }
 }

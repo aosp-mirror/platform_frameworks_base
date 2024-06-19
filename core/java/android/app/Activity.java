@@ -3701,7 +3701,7 @@ public class Activity extends ContextThemeWrapper
      * @see View#findViewById(int)
      * @see Activity#requireViewById(int)
      */
-    /* TODO(b/347672184): Re-add @Nullable */
+    @Nullable
     public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
     }

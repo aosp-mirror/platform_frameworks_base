@@ -36,11 +36,3 @@ flag {
   bug: "305095040"
   is_fixed_read_only: true
 }
-
-flag {
-    name: "notification_classification"
-    is_exported: true
-    namespace: "systemui"
-    description: "Allows the NAS to classify notifications"
-    bug: "343988084"
-}

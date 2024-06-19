@@ -82,6 +82,7 @@ constructor(
     ) {
         OverlayShade(
             viewModel = viewModel.overlayShadeViewModel,
+            panelAlignment = Alignment.TopEnd,
             lockscreenContent = lockscreenContent,
             modifier = modifier,
         ) {

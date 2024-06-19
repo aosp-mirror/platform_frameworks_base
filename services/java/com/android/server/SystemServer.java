@@ -1924,11 +1924,7 @@ public final class SystemServer implements Dumpable {
             startRotationResolverService(context, t);
             startSystemCaptionsManagerService(context, t);
             startTextToSpeechManagerService(context, t);
-            if (!isWatch || !android.server.Flags.removeWearableSensingServiceFromWear()) {
-                startWearableSensingService(t);
-            } else {
-                Slog.d(TAG, "Not starting WearableSensingService");
-            }
+            startWearableSensingService(t);
             startOnDeviceIntelligenceService(t);
 
             if (deviceHasConfigString(

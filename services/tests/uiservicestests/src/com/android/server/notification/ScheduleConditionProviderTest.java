@@ -1,7 +1,5 @@
 package com.android.server.notification;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -10,7 +8,6 @@ import static org.mockito.Mockito.spy;
 
 import android.app.Application;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 import android.service.notification.Condition;
@@ -59,12 +56,6 @@ public class ScheduleConditionProviderTest extends UiServiceTestCase {
         service.onBind(startIntent);
         mService = spy(service);
    }
-
-    @Test
-    public void getComponent_returnsComponent() {
-        assertThat(mService.getComponent()).isEqualTo(new ComponentName("android",
-                "com.android.server.notification.ScheduleConditionProvider"));
-    }
 
     @Test
     public void testIsValidConditionId_incomplete() throws Exception {

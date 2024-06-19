@@ -25,28 +25,33 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.annotation.UserIdInt;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.pm.ParceledListSlice;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
-import android.testing.TestableContext;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.internal.accessibility.TestUtils;
 import com.android.internal.accessibility.common.ShortcutConstants;
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -74,33 +79,39 @@ public class ShortcutUtilsTest {
     private static final String STANDARD_SERVICE_COMPONENT_NAME =
             "fake.package/fake.standard.service.name";
     private static final String SERVICE_NAME_SUMMARY = "Summary";
+
+    @Rule
+    public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
     @Mock
     private IAccessibilityManager mAccessibilityManagerService;
-    private TestableContext mContext;
-    @UserIdInt
-    private int mDefaultUserId;
+    private ContextWrapper mContextSpy;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mContext = new TestableContext(InstrumentationRegistry.getInstrumentation().getContext());
-        mDefaultUserId = mContext.getContentResolver().getUserId();
+        mContextSpy = spy(
+                new ContextWrapper(InstrumentationRegistry.getInstrumentation().getContext()));
+
+        ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
+        when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
 
         AccessibilityManager accessibilityManager =
                 new AccessibilityManager(
-                        mContext, mock(Handler.class),
-                        mAccessibilityManagerService, mDefaultUserId,
+                        mContextSpy, mock(Handler.class),
+                        mAccessibilityManagerService, UserHandle.myUserId(),
                         /* serviceConnect= */ true);
-        mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, accessibilityManager);
-        setupFakeInstalledA11yServiceInfos();
+        when(mContextSpy.getSystemService(Context.ACCESSIBILITY_SERVICE))
+                .thenReturn(accessibilityManager);
+
+        setupFakeA11yServiceInfos();
     }
 
     @Test
     public void getShortcutTargets_softwareShortcutNoService_emptyResult() {
         assertThat(
                 ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext,
-                        ShortcutConstants.UserShortcutType.SOFTWARE, mDefaultUserId)
+                        mContextSpy,
+                        ShortcutConstants.UserShortcutType.SOFTWARE, UserHandle.myUserId())
         ).isEmpty();
     }
 
@@ -108,8 +119,8 @@ public class ShortcutUtilsTest {
     public void getShortcutTargets_volumeKeyShortcutNoService_emptyResult() {
         assertThat(
                 ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext, ShortcutConstants.UserShortcutType.HARDWARE,
-                        mDefaultUserId)
+                        mContextSpy, ShortcutConstants.UserShortcutType.HARDWARE,
+                        UserHandle.myUserId())
         ).isEmpty();
     }
 
@@ -120,8 +131,8 @@ public class ShortcutUtilsTest {
 
         assertThat(
                 ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext, ShortcutConstants.UserShortcutType.SOFTWARE,
-                        mDefaultUserId)
+                        mContextSpy, ShortcutConstants.UserShortcutType.SOFTWARE,
+                        UserHandle.myUserId())
         ).containsExactlyElementsIn(ONE_COMPONENT);
     }
 
@@ -132,8 +143,8 @@ public class ShortcutUtilsTest {
 
         assertThat(
                 ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext, ShortcutConstants.UserShortcutType.HARDWARE,
-                        mDefaultUserId)
+                        mContextSpy, ShortcutConstants.UserShortcutType.HARDWARE,
+                        UserHandle.myUserId())
         ).containsExactlyElementsIn(TWO_COMPONENTS);
     }
 
@@ -145,8 +156,8 @@ public class ShortcutUtilsTest {
 
         assertThat(
                 ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext, ShortcutConstants.UserShortcutType.TRIPLETAP,
-                        mDefaultUserId)
+                        mContextSpy, ShortcutConstants.UserShortcutType.TRIPLETAP,
+                        UserHandle.myUserId())
         ).isEmpty();
     }
 
@@ -158,8 +169,8 @@ public class ShortcutUtilsTest {
 
         assertThat(
                 ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext, ShortcutConstants.UserShortcutType.TRIPLETAP,
-                        mDefaultUserId)
+                        mContextSpy, ShortcutConstants.UserShortcutType.TRIPLETAP,
+                        UserHandle.myUserId())
         ).containsExactly(ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER);
     }
 
@@ -169,35 +180,12 @@ public class ShortcutUtilsTest {
                 ALWAYS_ON_SERVICE_COMPONENT_NAME, /* serviceOn= */ true, /* shortcutOn= */ false);
 
         ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                mContext,
+                mContextSpy,
                 Set.of(ALWAYS_ON_SERVICE_COMPONENT_NAME),
-                mDefaultUserId
+                UserHandle.myUserId()
         );
 
         assertA11yServiceState(ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ false);
-    }
-
-    @Test
-    public void updateAccessibilityServiceStateIfNeeded_alwaysOnServiceOnForBothUsers_noShortcutsForGuestUser_serviceTurnedOffForGuestUserOnly() {
-        // setup arbitrary userId by add 10 to the default user id
-        final int guestUserId = mDefaultUserId + 10;
-        setupA11yServiceAndShortcutStateForUser(
-                ALWAYS_ON_SERVICE_COMPONENT_NAME, /* serviceOn= */ true,
-                /* shortcutOn= */ true, mDefaultUserId);
-        setupA11yServiceAndShortcutStateForUser(
-                ALWAYS_ON_SERVICE_COMPONENT_NAME, /* serviceOn= */ true,
-                /* shortcutOn= */ false, guestUserId);
-
-        ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                mContext,
-                Set.of(ALWAYS_ON_SERVICE_COMPONENT_NAME),
-                guestUserId
-        );
-
-        assertA11yServiceStateForUser(
-                ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ false, guestUserId);
-        assertA11yServiceStateForUser(
-                ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ true, mDefaultUserId);
     }
 
     @Test
@@ -206,9 +194,9 @@ public class ShortcutUtilsTest {
                 ALWAYS_ON_SERVICE_COMPONENT_NAME, /* serviceOn= */ true, /* shortcutOn= */ true);
 
         ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                mContext,
+                mContextSpy,
                 Set.of(ALWAYS_ON_SERVICE_COMPONENT_NAME),
-                mDefaultUserId
+                UserHandle.myUserId()
         );
 
         assertA11yServiceState(ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ true);
@@ -220,9 +208,9 @@ public class ShortcutUtilsTest {
                 ALWAYS_ON_SERVICE_COMPONENT_NAME, /* serviceOn= */ false, /* shortcutOn= */ false);
 
         ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                mContext,
+                mContextSpy,
                 Set.of(ALWAYS_ON_SERVICE_COMPONENT_NAME),
-                mDefaultUserId
+                UserHandle.myUserId()
         );
 
         assertA11yServiceState(ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ false);
@@ -234,9 +222,9 @@ public class ShortcutUtilsTest {
                 ALWAYS_ON_SERVICE_COMPONENT_NAME, /* serviceOn= */ false, /* shortcutOn= */ true);
 
         ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                mContext,
+                mContextSpy,
                 Set.of(ALWAYS_ON_SERVICE_COMPONENT_NAME),
-                mDefaultUserId
+                UserHandle.myUserId()
         );
 
         assertA11yServiceState(ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ true);
@@ -248,9 +236,9 @@ public class ShortcutUtilsTest {
                 STANDARD_SERVICE_COMPONENT_NAME, /* serviceOn= */ true, /* shortcutOn= */ false);
 
         ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                mContext,
+                mContextSpy,
                 Set.of(STANDARD_SERVICE_COMPONENT_NAME),
-                mDefaultUserId
+                UserHandle.myUserId()
         );
 
         assertA11yServiceState(STANDARD_SERVICE_COMPONENT_NAME, /* enabled= */ true);
@@ -262,9 +250,9 @@ public class ShortcutUtilsTest {
                 STANDARD_SERVICE_COMPONENT_NAME, /* serviceOn= */ true, /* shortcutOn= */ true);
 
         ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                mContext,
+                mContextSpy,
                 Set.of(STANDARD_SERVICE_COMPONENT_NAME),
-                mDefaultUserId
+                UserHandle.myUserId()
         );
 
         assertA11yServiceState(STANDARD_SERVICE_COMPONENT_NAME, /* enabled= */ true);
@@ -276,9 +264,9 @@ public class ShortcutUtilsTest {
                 STANDARD_SERVICE_COMPONENT_NAME, /* serviceOn= */ false, /* shortcutOn= */ false);
 
         ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                mContext,
+                mContextSpy,
                 Set.of(STANDARD_SERVICE_COMPONENT_NAME),
-                mDefaultUserId
+                UserHandle.myUserId()
         );
 
         assertA11yServiceState(STANDARD_SERVICE_COMPONENT_NAME, /* enabled= */ false);
@@ -290,9 +278,9 @@ public class ShortcutUtilsTest {
                 STANDARD_SERVICE_COMPONENT_NAME, /* serviceOn= */ false, /* shortcutOn= */ true);
 
         ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                mContext,
+                mContextSpy,
                 Set.of(STANDARD_SERVICE_COMPONENT_NAME),
-                mDefaultUserId
+                UserHandle.myUserId()
         );
 
         assertA11yServiceState(STANDARD_SERVICE_COMPONENT_NAME, /* enabled= */ false);
@@ -304,18 +292,18 @@ public class ShortcutUtilsTest {
             stringJoiner.add(target);
         }
         Settings.Secure.putStringForUser(
-                mContext.getContentResolver(), shortcutSettingsKey,
+                mContextSpy.getContentResolver(), shortcutSettingsKey,
                 stringJoiner.toString(),
-                mDefaultUserId);
+                UserHandle.myUserId());
     }
 
     private void enableTripleTapShortcutForMagnification(boolean enable) {
         Settings.Secure.putInt(
-                mContext.getContentResolver(),
+                mContextSpy.getContentResolver(),
                 ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED, enable ? 1 : 0);
     }
 
-    private void setupFakeInstalledA11yServiceInfos() throws RemoteException {
+    private void setupFakeA11yServiceInfos() throws RemoteException {
         List<AccessibilityServiceInfo> serviceInfos = List.of(
                 TestUtils.createFakeServiceInfo(
                         ALWAYS_ON_SERVICE_PACKAGE_LABEL,
@@ -334,55 +322,37 @@ public class ShortcutUtilsTest {
 
     private void setupA11yServiceAndShortcutState(
             String a11yServiceComponentName, boolean serviceOn, boolean shortcutOn) {
-        setupA11yServiceAndShortcutStateForUser(
-                a11yServiceComponentName, serviceOn, shortcutOn, mDefaultUserId);
-    }
-
-    private void setupA11yServiceAndShortcutStateForUser(
-            String a11yServiceComponentName, boolean serviceOn,
-            boolean shortcutOn, @UserIdInt int userId) {
-        enableA11yServiceForUser(a11yServiceComponentName, serviceOn, userId);
-        addShortcutForA11yServiceForUser(a11yServiceComponentName, shortcutOn, userId);
+        enableA11yService(a11yServiceComponentName, serviceOn);
+        addShortcutForA11yService(a11yServiceComponentName, shortcutOn);
     }
 
     private void assertA11yServiceState(String a11yServiceComponentName, boolean enabled) {
-        assertA11yServiceStateForUser(a11yServiceComponentName, enabled, mDefaultUserId);
-    }
-
-    private void assertA11yServiceStateForUser(
-            String a11yServiceComponentName, boolean enabled, @UserIdInt int userId) {
         if (enabled) {
             assertThat(
-                    Settings.Secure.getStringForUser(
-                            mContext.getContentResolver(),
-                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                            userId)
+                    Settings.Secure.getString(
+                            mContextSpy.getContentResolver(),
+                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
             ).contains(a11yServiceComponentName);
         } else {
             assertThat(
-                    Settings.Secure.getStringForUser(
-                            mContext.getContentResolver(),
-                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                            userId)
+                    Settings.Secure.getString(
+                            mContextSpy.getContentResolver(),
+                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
             ).doesNotContain(a11yServiceComponentName);
         }
     }
 
-    private void enableA11yServiceForUser(
-            String a11yServiceComponentName, boolean enable, @UserIdInt int userId) {
-        Settings.Secure.putStringForUser(
-                mContext.getContentResolver(),
+    private void enableA11yService(String a11yServiceComponentName, boolean enable) {
+        Settings.Secure.putString(
+                mContextSpy.getContentResolver(),
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                enable ? a11yServiceComponentName : "",
-                userId);
+                enable ? a11yServiceComponentName : "");
     }
 
-    private void addShortcutForA11yServiceForUser(
-            String a11yServiceComponentName, boolean add, @UserIdInt int userId) {
-        Settings.Secure.putStringForUser(
-                mContext.getContentResolver(),
+    private void addShortcutForA11yService(String a11yServiceComponentName, boolean add) {
+        Settings.Secure.putString(
+                mContextSpy.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-                add ? a11yServiceComponentName : "",
-                userId);
+                add ? a11yServiceComponentName : "");
     }
 }

@@ -350,10 +350,6 @@ constructor(
 
         initialLongPressProperties?.width = width
         finalLongPressProperties?.width = LONG_PRESS_EFFECT_WIDTH_SCALE * width
-
-        val deltaW = (LONG_PRESS_EFFECT_WIDTH_SCALE - 1f) * width
-        paddingForLaunch.left = -deltaW.toInt() / 2
-        paddingForLaunch.right = deltaW.toInt() / 2
     }
 
     private fun maybeUpdateLongPressEffectHeight(height: Float) {
@@ -361,10 +357,6 @@ constructor(
 
         initialLongPressProperties?.height = height
         finalLongPressProperties?.height = LONG_PRESS_EFFECT_HEIGHT_SCALE * height
-
-        val deltaH = (LONG_PRESS_EFFECT_HEIGHT_SCALE - 1f) * height
-        paddingForLaunch.top = -deltaH.toInt() / 2
-        paddingForLaunch.bottom = deltaH.toInt() / 2
     }
 
     override fun onFocusChanged(gainFocus: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
@@ -440,14 +432,12 @@ constructor(
         longPressEffect?.callback =
             object : QSLongPressEffect.Callback {
 
-                override fun onResetProperties() {
-                    resetLongPressEffectProperties()
+                override fun onPrepareForLaunch() {
+                    prepareForLaunch()
                 }
 
-                override fun onEffectFinishedReversing() {
-                    // The long-press effect properties finished at the same starting point.
-                    // This is the same as if the properties were reset
-                    haveLongPressPropertiesBeenReset = true
+                override fun onResetProperties() {
+                    resetLongPressEffectProperties()
                 }
 
                 override fun onStartAnimator() {
@@ -1053,7 +1043,6 @@ constructor(
                 getOverlayColorForState(Tile.STATE_ACTIVE),
                 Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive),
             )
-        prepareForLaunch()
     }
 
     private fun changeCornerRadius(radius: Float) {

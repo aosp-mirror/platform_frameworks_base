@@ -129,23 +129,17 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
-    <skip />
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
-    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
-    <skip />
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
@@ -1203,8 +1197,6 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Puudutage lisateabe saamiseks"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Äratust pole"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"sisesta ekraanilukk"</string>
-    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
-    <skip />
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sõrmejäljeandur"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autentimiseks"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"seadmesse sisenemiseks"</string>

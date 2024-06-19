@@ -16,7 +16,6 @@
 
 package com.android.systemui.scene.shared.logger
 
-import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
@@ -83,30 +82,6 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
             },
             messagePrinter = { "Scene change committed: $str1 → $str2" },
         )
-    }
-
-    fun logSceneTransition(transitionState: ObservableTransitionState) {
-        when (transitionState) {
-            is ObservableTransitionState.Transition -> {
-                logBuffer.log(
-                    tag = TAG,
-                    level = LogLevel.INFO,
-                    messageInitializer = {
-                        str1 = transitionState.fromScene.toString()
-                        str2 = transitionState.toScene.toString()
-                    },
-                    messagePrinter = { "Scene transition started: $str1 → $str2" },
-                )
-            }
-            is ObservableTransitionState.Idle -> {
-                logBuffer.log(
-                    tag = TAG,
-                    level = LogLevel.INFO,
-                    messageInitializer = { str1 = transitionState.currentScene.toString() },
-                    messagePrinter = { "Scene transition idle on: $str1" },
-                )
-            }
-        }
     }
 
     fun logVisibilityChange(

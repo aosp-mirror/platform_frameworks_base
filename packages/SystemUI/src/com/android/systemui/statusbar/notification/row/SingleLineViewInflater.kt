@@ -244,7 +244,7 @@ internal object SingleLineViewInflater {
             return SingleIcon(null)
         }
         val userKey = user.getKeyOrName()
-        var conversationIcon: Icon? = shortcutIcon
+        var conversationIcon: Icon? = null
         var conversationText: CharSequence? = conversationTitle
 
         val groups = groupMessages(messages, historicMessages)
@@ -253,6 +253,10 @@ internal object SingleLineViewInflater {
         if (!isGroupConversation) {
             // Conversation is one-to-one, load the single icon
             // Let's resolve the icon / text from the last sender
+            if (shortcutIcon != null) {
+                conversationIcon = shortcutIcon
+            }
+
             for (i in messages.lastIndex downTo 0) {
                 val message = messages[i]
                 val sender = message.senderPerson

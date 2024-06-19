@@ -19,12 +19,15 @@ package com.android.systemui.statusbar.policy;
 import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -34,6 +37,8 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.res.R;
+import com.android.systemui.util.Utils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -46,11 +51,10 @@ import javax.inject.Inject;
 /** Platform implementation of the cast controller. **/
 @SysUISingleton
 public class CastControllerImpl implements CastController {
-    public static final String TAG = "CastController";
+    private static final String TAG = "CastController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
-    private final PackageManager mPackageManager;
     @GuardedBy("mCallbacks")
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final MediaRouter mMediaRouter;
@@ -64,12 +68,8 @@ public class CastControllerImpl implements CastController {
     private MediaProjectionInfo mProjection;
 
     @Inject
-    public CastControllerImpl(
-            Context context,
-            PackageManager packageManager,
-            DumpManager dumpManager) {
+    public CastControllerImpl(Context context, DumpManager dumpManager) {
         mContext = context;
-        mPackageManager = packageManager;
         mMediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         mMediaRouter.setRouterGroupId(MediaRouter.MIRRORING_GROUP_ID);
         mProjectionManager = (MediaProjectionManager)
@@ -156,17 +156,36 @@ public class CastControllerImpl implements CastController {
         final ArrayList<CastDevice> devices = new ArrayList<>();
         synchronized(mRoutes) {
             for (RouteInfo route : mRoutes.values()) {
-                devices.add(CastDevice.Companion.toCastDevice(route, mContext));
+                final CastDevice device = new CastDevice();
+                device.id = route.getTag().toString();
+                final CharSequence name = route.getName(mContext);
+                device.name = name != null ? name.toString() : null;
+                final CharSequence description = route.getDescription();
+                device.description = description != null ? description.toString() : null;
+
+                int statusCode = route.getStatusCode();
+                if (statusCode == RouteInfo.STATUS_CONNECTING) {
+                    device.state = CastDevice.STATE_CONNECTING;
+                } else if (route.isSelected() || statusCode == RouteInfo.STATUS_CONNECTED) {
+                    device.state = CastDevice.STATE_CONNECTED;
+                } else {
+                    device.state = CastDevice.STATE_DISCONNECTED;
+                }
+
+                device.tag = route;
+                devices.add(device);
             }
         }
 
         synchronized (mProjectionLock) {
             if (mProjection != null) {
-                devices.add(
-                        CastDevice.Companion.toCastDevice(
-                                mProjection,
-                                mContext,
-                                mPackageManager));
+                final CastDevice device = new CastDevice();
+                device.id = mProjection.getPackageName();
+                device.name = getAppName(mProjection.getPackageName());
+                device.description = mContext.getString(R.string.quick_settings_casting);
+                device.state = CastDevice.STATE_CONNECTED;
+                device.tag = mProjection;
+                devices.add(device);
             }
         }
 
@@ -175,18 +194,18 @@ public class CastControllerImpl implements CastController {
 
     @Override
     public void startCasting(CastDevice device) {
-        if (device == null || device.getTag() == null) return;
-        final RouteInfo route = (RouteInfo) device.getTag();
+        if (device == null || device.tag == null) return;
+        final RouteInfo route = (RouteInfo) device.tag;
         if (DEBUG) Log.d(TAG, "startCasting: " + routeToString(route));
         mMediaRouter.selectRoute(ROUTE_TYPE_REMOTE_DISPLAY, route);
     }
 
     @Override
     public void stopCasting(CastDevice device) {
-        final boolean isProjection = device.getTag() instanceof MediaProjectionInfo;
+        final boolean isProjection = device.tag instanceof MediaProjectionInfo;
         if (DEBUG) Log.d(TAG, "stopCasting isProjection=" + isProjection);
         if (isProjection) {
-            final MediaProjectionInfo projection = (MediaProjectionInfo) device.getTag();
+            final MediaProjectionInfo projection = (MediaProjectionInfo) device.tag;
             if (Objects.equals(mProjectionManager.getActiveProjectionInfo(), projection)) {
                 mProjectionManager.stopActiveProjection();
             } else {
@@ -200,7 +219,7 @@ public class CastControllerImpl implements CastController {
     @Override
     public boolean hasConnectedCastDevice() {
         return getCastDevices().stream().anyMatch(
-                castDevice -> castDevice.getState() == CastDevice.CastState.Connected);
+                castDevice -> castDevice.state == CastDevice.STATE_CONNECTED);
     }
 
     private void setProjection(MediaProjectionInfo projection, boolean started) {
@@ -220,6 +239,27 @@ public class CastControllerImpl implements CastController {
             if (DEBUG) Log.d(TAG, "setProjection: " + oldProjection + " -> " + mProjection);
             fireOnCastDevicesChanged();
         }
+    }
+
+    private String getAppName(String packageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        if (Utils.isHeadlessRemoteDisplayProvider(pm, packageName)) {
+            return "";
+        }
+
+        try {
+            final ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
+            if (appInfo != null) {
+                final CharSequence label = appInfo.loadLabel(pm);
+                if (!TextUtils.isEmpty(label)) {
+                    return label.toString();
+                }
+            }
+            Log.w(TAG, "No label found for package: " + packageName);
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Error getting appName for package: " + packageName, e);
+        }
+        return packageName;
     }
 
     private void updateRemoteDisplays() {

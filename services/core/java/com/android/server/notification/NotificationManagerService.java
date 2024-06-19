@@ -46,10 +46,6 @@ import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
-import static android.app.NotificationChannel.NEWS_ID;
-import static android.app.NotificationChannel.PROMOTIONS_ID;
-import static android.app.NotificationChannel.RECS_ID;
-import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
 import static android.app.NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED;
@@ -102,11 +98,6 @@ import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROU
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
-import static android.service.notification.Adjustment.KEY_TYPE;
-import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
-import static android.service.notification.Adjustment.TYPE_NEWS;
-import static android.service.notification.Adjustment.TYPE_PROMOTION;
-import static android.service.notification.Adjustment.TYPE_SOCIAL_MEDIA;
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
 import static android.service.notification.Flags.redactSensitiveNotificationsBigTextStyle;
@@ -467,8 +458,7 @@ public class NotificationManagerService extends SystemService {
             Adjustment.KEY_IMPORTANCE_PROPOSAL,
             Adjustment.KEY_SENSITIVE_CONTENT,
             Adjustment.KEY_RANKING_SCORE,
-            Adjustment.KEY_NOT_CONVERSATION,
-            Adjustment.KEY_TYPE
+            Adjustment.KEY_NOT_CONVERSATION
     };
 
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
@@ -6617,30 +6607,6 @@ public class NotificationManagerService extends SystemService {
             }
             for (String removeKey : toRemove) {
                 adjustments.remove(removeKey);
-            }
-            if (android.service.notification.Flags.notificationClassification()
-                    && adjustments.containsKey(KEY_TYPE)) {
-                NotificationChannel newChannel = null;
-                int type = adjustments.getInt(KEY_TYPE);
-                if (TYPE_NEWS == type) {
-                    newChannel = mPreferencesHelper.getNotificationChannel(
-                            r.getSbn().getPackageName(), r.getUid(), NEWS_ID, false);
-                } else if (TYPE_PROMOTION == type) {
-                    newChannel = mPreferencesHelper.getNotificationChannel(
-                            r.getSbn().getPackageName(), r.getUid(), PROMOTIONS_ID, false);
-                } else if (TYPE_SOCIAL_MEDIA == type) {
-                    newChannel = mPreferencesHelper.getNotificationChannel(
-                            r.getSbn().getPackageName(), r.getUid(), SOCIAL_MEDIA_ID, false);
-                } else if (TYPE_CONTENT_RECOMMENDATION == type) {
-                    newChannel = mPreferencesHelper.getNotificationChannel(
-                            r.getSbn().getPackageName(), r.getUid(), RECS_ID, false);
-                }
-                if (newChannel == null) {
-                    adjustments.remove(KEY_TYPE);
-                } else {
-                    // swap app provided type with the real thing
-                    adjustments.putParcelable(KEY_TYPE, newChannel);
-                }
             }
             r.addAdjustment(adjustment);
             if (adjustment.getSignals().containsKey(Adjustment.KEY_SENSITIVE_CONTENT)) {

@@ -99,21 +99,21 @@ AThermalManager::AThermalManager(sp<IThermalService> service)
       : mThermalSvc(std::move(service)), mServiceListener(nullptr) {}
 
 AThermalManager::~AThermalManager() {
-    {
-        std::scoped_lock<std::mutex> listenerLock(mListenerMutex);
-        mListeners.clear();
-        if (mServiceListener != nullptr) {
-            bool success = false;
-            mThermalSvc->unregisterThermalStatusListener(mServiceListener, &success);
-            mServiceListener = nullptr;
-        }
+    std::unique_lock<std::mutex> listenerLock(mListenerMutex);
+
+    mListeners.clear();
+    if (mServiceListener != nullptr) {
+        bool success = false;
+        mThermalSvc->unregisterThermalStatusListener(mServiceListener, &success);
+        mServiceListener = nullptr;
     }
-    std::scoped_lock<std::mutex> lock(mThresholdsMutex);
+    listenerLock.unlock();
+    std::unique_lock<std::mutex> lock(mThresholdsMutex);
     delete[] mThresholds;
 }
 
 status_t AThermalManager::notifyStateChange(int32_t status) {
-    std::scoped_lock<std::mutex> lock(mListenerMutex);
+    std::unique_lock<std::mutex> lock(mListenerMutex);
     AThermalStatus thermalStatus = static_cast<AThermalStatus>(status);
 
     for (auto listener : mListeners) {
@@ -123,7 +123,7 @@ status_t AThermalManager::notifyStateChange(int32_t status) {
 }
 
 status_t AThermalManager::addListener(AThermal_StatusCallback callback, void *data) {
-    std::scoped_lock<std::mutex> lock(mListenerMutex);
+    std::unique_lock<std::mutex> lock(mListenerMutex);
 
     if (callback == nullptr) {
         // Callback can not be nullptr
@@ -157,7 +157,7 @@ status_t AThermalManager::addListener(AThermal_StatusCallback callback, void *da
 }
 
 status_t AThermalManager::removeListener(AThermal_StatusCallback callback, void *data) {
-    std::scoped_lock<std::mutex> lock(mListenerMutex);
+    std::unique_lock<std::mutex> lock(mListenerMutex);
 
     auto it = std::remove_if(mListeners.begin(),
                              mListeners.end(),
@@ -216,7 +216,7 @@ status_t AThermalManager::getThermalHeadroom(int32_t forecastSeconds, float *res
 
 status_t AThermalManager::getThermalHeadroomThresholds(const AThermalHeadroomThreshold **result,
                                                        size_t *size) {
-    std::scoped_lock<std::mutex> lock(mThresholdsMutex);
+    std::unique_lock<std::mutex> lock(mThresholdsMutex);
     if (mThresholds == nullptr) {
         auto thresholds = std::make_unique<std::vector<float>>();
         binder::Status ret = mThermalSvc->getThermalHeadroomThresholds(thresholds.get());

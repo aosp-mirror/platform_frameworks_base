@@ -15,8 +15,6 @@
  */
 package android.service.notification;
 
-import android.annotation.FlaggedApi;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
@@ -64,8 +62,7 @@ public final class Adjustment implements Parcelable {
             KEY_IMPORTANCE_PROPOSAL,
             KEY_SENSITIVE_CONTENT,
             KEY_RANKING_SCORE,
-            KEY_NOT_CONVERSATION,
-            KEY_TYPE
+            KEY_NOT_CONVERSATION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Keys {}
@@ -173,59 +170,6 @@ public final class Adjustment implements Parcelable {
      */
     @SystemApi
     public static final String KEY_NOT_CONVERSATION = "key_not_conversation";
-
-    /**
-     * Data type: int, the classification type of this notification. The OS may display
-     * notifications differently depending on the type, and may change the alerting level of the
-     * notification.
-     */
-    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
-    public static final String KEY_TYPE = "key_type";
-
-    /** @hide */
-    @IntDef(prefix = { "TYPE_" }, value = {
-            TYPE_UNKNOWN,
-            TYPE_OTHER,
-            TYPE_PROMOTION,
-            TYPE_SOCIAL_MEDIA,
-            TYPE_NEWS,
-            TYPE_CONTENT_RECOMMENDATION
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Types {}
-
-    /**
-     * The type of this notification is unknown.
-     */
-    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
-    public static final int TYPE_UNKNOWN = -1;
-    /**
-     * The type of this notification is not one of ones known to the NotificationAssistantService.
-     */
-    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
-    public static final int TYPE_OTHER = 0;
-    /**
-     * The type of this notification is a promotion/deal.
-     */
-    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
-    public static final int TYPE_PROMOTION = 1;
-    /**
-     * The type of this notification is social media content that isn't a
-     * {@link Notification.Builder#setShortcutId(String) conversation}.
-     */
-    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
-    public static final int TYPE_SOCIAL_MEDIA = 2;
-    /**
-     * The type of this notification is news.
-     */
-    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
-    public static final int TYPE_NEWS = 3;
-    /**
-     * The type of this notification is content recommendation, for example new videos or books the
-     * user may be interested in.
-     */
-    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
-    public static final int TYPE_CONTENT_RECOMMENDATION = 4;
 
     /**
      * Create a notification adjustment.

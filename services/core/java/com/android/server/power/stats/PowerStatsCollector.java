@@ -16,7 +16,6 @@
 
 package com.android.server.power.stats;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
@@ -62,6 +61,7 @@ public abstract class PowerStatsCollector {
     private long mLastScheduledUpdateMs = -1;
 
     @GuardedBy("this")
+    @SuppressWarnings("unchecked")
     private volatile List<Consumer<PowerStats>> mConsumerList = Collections.emptyList();
 
     public PowerStatsCollector(Handler handler, long throttlePeriodMs,
@@ -90,6 +90,7 @@ public abstract class PowerStatsCollector {
      * Adds a consumer that will receive a callback every time a snapshot of stats is collected.
      * The method is thread safe.
      */
+    @SuppressWarnings("unchecked")
     public void addConsumer(Consumer<PowerStats> consumer) {
         synchronized (this) {
             if (mConsumerList.contains(consumer)) {
@@ -106,6 +107,7 @@ public abstract class PowerStatsCollector {
      * Removes a consumer.
      * The method is thread safe.
      */
+    @SuppressWarnings("unchecked")
     public void removeConsumer(Consumer<PowerStats> consumer) {
         synchronized (this) {
             List<Consumer<PowerStats>> newList = new ArrayList<>(mConsumerList);
@@ -127,6 +129,18 @@ public abstract class PowerStatsCollector {
      */
     public boolean isEnabled() {
         return mEnabled;
+    }
+
+    @SuppressWarnings("GuardedBy")  // Field is volatile
+    public void collectAndDeliverStats() {
+        PowerStats stats = collectStats();
+        if (stats == null) {
+            return;
+        }
+        List<Consumer<PowerStats>> consumerList = mConsumerList;
+        for (int i = consumerList.size() - 1; i >= 0; i--) {
+            consumerList.get(i).accept(stats);
+        }
     }
 
     /**
@@ -161,30 +175,8 @@ public abstract class PowerStatsCollector {
         return true;
     }
 
-    /**
-     * Performs a PowerStats collection pass and delivers the result to registered consumers.
-     */
-    @SuppressWarnings("GuardedBy")  // Field is volatile
-    public void collectAndDeliverStats() {
-        deliverStats(collectStats());
-    }
-
     @Nullable
-    protected PowerStats collectStats() {
-        return null;
-    }
-
-    @SuppressWarnings("GuardedBy")  // Field is volatile
-    protected void deliverStats(PowerStats stats) {
-        if (stats == null) {
-            return;
-        }
-
-        List<Consumer<PowerStats>> consumerList = mConsumerList;
-        for (int i = consumerList.size() - 1; i >= 0; i--) {
-            consumerList.get(i).accept(stats);
-        }
-    }
+    protected abstract PowerStats collectStats();
 
     /**
      * Collects a fresh stats snapshot and prints it to the supplied printer.
@@ -239,33 +231,10 @@ public abstract class PowerStatsCollector {
     }
 
     interface ConsumedEnergyRetriever {
-        @NonNull
         int[] getEnergyConsumerIds(@EnergyConsumerType int energyConsumerType, String name);
 
-        String getEnergyConsumerName(int energyConsumerId);
-
         @Nullable
-        EnergyConsumerResult[] getConsumedEnergy(int[] energyConsumerIds);
-
-        @Nullable
-        default long[] getConsumedEnergyUws(int[] energyConsumerIds) {
-            EnergyConsumerResult[] results = getConsumedEnergy(energyConsumerIds);
-            if (results == null) {
-                return null;
-            }
-
-            long[] energy = new long[energyConsumerIds.length];
-            for (int i = 0; i < energyConsumerIds.length; i++) {
-                int id = energyConsumerIds[i];
-                for (EnergyConsumerResult result : results) {
-                    if (result.id == id) {
-                        energy[i] = result.energyUWs;
-                        break;
-                    }
-                }
-            }
-            return energy;
-        }
+        long[] getConsumedEnergyUws(int[] energyConsumerIds);
 
         default int[] getEnergyConsumerIds(@EnergyConsumerType int energyConsumerType) {
             return getEnergyConsumerIds(energyConsumerType, null);
@@ -274,38 +243,24 @@ public abstract class PowerStatsCollector {
 
     static class ConsumedEnergyRetrieverImpl implements ConsumedEnergyRetriever {
         private final PowerStatsInternal mPowerStatsInternal;
-        private EnergyConsumer[] mEnergyConsumers;
 
         ConsumedEnergyRetrieverImpl(PowerStatsInternal powerStatsInternal) {
             mPowerStatsInternal = powerStatsInternal;
         }
 
-        private void ensureEnergyConsumers() {
-            if (mEnergyConsumers != null) {
-                return;
-            }
-
-            if (mPowerStatsInternal == null) {
-                mEnergyConsumers = new EnergyConsumer[0];
-                return;
-            }
-
-            mEnergyConsumers = mPowerStatsInternal.getEnergyConsumerInfo();
-            if (mEnergyConsumers == null) {
-                mEnergyConsumers = new EnergyConsumer[0];
-            }
-        }
-
         @Override
         public int[] getEnergyConsumerIds(int energyConsumerType, String name) {
-            ensureEnergyConsumers();
+            if (mPowerStatsInternal == null) {
+                return new int[0];
+            }
 
-            if (mEnergyConsumers.length == 0) {
+            EnergyConsumer[] energyConsumerInfo = mPowerStatsInternal.getEnergyConsumerInfo();
+            if (energyConsumerInfo == null) {
                 return new int[0];
             }
 
             List<EnergyConsumer> energyConsumers = new ArrayList<>();
-            for (EnergyConsumer energyConsumer : mEnergyConsumers) {
+            for (EnergyConsumer energyConsumer : energyConsumerInfo) {
                 if (energyConsumer.type == energyConsumerType
                         && (name == null || name.equals(energyConsumer.name))) {
                     energyConsumers.add(energyConsumer);
@@ -325,50 +280,32 @@ public abstract class PowerStatsCollector {
         }
 
         @Override
-        public EnergyConsumerResult[] getConsumedEnergy(int[] energyConsumerIds) {
+        public long[] getConsumedEnergyUws(int[] energyConsumerIds) {
             CompletableFuture<EnergyConsumerResult[]> future =
                     mPowerStatsInternal.getEnergyConsumedAsync(energyConsumerIds);
+            EnergyConsumerResult[] results = null;
             try {
-                return future.get(POWER_STATS_ENERGY_CONSUMERS_TIMEOUT, TimeUnit.MILLISECONDS);
+                results = future.get(
+                        POWER_STATS_ENERGY_CONSUMERS_TIMEOUT, TimeUnit.MILLISECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 Slog.e(TAG, "Could not obtain energy consumers from PowerStatsService", e);
             }
 
-            return null;
-        }
+            if (results == null) {
+                return null;
+            }
 
-        @Override
-        public String getEnergyConsumerName(int energyConsumerId) {
-            ensureEnergyConsumers();
-
-            for (EnergyConsumer energyConsumer : mEnergyConsumers) {
-                if (energyConsumer.id == energyConsumerId) {
-                    return sanitizeCustomPowerComponentName(energyConsumer);
+            long[] energy = new long[energyConsumerIds.length];
+            for (int i = 0; i < energyConsumerIds.length; i++) {
+                int id = energyConsumerIds[i];
+                for (EnergyConsumerResult result : results) {
+                    if (result.id == id) {
+                        energy[i] = result.energyUWs;
+                        break;
+                    }
                 }
             }
-
-            Slog.e(TAG, "Unsupported energy consumer ID " + energyConsumerId);
-            return "unsupported";
-        }
-
-        private String sanitizeCustomPowerComponentName(EnergyConsumer energyConsumer) {
-            String name = energyConsumer.name;
-            if (name == null || name.isBlank()) {
-                name = "CUSTOM_" + energyConsumer.id;
-            }
-            int length = name.length();
-            StringBuilder sb = new StringBuilder(length);
-            for (int i = 0; i < length; i++) {
-                char c = name.charAt(i);
-                if (Character.isWhitespace(c)) {
-                    sb.append(' ');
-                } else if (Character.isISOControl(c)) {
-                    sb.append('_');
-                } else {
-                    sb.append(c);
-                }
-            }
-            return sb.toString();
+            return energy;
         }
     }
 }

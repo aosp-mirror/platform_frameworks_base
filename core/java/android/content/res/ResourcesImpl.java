@@ -49,7 +49,6 @@ import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.os.Trace;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -72,7 +71,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -207,21 +205,13 @@ public class ResourcesImpl {
             @Nullable Configuration config, @NonNull DisplayAdjustments displayAdjustments) {
         mAssets = assets;
         if (Flags.registerResourcePaths()) {
-            final ArraySet<String> uniquePaths = new ArraySet<>();
-            final ArrayList<String> orderedPaths = new ArrayList<>();
-            final ArrayMap<String, SharedLibraryAssets> sharedLibMap =
+            ArrayMap<String, SharedLibraryAssets> sharedLibMap =
                     ResourcesManager.getInstance().getSharedLibAssetsMap();
             final int size = sharedLibMap.size();
             for (int i = 0; i < size; i++) {
-                final var paths = sharedLibMap.valueAt(i).getAllAssetPaths();
-                for (int j = 0; j < paths.length; j++) {
-                    if (uniquePaths.add(paths[j])) {
-                        orderedPaths.add(paths[j]);
-                    }
-                }
+                assets.addSharedLibraryPaths(sharedLibMap.valueAt(i).getAllAssetPaths());
             }
-            assets.addSharedLibraryPaths(orderedPaths);
-            mSharedLibCount = size;
+            mSharedLibCount = sharedLibMap.size();
         }
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;

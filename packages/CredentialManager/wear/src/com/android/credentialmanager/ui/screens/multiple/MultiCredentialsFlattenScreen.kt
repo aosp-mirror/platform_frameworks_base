@@ -75,10 +75,7 @@ fun MultiCredentialsFlattenScreen(
                     CredentialsScreenChip(
                         label = credential.userName,
                         onClick = { selectEntry(credential, false) },
-                        secondaryLabel =
-                        credential.credentialTypeDisplayName.ifEmpty {
-                            credential.providerDisplayName
-                         },
+                        secondaryLabel = credential.credentialTypeDisplayName,
                         icon = credential.icon,
                         textAlign = TextAlign.Start
                     )

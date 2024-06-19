@@ -1745,15 +1745,10 @@ public class ResourcesManager {
                     if (r.getImpl() != null) {
                         final ResourcesImpl oldImpl = r.getImpl();
                         // ResourcesImpl constructor will help to append shared library asset paths.
-                        if (oldImpl.getAssets().isUpToDate()) {
-                            final ResourcesImpl newImpl = new ResourcesImpl(oldImpl.getAssets(),
-                                    oldImpl.getMetrics(), oldImpl.getConfiguration(),
-                                    oldImpl.getDisplayAdjustments());
-                            r.setImpl(newImpl);
-                        } else {
-                            Slog.w(TAG, "Skip appending shared library asset paths for the "
-                                    + "Resource as its assets are not up to date.");
-                        }
+                        final ResourcesImpl newImpl = new ResourcesImpl(oldImpl.getAssets(),
+                                oldImpl.getMetrics(), oldImpl.getConfiguration(),
+                                oldImpl.getDisplayAdjustments());
+                        r.setImpl(newImpl);
                     }
                 }
             }

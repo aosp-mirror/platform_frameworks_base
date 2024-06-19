@@ -109,7 +109,6 @@ constructor(
         @Main private val uiExecutor: Executor,
         @Background private val bgExecutor: Executor,
         @Main private val handler: Handler,
-        @Background private val bgHandler: Handler,
         @Named(DATE_SMARTSPACE_DATA_PLUGIN)
         optionalDatePlugin: Optional<BcSmartspaceDataPlugin>,
         @Named(WEATHER_SMARTSPACE_DATA_PLUGIN)
@@ -413,7 +412,6 @@ constructor(
 
         val ssView = plugin.getView(parent)
         configPlugin?.let { ssView.registerConfigProvider(it) }
-        ssView.setBgHandler(bgHandler)
         ssView.setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         ssView.setTimeChangedDelegate(SmartspaceTimeChangedDelegate(keyguardUpdateMonitor))
         ssView.registerDataProvider(plugin)

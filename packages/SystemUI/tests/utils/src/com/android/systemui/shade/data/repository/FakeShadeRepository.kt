@@ -64,8 +64,6 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     private val _shadeMode = MutableStateFlow<ShadeMode>(ShadeMode.Single)
     override val shadeMode: StateFlow<ShadeMode> = _shadeMode.asStateFlow()
 
-    override val isDualShadeAlignedToBottom = false
-
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean) {
         _legacyIsQsExpanded.value = legacyIsQsExpanded

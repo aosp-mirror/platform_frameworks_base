@@ -1,12 +1,10 @@
 package com.android.systemui.scene.ui.composable
 
 import androidx.compose.foundation.gestures.Orientation
-import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.bouncer.ui.composable.Bouncer
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.OpenBottomShade
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransition
@@ -44,12 +42,7 @@ val SceneContainerTransitions = transitions {
     // Scene transitions
 
     from(Scenes.Bouncer, to = Scenes.Gone) { bouncerToGoneTransition() }
-    from(Scenes.Gone, to = Scenes.NotificationsShade) {
-        goneToNotificationsShadeTransition(Edge.Top)
-    }
-    from(Scenes.Gone, to = Scenes.NotificationsShade, key = OpenBottomShade) {
-        goneToNotificationsShadeTransition(Edge.Bottom)
-    }
+    from(Scenes.Gone, to = Scenes.NotificationsShade) { goneToNotificationsShadeTransition() }
     from(Scenes.Gone, to = Scenes.Shade) { goneToShadeTransition() }
     from(
         Scenes.Gone,

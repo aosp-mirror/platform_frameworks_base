@@ -55,7 +55,6 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
-    private val lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     private val keyguardClockViewModel: KeyguardClockViewModel,
@@ -75,30 +74,13 @@ constructor(
                 burnInParams
             }
         return configurationInteractor
-            .dimensionPixelSize(
-                setOf(
-                    R.dimen.keyguard_enter_from_top_translation_y,
-                    R.dimen.keyguard_enter_from_side_translation_x,
-                )
-            )
-            .flatMapLatest { dimens ->
+            .dimensionPixelSize(R.dimen.keyguard_enter_from_top_translation_y)
+            .flatMapLatest { enterFromTopAmount ->
                 combine(
                     keyguardInteractor.keyguardTranslationY.onStart { emit(0f) },
                     burnIn(params).onStart { emit(BurnInModel()) },
                     goneToAodTransitionViewModel
-                        .enterFromTopTranslationY(
-                            dimens[R.dimen.keyguard_enter_from_top_translation_y]!!
-                        )
-                        .onStart { emit(StateToValue()) },
-                    goneToAodTransitionViewModel
-                        .enterFromSideTranslationX(
-                            dimens[R.dimen.keyguard_enter_from_side_translation_x]!!
-                        )
-                        .onStart { emit(StateToValue()) },
-                    lockscreenToAodTransitionViewModel
-                        .enterFromSideTranslationX(
-                            dimens[R.dimen.keyguard_enter_from_side_translation_x]!!
-                        )
+                        .enterFromTopTranslationY(enterFromTopAmount)
                         .onStart { emit(StateToValue()) },
                     occludedToLockscreenTransitionViewModel.lockscreenTranslationY.onStart {
                         emit(0f)
@@ -106,31 +88,21 @@ constructor(
                     aodToLockscreenTransitionViewModel.translationY(params.translationY).onStart {
                         emit(StateToValue())
                     },
-                ) { flows ->
-                    val keyguardTranslationY = flows[0] as Float
-                    val burnInModel = flows[1] as BurnInModel
-                    val goneToAodTranslationY = flows[2] as StateToValue
-                    val goneToAodTranslationX = flows[3] as StateToValue
-                    val lockscreenToAodTranslationX = flows[4] as StateToValue
-                    val occludedToLockscreen = flows[5] as Float
-                    val aodToLockscreen = flows[6] as StateToValue
-
+                ) {
+                    keyguardTranslationY,
+                    burnInModel,
+                    goneToAod,
+                    occludedToLockscreen,
+                    aodToLockscreen ->
                     val translationY =
                         if (aodToLockscreen.transitionState.isTransitioning()) {
                             aodToLockscreen.value ?: 0f
-                        } else if (goneToAodTranslationY.transitionState.isTransitioning()) {
-                            (goneToAodTranslationY.value ?: 0f) + burnInModel.translationY
+                        } else if (goneToAod.transitionState.isTransitioning()) {
+                            (goneToAod.value ?: 0f) + burnInModel.translationY
                         } else {
                             burnInModel.translationY + occludedToLockscreen + keyguardTranslationY
                         }
-                    val translationX =
-                        burnInModel.translationX +
-                            (goneToAodTranslationX.value ?: 0f) +
-                            (lockscreenToAodTranslationX.value ?: 0f)
-                    burnInModel.copy(
-                        translationX = translationX.toInt(),
-                        translationY = translationY.toInt(),
-                    )
+                    burnInModel.copy(translationY = translationY.toInt())
                 }
             }
             .distinctUntilChanged()

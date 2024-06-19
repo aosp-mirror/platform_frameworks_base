@@ -32,7 +32,6 @@ import android.hardware.radio.Announcement;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
-import android.os.ParcelableException;
 import android.util.ArrayMap;
 
 import com.google.common.truth.Expect;
@@ -87,15 +86,6 @@ public final class ConvertTest {
 
         expect.withMessage("Exception for illegeal argument").that(thrown)
                 .hasMessageThat().contains("INVALID_ARGUMENTS");
-    }
-
-    @Test
-    public void throwOnError_withUnknownErrorCode() {
-        ParcelableException thrown = assertThrows(ParcelableException.class, () ->
-                Convert.throwOnError("tune", /* result= */ 1000));
-
-        expect.withMessage("Exception for unknown error code").that(thrown)
-                .hasMessageThat().contains("unknown error");
     }
 
     @Test
@@ -239,12 +229,6 @@ public final class ConvertTest {
 
         expect.withMessage("Vendor info with null value converted to HAL")
                 .that(Convert.vendorInfoToHal(vendorInfo)).isEmpty();
-    }
-
-    @Test
-    public void vendorInfoFromHalVendorKeyValues_withNull() {
-        expect.withMessage("Null vendor info converted from HAL")
-                .that(Convert.vendorInfoFromHal(/* info= */ null)).isEmpty();
     }
 
     @Test

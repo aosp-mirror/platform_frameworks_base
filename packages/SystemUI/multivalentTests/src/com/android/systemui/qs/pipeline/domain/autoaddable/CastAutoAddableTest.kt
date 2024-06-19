@@ -25,7 +25,6 @@ import com.android.systemui.qs.pipeline.domain.model.AutoAddSignal
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.CastTile
 import com.android.systemui.statusbar.policy.CastController
-import com.android.systemui.statusbar.policy.CastDevice
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -74,12 +73,9 @@ class CastAutoAddableTest : SysuiTestCase() {
     @Test
     fun onCastDevicesChanged_deviceNotConnectedOrConnecting_noSignal() = runTest {
         val device =
-            CastDevice(
-                id = "id",
-                name = null,
-                state = CastDevice.CastState.Disconnected,
-                origin = CastDevice.CastOrigin.MediaProjection,
-            )
+            CastController.CastDevice().apply {
+                state = CastController.CastDevice.STATE_DISCONNECTED
+            }
         whenever(castController.castDevices).thenReturn(listOf(device))
 
         val signal by collectLastValue(underTest.autoAddSignal(0))
@@ -95,19 +91,11 @@ class CastAutoAddableTest : SysuiTestCase() {
     @Test
     fun onCastDevicesChanged_someDeviceConnecting_addSignal() = runTest {
         val disconnectedDevice =
-            CastDevice(
-                id = "id",
-                name = null,
-                state = CastDevice.CastState.Disconnected,
-                origin = CastDevice.CastOrigin.MediaProjection,
-            )
+            CastController.CastDevice().apply {
+                state = CastController.CastDevice.STATE_DISCONNECTED
+            }
         val connectingDevice =
-            CastDevice(
-                id = "id",
-                name = null,
-                state = CastDevice.CastState.Connecting,
-                origin = CastDevice.CastOrigin.MediaProjection,
-            )
+            CastController.CastDevice().apply { state = CastController.CastDevice.STATE_CONNECTING }
         whenever(castController.castDevices)
             .thenReturn(listOf(disconnectedDevice, connectingDevice))
 
@@ -124,19 +112,11 @@ class CastAutoAddableTest : SysuiTestCase() {
     @Test
     fun onCastDevicesChanged_someDeviceConnected_addSignal() = runTest {
         val disconnectedDevice =
-            CastDevice(
-                id = "id",
-                name = null,
-                state = CastDevice.CastState.Disconnected,
-                origin = CastDevice.CastOrigin.MediaProjection,
-            )
+            CastController.CastDevice().apply {
+                state = CastController.CastDevice.STATE_DISCONNECTED
+            }
         val connectedDevice =
-            CastDevice(
-                id = "id",
-                name = null,
-                state = CastDevice.CastState.Connected,
-                origin = CastDevice.CastOrigin.MediaProjection,
-            )
+            CastController.CastDevice().apply { state = CastController.CastDevice.STATE_CONNECTED }
         whenever(castController.castDevices).thenReturn(listOf(disconnectedDevice, connectedDevice))
 
         val signal by collectLastValue(underTest.autoAddSignal(0))

@@ -224,9 +224,7 @@ public final class ShortcutUtils {
                 boolean enableA11yService = servicesWithShortcuts.contains(componentName);
                 AccessibilityUtils.setAccessibilityServiceState(
                         context,
-                        ComponentName.unflattenFromString(componentName),
-                        enableA11yService,
-                        userId);
+                        ComponentName.unflattenFromString(componentName), enableA11yService);
             }
         }
     }

@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.shareIn
@@ -154,11 +155,10 @@ constructor(
                             is DisplayEvent.Changed -> previousIds + id
                         }
                     }
-                    .distinctUntilChanged()
-                    .stateIn(
+                    .shareIn(
                         bgApplicationScope,
-                        SharingStarted.WhileSubscribed(),
-                        emptySet(),
+                        started = SharingStarted.WhileSubscribed(),
+                        replay = 1
                     )
             } else {
                 oldEnabledDisplays.map { enabledDisplaysSet ->
@@ -177,8 +177,7 @@ constructor(
             enabledDisplayIds
                 .mapElementsLazily { displayId -> getDisplay(displayId) }
                 .flowOn(backgroundCoroutineDispatcher)
-                .debugLog("enabledDisplays")
-                .stateIn(bgApplicationScope, SharingStarted.WhileSubscribed(), emptySet())
+                .debugLog("enabledDisplayIds")
         } else {
             oldEnabledDisplays
         }
@@ -356,31 +355,20 @@ constructor(
      * [createValue] returns a null element, it will not be added in the output set.
      */
     private fun <T, V> Flow<Set<T>>.mapElementsLazily(createValue: (T) -> V?): Flow<Set<V>> {
-        data class State<T, V>(
-            val previousSet: Set<T>,
-            // Caches T values from the previousSet that were already converted to V
-            val valueMap: Map<T, V>,
-            val resultSet: Set<V>
-        )
-
-        val initialState = State(emptySet<T>(), emptyMap(), emptySet<V>())
-
-        return this.scan(initialState) { state, currentSet ->
-                if (currentSet == state.previousSet) {
-                    state
-                } else {
-                    val removed = state.previousSet - currentSet
-                    val added = currentSet - state.previousSet
-                    val newMap = state.valueMap.toMutableMap()
-
-                    added.forEach { key -> createValue(key)?.let { newMap[key] = it } }
-                    removed.forEach { key -> newMap.remove(key) }
-
-                    val resultSet = newMap.values.toSet()
-                    State(currentSet, newMap, resultSet)
+        var initialSet = emptySet<T>()
+        val currentMap = mutableMapOf<T, V>()
+        var resultSet = emptySet<V>()
+        return onEach { currentSet ->
+                val removed = initialSet - currentSet
+                val added = currentSet - initialSet
+                if (added.isNotEmpty() || removed.isNotEmpty()) {
+                    added.forEach { key: T -> createValue(key)?.let { currentMap[key] = it } }
+                    removed.forEach { key: T -> currentMap.remove(key) }
+                    resultSet = currentMap.values.toSet() // Creates a **copy** of values
                 }
+                initialSet = currentSet
             }
-            .map { it.resultSet }
+            .map { resultSet }
     }
 
     private companion object {

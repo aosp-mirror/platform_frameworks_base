@@ -40,7 +40,6 @@ import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.Notification.VISIBILITY_PRIVATE;
-import static android.app.NotificationChannel.NEWS_ID;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
@@ -92,9 +91,7 @@ import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.service.notification.Adjustment.KEY_CONTEXTUAL_ACTIONS;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_TEXT_REPLIES;
-import static android.service.notification.Adjustment.KEY_TYPE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
-import static android.service.notification.Adjustment.TYPE_NEWS;
 import static android.service.notification.Condition.SOURCE_CONTEXT;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_TRUE;
@@ -15780,28 +15777,5 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 HINT_HOST_DISABLE_EFFECTS);
         when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenReturn(false);
         assertThat(mBinderService.getEffectsSuppressor()).isEqualTo(mListener.component);
-    }
-
-    @Test
-    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
-    public void testApplyAdjustment_keyType_validType() throws Exception {
-        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
-        mService.addNotification(r);
-        NotificationManagerService.WorkerHandler handler = mock(
-                NotificationManagerService.WorkerHandler.class);
-        mService.setHandler(handler);
-
-        Bundle signals = new Bundle();
-        signals.putInt(KEY_TYPE, TYPE_NEWS);
-        Adjustment adjustment = new Adjustment(
-                r.getSbn().getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
-        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
-        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
-
-        waitForIdle();
-
-        r.applyAdjustments();
-
-        assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
     }
 }

@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -27,6 +28,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.provider.Settings;
 import android.service.notification.Condition;
+import android.service.notification.IConditionProvider;
 import android.service.notification.ScheduleCalendar;
 import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
@@ -52,6 +54,8 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     static final String TAG = "ConditionProviders.SCP";
     static final boolean DEBUG = true || Log.isLoggable("ConditionProviders", Log.DEBUG);
 
+    public static final ComponentName COMPONENT =
+            new ComponentName("android", ScheduleConditionProvider.class.getName());
     private static final String NOT_SHOWN = "...";
     private static final String SIMPLE_NAME = ScheduleConditionProvider.class.getSimpleName();
     private static final String ACTION_EVALUATE =  SIMPLE_NAME + ".EVALUATE";
@@ -62,8 +66,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
 
     private final Context mContext = this;
     private final ArrayMap<Uri, ScheduleCalendar> mSubscriptions = new ArrayMap<>();
-    @GuardedBy("mSnoozedForAlarm")
-    private final ArraySet<Uri> mSnoozedForAlarm = new ArraySet<>();
+    private ArraySet<Uri> mSnoozedForAlarm = new ArraySet<>();
 
     private AlarmManager mAlarmManager;
     private boolean mConnected;
@@ -72,6 +75,11 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
 
     public ScheduleConditionProvider() {
         if (DEBUG) Slog.d(TAG, "new " + SIMPLE_NAME + "()");
+    }
+
+    @Override
+    public ComponentName getComponent() {
+        return COMPONENT;
     }
 
     @Override
@@ -95,10 +103,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
                 pw.println(mSubscriptions.get(conditionId).toString());
             }
         }
-        synchronized (mSnoozedForAlarm) {
-            pw.println(
-                    "      snoozed due to alarm: " + TextUtils.join(SEPARATOR, mSnoozedForAlarm));
-        }
+        pw.println("      snoozed due to alarm: " + TextUtils.join(SEPARATOR, mSnoozedForAlarm));
         dumpUpcomingTime(pw, "mNextAlarmTime", mNextAlarmTime, now);
     }
 
@@ -142,6 +147,16 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         }
         removeSnoozed(conditionId);
         evaluateSubscriptions();
+    }
+
+    @Override
+    public void attachBase(Context base) {
+        attachBaseContext(base);
+    }
+
+    @Override
+    public IConditionProvider asInterface() {
+        return (IConditionProvider) onBind(null);
     }
 
     private void evaluateSubscriptions() {
@@ -284,7 +299,6 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         }
     }
 
-    @GuardedBy("mSnoozedForAlarm")
     private void saveSnoozedLocked() {
         final String setting = TextUtils.join(SEPARATOR, mSnoozedForAlarm);
         final int currentUser = ActivityManager.getCurrentUser();

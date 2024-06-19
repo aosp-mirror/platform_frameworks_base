@@ -130,7 +130,6 @@ import com.android.server.power.stats.BatteryUsageStatsProvider;
 import com.android.server.power.stats.BluetoothPowerStatsProcessor;
 import com.android.server.power.stats.CameraPowerStatsProcessor;
 import com.android.server.power.stats.CpuPowerStatsProcessor;
-import com.android.server.power.stats.CustomEnergyConsumerPowerStatsProcessor;
 import com.android.server.power.stats.FlashlightPowerStatsProcessor;
 import com.android.server.power.stats.GnssPowerStatsProcessor;
 import com.android.server.power.stats.MobileRadioPowerStatsProcessor;
@@ -575,15 +574,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessor(
                         new GnssPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
-
-        config.trackCustomPowerComponents(CustomEnergyConsumerPowerStatsProcessor::new)
-                .trackDeviceStates(
-                        AggregatedPowerStatsConfig.STATE_POWER,
-                        AggregatedPowerStatsConfig.STATE_SCREEN)
-                .trackUidStates(
-                        AggregatedPowerStatsConfig.STATE_POWER,
-                        AggregatedPowerStatsConfig.STATE_SCREEN,
-                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
         return config;
     }
 
@@ -673,10 +663,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 Flags.streamlinedMiscBatteryStats());
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
                 BatteryConsumer.POWER_COMPONENT_CAMERA,
-                Flags.streamlinedMiscBatteryStats());
-
-        // By convention POWER_COMPONENT_ANY represents custom Energy Consumers
-        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_ANY,
                 Flags.streamlinedMiscBatteryStats());
 
         mWorker.systemServicesReady();

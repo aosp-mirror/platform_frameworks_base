@@ -9,7 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.pm.PackageManager;
 import android.media.MediaRouter;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
@@ -53,12 +52,8 @@ public class CastControllerImplTest extends SysuiTestCase {
         mContext.addMockSystemService(MediaRouter.class, mMediaRouter);
         mContext.addMockSystemService(MediaProjectionManager.class, mMediaProjectionManager);
         when(mMediaProjectionManager.getActiveProjectionInfo()).thenReturn(mProjection);
-        when(mProjection.getPackageName()).thenReturn("fake.package");
 
-        mController = new CastControllerImpl(
-                mContext,
-                mock(PackageManager.class),
-                mock(DumpManager.class));
+        mController = new CastControllerImpl(mContext, mock(DumpManager.class));
     }
 
     @Test
@@ -153,26 +148,16 @@ public class CastControllerImplTest extends SysuiTestCase {
 
     @Test
     public void hasConnectedCastDevice_connected() {
-        CastDevice castDevice = new CastDevice(
-                "id",
-                /* name= */ null,
-                /* description= */ null,
-                /* state= */ CastDevice.CastState.Connected,
-                /* origin= */ CastDevice.CastOrigin.MediaProjection,
-                /* tag= */ null);
+        CastController.CastDevice castDevice = new CastController.CastDevice();
+        castDevice.state = CastController.CastDevice.STATE_CONNECTED;
         mController.startCasting(castDevice);
         assertTrue(mController.hasConnectedCastDevice());
     }
 
     @Test
     public void hasConnectedCastDevice_notConnected() {
-        CastDevice castDevice = new CastDevice(
-                "id",
-                /* name= */ null,
-                /* description= */ null,
-                /* state= */ CastDevice.CastState.Connecting,
-                /* origin= */ CastDevice.CastOrigin.MediaProjection,
-                /* tag= */ null);
+        CastController.CastDevice castDevice = new CastController.CastDevice();
+        castDevice.state = CastController.CastDevice.STATE_CONNECTING;
         mController.startCasting(castDevice);
         assertTrue(mController.hasConnectedCastDevice());
     }

@@ -19,20 +19,16 @@ package com.android.server.power.stats;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
-import android.os.BatteryConsumer;
 import android.os.BatteryStats;
-import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TimeUtils;
 
 import com.android.internal.os.PowerStats;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
-import com.android.server.power.stats.AggregatedPowerStatsConfig.PowerComponent;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -57,14 +53,11 @@ class AggregatedPowerStats {
     private static final int MAX_CLOCK_UPDATES = 100;
     private static final String XML_TAG_AGGREGATED_POWER_STATS = "agg-power-stats";
 
-    private final AggregatedPowerStatsConfig mConfig;
-    private final SparseArray<PowerComponentAggregatedPowerStats> mPowerComponentStats;
-    private final PowerComponentAggregatedPowerStats mGenericPowerComponent;
+    private final PowerComponentAggregatedPowerStats[] mPowerComponentStats;
 
     static class ClockUpdate {
         public long monotonicTime;
-        @CurrentTimeMillisLong
-        public long currentTime;
+        @CurrentTimeMillisLong public long currentTime;
     }
 
     private final List<ClockUpdate> mClockUpdates = new ArrayList<>();
@@ -72,35 +65,13 @@ class AggregatedPowerStats {
     @DurationMillisLong
     private long mDurationMs;
 
-    AggregatedPowerStats(@NonNull AggregatedPowerStatsConfig aggregatedPowerStatsConfig) {
-        mConfig = aggregatedPowerStatsConfig;
-        List<PowerComponent> configs =
+    AggregatedPowerStats(AggregatedPowerStatsConfig aggregatedPowerStatsConfig) {
+        List<AggregatedPowerStatsConfig.PowerComponent> configs =
                 aggregatedPowerStatsConfig.getPowerComponentsAggregatedStatsConfigs();
-        mPowerComponentStats = new SparseArray<>(configs.size());
+        mPowerComponentStats = new PowerComponentAggregatedPowerStats[configs.size()];
         for (int i = 0; i < configs.size(); i++) {
-            PowerComponent powerComponent = configs.get(i);
-            mPowerComponentStats.put(powerComponent.getPowerComponentId(),
-                    new PowerComponentAggregatedPowerStats(this, powerComponent));
+            mPowerComponentStats[i] = new PowerComponentAggregatedPowerStats(this, configs.get(i));
         }
-        mGenericPowerComponent = createGenericPowerComponent();
-        mPowerComponentStats.put(BatteryConsumer.POWER_COMPONENT_ANY, mGenericPowerComponent);
-    }
-
-    private PowerComponentAggregatedPowerStats createGenericPowerComponent() {
-        PowerComponent config = new PowerComponent(BatteryConsumer.POWER_COMPONENT_ANY);
-        config.trackDeviceStates(
-                        AggregatedPowerStatsConfig.STATE_POWER,
-                        AggregatedPowerStatsConfig.STATE_SCREEN)
-                .trackUidStates(
-                        AggregatedPowerStatsConfig.STATE_POWER,
-                        AggregatedPowerStatsConfig.STATE_SCREEN,
-                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
-        PowerComponentAggregatedPowerStats stats =
-                new PowerComponentAggregatedPowerStats(this, config);
-        stats.setPowerStatsDescriptor(
-                new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_ANY, 0, null, 0, 0,
-                        new PersistableBundle()));
-        return stats;
     }
 
     /**
@@ -108,7 +79,7 @@ class AggregatedPowerStats {
      * there may be multiple clock updates in one set of aggregated stats.
      *
      * @param monotonicTime monotonic time in milliseconds, see
-     *                      {@link com.android.internal.os.MonotonicClock}
+     * {@link com.android.internal.os.MonotonicClock}
      * @param currentTime   current time in milliseconds, see {@link System#currentTimeMillis()}
      */
     void addClockUpdate(long monotonicTime, @CurrentTimeMillisLong long currentTime) {
@@ -119,7 +90,7 @@ class AggregatedPowerStats {
             mClockUpdates.add(clockUpdate);
         } else {
             Slog.i(TAG, "Too many clock updates. Replacing the previous update with "
-                    + DateFormat.format("yyyy-MM-dd-HH-mm-ss", currentTime));
+                        + DateFormat.format("yyyy-MM-dd-HH-mm-ss", currentTime));
             mClockUpdates.set(mClockUpdates.size() - 1, clockUpdate);
         }
     }
@@ -148,97 +119,66 @@ class AggregatedPowerStats {
         return mDurationMs;
     }
 
-    List<PowerComponentAggregatedPowerStats> getPowerComponentStats() {
-        List<PowerComponentAggregatedPowerStats> list = new ArrayList<>(
-                mPowerComponentStats.size());
-        for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            PowerComponentAggregatedPowerStats stats = mPowerComponentStats.valueAt(i);
-            if (stats != mGenericPowerComponent) {
-                list.add(stats);
+    PowerComponentAggregatedPowerStats getPowerComponentStats(int powerComponentId) {
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            if (stats.powerComponentId == powerComponentId) {
+                return stats;
             }
         }
-        return list;
-    }
-
-    PowerComponentAggregatedPowerStats getPowerComponentStats(int powerComponentId) {
-        return mPowerComponentStats.get(powerComponentId);
-    }
-
-    void start(long timestampMs) {
-        for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            PowerComponentAggregatedPowerStats component = mPowerComponentStats.valueAt(i);
-            component.getConfig().getProcessor().start(component, timestampMs);
-        }
+        return null;
     }
 
     void setDeviceState(@AggregatedPowerStatsConfig.TrackedState int stateId, int state,
             long time) {
-        for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            mPowerComponentStats.valueAt(i).setState(stateId, state, time);
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            stats.setState(stateId, state, time);
         }
     }
 
     void setUidState(int uid, @AggregatedPowerStatsConfig.TrackedState int stateId, int state,
             long time) {
-        for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            mPowerComponentStats.valueAt(i).setUidState(uid, stateId, state, time);
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            stats.setUidState(uid, stateId, state, time);
         }
     }
 
     boolean isCompatible(PowerStats powerStats) {
         int powerComponentId = powerStats.descriptor.powerComponentId;
-        PowerComponentAggregatedPowerStats stats = mPowerComponentStats.get(powerComponentId);
-        return stats != null && stats.isCompatible(powerStats);
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            if (stats.powerComponentId == powerComponentId && !stats.isCompatible(powerStats)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     void addPowerStats(PowerStats powerStats, long time) {
         int powerComponentId = powerStats.descriptor.powerComponentId;
-        PowerComponentAggregatedPowerStats stats = mPowerComponentStats.get(powerComponentId);
-        if (stats == null) {
-            PowerComponent powerComponent = mConfig.createPowerComponent(powerComponentId);
-            if (powerComponent == null) {
-                return;
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            if (stats.powerComponentId == powerComponentId) {
+                stats.getConfig().getProcessor().addPowerStats(stats, powerStats, time);
             }
-
-            stats = new PowerComponentAggregatedPowerStats(this, powerComponent);
-            stats.setPowerStatsDescriptor(powerStats.descriptor);
-            stats.copyStatesFrom(mGenericPowerComponent);
-            mPowerComponentStats.put(powerComponentId, stats);
         }
-
-        PowerStatsProcessor processor = stats.getConfig().getProcessor();
-        processor.addPowerStats(stats, powerStats, time);
     }
 
     public void noteStateChange(BatteryStats.HistoryItem item) {
-        for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            PowerComponentAggregatedPowerStats stats = mPowerComponentStats.valueAt(i);
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
             stats.getConfig().getProcessor().noteStateChange(stats, item);
-        }
-    }
-
-    void finish(long timestampMs) {
-        for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            PowerComponentAggregatedPowerStats component = mPowerComponentStats.valueAt(i);
-            component.getConfig().getProcessor().finish(component, timestampMs);
         }
     }
 
     void reset() {
         mClockUpdates.clear();
         mDurationMs = 0;
-        for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            mPowerComponentStats.valueAt(i).reset();
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            stats.reset();
         }
     }
 
     public void writeXml(TypedXmlSerializer serializer) throws IOException {
         serializer.startTag(null, XML_TAG_AGGREGATED_POWER_STATS);
-        for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            PowerComponentAggregatedPowerStats stats = mPowerComponentStats.valueAt(i);
-            if (stats != mGenericPowerComponent) {
-                stats.writeXml(serializer);
-            }
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            stats.writeXml(serializer);
         }
         serializer.endTag(null, XML_TAG_AGGREGATED_POWER_STATS);
         serializer.flush();
@@ -260,34 +200,23 @@ class AggregatedPowerStats {
                     case XML_TAG_AGGREGATED_POWER_STATS:
                         inElement = true;
                         break;
-                    case PowerComponentAggregatedPowerStats.XML_TAG_POWER_COMPONENT: {
+                    case PowerComponentAggregatedPowerStats.XML_TAG_POWER_COMPONENT:
                         if (!inElement) {
                             break;
                         }
 
                         int powerComponentId = parser.getAttributeInt(null,
                                 PowerComponentAggregatedPowerStats.XML_ATTR_ID);
-
-                        PowerComponentAggregatedPowerStats powerComponentStats =
-                                stats.getPowerComponentStats(powerComponentId);
-                        if (powerComponentStats == null) {
-                            PowerComponent powerComponent =
-                                    aggregatedPowerStatsConfig.createPowerComponent(
-                                            powerComponentId);
-                            if (powerComponent != null) {
-                                powerComponentStats = new PowerComponentAggregatedPowerStats(stats,
-                                        powerComponent);
-                                stats.mPowerComponentStats.put(powerComponentId,
-                                        powerComponentStats);
-                            }
-                        }
-                        if (powerComponentStats != null) {
-                            if (!powerComponentStats.readFromXml(parser)) {
-                                skipToEnd = true;
+                        for (PowerComponentAggregatedPowerStats powerComponent :
+                                stats.mPowerComponentStats) {
+                            if (powerComponent.powerComponentId == powerComponentId) {
+                                if (!powerComponent.readFromXml(parser)) {
+                                    skipToEnd = true;
+                                }
+                                break;
                             }
                         }
                         break;
-                    }
                 }
             }
             eventType = parser.next();
@@ -325,14 +254,14 @@ class AggregatedPowerStats {
 
         ipw.println("Device");
         ipw.increaseIndent();
-        for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            mPowerComponentStats.valueAt(i).dumpDevice(ipw);
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            stats.dumpDevice(ipw);
         }
         ipw.decreaseIndent();
 
         Set<Integer> uids = new HashSet<>();
-        for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            mPowerComponentStats.valueAt(i).collectUids(uids);
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            stats.collectUids(uids);
         }
 
         Integer[] allUids = uids.toArray(new Integer[uids.size()]);
@@ -340,8 +269,8 @@ class AggregatedPowerStats {
         for (int uid : allUids) {
             ipw.println(UserHandle.formatUid(uid));
             ipw.increaseIndent();
-            for (int i = 0; i < mPowerComponentStats.size(); i++) {
-                mPowerComponentStats.valueAt(i).dumpUid(ipw, uid);
+            for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+                stats.dumpUid(ipw, uid);
             }
             ipw.decreaseIndent();
         }

@@ -66,7 +66,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
@@ -91,8 +90,7 @@ object Notifications {
     object Elements {
         val NotificationScrim = ElementKey("NotificationScrim")
         val NotificationStackPlaceholder = ElementKey("NotificationStackPlaceholder")
-        val HeadsUpNotificationPlaceholder =
-            ElementKey("HeadsUpNotificationPlaceholder", scenePicker = LowestZIndexScenePicker)
+        val HeadsUpNotificationPlaceholder = ElementKey("HeadsUpNotificationPlaceholder")
         val ShelfSpace = ElementKey("ShelfSpace")
     }
 
@@ -115,10 +113,10 @@ fun SceneScope.HeadsUpNotificationSpace(
     modifier: Modifier = Modifier,
     isPeekFromBottom: Boolean = false,
 ) {
-    Box(
+    Element(
+        Notifications.Elements.HeadsUpNotificationPlaceholder,
         modifier =
             modifier
-                .element(Notifications.Elements.HeadsUpNotificationPlaceholder)
                 .fillMaxWidth()
                 .notificationHeadsUpHeight(stackScrollView)
                 .debugBackground(viewModel, DEBUG_HUN_COLOR)
@@ -132,7 +130,9 @@ fun SceneScope.HeadsUpNotificationSpace(
                     // Note: boundsInWindow doesn't scroll off the screen
                     stackScrollView.setHeadsUpTop(boundsInWindow.top)
                 }
-    )
+    ) {
+        content {}
+    }
 }
 
 /** Adds the space where notification stack should appear in the scene. */
@@ -177,7 +177,6 @@ fun SceneScope.NotificationScrollingStack(
     shouldPunchHoleBehindScrim: Boolean,
     shouldFillMaxSize: Boolean = true,
     shouldReserveSpaceForNavBar: Boolean = true,
-    shouldIncludeHeadsUpSpace: Boolean = true,
     shadeMode: ShadeMode,
     modifier: Modifier = Modifier,
 ) {
@@ -367,9 +366,7 @@ fun SceneScope.NotificationScrollingStack(
                         .onSizeChanged { size -> stackHeight.intValue = size.height },
             )
         }
-        if (shouldIncludeHeadsUpSpace) {
-            HeadsUpNotificationSpace(stackScrollView = stackScrollView, viewModel = viewModel)
-        }
+        HeadsUpNotificationSpace(stackScrollView = stackScrollView, viewModel = viewModel)
     }
 }
 
@@ -417,7 +414,10 @@ fun NotificationStackCutoffGuideline(
 ) {
     Spacer(
         modifier =
-            modifier.fillMaxWidth().height(0.dp).onGloballyPositioned { coordinates ->
+            modifier
+                    .fillMaxWidth()
+                    .height(0.dp)
+                    .onGloballyPositioned { coordinates ->
                 val positionY = coordinates.positionInWindow().y
                 debugLog(viewModel) { "STACK cutoff onGloballyPositioned: y=$positionY" }
                 stackScrollView.setStackCutoff(positionY)

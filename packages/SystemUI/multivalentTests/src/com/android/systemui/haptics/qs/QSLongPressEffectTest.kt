@@ -144,7 +144,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
             longPressEffect.handleActionUp()
 
             // THEN the effect reverses
-            assertEffectReverses(QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_UP)
+            assertEffectReverses()
         }
 
     @Test
@@ -171,17 +171,18 @@ class QSLongPressEffectTest : SysuiTestCase() {
             longPressEffect.handleActionCancel()
 
             // THEN the effect gets reversed
-            assertEffectReverses(QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_CANCEL)
+            assertEffectReverses()
         }
 
     @Test
-    fun onAnimationComplete_keyguardDismissible_effectCompletes() =
+    fun onAnimationComplete_keyguardDismissible_effectEndsWithPrepare() =
         testWhileInState(QSLongPressEffect.State.RUNNING_FORWARD) {
             // GIVEN that the animation completes
             longPressEffect.handleAnimationComplete()
 
-            // THEN the long-press effect completes
+            // THEN the long-press effect completes and the view is called to prepare
             assertEffectCompleted()
+            verify(callback, times(1)).onPrepareForLaunch()
         }
 
     @Test
@@ -196,26 +197,6 @@ class QSLongPressEffectTest : SysuiTestCase() {
             // THEN the long-press effect completes and the properties are called to reset
             assertEffectCompleted()
             verify(callback, times(1)).onResetProperties()
-        }
-
-    @Test
-    fun onAnimationComplete_whenRunningBackwardsFromUp_endsWithFinishedReversing() =
-        testWhileInState(QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_UP) {
-            // GIVEN that the animation completes
-            longPressEffect.handleAnimationComplete()
-
-            // THEN the callback for finished reversing is used.
-            verify(callback, times(1)).onEffectFinishedReversing()
-        }
-
-    @Test
-    fun onAnimationComplete_whenRunningBackwardsFromCancel_endsInIdle() =
-        testWhileInState(QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_CANCEL) {
-            // GIVEN that the animation completes
-            longPressEffect.handleAnimationComplete()
-
-            // THEN the effect ends in the idle state.
-            assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.IDLE)
         }
 
     @Test
@@ -242,8 +223,11 @@ class QSLongPressEffectTest : SysuiTestCase() {
         }
 
     @Test
-    fun onAnimationComplete_whileRunningBackwardsFromCancel_goesToIdle() =
-        testWhileInState(QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_CANCEL) {
+    fun onAnimationComplete_whileRunningBackwards_goesToIdle() =
+        testWhileInState(QSLongPressEffect.State.RUNNING_BACKWARDS) {
+            // GIVEN an action cancel occurs and the effect gets reversed
+            longPressEffect.handleActionCancel()
+
             // GIVEN that the animation completes
             longPressEffect.handleAnimationComplete()
 
@@ -323,16 +307,12 @@ class QSLongPressEffectTest : SysuiTestCase() {
     /**
      * Asserts that the effect did not start by checking that:
      * 1. No haptics are played
-     * 2. The internal state is not [QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_UP] or
-     *    [QSLongPressEffect.State.RUNNING_FORWARD] or
-     *    [QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_CANCEL]
+     * 2. The internal state is not [QSLongPressEffect.State.RUNNING_BACKWARDS] or
+     *    [QSLongPressEffect.State.RUNNING_FORWARD]
      */
     private fun assertEffectDidNotStart() {
         assertThat(longPressEffect.state).isNotEqualTo(QSLongPressEffect.State.RUNNING_FORWARD)
-        assertThat(longPressEffect.state)
-            .isNotEqualTo(QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_UP)
-        assertThat(longPressEffect.state)
-            .isNotEqualTo(QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_CANCEL)
+        assertThat(longPressEffect.state).isNotEqualTo(QSLongPressEffect.State.RUNNING_BACKWARDS)
         assertThat(vibratorHelper.totalVibrations).isEqualTo(0)
     }
 
@@ -350,14 +330,12 @@ class QSLongPressEffectTest : SysuiTestCase() {
     }
 
     /**
-     * Assert that the effect gets reverted by checking that the callback to reverse the animator is
-     * used, and that the state is given reversing state.
-     *
-     * @param[reversingState] Either [QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_CANCEL] or
-     *   [QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_UP]
+     * Assert that the effect gets reverted by checking that:
+     * 1. The internal state is [QSLongPressEffect.State.RUNNING_BACKWARDS]
+     * 2. An action to reverse the animator is emitted
      */
-    private fun assertEffectReverses(reversingState: QSLongPressEffect.State) {
-        assertThat(longPressEffect.state).isEqualTo(reversingState)
+    private fun assertEffectReverses() {
+        assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.RUNNING_BACKWARDS)
         verify(callback, times(1)).onReverseAnimator()
     }
 }

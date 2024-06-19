@@ -7630,13 +7630,6 @@ public class Intent implements Parcelable, Cloneable {
             | FLAG_GRANT_PREFIX_URI_PERMISSION;
 
     /**
-     * Flags that are not normally set by application code, but set for you by the system.
-     */
-    private static final int SYSTEM_ONLY_FLAGS = FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-            | FLAG_ACTIVITY_BROUGHT_TO_FRONT
-            | FLAG_RECEIVER_FROM_SHELL;
-
-    /**
      * Local flag indicating this instance was created by copy constructor.
      */
     private static final int LOCAL_FLAG_FROM_COPY = 1 << 0;
@@ -7688,11 +7681,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     @TestApi
     public static final int EXTENDED_FLAG_FILTER_MISMATCH = 1 << 0;
-
-    /**
-     * Extended flags that are not normally set by application code, but set for you by the system.
-     */
-    private static final int SYSTEM_ONLY_EXTENDED_FLAGS = EXTENDED_FLAG_FILTER_MISMATCH;
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -12634,28 +12622,6 @@ public class Intent implements Parcelable, Cloneable {
             if (device != null) {
                 device.prepareToEnterProcess(source);
             }
-        }
-    }
-
-    /**
-     * Prepare this {@link Intent} to enter system_server.
-     *
-     * @hide
-     */
-    public void prepareToEnterSystemServer() {
-        // Refuse possible leaked file descriptors
-        if (hasFileDescriptors()) {
-            throw new IllegalArgumentException("File descriptors passed in Intent");
-        }
-        // These flags are set only by the system, and should be stripped out as soon as the intent
-        // is received by system_server from the caller so it can be properly updated later.
-        removeFlags(SYSTEM_ONLY_FLAGS);
-        removeExtendedFlags(SYSTEM_ONLY_EXTENDED_FLAGS);
-        if (mOriginalIntent != null) {
-            mOriginalIntent.prepareToEnterSystemServer();
-        }
-        if (mSelector != null) {
-            mSelector.prepareToEnterSystemServer();
         }
     }
 

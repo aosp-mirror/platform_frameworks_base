@@ -40,7 +40,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -94,7 +93,6 @@ public class NotificationShelf extends ActivatableNotificationView {
     private float mCornerAnimationDistance;
     private float mActualWidth = -1;
     private int mMaxIconsOnLockscreen;
-    private int mNotificationScrimPadding;
     private boolean mCanModifyColorOfNotifications;
     private boolean mCanInteract;
     private NotificationStackScrollLayout mHostLayout;
@@ -138,7 +136,6 @@ public class NotificationShelf extends ActivatableNotificationView {
         mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         mPaddingBetweenElements = res.getDimensionPixelSize(R.dimen.notification_divider_height);
         mMaxIconsOnLockscreen = res.getInteger(R.integer.max_notif_icons_on_lockscreen);
-        mNotificationScrimPadding = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
 
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         final int newShelfHeight = res.getDimensionPixelOffset(R.dimen.notification_shelf_height);
@@ -264,31 +261,15 @@ public class NotificationShelf extends ActivatableNotificationView {
             viewState.hasItemsInStableShelf = false;
         }
 
-        final float stackBottom = SceneContainerFlag.isEnabled()
-                ? getStackBottom(ambientState)
-                : ambientState.getStackY() + ambientState.getStackHeight();
-
+        final float stackEnd = ambientState.getStackY() + ambientState.getStackHeight();
         if (viewState.hidden) {
             // if the shelf is hidden, position it at the end of the stack (plus the clip
             // padding), such that when it appears animated, it will smoothly move in from the
             // bottom, without jump cutting any notifications
-            viewState.setYTranslation(stackBottom + mPaddingBetweenElements);
+            viewState.setYTranslation(stackEnd + mPaddingBetweenElements);
         } else {
-            viewState.setYTranslation(stackBottom - viewState.height);
+            viewState.setYTranslation(stackEnd - viewState.height);
         }
-    }
-
-    /**
-     * bottom-most position, where we can draw the stack
-     */
-    private float getStackBottom(AmbientState ambientState) {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
-        float stackBottom = ambientState.getStackCutoff() - mNotificationScrimPadding;
-        if (ambientState.isExpansionChanging()) {
-            stackBottom = MathUtils.lerp(stackBottom * StackScrollAlgorithm.START_FRACTION,
-                    stackBottom, ambientState.getExpansionFraction());
-        }
-        return stackBottom;
     }
 
     private int getSpeedBumpIndex() {

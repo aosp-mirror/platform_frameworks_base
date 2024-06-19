@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.os.PowerStats;
@@ -45,7 +44,6 @@ import java.util.function.IntConsumer;
  * as part of the {@link PowerStats.Descriptor}.
  */
 class PowerComponentAggregatedPowerStats {
-    private static final String TAG = "AggregatePowerStats";
     static final String XML_TAG_POWER_COMPONENT = "power_component";
     static final String XML_ATTR_ID = "id";
     private static final String XML_TAG_DEVICE_STATS = "device-stats";
@@ -371,37 +369,6 @@ class PowerComponentAggregatedPowerStats {
             for (int stateId = 0; stateId < mUidStateConfig.length; stateId++) {
                 uidStats.stats.setState(stateId, uidStats.states[stateId], timestampMs);
             }
-        }
-    }
-
-    void copyStatesFrom(PowerComponentAggregatedPowerStats source) {
-        if (source.mDeviceStates.length == mDeviceStates.length) {
-            System.arraycopy(source.mDeviceStates, 0, mDeviceStates, 0, mDeviceStates.length);
-            if (source.mDeviceStats != null) {
-                createDeviceStats(0);
-                if (mDeviceStats != null) {
-                    mDeviceStats.copyStatesFrom(source.mDeviceStats);
-                }
-            }
-        } else {
-            Slog.wtf(TAG, "State configurations have different lengths: "
-                    + source.mDeviceStates.length + " vs " + mDeviceStates.length);
-        }
-        for (int i = source.mUidStats.size() - 1; i >= 0; i--) {
-            int uid = source.mUidStats.keyAt(i);
-            UidStats sourceUidStats = source.mUidStats.valueAt(i);
-            if (sourceUidStats.states == null) {
-                continue;
-            }
-            UidStats uidStats = new UidStats();
-            uidStats.states = Arrays.copyOf(sourceUidStats.states, sourceUidStats.states.length);
-            if (sourceUidStats.stats != null) {
-                createUidStats(uidStats, 0);
-                if (uidStats.stats != null) {
-                    uidStats.stats.copyStatesFrom(sourceUidStats.stats);
-                }
-            }
-            mUidStats.put(uid, uidStats);
         }
     }
 

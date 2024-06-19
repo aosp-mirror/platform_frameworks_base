@@ -804,7 +804,6 @@ public class NotificationTest {
     }
 
     @Test
-    @Ignore // b/347089000 - Restore or delete
     public void testColors_ensureColors_colorized_producesValidPalette_white() {
         validateColorizedPaletteForColor(Color.WHITE);
     }

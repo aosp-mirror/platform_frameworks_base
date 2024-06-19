@@ -602,14 +602,10 @@ private fun Toolbar(
     removeEnabled: Boolean,
     onRemoveClicked: () -> Unit,
     setToolbarSize: (toolbarSize: IntSize) -> Unit,
-    setRemoveButtonCoordinates: (coordinates: LayoutCoordinates?) -> Unit,
+    setRemoveButtonCoordinates: (coordinates: LayoutCoordinates) -> Unit,
     onOpenWidgetPicker: () -> Unit,
     onEditDone: () -> Unit
 ) {
-    if (!removeEnabled) {
-        // Clear any existing coordinates when remove is not enabled.
-        setRemoveButtonCoordinates(null)
-    }
     val removeButtonAlpha: Float by
         animateFloatAsState(
             targetValue = if (removeEnabled) 1f else 0.5f,
@@ -649,13 +645,7 @@ private fun Toolbar(
                 contentPadding = Dimensions.ButtonPadding,
                 modifier =
                     Modifier.graphicsLayer { alpha = removeButtonAlpha }
-                        .onGloballyPositioned {
-                            // It's possible for this callback to fire after remove has been
-                            // disabled. Check enabled state before setting.
-                            if (removeEnabled) {
-                                setRemoveButtonCoordinates(it)
-                            }
-                        }
+                        .onGloballyPositioned { setRemoveButtonCoordinates(it) }
             ) {
                 Row(
                     horizontalArrangement =

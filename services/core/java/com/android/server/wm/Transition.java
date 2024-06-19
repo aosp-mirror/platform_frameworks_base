@@ -2816,9 +2816,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final Rect parentBounds = parent.getBounds();
             change.setEndRelOffset(bounds.left - parentBounds.left,
                     bounds.top - parentBounds.top);
-            if (Flags.activityEmbeddingOverlayPresentationFlag()) {
-                change.setEndParentSize(parentBounds.width(), parentBounds.height());
-            }
             int endRotation = target.getWindowConfiguration().getRotation();
             if (activityRecord != null) {
                 // TODO(b/227427984): Shell needs to aware letterbox.

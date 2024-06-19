@@ -73,7 +73,6 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.mockito.kotlin.argumentCaptor
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -218,13 +217,6 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             runCurrent()
 
             verify(kosmos.windowManager).addView(any(), any())
-
-            var viewCaptor = argumentCaptor<View>()
-            verify(kosmos.windowManager).addView(viewCaptor.capture(), any())
-            verify(viewCaptor.firstValue)
-                .announceForAccessibility(
-                    mContext.getText(R.string.accessibility_side_fingerprint_indicator_label)
-                )
 
             // Hide alternate bouncer
             kosmos.keyguardBouncerRepository.setAlternateVisible(false)

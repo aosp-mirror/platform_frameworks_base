@@ -24,7 +24,6 @@ import android.app.smartspace.uitemplatedata.TapAction;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
@@ -123,9 +122,6 @@ public interface BcSmartspaceDataPlugin extends Plugin {
          * Set the UI surface for the cards. Should be called immediately after the view is created.
          */
         void setUiSurface(String uiSurface);
-
-        /** Set background handler to make binder calls. */
-        void setBgHandler(Handler bgHandler);
 
         /**
          * Range [0.0 - 1.0] when transitioning from Lockscreen to/from AOD

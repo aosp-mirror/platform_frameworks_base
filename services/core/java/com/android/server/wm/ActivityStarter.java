@@ -718,7 +718,13 @@ class ActivityStarter {
             onExecutionStarted();
 
             if (mRequest.intent != null) {
-                mRequest.intent.prepareToEnterSystemServer();
+                // Refuse possible leaked file descriptors
+                if (mRequest.intent.hasFileDescriptors()) {
+                    throw new IllegalArgumentException("File descriptors passed in Intent");
+                }
+
+                // Remove existing mismatch flag so it can be properly updated later
+                mRequest.intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
             }
 
             final LaunchingState launchingState;

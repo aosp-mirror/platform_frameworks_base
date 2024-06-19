@@ -163,7 +163,7 @@ public class WindowContainerTests extends WindowTestsBase {
     @Test
     public void testAddChildSetsSurfacePosition() {
         reset(mTransaction);
-        try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mDisplayContent)) {
+        try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mWm)) {
             WindowContainer child = new WindowContainer(mWm);
             child.setBounds(1, 1, 10, 10);
 
@@ -266,7 +266,7 @@ public class WindowContainerTests extends WindowTestsBase {
     @Test
     public void testRemoveImmediatelyClearsLastSurfacePosition() {
         reset(mTransaction);
-        try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mDisplayContent)) {
+        try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mWm)) {
             final WindowContainer<WindowContainer> child1 = new WindowContainer(mWm);
             child1.setBounds(1, 1, 10, 10);
 
@@ -1827,9 +1827,8 @@ public class WindowContainerTests extends WindowTestsBase {
             implements AutoCloseable {
         private final SurfaceSession mSession = new SurfaceSession();
 
-        MockSurfaceBuildingContainer(DisplayContent dc) {
-            super(dc.mWmService);
-            onDisplayChanged(dc);
+        MockSurfaceBuildingContainer(WindowManagerService wm) {
+            super(wm);
         }
 
         static class MockSurfaceBuilder extends SurfaceControl.Builder {

@@ -18,8 +18,6 @@ package com.android.wm.shell.activityembedding;
 
 
 import static android.app.ActivityOptions.ANIM_CUSTOM;
-import static android.view.WindowManager.TRANSIT_CHANGE;
-import static android.window.TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID;
 
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_NONE;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
@@ -29,8 +27,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
-import android.util.Log;
-import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -207,7 +203,7 @@ class ActivityEmbeddingAnimationSpec {
     Animation loadOpenAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = TransitionUtil.isOpeningType(change.getMode());
-        final Animation customAnimation = loadCustomAnimation(info, change);
+        final Animation customAnimation = loadCustomAnimation(info, change, isEnter);
         final Animation animation;
         if (customAnimation != null) {
             animation = customAnimation;
@@ -234,7 +230,7 @@ class ActivityEmbeddingAnimationSpec {
     Animation loadCloseAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = TransitionUtil.isOpeningType(change.getMode());
-        final Animation customAnimation = loadCustomAnimation(info, change);
+        final Animation customAnimation = loadCustomAnimation(info, change, isEnter);
         final Animation animation;
         if (customAnimation != null) {
             animation = customAnimation;
@@ -267,40 +263,18 @@ class ActivityEmbeddingAnimationSpec {
 
     @Nullable
     private Animation loadCustomAnimation(@NonNull TransitionInfo info,
-            @NonNull TransitionInfo.Change change) {
+            @NonNull TransitionInfo.Change change, boolean isEnter) {
         final TransitionInfo.AnimationOptions options;
         if (Flags.moveAnimationOptionsToChange()) {
             options = change.getAnimationOptions();
         } else {
             options = info.getAnimationOptions();
         }
-        return loadCustomAnimationFromOptions(options, change.getMode());
-    }
-
-    @Nullable
-    Animation loadCustomAnimationFromOptions(@Nullable TransitionInfo.AnimationOptions options,
-             @WindowManager.TransitionType int mode) {
         if (options == null || options.getType() != ANIM_CUSTOM) {
             return null;
         }
-        final int resId;
-        if (TransitionUtil.isOpeningType(mode)) {
-            resId = options.getEnterResId();
-        } else if (TransitionUtil.isClosingType(mode)) {
-            resId = options.getExitResId();
-        } else if (mode == TRANSIT_CHANGE) {
-            resId = options.getChangeResId();
-        } else {
-            Log.w(TAG, "Unknown transit type:" + mode);
-            resId = DEFAULT_ANIMATION_RESOURCES_ID;
-        }
-        // Use the default animation if the resources ID is not specified.
-        if (resId == DEFAULT_ANIMATION_RESOURCES_ID) {
-            return null;
-        }
-
         final Animation anim = mTransitionAnimation.loadAnimationRes(options.getPackageName(),
-                resId);
+                isEnter ? options.getEnterResId() : options.getExitResId());
         if (anim != null) {
             return anim;
         }

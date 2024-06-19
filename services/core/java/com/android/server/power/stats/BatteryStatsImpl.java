@@ -300,7 +300,6 @@ public class BatteryStatsImpl extends BatteryStats {
     private final BluetoothPowerStatsCollector mBluetoothPowerStatsCollector;
     private final CameraPowerStatsCollector mCameraPowerStatsCollector;
     private final GnssPowerStatsCollector mGnssPowerStatsCollector;
-    private final CustomEnergyConsumerPowerStatsCollector mCustomEnergyConsumerPowerStatsCollector;
     private final SparseBooleanArray mPowerStatsCollectorEnabled = new SparseBooleanArray();
     private final WifiPowerStatsCollector.WifiStatsRetriever mWifiStatsRetriever =
             new WifiPowerStatsCollector.WifiStatsRetriever() {
@@ -11304,10 +11303,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mGnssPowerStatsCollector = new GnssPowerStatsCollector(mPowerStatsCollectorInjector);
         mGnssPowerStatsCollector.addConsumer(this::recordPowerStats);
 
-        mCustomEnergyConsumerPowerStatsCollector =
-                new CustomEnergyConsumerPowerStatsCollector(mPowerStatsCollectorInjector);
-        mCustomEnergyConsumerPowerStatsCollector.addConsumer(this::recordPowerStats);
-
         mStartCount++;
         initTimersAndCounters();
         mOnBattery = mOnBatteryInternal = false;
@@ -13927,11 +13922,6 @@ public class BatteryStatsImpl extends BatteryStats {
      * Read and record Rail Energy data.
      */
     public void updateRailStatsLocked() {
-        if (mCustomEnergyConsumerPowerStatsCollector.isEnabled()) {
-            mCustomEnergyConsumerPowerStatsCollector.schedule();
-            return;
-        }
-
         if (mEnergyConsumerRetriever == null || !mTmpRailStats.isRailStatsAvailable()) {
             return;
         }
@@ -14742,10 +14732,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mGnssPowerStatsCollector.setEnabled(
                 mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_GNSS));
         mGnssPowerStatsCollector.schedule();
-
-        mCustomEnergyConsumerPowerStatsCollector.setEnabled(
-                mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_ANY));
-        mCustomEnergyConsumerPowerStatsCollector.schedule();
 
         mSystemReady = true;
     }
