@@ -43,7 +43,6 @@ import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_CONTACTS;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_STARRED;
-import static android.app.NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND;
 import static android.app.NotificationManager.Policy.STATE_PRIORITY_CHANNELS_BLOCKED;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -5010,6 +5009,48 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
         assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).condition).isNull();
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void updateAutomaticZenRule_changeOwnerForSystemRule_allowed() {
+        when(mContext.checkCallingPermission(anyString()))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        AutomaticZenRule original = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName("android", "some.old.cps"))
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule("android", original,
+                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "reason", Process.SYSTEM_UID);
+
+        AutomaticZenRule update = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName("android", "brand.new.cps"))
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, update, UPDATE_ORIGIN_USER, "reason",
+                Process.SYSTEM_UID);
+
+        AutomaticZenRule result = mZenModeHelper.getAutomaticZenRule(ruleId);
+        assertThat(result).isNotNull();
+        assertThat(result.getOwner().getClassName()).isEqualTo("brand.new.cps");
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void updateAutomaticZenRule_changeOwnerForAppOwnedRule_ignored() {
+        AutomaticZenRule original = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName(mContext.getPackageName(), "old.third.party.cps"))
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), original,
+                UPDATE_ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+
+        AutomaticZenRule update = new AutomaticZenRule.Builder("Rule", Uri.EMPTY)
+                .setOwner(new ComponentName(mContext.getPackageName(), "new.third.party.cps"))
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, update, UPDATE_ORIGIN_USER, "reason",
+                Process.SYSTEM_UID);
+
+        AutomaticZenRule result = mZenModeHelper.getAutomaticZenRule(ruleId);
+        assertThat(result).isNotNull();
+        assertThat(result.getOwner().getClassName()).isEqualTo("old.third.party.cps");
     }
 
     @Test

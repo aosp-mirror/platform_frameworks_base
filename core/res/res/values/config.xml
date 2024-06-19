@@ -3917,6 +3917,7 @@
         <item>countdown</item>
         <item>schedule</item>
         <item>event</item>
+        <item>custom_manual</item>
     </string-array>
 
     <!-- Priority repeat caller threshold, in minutes -->
