@@ -46,6 +46,9 @@ class DesktopModeTaskRepository {
         val activeTasks: ArraySet<Int> = ArraySet(),
         val visibleTasks: ArraySet<Int> = ArraySet(),
         val minimizedTasks: ArraySet<Int> = ArraySet(),
+        // Tasks that are closing, but are still visible
+        //  TODO(b/332682201): Remove when the repository state is updated via TransitionObserver
+        val closingTasks: ArraySet<Int> = ArraySet(),
         // Tasks currently in freeform mode, ordered from top to bottom (top is at index 0).
         val freeformTasksInZOrder: ArrayList<Int> = ArrayList(),
     )
@@ -169,12 +172,52 @@ class DesktopModeTaskRepository {
         return result
     }
 
+    /**
+     * Mark a task with given [taskId] as closing on given [displayId]
+     *
+     * @return `true` if the task was not closing on given [displayId]
+     */
+    fun addClosingTask(displayId: Int, taskId: Int): Boolean {
+        val added = displayData.getOrCreate(displayId).closingTasks.add(taskId)
+        if (added) {
+            KtProtoLog.d(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopTaskRepo: added closing task=%d displayId=%d",
+                taskId,
+                displayId
+            )
+        }
+        return added
+    }
+
+    /**
+     * Remove task with given [taskId] from closing tasks.
+     *
+     * @return `true` if the task was closing
+     */
+    fun removeClosingTask(taskId: Int): Boolean {
+        var removed = false
+        displayData.forEach { _, data ->
+            if (data.closingTasks.remove(taskId)) {
+                removed = true
+            }
+        }
+        if (removed) {
+            KtProtoLog.d(WM_SHELL_DESKTOP_MODE, "DesktopTaskRepo: remove closing task=%d", taskId)
+        }
+        return removed
+    }
+
     /** Check if a task with the given [taskId] was marked as an active task */
     fun isActiveTask(taskId: Int): Boolean {
         return displayData.valueIterator().asSequence().any { data ->
             data.activeTasks.contains(taskId)
         }
     }
+
+    /** Check if a task with the given [taskId] was marked as a closing task */
+    fun isClosingTask(taskId: Int): Boolean =
+        displayData.valueIterator().asSequence().any { data -> taskId in data.closingTasks }
 
     /** Whether a task is visible. */
     fun isVisibleTask(taskId: Int): Boolean {
@@ -190,10 +233,16 @@ class DesktopModeTaskRepository {
         }
     }
 
-    /** Check if a task with the given [taskId] is the only active task on its display */
-    fun isOnlyActiveTask(taskId: Int): Boolean {
+    /**
+     * Check if a task with the given [taskId] is the only active, non-closing, not-minimized task
+     * on its display
+     */
+    fun isOnlyActiveNonClosingTask(taskId: Int): Boolean {
         return displayData.valueIterator().asSequence().any { data ->
-            data.activeTasks.singleOrNull() == taskId
+            data.activeTasks
+                .subtract(data.closingTasks)
+                .subtract(data.minimizedTasks)
+                .singleOrNull() == taskId
         }
     }
 

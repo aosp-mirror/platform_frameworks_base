@@ -22,16 +22,25 @@ import android.provider.Settings
 import com.android.settingslib.spaprivileged.database.contentChangeFlow
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
-fun Context.settingsSecureBoolean(name: String, defaultValue: Boolean = false):
-    ReadWriteProperty<Any?, Boolean> = SettingsSecureBooleanDelegate(this, name, defaultValue)
+fun Context.settingsSecureBoolean(
+    name: String,
+    defaultValue: Boolean = false,
+): ReadWriteProperty<Any?, Boolean> = SettingsSecureBooleanDelegate(this, name, defaultValue)
 
 fun Context.settingsSecureBooleanFlow(name: String, defaultValue: Boolean = false): Flow<Boolean> {
     val value by settingsSecureBoolean(name, defaultValue)
-    return contentChangeFlow(Settings.Secure.getUriFor(name)).map { value }.distinctUntilChanged()
+    return contentChangeFlow(Settings.Secure.getUriFor(name))
+        .map { value }
+        .distinctUntilChanged()
+        .conflate()
+        .flowOn(Dispatchers.Default)
 }
 
 private class SettingsSecureBooleanDelegate(

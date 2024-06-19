@@ -26,6 +26,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
@@ -95,7 +96,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_inCall_iconIsPhone() =
+    fun chip_iconIsPhone() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
@@ -103,6 +104,17 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             assertThat(((latest as OngoingActivityChipModel.Shown).icon as Icon.Resource).res)
                 .isEqualTo(com.android.internal.R.drawable.ic_phone)
+        }
+
+    @Test
+    fun chip_colorsAreThemed() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 1000, intent = null))
+
+            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+                .isEqualTo(ColorsModel.Themed)
         }
 
     @Test

@@ -5425,6 +5425,7 @@
   <java-symbol type="drawable" name="focus_event_pressed_key_background" />
   <java-symbol type="drawable" name="focus_event_rotary_input_background" />
   <java-symbol type="string" name="config_defaultShutdownVibrationFile" />
+  <java-symbol type="bool" name="config_disableShutdownVibrationInZen" />
   <java-symbol type="string" name="lockscreen_too_many_failed_attempts_countdown" />
 
   <java-symbol type="bool" name="config_enable_a11y_magnification_single_panning" />

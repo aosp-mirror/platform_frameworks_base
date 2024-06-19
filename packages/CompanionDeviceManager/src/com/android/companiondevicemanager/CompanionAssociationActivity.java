@@ -27,6 +27,8 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState;
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState.FINISHED_TIMEOUT;
+import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.LOCK;
+import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.sDiscoveryStarted;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_ICONS;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_NAMES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_PERMISSIONS;
@@ -326,8 +328,12 @@ public class CompanionAssociationActivity extends FragmentActivity implements
     private void onDiscoveryStateChanged(DiscoveryState newState) {
         if (newState == FINISHED_TIMEOUT
                 && CompanionDeviceDiscoveryService.getScanResult().getValue().isEmpty()) {
-            cancel(/* discoveryTimeOut */ true,
-                    /* userRejected */ false, /* internalError */ false);
+            synchronized (LOCK) {
+                if (sDiscoveryStarted) {
+                    cancel(/* discoveryTimeOut */ true,
+                            /* userRejected */ false, /* internalError */ false);
+                }
+            }
         }
     }
 

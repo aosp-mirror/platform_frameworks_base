@@ -731,7 +731,7 @@ class ElementTest {
                 onAnimatedFloat = { animatedFloat = it },
             )
 
-        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
         val transition = assertThat(state.transitionState).isTransition()
         assertThat(transition).isNotNull()
@@ -811,7 +811,7 @@ class ElementTest {
         }
 
         assertThat(state.transitionState).isIdle()
-        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
 
         // Swipe by half of verticalSwipeDistance.
@@ -839,6 +839,79 @@ class ElementTest {
     }
 
     @Test
+    fun elementTransitionDuringNestedScrollWith2Pointers() {
+        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
+        // detected as a drag event.
+        var touchSlop = 0f
+        val translateY = 10.dp
+        val layoutWidth = 200.dp
+        val layoutHeight = 400.dp
+
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    initialScene = SceneA,
+                    transitions = transitions {
+                        from(SceneA, to = SceneB) {
+                            translate(TestElements.Foo, y = translateY)
+                        }
+                    },
+                )
+                    as MutableSceneTransitionLayoutStateImpl
+            }
+
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(
+                state = state,
+                modifier = Modifier.size(layoutWidth, layoutHeight)
+            ) {
+                scene(
+                    SceneA,
+                    userActions = mapOf(Swipe(SwipeDirection.Down, pointerCount = 2) to SceneB)
+                ) {
+                    Box(
+                        Modifier
+                            // Unconsumed scroll gesture will be intercepted by STL
+                            .verticalNestedScrollToScene()
+                            // A scrollable that does not consume the scroll gesture
+                            .scrollable(
+                                rememberScrollableState(consumeScrollDelta = { 0f }),
+                                Orientation.Vertical
+                            )
+                            .fillMaxSize()
+                    ) {
+                        Spacer(Modifier.element(TestElements.Foo).fillMaxSize())
+                    }
+                }
+                scene(SceneB) { Spacer(Modifier.fillMaxSize()) }
+            }
+        }
+
+        assertThat(state.transitionState).isIdle()
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
+        fooElement.assertTopPositionInRootIsEqualTo(0.dp)
+
+        // Swipe down with 2 pointers by half of verticalSwipeDistance.
+        rule.onRoot().performTouchInput {
+            val middleTop = Offset((layoutWidth / 2).toPx(), 0f)
+            repeat(2) { i -> down(pointerId = i, middleTop) }
+            repeat(2) { i ->
+                // Scroll 50%
+                moveBy(
+                    pointerId = i,
+                    delta = Offset(0f, touchSlop + layoutHeight.toPx() * 0.5f),
+                    delayMillis = 1_000,
+                )
+            }
+        }
+
+        val transition = assertThat(state.transitionState).isTransition()
+        assertThat(transition).hasProgress(0.5f)
+        fooElement.assertTopPositionInRootIsEqualTo(translateY * 0.5f)
+    }
+
+    @Test
     fun elementTransitionWithDistanceDuringOverscroll() {
         val layoutWidth = 200.dp
         val layoutHeight = 400.dp
@@ -858,7 +931,7 @@ class ElementTest {
                 onAnimatedFloat = { animatedFloat = it },
             )
 
-        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
         assertThat(animatedFloat).isEqualTo(100f)
 
@@ -914,7 +987,7 @@ class ElementTest {
                 onAnimatedFloat = { animatedFloat = it },
             )
 
-        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
         assertThat(animatedFloat).isEqualTo(100f)
 

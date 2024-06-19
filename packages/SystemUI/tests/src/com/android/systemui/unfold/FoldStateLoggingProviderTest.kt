@@ -16,7 +16,7 @@
 
 package com.android.systemui.unfold
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.FoldStateLoggingProvider.FoldStateLoggingListener
@@ -34,7 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class FoldStateLoggingProviderTest : SysuiTestCase() {
 
