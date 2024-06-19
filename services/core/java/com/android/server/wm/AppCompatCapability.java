@@ -24,14 +24,11 @@ import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FRE
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
-import static android.content.pm.ActivityInfo.screenOrientationToString;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_FULLSCREEN;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -39,14 +36,12 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTA
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
-import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -54,9 +49,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import android.annotation.NonNull;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.util.Slog;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.utils.OptPropFactory;
 import com.android.window.flags.Flags;
 
@@ -75,8 +68,6 @@ public class AppCompatCapability {
     @NonNull
     private final ActivityRecord mActivityRecord;
 
-    private boolean mIsRelaunchingAfterRequestedOrientationChanged;
-
     // Corresponds to OVERRIDE_ANY_ORIENTATION_TO_USER
     private final boolean mIsSystemOverrideToFullscreenEnabled;
     // Corresponds to OVERRIDE_RESPECT_REQUESTED_ORIENTATION
@@ -84,10 +75,6 @@ public class AppCompatCapability {
     // Corresponds to OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA
     private final boolean mIsOverrideOrientationOnlyForCameraEnabled;
 
-    @NonNull
-    private final OptPropFactory.OptProp mIgnoreRequestedOrientationOptProp;
-    @NonNull
-    private final OptPropFactory.OptProp mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp;
     @NonNull
     private final OptPropFactory.OptProp mFakeFocusOptProp;
     @NonNull
@@ -109,21 +96,7 @@ public class AppCompatCapability {
     @NonNull
     private final OptPropFactory.OptProp mAllowUserAspectRatioFullscreenOverrideOptProp;
 
-
-    // Updated when ActivityRecord#setRequestedOrientation is called.
-    private long mTimeMsLastSetOrientationRequest = 0;
-
-    // Counter for ActivityRecord#setRequestedOrientation.
-    private int mSetOrientationRequestCounter = 0;
-
-    // Minimum value of mSetOrientationRequestCounter before qualifying as orientation request loop.
-    @VisibleForTesting
-    static final int MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP = 2;
-
-    // Used to determine reset of mSetOrientationRequestCounter if next app requested
-    // orientation is after timeout value.
-    @VisibleForTesting
-    static final int SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS = 1000;
+    private final AppCompatOrientationCapability mAppCompatOrientationCapability;
 
     AppCompatCapability(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord,
@@ -135,14 +108,10 @@ public class AppCompatCapability {
         final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
                 activityRecord.packageName);
 
-        final BooleanSupplier isPolicyForIgnoringRequestedOrientationEnabled = asLazy(
-                mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
-        mIgnoreRequestedOrientationOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION,
-                isPolicyForIgnoringRequestedOrientationEnabled);
-        mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp = optPropBuilder.create(
-                PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED,
-                isPolicyForIgnoringRequestedOrientationEnabled);
+        mAppCompatOrientationCapability =
+                new AppCompatOrientationCapability(optPropBuilder, mLetterboxConfiguration,
+                        mActivityRecord);
+
         mFakeFocusOptProp = optPropBuilder.create(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS,
                 mLetterboxConfiguration::isCompatFakeFocusEnabled);
 
@@ -218,31 +187,8 @@ public class AppCompatCapability {
      */
     boolean shouldIgnoreRequestedOrientation(
             @ActivityInfo.ScreenOrientation int requestedOrientation) {
-        if (mIgnoreRequestedOrientationOptProp.shouldEnableWithOverrideAndProperty(
-                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION))) {
-            if (mIsRelaunchingAfterRequestedOrientationChanged) {
-                Slog.w(TAG, "Ignoring orientation update to "
-                        + screenOrientationToString(requestedOrientation)
-                        + " due to relaunching after setRequestedOrientation for "
-                        + mActivityRecord);
-                return true;
-            }
-            if (isCameraCompatTreatmentActive()) {
-                Slog.w(TAG, "Ignoring orientation update to "
-                        + screenOrientationToString(requestedOrientation)
-                        + " due to camera compat treatment for " + mActivityRecord);
-                return true;
-            }
-        }
-
-        if (shouldIgnoreOrientationRequestLoop()) {
-            Slog.w(TAG, "Ignoring orientation update to "
-                    + screenOrientationToString(requestedOrientation)
-                    + " as orientation request loop was detected for "
-                    + mActivityRecord);
-            return true;
-        }
-        return false;
+        return mAppCompatOrientationCapability
+                .shouldIgnoreRequestedOrientation(requestedOrientation);
     }
 
     /**
@@ -258,61 +204,9 @@ public class AppCompatCapability {
                     .isTreatmentEnabledForActivity(mActivityRecord);
     }
 
-    /**
-     * Sets whether an activity is relaunching after the app has called {@link
-     * android.app.Activity#setRequestedOrientation}.
-     */
-    void setRelaunchingAfterRequestedOrientationChanged(boolean isRelaunching) {
-        mIsRelaunchingAfterRequestedOrientationChanged = isRelaunching;
-    }
-
-    boolean getIsRelaunchingAfterRequestedOrientationChanged() {
-        return mIsRelaunchingAfterRequestedOrientationChanged;
-    }
-
-    /**
-     * Whether an app is calling {@link android.app.Activity#setRequestedOrientation}
-     * in a loop and orientation request should be ignored.
-     *
-     * <p>This should only be called once in response to
-     * {@link android.app.Activity#setRequestedOrientation}. See
-     * {@link #shouldIgnoreRequestedOrientation} for more details.
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the treatment is enabled
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Per-app override is enabled
-     *     <li>App has requested orientation more than 2 times within 1-second
-     *     timer and activity is not letterboxed for fixed orientation
-     * </ul>
-     */
-    boolean shouldIgnoreOrientationRequestLoop() {
-        final boolean loopDetectionEnabled = isCompatChangeEnabled(
-                OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED);
-        if (!mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp
-                .shouldEnableWithOptInOverrideAndOptOutProperty(loopDetectionEnabled)) {
-            return false;
-        }
-
-        final long currTimeMs = System.currentTimeMillis();
-        if (currTimeMs - mTimeMsLastSetOrientationRequest
-                < SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS) {
-            mSetOrientationRequestCounter += 1;
-        } else {
-            // Resets app setOrientationRequest counter if timed out
-            mSetOrientationRequestCounter = 0;
-        }
-        // Update time last called
-        mTimeMsLastSetOrientationRequest = currTimeMs;
-
-        return mSetOrientationRequestCounter >= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP
-                && !mActivityRecord.isLetterboxedForFixedOrientationAndAspectRatio();
-    }
-
-    @VisibleForTesting
-    int getSetOrientationRequestCounter() {
-        return mSetOrientationRequestCounter;
+    @NonNull
+    AppCompatOrientationCapability getAppCompatOrientationCapability() {
+        return mAppCompatOrientationCapability;
     }
 
     /**
@@ -537,7 +431,7 @@ public class AppCompatCapability {
     }
 
     @NonNull
-    private static BooleanSupplier asLazy(@NonNull BooleanSupplier supplier) {
+    static BooleanSupplier asLazy(@NonNull BooleanSupplier supplier) {
         return new BooleanSupplier() {
             private boolean mRead;
             private boolean mValue;
