@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.android.settingslib.spaprivileged.settingsprovider
 import android.content.ContentResolver
 import android.content.Context
 import android.provider.Settings
+import com.android.settingslib.spaprivileged.database.contentChangeFlow
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 import kotlinx.coroutines.Dispatchers
@@ -28,32 +29,32 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
-fun Context.settingsGlobalBoolean(
+fun Context.settingsSecureString(
     name: String,
-    defaultValue: Boolean = false,
-): ReadWriteProperty<Any?, Boolean> = SettingsGlobalBooleanDelegate(this, name, defaultValue)
+    defaultValue: String = ""
+): ReadWriteProperty<Any?, String> = SettingsSecureStringDelegate(this, name, defaultValue)
 
-fun Context.settingsGlobalBooleanFlow(name: String, defaultValue: Boolean = false): Flow<Boolean> {
-    val value by settingsGlobalBoolean(name, defaultValue)
-    return settingsGlobalChangeFlow(name)
+fun Context.settingsSecureStringFlow(name: String, defaultValue: String = ""): Flow<String> {
+    val value by settingsSecureString(name, defaultValue)
+    return contentChangeFlow(Settings.Secure.getUriFor(name))
         .map { value }
         .distinctUntilChanged()
         .conflate()
         .flowOn(Dispatchers.Default)
 }
 
-private class SettingsGlobalBooleanDelegate(
+private class SettingsSecureStringDelegate(
     context: Context,
     private val name: String,
-    private val defaultValue: Boolean = false,
-) : ReadWriteProperty<Any?, Boolean> {
+    private val defaultValue: String = "",
+) : ReadWriteProperty<Any?, String> {
 
     private val contentResolver: ContentResolver = context.contentResolver
 
-    override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean =
-        Settings.Global.getInt(contentResolver, name, if (defaultValue) 1 else 0) != 0
+    override fun getValue(thisRef: Any?, property: KProperty<*>): String =
+        Settings.Secure.getString(contentResolver, name) ?: defaultValue
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
-        Settings.Global.putInt(contentResolver, name, if (value) 1 else 0)
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
+        Settings.Secure.putString(contentResolver, name, value)
     }
 }
