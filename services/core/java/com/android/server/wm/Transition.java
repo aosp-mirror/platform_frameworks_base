@@ -1893,7 +1893,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         } else {
             final List<TransitionInfo.Change> changes = info.getChanges();
             for (int i = changes.size() - 1; i >= 0; --i) {
-                if (mTargets.get(i).mContainer.asActivityRecord() != null) {
+                final WindowContainer<?> container = mTargets.get(i).mContainer;
+                if (container.asActivityRecord() != null
+                        || (container.asTask() != null
+                                && mOverrideOptions.getOverrideTaskTransition())) {
                     changes.get(i).setAnimationOptions(mOverrideOptions);
                 }
             }
