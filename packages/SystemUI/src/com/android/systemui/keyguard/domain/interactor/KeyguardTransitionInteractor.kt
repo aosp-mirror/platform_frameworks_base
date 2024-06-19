@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -75,7 +76,7 @@ constructor(
     private val fromAlternateBouncerTransitionInteractor:
         dagger.Lazy<FromAlternateBouncerTransitionInteractor>,
     private val fromDozingTransitionInteractor: dagger.Lazy<FromDozingTransitionInteractor>,
-    private val sceneInteractor: dagger.Lazy<SceneInteractor>,
+    private val sceneInteractor: SceneInteractor,
 ) {
     private val transitionMap = mutableMapOf<Edge.StateToState, MutableSharedFlow<TransitionStep>>()
 
@@ -194,7 +195,7 @@ constructor(
                 fun SceneKey?.isLockscreenOrNull() = this == Scenes.Lockscreen || this == null
 
                 return@filter (fromScene.isLockscreenOrNull() && toScene.isLockscreenOrNull()) ||
-                    sceneInteractor.get().transitionState.value.isTransitioning(fromScene, toScene)
+                    sceneInteractor.transitionState.value.isTransitioning(fromScene, toScene)
             }
         } else {
             flow
@@ -228,7 +229,7 @@ constructor(
         stateWithoutSceneContainer: KeyguardState,
     ): Flow<Float> {
         return if (SceneContainerFlag.isEnabled) {
-            sceneInteractor.get().transitionProgress(scene)
+            sceneInteractor.transitionProgress(scene)
         } else {
             transitionValue(stateWithoutSceneContainer)
         }
@@ -408,8 +409,14 @@ constructor(
     internal val currentTransitionInfoInternal: StateFlow<TransitionInfo> =
         repository.currentTransitionInfoInternal
 
-    /** Whether we've currently STARTED a transition and haven't yet FINISHED it. */
-    val isInTransitionToAnyState = isInTransitionWhere({ true }, { true })
+    val isInTransition =
+        combine(
+            isInTransitionWhere({ true }, { true }),
+            sceneInteractor.transitionState,
+        ) { isKeyguardTransitioning, sceneTransitionState ->
+            isKeyguardTransitioning ||
+                (SceneContainerFlag.isEnabled && sceneTransitionState.isTransitioning())
+        }
 
     /**
      * Called to start a transition that will ultimately dismiss the keyguard from the current
@@ -448,7 +455,7 @@ constructor(
     fun isInTransition(edge: Edge, edgeWithoutSceneContainer: Edge? = null): Flow<Boolean> {
         return if (SceneContainerFlag.isEnabled) {
                 if (edge.isSceneWildcardEdge()) {
-                    sceneInteractor.get().transitionState.map {
+                    sceneInteractor.transitionState.map {
                         when (edge) {
                             is Edge.StateToState ->
                                 throw IllegalStateException("Should not be reachable.")
@@ -469,30 +476,6 @@ constructor(
     }
 
     /**
-     * Whether we're in a transition to a [KeyguardState] that matches the given predicate, but
-     * haven't yet completed it.
-     *
-     * If you only care about a single state, instead use the optimized [isInTransition].
-     */
-    fun isInTransitionToStateWhere(
-        stateMatcher: (KeyguardState) -> Boolean,
-    ): Flow<Boolean> {
-        return isInTransitionWhere(fromStatePredicate = { true }, toStatePredicate = stateMatcher)
-    }
-
-    /**
-     * Whether we're in a transition out of a [KeyguardState] that matches the given predicate, but
-     * haven't yet completed it.
-     *
-     * If you only care about a single state, instead use the optimized [isInTransition].
-     */
-    fun isInTransitionFromStateWhere(
-        stateMatcher: (KeyguardState) -> Boolean,
-    ): Flow<Boolean> {
-        return isInTransitionWhere(fromStatePredicate = stateMatcher, toStatePredicate = { true })
-    }
-
-    /**
      * Whether we're in a transition between two [KeyguardState]s that match the given predicates,
      * but haven't yet completed it.
      *
@@ -500,27 +483,15 @@ constructor(
      * [isInTransition].
      */
     fun isInTransitionWhere(
-        fromStatePredicate: (KeyguardState) -> Boolean,
-        toStatePredicate: (KeyguardState) -> Boolean,
-    ): Flow<Boolean> {
-        return isInTransitionWhere { from, to -> fromStatePredicate(from) && toStatePredicate(to) }
-    }
-
-    /**
-     * Whether we're in a transition between two [KeyguardState]s that match the given predicates,
-     * but haven't yet completed it.
-     *
-     * If you only care about a single state for both from and to, instead use the optimized
-     * [isInTransition].
-     */
-    private fun isInTransitionWhere(
-        fromToStatePredicate: (KeyguardState, KeyguardState) -> Boolean
+        fromStatePredicate: (KeyguardState) -> Boolean = { true },
+        toStatePredicate: (KeyguardState) -> Boolean = { true },
     ): Flow<Boolean> {
         return repository.transitions
             .filter { it.transitionState != TransitionState.CANCELED }
             .mapLatest {
                 it.transitionState != TransitionState.FINISHED &&
-                    fromToStatePredicate(it.from, it.to)
+                    fromStatePredicate(it.from) &&
+                    toStatePredicate(it.to)
             }
             .distinctUntilChanged()
     }
@@ -532,9 +503,7 @@ constructor(
 
     fun isFinishedIn(scene: SceneKey, stateWithoutSceneContainer: KeyguardState): Flow<Boolean> {
         return if (SceneContainerFlag.isEnabled) {
-            sceneInteractor
-                .get()
-                .transitionState
+            sceneInteractor.transitionState
                 .map { it.isIdle(scene) || it.isTransitioning(from = scene) }
                 .distinctUntilChanged()
         } else {

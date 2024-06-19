@@ -318,7 +318,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
     @Test
     fun isInTransitionToAnyState() =
         testScope.runTest {
-            val inTransition by collectValues(underTest.isInTransitionToAnyState)
+            val inTransition by collectValues(underTest.isInTransition)
 
             assertEquals(
                 listOf(
@@ -374,9 +374,50 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
+    fun isInTransition_withScene() =
+        testScope.runTest {
+            val inTransition by collectValues(underTest.isInTransition)
+
+            assertEquals(
+                listOf(
+                    false,
+                    true, // The repo is seeded with a transition from OFF to LOCKSCREEN.
+                    false,
+                ),
+                inTransition
+            )
+
+            kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Bouncer))
+
+            assertEquals(
+                listOf(
+                    false,
+                    true,
+                    false,
+                    true,
+                ),
+                inTransition
+            )
+
+            kosmos.setSceneTransition(Idle(Scenes.Bouncer))
+
+            assertEquals(
+                listOf(
+                    false,
+                    true,
+                    false,
+                    true,
+                    false,
+                ),
+                inTransition
+            )
+        }
+
+    @Test
     fun isInTransitionToAnyState_finishedStateIsStartedStateAfterCancels() =
         testScope.runTest {
-            val inTransition by collectValues(underTest.isInTransitionToAnyState)
+            val inTransition by collectValues(underTest.isInTransition)
 
             assertEquals(
                 listOf(
@@ -717,92 +758,6 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             sendSteps(
                 TransitionStep(DOZING, LOCKSCREEN, 0f, STARTED),
                 TransitionStep(DOZING, LOCKSCREEN, 0f, RUNNING),
-            )
-
-            assertThat(results)
-                .isEqualTo(
-                    listOf(
-                        false,
-                        true,
-                        false,
-                        true,
-                    )
-                )
-        }
-
-    @Test
-    fun isInTransitionFromStateWhere() =
-        testScope.runTest {
-            val results by collectValues(underTest.isInTransitionFromStateWhere { it == DOZING })
-
-            sendSteps(
-                TransitionStep(AOD, DOZING, 0f, STARTED),
-                TransitionStep(AOD, DOZING, 0.5f, RUNNING),
-                TransitionStep(AOD, DOZING, 1f, FINISHED),
-            )
-
-            assertThat(results)
-                .isEqualTo(
-                    listOf(
-                        false,
-                    )
-                )
-
-            sendSteps(
-                TransitionStep(DOZING, GONE, 0f, STARTED),
-            )
-
-            assertThat(results)
-                .isEqualTo(
-                    listOf(
-                        false,
-                        true,
-                    )
-                )
-
-            sendSteps(
-                TransitionStep(DOZING, GONE, 0f, RUNNING),
-            )
-
-            assertThat(results)
-                .isEqualTo(
-                    listOf(
-                        false,
-                        true,
-                    )
-                )
-
-            sendSteps(
-                TransitionStep(DOZING, GONE, 0f, FINISHED),
-            )
-
-            assertThat(results)
-                .isEqualTo(
-                    listOf(
-                        false,
-                        true,
-                        false,
-                    )
-                )
-
-            sendSteps(
-                TransitionStep(GONE, DOZING, 0f, STARTED),
-                TransitionStep(GONE, DOZING, 0f, RUNNING),
-                TransitionStep(GONE, DOZING, 1f, FINISHED),
-            )
-
-            assertThat(results)
-                .isEqualTo(
-                    listOf(
-                        false,
-                        true,
-                        false,
-                    )
-                )
-
-            sendSteps(
-                TransitionStep(DOZING, GONE, 0f, STARTED),
-                TransitionStep(DOZING, GONE, 0f, RUNNING),
             )
 
             assertThat(results)
