@@ -19,6 +19,16 @@
 package com.android.wm.shell.compatui
 
 import android.app.TaskInfo
-fun isSingleTopActivityTranslucent(task: TaskInfo) =
-    task.isTopActivityTransparent && task.numActivities == 1
+import android.content.Context
+import com.android.internal.R
 
+// TODO(b/347289970): Consider replacing with API
+fun isTopActivityExemptFromDesktopWindowing(context: Context, task: TaskInfo) =
+    isSystemUiTask(context, task) || (task.isTopActivityTransparent && task.numActivities == 1
+            && !task.isTopActivityStyleFloating)
+
+private fun isSystemUiTask(context: Context, task: TaskInfo): Boolean {
+    val sysUiPackageName: String =
+        context.resources.getString(R.string.config_systemUi)
+    return task.baseActivity?.packageName == sysUiPackageName
+}

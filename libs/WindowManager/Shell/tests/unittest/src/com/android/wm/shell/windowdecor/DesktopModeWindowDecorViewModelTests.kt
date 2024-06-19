@@ -346,10 +346,35 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
-    fun testDecorationIsNotCreatedForTopTranslucentActivities() {
-        setFlagsRule.enableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    fun testDecorationIsCreatedForTopTranslucentActivitiesWithStyleFloating() {
+        val mockitoSession: StaticMockitoSession = mockitoSession()
+                .strictness(Strictness.LENIENT)
+                .spyStatic(DesktopModeStatus::class.java)
+                .startMocking()
+        try {
+            val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true).apply {
+                isTopActivityTransparent = true
+                isTopActivityStyleFloating = true
+                numActivities = 1
+            }
+            doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+            setUpMockDecorationsForTasks(task)
+
+            onTaskOpening(task)
+            verify(mockDesktopModeWindowDecorFactory)
+                    .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    fun testDecorationIsNotCreatedForTopTranslucentActivitiesWithoutStyleFloating() {
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true).apply {
             isTopActivityTransparent = true
+            isTopActivityStyleFloating = false
             numActivities = 1
         }
         onTaskOpening(task)
@@ -359,6 +384,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun testDecorationIsNotCreatedForSystemUIActivities() {
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
 

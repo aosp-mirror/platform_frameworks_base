@@ -734,6 +734,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean mOccludesParent;
 
+    /** Whether the activity have style floating */
+    private boolean mStyleFloating;
+
     /**
      * Unlike {@link #mOccludesParent} which can be changed at runtime. This is a static attribute
      * from the style of activity. Because we don't want {@link WindowContainer#getOrientation()}
@@ -2188,7 +2191,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 realTheme, com.android.internal.R.styleable.Window, mUserId);
 
         if (ent != null) {
-            mOccludesParent = !ActivityInfo.isTranslucentOrFloating(ent.array)
+            final boolean styleTranslucent = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowIsTranslucent, false);
+            mStyleFloating = ent.array.getBoolean(
+                    com.android.internal.R.styleable.Window_windowIsFloating, false);
+            mOccludesParent = !(styleTranslucent || mStyleFloating)
                     // This style is propagated to the main window attributes with
                     // FLAG_SHOW_WALLPAPER from PhoneWindow#generateLayout.
                     || ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
@@ -2197,6 +2204,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mOptOutEdgeToEdge = ent.array.getBoolean(
                     R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false);
         } else {
+            mStyleFloating = false;
             mStyleFillsParent = mOccludesParent = true;
             noDisplay = false;
             mOptOutEdgeToEdge = false;
@@ -3235,6 +3243,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     boolean fillsParent() {
         return occludesParent(true /* includingFinishing */);
+    }
+
+    boolean isStyleFloating() {
+        return mStyleFloating;
     }
 
     /** Returns true if this activity is not finishing, is opaque and fills the entire space of
