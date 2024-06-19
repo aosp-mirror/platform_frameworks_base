@@ -4,8 +4,8 @@ import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
 import android.hardware.camera2.CameraManager
-import android.testing.AndroidTestingRunner
 import android.util.PathParser
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.util.mockito.any
@@ -19,7 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class CameraAvailabilityListenerTest : SysuiTestCase() {
     companion object {

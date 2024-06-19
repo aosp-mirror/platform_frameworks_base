@@ -17,7 +17,6 @@ package com.android.keyguard;
 
 import android.graphics.Color;
 import android.net.Uri;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 
@@ -26,6 +25,7 @@ import androidx.slice.SliceProvider;
 import androidx.slice.SliceSpecs;
 import androidx.slice.builders.ListBuilder;
 import androidx.slice.widget.RowContent;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class KeyguardSliceViewTest extends SysuiTestCase {
     private KeyguardSliceView mKeyguardSliceView;
     private Uri mSliceUri;

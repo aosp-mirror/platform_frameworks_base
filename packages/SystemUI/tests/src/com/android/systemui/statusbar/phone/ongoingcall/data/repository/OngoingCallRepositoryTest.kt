@@ -16,13 +16,16 @@
 
 package com.android.systemui.statusbar.phone.ongoingcall.data.repository
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class OngoingCallRepositoryTest : SysuiTestCase() {
     private val underTest = OngoingCallRepository()
 

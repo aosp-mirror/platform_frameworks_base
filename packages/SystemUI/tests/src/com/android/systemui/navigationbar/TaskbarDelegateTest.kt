@@ -1,6 +1,7 @@
 package com.android.systemui.navigationbar
 
 import android.app.ActivityManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -19,6 +20,7 @@ import com.android.wm.shell.pip.Pip
 import java.util.Optional
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.any
@@ -30,6 +32,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class TaskbarDelegateTest : SysuiTestCase() {
     val DISPLAY_ID = 0;
     val MODE_GESTURE = 0;

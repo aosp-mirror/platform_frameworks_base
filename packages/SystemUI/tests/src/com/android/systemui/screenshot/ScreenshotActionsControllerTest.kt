@@ -16,7 +16,7 @@
 
 package com.android.systemui.screenshot
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
@@ -29,7 +29,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ScreenshotActionsControllerTest : SysuiTestCase() {
     private val screenshotData = mock<ScreenshotData>()
