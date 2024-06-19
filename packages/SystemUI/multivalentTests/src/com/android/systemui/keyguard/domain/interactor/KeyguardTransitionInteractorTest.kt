@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.DisableSceneContainer
@@ -42,19 +41,15 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.Transition
-import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -66,36 +61,6 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
     val underTest = kosmos.keyguardTransitionInteractor
     val repository = kosmos.fakeKeyguardTransitionRepository
     val testScope = kosmos.testScope
-
-    private val sceneTransitions =
-        MutableStateFlow<ObservableTransitionState>(
-            ObservableTransitionState.Idle(Scenes.Lockscreen)
-        )
-
-    private val lsToGone =
-        ObservableTransitionState.Transition(
-            Scenes.Lockscreen,
-            Scenes.Gone,
-            flowOf(Scenes.Lockscreen),
-            flowOf(0f),
-            false,
-            flowOf(false)
-        )
-
-    private val goneToLs =
-        ObservableTransitionState.Transition(
-            Scenes.Gone,
-            Scenes.Lockscreen,
-            flowOf(Scenes.Lockscreen),
-            flowOf(0f),
-            false,
-            flowOf(false)
-        )
-
-    @Before
-    fun setUp() {
-        kosmos.sceneContainerRepository.setTransitionState(sceneTransitions)
-    }
 
     @Test
     fun transitionCollectorsReceivesOnlyAppropriateEvents() =
@@ -1554,7 +1519,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             val currentStatesConverted by
                 collectValues(underTest.transition(Edge.create(LOCKSCREEN, UNDEFINED)))
 
-            sceneTransitions.value = lsToGone
+            kosmos.setSceneTransition(Transition(Scenes.Lockscreen, Scenes.Gone))
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
             val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
             val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
@@ -1570,7 +1535,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val currentStates by collectValues(underTest.transition(Edge.create(LOCKSCREEN, GONE)))
 
-            sceneTransitions.value = goneToLs
+            kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
             val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
             val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
@@ -1586,7 +1551,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             val currentStates by
                 collectValues(underTest.transition(Edge.create(LOCKSCREEN, DOZING)))
 
-            sceneTransitions.value = goneToLs
+            kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
             val sendStep1 = TransitionStep(LOCKSCREEN, DOZING, 0f, STARTED)
             val sendStep2 = TransitionStep(LOCKSCREEN, DOZING, 1f, FINISHED)
             val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
@@ -1603,7 +1568,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             val currentStatesReversed by
                 collectValues(underTest.transition(Edge.create(null, LOCKSCREEN)))
 
-            sceneTransitions.value = goneToLs
+            kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
             val sendStep1 = TransitionStep(LOCKSCREEN, DOZING, 0f, STARTED)
             val sendStep2 = TransitionStep(LOCKSCREEN, DOZING, 1f, FINISHED)
             val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
@@ -1621,7 +1586,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             val currentStates by collectValues(underTest.transition(Edge.create(null, UNDEFINED)))
             val currentStatesMapped by collectValues(underTest.transition(Edge.create(null, GONE)))
 
-            sceneTransitions.value = lsToGone
+            kosmos.setSceneTransition(Transition(Scenes.Lockscreen, Scenes.Gone))
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
             val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
             val sendStep3 = TransitionStep(UNDEFINED, AOD, 0f, STARTED)
@@ -1638,7 +1603,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val currentStatesMapped by collectValues(underTest.transition(Edge.create(null, GONE)))
 
-            sceneTransitions.value = goneToLs
+            kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
             val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
             val sendStep3 = TransitionStep(UNDEFINED, AOD, 0f, STARTED)
