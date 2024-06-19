@@ -63,6 +63,7 @@ android_test {
         "-c fa",
     ],
     static_libs: [
+        "A11yChecker",
         "collector-device-lib-platform",
         "frameworks-base-testutils",
         "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
