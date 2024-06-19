@@ -158,7 +158,6 @@ import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANG
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
-import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
@@ -7519,7 +7518,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *               use an icon or solid color splash screen will be made by WmShell.
      */
     private boolean shouldUseSolidColorSplashScreen(ActivityRecord sourceRecord,
-            boolean startActivity, ActivityOptions options, int resolvedTheme) {
+            boolean startActivity, ActivityOptions options, int resolvedTheme,
+            boolean newTask) {
         if (sourceRecord == null && !startActivity) {
             // Use simple style if this activity is not top activity. This could happen when adding
             // a splash screen window to the warm start activity which is re-create because top is
@@ -7542,21 +7542,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Choose the default behavior when neither the ActivityRecord nor the activity theme have
         // specified a splash screen style.
-
-        if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME || launchedFromUid == Process.SHELL_UID) {
-            return false;
-        } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
+        if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
             return true;
         } else {
             // Need to check sourceRecord in case this activity is launched from a service.
             if (sourceRecord == null) {
                 sourceRecord = searchCandidateLaunchingActivity();
             }
-
             if (sourceRecord != null) {
-                return sourceRecord.mSplashScreenStyleSolidColor;
+                return sourceRecord.mSplashScreenStyleSolidColor; // follow previous activity
+            } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME
+                    || launchedFromUid == Process.SHELL_UID) {
+                return !newTask; // only show icon for new task
             }
-
             // Use an icon if the activity was launched from System for the first start.
             // Otherwise, must use solid color splash screen.
             return mLaunchSourceType != LAUNCH_SOURCE_TYPE_SYSTEM || !startActivity;
@@ -7624,7 +7622,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 splashScreenTheme);
 
         mSplashScreenStyleSolidColor = shouldUseSolidColorSplashScreen(sourceRecord, startActivity,
-                startOptions, resolvedTheme);
+                startOptions, resolvedTheme, newTask);
 
         final boolean activityCreated =
                 mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal();
