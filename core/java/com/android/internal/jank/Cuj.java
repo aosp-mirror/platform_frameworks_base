@@ -147,8 +147,16 @@ public class Cuj {
      */
     public static final int CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW = 104;
 
+    /**
+     * Track fade-in animation when in SystemUI process fold
+     *
+     * <p>Tracking starts after the screen turns on and finish when the animation is over {@link
+     * com.android.systemui.unfold.FoldLightRevealOverlayAnimation#playFoldLightRevealOverlayAnimation} for the span
+     */
+    public static final int CUJ_FOLD_ANIM = 105;
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_FOLD_ANIM;
 
     /** @hide */
     @IntDef({
@@ -244,7 +252,8 @@ public class Cuj {
             CUJ_LAUNCHER_WIDGET_BOTTOM_SHEET_CLOSE_BACK,
             CUJ_LAUNCHER_PRIVATE_SPACE_LOCK,
             CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK,
-            CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW
+            CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW,
+            CUJ_FOLD_ANIM
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -351,6 +360,7 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_PRIVATE_SPACE_LOCK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_PRIVATE_SPACE_LOCK;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_PRIVATE_SPACE_UNLOCK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_PRIVATE_SPACE_UNLOCK;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_MAXIMIZE_WINDOW;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_FOLD_ANIM] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__FOLD_ANIM;
     }
 
     private Cuj() {
@@ -555,6 +565,8 @@ public class Cuj {
                 return "LAUNCHER_PRIVATE_SPACE_UNLOCK";
             case CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW:
                 return "DESKTOP_MODE_MAXIMIZE_WINDOW";
+            case CUJ_FOLD_ANIM:
+                return "FOLD_ANIM";
         }
         return "UNKNOWN";
     }
