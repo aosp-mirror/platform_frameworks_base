@@ -178,7 +178,15 @@ constructor(
                 .mapElementsLazily { displayId -> getDisplay(displayId) }
                 .flowOn(backgroundCoroutineDispatcher)
                 .debugLog("enabledDisplays")
-                .stateIn(bgApplicationScope, SharingStarted.WhileSubscribed(), emptySet())
+                .stateIn(
+                    bgApplicationScope,
+                    started = SharingStarted.WhileSubscribed(),
+                    initialValue =
+                        setOf(
+                            getDisplay(Display.DEFAULT_DISPLAY)
+                                ?: error("Unable to get default display.")
+                        )
+                )
         } else {
             oldEnabledDisplays
         }
