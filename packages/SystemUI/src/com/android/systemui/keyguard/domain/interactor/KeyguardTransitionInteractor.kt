@@ -17,7 +17,6 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.annotation.FloatRange
 import android.annotation.SuppressLint
 import android.util.Log
 import com.android.compose.animation.scene.SceneKey
@@ -33,14 +32,12 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.UNDEFINED
-import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.pairwise
-import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -384,31 +381,6 @@ constructor(
             .distinctUntilChanged()
             .stateIn(scope, SharingStarted.Eagerly, KeyguardState.OFF)
 
-    /**
-     * The [TransitionInfo] of the most recent call to
-     * [KeyguardTransitionRepository.startTransition].
-     *
-     * This should only be used by keyguard transition internals (From*TransitionInteractor and
-     * related classes). Other consumers of keyguard state in System UI should use
-     * [startedKeyguardState], [currentKeyguardState], and related flows.
-     *
-     * Keyguard internals use this to determine the most up-to-date KeyguardState that we've
-     * requested a transition to, even if the animator running the transition on the main thread has
-     * not yet emitted the STARTED TransitionStep.
-     *
-     * For example: if we're finished in GONE and press the power button twice very quickly, we may
-     * request a transition to AOD, but then receive the second power button press prior to the
-     * STARTED -> AOD transition step emitting. We still need the FromAodTransitionInteractor to
-     * request a transition from AOD -> LOCKSCREEN in response to the power press, even though the
-     * main thread animator hasn't emitted STARTED > AOD yet (which means [startedKeyguardState] is
-     * still GONE, which is not relevant to FromAodTransitionInteractor). In this case, the
-     * interactor can use this current transition info to determine that a STARTED -> AOD step
-     * *will* be emitted, and therefore that it can safely request an AOD -> LOCKSCREEN transition
-     * which will subsequently cancel GONE -> AOD.
-     */
-    internal val currentTransitionInfoInternal: StateFlow<TransitionInfo> =
-        repository.currentTransitionInfoInternal
-
     val isInTransition =
         combine(
             isInTransitionWhere({ true }, { true }),
@@ -429,7 +401,7 @@ constructor(
         // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         Log.d(TAG, "#startDismissKeyguardTransition(reason=$reason)")
-        when (val startedState = currentTransitionInfoInternal.value.to) {
+        when (val startedState = repository.currentTransitionInfoInternal.value.to) {
             LOCKSCREEN -> fromLockscreenTransitionInteractor.get().dismissKeyguard()
             PRIMARY_BOUNCER -> fromPrimaryBouncerTransitionInteractor.get().dismissPrimaryBouncer()
             ALTERNATE_BOUNCER ->
@@ -528,14 +500,6 @@ constructor(
     fun getFinishedState(): KeyguardState {
         return finishedKeyguardState.replayCache.last()
     }
-
-    suspend fun startTransition(info: TransitionInfo) = repository.startTransition(info)
-
-    fun updateTransition(
-        transitionId: UUID,
-        @FloatRange(from = 0.0, to = 1.0) value: Float,
-        state: TransitionState
-    ) = repository.updateTransition(transitionId, value, state)
 
     companion object {
         private val TAG = KeyguardTransitionInteractor::class.simpleName
