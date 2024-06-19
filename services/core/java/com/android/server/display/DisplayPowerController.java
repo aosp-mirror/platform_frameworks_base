@@ -587,7 +587,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         mUniqueDisplayId,
                         mThermalBrightnessThrottlingDataId,
                         logicalDisplay.getPowerThrottlingDataIdLocked(),
-                        mDisplayDeviceConfig), mContext, flags, mSensorManager);
+                        mDisplayDeviceConfig,
+                        mDisplayId), mContext, flags, mSensorManager);
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
         mAutomaticBrightnessStrategy =
@@ -892,7 +893,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // will call updatePowerState if needed.
             mBrightnessClamperController.onDisplayChanged(
                     new BrightnessClamperController.DisplayDeviceData(uniqueId,
-                        thermalBrightnessThrottlingDataId, powerThrottlingDataId, config));
+                            thermalBrightnessThrottlingDataId, powerThrottlingDataId,
+                            config, mDisplayId));
 
             if (changed) {
                 updatePowerState();
