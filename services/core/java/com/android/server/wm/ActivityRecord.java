@@ -8183,8 +8183,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void setRequestedOrientation(@ActivityInfo.ScreenOrientation int requestedOrientation) {
-        if (mAppCompatController.getAppCompatCapability()
-                .getAppCompatOrientationCapability()
+        if (mAppCompatController.getAppCompatOverrides()
+                .getAppCompatOrientationOverrides()
                 .shouldIgnoreRequestedOrientation(requestedOrientation)) {
             return;
         }
@@ -10821,7 +10821,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(SHOULD_OVERRIDE_MIN_ASPECT_RATIO,
                 mLetterboxUiController.shouldOverrideMinAspectRatio());
         proto.write(SHOULD_IGNORE_ORIENTATION_REQUEST_LOOP,
-                mAppCompatController.getAppCompatCapability().getAppCompatOrientationCapability()
+                mAppCompatController.getAppCompatOverrides().getAppCompatOrientationOverrides()
                         .shouldIgnoreOrientationRequestLoop());
         proto.write(SHOULD_OVERRIDE_FORCE_RESIZE_APP,
                 mLetterboxUiController.shouldOverrideForceResizeApp());

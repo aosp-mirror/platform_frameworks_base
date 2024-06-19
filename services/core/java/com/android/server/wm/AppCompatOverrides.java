@@ -57,9 +57,9 @@ import java.util.function.BooleanSupplier;
 /**
  * Encapsulate logic related to operations guarded by an app override.
  */
-public class AppCompatCapability {
+public class AppCompatOverrides {
 
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "AppCompatCapability" : TAG_ATM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "AppCompatOverrides" : TAG_ATM;
 
     @NonNull
     private final LetterboxConfiguration mLetterboxConfiguration;
@@ -95,9 +95,9 @@ public class AppCompatCapability {
     @NonNull
     private final OptPropFactory.OptProp mAllowUserAspectRatioFullscreenOverrideOptProp;
 
-    private final AppCompatOrientationCapability mAppCompatOrientationCapability;
+    private final AppCompatOrientationOverrides mAppCompatOrientationOverrides;
 
-    AppCompatCapability(@NonNull WindowManagerService wmService,
+    AppCompatOverrides(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord,
                         @NonNull LetterboxConfiguration letterboxConfiguration) {
         mLetterboxConfiguration = letterboxConfiguration;
@@ -107,8 +107,8 @@ public class AppCompatCapability {
         final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
                 activityRecord.packageName);
 
-        mAppCompatOrientationCapability =
-                new AppCompatOrientationCapability(optPropBuilder, mLetterboxConfiguration,
+        mAppCompatOrientationOverrides =
+                new AppCompatOrientationOverrides(optPropBuilder, mLetterboxConfiguration,
                         mActivityRecord);
 
         mFakeFocusOptProp = optPropBuilder.create(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS,
@@ -172,8 +172,8 @@ public class AppCompatCapability {
     }
 
     @NonNull
-    AppCompatOrientationCapability getAppCompatOrientationCapability() {
-        return mAppCompatOrientationCapability;
+    AppCompatOrientationOverrides getAppCompatOrientationOverrides() {
+        return mAppCompatOrientationOverrides;
     }
 
     /**

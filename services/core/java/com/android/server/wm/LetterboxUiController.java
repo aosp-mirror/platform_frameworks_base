@@ -153,7 +153,7 @@ final class LetterboxUiController {
 
     @VisibleForTesting
     int getSetOrientationRequestCounter() {
-        return getAppCompatCapability().getAppCompatOrientationCapability()
+        return getAppCompatOverrides().getAppCompatOrientationOverrides()
                 .getSetOrientationRequestCounter();
     }
 
@@ -170,7 +170,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldSendFakeFocus() {
-        return getAppCompatCapability().shouldSendFakeFocus();
+        return getAppCompatOverrides().shouldSendFakeFocus();
     }
 
     /**
@@ -186,7 +186,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideMinAspectRatio() {
-        return getAppCompatCapability().shouldOverrideMinAspectRatio();
+        return getAppCompatOverrides().shouldOverrideMinAspectRatio();
     }
 
     /**
@@ -203,7 +203,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideMinAspectRatioForCamera() {
-        return getAppCompatCapability().shouldOverrideMinAspectRatioForCamera();
+        return getAppCompatOverrides().shouldOverrideMinAspectRatioForCamera();
     }
 
     /**
@@ -219,7 +219,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideForceResizeApp() {
-        return getAppCompatCapability().shouldOverrideForceResizeApp();
+        return getAppCompatOverrides().shouldOverrideForceResizeApp();
     }
 
     /**
@@ -233,7 +233,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideForceNonResizeApp() {
-        return getAppCompatCapability().shouldOverrideForceNonResizeApp();
+        return getAppCompatOverrides().shouldOverrideForceNonResizeApp();
     }
 
     /**
@@ -241,7 +241,7 @@ final class LetterboxUiController {
      * android.app.Activity#setRequestedOrientation}.
      */
     void setRelaunchingAfterRequestedOrientationChanged(boolean isRelaunching) {
-        getAppCompatCapability().getAppCompatOrientationCapability()
+        getAppCompatOverrides().getAppCompatOrientationOverrides()
                 .setRelaunchingAfterRequestedOrientationChanged(isRelaunching);
     }
 
@@ -257,7 +257,7 @@ final class LetterboxUiController {
     }
 
     boolean isOverrideRespectRequestedOrientationEnabled() {
-        return getAppCompatCapability().isOverrideRespectRequestedOrientationEnabled();
+        return getAppCompatOverrides().isOverrideRespectRequestedOrientationEnabled();
     }
 
     /**
@@ -274,11 +274,11 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldUseDisplayLandscapeNaturalOrientation() {
-        return getAppCompatCapability().shouldUseDisplayLandscapeNaturalOrientation();
+        return getAppCompatOverrides().shouldUseDisplayLandscapeNaturalOrientation();
     }
 
     boolean isOverrideOrientationOnlyForCameraEnabled() {
-        return getAppCompatCapability().isOverrideOrientationOnlyForCameraEnabled();
+        return getAppCompatOverrides().isOverrideOrientationOnlyForCameraEnabled();
     }
 
     /**
@@ -293,7 +293,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldRefreshActivityForCameraCompat() {
-        return getAppCompatCapability().shouldRefreshActivityForCameraCompat();
+        return getAppCompatOverrides().shouldRefreshActivityForCameraCompat();
     }
 
     /**
@@ -311,7 +311,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldRefreshActivityViaPauseForCameraCompat() {
-        return getAppCompatCapability().shouldRefreshActivityViaPauseForCameraCompat();
+        return getAppCompatOverrides().shouldRefreshActivityViaPauseForCameraCompat();
     }
 
     /**
@@ -326,7 +326,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldForceRotateForCameraCompat() {
-        return getAppCompatCapability().shouldForceRotateForCameraCompat();
+        return getAppCompatOverrides().shouldForceRotateForCameraCompat();
     }
 
     /**
@@ -344,7 +344,7 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldApplyFreeformTreatmentForCameraCompat() {
-        return getAppCompatCapability().shouldApplyFreeformTreatmentForCameraCompat();
+        return getAppCompatOverrides().shouldApplyFreeformTreatmentForCameraCompat();
     }
 
     @FreeformCameraCompatMode
@@ -609,7 +609,7 @@ final class LetterboxUiController {
         // Don't resize to split screen size when in book mode if letterbox position is centered
         return (isBookMode && isNotCenteredHorizontally || isTabletopMode && isLandscape)
                     || isCameraCompatSplitScreenAspectRatioAllowed()
-                        && getAppCompatCapability().isCameraCompatTreatmentActive();
+                        && getAppCompatOverrides().isCameraCompatTreatmentActive();
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {
@@ -711,7 +711,7 @@ final class LetterboxUiController {
      * Whether we should enable users to resize the current app.
      */
     boolean shouldEnableUserAspectRatioSettings() {
-        return getAppCompatCapability().shouldEnableUserAspectRatioSettings();
+        return getAppCompatOverrides().shouldEnableUserAspectRatioSettings();
     }
 
     /**
@@ -741,11 +741,11 @@ final class LetterboxUiController {
     }
 
     boolean isUserFullscreenOverrideEnabled() {
-        return getAppCompatCapability().isUserFullscreenOverrideEnabled();
+        return getAppCompatOverrides().isUserFullscreenOverrideEnabled();
     }
 
     boolean isSystemOverrideToFullscreenEnabled() {
-        return getAppCompatCapability().isSystemOverrideToFullscreenEnabled(mUserAspectRatio);
+        return getAppCompatOverrides().isSystemOverrideToFullscreenEnabled(mUserAspectRatio);
     }
 
     boolean hasFullscreenOverride() {
@@ -941,8 +941,8 @@ final class LetterboxUiController {
     }
 
     // TODO(b/346264992): Remove after AppCompatController refactoring
-    private AppCompatCapability getAppCompatCapability() {
-        return mActivityRecord.mAppCompatController.getAppCompatCapability();
+    private AppCompatOverrides getAppCompatOverrides() {
+        return mActivityRecord.mAppCompatController.getAppCompatOverrides();
     }
 
     /**
@@ -983,7 +983,7 @@ final class LetterboxUiController {
 
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        if (getAppCompatCapability().getAppCompatOrientationCapability()
+        if (getAppCompatOverrides().getAppCompatOrientationOverrides()
                 .getIsRelaunchingAfterRequestedOrientationChanged()) {
             return mLastShouldShowLetterboxUi;
         }
@@ -1144,7 +1144,7 @@ final class LetterboxUiController {
     }
 
     boolean getIsRelaunchingAfterRequestedOrientationChanged() {
-        return getAppCompatCapability().getAppCompatOrientationCapability()
+        return getAppCompatOverrides().getAppCompatOrientationOverrides()
                 .getIsRelaunchingAfterRequestedOrientationChanged();
     }
 
