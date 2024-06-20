@@ -58,6 +58,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
+import android.app.AlarmManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
@@ -322,6 +323,12 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private static final long PRIVATE_SPACE_AUTO_LOCK_INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
 
+    /**
+     * The time duration (in milliseconds) of the window length for the auto-lock message alarm
+     */
+    private static final long PRIVATE_SPACE_AUTO_LOCK_INACTIVITY_ALARM_WINDOW_MS =
+            TimeUnit.SECONDS.toMillis(55);
+
     // Tron counters
     private static final String TRON_GUEST_CREATED = "users_guest_created";
     private static final String TRON_USER_CREATED = "users_user_created";
@@ -552,8 +559,15 @@ public class UserManagerService extends IUserManager.Stub {
 
     private KeyguardManager.KeyguardLockedStateListener mKeyguardLockedStateListener;
 
-    /** Token to identify and remove already scheduled private space auto-lock messages */
-    private static final Object PRIVATE_SPACE_AUTO_LOCK_MESSAGE_TOKEN = new Object();
+    /**
+     * {@link android.app.AlarmManager.OnAlarmListener} to schedule an alarm to enable
+     * auto-locking private space after screen timeout
+     */
+    private PrivateSpaceAutoLockTimer mPrivateSpaceAutoLockTimer;
+
+    /** Tag representing the alarm manager timer for auto-locking private space */
+    private static final String PRIVATE_SPACE_AUTO_LOCK_TIMER_TAG = "PrivateSpaceAutoLockTimer";
+
 
     /** Content observer to get callbacks for privte space autolock settings changes */
     private final SettingsObserver mPrivateSpaceAutoLockSettingsObserver;
@@ -604,22 +618,28 @@ public class UserManagerService extends IUserManager.Stub {
         public void onReceive(Context context, Intent intent) {
             if (isAutoLockForPrivateSpaceEnabled()) {
                 if (ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                    Slog.d(LOG_TAG, "SCREEN_OFF broadcast received");
-                    maybeScheduleMessageToAutoLockPrivateSpace();
+                    maybeScheduleAlarmToAutoLockPrivateSpace();
                 } else if (ACTION_SCREEN_ON.equals(intent.getAction())) {
                     Slog.d(LOG_TAG, "SCREEN_ON broadcast received, "
-                            + "removing queued message to auto-lock private space");
-                    // Remove any queued messages since the device is interactive again
-                    mHandler.removeCallbacksAndMessages(PRIVATE_SPACE_AUTO_LOCK_MESSAGE_TOKEN);
+                            + "removing pending alarms to auto-lock private space");
+                    // Remove any pending alarm since the device is interactive again
+                    cancelPendingAutoLockAlarms();
                 }
             }
         }
     };
 
+    private void cancelPendingAutoLockAlarms() {
+        final AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
+        if (alarmManager != null && mPrivateSpaceAutoLockTimer != null) {
+            alarmManager.cancel(mPrivateSpaceAutoLockTimer);
+        }
+    }
+
     @VisibleForTesting
-    void maybeScheduleMessageToAutoLockPrivateSpace() {
+    void maybeScheduleAlarmToAutoLockPrivateSpace() {
         // No action needed if auto-lock on inactivity not selected
-        int privateSpaceAutoLockPreference =
+        final int privateSpaceAutoLockPreference =
                 Settings.Secure.getIntForUser(mContext.getContentResolver(),
                         Settings.Secure.PRIVATE_SPACE_AUTO_LOCK,
                         Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_DEVICE_RESTART,
@@ -632,26 +652,65 @@ public class UserManagerService extends IUserManager.Stub {
         }
         int privateProfileUserId = getPrivateProfileUserId();
         if (privateProfileUserId != UserHandle.USER_NULL) {
-            scheduleMessageToAutoLockPrivateSpace(privateProfileUserId,
-                    PRIVATE_SPACE_AUTO_LOCK_MESSAGE_TOKEN,
+            if (isQuietModeEnabled(privateProfileUserId)) {
+                Slogf.d(LOG_TAG, "Not scheduling auto-lock alarm for %d, "
+                        + "quiet mode already enabled", privateProfileUserId);
+                return;
+            }
+            scheduleAlarmToAutoLockPrivateSpace(privateProfileUserId,
                     PRIVATE_SPACE_AUTO_LOCK_INACTIVITY_TIMEOUT_MS);
         }
     }
 
     @VisibleForTesting
-    void scheduleMessageToAutoLockPrivateSpace(int userId, Object token,
-            long delayInMillis) {
-        Slog.i(LOG_TAG, "Scheduling auto-lock message");
-        mHandler.postDelayed(() -> {
+    void scheduleAlarmToAutoLockPrivateSpace(int userId, long delayInMillis) {
+        final AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
+        if (alarmManager == null) {
+            Slog.e(LOG_TAG, "AlarmManager not available, cannot schedule auto-lock alarm");
+            return;
+        }
+        initPrivateSpaceAutoLockTimer(userId);
+        final long alarmWindowStartTime = SystemClock.elapsedRealtime() + delayInMillis;
+        alarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                alarmWindowStartTime,
+                PRIVATE_SPACE_AUTO_LOCK_INACTIVITY_ALARM_WINDOW_MS,
+                PRIVATE_SPACE_AUTO_LOCK_TIMER_TAG,
+                new HandlerExecutor(mHandler),
+                mPrivateSpaceAutoLockTimer);
+    }
+
+    private void initPrivateSpaceAutoLockTimer(int userId) {
+        cancelPendingAutoLockAlarms();
+        if (mPrivateSpaceAutoLockTimer == null
+                || mPrivateSpaceAutoLockTimer.getUserId() != userId) {
+            mPrivateSpaceAutoLockTimer = new PrivateSpaceAutoLockTimer(userId);
+        }
+    }
+
+    private class PrivateSpaceAutoLockTimer implements AlarmManager.OnAlarmListener {
+
+        private final int mUserId;
+
+        PrivateSpaceAutoLockTimer(int userId) {
+            mUserId = userId;
+        }
+
+        int getUserId() {
+            return mUserId;
+        }
+
+        @Override
+        public void onAlarm() {
             final PowerManager powerManager = mContext.getSystemService(PowerManager.class);
             if (powerManager != null && !powerManager.isInteractive()) {
-                Slog.i(LOG_TAG, "Auto-locking private space with user-id " + userId);
-                setQuietModeEnabledAsync(userId, true,
+                Slog.i(LOG_TAG, "Auto-locking private space with user-id " + mUserId);
+                setQuietModeEnabledAsync(mUserId, true,
                         /* target */ null, mContext.getPackageName());
             } else {
-                Slog.i(LOG_TAG, "Device is interactive, skipping auto-lock");
+                Slog.i(LOG_TAG, "Device is interactive, skipping auto-lock for profile user "
+                        + mUserId);
             }
-        }, token, delayInMillis);
+        }
     }
 
     @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
@@ -697,7 +756,7 @@ public class UserManagerService extends IUserManager.Stub {
             // Unregister device inactivity broadcasts
             if (mIsDeviceInactivityBroadcastReceiverRegistered) {
                 Slog.i(LOG_TAG, "Removing device inactivity broadcast receivers");
-                mHandler.removeCallbacksAndMessages(PRIVATE_SPACE_AUTO_LOCK_MESSAGE_TOKEN);
+                cancelPendingAutoLockAlarms();
                 mContext.unregisterReceiver(mDeviceInactivityBroadcastReceiver);
                 mIsDeviceInactivityBroadcastReceiverRegistered = false;
             }
