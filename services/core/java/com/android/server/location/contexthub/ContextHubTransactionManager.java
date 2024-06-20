@@ -47,6 +47,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 /* package */ class ContextHubTransactionManager {
     private static final String TAG = "ContextHubTransactionManager";
 
+    /**
+     * The timeout in ns of a reliable message transaction.
+     */
+    public static final int RELIABLE_MESSAGE_TIMEOUT_NS = 1_000_000_000; // 1 second
+
     /*
      * Maximum number of transaction requests that can be pending at a time
      */
