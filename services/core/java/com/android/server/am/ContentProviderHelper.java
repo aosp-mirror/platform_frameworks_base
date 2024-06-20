@@ -671,7 +671,9 @@ public class ContentProviderHelper {
                     if (conn != null) {
                         conn.waiting = true;
                     }
-                    cpr.wait(wait);
+                    if (wait > 0) {
+                        cpr.wait(wait);
+                    }
                     if (cpr.provider == null) {
                         timedOut = true;
                         break;
