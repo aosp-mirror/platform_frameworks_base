@@ -8,6 +8,7 @@ import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation.getContentAlpha
 import com.android.systemui.dump.DumpManager
@@ -66,7 +67,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         EmptyShadeView(context, /* attrs= */ null).apply {
             layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
         }
-    private val footerView = FooterView(context, /*attrs=*/ null)
+    private val footerView = FooterView(context, /* attrs= */ null)
     @OptIn(ExperimentalCoroutinesApi::class)
     private val ambientState =
         AmbientState(
@@ -523,6 +524,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
     }
 
+    @DisableFlags(Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR)
     @Test
     fun resetViewStates_clearAllInProgress_allRowsRemoved_emptyShade_footerHidden() {
         ambientState.isClearAllInProgress = true
@@ -1157,6 +1159,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         assertFalse(stackScrollAlgorithm.shouldHunAppearFromBottom(ambientState, viewState))
     }
+
     // endregion
 
     private fun createHunViewMock(
