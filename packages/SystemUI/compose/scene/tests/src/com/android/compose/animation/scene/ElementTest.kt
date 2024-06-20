@@ -851,11 +851,12 @@ class ElementTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutState(
                     initialScene = SceneA,
-                    transitions = transitions {
-                        from(SceneA, to = SceneB) {
-                            translate(TestElements.Foo, y = translateY)
-                        }
-                    },
+                    transitions =
+                        transitions {
+                            from(SceneA, to = SceneB) {
+                                translate(TestElements.Foo, y = translateY)
+                            }
+                        },
                 )
                     as MutableSceneTransitionLayoutStateImpl
             }
@@ -2009,5 +2010,82 @@ class ElementTest {
                 layoutImpl.elements.getValue(TestElements.Foo).sceneStates.getValue(SceneB).lastSize
             )
             .isEqualTo(Element.SizeUnspecified)
+    }
+
+    @Test
+    fun transparentElementIsNotImpactingInterruption() = runTest {
+        val state =
+            rule.runOnIdle {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions {
+                        from(SceneA, to = SceneB) {
+                            // In A => B, Foo is not shared and first fades out from A then fades in
+                            // B.
+                            sharedElement(TestElements.Foo, enabled = false)
+                            fractionRange(end = 0.5f) { fade(TestElements.Foo.inScene(SceneA)) }
+                            fractionRange(start = 0.5f) { fade(TestElements.Foo.inScene(SceneB)) }
+                        }
+
+                        from(SceneB, to = SceneA) {
+                            // In B => A, Foo is shared.
+                            sharedElement(TestElements.Foo, enabled = true)
+                        }
+                    }
+                )
+            }
+
+        @Composable
+        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+            Box(modifier.element(TestElements.Foo).size(10.dp))
+        }
+
+        rule.setContent {
+            SceneTransitionLayout(state) {
+                scene(SceneB) { Foo(Modifier.offset(40.dp, 60.dp)) }
+
+                // Define A after B so that Foo is placed in A during A <=> B.
+                scene(SceneA) { Foo() }
+            }
+        }
+
+        // Start A => B at 70%.
+        rule.runOnUiThread {
+            state.startTransition(
+                transition(
+                    from = SceneA,
+                    to = SceneB,
+                    progress = { 0.7f },
+                    onFinish = neverFinish(),
+                )
+            )
+        }
+
+        rule.onNode(isElement(TestElements.Foo, SceneA)).assertPositionInRootIsEqualTo(0.dp, 0.dp)
+        rule.onNode(isElement(TestElements.Foo, SceneB)).assertPositionInRootIsEqualTo(40.dp, 60.dp)
+
+        // Start B => A at 50% with interruptionProgress = 100%. Foo is placed in A and should still
+        // be at (40dp, 60dp) given that it was fully transparent in A before the interruption.
+        var interruptionProgress by mutableStateOf(1f)
+        rule.runOnUiThread {
+            state.startTransition(
+                transition(
+                    from = SceneB,
+                    to = SceneA,
+                    progress = { 0.5f },
+                    interruptionProgress = { interruptionProgress },
+                    onFinish = neverFinish(),
+                )
+            )
+        }
+
+        rule.onNode(isElement(TestElements.Foo, SceneA)).assertPositionInRootIsEqualTo(40.dp, 60.dp)
+        rule.onNode(isElement(TestElements.Foo, SceneB)).assertIsNotDisplayed()
+
+        // Set the interruption progress to 0%. Foo should be at (20dp, 30dp) given that B => is at
+        // 50%.
+        interruptionProgress = 0f
+        rule.onNode(isElement(TestElements.Foo, SceneA)).assertPositionInRootIsEqualTo(20.dp, 30.dp)
+        rule.onNode(isElement(TestElements.Foo, SceneB)).assertIsNotDisplayed()
     }
 }

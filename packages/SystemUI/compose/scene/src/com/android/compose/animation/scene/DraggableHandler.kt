@@ -395,10 +395,11 @@ private class DragControllerImpl(
             if (
                 distance != DistanceUnspecified &&
                     shouldCommitSwipe(
-                        offset,
-                        distance,
-                        velocity,
+                        offset = offset,
+                        distance = distance,
+                        velocity = velocity,
                         wasCommitted = swipeTransition._currentScene == toScene,
+                        requiresFullDistanceSwipe = swipeTransition.requiresFullDistanceSwipe,
                     )
             ) {
                 targetScene = toScene
@@ -472,7 +473,12 @@ private class DragControllerImpl(
         distance: Float,
         velocity: Float,
         wasCommitted: Boolean,
+        requiresFullDistanceSwipe: Boolean,
     ): Boolean {
+        if (requiresFullDistanceSwipe && !wasCommitted) {
+            return offset / distance >= 1f
+        }
+
         fun isCloserToTarget(): Boolean {
             return (offset - distance).absoluteValue < offset.absoluteValue
         }
@@ -530,6 +536,7 @@ private fun SwipeTransition(
         userActionDistanceScope = layoutImpl.userActionDistanceScope,
         orientation = orientation,
         isUpOrLeft = isUpOrLeft,
+        requiresFullDistanceSwipe = result.requiresFullDistanceSwipe,
     )
 }
 
@@ -545,6 +552,7 @@ private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
             orientation = old.orientation,
             isUpOrLeft = old.isUpOrLeft,
             lastDistance = old.lastDistance,
+            requiresFullDistanceSwipe = old.requiresFullDistanceSwipe,
         )
         .apply {
             _currentScene = old._currentScene
@@ -562,6 +570,7 @@ private class SwipeTransition(
     val userActionDistanceScope: UserActionDistanceScope,
     override val orientation: Orientation,
     override val isUpOrLeft: Boolean,
+    val requiresFullDistanceSwipe: Boolean,
     var lastDistance: Float = DistanceUnspecified,
 ) :
     TransitionState.Transition(_fromScene.key, _toScene.key),
