@@ -146,6 +146,7 @@ message VibrationProto {
         IGNORED_FROM_VIRTUAL_DEVICE = 26;
         IGNORED_ON_WIRELESS_CHARGER = 27;
         IGNORED_MISSING_PERMISSION = 28;
+        CANCELLED_BY_APP_OPS = 29;
         reserved 17; // prev IGNORED_UNKNOWN_VIBRATION
     }
 }
