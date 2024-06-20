@@ -381,10 +381,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @NonNull
     @MultiUserUnawareField
     private InputMethodSubtypeSwitchingController mSwitchingController;
-    // TODO: Instantiate mHardwareKeyboardShortcutController for each user.
-    @NonNull
-    @MultiUserUnawareField
-    private HardwareKeyboardShortcutController mHardwareKeyboardShortcutController;
 
     @Nullable
     private StatusBarManagerInternal mStatusBarManagerInternal;
@@ -1302,9 +1298,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             mSwitchingController = new InputMethodSubtypeSwitchingController(context,
                     settings.getMethodMap(), settings.getUserId());
-            mHardwareKeyboardShortcutController =
-                    new HardwareKeyboardShortcutController(settings.getMethodMap(),
-                            settings.getUserId());
+            getUserData(mCurrentUserId).mHardwareKeyboardShortcutController.update(settings);
             mMenuController = new InputMethodMenuController(this);
             mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
             mVisibilityApplier = new DefaultImeVisibilityApplier(this);
@@ -2936,7 +2930,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      *     </li>
      *     <li>{@link InputMethodBindingController#getDeviceIdToShowIme()} is ignored.</li>
      *     <li>{@link #mSwitchingController} is ignored.</li>
-     *     <li>{@link #mHardwareKeyboardShortcutController} is ignored.</li>
      *     <li>{@link #mPreventImeStartupUnlessTextEditor} is ignored.</li>
      *     <li>and so on.</li>
      * </ul>
@@ -2969,6 +2962,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             id = imi.getId();
             settings.putSelectedInputMethod(id);
         }
+
+        final var userData = getUserData(userId);
+        userData.mHardwareKeyboardShortcutController.update(settings);
     }
 
     @GuardedBy("ImfLock.class")
@@ -3051,13 +3047,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mSwitchingController = new InputMethodSubtypeSwitchingController(mContext,
                     settings.getMethodMap(), userId);
         }
-        // TODO: Instantiate mHardwareKeyboardShortcutController for each user.
-        if (userId == mHardwareKeyboardShortcutController.getUserId()) {
-            mHardwareKeyboardShortcutController.reset(settings.getMethodMap());
-        } else {
-            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController(
-                    settings.getMethodMap(), userId);
-        }
+        getUserData(userId).mHardwareKeyboardShortcutController.update(settings);
         sendOnNavButtonFlagsChangedLocked();
     }
 
@@ -5322,13 +5312,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mSwitchingController = new InputMethodSubtypeSwitchingController(mContext,
                     settings.getMethodMap(), mCurrentUserId);
         }
-        // TODO: Instantiate mHardwareKeyboardShortcutController for each user.
-        if (userId == mHardwareKeyboardShortcutController.getUserId()) {
-            mHardwareKeyboardShortcutController.reset(settings.getMethodMap());
-        } else {
-            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController(
-                    settings.getMethodMap(), userId);
-        }
+        getUserData(userId).mHardwareKeyboardShortcutController.update(settings);
 
         sendOnNavButtonFlagsChangedLocked();
 
@@ -5639,8 +5623,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final InputMethodSubtypeHandle currentSubtypeHandle =
                 InputMethodSubtypeHandle.of(currentImi, bindingController.getCurrentSubtype());
         final InputMethodSubtypeHandle nextSubtypeHandle =
-                mHardwareKeyboardShortcutController.onSubtypeSwitch(currentSubtypeHandle,
-                        direction > 0);
+                getUserData(userId).mHardwareKeyboardShortcutController.onSubtypeSwitch(
+                        currentSubtypeHandle, direction > 0);
         if (nextSubtypeHandle == null) {
             return;
         }
