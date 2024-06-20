@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
@@ -39,7 +39,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class PackageUpdateMonitorTest : SysuiTestCase() {
 
     @Mock private lateinit var context: Context
@@ -59,9 +59,7 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
         underTest = PackageUpdateMonitor(USER, PACKAGE, {}, bgHandler, context)
 
         underTest.startMonitoring()
-        // There are two receivers registered
-        verify(context, times(1))
-            .registerReceiverAsUser(any(), eq(USER), any(), eq(null), eq(bgHandler))
+
         verify(packageManager).registerPackageMonitorCallback(any(), eq(USER.getIdentifier()))
         // context will be used to get PackageManager, the test should clear invocations
         // for next startMonitoring() assertion
@@ -83,7 +81,7 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
         clearInvocations(packageManager)
 
         underTest.stopMonitoring()
-        verify(context).unregisterReceiver(any())
+
         verify(packageManager).unregisterPackageMonitorCallback(any())
         // context will be used to get PackageManager, the test should clear invocations
         // for next stopMonitoring() assertion

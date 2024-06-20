@@ -29,5 +29,6 @@ package android.view.accessibility;
      * @param success {@code true} if animating successfully with given spec or the spec did not
      *                change. Otherwise {@code false}
      */
+     @RequiresNoPermission
     void onResult(boolean success);
 }

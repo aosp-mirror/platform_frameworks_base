@@ -119,7 +119,7 @@ final class ActivityCallerState {
 
             if (!hasRead && !hasWrite) {
                 callerInfo.mInaccessibleContentUris.add(convertToGrantUri(contentUri,
-                        /* modeFlags */ 0));
+                        /* modeFlags */ 0, callerUid));
             }
         }
     }
@@ -164,7 +164,7 @@ final class ActivityCallerState {
 
     private boolean addContentUriIfUidHasPermission(Uri contentUri, int uid, int modeFlags,
             ArraySet<GrantUri> grantUris) {
-        final GrantUri grantUri = convertToGrantUri(contentUri, modeFlags);
+        final GrantUri grantUri = convertToGrantUri(contentUri, modeFlags, uid);
         if (mAtmService.mUgmInternal.checkUriPermission(grantUri, uid,
                 modeFlags, /* isFullAccessForContentUri */ true)) {
             grantUris.add(grantUri);
@@ -173,9 +173,9 @@ final class ActivityCallerState {
         return false;
     }
 
-    private static GrantUri convertToGrantUri(Uri contentUri, int modeFlags) {
+    private static GrantUri convertToGrantUri(Uri contentUri, int modeFlags, int uid) {
         return new GrantUri(ContentProvider.getUserIdFromUri(contentUri,
-                UserHandle.getCallingUserId()), ContentProvider.getUriWithoutUserId(contentUri),
+                UserHandle.getUserId(uid)), ContentProvider.getUriWithoutUserId(contentUri),
                 modeFlags);
     }
 

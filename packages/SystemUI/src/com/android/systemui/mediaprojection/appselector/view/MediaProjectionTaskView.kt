@@ -140,10 +140,11 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
         val bitmapShader = bitmapShader ?: return
         val thumbnailData = thumbnailData ?: return
+        val thumbnail = thumbnailData.thumbnail ?: return
         val display = context.display ?: return
         val windowMetrics = windowManager.maximumWindowMetrics
 
-        previewRect.set(0, 0, thumbnailData.thumbnail.width, thumbnailData.thumbnail.height)
+        previewRect.set(0, 0, thumbnail.width, thumbnail.height)
 
         val currentRotation: Int = display.rotation
         val isRtl = layoutDirection == LAYOUT_DIRECTION_RTL

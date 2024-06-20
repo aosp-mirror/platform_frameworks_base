@@ -23,7 +23,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.unfold.TestUnfoldTransitionProvider
+import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import com.android.systemui.unfold.progress.TestUnfoldProgressListener
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
@@ -43,7 +43,7 @@ import org.junit.runner.RunWith
 @RunWithLooper
 class ScopedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
-    private val rootProvider = TestUnfoldTransitionProvider()
+    private val rootProvider = FakeUnfoldTransitionProvider()
     private val listener = TestUnfoldProgressListener()
     private val testScope = TestScope(UnconfinedTestDispatcher())
     private val bgThread =

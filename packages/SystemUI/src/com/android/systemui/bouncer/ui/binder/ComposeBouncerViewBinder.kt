@@ -1,6 +1,9 @@
 package com.android.systemui.bouncer.ui.binder
 
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -30,7 +33,24 @@ object ComposeBouncerViewBinder {
     ) {
         view.addView(
             ComposeView(view.context).apply {
-                setContent { PlatformTheme { BouncerContent(viewModel, dialogFactory) } }
+                repeatWhenAttached {
+                    repeatOnLifecycle(Lifecycle.State.CREATED) {
+                        setViewTreeOnBackPressedDispatcherOwner(
+                            object : OnBackPressedDispatcherOwner {
+                                override val onBackPressedDispatcher =
+                                    OnBackPressedDispatcher().apply {
+                                        setOnBackInvokedDispatcher(
+                                            view.viewRootImpl.onBackInvokedDispatcher
+                                        )
+                                    }
+
+                                override val lifecycle: Lifecycle =
+                                    this@repeatWhenAttached.lifecycle
+                            }
+                        )
+                        setContent { PlatformTheme { BouncerContent(viewModel, dialogFactory) } }
+                    }
+                }
             }
         )
 

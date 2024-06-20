@@ -16,9 +16,18 @@
 
 package com.android.server.am;
 
+import static android.os.Process.INVALID_UID;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_NULL;
+import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_ONE_SHOT_SENT;
+import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_OWNER_CANCELED;
+import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_OWNER_FORCE_STOPPED;
+import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_SUPERSEDED;
+import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_USER_STOPPED;
+import static com.android.server.am.PendingIntentRecord.cancelReasonToString;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -34,6 +43,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.os.Looper;
+import android.os.UserHandle;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -54,6 +64,7 @@ public class PendingIntentControllerTest {
     private static final String TEST_PACKAGE_NAME = "test-package-1";
     private static final String TEST_FEATURE_ID = "test-feature-1";
     private static final int TEST_CALLING_UID = android.os.Process.myUid();
+    private static final int TEST_USER_ID = 0;
     private static final Intent[] TEST_INTENTS = new Intent[]{new Intent("com.test.intent")};
 
     @Mock
@@ -92,7 +103,7 @@ public class PendingIntentControllerTest {
 
     private PendingIntentRecord createPendingIntentRecord(int flags) {
         return mPendingIntentController.getIntentSender(ActivityManager.INTENT_SENDER_BROADCAST,
-                TEST_PACKAGE_NAME, TEST_FEATURE_ID, TEST_CALLING_UID, 0, null, null, 0,
+                TEST_PACKAGE_NAME, TEST_FEATURE_ID, TEST_CALLING_UID, TEST_USER_ID, null, null, 0,
                 TEST_INTENTS, null, flags, null);
     }
 
@@ -124,6 +135,54 @@ public class PendingIntentControllerTest {
         verify(mAlarmManagerInternal).remove(piCaptor.capture());
         assertEquals("Wrong target for pending intent passed to alarm manager", pir,
                 piCaptor.getValue().getTarget());
+    }
+
+    @Test
+    public void testCancellationReason() {
+        {
+            final PendingIntentRecord pir = createPendingIntentRecord(0);
+            assertCancelReason(CANCEL_REASON_NULL, pir.cancelReason);
+        }
+
+        {
+            final PendingIntentRecord pir = createPendingIntentRecord(0);
+            mPendingIntentController.cancelIntentSender(pir);
+            assertCancelReason(CANCEL_REASON_OWNER_CANCELED, pir.cancelReason);
+        }
+
+        {
+            final PendingIntentRecord pir = createPendingIntentRecord(0);
+            createPendingIntentRecord(PendingIntent.FLAG_CANCEL_CURRENT);
+            assertCancelReason(CANCEL_REASON_SUPERSEDED, pir.cancelReason);
+        }
+
+        {
+            final PendingIntentRecord pir = createPendingIntentRecord(PendingIntent.FLAG_ONE_SHOT);
+            pir.send(0, null, null, null, null, null, null);
+            assertCancelReason(CANCEL_REASON_ONE_SHOT_SENT, pir.cancelReason);
+        }
+
+        {
+            final PendingIntentRecord pir = createPendingIntentRecord(0);
+            mPendingIntentController.removePendingIntentsForPackage(TEST_PACKAGE_NAME,
+                    TEST_USER_ID, UserHandle.getAppId(TEST_CALLING_UID), true,
+                    CANCEL_REASON_OWNER_FORCE_STOPPED);
+            assertCancelReason(CANCEL_REASON_OWNER_FORCE_STOPPED, pir.cancelReason);
+        }
+
+        {
+            final PendingIntentRecord pir = createPendingIntentRecord(0);
+            mPendingIntentController.removePendingIntentsForPackage(null,
+                    TEST_USER_ID, INVALID_UID, true,
+                    CANCEL_REASON_USER_STOPPED);
+            assertCancelReason(CANCEL_REASON_USER_STOPPED, pir.cancelReason);
+        }
+    }
+
+    private void assertCancelReason(int expectedReason, int actualReason) {
+        final String errMsg = "Expected: " + cancelReasonToString(expectedReason)
+                + "; Actual: " + cancelReasonToString(actualReason);
+        assertEquals(errMsg, expectedReason, actualReason);
     }
 
     @After

@@ -17,22 +17,21 @@
 package com.android.systemui.qs
 
 import android.content.Context
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Mock
@@ -42,8 +41,6 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private lateinit var context: Context
-
-    private val sceneContainerFlags = FakeSceneContainerFlags()
 
     private lateinit var controller: QuickStatusBarHeaderController
 
@@ -55,9 +52,8 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
         `when`(view.context).thenReturn(context)
 
         controller = QuickStatusBarHeaderController(
-                view,
-                quickQSPanelController,
-                sceneContainerFlags,
+            view,
+            quickQSPanelController,
         )
     }
 

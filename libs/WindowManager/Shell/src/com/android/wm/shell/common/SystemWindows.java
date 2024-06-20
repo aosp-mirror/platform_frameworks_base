@@ -48,6 +48,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.view.inputmethod.ImeTracker;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 
@@ -348,11 +349,11 @@ public class SystemWindows {
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration newMergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
-                boolean dragResizing) {}
+                boolean dragResizing, @Nullable ActivityWindowInfo activityWindowInfo) {}
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls) {}
+                InsetsSourceControl.Array activeControls) {}
 
         @Override
         public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {}
@@ -388,9 +389,6 @@ public class SystemWindows {
         public void dispatchDragEvent(DragEvent event) {}
 
         @Override
-        public void updatePointerIcon(float x, float y) {}
-
-        @Override
         public void dispatchWindowShown() {}
 
         @Override
@@ -407,6 +405,11 @@ public class SystemWindows {
             } catch (RemoteException ex) {
                 // ignore
             }
+        }
+
+        @Override
+        public void dumpWindow(ParcelFileDescriptor pfd) {
+
         }
     }
 }

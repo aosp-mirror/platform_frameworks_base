@@ -46,8 +46,11 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.telephony.TelephonyManager;
+import android.telephony.UiccSlotMapping;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
+import android.util.IntArray;
 import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
@@ -68,6 +71,8 @@ import com.android.server.utils.AlarmQueue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -322,6 +327,9 @@ public final class FlexibilityController extends StateController {
     private final ArraySet<JobStatus> mJobsToCheck = new ArraySet<>();
     @GuardedBy("mLock")
     private final ArraySet<String> mPackagesToCheck = new ArraySet<>();
+
+    @GuardedBy("mLock")
+    private boolean mLocalOverride;
 
     public FlexibilityController(
             JobSchedulerService service, PrefetchController prefetchController) {
@@ -1620,9 +1628,21 @@ public final class FlexibilityController extends StateController {
         private final Object mSatLock = new Object();
 
         private DeviceIdleInternal mDeviceIdleInternal;
+        private TelephonyManager mTelephonyManager;
+
+        private final boolean mHasFeatureTelephonySubscription;
 
         /** Set of all apps that have been deemed special, keyed by user ID. */
         private final SparseSetArray<String> mSpecialApps = new SparseSetArray<>();
+        /**
+         * Set of carrier privileged apps, keyed by the logical ID of the SIM their privileged
+         * for.
+         */
+        @GuardedBy("mSatLock")
+        private final SparseSetArray<String> mCarrierPrivilegedApps = new SparseSetArray<>();
+        @GuardedBy("mSatLock")
+        private final SparseArray<LogicalIndexCarrierPrivilegesCallback>
+                mCarrierPrivilegedCallbacks = new SparseArray<>();
         @GuardedBy("mSatLock")
         private final ArraySet<String> mPowerAllowlistedApps = new ArraySet<>();
 
@@ -1630,12 +1650,21 @@ public final class FlexibilityController extends StateController {
             @Override
             public void onReceive(Context context, Intent intent) {
                 switch (intent.getAction()) {
+                    case TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED:
+                        updateCarrierPrivilegedCallbackRegistration();
+                        break;
+
                     case PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED:
                         mHandler.post(SpecialAppTracker.this::updatePowerAllowlistCache);
                         break;
                 }
             }
         };
+
+        SpecialAppTracker() {
+            mHasFeatureTelephonySubscription = mContext.getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION);
+        }
 
         public boolean isSpecialApp(final int userId, @NonNull String packageName) {
             synchronized (mSatLock) {
@@ -1654,6 +1683,12 @@ public final class FlexibilityController extends StateController {
                 if (mPowerAllowlistedApps.contains(packageName)) {
                     return true;
                 }
+                for (int l = mCarrierPrivilegedApps.size() - 1; l >= 0; --l) {
+                    if (mCarrierPrivilegedApps.contains(
+                            mCarrierPrivilegedApps.keyAt(l), packageName)) {
+                        return true;
+                    }
+                }
             }
             return false;
         }
@@ -1669,9 +1704,12 @@ public final class FlexibilityController extends StateController {
 
         private void onSystemServicesReady() {
             mDeviceIdleInternal = LocalServices.getService(DeviceIdleInternal.class);
+            mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
 
             synchronized (mLock) {
                 if (mFlexibilityEnabled) {
+                    mHandler.post(
+                            SpecialAppTracker.this::updateCarrierPrivilegedCallbackRegistration);
                     mHandler.post(SpecialAppTracker.this::updatePowerAllowlistCache);
                 }
             }
@@ -1686,6 +1724,13 @@ public final class FlexibilityController extends StateController {
         private void startTracking() {
             IntentFilter filter = new IntentFilter(
                     PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
+
+            if (mHasFeatureTelephonySubscription) {
+                filter.addAction(TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED);
+
+                updateCarrierPrivilegedCallbackRegistration();
+            }
+
             mContext.registerReceiver(mBroadcastReceiver, filter);
 
             updatePowerAllowlistCache();
@@ -1695,9 +1740,67 @@ public final class FlexibilityController extends StateController {
             mContext.unregisterReceiver(mBroadcastReceiver);
 
             synchronized (mSatLock) {
+                mCarrierPrivilegedApps.clear();
                 mPowerAllowlistedApps.clear();
                 mSpecialApps.clear();
+
+                for (int i = mCarrierPrivilegedCallbacks.size() - 1; i >= 0; --i) {
+                    mTelephonyManager.unregisterCarrierPrivilegesCallback(
+                            mCarrierPrivilegedCallbacks.valueAt(i));
+                }
+                mCarrierPrivilegedCallbacks.clear();
             }
+        }
+
+        private void updateCarrierPrivilegedCallbackRegistration() {
+            if (mTelephonyManager == null) {
+                return;
+            }
+            if (!mHasFeatureTelephonySubscription) {
+                return;
+            }
+
+            Collection<UiccSlotMapping> simSlotMapping = mTelephonyManager.getSimSlotMapping();
+            final ArraySet<String> changedPkgs = new ArraySet<>();
+            synchronized (mSatLock) {
+                final IntArray callbacksToRemove = new IntArray();
+                for (int i = mCarrierPrivilegedCallbacks.size() - 1; i >= 0; --i) {
+                    callbacksToRemove.add(mCarrierPrivilegedCallbacks.keyAt(i));
+                }
+                for (UiccSlotMapping mapping : simSlotMapping) {
+                    final int logicalIndex = mapping.getLogicalSlotIndex();
+                    if (mCarrierPrivilegedCallbacks.contains(logicalIndex)) {
+                        // Callback already exists. No need to create a new one or remove it.
+                        for (int i = callbacksToRemove.size() - 1; i >= 0; i--) {
+                            if (callbacksToRemove.get(i) == logicalIndex) {
+                                callbacksToRemove.remove(i);
+                                break;
+                            }
+                        }
+
+                        continue;
+                    }
+                    final LogicalIndexCarrierPrivilegesCallback callback =
+                            new LogicalIndexCarrierPrivilegesCallback(logicalIndex);
+                    mCarrierPrivilegedCallbacks.put(logicalIndex, callback);
+                    // Upon registration, the callbacks will be called with the current list of
+                    // apps, so there's no need to query the app list synchronously.
+                    mTelephonyManager.registerCarrierPrivilegesCallback(logicalIndex,
+                            AppSchedulingModuleThread.getExecutor(), callback);
+                }
+
+                for (int i = callbacksToRemove.size() - 1; i >= 0; --i) {
+                    final int logicalIndex = callbacksToRemove.get(i);
+                    final LogicalIndexCarrierPrivilegesCallback callback =
+                            mCarrierPrivilegedCallbacks.get(logicalIndex);
+                    mTelephonyManager.unregisterCarrierPrivilegesCallback(callback);
+                    mCarrierPrivilegedCallbacks.remove(logicalIndex);
+                    changedPkgs.addAll(mCarrierPrivilegedApps.get(logicalIndex));
+                    mCarrierPrivilegedApps.remove(logicalIndex);
+                }
+            }
+
+            updateSpecialAppSetUnlocked(UserHandle.USER_ALL, changedPkgs);
         }
 
         /**
@@ -1762,16 +1865,63 @@ public final class FlexibilityController extends StateController {
             updateSpecialAppSetUnlocked(UserHandle.USER_ALL, changedPkgs);
         }
 
+        class LogicalIndexCarrierPrivilegesCallback implements
+                TelephonyManager.CarrierPrivilegesCallback {
+            public final int logicalIndex;
+
+            LogicalIndexCarrierPrivilegesCallback(int logicalIndex) {
+                this.logicalIndex = logicalIndex;
+            }
+
+            @Override
+            public void onCarrierPrivilegesChanged(@NonNull Set<String> privilegedPackageNames,
+                    @NonNull Set<Integer> privilegedUids) {
+                final ArraySet<String> changedPkgs = new ArraySet<>();
+                synchronized (mSatLock) {
+                    final ArraySet<String> oldPrivilegedSet =
+                            mCarrierPrivilegedApps.get(logicalIndex);
+                    if (oldPrivilegedSet != null) {
+                        changedPkgs.addAll(oldPrivilegedSet);
+                        mCarrierPrivilegedApps.remove(logicalIndex);
+                    }
+                    for (String pkgName : privilegedPackageNames) {
+                        mCarrierPrivilegedApps.add(logicalIndex, pkgName);
+                        if (!changedPkgs.remove(pkgName)) {
+                            // The package wasn't in the previous set of privileged apps. Add it
+                            // since its state has changed.
+                            changedPkgs.add(pkgName);
+                        }
+                    }
+                }
+
+                // The carrier privileged list doesn't provide a simple userId correlation,
+                // so for now, use USER_ALL for these packages.
+                // TODO(141645789): use the UID list to narrow down to specific userIds
+                updateSpecialAppSetUnlocked(UserHandle.USER_ALL, changedPkgs);
+            }
+        }
+
         public void dump(@NonNull IndentingPrintWriter pw) {
             pw.println("Special apps:");
             pw.increaseIndent();
 
             synchronized (mSatLock) {
                 for (int u = 0; u < mSpecialApps.size(); ++u) {
+                    pw.print("User ");
                     pw.print(mSpecialApps.keyAt(u));
                     pw.print(": ");
                     pw.println(mSpecialApps.valuesAt(u));
                 }
+
+                pw.println();
+                pw.println("Carrier privileged packages:");
+                pw.increaseIndent();
+                for (int i = 0; i < mCarrierPrivilegedApps.size(); ++i) {
+                    pw.print(mCarrierPrivilegedApps.keyAt(i));
+                    pw.print(": ");
+                    pw.println(mCarrierPrivilegedApps.valuesAt(i));
+                }
+                pw.decreaseIndent();
 
                 pw.println();
                 pw.print("Power allowlisted packages: ");
@@ -1779,6 +1929,27 @@ public final class FlexibilityController extends StateController {
             }
 
             pw.decreaseIndent();
+        }
+    }
+
+    /**
+     * If {@code override} is true, uses {@code appliedConstraints} for flex policy evaluation,
+     * overriding anything else that was set. If {@code override} is false, any previous calls
+     * will be discarded and the policy will be reset to the normal default policy.
+     */
+    public void setLocalPolicyForTesting(boolean override, int appliedConstraints) {
+        synchronized (mLock) {
+            final boolean recheckJobs = mLocalOverride != override
+                    || mAppliedConstraints != appliedConstraints;
+            mLocalOverride = override;
+            if (mLocalOverride) {
+                mAppliedConstraints = appliedConstraints;
+            } else {
+                mAppliedConstraints = mFcConfig.APPLIED_CONSTRAINTS;
+            }
+            if (recheckJobs) {
+                mHandler.obtainMessage(MSG_CHECK_ALL_JOBS).sendToTarget();
+            }
         }
     }
 
@@ -1791,6 +1962,12 @@ public final class FlexibilityController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void dumpControllerStateLocked(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
+        if (mLocalOverride) {
+            pw.println("Local override active");
+        }
+        pw.print("Applied Flexible Constraints:");
+        JobStatus.dumpConstraints(pw, mAppliedConstraints);
+        pw.println();
         pw.print("Satisfied Flexible Constraints:");
         JobStatus.dumpConstraints(pw, mSatisfiedFlexibleConstraints);
         pw.println();

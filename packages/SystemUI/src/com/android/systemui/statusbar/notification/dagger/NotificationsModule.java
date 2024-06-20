@@ -74,6 +74,8 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
+import com.android.systemui.statusbar.notification.row.NotificationEntryProcessorFactory;
+import com.android.systemui.statusbar.notification.row.NotificationEntryProcessorFactoryLooperImpl;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule;
@@ -85,15 +87,17 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
-import javax.inject.Provider;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+
 import kotlin.coroutines.CoroutineContext;
+
 import kotlinx.coroutines.CoroutineScope;
+
+import javax.inject.Provider;
 
 /**
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
@@ -231,6 +235,11 @@ public interface NotificationsModule {
     /** */
     @Binds
     NotifInflater bindNotifInflater(NotifInflaterImpl notifInflaterImpl);
+
+    /** */
+    @Binds
+    NotificationEntryProcessorFactory bindNotificationEntryProcessorFactory(
+            NotificationEntryProcessorFactoryLooperImpl factoryImpl);
 
     /** */
     @Binds

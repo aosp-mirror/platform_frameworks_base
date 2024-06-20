@@ -83,6 +83,8 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFO
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
+import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -113,13 +115,12 @@ import android.hardware.HardwareBuffer;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.SystemClock;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
-import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -129,7 +130,6 @@ import android.view.IDisplayChangeWindowController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
 import android.view.InsetsState;
-import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -149,7 +149,6 @@ import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.WmDisplayCutout;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -175,10 +174,6 @@ import java.util.concurrent.TimeoutException;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class DisplayContentTests extends WindowTestsBase {
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @SetupWindows(addAllCommonWindows = true)
     @Test
@@ -510,44 +505,6 @@ public class DisplayContentTests extends WindowTestsBase {
         globalConfig = mWm.mRoot.getConfiguration();
         assertEquals(currentConfig.densityDpi, globalConfig.densityDpi);
         assertEquals(currentConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
-    }
-
-    /**
-     * Tests tapping on a root task in different display results in window gaining focus.
-     */
-    @Test
-    @RequiresFlagsDisabled(com.android.input.flags.Flags.FLAG_REMOVE_POINTER_EVENT_TRACKING_IN_WM)
-    public void testInputEventBringsCorrectDisplayInFocus() {
-        DisplayContent dc0 = mWm.getDefaultDisplayContentLocked();
-        // Create a second display
-        final DisplayContent dc1 = createNewDisplay();
-
-        // Add root task with activity.
-        final Task rootTask0 = createTask(dc0);
-        final Task task0 = createTaskInRootTask(rootTask0, 0 /* userId */);
-        final ActivityRecord activity = createNonAttachedActivityRecord(dc0);
-        task0.addChild(activity, 0);
-        dc0.configureDisplayPolicy();
-        assertNotNull(dc0.mTapDetector);
-
-        final Task rootTask1 = createTask(dc1);
-        final Task task1 = createTaskInRootTask(rootTask1, 0 /* userId */);
-        final ActivityRecord activity1 = createNonAttachedActivityRecord(dc0);
-        task1.addChild(activity1, 0);
-        dc1.configureDisplayPolicy();
-        assertNotNull(dc1.mTapDetector);
-
-        // tap on primary display.
-        tapOnDisplay(dc0);
-        // Check focus is on primary display.
-        assertEquals(mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus,
-                dc0.findFocusedWindow());
-
-        // Tap on secondary display.
-        tapOnDisplay(dc1);
-        // Check focus is on secondary.
-        assertEquals(mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus,
-                dc1.findFocusedWindow());
     }
 
     @Test
@@ -1068,19 +1025,10 @@ public class DisplayContentTests extends WindowTestsBase {
                 mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
     }
 
-    @SetupWindows(addWindows = W_INPUT_METHOD)
-    @Test
-    public void testInputMethodSet_listenOnDisplayAreaConfigurationChanged() {
-        spyOn(mAtm);
-        mDisplayContent.setInputMethodWindowLocked(mImeWindow);
-
-        verify(mAtm).onImeWindowSetOnDisplayArea(
-                mImeWindow.mSession.mPid, mDisplayContent.getImeContainer());
-    }
-
     @Test
     public void testAllowsTopmostFullscreenOrientation() {
         final DisplayContent dc = createNewDisplay();
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, dc.getOrientation());
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
 
@@ -1397,6 +1345,27 @@ public class DisplayContentTests extends WindowTestsBase {
             mDisplayContent.getImeInputTarget().getWindowState());
         mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
         assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget());
+    }
+
+    @SetupWindows(addWindows = W_ACTIVITY)
+    @Test
+    public void testShouldImeAttachedToApp_targetBoundsDifferentFromImeContainer_returnsFalse()
+            throws Exception {
+        Rect imeContainerBounds = new Rect(0, 0, 100, 100);
+        Rect imeTargetBounds = new Rect(0, 0, 100, 200);
+        spyOn(mAppWindow);
+        spyOn(mAppWindow.mActivityRecord);
+        doReturn(imeTargetBounds).when(mAppWindow).getBounds();
+        doReturn(true).when(mAppWindow.mActivityRecord).matchParentBounds();
+        mDisplayContent.setImeInputTarget(mAppWindow);
+        mDisplayContent.setImeLayeringTarget(
+                mDisplayContent.getImeInputTarget().getWindowState());
+        mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
+        final DisplayArea.Tokens imeContainer = mDisplayContent.getImeContainer();
+        spyOn(imeContainer);
+        doReturn(imeContainerBounds).when(imeContainer).getBounds();
+
+        assertFalse(mDisplayContent.shouldImeAttachedToApp());
     }
 
     @Test
@@ -2170,8 +2139,49 @@ public class DisplayContentTests extends WindowTestsBase {
             assertEquals("There should be only one DisplayArea for FEATURE_WINDOWED_MAGNIFICATION",
                     1, windowedMagnificationAreas.size());
             assertEquals(windowedMagnificationAreas.get(0).mSurfaceControl, windowingLayer);
+            assertEquals(windowingLayer,
+                    mDisplayContent.mDisplayAreaPolicy.getWindowingArea().mSurfaceControl);
         } else {
             assertNotEquals(mDisplayContent.mSurfaceControl, windowingLayer);
+        }
+
+        // When migrating the surface of default trusted display, the children should belong to the
+        // surface of DisplayContent directly.
+        clearInvocations(mTransaction);
+        mDisplayContent.migrateToNewSurfaceControl(mTransaction);
+        for (int i = mDisplayContent.getChildCount() - 1; i >= 0; i--) {
+            final SurfaceControl childSc = mDisplayContent.getChildAt(i).mSurfaceControl;
+            verify(mTransaction).reparent(eq(childSc), eq(mDisplayContent.mSurfaceControl));
+            verify(mTransaction, never()).reparent(eq(childSc), eq(windowingLayer));
+        }
+
+        // If a display doesn't have WINDOWED_MAGNIFICATION (e.g. untrusted), it will have an
+        // additional windowing layer to put the window content.
+        clearInvocations(mTransaction);
+        final DisplayInfo info = new DisplayInfo(mDisplayInfo);
+        info.flags &= ~Display.FLAG_TRUSTED;
+        final DisplayContent dc2 = createNewDisplay(info);
+        final SurfaceControl dc2WinLayer = dc2.getWindowingLayer();
+        final DisplayArea<?> dc2WinArea = dc2.mDisplayAreaPolicy.getWindowingArea();
+        assertEquals(dc2WinLayer, dc2WinArea.mSurfaceControl);
+
+        // When migrating the surface of a display with additional windowing layer, the children
+        // layer of display should still belong to the display.
+        clearInvocations(mTransaction);
+        dc2.migrateToNewSurfaceControl(mTransaction);
+        verify(mTransaction).reparent(eq(dc2WinLayer), eq(dc2.mSurfaceControl));
+        for (int i = dc2.getChildCount() - 1; i >= 0; i--) {
+            verify(mTransaction).reparent(eq(dc2.getChildAt(i).mSurfaceControl),
+                    eq(dc2.mSurfaceControl));
+        }
+
+        // When migrating the surface of child area under windowing area, the new child surfaces
+        // should reparent to the windowing layer.
+        clearInvocations(mTransaction);
+        for (int i = dc2WinArea.getChildCount() - 1; i >= 0; i--) {
+            final WindowContainer<?> child = dc2WinArea.getChildAt(i);
+            child.migrateToNewSurfaceControl(mTransaction);
+            verify(mTransaction).reparent(eq(child.mSurfaceControl), eq(dc2WinLayer));
         }
     }
 
@@ -2781,6 +2791,66 @@ public class DisplayContentTests extends WindowTestsBase {
                 mDisplayContent.getKeepClearAreas());
     }
 
+    @Test
+    public void testHasAccessConsidersUserVisibilityForBackgroundVisibleUsers() {
+        doReturn(true).when(() -> UserManager.isVisibleBackgroundUsersEnabled());
+        final int appId = 1234;
+        final int userId1 = 11;
+        final int userId2 = 12;
+        final int uid1 = UserHandle.getUid(userId1, appId);
+        final int uid2 = UserHandle.getUid(userId2, appId);
+        final DisplayInfo displayInfo = new DisplayInfo(mDisplayInfo);
+        final DisplayContent dc = createNewDisplay(displayInfo);
+        int displayId = dc.getDisplayId();
+        doReturn(true).when(mWm.mUmInternal).isUserVisible(userId1, displayId);
+        doReturn(false).when(mWm.mUmInternal).isUserVisible(userId2, displayId);
+
+        assertTrue(dc.hasAccess(uid1));
+        assertFalse(dc.hasAccess(uid2));
+    }
+
+    @Test
+    public void testHasAccessIgnoresUserVisibilityForPrivateDisplay() {
+        doReturn(true).when(() -> UserManager.isVisibleBackgroundUsersEnabled());
+        final int appId = 1234;
+        final int userId2 = 12;
+        final int uid2 = UserHandle.getUid(userId2, appId);
+        final DisplayInfo displayInfo = new DisplayInfo(mDisplayInfo);
+        displayInfo.flags = FLAG_PRIVATE;
+        displayInfo.ownerUid = uid2;
+        final DisplayContent dc = createNewDisplay(displayInfo);
+        int displayId = dc.getDisplayId();
+
+        assertTrue(dc.hasAccess(uid2));
+
+        verify(mWm.mUmInternal, never()).isUserVisible(userId2, displayId);
+    }
+
+    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @Test
+    public void cameraCompatFreeformFlagEnabled_cameraCompatFreeformPolicyNotNull() {
+        doReturn(true).when(() ->
+                DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+
+        assertNotNull(createNewDisplay().mCameraCompatFreeformPolicy);
+    }
+
+    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @Test
+    public void cameraCompatFreeformFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
+        doReturn(true).when(() ->
+                DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+
+        assertNull(createNewDisplay().mCameraCompatFreeformPolicy);
+    }
+
+    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @Test
+    public void desktopWindowingFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
+        assertNull(createNewDisplay().mCameraCompatFreeformPolicy);
+    }
+
     private void removeRootTaskTests(Runnable runnable) {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final Task rootTask1 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
@@ -2889,34 +2959,5 @@ public class DisplayContentTests extends WindowTestsBase {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void tapOnDisplay(final DisplayContent dc) {
-        final DisplayMetrics dm = dc.getDisplayMetrics();
-        final float x = dm.widthPixels / 2;
-        final float y = dm.heightPixels / 2;
-        final long downTime = SystemClock.uptimeMillis();
-        final long eventTime = SystemClock.uptimeMillis() + 100;
-        // sending ACTION_DOWN
-        final MotionEvent downEvent = MotionEvent.obtain(
-                downTime,
-                downTime,
-                MotionEvent.ACTION_DOWN,
-                x,
-                y,
-                0 /*metaState*/);
-        downEvent.setDisplayId(dc.getDisplayId());
-        dc.mTapDetector.onPointerEvent(downEvent);
-
-        // sending ACTION_UP
-        final MotionEvent upEvent = MotionEvent.obtain(
-                downTime,
-                eventTime,
-                MotionEvent.ACTION_UP,
-                x,
-                y,
-                0 /*metaState*/);
-        upEvent.setDisplayId(dc.getDisplayId());
-        dc.mTapDetector.onPointerEvent(upEvent);
     }
 }

@@ -47,7 +47,6 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import javax.inject.Inject;
 
-
 /** Controller for a {@link KeyguardSecurityView}. */
 public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         extends ViewController<T> implements KeyguardSecurityView {
@@ -107,7 +106,10 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         }
     }
 
-    private void updateMessageAreaVisibility() {
+    /**
+     * Determines whether to show the message area controlled by MessageAreaController.
+     */
+    public void updateMessageAreaVisibility() {
         if (mMessageAreaController == null) return;
         if (Flags.revampedBouncerMessages()) {
             mMessageAreaController.disable();

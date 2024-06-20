@@ -257,7 +257,7 @@
     <item msgid="1212561935004167943">"以绿色突出显示测试绘制命令"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="634406443901014984">"关闭"</item>
+    <item msgid="634406443901014984">"已关闭"</item>
     <item msgid="1288760936356000927">"在屏幕上显示为条形图"</item>
     <item msgid="5023908510820531131">"在 <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> 中"</item>
   </string-array>

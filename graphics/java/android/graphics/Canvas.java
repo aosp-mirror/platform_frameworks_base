@@ -789,10 +789,8 @@ public class Canvas extends BaseCanvas {
      * @param m The 4x4 matrix to preconcatenate with the current matrix
      */
     @FlaggedApi(Flags.FLAG_MATRIX_44)
-    public void concat44(@Nullable Matrix44 m) {
-        if (m != null) {
-            nConcat(mNativeCanvasWrapper, m.mBackingArray);
-        }
+    public void concat(@Nullable Matrix44 m) {
+        if (m != null) nConcat(mNativeCanvasWrapper, m.mBackingArray);
     }
 
     /**
@@ -1930,6 +1928,17 @@ public class Canvas extends BaseCanvas {
      */
     public void drawPath(@NonNull Path path, @NonNull Paint paint) {
         super.drawPath(path, paint);
+    }
+
+    /**
+     * Draws the given region using the given paint.
+     *
+     * @param region The region to be drawn
+     * @param paint The paint used to draw the region
+     */
+    @FlaggedApi(Flags.FLAG_DRAW_REGION)
+    public void drawRegion(@NonNull Region region, @NonNull Paint paint) {
+        super.drawRegion(region, paint);
     }
 
     /**

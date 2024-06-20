@@ -21,8 +21,8 @@ import android.app.WallpaperManager.OnColorsChangedListener
 import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
-import android.testing.AndroidTestingRunner
 import android.view.IWindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -40,7 +40,7 @@ import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class LetterboxBackgroundProviderTest : SysuiTestCase() {
 

@@ -21,7 +21,6 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
 
@@ -114,10 +113,9 @@ class TransitionController {
     private static final int LEGACY_STATE_READY = 1;
     private static final int LEGACY_STATE_RUNNING = 2;
 
-    private ITransitionPlayer mTransitionPlayer;
+    private final ArrayList<TransitionPlayerRecord> mTransitionPlayers = new ArrayList<>();
     final TransitionMetricsReporter mTransitionMetricsReporter = new TransitionMetricsReporter();
 
-    private WindowProcessController mTransitionPlayerProc;
     final ActivityTaskManagerService mAtm;
     BLASTSyncEngine mSyncEngine;
 
@@ -175,8 +173,6 @@ class TransitionController {
     final ArrayList<WindowState> mAnimatingExitWindows = new ArrayList<>();
 
     final Lock mRunningLock = new Lock();
-
-    private final IBinder.DeathRecipient mTransitionPlayerDeath;
 
     static class QueuedTransition {
         final Transition mTransition;
@@ -244,11 +240,6 @@ class TransitionController {
     TransitionController(ActivityTaskManagerService atm) {
         mAtm = atm;
         mRemotePlayer = new RemotePlayer(atm);
-        mTransitionPlayerDeath = () -> {
-            synchronized (mAtm.mGlobalLock) {
-                detachPlayer();
-            }
-        };
     }
 
     void setWindowManager(WindowManagerService wms) {
@@ -267,11 +258,10 @@ class TransitionController {
         mSyncEngine.addOnIdleListener(this::tryStartCollectFromQueue);
     }
 
-    @VisibleForTesting
-    void detachPlayer() {
-        if (mTransitionPlayer == null) return;
-        // Immediately set to null so that nothing inadvertently starts/queues.
-        mTransitionPlayer = null;
+    void flushRunningTransitions() {
+        // Temporarily clear so that nothing gets started/queued while flushing
+        final ArrayList<TransitionPlayerRecord> temp = new ArrayList<>(mTransitionPlayers);
+        mTransitionPlayers.clear();
         // Clean-up/finish any playing transitions. Backwards since they can remove themselves.
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             mPlayingTransitions.get(i).cleanUpOnFailure();
@@ -286,9 +276,10 @@ class TransitionController {
         if (mCollectingTransition != null) {
             mCollectingTransition.abort();
         }
-        mTransitionPlayerProc = null;
         mRemotePlayer.clear();
         mRunningLock.doNotifyLocked();
+        // Restore the rest of the player stack
+        mTransitionPlayers.addAll(temp);
     }
 
     /** @see #createTransition(int, int) */
@@ -301,9 +292,9 @@ class TransitionController {
      * Creates a transition. It can immediately collect participants.
      */
     @NonNull
-    private Transition createTransition(@WindowManager.TransitionType int type,
+    Transition createTransition(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags) {
-        if (mTransitionPlayer == null) {
+        if (mTransitionPlayers.isEmpty()) {
             throw new IllegalStateException("Shell Transitions not enabled");
         }
         if (mCollectingTransition != null) {
@@ -322,7 +313,7 @@ class TransitionController {
         if (mCollectingTransition != null) {
             throw new IllegalStateException("Simultaneous transition collection not supported.");
         }
-        if (mTransitionPlayer == null) {
+        if (mTransitionPlayers.isEmpty()) {
             // If sysui has been killed (by a test) or crashed, we can temporarily have no player
             // In this case, abort the transition.
             transition.abort();
@@ -340,30 +331,56 @@ class TransitionController {
 
     void registerTransitionPlayer(@Nullable ITransitionPlayer player,
             @Nullable WindowProcessController playerProc) {
-        try {
-            // Note: asBinder() can be null if player is same process (likely in a test).
-            if (mTransitionPlayer != null) {
-                if (mTransitionPlayer.asBinder() != null) {
-                    mTransitionPlayer.asBinder().unlinkToDeath(mTransitionPlayerDeath, 0);
-                }
-                detachPlayer();
-            }
-            if (player.asBinder() != null) {
-                player.asBinder().linkToDeath(mTransitionPlayerDeath, 0);
-            }
-            mTransitionPlayer = player;
-            mTransitionPlayerProc = playerProc;
-        } catch (RemoteException e) {
-            throw new RuntimeException("Unable to set transition player");
+        if (!mTransitionPlayers.isEmpty()) {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Registering transition "
+                    + "player %s over %d other players", player.asBinder(),
+                    mTransitionPlayers.size());
+            // flush currently running transitions so that the new player doesn't get
+            // intermediate state
+            flushRunningTransitions();
+        } else {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Registering transition "
+                    + "player %s ", player.asBinder());
         }
+        mTransitionPlayers.add(new TransitionPlayerRecord(player, playerProc));
+    }
+
+    @VisibleForTesting
+    void unregisterTransitionPlayer(@NonNull ITransitionPlayer player) {
+        int idx = mTransitionPlayers.size() - 1;
+        for (; idx >= 0; --idx) {
+            if (mTransitionPlayers.get(idx).mPlayer.asBinder() == player.asBinder()) break;
+        }
+        if (idx < 0) {
+            ProtoLog.w(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Attempt to unregister "
+                    + "transition player %s but it isn't registered", player.asBinder());
+            return;
+        }
+        final boolean needsFlush = idx == (mTransitionPlayers.size() - 1);
+        final TransitionPlayerRecord record = mTransitionPlayers.remove(idx);
+        if (needsFlush) {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Unregistering active "
+                    + "transition player %s at index=%d leaving %d in stack", player.asBinder(),
+                    idx, mTransitionPlayers.size());
+        } else {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Unregistering transition "
+                    + "player %s at index=%d leaving %d in stack", player.asBinder(), idx,
+                    mTransitionPlayers.size());
+        }
+        record.unlinkToDeath();
+        if (!needsFlush) {
+            // Not the active player, so no need to flush transitions.
+            return;
+        }
+        flushRunningTransitions();
     }
 
     @Nullable ITransitionPlayer getTransitionPlayer() {
-        return mTransitionPlayer;
+        return mTransitionPlayers.isEmpty() ? null : mTransitionPlayers.getLast().mPlayer;
     }
 
     boolean isShellTransitionsEnabled() {
-        return mTransitionPlayer != null;
+        return !mTransitionPlayers.isEmpty();
     }
 
     /** @return {@code true} if using shell-transitions rotation instead of fixed-rotation. */
@@ -493,6 +510,27 @@ class TransitionController {
         return false;
     }
 
+    /** Returns {@code true} if the display contains a transient-launch transition. */
+    boolean hasTransientLaunch(@NonNull DisplayContent dc) {
+        if (mCollectingTransition != null && mCollectingTransition.hasTransientLaunch()
+                && mCollectingTransition.isOnDisplay(dc)) {
+            return true;
+        }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            final Transition transition = mWaitingTransitions.get(i);
+            if (transition.hasTransientLaunch() && transition.isOnDisplay(dc)) {
+                return true;
+            }
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            final Transition transition = mPlayingTransitions.get(i);
+            if (transition.hasTransientLaunch() && transition.isOnDisplay(dc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     boolean isTransientHide(@NonNull Task task) {
         if (mCollectingTransition != null && mCollectingTransition.isInTransientHide(task)) {
             return true;
@@ -566,6 +604,9 @@ class TransitionController {
         if (isTransientCollect(ar)) {
             return true;
         }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            if (mWaitingTransitions.get(i).isTransientLaunch(ar)) return true;
+        }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             if (mPlayingTransitions.get(i).isTransientLaunch(ar)) return true;
         }
@@ -616,30 +657,6 @@ class TransitionController {
         return changeInfo != null && changeInfo.mRotation != targetRotation;
     }
 
-    /**
-     * @see #requestTransitionIfNeeded(int, int, WindowContainer, WindowContainer, RemoteTransition)
-     */
-    @Nullable
-    Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
-            @NonNull WindowContainer trigger) {
-        return requestTransitionIfNeeded(type, 0 /* flags */, trigger, trigger /* readyGroupRef */);
-    }
-
-    /**
-     * @see #requestTransitionIfNeeded(int, int, WindowContainer, WindowContainer, RemoteTransition)
-     */
-    @Nullable
-    Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
-            @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger,
-            @NonNull WindowContainer readyGroupRef) {
-        return requestTransitionIfNeeded(type, flags, trigger, readyGroupRef,
-                null /* remoteTransition */, null /* displayChange */);
-    }
-
-    private static boolean isExistenceType(@WindowManager.TransitionType int type) {
-        return type == TRANSIT_OPEN || type == TRANSIT_CLOSE;
-    }
-
     /** Sets the sync method for the display change. */
     private void setDisplaySyncMethod(@NonNull TransitionRequestInfo.DisplayChange displayChange,
             @NonNull DisplayContent displayContent) {
@@ -672,21 +689,17 @@ class TransitionController {
      * start it. Collection can start immediately.
      * @param trigger if non-null, this is the first container that will be collected
      * @param readyGroupRef Used to identify which ready-group this request is for.
-     * @return the created transition if created or null otherwise.
+     * @return the created transition if created or null otherwise (already global collecting)
      */
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger,
-            @NonNull WindowContainer readyGroupRef, @Nullable RemoteTransition remoteTransition,
-            @Nullable TransitionRequestInfo.DisplayChange displayChange) {
-        if (mTransitionPlayer == null) {
+            @NonNull WindowContainer readyGroupRef) {
+        if (mTransitionPlayers.isEmpty()) {
             return null;
         }
         Transition newTransition = null;
         if (isCollecting()) {
-            if (displayChange != null) {
-                Slog.e(TAG, "Provided displayChange for a non-new request", new Throwable());
-            }
             // Make the collecting transition wait until this request is ready.
             mCollectingTransition.setReady(readyGroupRef, false);
             if ((flags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
@@ -695,18 +708,26 @@ class TransitionController {
             }
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
-                    trigger != null ? trigger.asTask() : null, remoteTransition, displayChange);
-            if (newTransition != null && displayChange != null && trigger != null
-                    && trigger.asDisplayContent() != null) {
-                setDisplaySyncMethod(displayChange, trigger.asDisplayContent());
-            }
+                    trigger != null ? trigger.asTask() : null, null /* remote */, null /* disp */);
         }
-        if (trigger != null) {
-            if (isExistenceType(type)) {
-                collectExistenceChange(trigger);
-            } else {
-                collect(trigger);
-            }
+        return newTransition;
+    }
+
+    /**
+     * Creates a transition and asks the TransitionPlayer (Shell) to
+     * start it. Collection can start immediately.
+     * @param trigger if non-null, this is the first container that will be collected
+     * @return the created transition if created or null otherwise.
+     */
+    @NonNull
+    Transition requestStartDisplayTransition(@WindowManager.TransitionType int type,
+            @WindowManager.TransitionFlags int flags, @NonNull DisplayContent trigger,
+            @Nullable RemoteTransition remoteTransition,
+            @Nullable TransitionRequestInfo.DisplayChange displayChange) {
+        final Transition newTransition = createTransition(type, flags);
+        requestStartTransition(newTransition, null /* trigger */, remoteTransition, displayChange);
+        if (displayChange != null) {
+            setDisplaySyncMethod(displayChange, trigger);
         }
         return newTransition;
     }
@@ -725,7 +746,7 @@ class TransitionController {
                     transition.getToken(), null));
             return transition;
         }
-        if (mTransitionPlayer == null || transition.isAborted()) {
+        if (mTransitionPlayers.isEmpty() || transition.isAborted()) {
             // Apparently, some tests will kill(and restart) systemui, so there is a chance that
             // the player might be transiently null.
             if (transition.isCollecting()) {
@@ -754,7 +775,8 @@ class TransitionController {
 
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             transition.mLogger.mRequest = request;
-            mTransitionPlayer.requestStartTransition(transition.getToken(), request);
+            mTransitionPlayers.getLast().mPlayer.requestStartTransition(
+                    transition.getToken(), request);
             if (remoteTransition != null) {
                 transition.setRemoteAnimationApp(remoteTransition.getAppThread());
             }
@@ -770,20 +792,10 @@ class TransitionController {
      * @return the new transition if it was created for this request, `null` otherwise.
      */
     Transition requestCloseTransitionIfNeeded(@NonNull WindowContainer<?> wc) {
-        if (mTransitionPlayer == null) return null;
-        Transition out = null;
-        if (wc.isVisibleRequested()) {
-            if (!isCollecting()) {
-                out = requestStartTransition(createTransition(TRANSIT_CLOSE, 0 /* flags */),
-                        wc.asTask(), null /* remoteTransition */, null /* displayChange */);
-            }
-            collectExistenceChange(wc);
-        } else {
-            // Removing a non-visible window doesn't require a transition, but if there is one
-            // collecting, this should be a member just in case.
-            collect(wc);
-        }
-        return out;
+        if (mTransitionPlayers.isEmpty() || isCollecting()) return null;
+        if (!wc.isVisibleRequested()) return null;
+        return requestStartTransition(createTransition(TRANSIT_CLOSE, 0 /* flags */), wc.asTask(),
+                null /* remoteTransition */, null /* displayChange */);
     }
 
     /** @see Transition#collect */
@@ -1257,11 +1269,13 @@ class TransitionController {
 
     /** Updates the process state of animation player. */
     private void updateRunningRemoteAnimation(Transition transition, boolean isPlaying) {
-        if (mTransitionPlayerProc == null) return;
+        if (mTransitionPlayers.isEmpty()) return;
+        final TransitionPlayerRecord record = mTransitionPlayers.getLast();
+        if (record.mPlayerProc == null) return;
         if (isPlaying) {
-            mTransitionPlayerProc.setRunningRemoteAnimation(true);
+            record.mPlayerProc.setRunningRemoteAnimation(true);
         } else if (mPlayingTransitions.isEmpty()) {
-            mTransitionPlayerProc.setRunningRemoteAnimation(false);
+            record.mPlayerProc.setRunningRemoteAnimation(false);
             mRemotePlayer.clear();
         }
     }
@@ -1423,7 +1437,7 @@ class TransitionController {
      */
     @NonNull
     Transition createAndStartCollecting(int type) {
-        if (mTransitionPlayer == null) {
+        if (mTransitionPlayers.isEmpty()) {
             return null;
         }
         if (!mQueuedTransitions.isEmpty()) {
@@ -1482,6 +1496,40 @@ class TransitionController {
 
     interface OnStartCollect {
         void onCollectStarted(boolean deferred);
+    }
+
+    private class TransitionPlayerRecord {
+        final ITransitionPlayer mPlayer;
+        IBinder.DeathRecipient mDeath = null;
+        private WindowProcessController mPlayerProc;
+
+        TransitionPlayerRecord(@NonNull ITransitionPlayer player,
+                @Nullable WindowProcessController playerProc) {
+            mPlayer = player;
+            mPlayerProc = playerProc;
+            try {
+                linkToDeath();
+            } catch (RemoteException e) {
+                throw new RuntimeException("Unable to set transition player");
+            }
+        }
+
+        private void linkToDeath() throws RemoteException {
+            // Note: asBinder() can be null if player is same process (likely in a test).
+            if (mPlayer.asBinder() == null) return;
+            mDeath = () -> {
+                synchronized (mAtm.mGlobalLock) {
+                    unregisterTransitionPlayer(mPlayer);
+                }
+            };
+            mPlayer.asBinder().linkToDeath(mDeath, 0);
+        }
+
+        void unlinkToDeath() {
+            if (mPlayer.asBinder() == null || mDeath == null) return;
+            mPlayer.asBinder().unlinkToDeath(mDeath, 0);
+            mDeath = null;
+        }
     }
 
     /**

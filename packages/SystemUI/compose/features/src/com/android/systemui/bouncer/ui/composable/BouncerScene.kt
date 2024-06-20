@@ -22,27 +22,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 object Bouncer {
     object Elements {
         val Background = ElementKey("BouncerBackground")
         val Content = ElementKey("BouncerContent")
+    }
+
+    object TestTags {
+        const val Root = "bouncer_root"
     }
 }
 
@@ -57,13 +57,7 @@ constructor(
     override val key = Scenes.Bouncer
 
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        MutableStateFlow(
-                mapOf(
-                    Back to UserActionResult(Scenes.Lockscreen),
-                    Swipe(SwipeDirection.Down) to UserActionResult(Scenes.Lockscreen),
-                )
-            )
-            .asStateFlow()
+        viewModel.destinationScenes
 
     @Composable
     override fun SceneScope.Content(
@@ -89,7 +83,9 @@ private fun SceneScope.BouncerScene(
         BouncerContent(
             viewModel,
             dialogFactory,
-            Modifier.element(Bouncer.Elements.Content).fillMaxSize()
+            Modifier.sysuiResTag(Bouncer.TestTags.Root)
+                .element(Bouncer.Elements.Content)
+                .fillMaxSize()
         )
     }
 }

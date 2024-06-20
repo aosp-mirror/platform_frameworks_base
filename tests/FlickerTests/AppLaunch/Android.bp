@@ -30,7 +30,7 @@ filegroup {
 
 filegroup {
     name: "FlickerTestsAppLaunch1-src",
-    srcs: ["src/**/OpenApp*"],
+    srcs: ["src/**/OpenAppFrom*"],
 }
 
 java_library {

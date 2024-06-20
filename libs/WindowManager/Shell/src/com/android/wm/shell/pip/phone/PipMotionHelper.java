@@ -37,7 +37,6 @@ import android.os.Debug;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
-import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
@@ -47,6 +46,7 @@ import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.animation.PhysicsAnimator;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;

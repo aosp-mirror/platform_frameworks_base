@@ -47,6 +47,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.gui.DropInputMode;
 import android.gui.StalledTransactionInfo;
+import android.gui.TrustedOverlay;
 import android.hardware.DataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.OverlayProperties;
@@ -165,7 +166,7 @@ public final class SurfaceControl implements Parcelable {
             float maxStretchAmountX, float maxStretchAmountY, float childRelativeLeft,
             float childRelativeTop, float childRelativeRight, float childRelativeBottom);
     private static native void nativeSetTrustedOverlay(long transactionObj, long nativeObject,
-            boolean isTrustedOverlay);
+            int isTrustedOverlay);
     private static native void nativeSetDropInputMode(
             long transactionObj, long nativeObject, int flags);
     private static native void nativeSetCanOccludePresentation(long transactionObj,
@@ -302,6 +303,7 @@ public final class SurfaceControl implements Parcelable {
                                                                 long desiredPresentTimeNanos);
     private static native void nativeSetFrameTimeline(long transactionObj,
                                                            long vsyncId);
+    private static native void nativeNotifyShutdown();
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -2099,6 +2101,65 @@ public final class SurfaceControl implements Parcelable {
         }
     }
 
+    /**
+     * Contains information of the idle time of the screen after which the refresh rate is to be
+     * reduced.
+     *
+     * @hide
+     */
+    public static final class IdleScreenRefreshRateConfig {
+        /**
+         *  The time(in ms) after which the refresh rate is to be reduced. Defaults to -1, which
+         *  means no timeout has been configured for the current conditions
+         */
+        public int timeoutMillis;
+
+        public IdleScreenRefreshRateConfig() {
+            timeoutMillis = -1;
+        }
+
+        public IdleScreenRefreshRateConfig(int timeoutMillis) {
+            this.timeoutMillis = timeoutMillis;
+        }
+
+        /**
+         * Checks whether the two objects have the same values.
+         */
+        @Override
+        public boolean equals(Object other) {
+            if (other == this) {
+                return true;
+            }
+
+            if (!(other instanceof IdleScreenRefreshRateConfig) || other == null) {
+                return false;
+            }
+
+            IdleScreenRefreshRateConfig
+                    idleScreenRefreshRateConfig = (IdleScreenRefreshRateConfig) other;
+            return timeoutMillis == idleScreenRefreshRateConfig.timeoutMillis;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(timeoutMillis);
+        }
+
+        @Override
+        public String toString() {
+            return "timeoutMillis: " + timeoutMillis;
+        }
+
+        /**
+         * Copies the supplied object's values to this object.
+         */
+        public void copyFrom(IdleScreenRefreshRateConfig other) {
+            if (other != null) {
+                this.timeoutMillis = other.timeoutMillis;
+            }
+        }
+    }
+
 
     /**
      * Contains information about desired display configuration.
@@ -2132,6 +2193,15 @@ public final class SurfaceControl implements Parcelable {
          */
         public final RefreshRateRanges appRequestRanges;
 
+        /**
+         * Represents the idle time of the screen after which the associated display's refresh rate
+         * is to be reduced to preserve power
+         * Defaults to null, meaning that the device is not configured to have a timeout.
+         * Timeout value of -1 refers that the current conditions require no timeout
+         */
+        @Nullable
+        public IdleScreenRefreshRateConfig idleScreenRefreshRateConfig;
+
         public DesiredDisplayModeSpecs() {
             this.primaryRanges = new RefreshRateRanges();
             this.appRequestRanges = new RefreshRateRanges();
@@ -2144,13 +2214,17 @@ public final class SurfaceControl implements Parcelable {
         }
 
         public DesiredDisplayModeSpecs(int defaultMode, boolean allowGroupSwitching,
-                RefreshRateRanges primaryRanges, RefreshRateRanges appRequestRanges) {
+                RefreshRateRanges primaryRanges, RefreshRateRanges appRequestRanges,
+                @Nullable IdleScreenRefreshRateConfig idleScreenRefreshRateConfig) {
             this.defaultMode = defaultMode;
             this.allowGroupSwitching = allowGroupSwitching;
             this.primaryRanges =
                     new RefreshRateRanges(primaryRanges.physical, primaryRanges.render);
             this.appRequestRanges =
                     new RefreshRateRanges(appRequestRanges.physical, appRequestRanges.render);
+            this.idleScreenRefreshRateConfig =
+                    (idleScreenRefreshRateConfig == null) ? null : new IdleScreenRefreshRateConfig(
+                            idleScreenRefreshRateConfig.timeoutMillis);
         }
 
         @Override
@@ -2165,7 +2239,9 @@ public final class SurfaceControl implements Parcelable {
             return other != null && defaultMode == other.defaultMode
                     && allowGroupSwitching == other.allowGroupSwitching
                     && primaryRanges.equals(other.primaryRanges)
-                    && appRequestRanges.equals(other.appRequestRanges);
+                    && appRequestRanges.equals(other.appRequestRanges)
+                    && Objects.equals(
+                    idleScreenRefreshRateConfig, other.idleScreenRefreshRateConfig);
         }
 
         @Override
@@ -2181,6 +2257,7 @@ public final class SurfaceControl implements Parcelable {
             allowGroupSwitching = other.allowGroupSwitching;
             primaryRanges.copyFrom(other.primaryRanges);
             appRequestRanges.copyFrom(other.appRequestRanges);
+            copyIdleScreenRefreshRateConfig(other.idleScreenRefreshRateConfig);
         }
 
         @Override
@@ -2188,7 +2265,21 @@ public final class SurfaceControl implements Parcelable {
             return "defaultMode=" + defaultMode
                     + " allowGroupSwitching=" + allowGroupSwitching
                     + " primaryRanges=" + primaryRanges
-                    + " appRequestRanges=" + appRequestRanges;
+                    + " appRequestRanges=" + appRequestRanges
+                    + " idleScreenRefreshRate=" + String.valueOf(idleScreenRefreshRateConfig);
+        }
+
+        private void copyIdleScreenRefreshRateConfig(IdleScreenRefreshRateConfig other) {
+            if (idleScreenRefreshRateConfig == null) {
+                if (other != null) {
+                    idleScreenRefreshRateConfig =
+                            new IdleScreenRefreshRateConfig(other.timeoutMillis);
+                }
+            } else if (other == null) {
+                idleScreenRefreshRateConfig = null;
+            } else {
+                idleScreenRefreshRateConfig.copyFrom(other);
+            }
         }
     }
 
@@ -2631,7 +2722,10 @@ public final class SurfaceControl implements Parcelable {
      * Threshold values that are sent with
      * {@link Transaction#setTrustedPresentationCallback(SurfaceControl,
      * TrustedPresentationThresholds, Executor, Consumer)}
+     *
+     * @deprecated Use {@link android.window.TrustedPresentationThresholds} instead.
      */
+    @Deprecated
     public static final class TrustedPresentationThresholds {
         private final float mMinAlpha;
         private final float mMinFractionRendered;
@@ -4099,7 +4193,7 @@ public final class SurfaceControl implements Parcelable {
          * whose dataspace has RANGE_EXTENDED.
          *
          * @param sc The layer whose extended range brightness is being specified
-         * @param currentBufferRatio The current hdr/sdr ratio of the current buffer. For example
+         * @param currentBufferRatio The current HDR/SDR ratio of the current buffer. For example
          *                           if the buffer was rendered with a target SDR whitepoint of
          *                           100 nits and a max display brightness of 200 nits, this should
          *                           be set to 2.0f.
@@ -4113,7 +4207,7 @@ public final class SurfaceControl implements Parcelable {
          *
          *                           <p>Must be finite && >= 1.0f
          *
-         * @param desiredRatio The desired hdr/sdr ratio. This can be used to communicate the max
+         * @param desiredRatio The desired HDR/SDR ratio. This can be used to communicate the max
          *                     desired brightness range. This is similar to the "max luminance"
          *                     value in other HDR metadata formats, but represented as a ratio of
          *                     the target SDR whitepoint to the max display brightness. The system
@@ -4150,15 +4244,15 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Sets the desired hdr headroom for the layer.
+         * Sets the desired HDR headroom for the layer.
          *
          * <p>Prefer using this API over {@link #setExtendedRangeBrightness} for formats that
          *. conform to HDR video standards like HLG or HDR10 which do not communicate a HDR/SDR
          * ratio as part of generating the buffer.
          *
-         * @param sc The layer whose desired hdr headroom is being specified
+         * @param sc The layer whose desired HDR headroom is being specified
          *
-         * @param desiredRatio The desired hdr/sdr ratio. This can be used to communicate the max
+         * @param desiredRatio The desired HDR/SDR ratio. This can be used to communicate the max
          *                     desired brightness range. This is similar to the "max luminance"
          *                     value in other HDR metadata formats, but represented as a ratio of
          *                     the target SDR whitepoint to the max display brightness. The system
@@ -4211,13 +4305,37 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Sets the trusted overlay state on this SurfaceControl and it is inherited to all the
-         * children. The caller must hold the ACCESS_SURFACE_FLINGER permission.
+         * @see Transaction#setTrustedOverlay(SurfaceControl, int)
          * @hide
          */
         public Transaction setTrustedOverlay(SurfaceControl sc, boolean isTrustedOverlay) {
+            return setTrustedOverlay(sc,
+                    isTrustedOverlay ? TrustedOverlay.ENABLED : TrustedOverlay.UNSET);
+        }
+
+        /**
+         * Trusted overlay state prevents SurfaceControl from being considered as obscuring for
+         * input occlusion detection purposes. The caller must hold the
+         * ACCESS_SURFACE_FLINGER permission. See {@code TrustedOverlay}.
+         * <p>
+         * Arguments:
+         * {@code TrustedOverlay.UNSET} - The default value, SurfaceControl will inherit the state
+         * from its parents. If the parent state is also {@code TrustedOverlay.UNSET}, the layer
+         * will be considered as untrusted.
+         * <p>
+         * {@code TrustedOverlay.DISABLED} - Treats this SurfaceControl and all its children as an
+         * untrusted overlay. This will override any state set by its parent SurfaceControl.
+         * <p>
+         * {@code TrustedOverlay.ENABLED} - Treats this SurfaceControl and all its children as a
+         * trusted overlay unless the child SurfaceControl explicitly disables its trusted state
+         * via {@code TrustedOverlay.DISABLED}.
+         * <p>
+         * @hide
+         */
+        public Transaction setTrustedOverlay(SurfaceControl sc,
+                                             @TrustedOverlay int trustedOverlay) {
             checkPreconditions(sc);
-            nativeSetTrustedOverlay(mNativeObject, sc.mNativeObject, isTrustedOverlay);
+            nativeSetTrustedOverlay(mNativeObject, sc.mNativeObject, trustedOverlay);
             return this;
         }
 
@@ -4451,8 +4569,7 @@ public final class SurfaceControl implements Parcelable {
          *   <tr><td>o</td><td>x</td><td>x</td><td>x</td></tr>
          * </table>
          * </blockquote>
-         *
-         *<p>
+         * <p>
          * We first start by computing fr=xscale*yscale=0.9*0.9=0.81, indicating
          * that "81%" of the pixels were rendered. This corresponds to what was 100
          * pixels being displayed in 81 pixels. This is somewhat of an abuse of
@@ -4469,6 +4586,7 @@ public final class SurfaceControl implements Parcelable {
          * be somewhat arbitrary, and so there are some somewhat arbitrary decisions in
          * this API as well.
          * <p>
+         *
          * @param sc         The {@link SurfaceControl} to set the callback on
          * @param thresholds The {@link TrustedPresentationThresholds} that will specify when the to
          *                   invoke the callback.
@@ -4477,7 +4595,11 @@ public final class SurfaceControl implements Parcelable {
          *                   exited the threshold.
          * @return This transaction
          * @see TrustedPresentationThresholds
+         * @deprecated Use
+         * {@link WindowManager#registerTrustedPresentationListener(IBinder,
+         * android.window.TrustedPresentationThresholds, Executor, Consumer)} instead.
          */
+        @Deprecated
         @NonNull
         public Transaction setTrustedPresentationCallback(@NonNull SurfaceControl sc,
                 @NonNull TrustedPresentationThresholds thresholds, @NonNull Executor executor,
@@ -4506,7 +4628,10 @@ public final class SurfaceControl implements Parcelable {
          *
          * @param sc The SurfaceControl that the callback should be cleared from
          * @return This transaction
+         * @deprecated Use {@link WindowManager#unregisterTrustedPresentationListener(Consumer)}
+         * instead.
          */
+        @Deprecated
         @NonNull
         public Transaction clearTrustedPresentationCallback(@NonNull SurfaceControl sc) {
             checkPreconditions(sc);
@@ -4666,4 +4791,11 @@ public final class SurfaceControl implements Parcelable {
         return nativeGetStalledTransactionInfo(pid);
     }
 
+    /**
+     * Notify the SurfaceFlinger to capture transaction traces when shutdown.
+     * @hide
+     */
+    public static void notifyShutdown() {
+        nativeNotifyShutdown();
+    }
 }

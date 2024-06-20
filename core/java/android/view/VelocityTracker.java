@@ -264,7 +264,6 @@ public final class VelocityTracker {
 
     /**
      * Obtains a velocity tracker with the specified strategy.
-     * For testing and comparison purposes only.
      *
      * @param strategy The strategy Id, VELOCITY_TRACKER_STRATEGY_DEFAULT to use the default.
      * @return The velocity tracker.
@@ -272,6 +271,9 @@ public final class VelocityTracker {
      * @hide
      */
     public static VelocityTracker obtain(int strategy) {
+        if (strategy == VELOCITY_TRACKER_STRATEGY_DEFAULT) {
+            return obtain();
+        }
         return new VelocityTracker(strategy);
     }
 

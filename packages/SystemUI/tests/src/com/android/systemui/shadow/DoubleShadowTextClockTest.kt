@@ -19,11 +19,12 @@ package com.android.systemui.shadow
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.TypedArray
+import android.platform.test.annotations.PlatinumTest
 import android.testing.AndroidTestingRunner
 import android.util.AttributeSet
 import androidx.test.filters.SmallTest
-import com.android.systemui.shared.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.shared.R
 import com.android.systemui.shared.shadow.DoubleShadowTextClock
 import com.android.systemui.util.mockito.whenever
 import junit.framework.Assert.assertTrue
@@ -36,6 +37,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
+@PlatinumTest(focusArea = "sysui")
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class DoubleShadowTextClockTest : SysuiTestCase() {

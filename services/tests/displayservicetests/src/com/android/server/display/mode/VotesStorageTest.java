@@ -18,6 +18,7 @@ package com.android.server.display.mode;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,10 +38,10 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class VotesStorageTest {
     private static final int DISPLAY_ID = 100;
-    private static final int PRIORITY = Vote.PRIORITY_APP_REQUEST_SIZE;
+    private static final @Vote.Priority int PRIORITY = Vote.PRIORITY_APP_REQUEST_SIZE;
     private static final Vote VOTE = Vote.forDisableRefreshRateSwitching();
     private static final int DISPLAY_ID_OTHER = 101;
-    private static final int PRIORITY_OTHER = Vote.PRIORITY_FLICKER_REFRESH_RATE;
+    private static final @Vote.Priority int PRIORITY_OTHER = Vote.PRIORITY_FLICKER_REFRESH_RATE;
     private static final Vote VOTE_OTHER = Vote.forBaseModeRefreshRate(10f);
 
     @Mock
@@ -151,6 +152,53 @@ public class VotesStorageTest {
         mVotesStorage.updateVote(DISPLAY_ID, Vote.MAX_PRIORITY + 1, VOTE);
         // THEN vote is not added to the storage AND listener not notified
         assertThat(mVotesStorage.getVotes(DISPLAY_ID).size()).isEqualTo(0);
+        verify(mVotesListener, never()).onChanged();
+    }
+
+
+    @Test
+    public void removesAllVotesForPriority() {
+        // GIVEN vote storage with votes
+        mVotesStorage.updateVote(DISPLAY_ID, PRIORITY, VOTE);
+        mVotesStorage.updateVote(DISPLAY_ID, PRIORITY_OTHER, VOTE_OTHER);
+        mVotesStorage.updateVote(DISPLAY_ID_OTHER, PRIORITY, VOTE);
+        mVotesStorage.updateVote(DISPLAY_ID_OTHER, PRIORITY_OTHER, VOTE_OTHER);
+        // WHEN removeAllVotesForPriority is called
+        mVotesStorage.removeAllVotesForPriority(PRIORITY);
+        // THEN votes with priority are removed from the storage
+        SparseArray<Vote> votes = mVotesStorage.getVotes(DISPLAY_ID);
+        assertThat(votes.size()).isEqualTo(1);
+        assertThat(votes.get(PRIORITY)).isNull();
+        votes = mVotesStorage.getVotes(DISPLAY_ID_OTHER);
+        assertThat(votes.size()).isEqualTo(1);
+        assertThat(votes.get(PRIORITY)).isNull();
+    }
+
+    @Test
+    public void removesAllVotesForPriority_notifiesListenerOnce() {
+        // GIVEN vote storage with votes
+        mVotesStorage.updateVote(DISPLAY_ID, PRIORITY, VOTE);
+        mVotesStorage.updateVote(DISPLAY_ID, PRIORITY_OTHER, VOTE_OTHER);
+        mVotesStorage.updateVote(DISPLAY_ID_OTHER, PRIORITY, VOTE);
+        mVotesStorage.updateVote(DISPLAY_ID_OTHER, PRIORITY_OTHER, VOTE_OTHER);
+        clearInvocations(mVotesListener);
+        // WHEN removeAllVotesForPriority is called
+        mVotesStorage.removeAllVotesForPriority(PRIORITY);
+        // THEN listener notified once
+        verify(mVotesListener).onChanged();
+    }
+
+    @Test
+    public void removesAllVotesForPriority_noChangesIfNothingRemoved() {
+        // GIVEN vote storage with votes
+        mVotesStorage.updateVote(DISPLAY_ID, PRIORITY, VOTE);
+        clearInvocations(mVotesListener);
+        // WHEN removeAllVotesForPriority is called for missing priority
+        mVotesStorage.removeAllVotesForPriority(PRIORITY_OTHER);
+        // THEN no changes to votes storage
+        SparseArray<Vote> votes = mVotesStorage.getVotes(DISPLAY_ID);
+        assertThat(votes.size()).isEqualTo(1);
+        assertThat(votes.get(PRIORITY)).isEqualTo(VOTE);
         verify(mVotesListener, never()).onChanged();
     }
 }

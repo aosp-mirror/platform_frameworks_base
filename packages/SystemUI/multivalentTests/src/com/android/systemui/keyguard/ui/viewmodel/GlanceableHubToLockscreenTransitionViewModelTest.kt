@@ -50,7 +50,7 @@ class GlanceableHubToLockscreenTransitionViewModelTest : SysuiTestCase() {
     fun lockscreenFadeIn() =
         testScope.runTest {
             val values by collectValues(underTest.keyguardAlpha)
-            assertThat(values).containsExactly(0f)
+            assertThat(values).isEmpty()
 
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(
@@ -70,7 +70,7 @@ class GlanceableHubToLockscreenTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values).hasSize(5)
+            assertThat(values).hasSize(4)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
         }
 
@@ -97,6 +97,31 @@ class GlanceableHubToLockscreenTransitionViewModelTest : SysuiTestCase() {
 
             assertThat(values).hasSize(5)
             values.forEach { assertThat(it.value).isIn(Range.closed(-100f, 0f)) }
+        }
+
+    @Test
+    fun lockscreenTranslationX_resetsAfterCancellation() =
+        testScope.runTest {
+            configurationRepository.setDimensionPixelSize(
+                R.dimen.hub_to_lockscreen_transition_lockscreen_translation_x,
+                100
+            )
+            val values by collectValues(underTest.keyguardTranslationX)
+            assertThat(values).isEmpty()
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    step(0f, TransitionState.STARTED),
+                    step(0.3f),
+                    step(0.5f),
+                    step(0.9f, TransitionState.CANCELED)
+                ),
+                testScope,
+            )
+
+            assertThat(values).hasSize(4)
+            values.forEach { assertThat(it.value).isIn(Range.closed(-100f, 0f)) }
+            assertThat(values.last().value).isEqualTo(0f)
         }
 
     private fun step(

@@ -26,6 +26,7 @@ import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
+import static android.os.UserHandle.USER_SYSTEM;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
@@ -93,6 +94,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Clock;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -113,6 +116,8 @@ public class PreferencesHelper implements RankingConfig {
     private static final int XML_VERSION_REVIEW_PERMISSIONS_NOTIFICATION = 4;
     @VisibleForTesting
     static final int UNKNOWN_UID = UserHandle.USER_NULL;
+    // The amount of time pacakage preferences can exist without the app being installed.
+    private static final long PREF_GRACE_PERIOD_MS = Duration.ofDays(2).toMillis();
 
     @VisibleForTesting
     static final int NOTIFICATION_CHANNEL_COUNT_LIMIT = 5000;
@@ -135,6 +140,8 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_VERSION = "version";
     private static final String ATT_NAME = "name";
     private static final String ATT_UID = "uid";
+
+    private static final String ATT_USERID = "userid";
     private static final String ATT_ID = "id";
     private static final String ATT_ALLOW_BUBBLE = "allow_bubble";
     private static final String ATT_PRIORITY = "priority";
@@ -148,6 +155,8 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_SENT_VALID_MESSAGE = "sent_valid_msg";
     private static final String ATT_USER_DEMOTED_INVALID_MSG_APP = "user_demote_msg_app";
     private static final String ATT_SENT_VALID_BUBBLE = "sent_valid_bubble";
+
+    private static final String ATT_CREATION_TIME = "creation_time";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
@@ -208,11 +217,13 @@ public class PreferencesHelper implements RankingConfig {
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
     private final boolean mShowReviewPermissionsNotification;
 
+    Clock mClock;
+
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, PermissionHelper permHelper, PermissionManager permManager,
             NotificationChannelLogger notificationChannelLogger,
             AppOpsManager appOpsManager, ManagedServices.UserProfiles userProfiles,
-            boolean showReviewPermissionsNotification) {
+            boolean showReviewPermissionsNotification, Clock clock) {
         mContext = context;
         mZenModeHelper = zenHelper;
         mRankingHandler = rankingHandler;
@@ -225,7 +236,7 @@ public class PreferencesHelper implements RankingConfig {
         mShowReviewPermissionsNotification = showReviewPermissionsNotification;
         mIsMediaNotificationFilteringEnabled = context.getResources()
                 .getBoolean(R.bool.config_quickSettingsShowMediaPlayer);
-
+        mClock = clock;
         XML_VERSION = 4;
 
         updateBadgingEnabled();
@@ -260,7 +271,7 @@ public class PreferencesHelper implements RankingConfig {
                 }
                 if (type == XmlPullParser.START_TAG) {
                     if (TAG_STATUS_ICONS.equals(tag)) {
-                        if (forRestore && userId != UserHandle.USER_SYSTEM) {
+                        if (forRestore && userId != USER_SYSTEM) {
                             continue;
                         }
                         mHideSilentStatusBarIcons = parser.getAttributeBoolean(null,
@@ -303,13 +314,22 @@ public class PreferencesHelper implements RankingConfig {
                     : parser.getAttributeInt(null, ATT_ALLOW_BUBBLE, DEFAULT_BUBBLE_PREFERENCE);
             int appImportance = parser.getAttributeInt(null, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
 
+            // when data is loaded from disk it's loaded as USER_ALL, but restored data that
+            // is pending app install needs the user id that the data was restored to
+            int fixedUserId = userId;
+            if (Flags.persistIncompleteRestoreData()) {
+                if (!forRestore && uid == UNKNOWN_UID) {
+                    fixedUserId = parser.getAttributeInt(null, ATT_USERID, USER_SYSTEM);
+                }
+            }
             PackagePreferences r = getOrCreatePackagePreferencesLocked(
-                    name, userId, uid,
+                    name, fixedUserId, uid,
                     appImportance,
                     parser.getAttributeInt(null, ATT_PRIORITY, DEFAULT_PRIORITY),
                     parser.getAttributeInt(null, ATT_VISIBILITY, DEFAULT_VISIBILITY),
                     parser.getAttributeBoolean(null, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE),
-                    bubblePref);
+                    bubblePref, parser.getAttributeLong(null, ATT_CREATION_TIME, mClock.millis()));
+            r.bubblePreference = bubblePref;
             r.priority = parser.getAttributeInt(null, ATT_PRIORITY, DEFAULT_PRIORITY);
             r.visibility = parser.getAttributeInt(null, ATT_VISIBILITY, DEFAULT_VISIBILITY);
             r.showBadge = parser.getAttributeBoolean(null, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
@@ -462,12 +482,12 @@ public class PreferencesHelper implements RankingConfig {
         // TODO (b/194833441): use permissionhelper instead of DEFAULT_IMPORTANCE
         return getOrCreatePackagePreferencesLocked(pkg, UserHandle.getUserId(uid), uid,
                 DEFAULT_IMPORTANCE, DEFAULT_PRIORITY, DEFAULT_VISIBILITY, DEFAULT_SHOW_BADGE,
-                DEFAULT_BUBBLE_PREFERENCE);
+                DEFAULT_BUBBLE_PREFERENCE, mClock.millis());
     }
 
     private PackagePreferences getOrCreatePackagePreferencesLocked(String pkg,
             @UserIdInt int userId, int uid, int importance, int priority, int visibility,
-            boolean showBadge, int bubblePreference) {
+            boolean showBadge, int bubblePreference, long creationTime) {
         final String key = packagePreferencesKey(pkg, uid);
         PackagePreferences
                 r = (uid == UNKNOWN_UID)
@@ -482,6 +502,11 @@ public class PreferencesHelper implements RankingConfig {
             r.visibility = visibility;
             r.showBadge = showBadge;
             r.bubblePreference = bubblePreference;
+            if (Flags.persistIncompleteRestoreData()) {
+                if (r.uid == UNKNOWN_UID) {
+                    r.creationTime = creationTime;
+                }
+            }
 
             try {
                 createDefaultChannelIfNeededLocked(r);
@@ -490,9 +515,18 @@ public class PreferencesHelper implements RankingConfig {
             }
 
             if (r.uid == UNKNOWN_UID) {
+                if (Flags.persistIncompleteRestoreData()) {
+                    r.userId = userId;
+                }
                 mRestoredWithoutUids.put(unrestoredPackageKey(pkg, userId), r);
             } else {
                 mPackagePreferences.put(key, r);
+            }
+        }
+        if (r.uid == UNKNOWN_UID) {
+            if (Flags.persistIncompleteRestoreData()
+                    && PREF_GRACE_PERIOD_MS < (mClock.millis() - r.creationTime)) {
+                mRestoredWithoutUids.remove(unrestoredPackageKey(pkg, userId));
             }
         }
         return r;
@@ -589,70 +623,16 @@ public class PreferencesHelper implements RankingConfig {
                 if (forBackup && UserHandle.getUserId(r.uid) != userId) {
                     continue;
                 }
-                out.startTag(null, TAG_PACKAGE);
-                out.attribute(null, ATT_NAME, r.pkg);
-                if (!notifPermissions.isEmpty()) {
-                    Pair<Integer, String> app = new Pair(r.uid, r.pkg);
-                    final Pair<Boolean, Boolean> permission = notifPermissions.get(app);
-                    out.attributeInt(null, ATT_IMPORTANCE,
-                            permission != null && permission.first ? IMPORTANCE_DEFAULT
-                                    : IMPORTANCE_NONE);
-                    notifPermissions.remove(app);
-                } else {
-                    if (r.importance != DEFAULT_IMPORTANCE) {
-                        out.attributeInt(null, ATT_IMPORTANCE, r.importance);
-                    }
+                writePackageXml(r, out, notifPermissions, forBackup);
+            }
+        }
+        if (Flags.persistIncompleteRestoreData() && !forBackup) {
+            synchronized (mRestoredWithoutUids) {
+                final int N = mRestoredWithoutUids.size();
+                for (int i = 0; i < N; i++) {
+                    final PackagePreferences r = mRestoredWithoutUids.valueAt(i);
+                    writePackageXml(r, out, notifPermissions, false);
                 }
-                if (r.priority != DEFAULT_PRIORITY) {
-                    out.attributeInt(null, ATT_PRIORITY, r.priority);
-                }
-                if (r.visibility != DEFAULT_VISIBILITY) {
-                    out.attributeInt(null, ATT_VISIBILITY, r.visibility);
-                }
-                if (r.bubblePreference != DEFAULT_BUBBLE_PREFERENCE) {
-                    out.attributeInt(null, ATT_ALLOW_BUBBLE, r.bubblePreference);
-                }
-                out.attributeBoolean(null, ATT_SHOW_BADGE, r.showBadge);
-                out.attributeInt(null, ATT_APP_USER_LOCKED_FIELDS,
-                        r.lockedAppFields);
-                out.attributeBoolean(null, ATT_SENT_INVALID_MESSAGE,
-                        r.hasSentInvalidMessage);
-                out.attributeBoolean(null, ATT_SENT_VALID_MESSAGE,
-                        r.hasSentValidMessage);
-                out.attributeBoolean(null, ATT_USER_DEMOTED_INVALID_MSG_APP,
-                        r.userDemotedMsgApp);
-                out.attributeBoolean(null, ATT_SENT_VALID_BUBBLE, r.hasSentValidBubble);
-
-                if (!forBackup) {
-                    out.attributeInt(null, ATT_UID, r.uid);
-                }
-
-                if (r.delegate != null) {
-                    out.startTag(null, TAG_DELEGATE);
-
-                    out.attribute(null, ATT_NAME, r.delegate.mPkg);
-                    out.attributeInt(null, ATT_UID, r.delegate.mUid);
-                    if (r.delegate.mEnabled != Delegate.DEFAULT_ENABLED) {
-                        out.attributeBoolean(null, ATT_ENABLED, r.delegate.mEnabled);
-                    }
-                    out.endTag(null, TAG_DELEGATE);
-                }
-
-                for (NotificationChannelGroup group : r.groups.values()) {
-                    group.writeXml(out);
-                }
-
-                for (NotificationChannel channel : r.channels.values()) {
-                    if (forBackup) {
-                        if (!channel.isDeleted()) {
-                            channel.writeXmlForBackup(out, mContext);
-                        }
-                    } else {
-                        channel.writeXml(out);
-                    }
-                }
-
-                out.endTag(null, TAG_PACKAGE);
             }
         }
         // Some apps have permissions set but don't have expanded notification settings
@@ -668,6 +648,81 @@ public class PreferencesHelper implements RankingConfig {
         out.endTag(null, TAG_RANKING);
     }
 
+    public void writePackageXml(PackagePreferences r, TypedXmlSerializer out,
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> notifPermissions,
+            boolean forBackup) throws
+            IOException {
+        out.startTag(null, TAG_PACKAGE);
+        out.attribute(null, ATT_NAME, r.pkg);
+        if (!notifPermissions.isEmpty()) {
+            Pair<Integer, String> app = new Pair(r.uid, r.pkg);
+            final Pair<Boolean, Boolean> permission = notifPermissions.get(app);
+            out.attributeInt(null, ATT_IMPORTANCE,
+                    permission != null && permission.first ? IMPORTANCE_DEFAULT
+                            : IMPORTANCE_NONE);
+            notifPermissions.remove(app);
+        } else {
+            if (r.importance != DEFAULT_IMPORTANCE) {
+                out.attributeInt(null, ATT_IMPORTANCE, r.importance);
+            }
+        }
+        if (r.priority != DEFAULT_PRIORITY) {
+            out.attributeInt(null, ATT_PRIORITY, r.priority);
+        }
+        if (r.visibility != DEFAULT_VISIBILITY) {
+            out.attributeInt(null, ATT_VISIBILITY, r.visibility);
+        }
+        if (r.bubblePreference != DEFAULT_BUBBLE_PREFERENCE) {
+            out.attributeInt(null, ATT_ALLOW_BUBBLE, r.bubblePreference);
+        }
+        out.attributeBoolean(null, ATT_SHOW_BADGE, r.showBadge);
+        out.attributeInt(null, ATT_APP_USER_LOCKED_FIELDS,
+                r.lockedAppFields);
+        out.attributeBoolean(null, ATT_SENT_INVALID_MESSAGE,
+                r.hasSentInvalidMessage);
+        out.attributeBoolean(null, ATT_SENT_VALID_MESSAGE,
+                r.hasSentValidMessage);
+        out.attributeBoolean(null, ATT_USER_DEMOTED_INVALID_MSG_APP,
+                r.userDemotedMsgApp);
+        out.attributeBoolean(null, ATT_SENT_VALID_BUBBLE, r.hasSentValidBubble);
+
+        if (Flags.persistIncompleteRestoreData() && r.uid == UNKNOWN_UID) {
+            out.attributeLong(null, ATT_CREATION_TIME, r.creationTime);
+            out.attributeInt(null, ATT_USERID, r.userId);
+        }
+
+        if (!forBackup) {
+            out.attributeInt(null, ATT_UID, r.uid);
+        }
+
+        if (r.delegate != null) {
+            out.startTag(null, TAG_DELEGATE);
+
+            out.attribute(null, ATT_NAME, r.delegate.mPkg);
+            out.attributeInt(null, ATT_UID, r.delegate.mUid);
+            if (r.delegate.mEnabled != Delegate.DEFAULT_ENABLED) {
+                out.attributeBoolean(null, ATT_ENABLED, r.delegate.mEnabled);
+            }
+            out.endTag(null, TAG_DELEGATE);
+        }
+
+        for (NotificationChannelGroup group : r.groups.values()) {
+            group.writeXml(out);
+        }
+
+        for (NotificationChannel channel : r.channels.values()) {
+            if (forBackup) {
+                if (!channel.isDeleted()) {
+                    channel.writeXmlForBackup(out, mContext);
+                }
+            } else {
+                channel.writeXml(out);
+            }
+        }
+
+        out.endTag(null, TAG_PACKAGE);
+    }
+
     /**
      * Sets whether bubbles are allowed.
      *
@@ -676,7 +731,7 @@ public class PreferencesHelper implements RankingConfig {
      * @param bubblePreference whether bubbles are allowed.
      */
     public void setBubblesAllowed(String pkg, int uid, int bubblePreference) {
-        boolean changed = false;
+        boolean changed;
         synchronized (mPackagePreferences) {
             PackagePreferences p = getOrCreatePackagePreferencesLocked(pkg, uid);
             changed = p.bubblePreference != bubblePreference;
@@ -1386,8 +1441,7 @@ public class PreferencesHelper implements RankingConfig {
     public void updateFixedImportance(List<UserInfo> users) {
         for (UserInfo user : users) {
             List<PackageInfo> packages = mPm.getInstalledPackagesAsUser(
-                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY),
-                    user.getUserHandle().getIdentifier());
+                    0, user.getUserHandle().getIdentifier());
             for (PackageInfo pi : packages) {
                 boolean fixed = mPermissionHelper.isPermissionFixed(
                         pi.packageName, user.getUserHandle().getIdentifier());
@@ -2906,6 +2960,9 @@ public class PreferencesHelper implements RankingConfig {
         boolean hasSentValidBubble = false;
 
         boolean migrateToPm = false;
+        long creationTime;
+
+        @UserIdInt int userId;
 
         Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();

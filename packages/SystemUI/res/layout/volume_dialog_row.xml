@@ -52,7 +52,6 @@
                 android:paddingRight="0dp"
                 android:paddingStart="0dp"
                 android:paddingEnd="0dp"
-                android:clickable="true"
                 android:layout_width="@dimen/volume_row_slider_height"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell;
 
+
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -30,7 +31,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.AppCompatTaskInfo;
+import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.LocusId;
@@ -174,6 +175,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             .setName("home_task_overlay_container")
             .setContainerLayer()
             .setHidden(false)
+            .setCallsite("ShellTaskOrganizer.mHomeTaskOverlayContainer")
             .build();
 
     /**
@@ -551,10 +553,12 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 // Notify the compat UI if the listener or task info changed.
                 notifyCompatUI(taskInfo, newListener);
             }
-            if (data.getTaskInfo().getWindowingMode() != taskInfo.getWindowingMode()) {
-                // Notify the recent tasks when a task changes windowing modes
+            final boolean windowModeChanged =
+                    data.getTaskInfo().getWindowingMode() != taskInfo.getWindowingMode();
+            final boolean visibilityChanged = data.getTaskInfo().isVisible != taskInfo.isVisible;
+            if (windowModeChanged || visibilityChanged) {
                 mRecentTasks.ifPresent(recentTasks ->
-                        recentTasks.onTaskWindowingModeChanged(taskInfo));
+                        recentTasks.onTaskRunningInfoChanged(taskInfo));
             }
             // TODO (b/207687679): Remove check for HOME once bug is fixed
             final boolean isFocusedOrHome = taskInfo.isFocused
@@ -718,8 +722,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     @Override
-    public void onCameraControlStateUpdated(
-            int taskId, @AppCompatTaskInfo.CameraCompatControlState int state) {
+    public void onCameraControlStateUpdated(int taskId, @CameraCompatControlState int state) {
         final TaskAppearedInfo info;
         synchronized (mLock) {
             info = mTasks.get(taskId);

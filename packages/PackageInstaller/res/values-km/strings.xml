@@ -72,7 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"រក្សាទុក​ទិន្នន័យ​កម្មវិធីទំហំ <xliff:g id="SIZE">%1$s</xliff:g>។"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"តើអ្នកចង់លុបកម្មវិធីនេះដែរឬទេ?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"តើ​អ្នក​ចង់​លុប​កម្មវិធី​នេះ​ដែរឬទេ? ក្លូន <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ក៏នឹងត្រូវបានលុបផងដែរ។"</string>
-    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"តើអ្នកចង់លុបកម្មវិធីនេះចេញពី private space របស់អ្នកដែរទេ?"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"តើអ្នកចង់លុបកម្មវិធីនេះចេញពីលំហឯកជនរបស់អ្នកដែរទេ?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"កំពុង​ដំណើរការ​ការលុប"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ការលុប​ដែល​បរាជ័យ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"កំពុង​លុប…"</string>

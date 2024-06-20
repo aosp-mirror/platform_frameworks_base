@@ -25,4 +25,5 @@ parcelable CameraSessionConfig
     CameraMetadataNative sessionParameter;
     int sessionTemplateId;
     int sessionType;
+    int colorSpace = -1;
 }

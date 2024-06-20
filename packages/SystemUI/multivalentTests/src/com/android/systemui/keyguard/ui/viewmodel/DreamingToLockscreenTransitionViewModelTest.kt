@@ -26,14 +26,9 @@ import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
-import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
-import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.TransitionState.CANCELED
-import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -217,37 +212,6 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
 
             assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(-100f, 0f)) }
-        }
-
-    @Test
-    fun transitionEnded() =
-        testScope.runTest {
-            val values by collectValues(underTest.transitionEnded)
-
-            keyguardTransitionRepository.sendTransitionSteps(
-                listOf(
-                    TransitionStep(DOZING, DREAMING, 0.0f, STARTED),
-                    TransitionStep(DOZING, DREAMING, 1.0f, FINISHED),
-                    TransitionStep(DREAMING, LOCKSCREEN, 0.0f, STARTED),
-                    TransitionStep(DREAMING, LOCKSCREEN, 0.1f, RUNNING),
-                    TransitionStep(DREAMING, LOCKSCREEN, 1.0f, FINISHED),
-                    TransitionStep(LOCKSCREEN, DREAMING, 0.0f, STARTED),
-                    TransitionStep(LOCKSCREEN, DREAMING, 0.5f, RUNNING),
-                    TransitionStep(LOCKSCREEN, DREAMING, 1.0f, FINISHED),
-                    TransitionStep(DREAMING, GONE, 0.0f, STARTED),
-                    TransitionStep(DREAMING, GONE, 0.5f, RUNNING),
-                    TransitionStep(DREAMING, GONE, 1.0f, CANCELED),
-                    TransitionStep(DREAMING, AOD, 0.0f, STARTED),
-                    TransitionStep(DREAMING, AOD, 1.0f, FINISHED),
-                ),
-                testScope,
-            )
-
-            assertThat(values.size).isEqualTo(3)
-            values.forEach {
-                assertThat(it.transitionState == FINISHED || it.transitionState == CANCELED)
-                    .isTrue()
-            }
         }
 
     private fun step(value: Float, state: TransitionState = RUNNING): TransitionStep {

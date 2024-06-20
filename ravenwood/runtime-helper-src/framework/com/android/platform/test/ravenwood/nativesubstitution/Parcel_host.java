@@ -164,6 +164,9 @@ public class Parcel_host {
         p.mPos = pos;
     }
     public static void nativeSetDataCapacity(long nativePtr, int size) {
+        if (size < 0) {
+            throw new IllegalArgumentException("size < 0: size=" + size);
+        }
         var p = getInstance(nativePtr);
         if (p.getCapacity() < size) {
             p.forceSetCapacity(size);
@@ -383,7 +386,19 @@ public class Parcel_host {
         // Assume false for now, because we don't support writing FDs yet.
         return false;
     }
+
     public static boolean nativeHasFileDescriptorsInRange(
+            long nativePtr, int offset, int length) {
+        // Assume false for now, because we don't support writing FDs yet.
+        return false;
+    }
+
+    public static boolean nativeHasBinders(long nativePtr) {
+        // Assume false for now, because we don't support adding binders.
+        return false;
+    }
+
+    public static boolean nativeHasBindersInRange(
             long nativePtr, int offset, int length) {
         // Assume false for now, because we don't support writing FDs yet.
         return false;

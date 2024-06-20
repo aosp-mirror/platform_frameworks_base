@@ -19,10 +19,9 @@ import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -38,11 +37,10 @@ constructor(
     private val interactor: KeyguardDismissActionInteractor,
     @Application private val scope: CoroutineScope,
     private val keyguardLogger: KeyguardLogger,
-    private val featureFlags: FeatureFlagsClassic,
 ) : CoreStartable {
 
     override fun start() {
-        if (!featureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (!SceneContainerFlag.isEnabled) {
             return
         }
 

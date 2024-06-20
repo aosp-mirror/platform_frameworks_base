@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"Менеджер учетных данных"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Отмена"</string>
     <string name="string_continue" msgid="1346732695941131882">"Продолжить"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"Сохранить"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Другой способ"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Подробнее"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Показать пароль"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Скрыть пароль"</string>
@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Хотя движение к будущему без паролей уже началось, их по-прежнему можно будет использовать наряду с ключами доступа."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Укажите, куда нужно сохранить <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Выберите менеджер паролей, чтобы сохранять учетные данные и быстро выполнять вход."</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Создать ключ доступа для входа в приложение \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Сохранить ключ доступа для входа в приложение \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Сохранить учетные данные для приложения \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Создать ключ доступа для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Сохранить пароль для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Сохранить данные для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="passkey" msgid="632353688396759522">"ключ доступа"</string>
     <string name="password" msgid="6738570945182936667">"пароль"</string>
     <string name="passkeys" msgid="5733880786866559847">"ключи доступа"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Вернуться на предыдущую страницу"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Закрыть"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Закрыть"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Использовать сохраненный ключ доступа для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Использовать сохраненный пароль для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Войти в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" с этими данными?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Разблокировать варианты входа для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Используйте сохраненный ключ доступа для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Используйте сохраненный пароль для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Используйте аккаунт для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Используйте способ разблокировки экрана для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" (<xliff:g id="USERNAME">%2$s</xliff:g>)."</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Разблокируйте способы входа для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Выберите сохраненный ключ доступа для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Выберите сохраненный пароль для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Выберите сохраненные учетные данные для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Как вы хотите войти в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Выберите аккаунт для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Выберите данные для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Использовать эту информацию для входа в приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Войти другим способом"</string>

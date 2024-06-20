@@ -33,7 +33,6 @@ import android.os.Trace;
 public class DestroyActivityItem extends ActivityLifecycleItem {
 
     private boolean mFinished;
-    private int mConfigChanges;
 
     @Override
     public void preExecute(@NonNull ClientTransactionHandler client) {
@@ -44,7 +43,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
             @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDestroy");
-        client.handleDestroyActivity(r, mFinished, mConfigChanges,
+        client.handleDestroyActivity(r, mFinished,
                 false /* getNonConfigInstance */, "DestroyActivityItem");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -67,15 +66,13 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
 
     /** Obtain an instance initialized with provided params. */
     @NonNull
-    public static DestroyActivityItem obtain(@NonNull IBinder activityToken, boolean finished,
-            int configChanges) {
+    public static DestroyActivityItem obtain(@NonNull IBinder activityToken, boolean finished) {
         DestroyActivityItem instance = ObjectPool.obtain(DestroyActivityItem.class);
         if (instance == null) {
             instance = new DestroyActivityItem();
         }
         instance.setActivityToken(activityToken);
         instance.mFinished = finished;
-        instance.mConfigChanges = configChanges;
 
         return instance;
     }
@@ -84,7 +81,6 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     public void recycle() {
         super.recycle();
         mFinished = false;
-        mConfigChanges = 0;
         ObjectPool.recycle(this);
     }
 
@@ -95,14 +91,12 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mFinished);
-        dest.writeInt(mConfigChanges);
     }
 
     /** Read from Parcel. */
     private DestroyActivityItem(@NonNull Parcel in) {
         super(in);
         mFinished = in.readBoolean();
-        mConfigChanges = in.readInt();
     }
 
     public static final @NonNull Creator<DestroyActivityItem> CREATOR = new Creator<>() {
@@ -124,7 +118,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
             return false;
         }
         final DestroyActivityItem other = (DestroyActivityItem) o;
-        return mFinished == other.mFinished && mConfigChanges == other.mConfigChanges;
+        return mFinished == other.mFinished;
     }
 
     @Override
@@ -132,14 +126,12 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
         int result = 17;
         result = 31 * result + super.hashCode();
         result = 31 * result + (mFinished ? 1 : 0);
-        result = 31 * result + mConfigChanges;
         return result;
     }
 
     @Override
     public String toString() {
         return "DestroyActivityItem{" + super.toString()
-                + ",finished=" + mFinished
-                + ",mConfigChanges=" + mConfigChanges + "}";
+                + ",finished=" + mFinished + "}";
     }
 }

@@ -151,13 +151,13 @@ public class AudioServiceEvents {
 
     static final class VolChangedBroadcastEvent extends EventLogger.Event {
         final int mStreamType;
-        final int mAliasStreamType;
+        final String mAliasStreamIndexes;
         final int mIndex;
         final int mOldIndex;
 
-        VolChangedBroadcastEvent(int stream, int alias, int index, int oldIndex) {
+        VolChangedBroadcastEvent(int stream, String aliasIndexes, int index, int oldIndex) {
             mStreamType = stream;
-            mAliasStreamType = alias;
+            mAliasStreamIndexes = aliasIndexes;
             mIndex = index;
             mOldIndex = oldIndex;
         }
@@ -167,8 +167,8 @@ public class AudioServiceEvents {
             return new StringBuilder("sending VOLUME_CHANGED stream:")
                     .append(AudioSystem.streamToString(mStreamType))
                     .append(" index:").append(mIndex)
-                    .append(" (was:").append(mOldIndex)
-                    .append(") alias:").append(AudioSystem.streamToString(mAliasStreamType))
+                    .append(" (was:").append(mOldIndex).append(")")
+                    .append(mAliasStreamIndexes)
                     .toString();
         }
     }

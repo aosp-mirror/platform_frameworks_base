@@ -24,6 +24,13 @@ flag {
 }
 
 flag {
+    name: "fgs_disable_saw"
+    namespace: "backstage_power"
+    description: "Disable System Alert Window FGS start"
+    bug: "296558535"
+}
+
+flag {
     name: "bfgs_managed_network_access"
     namespace: "backstage_power"
     description: "Restrict network access for certain applications in BFGS process state"
@@ -46,6 +53,14 @@ flag {
 
 flag {
     namespace: "backstage_power"
+    name: "defer_outgoing_broadcasts"
+    description: "Defer outgoing broadcasts from processes in freezable state"
+    bug: "327496592"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "backstage_power"
     name: "avoid_repeated_bcast_re_enqueues"
     description: "Avoid re-enqueueing a broadcast repeatedly"
     bug: "319225224"
@@ -60,4 +75,80 @@ flag {
     name: "log_excessive_binder_proxies"
     description: "Log the excessive incoming binder proxies into statsd"
     bug: "298263955"
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "avoid_resolving_type"
+    description: "Avoid resolving data type for sticky broadcasts"
+    bug: "323817802"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "use_permission_manager_for_broadcast_delivery_check"
+    description: "Use PermissionManager API for broadcast delivery permission checks."
+    bug: "315468967"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "trace_receiver_registration"
+    description: "Add tracing for broadcast receiver registration and un-registration"
+    bug: "336385821"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "migrate_full_oomadj_updates"
+    namespace: "backstage_power"
+    description: "Migrate full updates to partial updates where possible"
+    bug: "324915545"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "skip_unimportant_connections"
+    namespace: "backstage_power"
+    description: "Avoid OomAdjuster calculations for connections that won't change importance"
+    bug: "323376416"
+}
+
+flag {
+    name: "simplify_process_traversal"
+    namespace: "backstage_power"
+    description: "Simplify the OomAdjuster's process traversal mechanism."
+    bug: "336178916"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "batching_oom_adj"
+    namespace: "backstage_power"
+    description: "Batch OOM adjustment calls to LMKD"
+    bug: "244232958"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "follow_up_oomadj_updates"
+    namespace: "backstage_power"
+    description: "Schedule follow up OomAdjuster updates for time sensitive states."
+    bug: "333450932"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

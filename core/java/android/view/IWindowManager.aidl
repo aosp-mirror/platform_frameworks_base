@@ -62,7 +62,6 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
 import android.view.AppTransitionAnimationSpec;
-import android.view.TaskTransitionSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
 import android.view.SurfaceControl;
@@ -289,6 +288,15 @@ interface IWindowManager
      * @see android.view.Display#DEFAULT_DISPLAY
      */
     int getDefaultDisplayRotation();
+
+    /**
+     * Retrieve the display user rotation.
+     * @param displayId Id of the display
+     * @return Rotation one of {@link android.view.Surface#ROTATION_0},
+     *        {@link android.view.Surface#ROTATION_90}, {@link android.view.Surface#ROTATION_180},
+     *        {@link android.view.Surface#ROTATION_270} or -1 if display is not found.
+     */
+    int getDisplayUserRotation(int displayId);
 
     /**
      * Watch the rotation of the specified screen.  Returns the current rotation,
@@ -951,19 +959,6 @@ interface IWindowManager
      * @hide
      */
     void setTaskSnapshotEnabled(boolean enabled);
-
-    /**
-     * Customized the task transition animation with a task transition spec.
-     *
-     * @param spec the spec that will be used to customize the task animations
-     */
-    void setTaskTransitionSpec(in TaskTransitionSpec spec);
-
-    /**
-     * Clears any task transition spec that has been previously set and
-     * reverts to using the default task transition with no spec changes.
-     */
-    void clearTaskTransitionSpec();
 
     /**
      * Registers the frame rate per second count callback for one given task ID.

@@ -434,6 +434,40 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    public NotificationChannel copy() {
+        NotificationChannel copy = new NotificationChannel(mId, mName, mImportance);
+        copy.setDescription(mDesc);
+        copy.setBypassDnd(mBypassDnd);
+        copy.setLockscreenVisibility(mLockscreenVisibility);
+        copy.setSound(mSound, mAudioAttributes);
+        copy.setLightColor(mLightColor);
+        copy.enableLights(mLights);
+        copy.setVibrationPattern(mVibrationPattern);
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            copy.setVibrationEffect(mVibrationEffect);
+        }
+        copy.lockFields(mUserLockedFields);
+        copy.setUserVisibleTaskShown(mUserVisibleTaskShown);
+        copy.enableVibration(mVibrationEnabled);
+        copy.setShowBadge(mShowBadge);
+        copy.setDeleted(mDeleted);
+        copy.setGroup(mGroup);
+        copy.setBlockable(mBlockableSystem);
+        copy.setAllowBubbles(mAllowBubbles);
+        copy.setOriginalImportance(mOriginalImportance);
+        copy.setConversationId(mParentId, mConversationId);
+        copy.setDemoted(mDemoted);
+        copy.setImportantConversation(mImportantConvo);
+        copy.setDeletedTimeMs(mDeletedTime);
+        copy.setImportanceLockedByCriticalDeviceFunction(mImportanceLockedDefaultApp);
+        copy.setLastNotificationUpdateTimeMs(mLastNotificationUpdateTimeMs);
+
+        return copy;
+    }
+
+    /**
+     * @hide
+     */
     @TestApi
     public void lockFields(int field) {
         mUserLockedFields |= field;
@@ -562,6 +596,12 @@ public final class NotificationChannel implements Parcelable {
      * audio attributes. Notification channels with an {@link #getImportance() importance} of at
      * least {@link NotificationManager#IMPORTANCE_DEFAULT} should have a sound.
      *
+     * Note: An app-specific sound can be provided in the Uri parameter, but because channels are
+     * persistent for the duration of the app install, and are backed up and restored, the Uri
+     * should be stable. For this reason it is not recommended to use a
+     * {@link ContentResolver#SCHEME_ANDROID_RESOURCE} uri, as resource ids can change on app
+     * upgrade.
+     *
      * Only modifiable before the channel is submitted to
      * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
@@ -655,8 +695,8 @@ public final class NotificationChannel implements Parcelable {
      * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      *
      * @see #getVibrationEffect()
-     * @see Vibrator#areEffectsSupported(int...)
-     * @see Vibrator#arePrimitivesSupported(int...)
+     * @see android.os.Vibrator#areEffectsSupported(int...)
+     * @see android.os.Vibrator#arePrimitivesSupported(int...)
      */
     @FlaggedApi(Flags.FLAG_NOTIFICATION_CHANNEL_VIBRATION_EFFECT_API)
     public void setVibrationEffect(@Nullable VibrationEffect effect) {
@@ -770,7 +810,8 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Whether or not notifications posted to this channel can bypass the Do Not Disturb
-     * {@link NotificationManager#INTERRUPTION_FILTER_PRIORITY} mode.
+     * {@link NotificationManager#INTERRUPTION_FILTER_PRIORITY} mode when the active policy allows
+     * priority channels to bypass notification filtering.
      */
     public boolean canBypassDnd() {
         return mBypassDnd;

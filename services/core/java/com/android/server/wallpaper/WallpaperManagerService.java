@@ -42,6 +42,7 @@ import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_LOCK_ORIG;
 import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
 import static com.android.server.wallpaper.WallpaperUtils.makeWallpaperIdLocked;
 import static com.android.window.flags.Flags.multiCrop;
+import static com.android.window.flags.Flags.offloadColorExtraction;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -131,6 +132,9 @@ import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wallpaper.WallpaperData.BindSource;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.tools.r8.keepanno.annotations.KeepItemKind;
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -166,6 +170,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         @Override
+        @UsesReflection(
+                value = {
+                    @KeepTarget(
+                            kind = KeepItemKind.CLASS_AND_MEMBERS,
+                            instanceOfClassConstantExclusive = IWallpaperManagerService.class,
+                            methodName = "<init>")
+                })
         public void onStart() {
             try {
                 final Class<? extends IWallpaperManagerService> klass =
@@ -380,7 +391,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
 
             // Outside of the lock since it will synchronize itself
-            notifyWallpaperColorsChanged(wallpaper);
+            if (!offloadColorExtraction()) notifyWallpaperColorsChanged(wallpaper);
         }
 
         @Override
@@ -403,12 +414,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     void notifyWallpaperColorsChanged(@NonNull WallpaperData wallpaper) {
+        notifyWallpaperColorsChanged(wallpaper, wallpaper.mWhich);
+    }
+
+    private void notifyWallpaperColorsChanged(@NonNull WallpaperData wallpaper, int which) {
         if (DEBUG) {
             Slog.i(TAG, "Notifying wallpaper colors changed");
         }
         if (wallpaper.connection != null) {
             wallpaper.connection.forEachDisplayConnector(connector ->
-                    notifyWallpaperColorsChangedOnDisplay(wallpaper, connector.mDisplayId));
+                    notifyWallpaperColorsChangedOnDisplay(wallpaper, connector.mDisplayId, which));
         }
     }
 
@@ -425,6 +440,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     private void notifyWallpaperColorsChangedOnDisplay(@NonNull WallpaperData wallpaper,
             int displayId) {
+        notifyWallpaperColorsChangedOnDisplay(wallpaper, displayId, wallpaper.mWhich);
+    }
+
+    private void notifyWallpaperColorsChangedOnDisplay(@NonNull WallpaperData wallpaper,
+            int displayId, int which) {
         boolean needsExtraction;
         synchronized (mLock) {
             final RemoteCallbackList<IWallpaperManagerCallback> currentUserColorListeners =
@@ -449,8 +469,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             notify = extractColors(wallpaper);
         }
         if (notify) {
-            notifyColorListeners(getAdjustedWallpaperColorsOnDimming(wallpaper),
-                    wallpaper.mWhich, wallpaper.userId, displayId);
+            notifyColorListeners(getAdjustedWallpaperColorsOnDimming(wallpaper), which,
+                    wallpaper.userId, displayId);
         }
     }
 
@@ -504,6 +524,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      * @return true unless the wallpaper changed during the color computation
      */
     private boolean extractColors(WallpaperData wallpaper) {
+        if (offloadColorExtraction()) return !mImageWallpaper.equals(wallpaper.wallpaperComponent);
         String cropFile = null;
         boolean defaultImageWallpaper = false;
         int wallpaperId;
@@ -803,7 +824,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     null /* options */);
             mWindowManagerInternal.setWallpaperShowWhenLocked(
                     mToken, (wallpaper.mWhich & FLAG_LOCK) != 0);
-            if (multiCrop() && wallpaper.mSupportsMultiCrop) {
+            if (multiCrop() && mImageWallpaper.equals(wallpaper.wallpaperComponent)) {
                 mWindowManagerInternal.setWallpaperCropHints(mToken,
                         mWallpaperCropper.getRelativeCropHints(wallpaper));
             } else {
@@ -1148,10 +1169,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             synchronized (mLock) {
                 // Do not broadcast changes on ImageWallpaper since it's handled
                 // internally by this class.
-                if (mImageWallpaper.equals(mWallpaper.wallpaperComponent)) {
+                boolean isImageWallpaper = mImageWallpaper.equals(mWallpaper.wallpaperComponent);
+                if (isImageWallpaper && (!offloadColorExtraction() || primaryColors == null)) {
                     return;
                 }
                 mWallpaper.primaryColors = primaryColors;
+                // only save the colors for ImageWallpaper - for live wallpapers, the colors
+                // are always recomputed after a reboot.
+                if (offloadColorExtraction() && isImageWallpaper) {
+                    saveSettingsLocked(mWallpaper.userId);
+                }
             }
             notifyWallpaperColorsChangedOnDisplay(mWallpaper, displayId);
         }
@@ -1177,7 +1204,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 try {
                     // This will trigger onComputeColors in the wallpaper engine.
                     // It's fine to be locked in here since the binder is oneway.
-                    connector.mEngine.requestWallpaperColors();
+                    if (!offloadColorExtraction() || mWallpaper.primaryColors == null) {
+                        connector.mEngine.requestWallpaperColors();
+                    }
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to request wallpaper colors", e);
                 }
@@ -1317,6 +1346,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     class MyPackageMonitor extends PackageMonitor {
+        private MyPackageMonitor() {
+            super(true);
+        }
+
         @Override
         public void onPackageUpdateFinished(String packageName, int uid) {
             synchronized (mLock) {
@@ -1811,6 +1844,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             // Offload color extraction to another thread since switchUser will be called
             // from the main thread.
             FgThread.getHandler().post(() -> {
+                if (offloadColorExtraction()) return;
                 notifyWallpaperColorsChanged(systemWallpaper);
                 if (lockWallpaper != systemWallpaper) notifyWallpaperColorsChanged(lockWallpaper);
                 notifyWallpaperColorsChanged(mFallbackWallpaper);
@@ -1917,11 +1951,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             final ComponentName component;
             final int finalWhich;
 
-            if ((which & FLAG_LOCK) > 0 && lockWallpaper != null) {
-                clearWallpaperBitmaps(lockWallpaper);
-            }
-            if ((which & FLAG_SYSTEM) > 0) {
-                clearWallpaperBitmaps(wallpaper);
+            // Clear any previous ImageWallpaper related fields
+            List<WallpaperData> toClear = new ArrayList<>();
+            if ((which & FLAG_LOCK) > 0 && lockWallpaper != null) toClear.add(lockWallpaper);
+            if ((which & FLAG_SYSTEM) > 0) toClear.add(wallpaper);
+            for (WallpaperData wallpaperToClear : toClear) {
+                clearWallpaperBitmaps(wallpaperToClear);
+                if (multiCrop()) {
+                    wallpaperToClear.mCropHints.clear();
+                    wallpaperToClear.cropHint.set(0, 0, 0, 0);
+                    wallpaperToClear.mSampleSize = 1;
+                }
             }
 
             // lock only case: set the system wallpaper component to both screens
@@ -2225,12 +2265,20 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             checkPermission(READ_WALLPAPER_INTERNAL);
             WallpaperData wallpaper = (which == FLAG_LOCK) ? mLockWallpaperMap.get(userId)
                     : mWallpaperMap.get(userId);
-            if (wallpaper == null || !wallpaper.mSupportsMultiCrop) return null;
+            if (wallpaper == null || !mImageWallpaper.equals(wallpaper.wallpaperComponent)) {
+                return null;
+            }
             SparseArray<Rect> relativeSuggestedCrops =
                     mWallpaperCropper.getRelativeCropHints(wallpaper);
             Point croppedBitmapSize = new Point(
                     (int) (0.5f + wallpaper.cropHint.width() / wallpaper.mSampleSize),
                     (int) (0.5f + wallpaper.cropHint.height() / wallpaper.mSampleSize));
+            if (croppedBitmapSize.equals(0, 0)) {
+                // There is an ImageWallpaper, but there are no crop hints and the bitmap size is
+                // unknown (e.g. the default wallpaper). Return a special "null" value that will be
+                // handled by WallpaperManager, which will fetch the dimensions of the wallpaper.
+                return null;
+            }
             SparseArray<Rect> relativeDefaultCrops =
                     mWallpaperCropper.getDefaultCrops(relativeSuggestedCrops, croppedBitmapSize);
             SparseArray<Rect> adjustedRelativeSuggestedCrops = new SparseArray<>();
@@ -2255,7 +2303,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     @Override
     public List<Rect> getFutureBitmapCrops(Point bitmapSize, List<Point> displaySizes,
             int[] screenOrientations, List<Rect> crops) {
-        SparseArray<Rect> cropMap = getCropMap(screenOrientations, crops, ORIENTATION_UNKNOWN);
+        SparseArray<Rect> cropMap = getCropMap(screenOrientations, crops);
         SparseArray<Rect> defaultCrops = mWallpaperCropper.getDefaultCrops(cropMap, bitmapSize);
         List<Rect> result = new ArrayList<>();
         boolean rtl = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
@@ -2272,7 +2320,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             throw new UnsupportedOperationException(
                     "This method should only be called with the multi crop flag enabled");
         }
-        SparseArray<Rect> cropMap = getCropMap(screenOrientations, crops, ORIENTATION_UNKNOWN);
+        SparseArray<Rect> cropMap = getCropMap(screenOrientations, crops);
         SparseArray<Rect> defaultCrops = mWallpaperCropper.getDefaultCrops(cropMap, bitmapSize);
         return WallpaperCropper.getTotalCrop(defaultCrops);
     }
@@ -2681,8 +2729,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         try {
             List<WallpaperData> pendingColorExtraction = new ArrayList<>();
             synchronized (mLock) {
-                WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
-                WallpaperData lockWallpaper = mLockWallpaperMap.get(mCurrentUserId);
+                // If called in boot before mCurrentUserId is set, sets the dim for USER_SYSTEM.
+                int userId = mCurrentUserId != UserHandle.USER_NULL
+                        ? mCurrentUserId : UserHandle.USER_SYSTEM;
+                WallpaperData wallpaper = mWallpaperMap.get(userId);
+                WallpaperData lockWallpaper = mLockWallpaperMap.get(userId);
 
                 if (dimAmount == 0.0f) {
                     wallpaper.mUidToDimAmount.remove(uid);
@@ -2691,6 +2742,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
 
                 float maxDimAmount = getHighestDimAmountFromMap(wallpaper.mUidToDimAmount);
+                if (wallpaper.mWallpaperDimAmount == maxDimAmount) return;
                 wallpaper.mWallpaperDimAmount = maxDimAmount;
                 // Also set the dim amount to the lock screen wallpaper if the lock and home screen
                 // do not share the same wallpaper
@@ -2713,8 +2765,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         });
                         // Need to extract colors again to re-calculate dark hints after
                         // applying dimming.
-                        wp.mIsColorExtractedFromDim = true;
-                        pendingColorExtraction.add(wp);
+                        if (!offloadColorExtraction()) {
+                            wp.mIsColorExtractedFromDim = true;
+                            pendingColorExtraction.add(wp);
+                        }
                         changed = true;
                     }
                 }
@@ -2723,7 +2777,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
             for (WallpaperData wp: pendingColorExtraction) {
-                notifyWallpaperColorsChanged(wp);
+                if (!offloadColorExtraction()) notifyWallpaperColorsChanged(wp);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2859,10 +2913,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             return null;
         }
 
-        int currentOrientation = mWallpaperDisplayHelper.getDefaultDisplayCurrentOrientation();
-        SparseArray<Rect> cropMap = !multiCrop() ? null
-                : getCropMap(screenOrientations, crops, currentOrientation);
-        Rect cropHint = multiCrop() || crops == null ? null : crops.get(0);
+        SparseArray<Rect> cropMap = !multiCrop() ? null : getCropMap(screenOrientations, crops);
+        Rect cropHint = multiCrop() || crops == null || crops.isEmpty() ? new Rect() : crops.get(0);
         final boolean fromForegroundApp = !multiCrop() ? false
                 : isFromForegroundApp(callingPackage);
 
@@ -2911,12 +2963,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     wallpaper.setComplete = completion;
                     wallpaper.fromForegroundApp = multiCrop() ? fromForegroundApp
                             : isFromForegroundApp(callingPackage);
-                    if (!multiCrop()) wallpaper.cropHint.set(cropHint);
-                    if (multiCrop()) wallpaper.mSupportsMultiCrop = true;
-                    if (multiCrop()) wallpaper.mCropHints = cropMap;
+                    wallpaper.cropHint.set(cropHint);
+                    if (multiCrop()) {
+                        wallpaper.mCropHints = cropMap;
+                        wallpaper.mSampleSize = 1f;
+                        wallpaper.mOrientationWhenSet =
+                                mWallpaperDisplayHelper.getDefaultDisplayCurrentOrientation();
+                    }
                     wallpaper.allowBackup = allowBackup;
                     wallpaper.mWallpaperDimAmount = getWallpaperDimAmount();
-                    wallpaper.mOrientationWhenSet = currentOrientation;
+                    if (offloadColorExtraction()) wallpaper.primaryColors = null;
                 }
                 return pfd;
             } finally {
@@ -2925,16 +2981,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private SparseArray<Rect> getCropMap(int[] screenOrientations, List<Rect> crops,
-            int currentOrientation) {
+    private SparseArray<Rect> getCropMap(int[] screenOrientations, List<Rect> crops) {
         if ((crops == null ^ screenOrientations == null)
                 || (crops != null && crops.size() != screenOrientations.length)) {
             throw new IllegalArgumentException(
                     "Illegal crops/orientations lists: must both be null, or both the same size");
         }
         SparseArray<Rect> cropMap = new SparseArray<>();
-        boolean unknown = false;
-        if (crops != null && crops.size() != 0) {
+        if (crops != null && !crops.isEmpty()) {
             for (int i = 0; i < crops.size(); i++) {
                 Rect crop = crops.get(i);
                 int width = crop.width(), height = crop.height();
@@ -2942,21 +2996,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     throw new IllegalArgumentException("Invalid crop rect supplied: " + crop);
                 }
                 int orientation = screenOrientations[i];
-                if (orientation == ORIENTATION_UNKNOWN) {
-                    if (currentOrientation == ORIENTATION_UNKNOWN) {
-                        throw new IllegalArgumentException(
-                                "Invalid orientation: " + ORIENTATION_UNKNOWN);
-                    }
-                    unknown = true;
-                    orientation = currentOrientation;
+                if (orientation == ORIENTATION_UNKNOWN && cropMap.size() > 1) {
+                    throw new IllegalArgumentException("Invalid crops supplied: the UNKNOWN"
+                            + "screen orientation should only be used in a singleton map");
                 }
                 cropMap.put(orientation, crop);
             }
-        }
-        if (unknown && cropMap.size() > 1) {
-            throw new IllegalArgumentException("Invalid crops supplied: the UNKNOWN screen "
-                    + "orientation should only be used in a singleton map (in which case it"
-                    + "represents the current orientation of the default display)");
         }
         return cropMap;
     }
@@ -2974,7 +3019,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData lockWP = new WallpaperData(userId, FLAG_LOCK);
         lockWP.wallpaperId = sysWP.wallpaperId;
         lockWP.cropHint.set(sysWP.cropHint);
-        lockWP.mSupportsMultiCrop = sysWP.mSupportsMultiCrop;
         if (sysWP.mCropHints != null) {
             lockWP.mCropHints = sysWP.mCropHints.clone();
         }
@@ -3071,6 +3115,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         checkPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT);
 
         boolean shouldNotifyColors = false;
+
+        // If the lockscreen wallpaper is set to the same as the home screen, notify that the
+        // lockscreen wallpaper colors changed, even if we don't bind a new wallpaper engine.
+        boolean shouldNotifyLockscreenColors = false;
         boolean bindSuccess;
         final WallpaperData newWallpaper;
 
@@ -3095,7 +3143,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             final long ident = Binder.clearCallingIdentity();
 
             try {
-                newWallpaper.mSupportsMultiCrop = mImageWallpaper.equals(name);
                 newWallpaper.imageWallpaperPending = false;
                 newWallpaper.mWhich = which;
                 newWallpaper.mSystemWasBoth = systemIsBoth;
@@ -3117,7 +3164,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 bindSuccess = bindWallpaperComponentLocked(name, /* force */
                         forceRebind, /* fromUser */ true, newWallpaper, reply);
                 if (bindSuccess) {
-                    if (!same) {
+                    if (!same || (offloadColorExtraction() && forceRebind)) {
                         newWallpaper.primaryColors = null;
                     } else {
                         if (newWallpaper.connection != null) {
@@ -3141,6 +3188,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     newWallpaper.wallpaperId = makeWallpaperIdLocked();
                     notifyCallbacksLocked(newWallpaper);
                     shouldNotifyColors = true;
+                    if (offloadColorExtraction()) {
+                        shouldNotifyColors = false;
+                        shouldNotifyLockscreenColors = !force && same && !systemIsBoth
+                                && which == (FLAG_SYSTEM | FLAG_LOCK);
+                    }
 
                     if (which == (FLAG_SYSTEM | FLAG_LOCK)) {
                         if (DEBUG) {
@@ -3169,6 +3221,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (shouldNotifyColors) {
             notifyWallpaperColorsChanged(newWallpaper);
         }
+        if (shouldNotifyLockscreenColors) {
+            notifyWallpaperColorsChanged(newWallpaper, FLAG_LOCK);
+        }
+
         return bindSuccess;
     }
 

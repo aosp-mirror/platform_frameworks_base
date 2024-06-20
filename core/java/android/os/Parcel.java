@@ -475,6 +475,10 @@ public final class Parcel {
     private static native boolean nativeHasFileDescriptors(long nativePtr);
     private static native boolean nativeHasFileDescriptorsInRange(
             long nativePtr, int offset, int length);
+
+    private static native boolean nativeHasBinders(long nativePtr);
+    private static native boolean nativeHasBindersInRange(
+            long nativePtr, int offset, int length);
     @RavenwoodThrow
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     @RavenwoodThrow
@@ -859,6 +863,28 @@ public final class Parcel {
     }
 
     /** @hide */
+    public void removeClassCookie(Class clz, Object expectedCookie) {
+        if (mClassCookies != null) {
+            Object removedCookie = mClassCookies.remove(clz);
+            if (removedCookie != expectedCookie) {
+                Log.wtf(TAG, "Expected to remove " + expectedCookie + " (with key=" + clz
+                        + ") but instead removed " + removedCookie);
+            }
+        } else {
+            Log.wtf(TAG, "Expected to remove " + expectedCookie + " (with key=" + clz
+                    + ") but no cookies were present");
+        }
+    }
+
+    /**
+     * Whether {@link #setClassCookie} has been called with the specified {@code clz}.
+     * @hide
+     */
+    public boolean hasClassCookie(Class clz) {
+        return mClassCookies != null && mClassCookies.containsKey(clz);
+    }
+
+    /** @hide */
     public final void adoptClassCookies(Parcel from) {
         mClassCookies = from.mClassCookies;
     }
@@ -972,6 +998,34 @@ public final class Parcel {
             getValueType(value); // Will throw if value is not supported
         }
         return false;
+    }
+
+    /**
+     * Report whether the parcel contains any marshalled IBinder objects.
+     *
+     * @throws UnsupportedOperationException if binder kernel driver was disabled or if method was
+     *                                       invoked in case of Binder RPC protocol.
+     * @hide
+     */
+    public boolean hasBinders() {
+        return nativeHasBinders(mNativePtr);
+    }
+
+    /**
+     * Report whether the parcel contains any marshalled {@link IBinder} objects in the range
+     * defined by {@code offset} and {@code length}.
+     *
+     * @param offset The offset from which the range starts. Should be between 0 and
+     *               {@link #dataSize()}.
+     * @param length The length of the range. Should be between 0 and {@link #dataSize()} - {@code
+     *               offset}.
+     * @return whether there are binders in the range or not.
+     * @throws IllegalArgumentException if the parameters are out of the permitted ranges.
+     *
+     * @hide
+     */
+    public boolean hasBinders(int offset, int length) {
+        return nativeHasBindersInRange(mNativePtr, offset, length);
     }
 
     /**

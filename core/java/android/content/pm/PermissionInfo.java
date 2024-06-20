@@ -273,6 +273,10 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * to the <code>retailDemo</code> value of
      * {@link android.R.attr#protectionLevel}.
      *
+     * @deprecated This flag has been replaced by the
+     *             {@link android.R.string#config_defaultRetailDemo retail demo role} and is a
+     *             no-op since {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}.
+     *
      * @hide
      */
     @SystemApi

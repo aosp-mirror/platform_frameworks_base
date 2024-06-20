@@ -32,6 +32,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.WindowInsets.Type.InsetsType;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -268,16 +269,64 @@ public class InsetsSourceControl implements Parcelable {
         public Array() {
         }
 
-        public Array(Parcel in) {
+        /**
+         * @param copyControls whether or not to make a copy of the each {@link InsetsSourceControl}
+         */
+        public Array(@NonNull Array other, boolean copyControls) {
+            setTo(other, copyControls);
+        }
+
+        public Array(@NonNull Parcel in) {
             readFromParcel(in);
         }
 
-        public void set(@Nullable InsetsSourceControl[] controls) {
-            mControls = controls;
+        /** Updates the current Array to the given Array. */
+        public void setTo(@NonNull Array other, boolean copyControls) {
+            set(other.mControls, copyControls);
         }
 
+        /** Updates the current controls to the given controls. */
+        public void set(@Nullable InsetsSourceControl[] controls, boolean copyControls) {
+            if (controls == null || !copyControls) {
+                mControls = controls;
+                return;
+            }
+            // Make a copy of the array.
+            mControls = new InsetsSourceControl[controls.length];
+            for (int i = mControls.length - 1; i >= 0; i--) {
+                if (controls[i] != null) {
+                    mControls[i] = new InsetsSourceControl(controls[i]);
+                }
+            }
+        }
+
+        /** Gets the controls. */
         public @Nullable InsetsSourceControl[] get() {
             return mControls;
+        }
+
+        /** Cleanup {@link SurfaceControl} stored in controls to prevent leak. */
+        public void release() {
+            if (mControls == null) {
+                return;
+            }
+            for (InsetsSourceControl control : mControls) {
+                if (control != null) {
+                    control.release(SurfaceControl::release);
+                }
+            }
+        }
+
+        /** Sets the given flags to all controls. */
+        public void setParcelableFlags(int parcelableFlags) {
+            if (mControls == null) {
+                return;
+            }
+            for (InsetsSourceControl control : mControls) {
+                if (control != null) {
+                    control.setParcelableFlags(parcelableFlags);
+                }
+            }
         }
 
         @Override
@@ -303,5 +352,22 @@ public class InsetsSourceControl implements Parcelable {
                 return new Array[size];
             }
         };
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            final InsetsSourceControl.Array other = (InsetsSourceControl.Array) o;
+            return Arrays.equals(mControls, other.mControls);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(mControls);
+        }
     }
 }

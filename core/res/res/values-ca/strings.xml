@@ -85,7 +85,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"No es pot accedir a la xarxa mòbil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prova de canviar de xarxa preferent. Toca per canviar-la."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Les trucades d\'emergència no estan disponibles"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"No es poden fer trucades d\'emergència per Wi-Fi"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Per poder fer trucades d\'emergència, cal tenir connexió de xarxa mòbil"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Desviació de trucades"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode de devolució de trucada d\'emergència"</string>
@@ -154,16 +154,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> després de <xliff:g id="TIME_DELAY">{2}</xliff:g> segons"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no s\'ha desviat"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no s\'ha desviat"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Seguretat de la xarxa mòbil"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Revisa la configuració"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"S\'ha accedit a l\'identificador del dispositiu"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Una xarxa connectada a <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> va gravar l\'identificador únic del teu dispositiu (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> vegades en el període entre els dies <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> i <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Connexió encriptada a <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Ara ja tens connexió a una xarxa mòbil més segura."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Connexió no encriptada a <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Tens connexió a una xarxa mòbil no encriptada. Els teus missatges, trucades i dades són vulnerables a intercepcions."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Configuració de seguretat de la xarxa mòbil"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Seguretat de xarxes mòbils"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Encriptació, notificacions de xarxes sense encriptació"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"S\'ha accedit a l\'identificador de dispositiu"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'identificador únic del teu dispositiu (IMSI or IMEI) mentre s\'utilitzava la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"A les <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una xarxa propera ha registrat l\'identificador únic del teu dispositiu (IMSI or IMEI) mentre s\'utilitzava la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nAixò vol dir que s\'han registrat la teva ubicació, activitat o identitat. Tot i ser una pràctica habitual, pot suposar un problema per a aquelles persones preocupades per la privadesa."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"T\'has connectat a la xarxa encriptada <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"La connexió SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ara és més segura"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"T\'has connectat a una xarxa sense encriptació"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Les trucades, els missatges i les dades ara són més vulnerables amb la SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Les trucades, els missatges i les dades ara són més vulnerables amb la SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g>.\n\nRebràs una altra notificació quan la connexió torni a estar encriptada."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Configuració de seguretat de xarxes mòbils"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Més informació"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"Entesos"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Codi de funció completat."</string>
     <string name="fcError" msgid="5325116502080221346">"Problema de connexió o codi de funció no vàlid."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"D\'acord"</string>
@@ -199,6 +202,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"El teu perfil de treball ja no està disponible en aquest dispositiu"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Has intentat introduir la contrasenya massa vegades"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"L\'administrador ha cedit el dispositiu per a ús personal"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"S\'ha suprimit l\'espai privat"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"La teva organització no permet espais privats en aquest dispositiu gestionat."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"El dispositiu està gestionat"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"La teva organització gestiona aquest dispositiu i és possible que supervisi el trànsit de xarxa. Toca per obtenir més informació."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Les aplicacions poden accedir a la teva ubicació"</string>
@@ -281,6 +286,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Assist. per veu"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Bloqueig de seguretat"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"+999"</string>
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Respon"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Notificació nova"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Teclat físic"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Seguretat"</string>
@@ -357,6 +363,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fer una captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pot fer una captura de la pantalla."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Previsualitza, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"ignora"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"aparèixer a la barra d\'estat"</string>
@@ -663,7 +670,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"L\'empremta digital no s\'ha reconegut"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"L\'empremta digital no s\'ha reconegut"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"No podem detectar la cara. Usa l\'empremta digital."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"La cara no s\'ha reconegut. Usa l\'empremta digital."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"L\'empremta digital s\'ha autenticat"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Cara autenticada; prem el botó per confirmar"</string>
@@ -829,14 +836,14 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Permet controlar la longitud i el nombre de caràcters permesos a les contrasenyes i als PIN del bloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisar els intents de desbloqueig de la pantalla"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja la tauleta o n\'esborra totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han introduït en intentar desbloquejar la pantalla i bloqueja el dispositiu Android TV o esborra totes les dades del dispositiu si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Supervisa el nombre de contrasenyes incorrectes introduïdes en desbloquejar la pantalla, i bloqueja el sistema d\'informació i entreteniment o n\'esborra totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Supervisa el nombre de contrasenyes incorrectes introduïdes en desbloquejar la pantalla, i bloqueja el telèfon o esborra totes les dades del telèfon si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja la tauleta o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han introduït en intentar desbloquejar la pantalla i bloqueja el dispositiu Android TV o n\'esborra totes les dades de l\'usuari si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Supervisa el nombre de contrasenyes incorrectes introduïdes en desbloquejar la pantalla, i bloqueja el sistema d\'informació i entreteniment o esborra totes les dades d\'aquest perfil si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja el telèfon o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja la tauleta o esborra\'n totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el dispositiu Android TV o esborra\'n totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el sistema d\'informació i entreteniment o esborra\'n totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el telèfon o esborra\'n totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja la tauleta o esborra totes les dades d\'aquest usuari si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el dispositiu Android TV o esborra totes les dades d\'aquest usuari si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el sistema d\'informació i entreteniment o esborra totes les dades d\'aquest perfil si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el telèfon o esborra totes les dades d\'aquest usuari si s\'introdueixen massa contrasenyes incorrectes."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Canviar el bloqueig de pantalla"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Canvia el bloqueig de pantalla."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bloquejar la pantalla"</string>
@@ -996,7 +1003,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcte!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Torna-ho a provar"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Torna-ho a provar"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbl. per accedir a totes les funcions i dades"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloqueja per accedir a les funcions i dades"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"S\'ha superat el nombre màxim d\'intents de Desbloqueig facial"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"No hi ha cap SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"No hi ha cap SIM a la tauleta."</string>
@@ -1184,6 +1191,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Suprimeix"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Mètode d\'introducció de text"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Accions de text"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"L\'escriptura a mà no s\'admet en aquest camp"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"L\'escriptura a mà no s\'admet als camps de contrasenya"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Enrere"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Canvia el mètode d\'introducció de text"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"L\'espai d\'emmagatzematge s\'està esgotant"</string>
@@ -1875,7 +1884,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"El PIN és massa curt. Ha de tenir quatre dígits com a mínim."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Torna-ho a provar més tard"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Mode de pantalla completa"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"Per sortir, llisca cap avall des de la part superior."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entesos"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gira per a una millor visualització"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Obre <xliff:g id="NAME">%s</xliff:g> en pantalla completa per a una millor visualització"</string>
@@ -1895,12 +1905,12 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Sol·licita el PIN per deixar de fixar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Sol·licita el patró de desbloqueig per deixar de fixar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demana la contrasenya per deixar de fixar"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"Instal·lat per l\'administrador"</string>
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"Instal·lat per l\'administrador.\nVes a la configuració per veure els permisos concedits."</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions a la xarxa."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions a la xarxa."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions de xarxa."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Estalvi de bateria activa el tema fosc i limita o desactiva l\'activitat en segon pla, alguns efectes visuals, determinades funcions i algunes connexions de xarxa."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Estalvi de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vols activar l\'Estalvi de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
@@ -1928,6 +1938,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gestionat per <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activat"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivat"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualsevol calendari"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> està silenciant alguns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"S\'ha produït un error intern al dispositiu i és possible que funcioni de manera inestable fins que restableixis les dades de fàbrica."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"S\'ha produït un error intern al dispositiu. Contacta amb el fabricant del dispositiu per obtenir més informació."</string>
@@ -2004,9 +2017,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"En aquests moments, No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al dispositiu Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"En aquests moments, No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho a la tauleta."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"No s\'hi pot accedir des del teu <xliff:g id="DEVICE">%1$s</xliff:g>. Prova-ho al telèfon."</string>
-    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió de reproducció en línia. Primer concedeix el permís al teu dispositiu Android TV."</string>
-    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió de reproducció en línia. Primer concedeix el permís a la teva tauleta."</string>
-    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió de reproducció en línia. Primer concedeix el permís al teu telèfon."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió d\'estríming. Primer concedeix el permís al teu dispositiu Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió d\'estríming. Primer concedeix el permís a la teva tauleta."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Aquesta aplicació requereix permisos addicionals, però els permisos no es poden concedir en una sessió d\'estríming. Primer concedeix el permís al teu telèfon."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho al dispositiu Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho a la tauleta."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Aquesta aplicació sol·licita seguretat addicional. Prova-ho al telèfon."</string>
@@ -2136,6 +2149,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificació d\'informació del mode de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Estalvi de bateria s\'ha activat"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"S\'està reduint l\'ús de la bateria per allargar-ne la durada"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"La funció Estalvi de bateria està activada"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"S\'ha activat la funció Estalvi de bateria per allargar la durada de la bateria"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Estalvi de bateria"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"L\'estalvi de bateria s\'ha desactivat"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"El telèfon té prou bateria. Les funcions ja no estan restringides."</string>
@@ -2183,7 +2198,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Creu direccional: esquerra"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Creu direccional: dreta"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Creu direccional: centre"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de títol de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> s\'ha transferit al segment RESTRINGIT"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ha enviat una imatge"</string>
@@ -2210,6 +2224,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vols canviar a l\'aplicació de treball?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"La teva organització només et permet fer trucades des d\'aplicacions de treball"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"La teva organització només et permet enviar missatges des d\'aplicacions de treball"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"Només pots fer trucades des de la teva aplicació Telèfon personal. Les trucades que facis amb aquesta aplicació s\'afegiran al teu historial de trucades personal."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Només pots enviar missatges SMS des de la teva aplicació Missatges personal."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utilitza el navegador personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utilitza el navegador de treball"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Truca"</string>
@@ -2350,7 +2366,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No es pot accedir a la càmera del telèfon des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No es pot accedir a la càmera de la tauleta des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"No s\'hi pot accedir mentre s\'està reproduint en continu. Prova-ho al telèfon."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No es pot veure el mode d\'imatge sobre imatge durant la reproducció en línia"</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No es pot veure el mode d\'imatge sobre imatge durant l\'estríming"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Valor predeterminat del sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARGETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Permís del perfil del rellotge perquè l\'aplicació complementària gestioni els rellotges"</string>
@@ -2389,9 +2405,26 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Treball 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Prova"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Compartit"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Perfil de treball"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espai privat"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clon"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Comunitari"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Espai privat"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"S\'ha amagat contingut sensible de les notificacions"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per motius de seguretat"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"S\'ha connectat automàticament a un satèl·lit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Pots enviar i rebre missatges sense una xarxa mòbil o Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Obre Missatges"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Com funciona"</string>
+    <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendent..."</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Torna a configurar Desbloqueig amb empremta digital"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> no funcionava correctament i s\'ha suprimit"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> no funcionaven correctament i s\'han suprimit"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> no funcionava correctament i s\'ha suprimit. Torna a configurar-la per desbloquejar el telèfon amb l\'empremta digital."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> no funcionaven correctament i s\'han suprimit. Torna a configurar-les per desbloquejar el telèfon amb l\'empremta digital."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Torna a configurar Desbloqueig facial"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"El teu model facial no funcionava correctament i s\'ha suprimit. Torna a configurar-lo per desbloquejar el telèfon amb la cara."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configura"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ara no"</string>
 </resources>

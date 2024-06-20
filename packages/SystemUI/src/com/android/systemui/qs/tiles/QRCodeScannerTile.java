@@ -21,13 +21,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -99,7 +99,7 @@ public class QRCodeScannerTile extends QSTileImpl<QSTile.State> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         Intent intent = mQRCodeScannerController.getIntent();
         if (intent == null) {
             // This should never happen as the fact that we are handling clicks means that the
@@ -109,7 +109,7 @@ public class QRCodeScannerTile extends QSTileImpl<QSTile.State> {
         }
 
         ActivityTransitionAnimator.Controller animationController =
-                view == null ? null : ActivityTransitionAnimator.Controller.fromView(view,
+                expandable == null ? null : expandable.activityTransitionController(
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE);
         mActivityStarter.startActivity(intent, true /* dismissShade */,
                 animationController, true /* showOverLockscreenWhenLocked */);

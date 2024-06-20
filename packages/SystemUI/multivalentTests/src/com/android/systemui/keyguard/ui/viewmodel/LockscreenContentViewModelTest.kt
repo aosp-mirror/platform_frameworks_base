@@ -16,38 +16,60 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.authController
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
+import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
+import com.android.systemui.unfold.fakeUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import java.util.Locale
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class LockscreenContentViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     private val kosmos: Kosmos = testKosmos()
 
     lateinit var underTest: LockscreenContentViewModel
 
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
     @Before
     fun setup() {
         with(kosmos) {
             fakeFeatureFlagsClassic.set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, true)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeRepository.setShadeMode(ShadeMode.Single)
             underTest = lockscreenContentViewModel
         }
     }
@@ -56,7 +78,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
     fun isUdfpsVisible_withUdfps_true() =
         with(kosmos) {
             testScope.runTest {
-                whenever(kosmos.authController.isUdfpsSupported).thenReturn(true)
+                whenever(authController.isUdfpsSupported).thenReturn(true)
                 assertThat(underTest.isUdfpsVisible).isTrue()
             }
         }
@@ -65,26 +87,30 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
     fun isUdfpsVisible_withoutUdfps_false() =
         with(kosmos) {
             testScope.runTest {
-                whenever(kosmos.authController.isUdfpsSupported).thenReturn(false)
+                whenever(authController.isUdfpsSupported).thenReturn(false)
                 assertThat(underTest.isUdfpsVisible).isFalse()
             }
         }
 
     @Test
-    fun isLargeClockVisible_withLargeClock_true() =
+    @DisableSceneContainer
+    fun clockSize_withLargeClock_true() =
         with(kosmos) {
             testScope.runTest {
-                kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
-                assertThat(underTest.isLargeClockVisible).isTrue()
+                val clockSize by collectLastValue(underTest.clockSize)
+                fakeKeyguardClockRepository.setClockSize(ClockSize.LARGE)
+                assertThat(clockSize).isEqualTo(ClockSize.LARGE)
             }
         }
 
     @Test
-    fun isLargeClockVisible_withSmallClock_false() =
+    @DisableSceneContainer
+    fun clockSize_withSmallClock_false() =
         with(kosmos) {
             testScope.runTest {
-                kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
-                assertThat(underTest.isLargeClockVisible).isFalse()
+                val clockSize by collectLastValue(underTest.clockSize)
+                fakeKeyguardClockRepository.setClockSize(ClockSize.SMALL)
+                assertThat(clockSize).isEqualTo(ClockSize.SMALL)
             }
         }
 
@@ -92,27 +118,98 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
     fun areNotificationsVisible_splitShadeTrue_true() =
         with(kosmos) {
             testScope.runTest {
-                overrideResource(R.bool.config_use_split_notification_shade, true)
-                kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
+                val areNotificationsVisible by collectLastValue(underTest.areNotificationsVisible)
+                shadeRepository.setShadeMode(ShadeMode.Split)
+                fakeKeyguardClockRepository.setClockSize(ClockSize.LARGE)
 
-                assertThat(underTest.areNotificationsVisible(context.resources)).isTrue()
+                assertThat(areNotificationsVisible).isTrue()
             }
         }
+
     @Test
+    @DisableSceneContainer
     fun areNotificationsVisible_withSmallClock_true() =
         with(kosmos) {
             testScope.runTest {
-                kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
-                assertThat(underTest.areNotificationsVisible(context.resources)).isTrue()
+                val areNotificationsVisible by collectLastValue(underTest.areNotificationsVisible)
+                fakeKeyguardClockRepository.setClockSize(ClockSize.SMALL)
+                assertThat(areNotificationsVisible).isTrue()
             }
         }
 
     @Test
+    @DisableSceneContainer
     fun areNotificationsVisible_withLargeClock_false() =
         with(kosmos) {
             testScope.runTest {
-                kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
-                assertThat(underTest.areNotificationsVisible(context.resources)).isFalse()
+                val areNotificationsVisible by collectLastValue(underTest.areNotificationsVisible)
+                fakeKeyguardClockRepository.setClockSize(ClockSize.LARGE)
+                assertThat(areNotificationsVisible).isFalse()
             }
         }
+
+    @Test
+    fun shouldUseSplitNotificationShade_withConfigTrue_true() =
+        with(kosmos) {
+            testScope.runTest {
+                val shouldUseSplitNotificationShade by
+                    collectLastValue(underTest.shouldUseSplitNotificationShade)
+                shadeRepository.setShadeMode(ShadeMode.Split)
+                assertThat(shouldUseSplitNotificationShade).isTrue()
+            }
+        }
+
+    @Test
+    fun shouldUseSplitNotificationShade_withConfigFalse_false() =
+        with(kosmos) {
+            testScope.runTest {
+                val shouldUseSplitNotificationShade by
+                    collectLastValue(underTest.shouldUseSplitNotificationShade)
+                shadeRepository.setShadeMode(ShadeMode.Single)
+                assertThat(shouldUseSplitNotificationShade).isFalse()
+            }
+        }
+
+    @Test
+    fun unfoldTranslations() =
+        with(kosmos) {
+            testScope.runTest {
+                val maxTranslation = prepareConfiguration()
+                val translations by collectLastValue(underTest.unfoldTranslations)
+
+                val unfoldProvider = fakeUnfoldTransitionProgressProvider
+                unfoldProvider.onTransitionStarted()
+                assertThat(translations?.start).isEqualTo(0f)
+                assertThat(translations?.end).isEqualTo(-0f)
+
+                repeat(10) { repetition ->
+                    val transitionProgress = 0.1f * (repetition + 1)
+                    unfoldProvider.onTransitionProgress(transitionProgress)
+                    assertThat(translations?.start)
+                        .isEqualTo((1 - transitionProgress) * maxTranslation)
+                    assertThat(translations?.end)
+                        .isEqualTo(-(1 - transitionProgress) * maxTranslation)
+                }
+
+                unfoldProvider.onTransitionFinishing()
+                assertThat(translations?.start).isEqualTo(0f)
+                assertThat(translations?.end).isEqualTo(-0f)
+
+                unfoldProvider.onTransitionFinished()
+                assertThat(translations?.start).isEqualTo(0f)
+                assertThat(translations?.end).isEqualTo(-0f)
+            }
+        }
+
+    private fun prepareConfiguration(): Int {
+        val configuration = context.resources.configuration
+        configuration.setLayoutDirection(Locale.US)
+        kosmos.fakeConfigurationRepository.onConfigurationChange(configuration)
+        val maxTranslation = 10
+        kosmos.fakeConfigurationRepository.setDimensionPixelSize(
+            R.dimen.notification_side_paddings,
+            maxTranslation,
+        )
+        return maxTranslation
+    }
 }

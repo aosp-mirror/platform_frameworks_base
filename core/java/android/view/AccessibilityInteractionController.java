@@ -48,6 +48,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityRequestPreparer;
+import android.view.accessibility.Flags;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.window.ScreenCapture;
 
@@ -1283,6 +1284,15 @@ public final class AccessibilityInteractionController {
         // Offset 0.5f to round after casting.
         outRect.set((int) (sourceRectF.left + 0.5), (int) (sourceRectF.top + 0.5),
                 (int) (sourceRectF.right + 0.5), (int) (sourceRectF.bottom + 0.5));
+    }
+
+    /**
+     * Destroy {@link AccessibilityInteractionController} and clean up the pending actions.
+     */
+    public void destroy() {
+        if (Flags.preventLeakingViewrootimpl()) {
+            mHandler.removeCallbacksAndMessages(null);
+        }
     }
 
     /**

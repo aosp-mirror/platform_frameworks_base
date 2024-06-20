@@ -19,9 +19,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_DOZING_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,17 +43,28 @@ constructor(
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_DOZING_DURATION,
-            from = KeyguardState.GONE,
-            to = KeyguardState.DOZING,
-        )
+        animationFlow
+            .setup(
+                duration = TO_DOZING_DURATION,
+                edge = Edge.create(from = Scenes.Gone, to = DOZING),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = GONE, to = DOZING),
+            )
 
     val lockscreenAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = 500.milliseconds,
             onStep = { 0f },
             onCancel = { 1f },
+            onFinish = { 1f },
+        )
+
+    val notificationAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 500.milliseconds,
+            onStep = { 1f - it },
+            // Needs to be 1f in order for HUNs to appear on AOD
             onFinish = { 1f },
         )
 

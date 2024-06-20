@@ -63,6 +63,8 @@ class PowerManagerShellCommand extends ShellCommand {
                     return runListAmbientDisplaySuppressionTokens();
                 case "set-prox":
                     return runSetProx();
+                case "set-face-down-detector":
+                    return runSetFaceDownDetector();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -178,6 +180,20 @@ class PowerManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    /**
+     * To be used for testing - allowing us to disable the usage of face down detector.
+     */
+    private int runSetFaceDownDetector() {
+        try {
+            mService.setUseFaceDownDetector(Boolean.parseBoolean(getNextArgRequired()));
+        } catch (Exception e) {
+            PrintWriter pw = getOutPrintWriter();
+            pw.println("Error: " + e);
+            return -1;
+        }
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -203,6 +219,8 @@ class PowerManagerShellCommand extends ShellCommand {
         pw.println("    Acquires the proximity sensor wakelock. Wakelock is associated with");
         pw.println("    a specific display if specified. 'list' lists wakelocks previously");
         pw.println("    created by set-prox including their held status.");
+        pw.println("  set-face-down-detector [true|false]");
+        pw.println("    sets whether we use face down detector timeouts or not");
 
         pw.println();
         Intent.printIntentArgsHelp(pw , "");

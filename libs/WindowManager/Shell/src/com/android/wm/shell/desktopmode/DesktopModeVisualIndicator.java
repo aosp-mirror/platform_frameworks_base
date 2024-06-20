@@ -17,10 +17,10 @@
 package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -35,6 +35,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.drawable.LayerDrawable;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
@@ -98,6 +99,7 @@ public class DesktopModeVisualIndicator {
      * Based on the coordinates of the current drag event, determine which indicator type we should
      * display, including no visible indicator.
      */
+    @NonNull
     IndicatorType updateIndicatorType(PointF inputCoordinates, int windowingMode) {
         final DisplayLayout layout = mDisplayController.getDisplayLayout(mTaskInfo.displayId);
         // If we are in freeform, we don't want a visible indicator in the "freeform" drag zone.
@@ -136,18 +138,18 @@ public class DesktopModeVisualIndicator {
     Region calculateFullscreenRegion(DisplayLayout layout,
             @WindowConfiguration.WindowingMode int windowingMode, int captionHeight) {
         final Region region = new Region();
-        int edgeTransitionHeight = mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_area_height);
+        int transitionHeight = windowingMode == WINDOWING_MODE_FREEFORM
+                ? mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height)
+                : 2 * layout.stableInsets().top;
         // A thin, short Rect at the top of the screen.
         if (windowingMode == WINDOWING_MODE_FREEFORM) {
             int fromFreeformWidth = mContext.getResources().getDimensionPixelSize(
                     com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_width);
-            int fromFreeformHeight = mContext.getResources().getDimensionPixelSize(
-                    com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height);
             region.union(new Rect((layout.width() / 2) - (fromFreeformWidth / 2),
                     -captionHeight,
                     (layout.width() / 2) + (fromFreeformWidth / 2),
-                    fromFreeformHeight));
+                    transitionHeight));
         }
         // A screen-wide, shorter Rect if the task is in fullscreen or split.
         if (windowingMode == WINDOWING_MODE_FULLSCREEN
@@ -155,7 +157,7 @@ public class DesktopModeVisualIndicator {
             region.union(new Rect(0,
                     -captionHeight,
                     layout.width(),
-                    edgeTransitionHeight));
+                    transitionHeight));
         }
         return region;
     }
@@ -184,7 +186,7 @@ public class DesktopModeVisualIndicator {
         // In freeform, keep the top corners clear.
         int transitionHeight = windowingMode == WINDOWING_MODE_FREEFORM
                 ? mContext.getResources().getDimensionPixelSize(
-                        com.android.wm.shell.R.dimen.desktop_mode_split_from_desktop_height) :
+                com.android.wm.shell.R.dimen.desktop_mode_split_from_desktop_height) :
                 -captionHeight;
         region.union(new Rect(0, transitionHeight, transitionEdgeWidth, layout.height()));
         return region;
@@ -221,6 +223,7 @@ public class DesktopModeVisualIndicator {
         mLeash = builder
                 .setName("Desktop Mode Visual Indicator")
                 .setContainerLayer()
+                .setCallsite("DesktopModeVisualIndicator.createView")
                 .build();
         t.show(mLeash);
         final WindowManager.LayoutParams lp =
@@ -310,12 +313,14 @@ public class DesktopModeVisualIndicator {
     private static class VisualIndicatorAnimator extends ValueAnimator {
         private static final int FULLSCREEN_INDICATOR_DURATION = 200;
         private static final float FULLSCREEN_SCALE_ADJUSTMENT_PERCENT = 0.015f;
-        private static final float INDICATOR_FINAL_OPACITY = 0.7f;
+        private static final float INDICATOR_FINAL_OPACITY = 0.35f;
+        private static final int MAXIMUM_OPACITY = 255;
 
-        /** Determines how this animator will interact with the view's alpha:
-         *  Fade in, fade out, or no change to alpha
+        /**
+         * Determines how this animator will interact with the view's alpha:
+         * Fade in, fade out, or no change to alpha
          */
-        private enum AlphaAnimType{
+        private enum AlphaAnimType {
             ALPHA_FADE_IN_ANIM, ALPHA_FADE_OUT_ANIM, ALPHA_NO_CHANGE_ANIM
         }
 
@@ -362,10 +367,10 @@ public class DesktopModeVisualIndicator {
          * Create animator for visual indicator changing type (i.e., fullscreen to freeform,
          * freeform to split, etc.)
          *
-         * @param view the view for this indicator
+         * @param view          the view for this indicator
          * @param displayLayout information about the display the transitioning task is currently on
-         * @param origType the original indicator type
-         * @param newType the new indicator type
+         * @param origType      the original indicator type
+         * @param newType       the new indicator type
          */
         private static VisualIndicatorAnimator animateIndicatorType(@NonNull View view,
                 @NonNull DisplayLayout displayLayout, IndicatorType origType,
@@ -454,7 +459,11 @@ public class DesktopModeVisualIndicator {
          * @param fraction current animation fraction
          */
         private void updateIndicatorAlpha(float fraction, View view) {
-            view.setAlpha(fraction * INDICATOR_FINAL_OPACITY);
+            final LayerDrawable drawable = (LayerDrawable) view.getBackground();
+            drawable.findDrawableByLayerId(R.id.indicator_stroke)
+                    .setAlpha((int) (MAXIMUM_OPACITY * fraction));
+            drawable.findDrawableByLayerId(R.id.indicator_solid)
+                    .setAlpha((int) (MAXIMUM_OPACITY * fraction * INDICATOR_FINAL_OPACITY));
         }
 
         /**
@@ -462,7 +471,7 @@ public class DesktopModeVisualIndicator {
          */
         private static Rect getMaxBounds(Rect startBounds) {
             return new Rect((int) (startBounds.left
-                            - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.width())),
+                    - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.width())),
                     (int) (startBounds.top
                             - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.height())),
                     (int) (startBounds.right

@@ -32,19 +32,26 @@ import java.util.List;
 
 /**
  * Polling Frames represent data about individual frames of an NFC polling loop. These frames will
- * be deliverd to subclasses of {@link HostApduService} that have registered filters with
- * {@link CardEmulation#registerPollingLoopFilterForService(ComponentName, String)} that match a
- * given frame in a loop and will be delivered through calls to
+ * be delivered to subclasses of {@link HostApduService} that have registered filters with
+ * {@link CardEmulation#registerPollingLoopFilterForService(ComponentName, String, boolean)} that
+ * match a given frame in a loop and will be delivered through calls to
  * {@link HostApduService#processPollingFrames(List)}.
  */
 @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-public final class PollingFrame implements Parcelable{
+public final class PollingFrame implements Parcelable {
 
     /**
      * @hide
      */
-    @IntDef(prefix = { "POLLING_LOOP_TYPE_"}, value = { POLLING_LOOP_TYPE_A, POLLING_LOOP_TYPE_B,
-            POLLING_LOOP_TYPE_F, POLLING_LOOP_TYPE_OFF, POLLING_LOOP_TYPE_ON })
+    @IntDef(prefix = { "POLLING_LOOP_TYPE_"},
+        value = {
+            POLLING_LOOP_TYPE_A,
+            POLLING_LOOP_TYPE_B,
+            POLLING_LOOP_TYPE_F,
+            POLLING_LOOP_TYPE_OFF,
+            POLLING_LOOP_TYPE_ON,
+            POLLING_LOOP_TYPE_UNKNOWN
+        })
     @Retention(RetentionPolicy.SOURCE)
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
     public @interface PollingFrameType {}
@@ -100,45 +107,46 @@ public final class PollingFrame implements Parcelable{
     /**
      * KEY_POLLING_LOOP_TYPE is the Bundle key for the type of
      * polling loop frame in the Bundle included in MSG_POLLING_LOOP.
-     *
-     * @hide
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String KEY_POLLING_LOOP_TYPE = "android.nfc.cardemulation.TYPE";
+    private static final String KEY_POLLING_LOOP_TYPE = "android.nfc.cardemulation.TYPE";
 
     /**
      * KEY_POLLING_LOOP_DATA is the Bundle key for the raw data of captured from
      * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
-     *
-     * @hide
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String KEY_POLLING_LOOP_DATA = "android.nfc.cardemulation.DATA";
+    private static final String KEY_POLLING_LOOP_DATA = "android.nfc.cardemulation.DATA";
 
     /**
      * KEY_POLLING_LOOP_GAIN is the Bundle key for the field strength of
      * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
-     *
-     * @hide
-     */
+    */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String KEY_POLLING_LOOP_GAIN = "android.nfc.cardemulation.GAIN";
+    private static final String KEY_POLLING_LOOP_GAIN = "android.nfc.cardemulation.GAIN";
 
     /**
      * KEY_POLLING_LOOP_TIMESTAMP is the Bundle key for the timestamp of
      * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
-     *
-     * @hide
-     */
+    */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String KEY_POLLING_LOOP_TIMESTAMP = "android.nfc.cardemulation.TIMESTAMP";
+    private static final String KEY_POLLING_LOOP_TIMESTAMP = "android.nfc.cardemulation.TIMESTAMP";
+
+    /**
+     * KEY_POLLING_LOOP_TIMESTAMP is the Bundle key for whether this polling frame triggered
+     * autoTransact in the Bundle included in MSG_POLLING_LOOP.
+    */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    private static final String KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT =
+            "android.nfc.cardemulation.TRIGGERED_AUTOTRANSACT";
 
 
     @PollingFrameType
     private final int mType;
     private final byte[] mData;
     private final int mGain;
-    private final int mTimestamp;
+    private final long mTimestamp;
+    private boolean mTriggeredAutoTransact;
 
     public static final @NonNull Parcelable.Creator<PollingFrame> CREATOR =
             new Parcelable.Creator<>() {
@@ -153,31 +161,46 @@ public final class PollingFrame implements Parcelable{
                 }
             };
 
-    PollingFrame(Bundle frame) {
+    private PollingFrame(Bundle frame) {
         mType = frame.getInt(KEY_POLLING_LOOP_TYPE);
         byte[] data = frame.getByteArray(KEY_POLLING_LOOP_DATA);
         mData = (data == null) ? new byte[0] : data;
-        mGain = frame.getByte(KEY_POLLING_LOOP_GAIN);
-        mTimestamp = frame.getInt(KEY_POLLING_LOOP_TIMESTAMP);
+        mGain = frame.getInt(KEY_POLLING_LOOP_GAIN, -1);
+        mTimestamp = frame.getLong(KEY_POLLING_LOOP_TIMESTAMP);
+        mTriggeredAutoTransact = frame.containsKey(KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT)
+                && frame.getBoolean(KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT);
     }
 
+    /**
+     * Constructor for Polling Frames.
+     *
+     * @param type the type of the frame
+     * @param data a byte array of the data contained in the frame
+     * @param gain the vendor-specific gain of the field
+     * @param timestampMicros the timestamp in microseconds
+     * @param triggeredAutoTransact whether or not this frame triggered the device to start a
+     * transaction automatically
+     *
+     * @hide
+     */
     public PollingFrame(@PollingFrameType int type, @Nullable byte[] data,
-            int gain, int timestamp) {
+            int gain, long timestampMicros, boolean triggeredAutoTransact) {
         mType = type;
         mData = data == null ? new byte[0] : data;
         mGain = gain;
-        mTimestamp = timestamp;
+        mTimestamp = timestampMicros;
+        mTriggeredAutoTransact = triggeredAutoTransact;
     }
 
     /**
      * Returns the type of frame for this polling loop frame.
      * The possible return values are:
      * <ul>
-     *   <li>{@link POLLING_LOOP_TYPE_ON}</li>
-     *   <li>{@link POLLING_LOOP_TYPE_OFF}</li>
-     *   <li>{@link POLLING_LOOP_TYPE_A}</li>
-     *   <li>{@link POLLING_LOOP_TYPE_B}</li>
-     *   <li>{@link POLLING_LOOP_TYPE_F}</li>
+     *   <li>{@link #POLLING_LOOP_TYPE_ON}</li>
+     *   <li>{@link #POLLING_LOOP_TYPE_OFF}</li>
+     *   <li>{@link #POLLING_LOOP_TYPE_A}</li>
+     *   <li>{@link #POLLING_LOOP_TYPE_B}</li>
+     *   <li>{@link #POLLING_LOOP_TYPE_F}</li>
      * </ul>
      */
     public @PollingFrameType int getType() {
@@ -194,19 +217,35 @@ public final class PollingFrame implements Parcelable{
     /**
      * Returns the gain representing the field strength of the NFC field when this polling loop
      * frame was observed.
+     * @return the gain or -1 if there is no gain measurement associated with this frame.
      */
-    public int getGain() {
+    public int getVendorSpecificGain() {
         return mGain;
     }
 
     /**
-     * Returns the timestamp of when the polling loop frame was observed in milliseconds. These
-     * timestamps are relative and not absolute and should only be used for comparing the timing of
-     * frames relative to each other.
-     * @return the timestamp in milliseconds
+     * Returns the timestamp of when the polling loop frame was observed, in microseconds. These
+     * timestamps are relative and should only be used for comparing the timing of frames relative
+     * to each other.
+     * @return the timestamp in microseconds
      */
-    public int getTimestamp() {
+    public long getTimestamp() {
         return mTimestamp;
+    }
+
+    /**
+     * @hide
+     */
+    public void setTriggeredAutoTransact(boolean triggeredAutoTransact) {
+        mTriggeredAutoTransact = triggeredAutoTransact;
+    }
+
+    /**
+     * Returns whether this frame triggered the device to automatically disable observe mode and
+     * allow one transaction.
+     */
+    public boolean getTriggeredAutoTransact() {
+        return mTriggeredAutoTransact;
     }
 
     @Override
@@ -220,24 +259,25 @@ public final class PollingFrame implements Parcelable{
     }
 
     /**
-     *
-     * @hide
      * @return a Bundle representing this frame
      */
-    public Bundle toBundle() {
+    private Bundle toBundle() {
         Bundle frame = new Bundle();
         frame.putInt(KEY_POLLING_LOOP_TYPE, getType());
-        frame.putByte(KEY_POLLING_LOOP_GAIN, (byte) getGain());
+        if (getVendorSpecificGain() != -1) {
+            frame.putInt(KEY_POLLING_LOOP_GAIN, (byte) getVendorSpecificGain());
+        }
         frame.putByteArray(KEY_POLLING_LOOP_DATA, getData());
-        frame.putInt(KEY_POLLING_LOOP_TIMESTAMP, getTimestamp());
+        frame.putLong(KEY_POLLING_LOOP_TIMESTAMP, getTimestamp());
+        frame.putBoolean(KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT, getTriggeredAutoTransact());
         return frame;
     }
 
     @Override
     public String toString() {
         return "PollingFrame { Type: " + (char) getType()
-                + ", gain: " + getGain()
-                + ", timestamp: " + Integer.toUnsignedString(getTimestamp())
+                + ", gain: " + getVendorSpecificGain()
+                + ", timestamp: " + Long.toUnsignedString(getTimestamp())
                 + ", data: [" + HexFormat.ofDelimiter(" ").formatHex(getData()) + "] }";
     }
 }

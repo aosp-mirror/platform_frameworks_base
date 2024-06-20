@@ -19,9 +19,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,12 +40,19 @@ constructor(
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = FromAodTransitionInteractor.TO_GONE_DURATION,
-            from = KeyguardState.AOD,
-            to = KeyguardState.GONE,
-        )
+        animationFlow
+            .setup(
+                duration = FromAodTransitionInteractor.TO_GONE_DURATION,
+                edge = Edge.create(from = AOD, to = Scenes.Gone),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = AOD, to = GONE),
+            )
 
+    /**
+     * AOD -> GONE should fade out the lockscreen contents. This transition plays both during wake
+     * and unlock, and also during insecure camera launch (which is GONE -> AOD (canceled) -> GONE).
+     */
     fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
         var startAlpha = 1f
         return transitionAnimation.sharedFlow(
@@ -50,6 +60,16 @@ constructor(
             onStart = { startAlpha = viewState.alpha() },
             onStep = { MathUtils.lerp(startAlpha, 0f, it) },
             onFinish = { 0f },
+        )
+    }
+
+    fun notificationAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        return transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStart = { startAlpha = viewState.alpha() },
+            onStep = { startAlpha },
+            onFinish = { 1f },
         )
     }
 

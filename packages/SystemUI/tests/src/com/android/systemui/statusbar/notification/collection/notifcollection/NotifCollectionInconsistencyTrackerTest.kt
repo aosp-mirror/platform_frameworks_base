@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.notification.collection.notifcollection
 
 import android.service.notification.NotificationListenerService.RankingMap
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.logcatLogBuffer
@@ -34,7 +34,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class NotifCollectionInconsistencyTrackerTest : SysuiTestCase() {
     private val logger = spy(NotifCollectionLogger(logcatLogBuffer()))

@@ -51,11 +51,13 @@ using namespace android;
 
 void usage(const char* pname, ftl::Optional<DisplayId> displayIdOpt) {
     fprintf(stderr, R"(
-usage: %s [-hp] [-d display-id] [FILENAME]
+usage: %s [-ahp] [-d display-id] [FILENAME]
    -h: this message
-   -p: save the file as a png.
+   -a: captures all the active displays. This appends an integer postfix to the FILENAME.
+       e.g., FILENAME_0.png, FILENAME_1.png. If both -a and -d are given, it ignores -d.
    -d: specify the display ID to capture%s
        see "dumpsys SurfaceFlinger --display-id" for valid display IDs.
+   -p: outputs in png format.
    --hint-for-seamless If set will use the hintForSeamless path in SF
 
 If FILENAME ends with .png it will be saved as a png.
@@ -63,11 +65,13 @@ If FILENAME is not given, the results will be printed to stdout.
 )",
             pname,
             displayIdOpt
-                    .transform([](DisplayId id) {
-                        return std::string(ftl::Concat(" (default: ", id.value, ')').str());
-                    })
-                    .value_or(std::string())
-                    .c_str());
+                .transform([](DisplayId id) {
+                    return std::string(ftl::Concat(
+                    " (If the id is not given, it defaults to ", id.value,')'
+                    ).str());
+                })
+                .value_or(std::string())
+                .c_str());
 }
 
 // For options that only exist in long-form. Anything in the
@@ -123,8 +127,8 @@ static status_t notifyMediaScanner(const char* fileName) {
     int status;
     int pid = fork();
     if (pid < 0){
-       fprintf(stderr, "Unable to fork in order to send intent for media scanner.\n");
-       return UNKNOWN_ERROR;
+        fprintf(stderr, "Unable to fork in order to send intent for media scanner.\n");
+        return UNKNOWN_ERROR;
     }
     if (pid == 0){
         int fd = open("/dev/null", O_WRONLY);
@@ -146,108 +150,26 @@ static status_t notifyMediaScanner(const char* fileName) {
     return NO_ERROR;
 }
 
-int main(int argc, char** argv)
-{
-    const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
-    if (ids.empty()) {
-        fprintf(stderr, "Failed to get ID for any displays.\n");
-        return 1;
-    }
-    std::optional<DisplayId> displayIdOpt;
-    gui::CaptureArgs captureArgs;
-    const char* pname = argv[0];
-    bool png = false;
-    int c;
-    while ((c = getopt_long(argc, argv, "phd:", LONG_OPTIONS, nullptr)) != -1) {
-        switch (c) {
-            case 'p':
-                png = true;
-                break;
-            case 'd': {
-                errno = 0;
-                char* end = nullptr;
-                const uint64_t id = strtoull(optarg, &end, 10);
-                if (!end || *end != '\0' || errno == ERANGE) {
-                    fprintf(stderr, "Invalid display ID: Out of range [0, 2^64).\n");
-                    return 1;
-                }
-
-                displayIdOpt = DisplayId::fromValue(id);
-                if (!displayIdOpt) {
-                    fprintf(stderr, "Invalid display ID: Incorrect encoding.\n");
-                    return 1;
-                }
-                break;
-            }
-            case '?':
-            case 'h':
-                if (ids.size() == 1) {
-                    displayIdOpt = ids.front();
-                }
-                usage(pname, displayIdOpt);
-                return 1;
-            case LongOpts::HintForSeamless:
-                captureArgs.hintForSeamlessTransition = true;
-                break;
-        }
-    }
-
-    if (!displayIdOpt) {
-        displayIdOpt = ids.front();
-        if (ids.size() > 1) {
-            fprintf(stderr,
-                    "[Warning] Multiple displays were found, but no display id was specified! "
-                    "Defaulting to the first display found, however this default is not guaranteed "
-                    "to be consistent across captures. A display id should be specified.\n");
-            fprintf(stderr, "A display ID can be specified with the [-d display-id] option.\n");
-            fprintf(stderr, "See \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n");
-        }
-    }
-
-    argc -= optind;
-    argv += optind;
-
-    int fd = -1;
-    const char* fn = NULL;
-    if (argc == 0) {
-        fd = dup(STDOUT_FILENO);
-    } else if (argc == 1) {
-        fn = argv[0];
-        fd = open(fn, O_WRONLY | O_CREAT | O_TRUNC, 0664);
-        if (fd == -1) {
-            fprintf(stderr, "Error opening file: %s (%s)\n", fn, strerror(errno));
-            return 1;
-        }
-        const int len = strlen(fn);
-        if (len >= 4 && 0 == strcmp(fn+len-4, ".png")) {
-            png = true;
-        }
-    }
-
-    if (fd == -1) {
-        usage(pname, displayIdOpt);
-        return 1;
-    }
-
-    void* base = NULL;
-
-    // setThreadPoolMaxThreadCount(0) actually tells the kernel it's
-    // not allowed to spawn any additional threads, but we still spawn
-    // a binder thread from userspace when we call startThreadPool().
-    // See b/36066697 for rationale
-    ProcessState::self()->setThreadPoolMaxThreadCount(0);
-    ProcessState::self()->startThreadPool();
-
+status_t capture(const DisplayId displayId,
+            const gui::CaptureArgs& captureArgs,
+            ScreenCaptureResults& outResult) {
     sp<SyncScreenCaptureListener> captureListener = new SyncScreenCaptureListener();
-    ScreenshotClient::captureDisplay(*displayIdOpt, captureArgs, captureListener);
+    ScreenshotClient::captureDisplay(displayId, captureArgs, captureListener);
 
     ScreenCaptureResults captureResults = captureListener->waitForResults();
     if (!captureResults.fenceResult.ok()) {
-        close(fd);
         fprintf(stderr, "Failed to take screenshot. Status: %d\n",
-            fenceStatus(captureResults.fenceResult));
+                fenceStatus(captureResults.fenceResult));
         return 1;
     }
+
+    outResult = captureResults;
+
+    return 0;
+}
+
+status_t saveImage(const char* fn, bool png, const ScreenCaptureResults& captureResults) {
+    void* base = nullptr;
     ui::Dataspace dataspace = captureResults.capturedDataspace;
     sp<GraphicBuffer> buffer = captureResults.buffer;
 
@@ -261,8 +183,22 @@ int main(int argc, char** argv)
             reason = "Failed to write to buffer";
         }
         fprintf(stderr, "Failed to take screenshot (%s)\n", reason.c_str());
-        close(fd);
         return 1;
+    }
+
+    int fd = -1;
+    if (fn == nullptr) {
+        fd = dup(STDOUT_FILENO);
+        if (fd == -1) {
+            fprintf(stderr, "Error writing to stdout. (%s)\n", strerror(errno));
+            return 1;
+        }
+    } else {
+        fd = open(fn, O_WRONLY | O_CREAT | O_TRUNC, 0664);
+        if (fd == -1) {
+            fprintf(stderr, "Error opening file: %s (%s)\n", fn, strerror(errno));
+            return 1;
+        }
     }
 
     if (png) {
@@ -306,6 +242,152 @@ int main(int argc, char** argv)
         }
     }
     close(fd);
+
+    return 0;
+}
+
+int main(int argc, char** argv)
+{
+    const std::vector<PhysicalDisplayId> physicalDisplays =
+        SurfaceComposerClient::getPhysicalDisplayIds();
+
+    if (physicalDisplays.empty()) {
+        fprintf(stderr, "Failed to get ID for any displays.\n");
+        return 1;
+    }
+    std::optional<DisplayId> displayIdOpt;
+    std::vector<DisplayId> displaysToCapture;
+    gui::CaptureArgs captureArgs;
+    const char* pname = argv[0];
+    bool png = false;
+    bool all = false;
+    int c;
+    while ((c = getopt_long(argc, argv, "aphd:", LONG_OPTIONS, nullptr)) != -1) {
+        switch (c) {
+            case 'p':
+                png = true;
+                break;
+            case 'd': {
+                errno = 0;
+                char* end = nullptr;
+                const uint64_t id = strtoull(optarg, &end, 10);
+                if (!end || *end != '\0' || errno == ERANGE) {
+                    fprintf(stderr, "Invalid display ID: Out of range [0, 2^64).\n");
+                    return 1;
+                }
+
+                displayIdOpt = DisplayId::fromValue(id);
+                if (!displayIdOpt) {
+                    fprintf(stderr, "Invalid display ID: Incorrect encoding.\n");
+                    return 1;
+                }
+                displaysToCapture.push_back(displayIdOpt.value());
+                break;
+            }
+            case 'a': {
+                all = true;
+                break;
+            }
+            case '?':
+            case 'h':
+                if (physicalDisplays.size() >= 1) {
+                    displayIdOpt = physicalDisplays.front();
+                }
+                usage(pname, displayIdOpt);
+                return 1;
+            case LongOpts::HintForSeamless:
+                captureArgs.hintForSeamlessTransition = true;
+                break;
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    // We don't expect more than 2 arguments.
+    if (argc >= 2) {
+        if (physicalDisplays.size() >= 1) {
+            usage(pname, physicalDisplays.front());
+        } else {
+            usage(pname, std::nullopt);
+        }
+        return 1;
+    }
+
+    std::string baseName;
+    std::string suffix;
+
+    if (argc == 1) {
+        std::string_view filename = { argv[0] };
+        if (filename.ends_with(".png")) {
+            baseName = filename.substr(0, filename.size()-4);
+            suffix = ".png";
+            png = true;
+        } else {
+            baseName = filename;
+        }
+    }
+
+    if (all) {
+        // Ignores -d if -a is given.
+        displaysToCapture.clear();
+        for (int i = 0; i < physicalDisplays.size(); i++) {
+            displaysToCapture.push_back(physicalDisplays[i]);
+        }
+    }
+
+    if (displaysToCapture.empty()) {
+        displaysToCapture.push_back(physicalDisplays.front());
+        if (physicalDisplays.size() > 1) {
+            fprintf(stderr,
+                    "[Warning] Multiple displays were found, but no display id was specified! "
+                    "Defaulting to the first display found, however this default is not guaranteed "
+                    "to be consistent across captures. A display id should be specified.\n");
+            fprintf(stderr, "A display ID can be specified with the [-d display-id] option.\n");
+            fprintf(stderr, "See \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n");
+        }
+    }
+
+    // setThreadPoolMaxThreadCount(0) actually tells the kernel it's
+    // not allowed to spawn any additional threads, but we still spawn
+    // a binder thread from userspace when we call startThreadPool().
+    // See b/36066697 for rationale
+    ProcessState::self()->setThreadPoolMaxThreadCount(0);
+    ProcessState::self()->startThreadPool();
+
+    std::vector<ScreenCaptureResults> results;
+    const size_t numDisplays = displaysToCapture.size();
+    for (int i=0; i<numDisplays; i++) {
+        ScreenCaptureResults result;
+
+        // 1. Capture the screen
+        if (const status_t captureStatus =
+            capture(displaysToCapture[i], captureArgs, result) != 0) {
+
+            fprintf(stderr, "Capturing failed.\n");
+            return captureStatus;
+        }
+
+        // 2. Save the capture result as an image.
+        // When there's more than one file to capture, add the index as postfix.
+        std::string filename;
+        if (!baseName.empty()) {
+            filename = baseName;
+            if (numDisplays > 1) {
+                filename += "_";
+                filename += std::to_string(i);
+            }
+            filename += suffix;
+        }
+        const char* fn = nullptr;
+        if (!filename.empty()) {
+            fn = filename.c_str();
+        }
+        if (const status_t saveImageStatus = saveImage(fn, png, result) != 0) {
+            fprintf(stderr, "Saving image failed.\n");
+            return saveImageStatus;
+        }
+    }
 
     return 0;
 }

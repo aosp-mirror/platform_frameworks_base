@@ -16,6 +16,8 @@
 
 package com.android.server.display.mode;
 
+import android.annotation.NonNull;
+
 import java.util.Objects;
 
 class SizeVote implements Vote {
@@ -48,7 +50,7 @@ class SizeVote implements Vote {
     }
 
     @Override
-    public void updateSummary(VoteSummary summary) {
+    public void updateSummary(@NonNull VoteSummary summary) {
         if (mHeight > 0 && mWidth > 0) {
             // For display size, disable refresh rate switching and base mode refresh rate use
             // only the first vote we come across (i.e. the highest priority vote that includes

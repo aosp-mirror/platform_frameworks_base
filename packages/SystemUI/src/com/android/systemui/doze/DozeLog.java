@@ -209,6 +209,15 @@ public class DozeLog implements Dumpable {
     }
 
     /**
+     * Logs cancelation requests for time ticks
+     * @param isPending is an unschedule request pending?
+     * @param isTimeTickScheduled is a time tick request scheduled
+     */
+    public void tracePendingUnscheduleTimeTick(boolean isPending, boolean isTimeTickScheduled) {
+        mLogger.logPendingUnscheduleTimeTick(isPending, isTimeTickScheduled);
+    }
+
+    /**
      * Appends keyguard visibility change event to the logs
      * @param showing whether the keyguard is now showing
      */

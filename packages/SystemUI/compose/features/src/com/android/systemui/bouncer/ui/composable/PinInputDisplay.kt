@@ -42,7 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
@@ -65,6 +64,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformOutlinedButton
 import com.android.compose.animation.Easings
 import com.android.keyguard.PinShapeAdapter
@@ -86,7 +86,7 @@ fun PinInputDisplay(
     viewModel: PinBouncerViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val hintedPinLength: Int? by viewModel.hintedPinLength.collectAsState()
+    val hintedPinLength: Int? by viewModel.hintedPinLength.collectAsStateWithLifecycle()
     val shapeAnimations = rememberShapeAnimations(viewModel.pinShapes)
 
     // The display comes in two different flavors:
@@ -119,7 +119,7 @@ private fun HintingPinInputDisplay(
     hintedPinLength: Int,
     modifier: Modifier = Modifier,
 ) {
-    val pinInput: PinInputViewModel by viewModel.pinInput.collectAsState()
+    val pinInput: PinInputViewModel by viewModel.pinInput.collectAsStateWithLifecycle()
     // [ClearAll] marker pointing at the beginning of the current pin input.
     // When a new [ClearAll] token is added to the [pinInput], the clear-all animation is played
     // and the marker is advanced manually to the most recent marker. See LaunchedEffect below.
@@ -257,9 +257,10 @@ private fun RegularPinInputDisplay(
 
 @Composable
 private fun SimArea(viewModel: PinBouncerViewModel) {
-    val isLockedEsim by viewModel.isLockedEsim.collectAsState()
-    val isSimUnlockingDialogVisible by viewModel.isSimUnlockingDialogVisible.collectAsState()
-    val errorDialogMessage by viewModel.errorDialogMessage.collectAsState()
+    val isLockedEsim by viewModel.isLockedEsim.collectAsStateWithLifecycle()
+    val isSimUnlockingDialogVisible by
+        viewModel.isSimUnlockingDialogVisible.collectAsStateWithLifecycle()
+    val errorDialogMessage by viewModel.errorDialogMessage.collectAsStateWithLifecycle()
     var unlockDialog: Dialog? by remember { mutableStateOf(null) }
     var errorDialog: Dialog? by remember { mutableStateOf(null) }
     val context = LocalView.current.context

@@ -30,7 +30,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
 import android.provider.Settings
+import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
@@ -38,6 +40,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
@@ -48,11 +51,14 @@ import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.smartspace.ui.viewmodel.SmartspaceViewModel
+import com.android.systemui.smartspace.viewmodel.smartspaceViewModelFactory
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecution
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -79,6 +85,7 @@ import java.util.Optional
 import java.util.concurrent.Executor
 
 @SmallTest
+@RunWithLooper(setAsMainLooper = true)
 class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     companion object {
         const val SMARTSPACE_TIME_TOO_EARLY = 1000L
@@ -180,6 +187,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var dateSmartspaceView: SmartspaceView
     private lateinit var weatherSmartspaceView: SmartspaceView
     private lateinit var smartspaceView: SmartspaceView
+    private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
+    private lateinit var smartspaceViewModelFactory: SmartspaceViewModel.Factory
 
     private val clock = FakeSystemClock()
     private val executor = FakeExecutor(clock)
@@ -225,6 +234,15 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         setAllowPrivateNotifications(userHandleSecondary, true)
         setShowNotifications(userHandlePrimary, true)
 
+        // Use the real wakefulness lifecycle instead of a mock
+        wakefulnessLifecycle = WakefulnessLifecycle(
+            context,
+            /* wallpaper= */ null,
+            clock,
+            dumpManager
+        )
+        smartspaceViewModelFactory = testKosmos().smartspaceViewModelFactory
+
         controller = LockscreenSmartspaceController(
                 context,
                 featureFlags,
@@ -240,6 +258,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 deviceProvisionedController,
                 keyguardBypassController,
                 keyguardUpdateMonitor,
+                wakefulnessLifecycle,
+                smartspaceViewModelFactory,
                 dumpManager,
                 execution,
                 executor,
@@ -742,6 +762,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         // THEN the existing session is reused and views are registered
         verify(smartspaceManager, never()).createSmartspaceSession(any())
         verify(smartspaceView2).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(smartspaceView2).setTimeChangedDelegate(any())
         verify(smartspaceView2).registerDataProvider(plugin)
         verify(smartspaceView2).registerConfigProvider(configPlugin)
     }
@@ -760,6 +781,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @RunWithLooper(setAsMainLooper = false)
     fun testConnectAttemptBeforeInitializationShouldNotCreateSession() {
         // GIVEN an uninitalized smartspaceView
         // WHEN the device is provisioned
@@ -773,6 +795,40 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(configurationController, never()).addCallback(any())
     }
 
+    @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_SMARTSPACE_LOCKSCREEN_VIEWMODEL)
+    fun testWakefulnessLifecycleDispatch_wake_setsSmartspaceScreenOnTrue() {
+        // Connect session
+        connectSession()
+
+        // Add mock views
+        val mockSmartspaceView = mock(SmartspaceView::class.java)
+        controller.smartspaceViews.add(mockSmartspaceView)
+
+        // Initiate wakefulness change
+        wakefulnessLifecycle.dispatchStartedWakingUp(0)
+
+        // Verify smartspace views receive screen on
+        verify(mockSmartspaceView).setScreenOn(true)
+    }
+
+    @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_SMARTSPACE_LOCKSCREEN_VIEWMODEL)
+    fun testWakefulnessLifecycleDispatch_sleep_setsSmartspaceScreenOnFalse() {
+        // Connect session
+        connectSession()
+
+        // Add mock views
+        val mockSmartspaceView = mock(SmartspaceView::class.java)
+        controller.smartspaceViews.add(mockSmartspaceView)
+
+        // Initiate wakefulness change
+        wakefulnessLifecycle.dispatchFinishedGoingToSleep()
+
+        // Verify smartspace views receive screen on
+        verify(mockSmartspaceView).setScreenOn(false)
+    }
+
     private fun connectSession() {
         val dateView = controller.buildAndConnectDateView(fakeParent)
         dateSmartspaceView = dateView as SmartspaceView
@@ -781,6 +837,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         verify(dateSmartspaceView).setUiSurface(
                 BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(dateSmartspaceView).setTimeChangedDelegate(any())
         verify(dateSmartspaceView).registerDataProvider(datePlugin)
 
         verify(dateSmartspaceView).setPrimaryTextColor(anyInt())
@@ -793,6 +850,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         verify(weatherSmartspaceView).setUiSurface(
                 BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(weatherSmartspaceView).setTimeChangedDelegate(any())
         verify(weatherSmartspaceView).registerDataProvider(weatherPlugin)
 
         verify(weatherSmartspaceView).setPrimaryTextColor(anyInt())
@@ -804,6 +862,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         controller.stateChangeListener.onViewAttachedToWindow(view)
 
         verify(smartspaceView).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(smartspaceView).setTimeChangedDelegate(any())
         verify(smartspaceView).registerDataProvider(plugin)
         verify(smartspaceView).registerConfigProvider(configPlugin)
         verify(smartspaceSession)
@@ -929,6 +988,10 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun setUiSurface(uiSurface: String) {
             }
 
+            override fun setTimeChangedDelegate(
+                delegate: BcSmartspaceDataPlugin.TimeChangedDelegate?
+            ) {}
+
             override fun setDozeAmount(amount: Float) {
             }
 
@@ -957,6 +1020,10 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun setUiSurface(uiSurface: String) {
             }
 
+            override fun setTimeChangedDelegate(
+                delegate: BcSmartspaceDataPlugin.TimeChangedDelegate?
+            ) {}
+
             override fun setDozeAmount(amount: Float) {
             }
 
@@ -980,6 +1047,10 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
             override fun setUiSurface(uiSurface: String) {
             }
+
+            override fun setTimeChangedDelegate(
+                delegate: BcSmartspaceDataPlugin.TimeChangedDelegate?
+            ) {}
 
             override fun setDozeAmount(amount: Float) {
             }

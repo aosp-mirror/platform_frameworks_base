@@ -73,12 +73,6 @@ public final class DexoptOptions {
     // or device setup and should be scheduled appropriately.
     public static final int DEXOPT_FOR_RESTORE = 1 << 11; // TODO(b/135202722): remove
 
-    /**
-     * A value indicating that dexopt shouldn't be run.  This string is only used when loading
-     * filters from the `pm.dexopt.install*` properties and is not propagated to dex2oat.
-     */
-    public static final String COMPILER_FILTER_NOOP = "skip";
-
     // The name of package to optimize.
     private final String mPackageName;
 
@@ -184,10 +178,6 @@ public final class DexoptOptions {
 
     public int getCompilationReason() {
         return mCompilationReason;
-    }
-
-    public boolean isCompilationEnabled() {
-        return !mCompilerFilter.equals(COMPILER_FILTER_NOOP);
     }
 
     /**

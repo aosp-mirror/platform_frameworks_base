@@ -33,11 +33,11 @@ import androidx.annotation.Nullable;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ExternalMainThread;
-import com.android.wm.shell.common.annotations.ShellAnimationThread;
-import com.android.wm.shell.common.annotations.ShellBackgroundThread;
-import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.shared.annotations.ExternalMainThread;
+import com.android.wm.shell.shared.annotations.ShellAnimationThread;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.annotations.ShellSplashscreenThread;
 
 import dagger.Module;
 import dagger.Provides;

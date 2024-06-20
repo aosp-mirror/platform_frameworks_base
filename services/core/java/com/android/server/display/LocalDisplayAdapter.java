@@ -37,6 +37,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.DisplayUtils;
 import android.util.LongSparseArray;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -52,6 +53,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.display.notifications.DisplayNotificationManager;
@@ -78,6 +80,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private static final String UNIQUE_ID_PREFIX = "local:";
 
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.boot.emulator.circular";
+    // Min and max strengths for even dimmer feature.
+    private static final float EVEN_DIMMER_MIN_STRENGTH = 0.0f;
+    private static final float EVEN_DIMMER_MAX_STRENGTH = 90.0f;
+    private static final float BRIGHTNESS_MIN = 0.0f;
 
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
@@ -90,6 +96,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private final DisplayNotificationManager mDisplayNotificationManager;
 
     private Context mOverlayContext;
+
+    private int mEvenDimmerStrength = -1;
+    private ColorDisplayService.ColorDisplayServiceInternal mCdsi;
 
     // Called with SyncRoot lock held.
     LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context,
@@ -159,6 +168,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
             SurfaceControl.DesiredDisplayModeSpecs modeSpecs =
                     mSurfaceControlProxy.getDesiredDisplayModeSpecs(displayToken);
+            if (modeSpecs == null) {
+                // If mode specs is null, it most probably means that display got
+                // unplugged very rapidly.
+                Slog.w(TAG, "Desired display mode specs from SurfaceFlinger are null");
+                return;
+            }
             LocalDisplayDevice device = mDevices.get(physicalDisplayId);
             if (device == null) {
                 // Display was added.
@@ -257,7 +272,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 SurfaceControl.DynamicDisplayInfo dynamicInfo,
                 SurfaceControl.DesiredDisplayModeSpecs modeSpecs, boolean isFirstDisplay) {
             super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + physicalDisplayId,
-                    getContext());
+                    getContext(),
+                    getFeatureFlags().isPixelAnisotropyCorrectionInLogicalDisplayEnabled());
             mPhysicalDisplayId = physicalDisplayId;
             mIsFirstDisplay = isFirstDisplay;
             updateDisplayPropertiesLocked(staticDisplayInfo, dynamicInfo, modeSpecs);
@@ -927,6 +943,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             final float nits = backlightToNits(backlight);
                             final float sdrNits = backlightToNits(sdrBacklight);
 
+                            if (getFeatureFlags().isEvenDimmerEnabled()
+                                    && mDisplayDeviceConfig != null
+                                    && mDisplayDeviceConfig.isEvenDimmerAvailable()) {
+                                applyColorMatrixBasedDimming(brightnessState);
+                            }
+
                             mBacklightAdapter.setBacklight(sdrBacklight, sdrNits, backlight, nits);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
                                     "ScreenBrightness",
@@ -971,6 +993,31 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                 mCurrentHdrSdrRatio = newHdrSdrRatio;
                                 updateDeviceInfoLocked();
                             }
+                        }
+                    }
+
+                    private void applyColorMatrixBasedDimming(float brightnessState) {
+                        int strength = (int) (MathUtils.constrainedMap(
+                                // to this range:
+                                EVEN_DIMMER_MAX_STRENGTH, EVEN_DIMMER_MIN_STRENGTH,
+                                // from this range:
+                                BRIGHTNESS_MIN, mDisplayDeviceConfig.getEvenDimmerTransitionPoint(),
+                                // map this (+ rounded up):
+                                brightnessState) + 0.5);
+
+                        if (mEvenDimmerStrength < 0 // uninitialised
+                                || MathUtils.abs(mEvenDimmerStrength - strength) > 1
+                                || strength <= 1) {
+                            mEvenDimmerStrength = strength;
+                        }
+                        boolean enabled = mEvenDimmerStrength > 0.0f;
+
+                        if (mCdsi == null) {
+                            mCdsi = LocalServices.getService(
+                                    ColorDisplayService.ColorDisplayServiceInternal.class);
+                        }
+                        if (mCdsi != null) {
+                            mCdsi.applyEvenDimmerColorChanges(enabled, strength);
                         }
                     }
                 };
@@ -1072,7 +1119,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         new SurfaceControl.DesiredDisplayModeSpecs(baseSfModeId,
                                 mDisplayModeSpecs.allowGroupSwitching,
                                 mDisplayModeSpecs.primary,
-                                mDisplayModeSpecs.appRequest)));
+                                mDisplayModeSpecs.appRequest,
+                                mDisplayModeSpecs.mIdleScreenRefreshRateConfig)));
             }
         }
 

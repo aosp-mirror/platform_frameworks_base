@@ -43,9 +43,10 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
             GlobalSettings globalSettings,
             SystemClock systemClock,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            AvalancheController avalancheController) {
         super(context, logger, mockExecutorHandler(executor), globalSettings, systemClock,
-                executor, accessibilityManagerWrapper, uiEventLogger);
+                executor, accessibilityManagerWrapper, uiEventLogger, avalancheController);
 
         mTouchAcceptanceDelay = BaseHeadsUpManagerTest.TEST_TOUCH_ACCEPTANCE_TIME;
         mMinimumDisplayTime = BaseHeadsUpManagerTest.TEST_MINIMUM_DISPLAY_TIME;
@@ -53,9 +54,10 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
         mStickyForSomeTimeAutoDismissTime = BaseHeadsUpManagerTest.TEST_STICKY_AUTO_DISMISS_TIME;
     }
 
+    @NonNull
     @Override
-    protected HeadsUpEntry createHeadsUpEntry() {
-        mLastCreatedEntry = spy(super.createHeadsUpEntry());
+    protected HeadsUpEntry createHeadsUpEntry(NotificationEntry entry) {
+        mLastCreatedEntry = spy(super.createHeadsUpEntry(entry));
         return mLastCreatedEntry;
     }
 
@@ -87,7 +89,7 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
     }
 
     @Override
-    public boolean isHeadsUpGoingAway() {
+    public boolean isHeadsUpAnimatingAwayValue() {
         throw new UnsupportedOperationException();
     }
 
@@ -113,7 +115,7 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
     }
 
     @Override
-    public void setHeadsUpGoingAway(boolean headsUpGoingAway) {
+    public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
         throw new UnsupportedOperationException();
     }
 

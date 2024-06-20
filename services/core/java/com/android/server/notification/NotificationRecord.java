@@ -15,6 +15,10 @@
  */
 package com.android.server.notification;
 
+import static android.app.Flags.restrictAudioAttributesAlarm;
+import static android.app.Flags.restrictAudioAttributesCall;
+import static android.app.Flags.restrictAudioAttributesMedia;
+import static android.app.Flags.sortSectionByTime;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -62,7 +66,6 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.widget.RemoteViews;
 
@@ -77,6 +80,7 @@ import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -498,8 +502,8 @@ public final class NotificationRecord {
         pw.println(prefix + "uid=" + getSbn().getUid() + " userId=" + getSbn().getUserId());
         pw.println(prefix + "opPkg=" + getSbn().getOpPkg());
         pw.println(prefix + "icon=" + notification.getSmallIcon());
-        pw.println(prefix + "flags=0x" + Integer.toHexString(notification.flags));
-        pw.println(prefix + "originalFlags=0x" + Integer.toHexString(mOriginalFlags));
+        pw.println(prefix + "flags=" + Notification.flagsToString(notification.flags));
+        pw.println(prefix + "originalFlags=" + Notification.flagsToString(mOriginalFlags));
         pw.println(prefix + "pri=" + notification.priority);
         pw.println(prefix + "key=" + getSbn().getKey());
         pw.println(prefix + "seen=" + mStats.hasSeen());
@@ -534,8 +538,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mInterruptionTimeMs=" + mInterruptionTimeMs);
         pw.println(prefix + "mSuppressedVisualEffects= " + mSuppressedVisualEffects);
         if (mPreChannelsNotification) {
-            pw.println(prefix + String.format("defaults=0x%08x flags=0x%08x",
-                    notification.defaults, notification.flags));
+            pw.println(prefix + "defaults=" + Notification.defaultsToString(notification.defaults));
             pw.println(prefix + "n.sound=" + notification.sound);
             pw.println(prefix + "n.audioStreamType=" + notification.audioStreamType);
             pw.println(prefix + "n.audioAttributes=" + notification.audioAttributes);
@@ -577,7 +580,7 @@ public final class NotificationRecord {
         pw.println(prefix + "deleteIntent=" + notification.deleteIntent);
         pw.println(prefix + "number=" + notification.number);
         pw.println(prefix + "groupAlertBehavior=" + notification.getGroupAlertBehavior());
-        pw.println(prefix + "when=" + notification.when);
+        pw.println(prefix + "when=" + notification.when + "/" + notification.getWhen());
 
         pw.print(prefix + "tickerText=");
         if (!TextUtils.isEmpty(notification.tickerText)) {
@@ -598,8 +601,7 @@ public final class NotificationRecord {
         pw.println(prefix + "headsUpContentView="
                 + formatRemoteViews(notification.headsUpContentView));
         pw.println(prefix + String.format("color=0x%08x", notification.color));
-        pw.println(prefix + "timeout="
-                + TimeUtils.formatForLogging(notification.getTimeoutAfter()));
+        pw.println(prefix + "timeout=" + Duration.ofMillis(notification.getTimeoutAfter()));
         if (notification.actions != null && notification.actions.length > 0) {
             pw.println(prefix + "actions={");
             final int N = notification.actions.length;
@@ -1090,8 +1092,14 @@ public final class NotificationRecord {
     private long calculateRankingTimeMs(long previousRankingTimeMs) {
         Notification n = getNotification();
         // Take developer provided 'when', unless it's in the future.
-        if (n.when != 0 && n.when <= getSbn().getPostTime()) {
-            return n.when;
+        if (sortSectionByTime()) {
+            if (n.hasAppProvidedWhen() && n.getWhen() <= getSbn().getPostTime()){
+                return n.getWhen();
+            }
+        } else {
+            if (n.when != 0 && n.when <= getSbn().getPostTime()) {
+                return n.when;
+            }
         }
         // If we've ranked a previous instance with a timestamp, inherit it. This case is
         // important in order to have ranking stability for updating notifications.
@@ -1154,6 +1162,15 @@ public final class NotificationRecord {
             mChannel = channel;
             calculateImportance();
             calculateUserSentiment();
+            mVibration = calculateVibration();
+            if (restrictAudioAttributesCall() || restrictAudioAttributesAlarm()
+                    || restrictAudioAttributesMedia()) {
+                if (channel.getAudioAttributes() != null) {
+                    mAttributes = channel.getAudioAttributes();
+                } else {
+                    mAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
+                }
+            }
         }
     }
 
@@ -1191,6 +1208,12 @@ public final class NotificationRecord {
 
     public ArrayList<String> getPeopleOverride() {
         return mPeopleOverride;
+    }
+
+    public void resetRankingTime() {
+        if (sortSectionByTime()) {
+            mRankingTimeMs = calculateRankingTimeMs(getSbn().getPostTime());
+        }
     }
 
     public void setInterruptive(boolean interruptive) {

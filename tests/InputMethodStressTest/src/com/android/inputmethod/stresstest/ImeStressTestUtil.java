@@ -393,6 +393,7 @@ public final class ImeStressTestUtil {
                 mEditText.setFocusableInTouchMode(false);
             }
             rootView.addView(mEditText, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+            rootView.setFitsSystemWindows(true);
             setContentView(rootView);
 
             if (requestFocus) {

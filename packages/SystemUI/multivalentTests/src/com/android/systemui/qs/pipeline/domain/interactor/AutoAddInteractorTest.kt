@@ -22,6 +22,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.qs.FakeQSTile
 import com.android.systemui.qs.pipeline.data.repository.FakeAutoAddRepository
 import com.android.systemui.qs.pipeline.domain.autoaddable.FakeAutoAddable
 import com.android.systemui.qs.pipeline.domain.model.AutoAddTracking

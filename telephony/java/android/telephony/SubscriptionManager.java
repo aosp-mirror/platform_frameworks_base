@@ -99,18 +99,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Subscription manager provides the mobile subscription information that are associated with the
- * calling user profile {@link UserHandle} for Android SDK 35(V) and above, while Android SDK 34(U)
- * and below can see all subscriptions as it does today.
- *
- * <p>For example, if we have
- * <ul>
- *     <li> Subscription 1 associated with personal profile.
- *     <li> Subscription 2 associated with work profile.
- * </ul>
- * Then for SDK 35+, if the caller identity is personal profile, then
- * {@link #getActiveSubscriptionInfoList} will return subscription 1 only and vice versa.
- *
+ * Subscription manager provides the mobile subscription information.
  */
 @SystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
@@ -1980,17 +1969,7 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the SubscriptionInfo(s) of the currently active SIM(s) associated with the current caller
-     * user profile {@link UserHandle} for Android SDK 35(V) and above, while Android SDK 34(U)
-     * and below can see all subscriptions as it does today.
-     *
-     * <p>For example, if we have
-     * <ul>
-     *     <li> Subscription 1 associated with personal profile.
-     *     <li> Subscription 2 associated with work profile.
-     * </ul>
-     * Then for SDK 35+, if the caller identity is personal profile, then this will return
-     * subscription 1 only and vice versa.
+     * Get the SubscriptionInfo(s) of the currently active SIM(s).
      *
      * <p> Returned records will be sorted by {@link SubscriptionInfo#getSimSlotIndex} then by
      * {@link SubscriptionInfo#getSubscriptionId}. Beginning with Android SDK 35, this method will
@@ -2259,9 +2238,7 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the active subscription count associated with the current caller user profile for
-     * Android SDK 35(V) and above, while Android SDK 34(U) and below can see all subscriptions as
-     * it does today.
+     * Get the active subscription count.
      *
      * @return The current number of active subscriptions.
      *
@@ -3137,7 +3114,7 @@ public class SubscriptionManager {
             if (useRootLocale) {
                 configurationKey.setLocale(Locale.ROOT);
             }
-            cacheKey = Pair.create(context.getPackageName(), configurationKey);
+            cacheKey = Pair.create(context.getPackageName() + ", subid=" + subId, configurationKey);
             synchronized (sResourcesCache) {
                 Resources cached = sResourcesCache.get(cacheKey);
                 if (cached != null) {
@@ -4610,6 +4587,31 @@ public class SubscriptionManager {
             case SubscriptionManager.USAGE_SETTING_DATA_CENTRIC: return "DATA_CENTRIC";
             default:
                 return "UNKNOWN(" + usageSetting + ")";
+        }
+    }
+
+    /**
+     * Set owner for this subscription.
+     *
+     * @param subscriptionId the subId of the subscription.
+     * @param groupOwner The group owner to assign to the subscription
+     *
+     * @throws SecurityException if caller is not authorized.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setGroupOwner(int subscriptionId, @NonNull String groupOwner) {
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                iSub.setGroupOwner(subscriptionId, groupOwner);
+            } else {
+                throw new IllegalStateException("[setGroupOwner]: "
+                        + "subscription service unavailable");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
         }
     }
 

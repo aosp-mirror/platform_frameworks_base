@@ -35,21 +35,43 @@ interface KeyguardBlueprint {
      * @param bindData: Whether to bind the data or not.
      */
     fun replaceViews(
-        previousBlueprint: KeyguardBlueprint?,
         constraintLayout: ConstraintLayout,
+        previousBlueprint: KeyguardBlueprint? = null,
+        rebuildSections: List<KeyguardSection> = listOf(),
         bindData: Boolean = true
     ) {
-        previousBlueprint?.let { previousBlueprint ->
-            previousBlueprint.sections.subtract(sections).forEach {
-                it.removeViews(constraintLayout)
-            }
-        }
-        sections.subtract((previousBlueprint?.sections ?: setOf()).toSet()).forEach {
+        rebuildSections.forEach { it.onRebuildBegin() }
+        val prevSections = previousBlueprint?.sections ?: listOf()
+        val skipSections = sections.intersect(prevSections).subtract(rebuildSections)
+        prevSections.subtract(skipSections).forEach { it.removeViews(constraintLayout) }
+        sections.subtract(skipSections).forEach {
             it.addViews(constraintLayout)
             if (bindData) {
                 it.bindData(constraintLayout)
             }
         }
+        rebuildSections.forEach { it.onRebuildEnd() }
+    }
+
+    /** Rebuilds views for the target sections, or all of them if unspecified. */
+    fun rebuildViews(
+        constraintLayout: ConstraintLayout,
+        rebuildSections: List<KeyguardSection> = sections,
+        bindData: Boolean = true
+    ) {
+        if (rebuildSections.isEmpty()) {
+            return
+        }
+
+        rebuildSections.forEach { it.onRebuildBegin() }
+        rebuildSections.forEach { it.removeViews(constraintLayout) }
+        rebuildSections.forEach {
+            it.addViews(constraintLayout)
+            if (bindData) {
+                it.bindData(constraintLayout)
+            }
+        }
+        rebuildSections.forEach { it.onRebuildEnd() }
     }
 
     fun applyConstraints(constraintSet: ConstraintSet) {

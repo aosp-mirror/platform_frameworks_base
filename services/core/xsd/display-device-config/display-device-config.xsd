@@ -114,7 +114,7 @@
                 <xs:element type="sensorDetails" name="screenOffBrightnessSensor">
                     <xs:annotation name="final"/>
                 </xs:element>
-                <xs:element type="sensorDetails" name="proxSensor">
+                <xs:element type="sensorDetails" name="proxSensor" maxOccurs="2">
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element type="sensorDetails" name="tempSensor">
@@ -162,10 +162,21 @@
                 <xs:element type="usiVersion" name="usiVersion">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="evenDimmerMode" name="evenDimmer">
+                    <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <!-- Maximum screen brightness setting when screen brightness capped in
                 Wear Bedtime mode. This must be a non-negative decimal within the range defined by
                 the first and the last brightness value in screenBrightnessMap. -->
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessCapForWearBedtimeMode">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Timeout after which we reduce the refresh rate if the screen has been idle, in order to save power. -->
+                <xs:element type="idleScreenRefreshRateTimeout" name="idleScreenRefreshRateTimeout" minOccurs="0">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <xs:element name="supportsVrr" type="xs:boolean" minOccurs="0">
                     <xs:annotation name="final"/>
                 </xs:element>
             </xs:sequence>
@@ -211,6 +222,21 @@
             <xs:enumeration value="adaptive"/>
         </xs:restriction>
     </xs:simpleType>
+
+    <xs:complexType name="evenDimmerMode">
+        <xs:sequence>
+            <xs:element name="transitionPoint" type="nonNegativeDecimal" minOccurs="1"
+                maxOccurs="1">
+            </xs:element>
+            <!-- Mapping of nits -> backlight -> brightness -->
+            <xs:element name="brightnessMapping" type="comprehensiveBrightnessMap" maxOccurs="1">
+            </xs:element>
+            <!-- Mapping of current lux to minimum allowed nits values. -->
+            <xs:element name="luxToMinimumNitsMap" type="nitsMap" maxOccurs="1">
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
+    </xs:complexType>
 
     <xs:complexType name="highBrightnessMode">
         <xs:all>
@@ -422,6 +448,35 @@
         </xs:sequence>
     </xs:complexType>
 
+    <xs:complexType name="comprehensiveBrightnessMap">
+        <xs:sequence>
+            <xs:element name="brightnessPoint" type="brightnessPoint" maxOccurs="unbounded" minOccurs="2">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+        <!-- valid value of interpolation if specified: linear -->
+        <xs:attribute name="interpolation" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="brightnessPoint">
+        <xs:sequence>
+            <xs:element type="nonNegativeDecimal" name="nits">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="backlight">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="brightness">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+
     <xs:complexType name="sdrHdrRatioMap">
         <xs:sequence>
             <xs:element name="point" type="sdrHdrRatioPoint" maxOccurs="unbounded" minOccurs="2">
@@ -451,6 +506,7 @@
     </xs:simpleType>
 
     <xs:complexType name="sensorDetails">
+        <xs:attribute name="featureFlag" type="xs:string" use="optional"/>
         <xs:sequence>
             <xs:element type="xs:string" name="type" minOccurs="0" maxOccurs="1">
                 <xs:annotation name="nullable"/>
@@ -690,6 +746,20 @@
                     minOccurs="0" maxOccurs="1">
             <xs:annotation name="final"/>
         </xs:element>
+        <!-- list of supported modes for low power. Each point corresponds to one mode.
+          Mode format is : first = refreshRate, second = vsyncRate. E.g. :
+          <lowPowerSupportedModes>
+              <point>
+                  <first>60</first>   // refreshRate
+                  <second>60</second> //vsyncRate
+              </point>
+              ....
+          </lowPowerSupportedModes>
+           -->
+        <xs:element type="nonNegativeFloatToFloatMap" name="lowPowerSupportedModes" minOccurs="0">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
     </xs:complexType>
 
     <xs:complexType name="refreshRateZoneProfiles">
@@ -709,6 +779,21 @@
     </xs:complexType>
 
     <xs:complexType name="blockingZoneConfig">
+        <!-- list of supported modes for blocking zone . Each point corresponds to one mode.
+            Supported only for lowerBlockingZoneConfigs
+            Mode format is : first = refreshRate, second = vsyncRate. E.g. :
+            <supportedModes>
+                <point>
+                    <first>60</first>   // refreshRate
+                    <second>60</second> //vsyncRate
+                </point>
+                ....
+            </supportedModes>
+        -->
+        <xs:element type="nonNegativeFloatToFloatMap" name="supportedModes" minOccurs="0">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
         <xs:element name="defaultRefreshRate" type="xs:nonNegativeInteger"
                     minOccurs="1" maxOccurs="1">
             <xs:annotation name="final"/>
@@ -770,6 +855,30 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="idleScreenRefreshRateTimeout">
+        <xs:element name="luxThresholds" type="idleScreenRefreshRateTimeoutLuxThresholds" minOccurs="0">
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
+    <!-- Lux based timeout after which we reduce the refresh rate if the screen has been idle, in order to save power. -->
+    <xs:complexType name="idleScreenRefreshRateTimeoutLuxThresholds">
+        <xs:sequence>
+            <xs:element name="point" type="idleScreenRefreshRateTimeoutLuxThresholdPoint" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Represents a tuple of lux and timeout(in ms), which represents the timeout value for the lux in
+    the [luxValue, nextLuxValue (INF if missing))  -->
+    <xs:complexType name="idleScreenRefreshRateTimeoutLuxThresholdPoint">
+        <xs:element name="lux" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="timeout" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
     </xs:complexType>
 
     <!-- Predefined type names as defined by

@@ -21,6 +21,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/glanceable_hub_handle"
+        android:layout_width="4dp"
+        android:layout_height="220dp"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/hub_handle"
+        android:visibility="gone"
+        android:contentDescription="UI indicator for swiping open the glanceable hub"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/dream_overlay_content"
         android:layout_width="match_parent"
@@ -31,5 +44,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         />
 
-    <include layout="@layout/dream_overlay_status_bar_view" />
+    <include layout="@layout/ambient_status_bar_view" />
 </com.android.systemui.dreams.DreamOverlayContainerView>

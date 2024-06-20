@@ -31,6 +31,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.annotation.FlaggedApi;
 import android.content.AttributionSource;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -46,6 +47,8 @@ import android.os.Parcel;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.VibrationEffect;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.MediaStore.Audio.AudioColumns;
 import android.test.mock.MockContentResolver;
@@ -74,6 +77,7 @@ import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class NotificationChannelTest {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -573,6 +577,40 @@ public class NotificationChannelTest {
         channel.setVibrationPattern(new long[] {1, 2, 3});
 
         assertNull(channel.getVibrationEffect());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_MEDIA,
+            Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_CALL, Flags.FLAG_RESTRICT_AUDIO_ATTRIBUTES_ALARM})
+    public void testCopy() {
+        NotificationChannel original = new NotificationChannel("id", "name", 2);
+        original.setDescription("desc");
+        original.setBypassDnd(true);
+        original.setLockscreenVisibility(7);
+        original.setSound(Uri.EMPTY, new AudioAttributes.Builder().build());
+        original.setLightColor(5);
+        original.enableLights(false);
+        original.setVibrationPattern(new long[] {1, 9, 3});
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            original.setVibrationEffect(VibrationEffect.createOneShot(100, 5));
+        }
+        original.lockFields(9999);
+        original.setUserVisibleTaskShown(true);
+        original.enableVibration(false);
+        original.setShowBadge(true);
+        original.setDeleted(false);
+        original.setGroup("group");
+        original.setBlockable(false);
+        original.setAllowBubbles(true);
+        original.setOriginalImportance(6);
+        original.setConversationId("parent", "convo");
+        original.setDemoted(false);
+        original.setImportantConversation(true);
+        original.setDeletedTimeMs(100);
+        original.setImportanceLockedByCriticalDeviceFunction(false);
+
+        NotificationChannel parcelCopy = writeToAndReadFromParcel(original);
+        assertThat(original.copy()).isEqualTo(parcelCopy);
     }
 
     /** Backs up a given channel to an XML, and returns the channel read from the XML. */

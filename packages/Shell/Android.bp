@@ -19,6 +19,9 @@ android_app {
         include_dirs: ["frameworks/native/cmds/dumpstate/binder"],
     },
     static_libs: shell_static_libs,
+    libs: [
+        "device_policy_aconfig_flags_lib",
+    ],
     platform_apis: true,
     certificate: "platform",
     privileged: true,

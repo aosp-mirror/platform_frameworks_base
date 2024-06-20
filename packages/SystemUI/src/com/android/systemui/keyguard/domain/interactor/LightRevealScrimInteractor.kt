@@ -25,14 +25,13 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.util.kotlin.sample
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class LightRevealScrimInteractor
 @Inject
@@ -41,9 +40,8 @@ constructor(
     private val lightRevealScrimRepository: LightRevealScrimRepository,
     @Application private val scope: CoroutineScope,
     private val scrimLogger: ScrimLogger,
-    private val powerInteractor: PowerInteractor,
+    private val powerInteractor: Lazy<PowerInteractor>,
 ) {
-
     init {
         listenForStartedKeyguardTransitionStep()
     }
@@ -52,9 +50,7 @@ constructor(
         scope.launch {
             transitionInteractor.startedKeyguardTransitionStep.collect {
                 scrimLogger.d(TAG, "listenForStartedKeyguardTransitionStep", it)
-                lightRevealScrimRepository.startRevealAmountAnimator(
-                    willBeRevealedInState(it.to),
-                )
+                lightRevealScrimRepository.startRevealAmountAnimator(willBeRevealedInState(it.to))
             }
         }
     }
@@ -84,10 +80,11 @@ constructor(
         }
 
     private fun screenIsShowingContent() =
-        powerInteractor.screenPowerState.value != ScreenPowerState.SCREEN_OFF &&
-            powerInteractor.screenPowerState.value != ScreenPowerState.SCREEN_TURNING_ON
+        powerInteractor.get().screenPowerState.value != ScreenPowerState.SCREEN_OFF &&
+            powerInteractor.get().screenPowerState.value != ScreenPowerState.SCREEN_TURNING_ON
 
-    companion object {
+    val isAnimating: Boolean
+        get() = lightRevealScrimRepository.isAnimating
 
     /**
      * Whether the light reveal scrim will be fully revealed (revealAmount = 1.0f) in the given
@@ -106,9 +103,11 @@ constructor(
             KeyguardState.LOCKSCREEN -> true
             KeyguardState.GONE -> true
             KeyguardState.OCCLUDED -> true
+            KeyguardState.UNDEFINED -> true
         }
     }
 
+    companion object {
         val TAG = LightRevealScrimInteractor::class.simpleName!!
     }
 }

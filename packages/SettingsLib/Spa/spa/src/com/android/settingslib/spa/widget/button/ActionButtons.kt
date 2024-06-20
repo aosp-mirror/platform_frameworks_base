@@ -88,9 +88,9 @@ private fun RowScope.ActionButton(actionButton: ActionButton) {
         interactionSource = remember(actionButton) { MutableInteractionSource() },
         shape = RectangleShape,
         colors = ButtonDefaults.filledTonalButtonColors(
-            containerColor = SettingsTheme.colorScheme.surface,
-            contentColor = SettingsTheme.colorScheme.categoryTitle,
-            disabledContainerColor = SettingsTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.primary,
+            disabledContainerColor = MaterialTheme.colorScheme.surface,
         ),
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 20.dp),
     ) {

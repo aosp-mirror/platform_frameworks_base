@@ -37,19 +37,14 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.content.res.Configuration;
-import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper.RunWithLooper;
 import android.util.SparseArray;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
-import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
@@ -61,7 +56,9 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
@@ -75,8 +72,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Optional;
 
 /** atest NavigationBarControllerTest */
-@RunWith(AndroidTestingRunner.class)
-@RunWithLooper
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class NavigationBarControllerImplTest extends SysuiTestCase {
 
@@ -87,6 +83,8 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
     private NavigationBar mSecondaryNavBar;
     private StaticMockitoSession mMockitoSession;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
+
+    private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Mock
     private CommandQueue mCommandQueue;
@@ -104,7 +102,7 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
                         mock(NavigationModeController.class),
                         mock(SysUiState.class),
                         mCommandQueue,
-                        Dependency.get(Dependency.MAIN_HANDLER),
+                        mExecutor,
                         mock(ConfigurationController.class),
                         mock(NavBarHelper.class),
                         mTaskbarDelegate,
@@ -289,23 +287,6 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
     @Test
     public void test3ButtonTaskbarFlagDisabledNoRegister() {
         verify(mCommandQueue, never()).addCallback(any(TaskbarDelegate.class));
-    }
-
-    @Test
-    public void testConfigurationChange_taskbarNotInitialized() {
-        Configuration configuration = mContext.getResources().getConfiguration();
-        mNavigationBarController.mIsLargeScreen = true;
-        mNavigationBarController.onConfigChanged(configuration);
-        verify(mTaskbarDelegate, never()).onConfigurationChanged(configuration);
-    }
-
-    @Test
-    public void testConfigurationChange_taskbarInitialized() {
-        Configuration configuration = mContext.getResources().getConfiguration();
-        mNavigationBarController.mIsLargeScreen = true;
-        when(mTaskbarDelegate.isInitialized()).thenReturn(true);
-        mNavigationBarController.onConfigChanged(configuration);
-        verify(mTaskbarDelegate, times(1)).onConfigurationChanged(configuration);
     }
 
     @Test

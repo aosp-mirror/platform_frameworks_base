@@ -53,7 +53,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 class RepositionFixedPortraitAppTest(flicker: LegacyFlickerTest) : BaseAppCompat(flicker) {
 
-    val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation).bounds
+    val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {

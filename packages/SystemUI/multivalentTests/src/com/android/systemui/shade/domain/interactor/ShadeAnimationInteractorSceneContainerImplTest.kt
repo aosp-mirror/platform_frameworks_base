@@ -55,6 +55,7 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -78,6 +79,7 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Gone,
+                        currentScene = flowOf(Scenes.Gone),
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -101,6 +103,7 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Gone,
+                        currentScene = flowOf(Scenes.QuickSettings),
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(true),

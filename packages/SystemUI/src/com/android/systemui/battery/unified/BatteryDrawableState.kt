@@ -20,6 +20,21 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 
 /**
+ * States that might set a color profile (e.g., red for low battery) and are mutually exclusive.
+ * This enum allows us to address which colors we want to use based on their function.
+ */
+enum class ColorProfile {
+    // Grayscale is the default color
+    None,
+    // Green for e.g., charging
+    Active,
+    // Yellow for e.g., battery saver
+    Warning,
+    // Red for e.g., low battery
+    Error,
+}
+
+/**
  * Encapsulates all drawing information needed by BatteryMeterDrawable to render properly. Rendered
  * state will be equivalent to the most recent state passed in.
  */
@@ -28,12 +43,9 @@ data class BatteryDrawableState(
     val level: Int,
     /** Whether or not to render the percent as a foreground text layer */
     val showPercent: Boolean,
-    /**
-     * In an error state, the drawable will use the error colors and removes the third layer. If
-     * [showPercent] is false, then the fill will be rendered in the foreground error color. Else
-     * the fill is not rendered.
-     */
-    val showErrorState: Boolean,
+
+    /** Set the [ColorProfile] to get the appropriate fill colors */
+    val color: ColorProfile = ColorProfile.None,
 
     /**
      * An attribution is a drawable that shows either alongside the percent, or centered in the
@@ -59,7 +71,6 @@ data class BatteryDrawableState(
             BatteryDrawableState(
                 level = 50,
                 showPercent = false,
-                showErrorState = false,
                 attribution = null,
             )
     }
@@ -82,12 +93,14 @@ sealed interface BatteryColors {
      */
     val fillOnly: Int
 
-    /** Error colors are used for low battery states typically */
-    val errorForeground: Int
-    val errorBackground: Int
+    /** Used when charging */
+    val activeFill: Int
 
-    /** Currently unused */
-    val warnBackground: Int
+    /** Warning color is used for battery saver mode */
+    val warnFill: Int
+
+    /** Error colors are used for low battery states typically */
+    val errorFill: Int
 
     /** Color scheme appropriate for light mode (dark icons) */
     data object LightThemeColors : BatteryColors {
@@ -95,18 +108,17 @@ sealed interface BatteryColors {
         // 22% alpha white
         override val bg: Int = Color.valueOf(1f, 1f, 1f, 0.22f).toArgb()
 
-        // 18% alpha black
-        override val fill = Color.valueOf(0f, 0f, 0f, 0.18f).toArgb()
         // GM Gray 500
-        override val fillOnly = Color.parseColor("#9AA0A6")
+        override val fill = Color.parseColor("#9AA0A6")
+        // GM Gray 600
+        override val fillOnly = Color.parseColor("#80868B")
 
-        // GM Red 600
-        override val errorForeground = Color.parseColor("#D93025")
-        // GM Red 100
-        override val errorBackground = Color.parseColor("#FAD2CF")
-
+        // GM Green 500
+        override val activeFill = Color.parseColor("#34A853")
         // GM Yellow 500
-        override val warnBackground = Color.parseColor("#FBBC04")
+        override val warnFill = Color.parseColor("#FBBC04")
+        // GM Red 500
+        override val errorFill = Color.parseColor("#EA4335")
     }
 
     /** Color scheme appropriate for dark mode (light icons) */
@@ -115,17 +127,17 @@ sealed interface BatteryColors {
         // 18% alpha black
         override val bg: Int = Color.valueOf(0f, 0f, 0f, 0.18f).toArgb()
 
-        // 22% alpha white
-        override val fill = Color.valueOf(1f, 1f, 1f, 0.22f).toArgb()
-        // GM Gray 600
-        override val fillOnly = Color.parseColor("#80868B")
+        // GM Gray 700
+        override val fill = Color.parseColor("#5F6368")
+        // GM Gray 400
+        override val fillOnly = Color.parseColor("#BDC1C6")
 
-        // GM Red 600
-        override val errorForeground = Color.parseColor("#D93025")
-        // GM Red 200
-        override val errorBackground = Color.parseColor("#F6AEA9")
-        // GM Yellow
-        override val warnBackground = Color.parseColor("#FBBC04")
+        // GM Green 700
+        override val activeFill = Color.parseColor("#188038")
+        // GM Yellow 700
+        override val warnFill = Color.parseColor("#F29900")
+        // GM Red 700
+        override val errorFill = Color.parseColor("#C5221F")
     }
 
     companion object {

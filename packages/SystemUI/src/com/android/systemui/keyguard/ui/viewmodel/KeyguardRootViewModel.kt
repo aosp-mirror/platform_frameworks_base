@@ -20,25 +20,32 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.graphics.Point
 import android.util.MathUtils
 import android.view.View.VISIBLE
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.StateToValue
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
@@ -47,22 +54,29 @@ import com.android.systemui.util.ui.toAnimatedValueFlow
 import com.android.systemui.util.ui.zip
 import javax.inject.Inject
 import kotlin.math.max
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardRootViewModel
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val dozeParameters: DozeParameters,
     private val keyguardInteractor: KeyguardInteractor,
@@ -73,12 +87,18 @@ constructor(
         AlternateBouncerToGoneTransitionViewModel,
     private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
+    private val aodToOccludedTransitionViewModel: AodToOccludedTransitionViewModel,
     private val dozingToGoneTransitionViewModel: DozingToGoneTransitionViewModel,
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
+    private val dozingToOccludedTransitionViewModel: DozingToOccludedTransitionViewModel,
+    private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
+    private val dreamingToGoneTransitionViewModel: DreamingToGoneTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
     private val goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
+    private val goneToDreamingTransitionViewModel: GoneToDreamingTransitionViewModel,
+    private val goneToLockscreenTransitionViewModel: GoneToLockscreenTransitionViewModel,
     private val lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
     private val lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
     private val lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
@@ -89,6 +109,7 @@ constructor(
     private val lockscreenToPrimaryBouncerTransitionViewModel:
         LockscreenToPrimaryBouncerTransitionViewModel,
     private val occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
+    private val occludedToDozingTransitionViewModel: OccludedToDozingTransitionViewModel,
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     private val primaryBouncerToAodTransitionViewModel: PrimaryBouncerToAodTransitionViewModel,
     private val primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
@@ -99,13 +120,20 @@ constructor(
     private val aodAlphaViewModel: AodAlphaViewModel,
     private val shadeInteractor: ShadeInteractor,
 ) {
+    private var burnInJob: Job? = null
+    private val _burnInModel = MutableStateFlow(BurnInModel())
+    val burnInModel = _burnInModel.asStateFlow()
 
     val burnInLayerVisibility: Flow<Int> =
         keyguardTransitionInteractor.startedKeyguardState
             .filter { it == AOD || it == LOCKSCREEN }
             .map { VISIBLE }
 
-    val goneToAodTransition = keyguardTransitionInteractor.transition(from = GONE, to = AOD)
+    val goneToAodTransition =
+        keyguardTransitionInteractor.transition(
+            edge = Edge.create(Scenes.Gone, AOD),
+            edgeWithoutSceneContainer = Edge.create(GONE, AOD)
+        )
 
     private val goneToAodTransitionRunning: Flow<Boolean> =
         goneToAodTransition
@@ -113,13 +141,55 @@ constructor(
             .onStart { emit(false) }
             .distinctUntilChanged()
 
-    private val alphaOnShadeExpansion: Flow<Float> =
+    private val isOnLockscreen: Flow<Boolean> =
         combine(
+                keyguardTransitionInteractor.isFinishedInState(LOCKSCREEN).onStart { emit(false) },
+                anyOf(
+                    keyguardTransitionInteractor.isInTransition(Edge.create(to = LOCKSCREEN)),
+                    keyguardTransitionInteractor.isInTransition(Edge.create(from = LOCKSCREEN)),
+                ),
+            ) { onLockscreen, transitioningToOrFromLockscreen ->
+                onLockscreen || transitioningToOrFromLockscreen
+            }
+            .distinctUntilChanged()
+
+    private val alphaOnShadeExpansion: Flow<Float> =
+        combineTransform(
+                keyguardTransitionInteractor.isInTransition(
+                    edge = Edge.create(from = LOCKSCREEN, to = Scenes.Gone),
+                    edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
+                ),
+                keyguardTransitionInteractor.isInTransition(
+                    edge = Edge.create(from = PRIMARY_BOUNCER, to = Scenes.Lockscreen),
+                    edgeWithoutSceneContainer =
+                        Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN),
+                ),
+                isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
-            ) { qsExpansion, shadeExpansion ->
+            ) {
+                lockscreenToGoneTransitionRunning,
+                primaryBouncerToLockscreenTransitionRunning,
+                isOnLockscreen,
+                qsExpansion,
+                shadeExpansion ->
                 // Fade out quickly as the shade expands
-                1f - MathUtils.constrainedMap(0f, 1f, 0f, 0.2f, max(qsExpansion, shadeExpansion))
+                if (
+                    isOnLockscreen &&
+                        !lockscreenToGoneTransitionRunning &&
+                        !primaryBouncerToLockscreenTransitionRunning
+                ) {
+                    val alpha =
+                        1f -
+                            MathUtils.constrainedMap(
+                                /* rangeMin = */ 0f,
+                                /* rangeMax = */ 1f,
+                                /* valueMin = */ 0f,
+                                /* valueMax = */ 0.2f,
+                                /* value = */ max(qsExpansion, shadeExpansion)
+                            )
+                    emit(alpha)
+                }
             }
             .distinctUntilChanged()
 
@@ -132,24 +202,24 @@ constructor(
         combine(
                 communalInteractor.isIdleOnCommunal,
                 keyguardTransitionInteractor
-                    .transitionValue(GONE)
+                    .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
                     .map { it == 1f }
                     .onStart { emit(false) },
                 keyguardTransitionInteractor
                     .transitionValue(OCCLUDED)
                     .map { it == 1f }
                     .onStart { emit(false) },
-            ) { isIdleOnCommunal, isGone, isOccluded ->
-                isIdleOnCommunal || isGone || isOccluded
+                keyguardTransitionInteractor
+                    .transitionValue(KeyguardState.DREAMING)
+                    .map { it == 1f }
+                    .onStart { emit(false) },
+            ) { isIdleOnCommunal, isGone, isOccluded, isDreaming ->
+                isIdleOnCommunal || isGone || isOccluded || isDreaming
             }
             .distinctUntilChanged()
 
     /** Last point that the root view was tapped */
     val lastRootViewTapPosition: Flow<Point?> = keyguardInteractor.lastRootViewTapPosition
-
-    /** the shared notification container bounds *on the lockscreen* */
-    val notificationBounds: StateFlow<NotificationContainerBounds> =
-        keyguardInteractor.notificationContainerBounds
 
     /**
      * The keyguard root view can be clipped as the shade is pulled down, typically only for
@@ -165,15 +235,21 @@ constructor(
                 // value emitted by any of them. Do not add flows that cannot make this guarantee.
                 merge(
                         alphaOnShadeExpansion,
-                        keyguardInteractor.dismissAlpha.filterNotNull(),
-                        alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
+                        keyguardInteractor.dismissAlpha,
+                        alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
+                        aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToLockscreenTransitionViewModel.lockscreenAlpha,
+                        dozingToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+                        dreamingToGoneTransitionViewModel.lockscreenAlpha,
+                        dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
                         glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
                         goneToAodTransitionViewModel.enterFromTopAnimationAlpha,
                         goneToDozingTransitionViewModel.lockscreenAlpha,
+                        goneToDreamingTransitionViewModel.lockscreenAlpha,
+                        goneToLockscreenTransitionViewModel.lockscreenAlpha,
                         lockscreenToAodTransitionViewModel.lockscreenAlpha(viewState),
                         lockscreenToDozingTransitionViewModel.lockscreenAlpha,
                         lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
@@ -182,6 +258,7 @@ constructor(
                         lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
                         lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
                         occludedToAodTransitionViewModel.lockscreenAlpha,
+                        occludedToDozingTransitionViewModel.lockscreenAlpha,
                         occludedToLockscreenTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToAodTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
@@ -207,24 +284,34 @@ constructor(
     /** For elements that appear and move during the animation -> AOD */
     val burnInLayerAlpha: Flow<Float> = aodAlphaViewModel.alpha
 
-    fun translationY(params: BurnInParameters): Flow<Float> {
-        return aodBurnInViewModel.translationY(params)
-    }
+    val translationY: Flow<Float> = burnInModel.map { it.translationY.toFloat() }
 
-    fun translationX(params: BurnInParameters): Flow<StateToValue> {
-        return merge(
-            aodBurnInViewModel.translationX(params).map { StateToValue(to = AOD, value = it) },
+    val translationX: Flow<StateToValue> =
+        merge(
+            burnInModel.map { StateToValue(to = AOD, value = it.translationX.toFloat()) },
             lockscreenToGlanceableHubTransitionViewModel.keyguardTranslationX,
             glanceableHubToLockscreenTransitionViewModel.keyguardTranslationX,
         )
+
+    fun updateBurnInParams(params: BurnInParameters) {
+        burnInJob?.cancel()
+
+        burnInJob =
+            applicationScope.launch("$TAG#aodBurnInViewModel") {
+                aodBurnInViewModel.movement(params).collect { _burnInModel.value = it }
+            }
     }
 
-    fun scale(params: BurnInParameters): Flow<BurnInScaleViewModel> {
-        return aodBurnInViewModel.scale(params)
-    }
+    val scale: Flow<BurnInScaleViewModel> =
+        burnInModel.map {
+            BurnInScaleViewModel(
+                scale = it.scale,
+                scaleClockOnly = it.scaleClockOnly,
+            )
+        }
 
     /** Is the notification icon container visible? */
-    val isNotifIconContainerVisible: Flow<AnimatedValue<Boolean>> =
+    val isNotifIconContainerVisible: StateFlow<AnimatedValue<Boolean>> =
         combine(
                 goneToAodTransitionRunning,
                 keyguardTransitionInteractor.finishedKeyguardState.map {
@@ -266,11 +353,15 @@ constructor(
                         }
                 }
             }
-            .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = AnimatedValue.NotAnimating(false),
+            )
 
-    fun onNotificationContainerBoundsChanged(top: Float, bottom: Float) {
+    fun onNotificationContainerBoundsChanged(top: Float, bottom: Float, animate: Boolean = false) {
         keyguardInteractor.setNotificationContainerBounds(
-            NotificationContainerBounds(top = top, bottom = bottom)
+            NotificationContainerBounds(top = top, bottom = bottom, isAnimated = animate)
         )
     }
 
@@ -311,5 +402,9 @@ constructor(
 
     fun setRootViewLastTapPosition(point: Point) {
         keyguardInteractor.setLastRootViewTapPosition(point)
+    }
+
+    companion object {
+        private const val TAG = "KeyguardRootViewModel"
     }
 }

@@ -37,6 +37,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -62,6 +63,7 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HwBinder;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -78,6 +80,7 @@ import android.service.usb.UsbDeviceManagerProto;
 import android.service.usb.UsbHandlerProto;
 import android.util.Pair;
 import android.util.Slog;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
@@ -89,6 +92,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.usb.flags.Flags;
 import com.android.server.usb.hal.gadget.UsbGadgetHal;
 import com.android.server.usb.hal.gadget.UsbGadgetHalInstance;
 import com.android.server.utils.EventLogger;
@@ -107,6 +111,8 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * UsbDeviceManager manages USB state in device mode.
@@ -132,6 +138,11 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
      */
     private static final String NORMAL_BOOT = "normal";
 
+    /**
+     *  UDC controller for the ConfigFS USB Gadgets.
+     */
+    private static final String USB_CONTROLLER_NAME_PROPERTY = "sys.usb.controller";
+
     private static final String USB_STATE_MATCH =
             "DEVPATH=/devices/virtual/android_usb/android0";
     private static final String ACCESSORY_START_MATCH =
@@ -142,8 +153,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             "/sys/class/android_usb/android0/state";
     private static final String RNDIS_ETH_ADDR_PATH =
             "/sys/class/android_usb/android0/f_rndis/ethaddr";
-    private static final String AUDIO_SOURCE_PCM_PATH =
-            "/sys/class/android_usb/android0/f_audio_source/pcm";
     private static final String MIDI_ALSA_PATH =
             "/sys/class/android_usb/android0/f_midi/alsa";
 
@@ -171,8 +180,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private static final int MSG_INCREASE_SENDSTRING_COUNT = 21;
     private static final int MSG_UPDATE_USB_SPEED = 22;
     private static final int MSG_UPDATE_HAL_VERSION = 23;
-
-    private static final int AUDIO_MODE_SOURCE = 1;
 
     // Delay for debouncing USB disconnects.
     // We often get rapid connect/disconnect events when enabling USB functions,
@@ -464,7 +471,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         int operationId = sUsbOperationCount.incrementAndGet();
 
         mAccessoryStrings = nativeGetAccessoryStrings();
-        boolean enableAudio = (nativeGetAudioMode() == AUDIO_MODE_SOURCE);
         // don't start accessory mode if our mandatory strings have not been set
         boolean enableAccessory = (mAccessoryStrings != null &&
                 mAccessoryStrings[UsbAccessory.MANUFACTURER_STRING] != null &&
@@ -473,9 +479,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         long functions = UsbManager.FUNCTION_NONE;
         if (enableAccessory) {
             functions |= UsbManager.FUNCTION_ACCESSORY;
-        }
-        if (enableAudio) {
-            functions |= UsbManager.FUNCTION_AUDIO_SOURCE;
         }
 
         if (functions != UsbManager.FUNCTION_NONE) {
@@ -593,6 +596,22 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
          * May also contain vendor-specific default functions for testing purposes.
          */
         protected static final String USB_PERSISTENT_CONFIG_PROPERTY = "persist.sys.usb.config";
+
+        protected static final String MTP_PACKAGE_NAME = "com.android.mtp";
+        protected static final String MTP_SERVICE_CLASS_NAME = "com.android.mtp.MtpService";
+
+        private boolean mIsMtpServiceBound = false;
+
+        /**
+         * {@link ServiceConnection} for {@link MtpService}.
+         */
+        private ServiceConnection mMtpServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder service) {}
+
+            @Override
+            public void onServiceDisconnected(ComponentName arg0) {}
+        };
 
         UsbHandler(Looper looper, Context context, UsbDeviceManager deviceManager,
                 UsbAlsaManager alsaManager, UsbPermissionManager permissionManager) {
@@ -921,25 +940,71 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             sEventLogger.enqueue(new EventLogger.StringEvent("USB intent: " + intent));
         }
 
+        private void getMidiCardDevice() throws FileNotFoundException {
+            String controllerName =  getSystemProperty(USB_CONTROLLER_NAME_PROPERTY, "");
+            if (TextUtils.isEmpty(controllerName)) {
+                throw new FileNotFoundException("controller name not found");
+            }
+
+            File soundDir = new File("/sys/class/udc/" + controllerName + "/gadget/sound");
+            if (!soundDir.exists()) {
+                throw new FileNotFoundException("sound device not found");
+            }
+
+            // There should be exactly one sound card
+            File[] cardDirs = FileUtils.listFilesOrEmpty(soundDir,
+                                                         (dir, file) -> file.startsWith("card"));
+            if (cardDirs.length != 1) {
+                throw new FileNotFoundException("sound card not match");
+            }
+
+            // There should be exactly one midi device
+            File[] midis = FileUtils.listFilesOrEmpty(cardDirs[0],
+                                                      (dir, file) -> file.startsWith("midi"));
+            if (midis.length != 1) {
+                throw new FileNotFoundException("MIDI device not match");
+            }
+
+            Pattern pattern = Pattern.compile("midiC(\\d+)D(\\d+)");
+            Matcher matcher = pattern.matcher(midis[0].getName());
+            if (matcher.matches()) {
+                mMidiCard = Integer.parseInt(matcher.group(1));
+                mMidiDevice = Integer.parseInt(matcher.group(2));
+                Slog.i(TAG, "Found MIDI card " + mMidiCard + " device " + mMidiDevice);
+            } else {
+                throw new FileNotFoundException("MIDI name not match");
+            }
+        }
+
         private void updateUsbFunctions() {
             updateMidiFunction();
+            updateMtpFunction();
         }
 
         private void updateMidiFunction() {
             boolean enabled = (mCurrentFunctions & UsbManager.FUNCTION_MIDI) != 0;
             if (enabled != mMidiEnabled) {
                 if (enabled) {
-                    Scanner scanner = null;
-                    try {
-                        scanner = new Scanner(new File(MIDI_ALSA_PATH));
-                        mMidiCard = scanner.nextInt();
-                        mMidiDevice = scanner.nextInt();
-                    } catch (FileNotFoundException e) {
-                        Slog.e(TAG, "could not open MIDI file", e);
-                        enabled = false;
-                    } finally {
-                        if (scanner != null) {
-                            scanner.close();
+                    if (android.hardware.usb.flags.Flags.enableUsbSysfsMidiIdentification()) {
+                        try {
+                            getMidiCardDevice();
+                        } catch (FileNotFoundException e) {
+                            Slog.e(TAG, "could not identify MIDI device", e);
+                            enabled = false;
+                        }
+                    } else {
+                        Scanner scanner = null;
+                        try {
+                            scanner = new Scanner(new File(MIDI_ALSA_PATH));
+                            mMidiCard = scanner.nextInt();
+                            mMidiDevice = scanner.nextInt();
+                        } catch (FileNotFoundException e) {
+                            Slog.e(TAG, "could not open MIDI file", e);
+                            enabled = false;
+                        } finally {
+                            if (scanner != null) {
+                                scanner.close();
+                            }
                         }
                     }
                 }
@@ -947,6 +1012,67 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             }
             mUsbAlsaManager.setPeripheralMidiState(
                     mMidiEnabled && mConfigured, mMidiCard, mMidiDevice);
+        }
+
+        /**
+         * Bind to MtpService when MTP or PTP is enabled. This is done to prevent activity manager
+         * from freezing the corresponding process.
+         */
+        private void updateMtpFunction() {
+            if (!Flags.enableBindToMtpService()) {
+                return;
+            }
+
+            boolean mtpEnabled = ((mCurrentFunctions & UsbManager.FUNCTION_MTP) != 0);
+            boolean ptpEnabled = ((mCurrentFunctions & UsbManager.FUNCTION_PTP) != 0);
+
+            if (DEBUG) {
+                Slog.d(TAG, "updateMtpFunction "
+                        + ", mtpEnabled: " + mtpEnabled
+                        + ", ptpEnabled: " + ptpEnabled
+                        + ", mIsMtpServiceBound: " + mIsMtpServiceBound
+                );
+            }
+
+            if (mConfigured && (mtpEnabled || ptpEnabled)) {
+                bindToMtpService();
+            } else if (mIsMtpServiceBound) {
+                unbindMtpService();
+            }
+        }
+
+        private void bindToMtpService() {
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName(MTP_PACKAGE_NAME, MTP_SERVICE_CLASS_NAME));
+
+            if (DEBUG) Slog.d(TAG, "Binding to MtpService");
+
+            try {
+                mIsMtpServiceBound = mContext.bindServiceAsUser(
+                    intent,
+                    mMtpServiceConnection,
+                    Context.BIND_AUTO_CREATE,
+                    UserHandle.CURRENT
+                );
+            } catch (SecurityException exception) {
+                Slog.e(TAG, "Unable to bind to MtpService due to SecurityException", exception);
+            }
+
+            // Unbinding from the service if binding was not successful to release the connection.
+            // https://developer.android.com/reference/android/content/Context#bindService(android.content.Intent,%20android.content.ServiceConnection,%20int)
+            if (!mIsMtpServiceBound) {
+                unbindMtpService();
+                Slog.e(TAG, "Binding to MtpService failed");
+            }
+
+            if (DEBUG && mIsMtpServiceBound) Slog.d(TAG, "Successfully bound to MtpService");
+        }
+
+        private void unbindMtpService() {
+            if (DEBUG) Slog.d(TAG, "Unbinding from MtpService");
+
+            mContext.unbindService(mMtpServiceConnection);
+            mIsMtpServiceBound = false;
         }
 
         private void setScreenUnlockedFunctions(int operationId) {
@@ -2490,6 +2616,4 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private native FileDescriptor nativeOpenControl(String usbFunction);
 
     private native boolean nativeIsStartRequested();
-
-    private native int nativeGetAudioMode();
 }

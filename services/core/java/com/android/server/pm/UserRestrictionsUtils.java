@@ -156,7 +156,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
             UserManager.DISALLOW_SIM_GLOBALLY,
             UserManager.DISALLOW_ASSIST_CONTENT,
-            UserManager.DISALLOW_THREAD_NETWORK
+            UserManager.DISALLOW_THREAD_NETWORK,
+            UserManager.DISALLOW_CHANGE_NEAR_FIELD_COMMUNICATION_RADIO
     });
 
     public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(
@@ -208,7 +209,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_CELLULAR_2G,
             UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
             UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
-            UserManager.DISALLOW_THREAD_NETWORK
+            UserManager.DISALLOW_THREAD_NETWORK,
+            UserManager.DISALLOW_CHANGE_NEAR_FIELD_COMMUNICATION_RADIO
     );
 
     /**
@@ -217,8 +219,7 @@ public class UserRestrictionsUtils {
     private static final Set<String> IMMUTABLE_BY_OWNERS = Sets.newArraySet(
             UserManager.DISALLOW_RECORD_AUDIO,
             UserManager.DISALLOW_WALLPAPER,
-            UserManager.DISALLOW_OEM_UNLOCK,
-            UserManager.DISALLOW_ADD_PRIVATE_PROFILE
+            UserManager.DISALLOW_OEM_UNLOCK
     );
 
     /**
@@ -255,8 +256,9 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_CELLULAR_2G,
                     UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
                     UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
-                    UserManager.DISALLOW_THREAD_NETWORK
-    );
+                    UserManager.DISALLOW_THREAD_NETWORK,
+                    UserManager.DISALLOW_CHANGE_NEAR_FIELD_COMMUNICATION_RADIO
+            );
 
     /**
      * Special user restrictions that profile owner of an organization-owned managed profile can
@@ -271,7 +273,7 @@ public class UserRestrictionsUtils {
      * Special user restrictions that profile owner of an organization-owned managed profile can
      * set on the parent profile instance to apply them on the personal profile.
      */
-    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS =
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_LOCAL_RESTRICTIONS =
             Sets.newArraySet(
                     UserManager.DISALLOW_CONFIG_BLUETOOTH,
                     UserManager.DISALLOW_CONFIG_LOCATION,
@@ -293,7 +295,10 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_USB_FILE_TRANSFER,
                     UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
                     UserManager.DISALLOW_UNMUTE_MICROPHONE,
-                    UserManager.DISALLOW_CONFIG_DEFAULT_APPS
+                    UserManager.DISALLOW_CONFIG_DEFAULT_APPS,
+                    UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                    UserManager.DISALLOW_CONFIG_BRIGHTNESS,
+                    UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT
     );
 
     /**
@@ -536,7 +541,7 @@ public class UserRestrictionsUtils {
     public static boolean canParentOfProfileOwnerOfOrganizationOwnedDeviceChange(
             String restriction) {
         return PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_GLOBAL_RESTRICTIONS.contains(restriction)
-                || PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS.contains(restriction);
+                || PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_LOCAL_RESTRICTIONS.contains(restriction);
     }
 
     /**
@@ -715,10 +720,12 @@ public class UserRestrictionsUtils {
                     break;
                 case UserManager.DISALLOW_RUN_IN_BACKGROUND:
                     if (newValue) {
-                        int currentUser = ActivityManager.getCurrentUser();
-                        if (currentUser != userId && userId != UserHandle.USER_SYSTEM) {
+                        final ActivityManager am = context.getSystemService(ActivityManager.class);
+                        if (!am.isProfileForeground(UserHandle.of(userId))
+                                && userId != UserHandle.USER_SYSTEM) {
                             try {
-                                ActivityManager.getService().stopUser(userId, false, null);
+                                ActivityManager.getService().stopUserExceptCertainProfiles(
+                                        userId, false, null);
                             } catch (RemoteException e) {
                                 throw e.rethrowAsRuntimeException();
                             }
@@ -855,7 +862,6 @@ public class UserRestrictionsUtils {
                 break;
 
             case android.provider.Settings.System.SCREEN_BRIGHTNESS:
-            case android.provider.Settings.System.SCREEN_BRIGHTNESS_FLOAT:
             case android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE:
                 if (callingUid == Process.SYSTEM_UID) {
                     return false;

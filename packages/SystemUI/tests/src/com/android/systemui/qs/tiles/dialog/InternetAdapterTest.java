@@ -13,16 +13,18 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableResources;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.wifitrackerlib.WifiEntry;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,7 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class InternetAdapterTest extends SysuiTestCase {
 
     private static final String WIFI_KEY = "Wi-Fi_Key";
@@ -50,6 +52,8 @@ public class InternetAdapterTest extends SysuiTestCase {
     public MockitoRule mRule = MockitoJUnit.rule();
     @Spy
     private Context mSpyContext = mContext;
+    @Mock
+    CoroutineScope mScope;
 
     @Mock
     private WifiEntry mInternetWifiEntry;
@@ -81,7 +85,7 @@ public class InternetAdapterTest extends SysuiTestCase {
         when(mWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
         when(mWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
 
-        mInternetAdapter = new InternetAdapter(mInternetDialogController);
+        mInternetAdapter = new InternetAdapter(mInternetDialogController, mScope);
         mViewHolder = mInternetAdapter.onCreateViewHolder(new LinearLayout(mContext), 0);
         mInternetAdapter.setWifiEntries(Arrays.asList(mWifiEntry), 1 /* wifiEntriesCount */);
     }

@@ -23,6 +23,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.ActivityThread;
 import android.os.Build;
 import android.os.LocaleList;
@@ -314,6 +315,7 @@ public final class LineBreakConfig implements Parcelable {
          * @param config an override line break config
          * @return This {@code Builder}.
          */
+        @SuppressLint("BuilderSetStyle")
         @FlaggedApi(FLAG_NO_BREAK_NO_HYPHENATION_SPAN)
         public @NonNull Builder merge(@NonNull LineBreakConfig config) {
             if (config.mLineBreakStyle != LINE_BREAK_STYLE_UNSPECIFIED) {

@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository
 
-import com.android.systemui.CoreStartable
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
@@ -80,8 +79,3 @@ interface WifiRepository {
  * repository.
  */
 interface RealWifiRepository : WifiRepository
-
-/** Used only by Dagger to bind [WifiRepositoryImpl]. */
-interface WifiRepositoryDagger : RealWifiRepository, CoreStartable
-/** Used only by Dagger to bind [WifiRepositoryViaTrackerLib]. */
-interface WifiRepositoryViaTrackerLibDagger : RealWifiRepository

@@ -19,6 +19,7 @@ import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_EARC_PENDING;
 import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_UNKNOWN;
 import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -90,6 +92,8 @@ public class HdmiCecAtomLoggingTvTest {
                 audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
+        doNothing().when(mHdmiControlServiceSpy)
+                .sendBroadcastAsUser(any(Intent.class));
         doReturn(mHdmiCecAtomWriterSpy).when(mHdmiControlServiceSpy).getAtomWriter();
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);

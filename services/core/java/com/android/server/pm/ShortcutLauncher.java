@@ -46,7 +46,7 @@ import java.util.List;
 /**
  * Launcher information used by {@link ShortcutService}.
  *
- * All methods should be guarded by {@code #mShortcutUser.mService.mLock}.
+ * All methods should be guarded by {@code ShortcutPackageItem#mPackageItemLock}.
  */
 class ShortcutLauncher extends ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
@@ -66,7 +66,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
     /**
      * Package name -> IDs.
      */
-    @GuardedBy("mLock")
+    @GuardedBy("mPackageItemLock")
     private final ArrayMap<UserPackage, ArraySet<String>> mPinnedShortcuts = new ArrayMap<>();
 
     private ShortcutLauncher(@NonNull ShortcutUser shortcutUser,
@@ -99,7 +99,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
      */
     private void onRestoreBlocked() {
         final ArrayList<UserPackage> pinnedPackages;
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             pinnedPackages = new ArrayList<>(mPinnedShortcuts.keySet());
             mPinnedShortcuts.clear();
         }
@@ -138,7 +138,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
 
         final int idSize = ids.size();
         if (idSize == 0) {
-            synchronized (mLock) {
+            synchronized (mPackageItemLock) {
                 mPinnedShortcuts.remove(up);
             }
         } else {
@@ -165,7 +165,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
                     floatingSet.add(id);
                 }
             }
-            synchronized (mLock) {
+            synchronized (mPackageItemLock) {
                 final ArraySet<String> prevSet = mPinnedShortcuts.get(up);
                 if (prevSet != null) {
                     for (String id : floatingSet) {
@@ -187,7 +187,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
     @Nullable
     public ArraySet<String> getPinnedShortcutIds(@NonNull String packageName,
             @UserIdInt int packageUserId) {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             final ArraySet<String> pinnedShortcuts = mPinnedShortcuts.get(
                     UserPackage.of(packageUserId, packageName));
             return pinnedShortcuts == null ? null : new ArraySet<>(pinnedShortcuts);
@@ -198,7 +198,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
      * Return true if the given shortcut is pinned by this launcher.<code></code>
      */
     public boolean hasPinned(ShortcutInfo shortcut) {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             final ArraySet<String> pinned = mPinnedShortcuts.get(
                     UserPackage.of(shortcut.getUserId(), shortcut.getPackage()));
             return (pinned != null) && pinned.contains(shortcut.getId());
@@ -211,7 +211,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
     public void addPinnedShortcut(@NonNull String packageName, @UserIdInt int packageUserId,
             String id, boolean forPinRequest) {
         final ArrayList<String> pinnedList;
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             final ArraySet<String> pinnedSet = mPinnedShortcuts.get(
                     UserPackage.of(packageUserId, packageName));
             if (pinnedSet != null) {
@@ -227,7 +227,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
     }
 
     boolean cleanUpPackage(String packageName, @UserIdInt int packageUserId) {
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             return mPinnedShortcuts.remove(UserPackage.of(packageUserId, packageName)) != null;
         }
     }
@@ -253,7 +253,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
             return;
         }
         final ArrayMap<UserPackage, ArraySet<String>> pinnedShortcuts;
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             pinnedShortcuts = new ArrayMap<>(mPinnedShortcuts);
         }
         final int size = pinnedShortcuts.size();
@@ -366,7 +366,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
                                 : ShortcutService.parseIntAttribute(parser,
                                 ATTR_PACKAGE_USER_ID, ownerUserId);
                         ids = new ArraySet<>();
-                        synchronized (ret.mLock) {
+                        synchronized (ret.mPackageItemLock) {
                             ret.mPinnedShortcuts.put(
                                     UserPackage.of(packageUserId, packageName), ids);
                         }
@@ -407,7 +407,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
         pw.println();
 
         final ArrayMap<UserPackage, ArraySet<String>> pinnedShortcuts;
-        synchronized (mLock) {
+        synchronized (mPackageItemLock) {
             pinnedShortcuts = new ArrayMap<>(mPinnedShortcuts);
         }
         final int size = pinnedShortcuts.size();

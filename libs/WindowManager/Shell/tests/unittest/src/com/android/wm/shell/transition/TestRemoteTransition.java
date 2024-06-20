@@ -20,6 +20,7 @@ import android.os.RemoteException;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.RemoteTransitionStub;
 import android.window.TransitionInfo;
 import android.window.WindowContainerTransaction;
 
@@ -29,7 +30,7 @@ import android.window.WindowContainerTransaction;
  * {@link #startAnimation(IBinder, TransitionInfo, SurfaceControl.Transaction,
  * IRemoteTransitionFinishedCallback)} being called.
  */
-public class TestRemoteTransition extends IRemoteTransition.Stub {
+public class TestRemoteTransition extends RemoteTransitionStub {
     private boolean mCalled = false;
     private boolean mConsumed = false;
     final WindowContainerTransaction mRemoteFinishWCT = new WindowContainerTransaction();
@@ -41,12 +42,6 @@ public class TestRemoteTransition extends IRemoteTransition.Stub {
             throws RemoteException {
         mCalled = true;
         finishCallback.onTransitionFinished(mRemoteFinishWCT, null /* sct */);
-    }
-
-    @Override
-    public void mergeAnimation(IBinder transition, TransitionInfo info,
-            SurfaceControl.Transaction t, IBinder mergeTarget,
-            IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
     }
 
     @Override

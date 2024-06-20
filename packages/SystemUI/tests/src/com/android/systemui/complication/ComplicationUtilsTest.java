@@ -27,11 +27,10 @@ import static com.android.systemui.complication.Complication.COMPLICATION_TYPE_W
 import static com.android.systemui.complication.ComplicationUtils.convertComplicationType;
 import static com.android.systemui.complication.ComplicationUtils.convertComplicationTypes;
 
-
 import static com.google.common.truth.Truth.assertThat;
 
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.dream.DreamBackend;
@@ -46,7 +45,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ComplicationUtilsTest extends SysuiTestCase {
     @Test
     public void testConvertComplicationType() {

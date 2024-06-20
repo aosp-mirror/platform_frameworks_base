@@ -45,6 +45,13 @@ public class TestableNotificationManagerService extends NotificationManagerServi
 
     ComponentPermissionChecker permissionChecker;
 
+    private static class SensitiveLog {
+        public boolean hasPosted;
+        public boolean hasSensitiveContent;
+        public long lifetime;
+    }
+    public SensitiveLog lastSensitiveLog = null;
+
     TestableNotificationManagerService(Context context, NotificationRecordLogger logger,
             InstanceIdSequence notificationInstanceIdSequence) {
         super(context, logger, notificationInstanceIdSequence);
@@ -167,6 +174,15 @@ public class TestableNotificationManagerService extends NotificationManagerServi
         return permissionChecker.check(permission, uid, owningUid, exported);
     }
 
+    @Override
+    protected void logSensitiveAdjustmentReceived(boolean hasPosted, boolean hasSensitiveContent,
+            int lifetimeMs) {
+        lastSensitiveLog = new SensitiveLog();
+        lastSensitiveLog.hasPosted = hasPosted;
+        lastSensitiveLog.hasSensitiveContent = hasSensitiveContent;
+        lastSensitiveLog.lifetime = lifetimeMs;
+    }
+
     public class StrongAuthTrackerFake extends NotificationManagerService.StrongAuthTracker {
         private int mGetStrongAuthForUserReturnValue = 0;
         StrongAuthTrackerFake(Context context) {
@@ -181,6 +197,15 @@ public class TestableNotificationManagerService extends NotificationManagerServi
         public int getStrongAuthForUser(int userId) {
             return mGetStrongAuthForUserReturnValue;
         }
+    }
+
+    public boolean checkLastSensitiveLog(boolean hasPosted, boolean hasSensitive, int lifetime) {
+        if (lastSensitiveLog == null) {
+            return false;
+        }
+        return hasPosted == lastSensitiveLog.hasPosted
+                && hasSensitive == lastSensitiveLog.hasSensitiveContent
+                && lifetime == lastSensitiveLog.lifetime;
     }
 
     public interface ComponentPermissionChecker {

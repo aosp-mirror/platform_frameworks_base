@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
 
+import com.android.hoststubgen.test.tinyframework.R.Nested;
 import com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses.SubClass;
 
 import org.junit.Rule;
@@ -154,12 +155,21 @@ public class TinyFrameworkClassTest {
     }
 
     @Test
+    public void testNativeSubstitutionLong() {
+        assertThat(TinyFrameworkNative.nativeLongPlus(1L, 2L)).isEqualTo(3L);
+    }
+
+    @Test
+    public void testNativeSubstitutionByte() {
+        assertThat(TinyFrameworkNative.nativeBytePlus((byte) 3, (byte) 4)).isEqualTo(7);
+    }
+
+    @Test
     public void testNativeSubstitutionClass_nonStatic() {
         TinyFrameworkNative instance = new TinyFrameworkNative();
         instance.setValue(5);
         assertThat(instance.nativeNonStaticAddToValue(3)).isEqualTo(8);
     }
-
 
     @Test
     public void testSubstituteNativeWithThrow() throws Exception {
@@ -318,5 +328,10 @@ public class TinyFrameworkClassTest {
     public void testAidlHeuristics() {
         assertThat(IPretendingAidl.Stub.addOne(1)).isEqualTo(2);
         assertThat(IPretendingAidl.Stub.Proxy.addTwo(1)).isEqualTo(3);
+    }
+
+    @Test
+    public void testRFileHeuristics() {
+        assertThat(Nested.ARRAY.length).isEqualTo(1);
     }
 }

@@ -22,12 +22,10 @@ import com.android.keyguard.logging.keyguardTransitionAnimationLogger
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.kosmos.applicationCoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.keyguardTransitionAnimationFlow by Fixture {
     KeyguardTransitionAnimationFlow(
-        scope = applicationCoroutineScope,
         transitionInteractor = keyguardTransitionInteractor,
         logger = keyguardTransitionAnimationLogger,
     )

@@ -30,7 +30,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
-import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.res.R
@@ -95,7 +95,7 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled) {
             onCreateV2()
         } else {
             onCreate()
@@ -132,7 +132,7 @@ constructor(
     }
 
     override fun onAttachedToWindow() {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled) {
             clockRegistry.registerClockChangeListener(clockChangedListener)
             clockEventController.registerListeners(clock!!)
 
@@ -141,7 +141,7 @@ constructor(
     }
 
     override fun onDetachedFromWindow() {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled) {
             clockEventController.unregisterListeners()
             clockRegistry.unregisterClockChangeListener(clockChangedListener)
         }

@@ -18,10 +18,11 @@ package com.android.systemui.display.data.repository
 
 import android.hardware.display.DisplayManager
 import android.os.Looper
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display
 import android.view.Display.TYPE_EXTERNAL
+import android.view.Display.TYPE_INTERNAL
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.FlowValue
@@ -45,7 +46,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -427,11 +428,47 @@ class DisplayRepositoryTest : SysuiTestCase() {
             assertThat(display!!.type).isEqualTo(TYPE_EXTERNAL)
         }
 
+    @Test
+    fun defaultDisplayOff_changes() =
+        testScope.runTest {
+            val defaultDisplayOff by latestDefaultDisplayOffFlowValue()
+            setDisplays(
+                listOf(
+                    display(
+                        type = TYPE_INTERNAL,
+                        id = Display.DEFAULT_DISPLAY,
+                        state = Display.STATE_OFF
+                    )
+                )
+            )
+            displayListener.value.onDisplayChanged(Display.DEFAULT_DISPLAY)
+            assertThat(defaultDisplayOff).isTrue()
+
+            setDisplays(
+                listOf(
+                    display(
+                        type = TYPE_INTERNAL,
+                        id = Display.DEFAULT_DISPLAY,
+                        state = Display.STATE_ON
+                    )
+                )
+            )
+            displayListener.value.onDisplayChanged(Display.DEFAULT_DISPLAY)
+            assertThat(defaultDisplayOff).isFalse()
+        }
+
     private fun Iterable<Display>.ids(): List<Int> = map { it.displayId }
 
     // Wrapper to capture the displayListener.
     private fun TestScope.latestDisplayFlowValue(): FlowValue<Set<Display>?> {
         val flowValue = collectLastValue(displayRepository.displays)
+        captureAddedRemovedListener()
+        return flowValue
+    }
+
+    // Wrapper to capture the displayListener.
+    private fun TestScope.latestDefaultDisplayOffFlowValue(): FlowValue<Boolean?> {
+        val flowValue = collectLastValue(displayRepository.defaultDisplayOff)
         captureAddedRemovedListener()
         return flowValue
     }

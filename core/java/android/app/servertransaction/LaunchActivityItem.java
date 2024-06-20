@@ -24,14 +24,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityClient;
 import android.app.ActivityOptions.SceneTransitionInfo;
-import android.app.ActivityThread;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.IActivityClientController;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
@@ -106,8 +104,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
     public void execute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
-        ActivityClientRecord r = new ActivityClientRecord(mActivityToken, mIntent, mIdent, mInfo,
-                mOverrideConfig, mReferrer, mVoiceInteractor, mState, mPersistentState,
+        final ActivityClientRecord r = new ActivityClientRecord(mActivityToken, mIntent, mIdent,
+                mInfo, mOverrideConfig, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mSceneTransitionInfo, mIsForward,
                 mProfilerInfo, client, mAssistToken, mShareableActivityToken, mLaunchedFromBubble,
                 mTaskFragmentToken, mInitialCallerInfoAccessToken, mActivityWindowInfo);
@@ -119,13 +117,6 @@ public class LaunchActivityItem extends ClientTransactionItem {
     public void postExecute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         client.countLaunchingActivities(-1);
-    }
-
-    @Nullable
-    @Override
-    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
-        // LaunchActivityItem may update the global config with #mCurConfig.
-        return ActivityThread.currentApplication();
     }
 
     // ObjectPoolItem implementation

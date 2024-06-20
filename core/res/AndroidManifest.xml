@@ -299,6 +299,9 @@
 
     <protected-broadcast android:name="android.hardware.display.action.WIFI_DISPLAY_STATUS_CHANGED" />
 
+    <protected-broadcast android:name="android.hardware.hdmi.action.OSD_MESSAGE" />
+    <protected-broadcast android:name="android.hardware.hdmi.action.ON_ACTIVE_SOURCE_RECOVERED_DISMISS_UI" />
+
     <protected-broadcast android:name="android.hardware.usb.action.USB_STATE" />
     <protected-broadcast android:name="android.hardware.usb.action.USB_PORT_CHANGED" />
     <protected-broadcast android:name="android.hardware.usb.action.USB_PORT_COMPLIANCE_CHANGED" />
@@ -582,6 +585,7 @@
 
     <protected-broadcast android:name="android.app.action.KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED" />
     <protected-broadcast android:name="NotificationManagerService.TIMEOUT" />
+    <protected-broadcast android:name="com.android.server.notification.TimeToLiveHelper" />
     <protected-broadcast android:name="NotificationHistoryDatabase.CLEANUP" />
     <protected-broadcast android:name="ScheduleConditionProvider.EVALUATE" />
     <protected-broadcast android:name="EventConditionProvider.EVALUATE" />
@@ -2599,6 +2603,13 @@
     <permission android:name="android.permission.VIBRATE_ALWAYS_ON"
         android:protectionLevel="signature" />
 
+    <!-- Allows access to system-only haptic feedback constants.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.VIBRATE_SYSTEM_CONSTANTS"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows access to the vibrator state.
          <p>Protection level: signature
          @hide
@@ -3238,17 +3249,21 @@
     <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
         android:protectionLevel="signature|appop" />
 
-    <!-- Allows applications to access profiles with ACCESS_HIDDEN_PROFILES user property
-     <p>Protection level: normal
-     @FlaggedApi("android.multiuser.enable_permission_to_access_hidden_profiles") -->
+    <!-- Allows applications to access profiles with
+        {@code android.content.pm.UserProperties#PROFILE_API_VISIBILITY_HIDDEN} user property, e.g.
+        {@link android.os.UserManager#USER_TYPE_PROFILE_PRIVATE}.
+        <p>Protection level: normal
+        @FlaggedApi("android.multiuser.enable_permission_to_access_hidden_profiles") -->
     <permission android:name="android.permission.ACCESS_HIDDEN_PROFILES"
         android:label="@string/permlab_accessHiddenProfile"
         android:description="@string/permdesc_accessHiddenProfile"
         android:protectionLevel="normal" />
 
-    <!-- @SystemApi @hide Allows privileged applications to get details about hidden profile
-        users.
-        @FlaggedApi("android.multiuser.flags.enable_permission_to_access_hidden_profiles") -->
+    <!-- @SystemApi @hide Allows privileged applications to get details about profiles with
+        {@code android.content.pm.UserProperties#PROFILE_API_VISIBILITY_HIDDEN} user property, e.g.
+        {@link android.os.UserManager#USER_TYPE_PROFILE_PRIVATE}. Removes extra requirements such
+        as having {@link android.app.role.RoleManager#ROLE_HOME} role for LauncherApps APIs.
+        @FlaggedApi("android.multiuser.enable_permission_to_access_hidden_profiles") -->
     <permission
         android:name="android.permission.ACCESS_HIDDEN_PROFILES_FULL"
         android:protectionLevel="signature|privileged" />
@@ -3311,13 +3326,18 @@
 
     <!-- Allows an application to manage device policy relating to time.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
-        APIs protected by this permission on users different to the calling user.-->
+        APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
+    -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_TIME"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to set the grant state of runtime permissions on packages.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS"
                 android:protectionLevel="internal|role" />
@@ -3325,6 +3345,8 @@
     <!-- Allows an application to manage the identity of the managing organization.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY"
                 android:protectionLevel="internal|role" />
@@ -3333,6 +3355,8 @@
         active policy.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE"
                 android:protectionLevel="internal|role" />
@@ -3340,6 +3364,8 @@
     <!-- Allows an application to manage backup service policy.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_BACKUP_SERVICE"
                 android:protectionLevel="internal|role" />
@@ -3347,6 +3373,8 @@
     <!-- Allows an application to manage lock task policy.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCK_TASK"
                 android:protectionLevel="internal|role" />
@@ -3354,6 +3382,8 @@
     <!-- Allows an application to manage policy regarding modifying applications.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL"
                 android:protectionLevel="internal|role" />
@@ -3361,6 +3391,8 @@
     <!-- Allows an application to manage installing from unknown sources policy.
         <p>MANAGE_SECURITY_CRITICAL_DEVICE_POLICY_ACROSS_USERS is required to call APIs protected
         by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES"
                 android:protectionLevel="internal|role" />
@@ -3368,6 +3400,8 @@
     <!-- Allows an application to manage application restrictions.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_RESTRICTIONS"
                 android:protectionLevel="internal|role" />
@@ -3375,6 +3409,8 @@
     <!-- Allows an application to manage calling policy.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CALLS"
                 android:protectionLevel="internal|role" />
@@ -3382,6 +3418,8 @@
     <!-- Allows an application to manage debugging features policy.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES"
                 android:protectionLevel="internal|role" />
@@ -3389,6 +3427,8 @@
     <!-- Allows an application to manage policy preventing users from modifying users.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MODIFY_USERS"
                 android:protectionLevel="internal|role" />
@@ -3396,6 +3436,8 @@
     <!-- Allows an application to manage safe boot policy.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SAFE_BOOT"
                 android:protectionLevel="internal|role" />
@@ -3404,6 +3446,8 @@
     enable and disable the microphone.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MICROPHONE"
                 android:protectionLevel="internal|role" />
@@ -3412,6 +3456,8 @@
     enable and disable the camera.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CAMERA"
                 android:protectionLevel="internal|role" />
@@ -3419,6 +3465,8 @@
     <!-- Allows an application to manage policy related to keyguard.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_KEYGUARD"
                 android:protectionLevel="internal|role" />
@@ -3426,6 +3474,8 @@
     <!-- Allows an application to set policy related to account management.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT"
                 android:protectionLevel="internal|role" />
@@ -3433,6 +3483,8 @@
     <!-- Allows an application to set policy related to hiding and suspending packages.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PACKAGE_STATE"
                 android:protectionLevel="internal|role" />
@@ -3441,17 +3493,24 @@
     challenge on current user.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_RESET_PASSWORD"
                 android:protectionLevel="internal|role" />
 
-    <!-- Allows an application to set policy related to the status bar.-->
+    <!-- Allows an application to set policy related to the status bar.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
+    -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_STATUS_BAR"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to set policy related to bluetooth.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_BLUETOOTH"
                 android:protectionLevel="internal|role" />
@@ -3459,6 +3518,8 @@
     <!-- Allows an application to set policy related to fun.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_FUN"
                 android:protectionLevel="internal|role" />
@@ -3466,6 +3527,8 @@
     <!-- Allows an application to set policy related to airplane mode.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_AIRPLANE_MODE"
                 android:protectionLevel="internal|role" />
@@ -3473,6 +3536,8 @@
     <!-- Allows an application to set policy related to mobile networks.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MOBILE_NETWORK"
                 android:protectionLevel="internal|role" />
@@ -3480,6 +3545,8 @@
     <!-- Allows an application to set policy related to physical media.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PHYSICAL_MEDIA"
                 android:protectionLevel="internal|role" />
@@ -3487,6 +3554,8 @@
     <!-- Allows an application to set policy related to sms.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SMS"
                 android:protectionLevel="internal|role" />
@@ -3494,6 +3563,8 @@
     <!-- Allows an application to set policy related to usb file transfers.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER"
                 android:protectionLevel="internal|role" />
@@ -3501,6 +3572,8 @@
     <!-- Allows an application to set policy related to lock credentials.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS"
                 android:protectionLevel="internal|role" />
@@ -3508,6 +3581,8 @@
     <!-- Allows an application to set policy related to Wifi.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_WIFI"
                 android:protectionLevel="internal|role" />
@@ -3515,6 +3590,8 @@
     <!-- Allows an application to set policy related to screen capture.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SCREEN_CAPTURE"
                 android:protectionLevel="internal|role" />
@@ -3522,6 +3599,8 @@
     <!-- Allows an application to set policy related to input methods.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_INPUT_METHODS"
                 android:protectionLevel="internal|role" />
@@ -3530,6 +3609,8 @@
      private DNS.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_RESTRICT_PRIVATE_DNS"
                 android:protectionLevel="internal|role" />
@@ -3537,6 +3618,8 @@
     <!-- Allows an application to set policy related to the default sms application.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_DEFAULT_SMS"
                 android:protectionLevel="internal|role" />
@@ -3544,6 +3627,8 @@
     <!-- Allows an application to set policy related to profiles.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PROFILES"
                 android:protectionLevel="internal|role" />
@@ -3552,6 +3637,8 @@
     cross-profile copy and paste).
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PROFILE_INTERACTION"
                 android:protectionLevel="internal|role" />
@@ -3559,6 +3646,8 @@
     <!-- Allows an application to set policy related to VPNs.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_VPN"
                 android:protectionLevel="internal|role" />
@@ -3566,6 +3655,8 @@
     <!-- Allows an application to set policy related to audio output.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUDIO_OUTPUT"
                 android:protectionLevel="internal|role" />
@@ -3573,6 +3664,8 @@
     <!-- Allows an application to set policy related to the display.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_DISPLAY"
                 android:protectionLevel="internal|role" />
@@ -3580,6 +3673,8 @@
     <!-- Allows an application to set policy related to location.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCATION"
                 android:protectionLevel="internal|role" />
@@ -3587,6 +3682,8 @@
     <!-- Allows an application to set policy related to factory reset.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_FACTORY_RESET"
                 android:protectionLevel="internal|role" />
@@ -3594,6 +3691,8 @@
     <!-- Allows an application to set policy related to the wallpaper.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_WALLPAPER"
                 android:protectionLevel="internal|role" />
@@ -3601,6 +3700,8 @@
     <!-- Allows an application to set policy related to the usage of the contents of the screen.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SCREEN_CONTENT"
                 android:protectionLevel="internal|role" />
@@ -3608,6 +3709,8 @@
     <!-- Allows an application to set policy related to system dialogs.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS"
                 android:protectionLevel="internal|role" />
@@ -3615,6 +3718,8 @@
     <!-- Allows an application to set policy related to users running in the background.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_RUN_IN_BACKGROUND"
                 android:protectionLevel="internal|role" />
@@ -3622,6 +3727,8 @@
     <!-- Allows an application to set policy related to printing.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PRINTING"
                 android:protectionLevel="internal|role" />
@@ -3630,12 +3737,16 @@
     nearby streaming).
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to set policy related to <a
     href="https://www.threadgroup.org">Thread</a> network.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
         @FlaggedApi("com.android.net.thread.platform.flags.thread_user_restriction_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_THREAD_NETWORK"
@@ -3643,6 +3754,8 @@
 
     <!-- Allows an application to set policy related to sending assist content to a
         privileged app such as the Assistant app.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
         @FlaggedApi("android.app.admin.flags.assist_content_user_restriction_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ASSIST_CONTENT"
@@ -3651,6 +3764,8 @@
     <!-- Allows an application to set policy related to windows.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_WINDOWS"
                 android:protectionLevel="internal|role" />
@@ -3658,6 +3773,8 @@
     <!-- Allows an application to set policy related to locale.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCALE"
                 android:protectionLevel="internal|role" />
@@ -3665,6 +3782,8 @@
     <!-- Allows an application to set policy related to autofill.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUTOFILL"
                 android:protectionLevel="internal|role" />
@@ -3672,6 +3791,8 @@
     <!-- Allows an application to set policy related to users.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_USERS"
                 android:protectionLevel="internal|role" />
@@ -3679,6 +3800,8 @@
     <!-- Allows an application to set policy related to certificates.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CERTIFICATES"
                 android:protectionLevel="internal|role" />
@@ -3686,6 +3809,8 @@
     <!-- Allows an application to set policy related to override APNs.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_OVERRIDE_APN"
                 android:protectionLevel="internal|role" />
@@ -3693,6 +3818,8 @@
     <!-- Allows an application to set policy related to security logging.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SECURITY_LOGGING"
                 android:protectionLevel="internal|role" />
@@ -3708,6 +3835,8 @@
     <!-- Allows an application to set policy related to system updates.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES"
                 android:protectionLevel="internal|role" />
@@ -3715,6 +3844,8 @@
     <!-- Allows an application query system updates.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES"
                 android:protectionLevel="internal|role" />
@@ -3722,6 +3853,8 @@
     <!-- Allows an application to set policy related to private DNS.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PRIVATE_DNS"
                 android:protectionLevel="internal|role" />
@@ -3729,6 +3862,8 @@
     <!-- Allows an application to set policy related to settings.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SETTINGS"
                 android:protectionLevel="internal|role" />
@@ -3736,17 +3871,24 @@
     <!-- Allows an application to set policy related to network logging.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_NETWORK_LOGGING"
                 android:protectionLevel="internal|role" />
 
-    <!-- Allows an application to set policy related to usb data signalling.-->
+    <!-- Allows an application to set policy related to usb data signalling.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
+    -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to set policy related to suspending personal apps.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SUSPEND_PERSONAL_APPS"
                 android:protectionLevel="internal|role" />
@@ -3754,13 +3896,17 @@
     <!-- Allows an application to set policy related to keeping uninstalled packages.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
         required to call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_KEEP_UNINSTALLED_PACKAGES"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to manage policy related to accessibility.
-   <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
-   APIs protected by this permission on users different to the calling user.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to
+        call APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACCESSIBILITY"
                 android:protectionLevel="internal|role" />
@@ -3768,6 +3914,8 @@
     <!-- Allows an application to manage policy related to common criteria mode.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE"
                 android:protectionLevel="internal|role" />
@@ -3775,6 +3923,8 @@
     <!-- Allows an application to manage policy related to metered data.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_METERED_DATA"
                 android:protectionLevel="internal|role" />
@@ -3782,6 +3932,8 @@
     <!-- Allows an application to set a network-independent global HTTP proxy.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PROXY"
                 android:protectionLevel="internal|role" />
@@ -3789,6 +3941,8 @@
     <!-- Allows an application to request bugreports with user consent.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_BUGREPORT"
                 android:protectionLevel="internal|role" />
@@ -3796,6 +3950,8 @@
     <!-- Allows an application to manage policy related to application user data.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_USER_DATA"
                 android:protectionLevel="internal|role" />
@@ -3804,21 +3960,25 @@
     permission.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCK"
                 android:protectionLevel="internal|role" />
 
-    <!-- Allows an application to manage policy related to theft detection.
+    <!-- Allows an application to query the device stolen state.
         @FlaggedApi("android.app.admin.flags.device_theft_api_enabled")
         @hide
         @SystemApi
     -->
-    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION"
+    <permission android:name="android.permission.QUERY_DEVICE_STOLEN_STATE"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to manage policy related to system apps.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SYSTEM_APPS"
                 android:protectionLevel="internal|role" />
@@ -3826,16 +3986,23 @@
     <!-- Allows an application to manage policy related to wiping data.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
         APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_WIPE_DATA"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to manage policy related to the Memory Tagging Extension (MTE).
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MTE"
                 android:protectionLevel="internal|role" />
 
-    <!-- Allows an application to manage policy related to device identifiers. -->
+    <!-- Allows an application to manage policy related to device identifiers.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
+    -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_DEVICE_IDENTIFIERS"
                 android:protectionLevel="internal|role" />
 
@@ -3848,24 +4015,33 @@
 
     <!-- Allows an application to set policy related to subscriptions downloaded by an admin.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
-            APIs protected by this permission on users different to the calling user.
-        @FlaggedApi("android.app.admin.flags.esim_management_enabled") -->
+        APIs protected by this permission on users different to the calling user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
+        @FlaggedApi("android.app.admin.flags.esim_management_enabled")
+    -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS"
         android:protectionLevel="internal|role" />
 
     <!-- Allows an application to manage policy related to block package uninstallation.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
         @FlaggedApi("android.app.admin.flags.dedicated_device_control_api_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_BLOCK_UNINSTALL"
         android:protectionLevel="internal|role" />
 
     <!-- Allows an application to manage policy related to camera toggle.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
         @FlaggedApi("android.app.admin.flags.dedicated_device_control_api_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CAMERA_TOGGLE"
         android:protectionLevel="internal|role" />
 
     <!-- Allows an application to manage policy related to microphone toggle.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
         @FlaggedApi("android.app.admin.flags.dedicated_device_control_api_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MICROPHONE_TOGGLE"
@@ -3874,16 +4050,21 @@
     <!-- Allows an application to set device policies outside the current user
         that are critical for securing data within the current user.
         <p>Holding this permission allows the use of other held MANAGE_DEVICE_POLICY_*
-            permissions across all users on the device provided they are required for securing data
-            within the current user.-->
+        permissions across all users on the device provided they are required for securing data
+        within the current user.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
+    -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to set device policies outside the current user
         that are required for securing device ownership without accessing user data.
         <p>Holding this permission allows the use of other held MANAGE_DEVICE_POLICY_*
-            permissions across all users on the device provided they do not grant access to user
-            data. -->
+        permissions across all users on the device provided they do not grant access to user data.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
+    -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS"
                 android:protectionLevel="internal|role" />
 
@@ -3891,9 +4072,19 @@
         <p>Fuller form of {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS}
              that removes the restriction on accessing user data.
         <p>Holding this permission allows the use of any other held MANAGE_DEVICE_POLICY_*
-            permissions across all users on the device.-->
+            permissions across all users on the device.
+        <p>Protection level: internal|role
+        <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
+    -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL"
                 android:protectionLevel="internal|role" />
+
+    <!-- Allows the holder to manage and retrieve max storage limit for admin policies. This
+        permission is only grantable on rooted devices.
+        @TestAPI
+        @hide -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT"
+                android:protectionLevel="internal" />
 
     <!-- Allows an application to access EnhancedConfirmationManager.
         @SystemApi
@@ -4683,6 +4874,11 @@
          @hide @TestApi -->
     <permission android:name="android.permission.REQUEST_UNIQUE_ID_ATTESTATION"
          android:protectionLevel="signature" />
+
+    <!-- Allows an application to use the RemoteKeyProvisioningService.
+         @hide -->
+    <permission android:name="android.permission.BIND_RKP_SERVICE"
+                android:protectionLevel="signature" />
 
     <!-- Allows an application to get enabled credential manager providers.
          @hide -->
@@ -5881,7 +6077,7 @@
     <!-- Allows an application to subscribe to notifications about the nearby devices' presence
          status change base on the UUIDs.
          <p>Not for use by third-party applications.</p>
-         @FlaggedApi("android.companion.flags.device_presence")
+         @FlaggedApi("android.companion.device_presence")
     -->
     <permission android:name="android.permission.REQUEST_OBSERVE_DEVICE_UUID_PRESENCE"
                 android:protectionLevel="signature|privileged" />
@@ -6191,7 +6387,7 @@
           @hide
           @removed -->
     <permission android:name="android.permission.CAPTURE_SECURE_VIDEO_OUTPUT"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows an application to know what content is playing and control its playback.
          <p>Not for use by third-party applications due to privacy of media consumption</p>  -->
@@ -6783,12 +6979,13 @@
     <permission android:name="android.permission.MANAGE_BIOMETRIC_DIALOG"
                 android:protectionLevel="signature" />
 
-    <!-- Allows an application to set the BiometricDialog (SystemUI) logo .
+    <!-- Allows an application to set the advanced features on BiometricDialog (SystemUI), including
+         logo, logo description, and content view with more options button.
          <p>Not for use by third-party applications.
          @FlaggedApi("android.hardware.biometrics.custom_biometric_prompt")
     -->
-    <permission android:name="android.permission.SET_BIOMETRIC_DIALOG_LOGO"
-                android:protectionLevel="signature" />
+    <permission android:name="android.permission.SET_BIOMETRIC_DIALOG_ADVANCED"
+                android:protectionLevel="signature|privileged" />
 
     <!-- Allows an application to control keyguard.  Only allowed for system processes.
         @hide -->
@@ -6922,6 +7119,13 @@
          @hide This is not a third-party API (intended for system apps). -->
     <permission android:name="android.permission.MANAGE_MEDIA_PROJECTION"
         android:protectionLevel="signature" />
+
+    <!-- @hide @TestApi Allows an application to record sensitive content during media
+         projection. This is intended for on device screen recording system app.
+         @FlaggedApi("android.permission.flags.sensitive_notification_app_protection") -->
+    <permission android:name="android.permission.RECORD_SENSITIVE_CONTENT"
+        android:protectionLevel="signature"
+        android:featureFlag="android.permission.flags.sensitive_notification_app_protection"/>
 
     <!-- @SystemApi Allows an application to read install sessions
          @hide This is not a third-party API (intended for system apps). -->
@@ -7207,6 +7411,13 @@
      @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.ACCESS_SMARTSPACE"
         android:protectionLevel="signature|privileged|development" />
+
+    <!-- @SystemApi Allows an application to start a contextual search.
+         @FlaggedApi("android.app.contextualsearch.flags.enable_service")
+         @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.ACCESS_CONTEXTUAL_SEARCH"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.app.contextualsearch.flags.enable_service"/>
 
     <!-- @SystemApi Allows an application to manage the wallpaper effects
      generation service.
@@ -7497,16 +7708,6 @@
          @hide -->
     <permission android:name="android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO"
                 android:protectionLevel="signature|privileged|appop" />
-
-    <!-- @SystemApi Required for the privileged assistant apps targeting
-         {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
-         that receive training data from a sandboxed {@link HotwordDetectionService} or
-         {@link VisualQueryDetectionService}.
-         <p>Protection level: internal|appop
-         @FlaggedApi("android.permission.flags.voice_activation_permission_apis")
-         @hide -->
-    <permission android:name="android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA"
-                android:protectionLevel="internal|appop" />
 
     <!-- @SystemApi Allows requesting the framework broadcast the
          {@link Intent#ACTION_DEVICE_CUSTOMIZATION_READY} intent.
@@ -7955,12 +8156,12 @@
         android:protectionLevel="signature|privileged" />
 
 
-    <!-- @SystemApi Allows an app to bind the on-device trusted service.
+    <!-- @SystemApi Allows an app to bind the on-device sandboxed service.
              <p>Protection level: signature|privileged
              @hide
          @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence")
         -->
-    <permission android:name="android.permission.BIND_ON_DEVICE_TRUSTED_SERVICE"
+    <permission android:name="android.permission.BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE"
         android:protectionLevel="signature"/>
 
 
@@ -7970,16 +8171,6 @@
      -->
     <permission android:name="android.permission.RUN_USER_INITIATED_JOBS"
                 android:protectionLevel="normal"/>
-
-    <!-- @FlaggedApi("android.app.job.backup_jobs_exemption")
-         Gives applications with a <b>major use case</b> of backing-up or syncing content increased
-         job execution allowance in order to complete the related work. The jobs must have a valid
-         content URI trigger and network constraint set.
-         <p>This is a special access permission that can be revoked by the system or the user.
-         <p>Protection level: signature|privileged|appop
-     -->
-    <permission android:name="android.permission.RUN_BACKUP_JOBS"
-                android:protectionLevel="signature|privileged|appop"/>
 
     <!-- Allows an app access to the installer provided app metadata.
         @SystemApi
@@ -8110,7 +8301,7 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- @hide @SystemApi
-        @FlaggedApi("com.android.server.notification.flags.redact_otp_notifications_from_untrusted_listeners")
+        @FlaggedApi("android.view.flags.sensitive_content_app_protection_api")
         Allows apps with a NotificationListenerService to receive notifications with sensitive
         information
         <p>Apps with a NotificationListenerService without this permission will not be able
@@ -8149,6 +8340,43 @@
     -->
     <permission android:name="android.permission.EMERGENCY_INSTALL_PACKAGES"
                 android:protectionLevel="signature|privileged"/>
+
+    <!-- Allows internal applications to restrict display modes
+       <p>Not for use by third-party applications.
+       <p>Protection level: signature
+       @hide
+    -->
+    <permission android:name="android.permission.RESTRICT_DISPLAY_MODES"
+        android:protectionLevel="signature" />
+
+    <!-- Allows internal applications to override screen timeout temporarily
+        <p>Protection level: signature
+        <p>Not for use by third-party applications.
+        @FlaggedApi("com.android.server.power.feature.flags.enable_early_screen_timeout_detector")
+        @hide
+    -->
+    <permission android:name="android.permission.SCREEN_TIMEOUT_OVERRIDE"
+                android:protectionLevel="signature" />
+
+    <!-- @SystemApi
+        @FlaggedApi("android.security.fsverity_api")
+        Allows app to setup fs-verity through FileIntegrityManager.
+        <p>Protection level: signature|privileged
+        @hide
+    -->
+    <permission android:name="android.permission.SETUP_FSVERITY"
+                android:protectionLevel="signature|privileged"/>
+
+    <!--
+        @TestApi
+        Signature permission reserved for testing. This should never be used to
+        gate any actual functionality.
+        <p>
+        Protection level: signature
+        @hide
+    -->
+    <permission android:name="android.permission.RESERVED_FOR_TESTING_SIGNATURE"
+                android:protectionLevel="signature"/>
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
@@ -8203,7 +8431,7 @@
         </activity>
         <activity android:name="com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity"
                   android:exported="false"
-                  android:theme="@style/Theme.DeviceDefault.Resolver"
+                  android:theme="@style/AccessibilityButtonChooserDialog"
                   android:finishOnCloseSystemDialogs="true"
                   android:excludeFromRecents="true"
                   android:documentLaunchMode="never"
@@ -8307,7 +8535,7 @@
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@style/Theme.DeviceDefault.Light.DialogWhenLarge"
+                android:theme="@style/GrantCredentialsPermissionActivity"
                 android:process=":ui"
                 android:visibleToInstantApps="true">
         </activity>
@@ -8383,9 +8611,11 @@
                 android:process=":ui">
         </activity>
 
+        <!-- BlockedAppStreamingActivity is launched as the system user. -->
         <activity android:name="com.android.internal.app.BlockedAppStreamingActivity"
             android:theme="@style/Theme.Dialog.Confirmation"
             android:excludeFromRecents="true"
+            android:showForAllUsers="true"
             android:process=":ui">
         </activity>
 
@@ -8679,7 +8909,7 @@
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
-        <service android:name="com.android.server.companion.InactiveAssociationsRemovalService"
+        <service android:name="com.android.server.companion.association.InactiveAssociationsRemovalService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
@@ -8738,6 +8968,7 @@
 
         <service android:name="com.android.server.companion.datatransfer.contextsync.CallMetadataSyncInCallService"
                  android:permission="android.permission.BIND_INCALL_SERVICE"
+                 android:enabled="@bool/config_enableContextSyncInCall"
                  android:exported="true">
             <meta-data android:name="android.telecom.INCLUDE_SELF_MANAGED_CALLS"
                        android:value="true" />

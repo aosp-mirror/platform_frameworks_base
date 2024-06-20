@@ -16,6 +16,7 @@
 
 package com.android.systemui.display.data.repository
 
+import android.annotation.SuppressLint
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED
 import android.hardware.display.DisplayManager.DisplayListener
@@ -27,6 +28,7 @@ import android.util.Log
 import android.view.Display
 import com.android.app.tracing.FlowTracing.traceEach
 import com.android.app.tracing.traceSection
+import com.android.systemui.Flags
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -45,7 +47,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 
@@ -67,6 +71,9 @@ interface DisplayRepository {
      */
     val pendingDisplay: Flow<PendingDisplay?>
 
+    /** Whether the default display is currently off. */
+    val defaultDisplayOff: Flow<Boolean>
+
     /** Represents a connected display that has not been enabled yet. */
     interface PendingDisplay {
         /** Id of the pending display. */
@@ -87,6 +94,7 @@ interface DisplayRepository {
 }
 
 @SysUISingleton
+@SuppressLint("SharedFlowCreation")
 class DisplayRepositoryImpl
 @Inject
 constructor(
@@ -128,8 +136,50 @@ constructor(
         allDisplayEvents.filterIsInstance<DisplayEvent.Changed>().map { event -> event.displayId }
 
     override val displayAdditionEvent: Flow<Display?> =
-        allDisplayEvents.filterIsInstance<DisplayEvent.Added>().map {
-            displayManager.getDisplay(it.displayId)
+        allDisplayEvents.filterIsInstance<DisplayEvent.Added>().map { getDisplay(it.displayId) }
+
+    private val oldEnabledDisplays: Flow<Set<Display>> =
+        allDisplayEvents
+            .map { getDisplays() }
+            .shareIn(bgApplicationScope, started = SharingStarted.WhileSubscribed(), replay = 1)
+
+    /** Propagate to the listeners only enabled displays */
+    private val enabledDisplayIds: Flow<Set<Int>> =
+        if (Flags.enableEfficientDisplayRepository()) {
+                allDisplayEvents
+                    .scan(initial = emptySet()) { previousIds: Set<Int>, event: DisplayEvent ->
+                        val id = event.displayId
+                        when (event) {
+                            is DisplayEvent.Removed -> previousIds - id
+                            is DisplayEvent.Added,
+                            is DisplayEvent.Changed -> previousIds + id
+                        }
+                    }
+                    .shareIn(
+                        bgApplicationScope,
+                        started = SharingStarted.WhileSubscribed(),
+                        replay = 1
+                    )
+            } else {
+                oldEnabledDisplays.map { enabledDisplaysSet ->
+                    enabledDisplaysSet.map { it.displayId }.toSet()
+                }
+            }
+            .debugLog("enabledDisplayIds")
+
+    /**
+     * Represents displays that went though the [DisplayListener.onDisplayAdded] callback.
+     *
+     * Those are commonly the ones provided by [DisplayManager.getDisplays] by default.
+     */
+    private val enabledDisplays: Flow<Set<Display>> =
+        if (Flags.enableEfficientDisplayRepository()) {
+            enabledDisplayIds
+                .mapElementsLazily { displayId -> getDisplay(displayId) }
+                .flowOn(backgroundCoroutineDispatcher)
+                .debugLog("enabledDisplayIds")
+        } else {
+            oldEnabledDisplays
         }
 
     /**
@@ -137,35 +187,26 @@ constructor(
      *
      * Those are commonly the ones provided by [DisplayManager.getDisplays] by default.
      */
-    private val enabledDisplays =
-        allDisplayEvents
-            .map { getDisplays() }
-            .shareIn(bgApplicationScope, started = SharingStarted.WhileSubscribed(), replay = 1)
-
     override val displays: Flow<Set<Display>> = enabledDisplays
 
     private fun getDisplays(): Set<Display> =
         traceSection("$TAG#getDisplays()") { displayManager.displays?.toSet() ?: emptySet() }
 
-    /** Propagate to the listeners only enabled displays */
-    private val enabledDisplayIds: Flow<Set<Int>> =
-        enabledDisplays
-            .map { enabledDisplaysSet -> enabledDisplaysSet.map { it.displayId }.toSet() }
-            .debugLog("enabledDisplayIds")
-
     private val _ignoredDisplayIds = MutableStateFlow<Set<Int>>(emptySet())
     private val ignoredDisplayIds: Flow<Set<Int>> = _ignoredDisplayIds.debugLog("ignoredDisplayIds")
 
     private fun getInitialConnectedDisplays(): Set<Int> =
-        displayManager
-            .getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
-            .map { it.displayId }
-            .toSet()
-            .also {
-                if (DEBUG) {
-                    Log.d(TAG, "getInitialConnectedDisplays: $it")
+        traceSection("$TAG#getInitialConnectedDisplays") {
+            displayManager
+                .getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
+                .map { it.displayId }
+                .toSet()
+                .also {
+                    if (DEBUG) {
+                        Log.d(TAG, "getInitialConnectedDisplays: $it")
+                    }
                 }
-            }
+        }
 
     /* keeps connected displays until they are disconnected. */
     private val connectedDisplayIds: StateFlow<Set<Int>> =
@@ -225,6 +266,9 @@ constructor(
 
     private fun getDisplayType(displayId: Int): Int? =
         traceSection("$TAG#getDisplayType") { displayManager.getDisplay(displayId)?.type }
+
+    private fun getDisplay(displayId: Int): Display? =
+        traceSection("$TAG#getDisplay") { displayManager.getDisplay(displayId) }
 
     /**
      * Pending displays are the ones connected, but not enabled and not ignored.
@@ -290,12 +334,41 @@ constructor(
             }
             .debugLog("pendingDisplay")
 
+    override val defaultDisplayOff: Flow<Boolean> =
+        displays
+            .map { displays -> displays.firstOrNull { it.displayId == Display.DEFAULT_DISPLAY } }
+            .map { it?.state == Display.STATE_OFF }
+
     private fun <T> Flow<T>.debugLog(flowName: String): Flow<T> {
         return if (DEBUG) {
             traceEach(flowName, logcat = true, traceEmissionCount = true)
         } else {
             this
         }
+    }
+
+    /**
+     * Maps a set of T to a set of V, minimizing the number of `createValue` calls taking into
+     * account the diff between each root flow emission.
+     *
+     * This is needed to minimize the number of [getDisplay] in this class. Note that if the
+     * [createValue] returns a null element, it will not be added in the output set.
+     */
+    private fun <T, V> Flow<Set<T>>.mapElementsLazily(createValue: (T) -> V?): Flow<Set<V>> {
+        var initialSet = emptySet<T>()
+        val currentMap = mutableMapOf<T, V>()
+        var resultSet = emptySet<V>()
+        return onEach { currentSet ->
+                val removed = initialSet - currentSet
+                val added = currentSet - initialSet
+                if (added.isNotEmpty() || removed.isNotEmpty()) {
+                    added.forEach { key: T -> createValue(key)?.let { currentMap[key] = it } }
+                    removed.forEach { key: T -> currentMap.remove(key) }
+                    resultSet = currentMap.values.toSet() // Creates a **copy** of values
+                }
+                initialSet = currentSet
+            }
+            .map { resultSet }
     }
 
     private companion object {

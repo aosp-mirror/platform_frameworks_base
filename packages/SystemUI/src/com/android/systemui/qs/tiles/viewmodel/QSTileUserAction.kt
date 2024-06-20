@@ -16,12 +16,12 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
-import android.view.View
+import com.android.systemui.animation.Expandable
 
 sealed interface QSTileUserAction {
 
-    val view: View?
+    val expandable: Expandable?
 
-    class Click(override val view: View?) : QSTileUserAction
-    class LongClick(override val view: View?) : QSTileUserAction
+    class Click(override val expandable: Expandable?) : QSTileUserAction
+    class LongClick(override val expandable: Expandable?) : QSTileUserAction
 }

@@ -21,8 +21,8 @@ import android.app.TaskInfo
 import android.content.Intent
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionRepository
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.TasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.domain.model.TaskSwitchState
 import javax.inject.Inject
@@ -57,7 +57,7 @@ constructor(
         mediaProjectionRepository.mediaProjectionState.flatMapLatest { projectionState ->
             Log.d(TAG, "MediaProjectionState -> $projectionState")
             when (projectionState) {
-                is MediaProjectionState.SingleTask -> {
+                is MediaProjectionState.Projecting.SingleTask -> {
                     val projectedTask = projectionState.task
                     tasksRepository.foregroundTask.map { foregroundTask ->
                         if (hasForegroundTaskSwitched(projectedTask, foregroundTask)) {
@@ -67,7 +67,7 @@ constructor(
                         }
                     }
                 }
-                is MediaProjectionState.EntireScreen,
+                is MediaProjectionState.Projecting.EntireScreen,
                 is MediaProjectionState.NotProjecting -> {
                     flowOf(TaskSwitchState.NotProjectingTask)
                 }

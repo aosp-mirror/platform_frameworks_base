@@ -503,6 +503,79 @@ public final class Display {
      */
     public static final int STATE_ON_SUSPEND = ViewProtoEnums.DISPLAY_STATE_ON_SUSPEND; // 6
 
+    /**
+     * The cause of the display state change is unknown.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_UNKNOWN = ViewProtoEnums.DISPLAY_STATE_REASON_UNKNOWN;
+
+    /**
+     * The default power and display policy caused the display state.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_DEFAULT_POLICY =
+            ViewProtoEnums.DISPLAY_STATE_REASON_DEFAULT_POLICY;
+
+    /**
+     * The display state was changed due to acquiring a draw wake lock.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_DRAW_WAKE_LOCK =
+            ViewProtoEnums.DISPLAY_STATE_REASON_DRAW_WAKE_LOCK;
+
+    /**
+     * The display state was changed due to display offloading.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_OFFLOAD = ViewProtoEnums.DISPLAY_STATE_REASON_OFFLOAD;
+
+    /**
+     * The display state was changed due to a tilt event.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_TILT = ViewProtoEnums.DISPLAY_STATE_REASON_TILT;
+
+    /**
+     * The display state was changed due to the dream manager.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_DREAM_MANAGER =
+            ViewProtoEnums.DISPLAY_STATE_REASON_DREAM_MANAGER;
+
+    /**
+     * The display state was changed due to a {@link KeyEvent}.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_KEY = ViewProtoEnums.DISPLAY_STATE_REASON_KEY;
+
+    /**
+     * The display state was changed due to a {@link MotionEvent}.
+     *
+     * @hide
+     */
+    public static final int STATE_REASON_MOTION = ViewProtoEnums.DISPLAY_STATE_REASON_MOTION;
+
+    /** @hide */
+    @IntDef(prefix = {"STATE_REASON_"}, value = {
+        STATE_REASON_UNKNOWN,
+        STATE_REASON_DEFAULT_POLICY,
+        STATE_REASON_DRAW_WAKE_LOCK,
+        STATE_REASON_OFFLOAD,
+        STATE_REASON_TILT,
+        STATE_REASON_DREAM_MANAGER,
+        STATE_REASON_KEY,
+        STATE_REASON_MOTION,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StateReason {}
+
     /* The color mode constants defined below must be kept in sync with the ones in
      * system/core/include/system/graphics-base.h */
 
@@ -843,6 +916,12 @@ public final class Display {
      *         {@code getWindowManager()} or {@code getSystemService(Context.WINDOW_SERVICE)}), the
      *         size of the current app window is returned. As a result, in multi-window mode, the
      *         returned size can be smaller than the size of the device screen.
+     *         The returned window size can vary depending on API level:
+     *         <ul>
+     *             <li>API level 35 and above, the window size will be returned.
+     *             <li>API level 34 and below, the window size minus system decoration areas and
+     *             display cutout is returned.
+     *         </ul>
      *     <li>If size is requested from a non-activity context (for example, the application
      *         context, where the WindowManager is accessed by
      *         {@code getApplicationContext().getSystemService(Context.WINDOW_SERVICE)}), the
@@ -851,9 +930,10 @@ public final class Display {
      *             <li>API level 29 and below &mdash; The size of the entire display (based on
      *                 current rotation) minus system decoration areas is returned.
      *             <li>API level 30 and above &mdash; The size of the top running activity in the
-     *                 current process is returned. If the current process has no running
-     *                 activities, the size of the device default display, including system
-     *                 decoration areas, is returned.
+     *                 current process is returned, system decoration areas exclusion follows the
+     *                 behavior defined above, based on the caller's API level. If the current
+     *                 process has no running activities, the size of the device default display,
+     *                 including system decoration areas, is returned.
      *         </ul>
      * </ul>
      *
@@ -1145,9 +1225,22 @@ public final class Display {
     }
 
     /**
-     * Gets the supported modes of this display.
+     * Gets the supported modes of this display, might include synthetic modes
      */
     public Mode[] getSupportedModes() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            final Display.Mode[] modes = mDisplayInfo.appsSupportedModes;
+            return Arrays.copyOf(modes, modes.length);
+        }
+    }
+
+    /**
+     * Gets system supported modes of this display,
+     * @hide
+     */
+    @SuppressLint("ArrayReturn")
+    public @NonNull Mode[] getSystemSupportedModes() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
             final Display.Mode[] modes = mDisplayInfo.supportedModes;
@@ -1996,6 +2089,30 @@ public final class Display {
         }
     }
 
+    /** @hide */
+    public static String stateReasonToString(@StateReason int reason) {
+        switch (reason) {
+            case STATE_REASON_UNKNOWN:
+                return "UNKNOWN";
+            case STATE_REASON_DEFAULT_POLICY:
+                return "DEFAULT_POLICY";
+            case STATE_REASON_DRAW_WAKE_LOCK:
+                return "DRAW_WAKE_LOCK";
+            case STATE_REASON_OFFLOAD:
+                return "OFFLOAD";
+            case STATE_REASON_TILT:
+                return "TILT";
+            case STATE_REASON_DREAM_MANAGER:
+                return "DREAM_MANAGER";
+            case STATE_REASON_KEY:
+                return "KEY";
+            case STATE_REASON_MOTION:
+                return "MOTION";
+            default:
+                return Integer.toString(reason);
+        }
+    }
+
     /**
      * Returns true if display updates may be suspended while in the specified
      * display power state. In SUSPEND states, updates are absolutely forbidden.
@@ -2109,6 +2226,7 @@ public final class Display {
         @NonNull
         @HdrCapabilities.HdrType
         private final int[] mSupportedHdrTypes;
+        private final boolean mIsSynthetic;
 
         /**
          * @hide
@@ -2117,13 +2235,6 @@ public final class Display {
         public Mode(int width, int height, float refreshRate) {
             this(INVALID_MODE_ID, width, height, refreshRate, refreshRate, new float[0],
                     new int[0]);
-        }
-
-        /**
-         * @hide
-         */
-        public Mode(int width, int height, float refreshRate, float vsyncRate) {
-            this(INVALID_MODE_ID, width, height, refreshRate, vsyncRate, new float[0], new int[0]);
         }
 
         /**
@@ -2149,11 +2260,22 @@ public final class Display {
          */
         public Mode(int modeId, int width, int height, float refreshRate, float vsyncRate,
                 float[] alternativeRefreshRates, @HdrCapabilities.HdrType int[] supportedHdrTypes) {
+            this(modeId, width, height, refreshRate, vsyncRate, false, alternativeRefreshRates,
+                    supportedHdrTypes);
+        }
+
+        /**
+         * @hide
+         */
+        public Mode(int modeId, int width, int height, float refreshRate, float vsyncRate,
+                boolean isSynthetic, float[] alternativeRefreshRates,
+                @HdrCapabilities.HdrType int[] supportedHdrTypes) {
             mModeId = modeId;
             mWidth = width;
             mHeight = height;
             mPeakRefreshRate = refreshRate;
             mVsyncRate = vsyncRate;
+            mIsSynthetic = isSynthetic;
             mAlternativeRefreshRates =
                     Arrays.copyOf(alternativeRefreshRates, alternativeRefreshRates.length);
             Arrays.sort(mAlternativeRefreshRates);
@@ -2215,6 +2337,15 @@ public final class Display {
          */
         public float getVsyncRate() {
             return mVsyncRate;
+        }
+
+        /**
+         * Returns true if mode is synthetic and does not have corresponding
+         * SurfaceControl.DisplayMode
+         * @hide
+         */
+        public boolean isSynthetic() {
+            return mIsSynthetic;
         }
 
         /**
@@ -2352,6 +2483,7 @@ public final class Display {
                     .append(", height=").append(mHeight)
                     .append(", fps=").append(mPeakRefreshRate)
                     .append(", vsync=").append(mVsyncRate)
+                    .append(", synthetic=").append(mIsSynthetic)
                     .append(", alternativeRefreshRates=")
                     .append(Arrays.toString(mAlternativeRefreshRates))
                     .append(", supportedHdrTypes=")
@@ -2367,7 +2499,7 @@ public final class Display {
 
         private Mode(Parcel in) {
             this(in.readInt(), in.readInt(), in.readInt(), in.readFloat(), in.readFloat(),
-                    in.createFloatArray(), in.createIntArray());
+                    in.readBoolean(), in.createFloatArray(), in.createIntArray());
         }
 
         @Override
@@ -2377,6 +2509,7 @@ public final class Display {
             out.writeInt(mHeight);
             out.writeFloat(mPeakRefreshRate);
             out.writeFloat(mVsyncRate);
+            out.writeBoolean(mIsSynthetic);
             out.writeFloatArray(mAlternativeRefreshRates);
             out.writeIntArray(mSupportedHdrTypes);
         }

@@ -109,6 +109,7 @@ import com.android.modules.expresslog.Counter;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.deviceidle.ConstraintController;
 import com.android.server.deviceidle.DeviceIdleConstraintTracker;
+import com.android.server.deviceidle.Flags;
 import com.android.server.deviceidle.IDeviceIdleConstraint;
 import com.android.server.deviceidle.TvConstraintController;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -2559,7 +2560,7 @@ public class DeviceIdleController extends SystemService
         }
 
         boolean isLocationPrefetchEnabled() {
-            return mContext.getResources().getBoolean(
+            return !Flags.removeIdleLocation() && mContext.getResources().getBoolean(
                    com.android.internal.R.bool.config_autoPowerModePrefetchLocation);
         }
 

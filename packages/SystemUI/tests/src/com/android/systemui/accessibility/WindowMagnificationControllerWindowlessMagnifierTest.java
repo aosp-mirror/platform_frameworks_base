@@ -46,6 +46,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -70,7 +71,6 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.text.TextUtils;
@@ -93,6 +93,7 @@ import android.widget.FrameLayout;
 import android.window.InputTransferToken;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
 import com.android.systemui.Flags;
@@ -102,6 +103,7 @@ import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.FakeDisplayTracker;
+import com.android.systemui.util.FakeSharedPreferences;
 import com.android.systemui.util.leak.ReferenceTestUtils;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.utils.os.FakeHandler;
@@ -127,12 +129,13 @@ import java.util.function.Supplier;
 
 @LargeTest
 @TestableLooper.RunWithLooper
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RequiresFlagsEnabled(Flags.FLAG_CREATE_WINDOWLESS_WINDOW_MAGNIFIER)
 public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiTestCase {
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
+    // NOTE: pass 'null' to allow this test advances time on the main thread.
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(/* test= */ null);
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
@@ -175,6 +178,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     // The most recently created SurfaceControlViewHost.
     private SurfaceControlViewHost mSurfaceControlViewHost;
     private KosmosJavaAdapter mKosmos;
+    private FakeSharedPreferences mSharedPreferences;
 
     /**
      *  return whether window magnification is supported for current test context.
@@ -186,6 +190,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mContext = spy(mContext);
         mKosmos = new KosmosJavaAdapter(this);
         mContext = Mockito.spy(getContext());
         mHandler = new FakeHandler(TestableLooper.get(this).getLooper());
@@ -227,6 +232,10 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
             return mSurfaceControlViewHost;
         };
         mTransaction = spy(new SurfaceControl.Transaction());
+        mSharedPreferences = new FakeSharedPreferences();
+        when(mContext.getSharedPreferences(
+                eq("window_magnification_preferences"), anyInt()))
+                .thenReturn(mSharedPreferences);
         mWindowMagnificationController =
                 new WindowMagnificationController(
                         mContext,
@@ -257,7 +266,9 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @After
     public void tearDown() {
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.deleteWindowMagnification());
+                () -> {
+                    mWindowMagnificationController.deleteWindowMagnification();
+                });
         mValueAnimator.cancel();
     }
 
@@ -272,7 +283,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void enableWindowMagnification_showControlAndNotifyBoundsChanged() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
 
@@ -341,7 +352,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void enableWindowMagnification_systemGestureExclusionRectsIsSet() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
         // Wait for Rects updated.
@@ -358,7 +369,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         mWindowManager.setWindowBounds(new Rect(0, 0, screenSize, screenSize));
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
 
@@ -373,7 +384,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void deleteWindowMagnification_destroyControlAndUnregisterComponentCallback() {
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                () -> mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                         Float.NaN,
                         Float.NaN));
 
@@ -391,7 +402,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         setSystemGestureInsets();
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     bounds.bottom);
         });
         ReferenceTestUtils.waitForCondition(this::hasMagnificationOverlapFlag);
@@ -407,7 +418,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void deleteWindowMagnification_notifySourceBoundsChanged() {
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                () -> mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                         Float.NaN,
                         Float.NaN));
 
@@ -423,7 +434,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void moveMagnifier_schedulesFrame() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
 
@@ -449,6 +460,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final float targetCenterX = sourceBoundsCaptor.getValue().exactCenterX() + 10;
         final float targetCenterY = sourceBoundsCaptor.getValue().exactCenterY() + 10;
 
+        reset(mWindowMagnifierCallback);
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.moveWindowMagnifierToPosition(
                     targetCenterX, targetCenterY, mAnimationCallback);
@@ -481,6 +493,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final float centerX = sourceBoundsCaptor.getValue().exactCenterX();
         final float centerY = sourceBoundsCaptor.getValue().exactCenterY();
 
+        reset(mWindowMagnifierCallback);
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.moveWindowMagnifierToPosition(
                     centerX + 10, centerY + 10, mAnimationCallback);
@@ -510,7 +523,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void setScale_enabled_expectedValueAndUpdateStateDescription() {
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.enableWindowMagnificationInternal(2.0f,
+                () -> mWindowMagnificationController.updateWindowMagnificationInternal(2.0f,
                         Float.NaN, Float.NaN));
 
         mInstrumentation.runOnMainSync(() -> mWindowMagnificationController.setScale(3.0f));
@@ -543,7 +556,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final float displayWidth = windowBounds.width();
         final PointF magnifiedCenter = new PointF(center, center + 5f);
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                     magnifiedCenter.x, magnifiedCenter.y);
             // Get the center again in case the center we set is out of screen.
             magnifiedCenter.set(mWindowMagnificationController.getCenterX(),
@@ -586,7 +599,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final float expectedRatio = 0.5f;
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
 
@@ -613,28 +626,47 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     }
 
     @Test
-    public void onScreenChangedToSavedDensity_enabled_restoreSavedMagnifierWindow() {
-        mContext.getResources().getConfiguration().smallestScreenWidthDp =
+    public void onScreenSizeAndDensityChanged_enabled_restoreSavedMagnifierWindow() {
+        int newSmallestScreenWidthDp =
                 mContext.getResources().getConfiguration().smallestScreenWidthDp * 2;
         int windowFrameSize = mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
-        mWindowMagnificationController.mWindowMagnificationSizePrefs.saveSizeForCurrentDensity(
-                new Size(windowFrameSize, windowFrameSize));
-
+        Size preferredWindowSize = new Size(windowFrameSize, windowFrameSize);
+        mSharedPreferences
+                .edit()
+                .putString(String.valueOf(newSmallestScreenWidthDp),
+                        preferredWindowSize.toString())
+                .commit();
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
 
+        // Screen density and size change
+        mContext.getResources().getConfiguration().smallestScreenWidthDp = newSmallestScreenWidthDp;
+        final Rect testWindowBounds = new Rect(
+                mWindowManager.getCurrentWindowMetrics().getBounds());
+        testWindowBounds.set(testWindowBounds.left, testWindowBounds.top,
+                testWindowBounds.right + 100, testWindowBounds.bottom + 100);
+        mWindowManager.setWindowBounds(testWindowBounds);
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
+        });
+
+        // wait for rect update
+        waitForIdleSync();
         ViewGroup.LayoutParams params = mSurfaceControlViewHost.getView().getLayoutParams();
-        assertTrue(params.width == windowFrameSize);
-        assertTrue(params.height == windowFrameSize);
+        final int mirrorSurfaceMargin = mResources.getDimensionPixelSize(
+                R.dimen.magnification_mirror_surface_margin);
+        // The width and height of the view include the magnification frame and the margins.
+        assertTrue(params.width == (windowFrameSize + 2 * mirrorSurfaceMargin));
+        assertTrue(params.height == (windowFrameSize + 2 * mirrorSurfaceMargin));
     }
 
     @Test
     public void screenSizeIsChangedToLarge_enabled_defaultWindowSize() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
         final int screenSize = mWindowManager.getCurrentWindowMetrics().getBounds().width() * 10;
@@ -659,7 +691,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void onDensityChanged_enabled_updateDimensionsAndResetWindowMagnification() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
             Mockito.reset(mWindowManager);
             Mockito.reset(mMirrorWindowControl);
@@ -688,7 +720,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void initializeA11yNode_enabled_expectedValues() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(2.5f, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(2.5f, Float.NaN,
                     Float.NaN);
         });
         final View mirrorView = mSurfaceControlViewHost.getView();
@@ -712,7 +744,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     public void performA11yActions_visible_expectedResults() {
         final int displayId = mContext.getDisplayId();
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(1.5f, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(1.5f, Float.NaN,
                     Float.NaN);
         });
 
@@ -746,7 +778,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     public void performA11yActions_visible_notifyAccessibilityActionPerformed() {
         final int displayId = mContext.getDisplayId();
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(2.5f, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(2.5f, Float.NaN,
                     Float.NaN);
         });
 
@@ -759,7 +791,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void windowMagnifierEditMode_performA11yClickAction_exitEditMode() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
             mWindowMagnificationController.setEditMagnifierSizeMode(true);
         });
@@ -800,7 +832,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
                 /* pbase= */ 1);
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
             mWindowMagnificationController.setWindowSize(startingWidth, startingHeight);
             mWindowMagnificationController.setEditMagnifierSizeMode(true);
@@ -842,7 +874,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
                 /* pbase= */ 1);
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
             mWindowMagnificationController.setWindowSize(startingWidth, startingHeight);
             mWindowMagnificationController.setEditMagnifierSizeMode(true);
@@ -880,7 +912,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final int startingHeight = windowBounds.height();
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
             mWindowMagnificationController.setWindowSize(startingWidth, startingHeight);
             mWindowMagnificationController.setEditMagnifierSizeMode(true);
@@ -900,7 +932,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final int startingHeight = windowBounds.height();
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
             mWindowMagnificationController.setWindowSize(startingWidth, startingHeight);
             mWindowMagnificationController.setEditMagnifierSizeMode(true);
@@ -923,7 +955,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
                 /* base= */ 1,
                 /* pbase= */ 1);
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
             mWindowMagnificationController.setWindowSize(startingSize, startingSize);
             mWindowMagnificationController.setEditMagnifierSizeMode(true);
@@ -965,7 +997,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
                 /* pbase= */ 1);
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
             mWindowMagnificationController.setWindowSize(startingSize, startingSize);
             mWindowMagnificationController.setEditMagnifierSizeMode(true);
@@ -1003,7 +1035,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final int startingSize = mMinWindowSize;
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
             mWindowMagnificationController.setWindowSize(startingSize, startingSize);
             mWindowMagnificationController.setEditMagnifierSizeMode(true);
@@ -1023,7 +1055,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final int startingSize = mMinWindowSize;
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
             mWindowMagnificationController.setWindowSize(startingSize, startingSize);
             mWindowMagnificationController.setEditMagnifierSizeMode(true);
@@ -1039,7 +1071,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void enableWindowMagnification_hasA11yWindowTitle() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
 
@@ -1050,12 +1082,12 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void enableWindowMagnificationWithScaleLessThanOne_enabled_disabled() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
 
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(0.9f, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(0.9f, Float.NaN,
                     Float.NaN);
         });
 
@@ -1074,7 +1106,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final int newRotation = simulateRotateTheDevice();
 
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                () -> mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                         Float.NaN, Float.NaN));
 
         assertEquals(newRotation, mWindowMagnificationController.mRotation);
@@ -1083,7 +1115,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void enableWindowMagnification_registerComponentCallback() {
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                () -> mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                         Float.NaN,
                         Float.NaN));
 
@@ -1094,7 +1126,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     public void onLocaleChanged_enabled_updateA11yWindowTitle() {
         final String newA11yWindowTitle = "new a11y window title";
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
         final TestableResources testableResources = getContext().getOrCreateTestableResources();
@@ -1112,7 +1144,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     @Test
     public void onSingleTap_enabled_scaleAnimates() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
 
@@ -1139,7 +1171,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
         setSystemGestureInsets();
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
 
@@ -1157,7 +1189,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         setSystemGestureInsets();
         mInstrumentation.runOnMainSync(
                 () -> {
-                    mWindowMagnificationController.enableWindowMagnificationInternal(
+                    mWindowMagnificationController.updateWindowMagnificationInternal(
                             Float.NaN, Float.NaN, Float.NaN);
                 });
         // Wait for Region updated.
@@ -1186,7 +1218,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         setSystemGestureInsets();
         mInstrumentation.runOnMainSync(
                 () -> {
-                    mWindowMagnificationController.enableWindowMagnificationInternal(
+                    mWindowMagnificationController.updateWindowMagnificationInternal(
                             Float.NaN, Float.NaN, Float.NaN);
                 });
         // Wait for Region updated.
@@ -1215,7 +1247,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final int  expectedWindowHeight = minimumWindowSize;
         final int  expectedWindowWidth = minimumWindowSize;
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                () -> mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                         Float.NaN, Float.NaN));
 
         final AtomicInteger actualWindowHeight = new AtomicInteger();
@@ -1242,7 +1274,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final AtomicInteger actualWindowWidth = new AtomicInteger();
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.setWindowSize(expectedWindowWidth, expectedWindowHeight);
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                     Float.NaN, Float.NaN);
             actualWindowHeight.set(mSurfaceControlViewHost.getView().getLayoutParams().height);
             actualWindowWidth.set(mSurfaceControlViewHost.getView().getLayoutParams().width);
@@ -1257,7 +1289,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final int minimumWindowSize = mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                () -> mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                         Float.NaN, Float.NaN));
 
         final AtomicInteger actualWindowHeight = new AtomicInteger();
@@ -1277,7 +1309,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     public void setWindowSizeLargerThanScreenSize_enabled_windowSizeIsScreenSize() {
         final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                () -> mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                         Float.NaN, Float.NaN));
 
         final AtomicInteger actualWindowHeight = new AtomicInteger();
@@ -1306,7 +1338,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
 
         mInstrumentation.runOnMainSync(
                 () ->
-                        mWindowMagnificationController.enableWindowMagnificationInternal(
+                        mWindowMagnificationController.updateWindowMagnificationInternal(
                                 Float.NaN, Float.NaN, Float.NaN));
 
         final AtomicInteger actualWindowHeight = new AtomicInteger();
@@ -1333,7 +1365,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
 
         mInstrumentation.runOnMainSync(
                 () ->
-                        mWindowMagnificationController.enableWindowMagnificationInternal(
+                        mWindowMagnificationController.updateWindowMagnificationInternal(
                                 Float.NaN, Float.NaN, Float.NaN));
 
         final AtomicInteger actualWindowHeight = new AtomicInteger();
@@ -1369,7 +1401,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
 
         mInstrumentation.runOnMainSync(
                 () ->
-                        mWindowMagnificationController.enableWindowMagnificationInternal(
+                        mWindowMagnificationController.updateWindowMagnificationInternal(
                                 Float.NaN, Float.NaN, Float.NaN));
 
         final AtomicInteger actualWindowHeight = new AtomicInteger();
@@ -1397,7 +1429,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
                 com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
         final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
         mInstrumentation.runOnMainSync(
-                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                () -> mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN,
                         Float.NaN, Float.NaN));
 
         final AtomicInteger magnificationCenterX = new AtomicInteger();
@@ -1418,7 +1450,7 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
         final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
         mInstrumentation.runOnMainSync(
                 () -> {
-                    mWindowMagnificationController.enableWindowMagnificationInternal(
+                    mWindowMagnificationController.updateWindowMagnificationInternal(
                             1.5f, bounds.centerX(), bounds.centerY());
                 });
         View dragButton = getInternalView(R.id.drag_handle);

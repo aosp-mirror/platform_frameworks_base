@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.TestMocksModule
+import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository
@@ -31,6 +32,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.mockTopActivityClassName
 import com.android.systemui.shared.system.ActivityManagerWrapper
+import com.android.systemui.user.domain.UserDomainLayerModule
 import dagger.BindsInstance
 import dagger.Component
 import junit.framework.Assert.assertEquals
@@ -441,6 +443,8 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
         modules =
             [
                 SysUITestModule::class,
+                BiometricsDomainLayerModule::class,
+                UserDomainLayerModule::class,
             ]
     )
     interface TestComponent {

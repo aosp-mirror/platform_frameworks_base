@@ -18,8 +18,12 @@ package com.android.systemui.common.data.repository
 
 import android.os.UserHandle
 import com.android.systemui.common.shared.model.PackageChangeModel
+import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.util.time.SystemClock
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 
 class FakePackageChangeRepository(private val systemClock: SystemClock) : PackageChangeRepository {
@@ -30,6 +34,15 @@ class FakePackageChangeRepository(private val systemClock: SystemClock) : Packag
         _packageChanged.filter {
             user == UserHandle.ALL || user == UserHandle.getUserHandleForUid(it.packageUid)
         }
+
+    private val _packageInstallSessions = MutableStateFlow<List<PackageInstallSession>>(emptyList())
+
+    override val packageInstallSessionsForPrimaryUser: Flow<List<PackageInstallSession>> =
+        _packageInstallSessions.asStateFlow()
+
+    fun setInstallSessions(sessions: List<PackageInstallSession>) {
+        _packageInstallSessions.value = sessions
+    }
 
     suspend fun notifyChange(model: PackageChangeModel) {
         _packageChanged.emit(model)

@@ -84,6 +84,8 @@ public class DividerSnapAlgorithm {
     private final int mMinimalSizeResizableTask;
     private final int mTaskHeightInMinimizedMode;
     private final float mFixedRatio;
+    /** Allows split ratios to calculated dynamically instead of using {@link #mFixedRatio}. */
+    private final boolean mAllowFlexibleSplitRatios;
     private boolean mIsHorizontalDivision;
 
     /** The first target which is still splitting the screen */
@@ -144,6 +146,8 @@ public class DividerSnapAlgorithm {
                 com.android.internal.R.fraction.docked_stack_divider_fixed_ratio, 1, 1);
         mMinimalSizeResizableTask = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.default_minimal_size_resizable_task);
+        mAllowFlexibleSplitRatios = res.getBoolean(
+                com.android.internal.R.bool.config_flexibleSplitRatios);
         mTaskHeightInMinimizedMode = isHomeResizable ? res.getDimensionPixelSize(
                 com.android.internal.R.dimen.task_height_of_minimized_mode) : 0;
         calculateTargets(isHorizontalDivision, dockSide);
@@ -349,6 +353,9 @@ public class DividerSnapAlgorithm {
                 ? mDisplayHeight - mInsets.bottom
                 : mDisplayWidth - mInsets.right;
         int size = (int) (mFixedRatio * (end - start)) - mDividerSize / 2;
+        if (mAllowFlexibleSplitRatios) {
+            size = Math.max(size, mMinimalSizeResizableTask);
+        }
         int topPosition = start + size;
         int bottomPosition = end - size - mDividerSize;
         addNonDismissingTargets(isHorizontalDivision, topPosition, bottomPosition, dividerMax);

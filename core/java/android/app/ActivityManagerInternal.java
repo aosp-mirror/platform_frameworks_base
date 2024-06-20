@@ -148,6 +148,13 @@ public abstract class ActivityManagerInternal {
     public abstract void onUserRemoved(@UserIdInt int userId);
 
     /**
+     * Start user, if it is not already running, but don't bring it to foreground.
+     * @param userId ID of the user to start
+     * @return true if the user has been successfully started
+     */
+    public abstract boolean startUserInBackground(int userId);
+
+    /**
      * Kill foreground apps from the specified user.
      */
     public abstract void killForegroundAppsForUser(@UserIdInt int userId);
@@ -224,12 +231,6 @@ public abstract class ActivityManagerInternal {
      * @return {@code true} if system is ready, {@code false} otherwise.
      */
     public abstract boolean isSystemReady();
-
-    /**
-     * @return {@code true} if system is using the "modern" broadcast queue,
-     *         {@code false} otherwise.
-     */
-    public abstract boolean isModernQueueEnabled();
 
     /**
      * Enforce capability restrictions on use of the given BroadcastOptions
@@ -476,6 +477,11 @@ public abstract class ActivityManagerInternal {
      */
     public static final int OOM_ADJ_REASON_COMPONENT_DISABLED = 22;
 
+    /**
+     * Oom Adj Reason: Follow up update for time sensitive state evaluations.
+     */
+    public static final int OOM_ADJ_REASON_FOLLOW_UP = 23;
+
     @IntDef(prefix = {"OOM_ADJ_REASON_"}, value = {
         OOM_ADJ_REASON_NONE,
         OOM_ADJ_REASON_ACTIVITY,
@@ -500,6 +506,7 @@ public abstract class ActivityManagerInternal {
         OOM_ADJ_REASON_EXECUTING_SERVICE,
         OOM_ADJ_REASON_RESTRICTION_CHANGE,
         OOM_ADJ_REASON_COMPONENT_DISABLED,
+        OOM_ADJ_REASON_FOLLOW_UP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OomAdjReason {}
@@ -1100,19 +1107,9 @@ public abstract class ActivityManagerInternal {
     public abstract ArraySet<String> getClientPackages(String servicePackageName);
 
     /**
-     * Retrieve an IUnsafeIntentStrictModeCallback matching the given callingUid.
-     * Returns null no match is found.
-     * @param callingPid The PID mapped with the callback.
-     * @return The callback, if it exists.
+     * Trigger an unsafe intent usage strict mode violation.
      */
-    public abstract IUnsafeIntentStrictModeCallback getRegisteredStrictModeCallback(
-            int callingPid);
-
-    /**
-     * Unregisters an IUnsafeIntentStrictModeCallback matching the given callingUid.
-     * @param callingPid The PID mapped with the callback.
-     */
-    public abstract void unregisterStrictModeCallback(int callingPid);
+    public abstract void triggerUnsafeIntentStrictMode(int callingPid, int type, Intent intent);
 
     /**
      * Start a foreground service delegate.
@@ -1259,10 +1256,37 @@ public abstract class ActivityManagerInternal {
     public abstract boolean clearApplicationUserData(String packageName, boolean keepState,
             boolean isRestore, IPackageDataObserver observer, int userId);
 
+
     /**
-     * Returns current state of {@link com.android.systemui.theme.ThemeOverlayController} color
-     * palette readiness.
+     * Method that checks if system is Headless (don't delay launch) case in which it
+     * should also check if ThemeOverlayController is ready (don't delay) or not (delay).
+     *
+     * @param userId
+     * @return Boolean indicating if Home launch should wait for ThemeOverlayController signal
      * @hide
      */
-    public abstract boolean isThemeOverlayReady(int userId);
+    public abstract boolean shouldDelayHomeLaunch(int userId);
+
+    /**
+     * Add a startup timestamp to the most recent start of the specified process.
+     *
+     * @param key The {@link ApplicationStartInfo} start timestamp key of the timestamp to add.
+     * @param timestampNs The clock monotonic timestamp to add in nanoseconds.
+     * @param uid The UID of the process to add this timestamp to.
+     * @param pid The process id of the process to add this timestamp to.
+     * @param userId The userId in the multi-user environment.
+     */
+    public abstract void addStartInfoTimestamp(int key, long timestampNs, int uid, int pid,
+            int userId);
+
+    /**
+     * It is similar {@link IActivityManager#killApplication(String, int, int, String, int)} but
+     * it immediately stop the package.
+     *
+     * <p>Note: Do not call this method from inside PMS's lock, otherwise it'll run into
+     * watchdog reset.
+     * @hide
+     */
+    public abstract void killApplicationSync(String pkgName, int appId, int userId,
+            String reason, int exitInfoReason);
 }

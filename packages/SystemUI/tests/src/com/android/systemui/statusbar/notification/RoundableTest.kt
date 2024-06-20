@@ -2,6 +2,7 @@ package com.android.systemui.statusbar.notification
 
 import android.platform.test.annotations.EnableFlags
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
@@ -10,13 +11,12 @@ import com.android.systemui.util.mockito.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class RoundableTest : SysuiTestCase() {
     private val targetView: View = mock()
     private val roundable = FakeRoundable(targetView = targetView)

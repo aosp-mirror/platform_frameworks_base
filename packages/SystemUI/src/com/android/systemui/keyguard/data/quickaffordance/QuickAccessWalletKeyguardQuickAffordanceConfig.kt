@@ -92,7 +92,8 @@ constructor(
                 walletController.setupWalletChangeObservers(
                     callback,
                     QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
-                    QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
+                    QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE,
+                    QuickAccessWalletController.WalletChangeEvent.DEFAULT_WALLET_APP_CHANGE
                 )
 
                 withContext(backgroundDispatcher) {
@@ -104,7 +105,8 @@ constructor(
                 awaitClose {
                     walletController.unregisterWalletChangeObservers(
                         QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE,
-                        QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
+                        QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE,
+                        QuickAccessWalletController.WalletChangeEvent.DEFAULT_WALLET_APP_CHANGE
                     )
                 }
             }

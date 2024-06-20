@@ -16,7 +16,7 @@
 
 package com.android.systemui.util.kotlin
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import java.util.concurrent.atomic.AtomicLong
@@ -31,43 +31,42 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class IpcSerializerTest : SysuiTestCase() {
 
     private val serializer = IpcSerializer()
 
     @Ignore("b/253046405")
     @Test
-    fun serializeManyIncomingIpcs(): Unit = runBlocking(Dispatchers.Main.immediate) {
-        val processor = launch(start = CoroutineStart.LAZY) { serializer.process() }
-        withContext(Dispatchers.IO) {
-            val lastEvaluatedTime = AtomicLong(System.currentTimeMillis())
-            // First, launch many serialization requests in parallel
-            repeat(100_000) {
-                launch(Dispatchers.Unconfined) {
-                    val enqueuedTime = System.currentTimeMillis()
-                    serializer.runSerialized {
-                        val last = lastEvaluatedTime.getAndSet(enqueuedTime)
-                        assertTrue(
-                            "expected $last less than or equal to $enqueuedTime ",
-                            last <= enqueuedTime,
-                        )
+    fun serializeManyIncomingIpcs(): Unit =
+        runBlocking(Dispatchers.Main.immediate) {
+            val processor = launch(start = CoroutineStart.LAZY) { serializer.process() }
+            withContext(Dispatchers.IO) {
+                val lastEvaluatedTime = AtomicLong(System.currentTimeMillis())
+                // First, launch many serialization requests in parallel
+                repeat(100_000) {
+                    launch(Dispatchers.Unconfined) {
+                        val enqueuedTime = System.currentTimeMillis()
+                        serializer.runSerialized {
+                            val last = lastEvaluatedTime.getAndSet(enqueuedTime)
+                            assertTrue(
+                                "expected $last less than or equal to $enqueuedTime ",
+                                last <= enqueuedTime,
+                            )
+                        }
                     }
                 }
+                // Then, process them all in the order they came in.
+                processor.start()
             }
-            // Then, process them all in the order they came in.
-            processor.start()
+            // All done, stop processing
+            processor.cancel()
         }
-        // All done, stop processing
-        processor.cancel()
-    }
 
     @Test(timeout = 5000)
     fun serializeOnOneThread_doesNotDeadlock() = runBlocking {
         val job = launch { serializer.process() }
-        repeat(100) {
-            serializer.runSerializedBlocking { }
-        }
+        repeat(100) { serializer.runSerializedBlocking {} }
         job.cancel()
     }
 }

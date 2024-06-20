@@ -23,8 +23,8 @@ map key 43 POUND
 ### ROW 1
 
 key GRAVE {
-    label:                              '`'
-    base:                               '`'
+    label:                              '\u0300'
+    base:                               '\u0300'
     shift:                              '\u00AC'
     ralt:                               '\u00A6'
 }
@@ -39,6 +39,7 @@ key 2 {
     label:                              '2'
     base:                               '2'
     shift:                              '"'
+    ralt:                               '\u0308'
 }
 
 key 3 {
@@ -64,6 +65,7 @@ key 6 {
     label:                              '6'
     base:                               '6'
     shift:                              '^'
+    ralt:                               '\u0302'
 }
 
 key 7 {
@@ -202,6 +204,7 @@ key RIGHT_BRACKET {
     label:                              ']'
     base:                               ']'
     shift:                              '}'
+    shift+ralt:                         '|'
 }
 
 ### ROW 3
@@ -282,14 +285,16 @@ key APOSTROPHE {
     label:                              '\''
     base:                               '\''
     shift:                              '@'
+    ralt:                               '\u0301'
+    shift+ralt:                         '`'
 }
 
 key POUND {
     label:                              '#'
     base:                               '#'
     shift:                              '~'
-    ralt:                               '\\'
-    shift+ralt:                         '|'
+    ralt:                               '\u0303'
+    shift+ralt:                         '\\'
 }
 
 ### ROW 4

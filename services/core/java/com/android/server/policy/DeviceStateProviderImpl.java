@@ -16,7 +16,7 @@
 
 package com.android.server.policy;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
 
 import android.annotation.NonNull;
@@ -45,9 +45,9 @@ import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.policy.devicestate.config.Conditions;
 import com.android.server.policy.devicestate.config.DeviceStateConfig;
-import com.android.server.policy.devicestate.config.Flags;
 import com.android.server.policy.devicestate.config.LidSwitchCondition;
 import com.android.server.policy.devicestate.config.NumericRange;
+import com.android.server.policy.devicestate.config.Properties;
 import com.android.server.policy.devicestate.config.SensorCondition;
 import com.android.server.policy.devicestate.config.XmlParser;
 
@@ -63,8 +63,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -94,21 +96,49 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final BooleanSupplier FALSE_BOOLEAN_SUPPLIER = () -> false;
 
     @VisibleForTesting
-    static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(MINIMUM_DEVICE_STATE_IDENTIFIER,
-            "DEFAULT", 0 /* flags */);
+    static final DeviceState DEFAULT_DEVICE_STATE =
+            new DeviceState(new DeviceState.Configuration.Builder(MINIMUM_DEVICE_STATE_IDENTIFIER,
+                    "DEFAULT").build());
 
     private static final String VENDOR_CONFIG_FILE_PATH = "etc/devicestate/";
     private static final String DATA_CONFIG_FILE_PATH = "system/devicestate/";
     private static final String CONFIG_FILE_NAME = "device_state_configuration.xml";
-    private static final String FLAG_CANCEL_OVERRIDE_REQUESTS = "FLAG_CANCEL_OVERRIDE_REQUESTS";
-    private static final String FLAG_APP_INACCESSIBLE = "FLAG_APP_INACCESSIBLE";
-    private static final String FLAG_EMULATED_ONLY = "FLAG_EMULATED_ONLY";
-    private static final String FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
-            "FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP";
-    private static final String FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL =
-            "FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL";
-    private static final String FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE =
-            "FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE";
+    private static final String PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED =
+            "com.android.server.policy.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED";
+    private static final String PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN =
+            "com.android.server.policy.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN";
+    private static final String PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN =
+            "com.android.server.policy.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN";
+    private static final String PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS =
+            "com.android.server.policy.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS";
+    private static final String PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
+            "com.android.server.policy.PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP";
+    private static final String PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL =
+            "com.android.server.policy.PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL";
+    private static final String PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE =
+            "com.android.server.policy.PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE";
+    private static final String PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST =
+            "com.android.server.policy.PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST";
+    private static final String PROPERTY_APP_INACCESSIBLE =
+            "com.android.server.policy.PROPERTY_APP_INACCESSIBLE";
+    private static final String PROPERTY_EMULATED_ONLY =
+            "com.android.server.policy.PROPERTY_EMULATED_ONLY";
+    private static final String PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY =
+            "com.android.server.policy.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY";
+    private static final String PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY =
+            "com.android.server.policy.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY";
+    private static final String PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP =
+            "com.android.server.policy.PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP";
+    private static final String PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE =
+            "com.android.server.policy.PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE";
+    private static final String PROPERTY_EXTENDED_DEVICE_STATE_EXTERNAL_DISPLAY =
+            "com.android.server.policy.PROPERTY_EXTENDED_DEVICE_STATE_EXTERNAL_DISPLAY";
+    private static final String PROPERTY_FEATURE_REAR_DISPLAY =
+            "com.android.server.policy.PROPERTY_FEATURE_REAR_DISPLAY";
+    private static final String PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT =
+            "com.android.server.policy.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT";
+
+
 
     /** Interface that allows reading the device state configuration. */
     interface ReadableConfig {
@@ -149,40 +179,25 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                     final int state = stateConfig.getIdentifier().intValue();
                     final String name = stateConfig.getName() == null ? "" : stateConfig.getName();
 
-                    int flags = 0;
-                    final Flags configFlags = stateConfig.getFlags();
+                    Set<@DeviceState.DeviceStateProperties Integer> systemProperties =
+                            new HashSet<>();
+                    Set<@DeviceState.DeviceStateProperties Integer> physicalProperties =
+                            new HashSet<>();
+                    final Properties configFlags = stateConfig.getProperties();
                     if (configFlags != null) {
-                        List<String> configFlagStrings = configFlags.getFlag();
-                        for (int i = 0; i < configFlagStrings.size(); i++) {
-                            final String configFlagString = configFlagStrings.get(i);
-                            switch (configFlagString) {
-                                case FLAG_CANCEL_OVERRIDE_REQUESTS:
-                                    flags |= DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
-                                    break;
-                                case FLAG_APP_INACCESSIBLE:
-                                    flags |= DeviceState.FLAG_APP_INACCESSIBLE;
-                                    break;
-                                case FLAG_EMULATED_ONLY:
-                                    flags |= DeviceState.FLAG_EMULATED_ONLY;
-                                    break;
-                                case FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP:
-                                    flags |= DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
-                                    break;
-                                case FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL:
-                                    flags |= DeviceState
-                                            .FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL;
-                                    break;
-                                case FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE:
-                                    flags |= DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE;
-                                default:
-                                    Slog.w(TAG, "Parsed unknown flag with name: "
-                                            + configFlagString);
-                                    break;
-                            }
+                        List<String> configPropertyStrings = configFlags.getProperty();
+                        for (int i = 0; i < configPropertyStrings.size(); i++) {
+                            final String configPropertyString = configPropertyStrings.get(i);
+                            addPropertyByString(configPropertyString, systemProperties,
+                                    physicalProperties);
                         }
                     }
-
-                    deviceStateList.add(new DeviceState(state, name, flags));
+                    DeviceState.Configuration deviceStateConfiguration =
+                            new DeviceState.Configuration.Builder(state, name)
+                                    .setSystemProperties(systemProperties)
+                                    .setPhysicalProperties(physicalProperties)
+                                    .build();
+                    deviceStateList.add(new DeviceState(deviceStateConfiguration));
 
                     final Conditions condition = stateConfig.getConditions();
                     conditionsList.add(condition);
@@ -190,11 +205,86 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             }
         }
 
-        if (deviceStateList.size() == 0) {
+        if (deviceStateList.isEmpty()) {
             deviceStateList.add(DEFAULT_DEVICE_STATE);
             conditionsList.add(null);
         }
         return new DeviceStateProviderImpl(context, deviceStateList, conditionsList);
+    }
+
+    private static void addPropertyByString(String propertyString,
+            Set<@DeviceState.SystemDeviceStateProperties Integer> systemProperties,
+            Set<@DeviceState.PhysicalDeviceStateProperties Integer> physicalProperties) {
+        switch (propertyString) {
+            // Look for the physical hardware properties first
+            case PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED:
+                physicalProperties.add(
+                        DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED);
+                break;
+            case PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN:
+                physicalProperties.add(
+                        DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN);
+                break;
+            case PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN:
+                physicalProperties.add(
+                        DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN);
+                break;
+            case PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS:
+                systemProperties.add(
+                        DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS);
+                break;
+            case PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP:
+                systemProperties.add(
+                        DeviceState.PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP);
+                break;
+            case PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL:
+                systemProperties.add(
+                        DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL);
+                break;
+            case PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE:
+                systemProperties.add(
+                        DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE);
+                break;
+            case PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST:
+                systemProperties.add(
+                        DeviceState.PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST);
+                break;
+            case PROPERTY_APP_INACCESSIBLE:
+                systemProperties.add(DeviceState.PROPERTY_APP_INACCESSIBLE);
+                break;
+            case PROPERTY_EMULATED_ONLY:
+                systemProperties.add(DeviceState.PROPERTY_EMULATED_ONLY);
+                break;
+            case PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY:
+                systemProperties.add(
+                        DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY);
+                break;
+            case PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY:
+                systemProperties.add(
+                        DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY);
+                break;
+            case PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP:
+                systemProperties.add(
+                        DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP);
+                break;
+            case PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE:
+                systemProperties.add(
+                        DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE);
+                break;
+            case PROPERTY_EXTENDED_DEVICE_STATE_EXTERNAL_DISPLAY:
+                systemProperties.add(
+                        DeviceState.PROPERTY_EXTENDED_DEVICE_STATE_EXTERNAL_DISPLAY);
+                break;
+            case PROPERTY_FEATURE_REAR_DISPLAY:
+                systemProperties.add(DeviceState.PROPERTY_FEATURE_REAR_DISPLAY);
+                break;
+            case PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT:
+                systemProperties.add(DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT);
+                break;
+            default:
+                Slog.w(TAG, "Parsed unknown flag with name: " + propertyString);
+                break;
+        }
     }
 
     // Lock for internal state.
@@ -210,7 +300,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     @GuardedBy("mLock")
     private Listener mListener = null;
     @GuardedBy("mLock")
-    private int mLastReportedState = INVALID_DEVICE_STATE;
+    private int mLastReportedState = INVALID_DEVICE_STATE_IDENTIFIER;
 
     @GuardedBy("mLock")
     private Boolean mIsLidOpen;
@@ -285,7 +375,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             if (conditions == null) {
                 // If this state has the FLAG_EMULATED_ONLY flag on it, it should never be triggered
                 // by a physical hardware change, and should always return false for it's conditions
-                if (deviceStates.get(i).hasFlag(DeviceState.FLAG_EMULATED_ONLY)) {
+                if (deviceStates.get(i).hasProperty(DeviceState.PROPERTY_EMULATED_ONLY)) {
                     mStateConditions.put(state, FALSE_BOOLEAN_SUPPLIER);
                 } else {
                     mStateConditions.put(state, TRUE_BOOLEAN_SUPPLIER);
@@ -410,13 +500,13 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             }
             listener = mListener;
             for (DeviceState deviceState : mOrderedStates) {
-                if (isThermalStatusCriticalOrAbove(mThermalStatus)
-                        && deviceState.hasFlag(
-                                DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL)) {
+                if (isThermalStatusCriticalOrAbove(mThermalStatus) && deviceState.hasProperty(
+                        DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
+                )) {
                     continue;
                 }
-                if (mPowerSaveModeEnabled && deviceState.hasFlag(
-                        DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE)) {
+                if (mPowerSaveModeEnabled && deviceState.hasProperty(
+                        DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE)) {
                     continue;
                 }
                 supportedStates.add(deviceState);
@@ -424,18 +514,19 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         }
 
         listener.onSupportedDeviceStatesChanged(
-                supportedStates.toArray(new DeviceState[supportedStates.size()]), reason);
+                supportedStates.toArray(new DeviceState[supportedStates.size()]),
+                reason);
     }
 
     /** Computes the current device state and notifies the listener of a change, if needed. */
     void notifyDeviceStateChangedIfNeeded() {
-        int stateToReport = INVALID_DEVICE_STATE;
+        int stateToReport = INVALID_DEVICE_STATE_IDENTIFIER;
         synchronized (mLock) {
             if (mListener == null) {
                 return;
             }
 
-            int newState = INVALID_DEVICE_STATE;
+            int newState = INVALID_DEVICE_STATE_IDENTIFIER;
             for (int i = 0; i < mOrderedStates.length; i++) {
                 int state = mOrderedStates[i].getIdentifier();
                 if (DEBUG) {
@@ -464,18 +555,18 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                     break;
                 }
             }
-            if (newState == INVALID_DEVICE_STATE) {
+            if (newState == INVALID_DEVICE_STATE_IDENTIFIER) {
                 Slog.e(TAG, "No declared device states match any of the required conditions.");
                 dumpSensorValues();
             }
 
-            if (newState != INVALID_DEVICE_STATE && newState != mLastReportedState) {
+            if (newState != INVALID_DEVICE_STATE_IDENTIFIER && newState != mLastReportedState) {
                 mLastReportedState = newState;
                 stateToReport = newState;
             }
         }
 
-        if (stateToReport != INVALID_DEVICE_STATE) {
+        if (stateToReport != INVALID_DEVICE_STATE_IDENTIFIER) {
             mListener.onStateChanged(stateToReport);
         }
     }
@@ -774,8 +865,9 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     }
 
     private static boolean hasThermalSensitiveState(List<DeviceState> deviceStates) {
-        for (DeviceState state : deviceStates) {
-            if (state.hasFlag(DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL)) {
+        for (int i = 0; i < deviceStates.size(); i++) {
+            if (deviceStates.get(i).hasProperty(
+                    DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL)) {
                 return true;
             }
         }
@@ -784,7 +876,8 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
     private static boolean hasPowerSaveSensitiveState(List<DeviceState> deviceStates) {
         for (int i = 0; i < deviceStates.size(); i++) {
-            if (deviceStates.get(i).hasFlag(DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE)) {
+            if (deviceStates.get(i).hasProperty(
+                    DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE)) {
                 return true;
             }
         }

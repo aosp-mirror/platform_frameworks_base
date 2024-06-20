@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "device_state_property_api"
+    is_exported: true
     namespace: "windowing_sdk"
     description: "Updated DeviceState hasProperty API"
     bug: "293636629"

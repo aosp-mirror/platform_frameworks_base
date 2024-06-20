@@ -45,6 +45,10 @@
     },
     {
       "file_patterns": ["Bugreport[^/]*\\.java"],
+      "name": "CtsRootBugreportTestCases"
+    },
+    {
+      "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "ShellTests"
     }
   ]

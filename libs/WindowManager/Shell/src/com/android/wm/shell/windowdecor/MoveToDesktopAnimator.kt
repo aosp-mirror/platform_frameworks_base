@@ -7,7 +7,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.SurfaceControl
-import com.android.internal.policy.ScreenDecorationsUtils
+import com.android.wm.shell.R
 
 /**
  * Creates an animator to shrink and position task after a user drags a fullscreen task from
@@ -31,17 +31,24 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
 
     private val animatedTaskWidth
         get() = dragToDesktopAnimator.animatedValue as Float * startBounds.width()
+    val scale: Float
+        get() = dragToDesktopAnimator.animatedValue as Float
+    private val mostRecentInput = PointF()
     private val dragToDesktopAnimator: ValueAnimator = ValueAnimator.ofFloat(1f,
             DRAG_FREEFORM_SCALE)
             .setDuration(ANIMATION_DURATION.toLong())
             .apply {
                 val t = SurfaceControl.Transaction()
-                val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
-                addUpdateListener { animation ->
-                    val animatorValue = animation.animatedValue as Float
-                    t.setScale(taskSurface, animatorValue, animatorValue)
-                            .setCornerRadius(taskSurface, cornerRadius)
-                            .apply()
+                val cornerRadius = context.resources
+                    .getDimensionPixelSize(R.dimen.desktop_mode_dragged_task_radius).toFloat()
+                addUpdateListener {
+                    setTaskPosition(mostRecentInput.x, mostRecentInput.y)
+                    t.setScale(taskSurface, scale, scale)
+                        .setCornerRadius(taskSurface, cornerRadius)
+                        .setScale(taskSurface, scale, scale)
+                        .setCornerRadius(taskSurface, cornerRadius)
+                        .setPosition(taskSurface, position.x, position.y)
+                        .apply()
                 }
             }
 
@@ -77,22 +84,31 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
         // allow dragging beyond its stage across any region of the display. Because of that, the
         // rawX/Y are more true to where the gesture is on screen and where the surface should be
         // positioned.
-        position.x = ev.rawX - animatedTaskWidth / 2
-        position.y = ev.rawY
+        mostRecentInput.set(ev.rawX, ev.rawY)
 
-        if (!allowSurfaceChangesOnMove) {
+        // If animator is running, allow it to set scale and position at the same time.
+        if (!allowSurfaceChangesOnMove || dragToDesktopAnimator.isRunning) {
             return
         }
-
+        setTaskPosition(ev.rawX, ev.rawY)
         val t = transactionFactory()
         t.setPosition(taskSurface, position.x, position.y)
         t.apply()
     }
 
     /**
-     * Ends the animation, setting the scale and position to the final animation value
+     * Calculates the top left corner of task from input coordinates.
+     * Top left will be needed for the resulting surface control transaction.
      */
-    fun endAnimator() {
-        dragToDesktopAnimator.end()
+    private fun setTaskPosition(x: Float, y: Float) {
+        position.x = x - animatedTaskWidth / 2
+        position.y = y
+    }
+
+    /**
+     * Cancels the animation, intended to be used when another animator will take over.
+     */
+    fun cancelAnimator() {
+        dragToDesktopAnimator.cancel()
     }
 }

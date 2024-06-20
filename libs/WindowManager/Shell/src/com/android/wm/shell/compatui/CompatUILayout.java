@@ -16,10 +16,10 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 
 import android.annotation.IdRes;
-import android.app.AppCompatTaskInfo.CameraCompatControlState;
+import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;

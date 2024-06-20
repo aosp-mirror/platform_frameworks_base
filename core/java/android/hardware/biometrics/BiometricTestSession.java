@@ -92,6 +92,7 @@ public class BiometricTestSession implements AutoCloseable {
         mTestedUsers = new ArraySet<>();
         mUsersCleaningUp = new ArraySet<>();
         setTestHalEnabled(true);
+        Log.d(getTag(), "Opening BiometricTestSession");
     }
 
     /**

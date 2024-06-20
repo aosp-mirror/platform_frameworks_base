@@ -21,7 +21,10 @@ import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Implementation of the interactor that noops all face auth operations.
@@ -31,22 +34,20 @@ import kotlinx.coroutines.flow.emptyFlow
  */
 @SysUISingleton
 class NoopDeviceEntryFaceAuthInteractor @Inject constructor() : DeviceEntryFaceAuthInteractor {
-    override val authenticationStatus: Flow<FaceAuthenticationStatus>
-        get() = emptyFlow()
-    override val detectionStatus: Flow<FaceDetectionStatus>
-        get() = emptyFlow()
+    override val authenticationStatus: Flow<FaceAuthenticationStatus> = emptyFlow()
+    override val detectionStatus: Flow<FaceDetectionStatus> = emptyFlow()
+    override val isLockedOut: StateFlow<Boolean> = MutableStateFlow(false)
+    override val isAuthenticated: StateFlow<Boolean> = MutableStateFlow(false)
+    override val isBypassEnabled: Flow<Boolean> = flowOf(false)
 
     override fun canFaceAuthRun(): Boolean = false
 
     override fun isRunning(): Boolean = false
 
-    override fun isLockedOut(): Boolean = false
-
     override fun isFaceAuthEnabledAndEnrolled(): Boolean = false
 
     override fun isFaceAuthStrong(): Boolean = false
-
-    override fun isAuthenticated(): Boolean = false
+    override fun start() = Unit
 
     override fun registerListener(listener: FaceAuthenticationListener) {}
 
@@ -66,4 +67,5 @@ class NoopDeviceEntryFaceAuthInteractor @Inject constructor() : DeviceEntryFaceA
     override fun onPrimaryBouncerUserInput() {}
     override fun onAccessibilityAction() {}
     override fun onWalletLaunched() = Unit
+    override fun onDeviceUnfolded() {}
 }

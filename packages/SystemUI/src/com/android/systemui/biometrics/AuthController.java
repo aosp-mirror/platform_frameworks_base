@@ -69,9 +69,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
-import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
-import com.android.systemui.biometrics.shared.SideFpsControllerRefactor;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
@@ -93,6 +91,9 @@ import dagger.Lazy;
 
 import kotlin.Unit;
 
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.Job;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,9 +106,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.Job;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
@@ -136,12 +134,10 @@ public class AuthController implements
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
-    private final Provider<SideFpsController> mSidefpsControllerFactory;
     private final CoroutineScope mApplicationCoroutineScope;
     private Job mBiometricContextListenerJob = null;
 
     // TODO: these should be migrated out once ready
-    @NonNull private final Provider<PromptCredentialInteractor> mPromptCredentialInteractor;
     @NonNull private final Provider<PromptSelectorInteractor> mPromptSelectorInteractor;
     @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
     @NonNull private final Provider<PromptViewModel> mPromptViewModelProvider;
@@ -163,7 +159,6 @@ public class AuthController implements
     @Nullable private UdfpsController mUdfpsController;
     @Nullable private UdfpsOverlayParams mUdfpsOverlayParams;
     @Nullable private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
-    @Nullable private SideFpsController mSideFpsController;
     @NonNull private Lazy<UdfpsLogger> mUdfpsLogger;
     @VisibleForTesting IBiometricSysuiReceiver mReceiver;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
@@ -205,12 +200,12 @@ public class AuthController implements
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 String reason = intent.getStringExtra("reason");
                 reason = (reason != null) ? reason : "unknown";
-                closeDioalog(reason);
+                closeDialog(reason);
             }
         }
     };
 
-    private void closeDioalog(String reason) {
+    private void closeDialog(String reason) {
         if (isShowing()) {
             Log.i(TAG, "Close BP, reason :" + reason);
             mCurrentDialog.dismissWithoutCallback(true /* animate */);
@@ -320,14 +315,7 @@ public class AuthController implements
                     this, mUdfpsLogger.get()));
             mUdfpsBounds = mUdfpsProps.get(0).getLocation().getRect();
         }
-
         mSidefpsProps = !sidefpsProps.isEmpty() ? sidefpsProps : null;
-        if (mSidefpsProps != null) {
-            if (!SideFpsControllerRefactor.isEnabled()) {
-                mSideFpsController = mSidefpsControllerFactory.get();
-            }
-        }
-
         mFingerprintManager.registerBiometricStateListener(new BiometricStateListener() {
             @Override
             public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
@@ -571,6 +559,11 @@ public class AuthController implements
                         credentialAttestation);
                 break;
 
+            case AuthDialogCallback.DISMISSED_BUTTON_CONTENT_VIEW_MORE_OPTIONS:
+                sendResultAndCleanUp(
+                        BiometricPrompt.DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS,
+                        credentialAttestation);
+                break;
             default:
                 Log.e(TAG, "Unhandled reason: " + reason);
                 break;
@@ -579,7 +572,7 @@ public class AuthController implements
 
     @Override
     public void handleShowGlobalActionsMenu() {
-        closeDioalog("PowerMenu shown");
+        closeDialog("PowerMenu shown");
     }
 
     /**
@@ -733,7 +726,6 @@ public class AuthController implements
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
             Provider<UdfpsController> udfpsControllerFactory,
-            Provider<SideFpsController> sidefpsControllerFactory,
             @NonNull DisplayManager displayManager,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
             @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
@@ -741,7 +733,6 @@ public class AuthController implements
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull Lazy<UdfpsLogger> udfpsLogger,
             @NonNull Lazy<LogContextInteractor> logContextInteractor,
-            @NonNull Provider<PromptCredentialInteractor> promptCredentialInteractorProvider,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
             @NonNull Provider<PromptViewModel> promptViewModelProvider,
@@ -761,7 +752,6 @@ public class AuthController implements
         mFingerprintManager = fingerprintManager;
         mFaceManager = faceManager;
         mUdfpsControllerFactory = udfpsControllerFactory;
-        mSidefpsControllerFactory = sidefpsControllerFactory;
         mUdfpsLogger = udfpsLogger;
         mDisplayManager = displayManager;
         mWindowManager = windowManager;
@@ -775,7 +765,6 @@ public class AuthController implements
 
         mLogContextInteractor = logContextInteractor;
         mPromptSelectorInteractor = promptSelectorInteractorProvider;
-        mPromptCredentialInteractor = promptCredentialInteractorProvider;
         mPromptViewModelProvider = promptViewModelProvider;
         mCredentialViewModelProvider = credentialViewModelProvider;
 
@@ -1260,6 +1249,8 @@ public class AuthController implements
         }
         mCurrentDialog = newDialog;
 
+        // TODO(b/339532378): We should check whether |allowBackgroundAuthentication| should be
+        //  removed.
         if (!promptInfo.isAllowBackgroundAuthentication() && !isOwnerInForeground()) {
             cancelIfOwnerIsNotInForeground();
         } else {
@@ -1323,8 +1314,8 @@ public class AuthController implements
         config.mScaleProvider = this::getScaleFactor;
         return new AuthContainerView(config, mApplicationCoroutineScope, mFpProps, mFaceProps,
                 wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
-                mInteractionJankMonitor, mPromptCredentialInteractor, mPromptSelectorInteractor,
-                viewModel, mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
+                mInteractionJankMonitor, mPromptSelectorInteractor, viewModel,
+                mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
     }
 
     @Override

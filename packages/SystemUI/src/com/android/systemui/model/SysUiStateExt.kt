@@ -40,7 +40,7 @@ import com.android.systemui.dagger.qualifiers.DisplayId
  */
 fun SysUiState.updateFlags(
     @DisplayId displayId: Int,
-    vararg flagValuePairs: Pair<Int, Boolean>,
+    vararg flagValuePairs: Pair<Long, Boolean>,
 ) {
     flagValuePairs.forEach { (flag, enabled) -> setFlag(flag, enabled) }
     commitUpdate(displayId)

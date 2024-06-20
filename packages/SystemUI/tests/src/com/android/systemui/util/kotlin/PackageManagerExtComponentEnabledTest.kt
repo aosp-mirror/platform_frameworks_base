@@ -27,13 +27,13 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameters
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 internal class PackageManagerExtComponentEnabledTest(private val testCase: TestCase) :
     SysuiTestCase() {
 

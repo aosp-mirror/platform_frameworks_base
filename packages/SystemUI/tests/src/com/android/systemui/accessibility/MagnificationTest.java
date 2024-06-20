@@ -27,6 +27,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_M
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
@@ -39,13 +40,14 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
+import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IMagnificationConnectionCallback;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -63,7 +65,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class MagnificationTest extends SysuiTestCase {
 
@@ -92,6 +94,8 @@ public class MagnificationTest extends SysuiTestCase {
     private MagnificationSettingsController mMagnificationSettingsController;
     @Mock
     private AccessibilityLogger mA11yLogger;
+    @Mock
+    private IWindowManager mIWindowManager;
 
     @Before
     public void setUp() throws Exception {
@@ -104,7 +108,7 @@ public class MagnificationTest extends SysuiTestCase {
         }).when(mAccessibilityManager).setMagnificationConnection(
                 any(IMagnificationConnection.class));
 
-        when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
+        when(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState);
 
         doAnswer(invocation -> {
             mMagnification.mMagnificationSettingsControllerCallback
@@ -121,9 +125,10 @@ public class MagnificationTest extends SysuiTestCase {
 
         mCommandQueue = new CommandQueue(getContext(), mDisplayTracker);
         mMagnification = new Magnification(getContext(),
-                getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
+                getContext().getMainThreadHandler(), mContext.getMainExecutor(),
+                mCommandQueue, mModeSwitchesController,
                 mSysUiState, mOverviewProxyService, mSecureSettings, mDisplayTracker,
-                getContext().getSystemService(DisplayManager.class), mA11yLogger);
+                getContext().getSystemService(DisplayManager.class), mA11yLogger, mIWindowManager);
         mMagnification.mWindowMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mWindowMagnificationController);
         mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(

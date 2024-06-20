@@ -20,6 +20,7 @@ import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
@@ -60,7 +61,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -73,7 +73,7 @@ import org.mockito.MockitoAnnotations
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class MobileRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var underTest: MobileRepositorySwitcher
     private lateinit var realRepo: MobileConnectionsRepositoryImpl
@@ -131,10 +131,12 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 mobileMappings,
                 fakeBroadcastDispatcher,
                 context,
-                IMMEDIATE,
+                /* bgDispatcher = */ IMMEDIATE,
                 scope,
+                /* mainDispatcher = */ IMMEDIATE,
                 FakeAirplaneModeRepository(),
                 wifiRepository,
+                mock(),
                 mock(),
                 mock(),
             )

@@ -44,6 +44,7 @@ flag {
 flag {
     namespace: "windowing_sdk"
     name: "untrusted_embedding_any_app_permission"
+    is_exported: true
     description: "Feature flag to enable the permission to embed any app in untrusted mode."
     bug: "293647332"
     is_fixed_read_only: true
@@ -60,6 +61,7 @@ flag {
 flag {
     namespace: "windowing_sdk"
     name: "untrusted_embedding_state_sharing"
+    is_exported: true
     description: "Feature flag to enable state sharing in untrusted embedding when apps opt in."
     bug: "293647332"
     is_fixed_read_only: true
@@ -75,7 +77,117 @@ flag {
 flag {
     namespace: "windowing_sdk"
     name: "cover_display_opt_in"
+    is_exported: true
     description: "Properties to allow apps and activities to opt-in to cover display rendering"
     bug: "312530526"
     is_fixed_read_only: true
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "enable_wm_extensions_for_all_flag"
+    description: "Whether to enable WM Extensions for all devices"
+    bug: "306666082"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "window_token_config_thread_safe"
+    description: "Ensure the Configuration pre/post changed is thread safe"
+    bug: "334285008"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "always_defer_transition_when_apply_wct"
+    description: "Report error when defer transition fails when it should not"
+    bug: "335562144"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "window_session_relayout_info"
+    description: "Pass an out RelayoutInfo instead of Bundle to fix the Parcel recycle bug"
+    bug: "335601427"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "fix_pip_restore_to_overlay"
+    description: "Restore exit-pip activity back to ActivityEmbedding overlay"
+    bug: "297887697"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "activity_embedding_animation_customization_flag"
+    description: "Whether the animation customization feature for AE is enabled"
+    bug: "293658614"
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "insets_control_changed_item"
+    description: "Pass insetsControlChanged through ClientTransaction to fix the racing"
+    bug: "339380439"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "insets_control_seq"
+    description: "Add seqId to InsetsControls to ensure the stale update is ignored"
+    bug: "339380439"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+     name: "move_animation_options_to_change"
+     description: "Move AnimationOptions from TransitionInfo to each Change"
+     bug: "327332488"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "disable_object_pool"
+    description: "Whether to disable object pool and let the GC handle lifecycle items"
+    bug: "311089192"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "rear_display_disable_force_desktop_system_decorations"
+    description: "Block system decorations from being added to a rear display when desktop mode is forced"
+    bug: "346103150"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

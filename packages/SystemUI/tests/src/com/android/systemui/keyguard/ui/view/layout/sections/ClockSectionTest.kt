@@ -22,238 +22,300 @@ import android.content.res.Resources
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.customization.R as customR
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardSmartspaceInteractor
+import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
+import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.policy.SplitShadeStateController
-import com.android.systemui.util.Utils
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
+import com.android.systemui.statusbar.policy.fakeConfigurationController
+import com.android.systemui.statusbar.ui.fakeSystemBarUtilsProxy
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import dagger.Lazy
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ClockSectionTest : SysuiTestCase() {
-    @Mock private lateinit var keyguardClockInteractor: KeyguardClockInteractor
-    @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel
-    @Mock private lateinit var splitShadeStateController: SplitShadeStateController
-    @Mock private lateinit var smartspaceViewModel: KeyguardSmartspaceViewModel
-    @Mock private lateinit var blueprintInteractor: Lazy<KeyguardBlueprintInteractor>
-    private val bcSmartspaceVisibility: MutableStateFlow<Int> = MutableStateFlow(VISIBLE)
-    private val clockShouldBeCentered: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    private val isAodIconsVisible: MutableStateFlow<Boolean> = MutableStateFlow(true)
-
     private lateinit var underTest: ClockSection
 
-    private val SMALL_CLOCK_TOP_SPLIT_SHADE =
-        context.resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
+    private val LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE: Int
+        get() =
+            kosmos.fakeSystemBarUtilsProxy.getStatusBarHeight() +
+                context.resources.getDimensionPixelSize(customR.dimen.small_clock_padding_top) +
+                context.resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
 
-    private val SMALL_CLOCK_TOP_NON_SPLIT_SHADE =
-        context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
-            Utils.getStatusBarHeaderHeightKeyguard(context)
+    private val LARGE_CLOCK_TOP
+        get() =
+            LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE +
+                SMART_SPACE_DATE_WEATHER_HEIGHT +
+                ENHANCED_SMART_SPACE_HEIGHT
 
-    private val LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE =
-        context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +
-            context.resources.getDimensionPixelSize(
-                com.android.systemui.customization.R.dimen.small_clock_padding_top
-            ) +
-            context.resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
+    private val CLOCK_FADE_TRANSLATION_Y
+        get() = context.resources.getDimensionPixelSize(customR.dimen.small_clock_height)
 
-    private val LARGE_CLOCK_TOP =
-        LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE +
-            SMART_SPACE_DATE_WEATHER_HEIGHT +
-            ENHANCED_SMART_SPACE_HEIGHT
-
-    private val CLOCK_FADE_TRANSLATION_Y =
-        context.resources.getDimensionPixelSize(
-            com.android.systemui.customization.R.dimen.small_clock_height
-        )
-
-    private var DIMENSION_BY_IDENTIFIER_NAME: List<Pair<String, Int>> = listOf()
+    private var DIMENSION_BY_IDENTIFIER: List<Pair<String, Int>> = listOf()
+    private lateinit var kosmos: Kosmos
 
     @Before
     fun setup() {
-        DIMENSION_BY_IDENTIFIER_NAME =
+        DIMENSION_BY_IDENTIFIER =
             listOf(
                 "date_weather_view_height" to SMART_SPACE_DATE_WEATHER_HEIGHT,
                 "enhanced_smartspace_height" to ENHANCED_SMART_SPACE_HEIGHT,
             )
 
         MockitoAnnotations.initMocks(this)
-        val remoteResources = mock<Resources>()
-        whenever(remoteResources.getIdentifier(anyString(), eq("dimen"), anyString())).then {
-            invocation ->
-            val name = invocation.arguments[0] as String
-            val index = DIMENSION_BY_IDENTIFIER_NAME.indexOfFirst { (key, _) -> key == name }
-            // increment index so that the not-found sentinel value lines up w/ what is
-            // returned by getIdentifier when a resource is not found
-            index + 1
-        }
-        whenever(remoteResources.getDimensionPixelSize(anyInt())).then { invocation ->
-            val id = invocation.arguments[0] as Int
-            DIMENSION_BY_IDENTIFIER_NAME[id - 1].second
-        }
-        val packageManager = mock<PackageManager>()
-        whenever(packageManager.getResourcesForApplication(anyString())).thenReturn(remoteResources)
-        mContext.setMockPackageManager(packageManager)
-
-        whenever(keyguardClockViewModel.clockShouldBeCentered).thenReturn(clockShouldBeCentered)
-        whenever(keyguardClockViewModel.isAodIconsVisible).thenReturn(isAodIconsVisible)
-        whenever(smartspaceViewModel.bcSmartspaceVisibility).thenReturn(bcSmartspaceVisibility)
-
-        underTest =
-            ClockSection(
-                keyguardClockInteractor,
-                keyguardClockViewModel,
-                mContext,
-                splitShadeStateController,
-                smartspaceViewModel,
-                blueprintInteractor
-            )
-    }
-
-    @Test
-    fun testApplyDefaultConstraints_LargeClock_SplitShade() {
-        setLargeClock(true)
-        setSplitShade(true)
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-
-        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
-        assertLargeClockTop(cs, expectedLargeClockTopMargin)
-
-        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
-    }
-
-    @Test
-    fun testApplyDefaultConstraints_LargeClock_NonSplitShade() {
-        setLargeClock(true)
-        setSplitShade(false)
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-
-        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
-        assertLargeClockTop(cs, expectedLargeClockTopMargin)
-
-        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
-    }
-
-    @Test
-    fun testApplyDefaultConstraints_LargeClock_MissingSmartspace_SplitShade() {
-        DIMENSION_BY_IDENTIFIER_NAME = listOf() // Remove Smartspace from mock
-        setLargeClock(true)
-        setSplitShade(true)
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-
-        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE
-        assertLargeClockTop(cs, expectedLargeClockTopMargin)
-
-        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
-    }
-
-    @Test
-    fun testApplyDefaultConstraints_LargeClock_MissingSmartspace_NonSplitShade() {
-        DIMENSION_BY_IDENTIFIER_NAME = listOf() // Remove Smartspace from mock
-        setLargeClock(true)
-        setSplitShade(false)
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-
-        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE
-        assertLargeClockTop(cs, expectedLargeClockTopMargin)
-
-        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
-    }
-
-    @Test
-    fun testApplyDefaultConstraints_SmallClock_SplitShade() {
-        setLargeClock(false)
-        setSplitShade(true)
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-
-        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
-        assertLargeClockTop(cs, expectedLargeClockTopMargin)
-
-        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
-    }
-
-    @Test
-    fun testApplyDefaultConstraints_SmallClock_NonSplitShade() {
-        setLargeClock(false)
-        setSplitShade(false)
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
-        assertLargeClockTop(cs, expectedLargeClockTopMargin)
-
-        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
-        assertSmallClockTop(cs, expectedSmallClockTopMargin)
-    }
-
-    @Test
-    fun testSmartspaceVisible_weatherClockDateAndIconsBarrierBottomBelowBCSmartspace() {
-        isAodIconsVisible.value = false
-        bcSmartspaceVisibility.value = VISIBLE
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-        val referencedIds = cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
-        referencedIds.contentEquals(intArrayOf(com.android.systemui.shared.R.id.bc_smartspace_view))
-    }
-
-    @Test
-    fun testSmartspaceGone_weatherClockDateAndIconsBarrierBottomBelowSmartspaceDateWeather() {
-        isAodIconsVisible.value = false
-        bcSmartspaceVisibility.value = GONE
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-        val referencedIds = cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
-        referencedIds.contentEquals(intArrayOf(R.id.lockscreen_clock_view))
-    }
-
-    @Test
-    fun testHasAodIcons_weatherClockDateAndIconsBarrierBottomBelowSmartspaceDateWeather() {
-        isAodIconsVisible.value = true
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-        val referencedIds = cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
-        referencedIds.contentEquals(
-            intArrayOf(
-                com.android.systemui.shared.R.id.bc_smartspace_view,
-                R.id.aod_notification_icon_container
-            )
+        val remoteResources =
+            mock<Resources>().apply {
+                whenever(getIdentifier(anyString(), eq("dimen"), anyString())).then { invocation ->
+                    val name = invocation.arguments[0] as String
+                    val index = DIMENSION_BY_IDENTIFIER.indexOfFirst { (key, _) -> key == name }
+                    // increment index so that the not-found sentinel value lines up w/ what is
+                    // returned by getIdentifier when a resource is not found
+                    index + 1
+                }
+                whenever(getDimensionPixelSize(anyInt())).then { invocation ->
+                    val id = invocation.arguments[0] as Int
+                    DIMENSION_BY_IDENTIFIER[id - 1].second
+                }
+            }
+        mContext.setMockPackageManager(
+            mock<PackageManager>().apply {
+                whenever(getResourcesForApplication(anyString())).thenReturn(remoteResources)
+            }
         )
+
+        kosmos = testKosmos()
+        with(kosmos) {
+            underTest =
+                ClockSection(
+                    keyguardClockInteractor,
+                    keyguardClockViewModel,
+                    context,
+                    keyguardSmartspaceViewModel,
+                    { keyguardBlueprintInteractor },
+                    keyguardRootViewModel,
+                )
+        }
     }
 
-    private fun setLargeClock(useLargeClock: Boolean) {
-        whenever(keyguardClockViewModel.useLargeClock).thenReturn(useLargeClock)
-    }
+    @Test
+    fun testApplyDefaultConstraints_LargeClock_SplitShade() =
+        kosmos.testScope.runTest {
+            with(kosmos) {
+                shadeRepository.setShadeMode(ShadeMode.Split)
+                keyguardClockInteractor.setClockSize(ClockSize.LARGE)
+                advanceUntilIdle()
+            }
 
-    private fun setSplitShade(isInSplitShade: Boolean) {
-        whenever(splitShadeStateController.shouldUseSplitNotificationShade(context.resources))
-            .thenReturn(isInSplitShade)
-    }
+            val cs = ConstraintSet()
+            underTest.applyDefaultConstraints(cs)
+
+            assertLargeClockTop(cs, LARGE_CLOCK_TOP)
+            assertSmallClockTop(cs)
+        }
+
+    @Test
+    fun testApplyDefaultConstraints_LargeClock_NonSplitShade() =
+        kosmos.testScope.runTest {
+            with(kosmos) {
+                val collectedShadeMode by collectLastValue(shadeRepository.shadeMode)
+                val isLargeClockVisible by
+                    collectLastValue(keyguardClockViewModel.isLargeClockVisible)
+
+                shadeRepository.setShadeMode(ShadeMode.Single)
+                keyguardClockInteractor.setClockSize(ClockSize.LARGE)
+                fakeKeyguardRepository.setClockShouldBeCentered(true)
+                notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
+                keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
+                fakeConfigurationController.notifyConfigurationChanged()
+                advanceUntilIdle()
+
+                val cs = ConstraintSet()
+                underTest.applyDefaultConstraints(cs)
+
+                assertLargeClockTop(cs, LARGE_CLOCK_TOP)
+                assertSmallClockTop(cs)
+            }
+        }
+
+    @Test
+    fun testApplyDefaultConstraints_LargeClock_MissingSmartspace_SplitShade() =
+        kosmos.testScope.runTest {
+            with(kosmos) {
+                DIMENSION_BY_IDENTIFIER = listOf() // Remove Smartspace from mock
+                val collectedShadeMode by collectLastValue(shadeRepository.shadeMode)
+                val isLargeClockVisible by
+                    collectLastValue(keyguardClockViewModel.isLargeClockVisible)
+
+                shadeRepository.setShadeMode(ShadeMode.Split)
+                keyguardClockInteractor.setClockSize(ClockSize.LARGE)
+                fakeKeyguardRepository.setClockShouldBeCentered(true)
+                notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
+                keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
+                fakeConfigurationController.notifyConfigurationChanged()
+                advanceUntilIdle()
+
+                val cs = ConstraintSet()
+                underTest.applyDefaultConstraints(cs)
+
+                assertLargeClockTop(cs, LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE)
+                assertSmallClockTop(cs)
+            }
+        }
+
+    @Test
+    fun testApplyDefaultConstraints_LargeClock_MissingSmartspace_NonSplitShade() =
+        kosmos.testScope.runTest {
+            with(kosmos) {
+                DIMENSION_BY_IDENTIFIER = listOf() // Remove Smartspace from mock
+                val collectedShadeMode by collectLastValue(shadeRepository.shadeMode)
+                val isLargeClockVisible by
+                    collectLastValue(keyguardClockViewModel.isLargeClockVisible)
+
+                shadeRepository.setShadeMode(ShadeMode.Single)
+                keyguardClockInteractor.setClockSize(ClockSize.LARGE)
+                fakeKeyguardRepository.setClockShouldBeCentered(true)
+                notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
+                keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
+                fakeConfigurationController.notifyConfigurationChanged()
+                advanceUntilIdle()
+
+                val cs = ConstraintSet()
+                underTest.applyDefaultConstraints(cs)
+
+                assertLargeClockTop(cs, LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE)
+                assertSmallClockTop(cs)
+            }
+        }
+
+    @Test
+    fun testApplyDefaultConstraints_SmallClock_SplitShade() =
+        kosmos.testScope.runTest {
+            with(kosmos) {
+                val collectedShadeMode by collectLastValue(shadeRepository.shadeMode)
+                val isLargeClockVisible by
+                    collectLastValue(keyguardClockViewModel.isLargeClockVisible)
+
+                shadeRepository.setShadeMode(ShadeMode.Split)
+                keyguardClockInteractor.setClockSize(ClockSize.SMALL)
+                fakeKeyguardRepository.setClockShouldBeCentered(true)
+                notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
+                keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
+                fakeConfigurationController.notifyConfigurationChanged()
+                advanceUntilIdle()
+
+                val cs = ConstraintSet()
+                underTest.applyDefaultConstraints(cs)
+
+                assertLargeClockTop(cs, LARGE_CLOCK_TOP)
+                assertSmallClockTop(cs)
+            }
+        }
+
+    @Test
+    fun testApplyDefaultConstraints_SmallClock_NonSplitShade() =
+        kosmos.testScope.runTest {
+            with(kosmos) {
+                val collectedShadeMode by collectLastValue(shadeRepository.shadeMode)
+                val isLargeClockVisible by
+                    collectLastValue(keyguardClockViewModel.isLargeClockVisible)
+
+                shadeRepository.setShadeMode(ShadeMode.Single)
+                keyguardClockInteractor.setClockSize(ClockSize.SMALL)
+                fakeKeyguardRepository.setClockShouldBeCentered(true)
+                notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
+                keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
+                fakeConfigurationController.notifyConfigurationChanged()
+                advanceUntilIdle()
+
+                val cs = ConstraintSet()
+                underTest.applyDefaultConstraints(cs)
+                assertLargeClockTop(cs, LARGE_CLOCK_TOP)
+                assertSmallClockTop(cs)
+            }
+        }
+
+    @Test
+    fun testSmartspaceVisible_weatherClockDateAndIconsBarrierBottomBelowBCSmartspace() =
+        kosmos.testScope.runTest {
+            with(kosmos) {
+                notificationsKeyguardInteractor.setNotificationsFullyHidden(false)
+                keyguardSmartspaceInteractor.setBcSmartspaceVisibility(VISIBLE)
+                fakeConfigurationController.notifyConfigurationChanged()
+                advanceUntilIdle()
+            }
+
+            val cs = ConstraintSet()
+            underTest.applyDefaultConstraints(cs)
+            val referencedIds =
+                cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
+            referencedIds.contentEquals(
+                intArrayOf(com.android.systemui.shared.R.id.bc_smartspace_view)
+            )
+        }
+
+    @Test
+    fun testSmartspaceGone_weatherClockDateAndIconsBarrierBottomBelowSmartspaceDateWeather() =
+        kosmos.testScope.runTest {
+            with(kosmos) {
+                notificationsKeyguardInteractor.setNotificationsFullyHidden(false)
+                keyguardSmartspaceInteractor.setBcSmartspaceVisibility(GONE)
+                fakeConfigurationController.notifyConfigurationChanged()
+                advanceUntilIdle()
+            }
+
+            val cs = ConstraintSet()
+            underTest.applyDefaultConstraints(cs)
+            val referencedIds =
+                cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
+            referencedIds.contentEquals(intArrayOf(R.id.lockscreen_clock_view))
+        }
+
+    @Test
+    fun testHasAodIcons_weatherClockDateAndIconsBarrierBottomBelowSmartspaceDateWeather() =
+        kosmos.testScope.runTest {
+            with(kosmos) {
+                notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
+                fakeConfigurationController.notifyConfigurationChanged()
+                advanceUntilIdle()
+            }
+
+            val cs = ConstraintSet()
+            underTest.applyDefaultConstraints(cs)
+            val referencedIds =
+                cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
+            referencedIds.contentEquals(
+                intArrayOf(
+                    com.android.systemui.shared.R.id.bc_smartspace_view,
+                    R.id.aod_notification_icon_container
+                )
+            )
+        }
 
     private fun assertLargeClockTop(cs: ConstraintSet, expectedLargeClockTopMargin: Int) {
         val largeClockConstraint = cs.getConstraint(R.id.lockscreen_clock_view_large)
@@ -261,11 +323,9 @@ class ClockSectionTest : SysuiTestCase() {
         assertThat(largeClockConstraint.layout.topMargin).isEqualTo(expectedLargeClockTopMargin)
     }
 
-    private fun assertSmallClockTop(cs: ConstraintSet, expectedSmallClockTopMargin: Int) {
+    private fun assertSmallClockTop(cs: ConstraintSet) {
         val smallClockGuidelineConstraint = cs.getConstraint(R.id.small_clock_guideline_top)
         assertThat(smallClockGuidelineConstraint.layout.topToTop).isEqualTo(-1)
-        assertThat(smallClockGuidelineConstraint.layout.guideBegin)
-            .isEqualTo(expectedSmallClockTopMargin)
 
         val smallClockConstraint = cs.getConstraint(R.id.lockscreen_clock_view)
         assertThat(smallClockConstraint.layout.topToBottom)

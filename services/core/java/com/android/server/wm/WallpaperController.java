@@ -22,7 +22,6 @@ import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
@@ -166,7 +165,7 @@ class WallpaperController {
                             || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
                 }
             } else if (w.hasWallpaper() && mService.mPolicy.isKeyguardHostWindow(w.mAttrs)
-                    && w.mTransitionController.isTransitionOnDisplay(mDisplayContent)) {
+                    && w.mTransitionController.hasTransientLaunch(mDisplayContent)) {
                 // If we have no candidates at all, notification shade is allowed to be the target
                 // of last resort even if it has not been made visible yet.
                 if (DEBUG_WALLPAPER) Slog.v(TAG, "Found keyguard as wallpaper target: " + w);
@@ -336,7 +335,7 @@ class WallpaperController {
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
             token.setVisibility(false);
-            if (ProtoLog.isEnabled(WM_DEBUG_WALLPAPER) && token.isVisible()) {
+            if (token.isVisible()) {
                 ProtoLog.d(WM_DEBUG_WALLPAPER,
                         "Hiding wallpaper %s from %s target=%s prev=%s callers=%s",
                         token, winGoingAway, mWallpaperTarget, mPrevWallpaperTarget,
@@ -350,7 +349,7 @@ class WallpaperController {
         final Rect lastWallpaperBounds = wallpaperWin.getParentFrame();
         int screenWidth = lastWallpaperBounds.width();
         int screenHeight = lastWallpaperBounds.height();
-        float screenRatio = ((float) screenWidth) / screenHeight;
+        float screenRatio = (float) screenWidth / screenHeight;
         Point screenSize = new Point(screenWidth, screenHeight);
 
         WallpaperWindowToken token = wallpaperWin.mToken.asWallpaperToken();
@@ -400,20 +399,32 @@ class WallpaperController {
             Point bitmapSize = new Point(
                     wallpaperWin.mRequestedWidth, wallpaperWin.mRequestedHeight);
             SparseArray<Rect> cropHints = token.getCropHints();
-            wallpaperFrame = mWallpaperCropUtils.getCrop(
-                    screenSize, bitmapSize, cropHints, wallpaperWin.isRtl());
+            wallpaperFrame = bitmapSize.x <= 0 || bitmapSize.y <= 0 ? wallpaperWin.getFrame()
+                    : mWallpaperCropUtils.getCrop(screenSize, bitmapSize, cropHints,
+                            wallpaperWin.isRtl());
+            int frameWidth = wallpaperFrame.width();
+            int frameHeight = wallpaperFrame.height();
+            float frameRatio = (float) frameWidth / frameHeight;
 
-            cropZoom = wallpaperFrame.isEmpty() ? 1f
-                    : ((float) screenHeight) / wallpaperFrame.height() / wallpaperWin.mVScale;
+            // If the crop is proportionally wider/taller than the screen, scale it so that its
+            // height/width matches the screen height/width, and use the additional width/height
+            // for parallax (respectively).
+            boolean scaleHeight = frameRatio >= screenRatio;
+            cropZoom = wallpaperFrame.isEmpty() ? 1f : scaleHeight
+                    ? (float) screenHeight / frameHeight / wallpaperWin.mVScale
+                    : (float) screenWidth / frameWidth / wallpaperWin.mHScale;
 
-            // A positive x / y offset shifts the wallpaper to the right / bottom respectively.
-            cropOffsetX = -wallpaperFrame.left
-                    + (int) ((cropZoom - 1f) * wallpaperFrame.height() * screenRatio / 2f);
-            cropOffsetY = -wallpaperFrame.top
-                    + (int) ((cropZoom - 1f) * wallpaperFrame.height() / 2f);
+            // The dimensions of the frame, without the additional width or height for parallax.
+            float w = scaleHeight ? frameHeight * screenRatio : frameWidth;
+            float h = scaleHeight ? frameHeight : frameWidth / screenRatio;
 
-            diffWidth = (int) (wallpaperFrame.width() * wallpaperWin.mHScale) - screenWidth;
-            diffHeight = (int) (wallpaperFrame.height() * wallpaperWin.mVScale) - screenHeight;
+            // Note: a positive x/y offset shifts the wallpaper to the right/bottom respectively.
+            cropOffsetX = -wallpaperFrame.left + (int) ((cropZoom - 1f) * w / 2f);
+            cropOffsetY = -wallpaperFrame.top + (int) ((cropZoom - 1f) * h / 2f);
+
+            // Available width or height for parallax
+            diffWidth = (int) ((frameWidth - w) * wallpaperWin.mHScale);
+            diffHeight = (int) ((frameHeight - h) * wallpaperWin.mVScale);
         } else {
             wallpaperFrame = wallpaperWin.getFrame();
             cropZoom = 1f;
@@ -515,15 +526,15 @@ class WallpaperController {
                         if ((mLastWallpaperTimeoutTime + WALLPAPER_TIMEOUT_RECOVERY)
                                 < start) {
                             try {
-                                if (DEBUG_WALLPAPER) Slog.v(TAG,
-                                        "Waiting for offset complete...");
+                                ProtoLog.v(WM_DEBUG_WALLPAPER, "Waiting for offset complete...");
                                 mService.mGlobalLock.wait(WALLPAPER_TIMEOUT);
                             } catch (InterruptedException e) {
                             }
-                            if (DEBUG_WALLPAPER) Slog.v(TAG, "Offset complete!");
+                            ProtoLog.v(WM_DEBUG_WALLPAPER, "Offset complete!");
                             if ((start + WALLPAPER_TIMEOUT) < SystemClock.uptimeMillis()) {
-                                Slog.i(TAG, "Timeout waiting for wallpaper to offset: "
-                                        + wallpaperWin);
+                                ProtoLog.v(WM_DEBUG_WALLPAPER,
+                                        "Timeout waiting for wallpaper to offset: %s",
+                                        wallpaperWin);
                                 mLastWallpaperTimeoutTime = start;
                             }
                         }
@@ -845,19 +856,12 @@ class WallpaperController {
         result.setWallpaperTarget(wallpaperTarget);
     }
 
-    public void updateWallpaperTokens(boolean keyguardLocked) {
-        if (DEBUG_WALLPAPER) {
-            Slog.v(TAG, "Wallpaper vis: target " + mWallpaperTarget + " prev="
-                    + mPrevWallpaperTarget);
-        }
-        updateWallpaperTokens(mWallpaperTarget != null || mPrevWallpaperTarget != null,
-                keyguardLocked);
-    }
-
     /**
      * Change the visibility of the top wallpaper to {@param visibility} and hide all the others.
      */
     private void updateWallpaperTokens(boolean visibility, boolean keyguardLocked) {
+        ProtoLog.v(WM_DEBUG_WALLPAPER, "updateWallpaperTokens requestedVisibility=%b on"
+                + " keyguardLocked=%b", visibility, keyguardLocked);
         WindowState topWallpaper = mFindResults.getTopWallpaper(keyguardLocked);
         WallpaperWindowToken topWallpaperToken =
                 topWallpaper == null ? null : topWallpaper.mToken.asWallpaperToken();
@@ -879,10 +883,6 @@ class WallpaperController {
         // The window is visible to the compositor...but is it visible to the user?
         // That is what the wallpaper cares about.
         final boolean visible = token != null;
-        if (DEBUG_WALLPAPER) {
-            Slog.v(TAG, "Wallpaper visibility: " + visible + " at display "
-                    + mDisplayContent.getDisplayId());
-        }
 
         if (visible) {
             if (mWallpaperTarget.mWallpaperX >= 0) {
@@ -903,10 +903,9 @@ class WallpaperController {
 
         updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
 
-        if (DEBUG_WALLPAPER) {
-            Slog.v(TAG, "adjustWallpaperWindows: wallpaper visibility " + visible
-                    + ", lock visibility " + mDisplayContent.isKeyguardLocked());
-        }
+        ProtoLog.v(WM_DEBUG_WALLPAPER,
+                "Wallpaper at display %d - visibility: %b, keyguardLocked: %b",
+                mDisplayContent.getDisplayId(), visible, mDisplayContent.isKeyguardLocked());
 
         if (visible && mLastFrozen != mFindResults.isWallpaperTargetForLetterbox) {
             mLastFrozen = mFindResults.isWallpaperTargetForLetterbox;
@@ -915,7 +914,7 @@ class WallpaperController {
                     /* x= */ 0, /* y= */ 0, /* z= */ 0, /* extras= */ null, /* sync= */ false);
         }
 
-        ProtoLog.d(WM_DEBUG_WALLPAPER, "New wallpaper: target=%s prev=%s",
+        ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper target=%s prev=%s",
                 mWallpaperTarget, mPrevWallpaperTarget);
     }
 
@@ -961,11 +960,9 @@ class WallpaperController {
                                 WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION);
 
                 }
-                if (DEBUG_WALLPAPER) {
-                    Slog.v(TAG,
-                            "Wallpaper should be visible but has not been drawn yet. "
-                                    + "mWallpaperDrawState=" + mWallpaperDrawState);
-                }
+                ProtoLog.v(WM_DEBUG_WALLPAPER,
+                        "Wallpaper should be visible but has not been drawn yet. "
+                                + "mWallpaperDrawState=%d", mWallpaperDrawState);
                 break;
             }
         }
@@ -1198,15 +1195,17 @@ class WallpaperController {
         boolean isWallpaperTargetForLetterbox = false;
 
         void setTopHideWhenLockedWallpaper(WindowState win) {
-            if (DEBUG_WALLPAPER) {
-                Slog.v(TAG, "setTopHideWhenLockedWallpaper " + win);
+            if (mTopWallpaper.mTopHideWhenLockedWallpaper != win) {
+                ProtoLog.d(WM_DEBUG_WALLPAPER, "New home screen wallpaper: %s, prev: %s",
+                        win, mTopWallpaper.mTopHideWhenLockedWallpaper);
             }
             mTopWallpaper.mTopHideWhenLockedWallpaper = win;
         }
 
         void setTopShowWhenLockedWallpaper(WindowState win) {
-            if (DEBUG_WALLPAPER) {
-                Slog.v(TAG, "setTopShowWhenLockedWallpaper " + win);
+            if (mTopWallpaper.mTopShowWhenLockedWallpaper != win) {
+                ProtoLog.d(WM_DEBUG_WALLPAPER, "New lock/shared screen wallpaper: %s, prev: %s",
+                        win, mTopWallpaper.mTopShowWhenLockedWallpaper);
             }
             mTopWallpaper.mTopShowWhenLockedWallpaper = win;
         }

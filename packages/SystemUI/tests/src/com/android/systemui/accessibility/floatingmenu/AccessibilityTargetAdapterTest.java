@@ -21,16 +21,16 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.graphics.drawable.Drawable;
-import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ViewHolder;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ import java.util.List;
 
 /** Tests for {@link AccessibilityTargetAdapter}. */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class AccessibilityTargetAdapterTest extends SysuiTestCase {
     @Mock
     private AccessibilityTarget mAccessibilityTarget;

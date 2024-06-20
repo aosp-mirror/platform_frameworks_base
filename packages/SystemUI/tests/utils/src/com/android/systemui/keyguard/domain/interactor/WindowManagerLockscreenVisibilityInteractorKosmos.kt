@@ -16,7 +16,9 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.notificationLaunchAnimationInteractor
 
 val Kosmos.windowManagerLockscreenVisibilityInteractor by
@@ -27,6 +29,9 @@ val Kosmos.windowManagerLockscreenVisibilityInteractor by
             surfaceBehindInteractor = keyguardSurfaceBehindInteractor,
             fromLockscreenInteractor = fromLockscreenTransitionInteractor,
             fromBouncerInteractor = fromPrimaryBouncerTransitionInteractor,
+            fromAlternateBouncerInteractor = fromAlternateBouncerTransitionInteractor,
             notificationLaunchAnimationInteractor = notificationLaunchAnimationInteractor,
+            sceneInteractor = { sceneInteractor },
+            deviceEntryInteractor = { deviceEntryInteractor },
         )
     }

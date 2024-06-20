@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.ui.composable
 
 import android.view.HapticFeedbackConstants
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
@@ -30,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,16 +47,24 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Easings
 import com.android.compose.modifiers.thenIf
 import com.android.internal.R
+import com.android.systemui.bouncer.ui.composable.MotionTestKeys.dotAppearFadeIn
+import com.android.systemui.bouncer.ui.composable.MotionTestKeys.dotAppearMoveUp
+import com.android.systemui.bouncer.ui.composable.MotionTestKeys.dotScaling
+import com.android.systemui.bouncer.ui.composable.MotionTestKeys.entryCompleted
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
+import com.android.systemui.compose.modifiers.sysuiResTag
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import platform.test.motion.compose.values.MotionTestValueKey
+import platform.test.motion.compose.values.motionTestValues
 
 /**
  * UI for the input part of a pattern-requiring version of the bouncer.
@@ -67,33 +75,34 @@ import kotlinx.coroutines.launch
  * `false`, the dots will be pushed towards the end/bottom of the axis.
  */
 @Composable
-internal fun PatternBouncer(
+@VisibleForTesting
+fun PatternBouncer(
     viewModel: PatternBouncerViewModel,
     centerDotsVertically: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    DisposableEffect(Unit) {
-        viewModel.onShown()
-        onDispose { viewModel.onHidden() }
-    }
+    val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
+    DisposableEffect(Unit) { onDispose { viewModel.onHidden() } }
 
     val colCount = viewModel.columnCount
     val rowCount = viewModel.rowCount
 
     val dotColor = MaterialTheme.colorScheme.secondary
-    val dotRadius = with(LocalDensity.current) { (DOT_DIAMETER_DP / 2).dp.toPx() }
+    val dotRadius = with(density) { (DOT_DIAMETER_DP / 2).dp.toPx() }
     val lineColor = MaterialTheme.colorScheme.primary
-    val lineStrokeWidth = with(LocalDensity.current) { LINE_STROKE_WIDTH_DP.dp.toPx() }
+    val lineStrokeWidth = with(density) { LINE_STROKE_WIDTH_DP.dp.toPx() }
 
     // All dots that should be rendered on the grid.
-    val dots: List<PatternDotViewModel> by viewModel.dots.collectAsState()
+    val dots: List<PatternDotViewModel> by viewModel.dots.collectAsStateWithLifecycle()
     // The most recently selected dot, if the user is currently dragging.
-    val currentDot: PatternDotViewModel? by viewModel.currentDot.collectAsState()
+    val currentDot: PatternDotViewModel? by viewModel.currentDot.collectAsStateWithLifecycle()
     // The dots selected so far, if the user is currently dragging.
-    val selectedDots: List<PatternDotViewModel> by viewModel.selectedDots.collectAsState()
-    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
-    val isAnimationEnabled: Boolean by viewModel.isPatternVisible.collectAsState()
-    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
+    val selectedDots: List<PatternDotViewModel> by
+        viewModel.selectedDots.collectAsStateWithLifecycle()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsStateWithLifecycle()
+    val isAnimationEnabled: Boolean by viewModel.isPatternVisible.collectAsStateWithLifecycle()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsStateWithLifecycle()
 
     // Map of animatables for the scale of each dot, keyed by dot.
     val dotScalingAnimatables = remember(dots) { dots.associateWith { Animatable(1f) } }
@@ -104,7 +113,19 @@ internal fun PatternBouncer(
         integerResource(R.integer.lock_pattern_line_fade_out_duration)
     val lineFadeOutAnimationDelayMs = integerResource(R.integer.lock_pattern_line_fade_out_delay)
 
-    val scope = rememberCoroutineScope()
+    val dotAppearFadeInAnimatables = remember(dots) { dots.associateWith { Animatable(0f) } }
+    val dotAppearMoveUpAnimatables = remember(dots) { dots.associateWith { Animatable(0f) } }
+    val dotAppearMaxOffsetPixels =
+        remember(dots) {
+            dots.associateWith { dot -> with(density) { (80 + (20 * dot.y)).dp.toPx() } }
+        }
+
+    var entryAnimationCompleted by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        showEntryAnimation(dotAppearFadeInAnimatables, dotAppearMoveUpAnimatables)
+        entryAnimationCompleted = true
+    }
+
     val view = LocalView.current
 
     // When the current dot is changed, we need to update our animations.
@@ -201,6 +222,7 @@ internal fun PatternBouncer(
 
     Canvas(
         modifier
+            .sysuiResTag("bouncer_pattern_root")
             // Because the width also includes spacing to the left and right of the leftmost and
             // rightmost dots in the grid and because UX mocks specify the width without that
             // spacing, the actual width needs to be defined slightly bigger than the UX mock width.
@@ -249,6 +271,12 @@ internal fun PatternBouncer(
                             }
                         }
                     }
+            }
+            .motionTestValues {
+                entryAnimationCompleted exportAs entryCompleted
+                dotAppearFadeInAnimatables.map { it.value.value } exportAs dotAppearFadeIn
+                dotAppearMoveUpAnimatables.map { it.value.value } exportAs dotAppearMoveUp
+                dotScalingAnimatables.map { it.value.value } exportAs dotScaling
             }
     ) {
         gridCoordinates?.let { nonNullCoordinates ->
@@ -325,10 +353,54 @@ internal fun PatternBouncer(
 
             // Draw each dot on the grid.
             dots.forEach { dot ->
+                val initialOffset = checkNotNull(dotAppearMaxOffsetPixels[dot])
+                val appearOffset =
+                    (1 - checkNotNull(dotAppearMoveUpAnimatables[dot]).value) * initialOffset
                 drawCircle(
-                    center = pixelOffset(dot, spacing, horizontalOffset, verticalOffset),
-                    color = dotColor,
-                    radius = dotRadius * (dotScalingAnimatables[dot]?.value ?: 1f),
+                    center =
+                        pixelOffset(
+                            dot,
+                            spacing,
+                            horizontalOffset,
+                            verticalOffset + appearOffset,
+                        ),
+                    color =
+                        dotColor.copy(alpha = checkNotNull(dotAppearFadeInAnimatables[dot]).value),
+                    radius = dotRadius * checkNotNull(dotScalingAnimatables[dot]).value
+                )
+            }
+        }
+    }
+}
+
+private suspend fun showEntryAnimation(
+    dotAppearFadeInAnimatables: Map<PatternDotViewModel, Animatable<Float, AnimationVector1D>>,
+    dotAppearMoveUpAnimatables: Map<PatternDotViewModel, Animatable<Float, AnimationVector1D>>,
+) {
+    coroutineScope {
+        dotAppearFadeInAnimatables.forEach { (dot, animatable) ->
+            launch {
+                animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec =
+                        tween(
+                            delayMillis = 33 * dot.y,
+                            durationMillis = 450,
+                            easing = Easings.LegacyDecelerate,
+                        )
+                )
+            }
+        }
+        dotAppearMoveUpAnimatables.forEach { (dot, animatable) ->
+            launch {
+                animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec =
+                        tween(
+                            delayMillis = 0,
+                            durationMillis = 450 + (33 * dot.y),
+                            easing = Easings.StandardDecelerate,
+                        )
                 )
             }
         }
@@ -435,12 +507,20 @@ private fun offset(
     }
 }
 
-private const val DOT_DIAMETER_DP = 16
-private const val SELECTED_DOT_DIAMETER_DP = 24
+private const val DOT_DIAMETER_DP = 14
+private const val SELECTED_DOT_DIAMETER_DP = (DOT_DIAMETER_DP * 1.5).toInt()
 private const val SELECTED_DOT_REACTION_ANIMATION_DURATION_MS = 83
 private const val SELECTED_DOT_RETRACT_ANIMATION_DURATION_MS = 750
-private const val LINE_STROKE_WIDTH_DP = 16
-private const val FAILURE_ANIMATION_DOT_DIAMETER_DP = 13
+private const val LINE_STROKE_WIDTH_DP = DOT_DIAMETER_DP
+private const val FAILURE_ANIMATION_DOT_DIAMETER_DP = (DOT_DIAMETER_DP * 0.81f).toInt()
 private const val FAILURE_ANIMATION_DOT_SHRINK_ANIMATION_DURATION_MS = 50
 private const val FAILURE_ANIMATION_DOT_SHRINK_STAGGER_DELAY_MS = 33
 private const val FAILURE_ANIMATION_DOT_REVERT_ANIMATION_DURATION = 617
+
+@VisibleForTesting
+object MotionTestKeys {
+    val entryCompleted = MotionTestValueKey<Boolean>("PinBouncer::entryAnimationCompleted")
+    val dotAppearFadeIn = MotionTestValueKey<List<Float>>("PinBouncer::dotAppearFadeIn")
+    val dotAppearMoveUp = MotionTestValueKey<List<Float>>("PinBouncer::dotAppearMoveUp")
+    val dotScaling = MotionTestValueKey<List<Float>>("PinBouncer::dotScaling")
+}

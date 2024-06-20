@@ -36,6 +36,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -201,6 +202,7 @@ class SimBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun verifySimPin() =
         testScope.runTest {
+            val msg by collectLastValue(underTest.bouncerMessageChanged)
             bouncerSimRepository.setSubscriptionId(1)
             bouncerSimRepository.setSimPukLocked(false)
             whenever(telephonyManager.createForSubscriptionId(anyInt()))
@@ -208,8 +210,7 @@ class SimBouncerInteractorTest : SysuiTestCase() {
             whenever(telephonyManager.supplyIccLockPin(anyString()))
                 .thenReturn(PinResult(PinResult.PIN_RESULT_TYPE_SUCCESS, 1))
 
-            val msg: String? = underTest.verifySim(listOf(0, 0, 0, 0))
-            runCurrent()
+            verifySim(listOf(0, 0, 0, 0))
             assertThat(msg).isNull()
 
             verify(keyguardUpdateMonitor).reportSimUnlocked(1)
@@ -218,6 +219,7 @@ class SimBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun verifySimPin_incorrect_oneRemainingAttempt() =
         testScope.runTest {
+            val msg by collectLastValue(underTest.bouncerMessageChanged)
             bouncerSimRepository.setSubscriptionId(1)
             bouncerSimRepository.setSimPukLocked(false)
             whenever(telephonyManager.createForSubscriptionId(anyInt()))
@@ -229,9 +231,7 @@ class SimBouncerInteractorTest : SysuiTestCase() {
                         1,
                     )
                 )
-
-            val msg: String? = underTest.verifySim(listOf(0, 0, 0, 0))
-            runCurrent()
+            verifySim(listOf(0, 0, 0, 0))
 
             assertThat(msg).isNull()
             val errorDialogMessage by collectLastValue(bouncerSimRepository.errorDialogMessage)
@@ -245,6 +245,7 @@ class SimBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun verifySimPin_incorrect_threeRemainingAttempts() =
         testScope.runTest {
+            val msg by collectLastValue(underTest.bouncerMessageChanged)
             bouncerSimRepository.setSubscriptionId(1)
             bouncerSimRepository.setSimPukLocked(false)
             whenever(telephonyManager.createForSubscriptionId(anyInt()))
@@ -257,8 +258,7 @@ class SimBouncerInteractorTest : SysuiTestCase() {
                     )
                 )
 
-            val msg = underTest.verifySim(listOf(0, 0, 0, 0))
-            runCurrent()
+            verifySim(listOf(0, 0, 0, 0))
 
             assertThat(msg).isEqualTo("Enter SIM PIN. You have 3 remaining attempts.")
         }
@@ -266,10 +266,11 @@ class SimBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun verifySimPin_notCorrectLength_tooShort() =
         testScope.runTest {
+            val msg by collectLastValue(underTest.bouncerMessageChanged)
             bouncerSimRepository.setSubscriptionId(1)
             bouncerSimRepository.setSimPukLocked(false)
 
-            val msg = underTest.verifySim(listOf(0))
+            verifySim(listOf(0))
 
             assertThat(msg).isEqualTo(resources.getString(R.string.kg_invalid_sim_pin_hint))
         }
@@ -277,10 +278,12 @@ class SimBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun verifySimPin_notCorrectLength_tooLong() =
         testScope.runTest {
+            val msg by collectLastValue(underTest.bouncerMessageChanged)
+
             bouncerSimRepository.setSubscriptionId(1)
             bouncerSimRepository.setSimPukLocked(false)
 
-            val msg = underTest.verifySim(listOf(0, 0, 0, 0, 0, 0, 0, 0, 0))
+            verifySim(listOf(0, 0, 0, 0, 0, 0, 0, 0, 0))
 
             assertThat(msg).isEqualTo(resources.getString(R.string.kg_invalid_sim_pin_hint))
         }
@@ -288,6 +291,7 @@ class SimBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun verifySimPuk() =
         testScope.runTest {
+            val msg by collectLastValue(underTest.bouncerMessageChanged)
             whenever(telephonyManager.createForSubscriptionId(anyInt()))
                 .thenReturn(telephonyManager)
             whenever(telephonyManager.supplyIccLockPuk(anyString(), anyString()))
@@ -295,13 +299,13 @@ class SimBouncerInteractorTest : SysuiTestCase() {
             bouncerSimRepository.setSubscriptionId(1)
             bouncerSimRepository.setSimPukLocked(true)
 
-            var msg = underTest.verifySim(listOf(0, 0, 0, 0, 0, 0, 0, 0, 0))
+            verifySim(listOf(0, 0, 0, 0, 0, 0, 0, 0, 0))
             assertThat(msg).isEqualTo(resources.getString(R.string.kg_puk_enter_pin_hint))
 
-            msg = underTest.verifySim(listOf(0, 0, 0, 0))
+            verifySim(listOf(0, 0, 0, 0))
             assertThat(msg).isEqualTo(resources.getString(R.string.kg_enter_confirm_pin_hint))
 
-            msg = underTest.verifySim(listOf(0, 0, 0, 0))
+            verifySim(listOf(0, 0, 0, 0))
             assertThat(msg).isNull()
 
             runCurrent()
@@ -311,36 +315,48 @@ class SimBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun verifySimPuk_inputTooShort() =
         testScope.runTest {
+            val msg by collectLastValue(underTest.bouncerMessageChanged)
+
             bouncerSimRepository.setSubscriptionId(1)
             bouncerSimRepository.setSimPukLocked(true)
-            val msg = underTest.verifySim(listOf(0, 0, 0, 0))
+
+            verifySim(listOf(0, 0, 0, 0))
             assertThat(msg).isEqualTo(resources.getString(R.string.kg_invalid_sim_puk_hint))
         }
 
     @Test
     fun verifySimPuk_pinNotCorrectLength() =
         testScope.runTest {
+            val msg by collectLastValue(underTest.bouncerMessageChanged)
             bouncerSimRepository.setSubscriptionId(1)
             bouncerSimRepository.setSimPukLocked(true)
 
-            underTest.verifySim(listOf(0, 0, 0, 0, 0, 0, 0, 0, 0))
+            verifySim(listOf(0, 0, 0, 0, 0, 0, 0, 0, 0))
 
-            val msg = underTest.verifySim(listOf(0, 0, 0))
+            verifySim(listOf(0, 0, 0))
+
             assertThat(msg).isEqualTo(resources.getString(R.string.kg_invalid_sim_pin_hint))
         }
 
     @Test
     fun verifySimPuk_confirmedPinDoesNotMatch() =
         testScope.runTest {
+            val msg by collectLastValue(underTest.bouncerMessageChanged)
+
             bouncerSimRepository.setSubscriptionId(1)
             bouncerSimRepository.setSimPukLocked(true)
 
-            underTest.verifySim(listOf(0, 0, 0, 0, 0, 0, 0, 0, 0))
-            underTest.verifySim(listOf(0, 0, 0, 0))
+            verifySim(listOf(0, 0, 0, 0, 0, 0, 0, 0, 0))
+            verifySim(listOf(0, 0, 0, 0))
 
-            val msg = underTest.verifySim(listOf(0, 0, 0, 1))
+            verifySim(listOf(0, 0, 0, 1))
             assertThat(msg).isEqualTo(resources.getString(R.string.kg_puk_enter_pin_hint))
         }
+
+    private suspend fun TestScope.verifySim(pinDigits: List<Int>) {
+        runCurrent()
+        underTest.verifySim(pinDigits)
+    }
 
     @Test
     fun onErrorDialogDismissed_clearsErrorDialogMessageInRepository() {

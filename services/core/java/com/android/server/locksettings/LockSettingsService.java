@@ -102,8 +102,10 @@ import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.ICeStorageLockEventListener;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.security.AndroidKeyStoreMaintenance;
@@ -337,6 +339,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final CopyOnWriteArrayList<LockSettingsStateListener> mLockSettingsStateListeners =
             new CopyOnWriteArrayList<>();
+
+    private final StorageManagerInternal mStorageManagerInternal;
 
     // This class manages life cycle events for encrypted users on File Based Encryption (FBE)
     // devices. The most basic of these is to show/hide notifications about missing features until
@@ -577,6 +581,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             return null;
         }
 
+        public StorageManagerInternal getStorageManagerInternal() {
+            return LocalServices.getService(StorageManagerInternal.class);
+        }
+
         public SyntheticPasswordManager getSyntheticPasswordManager(LockSettingsStorage storage) {
             return new SyntheticPasswordManager(getContext(), storage, getUserManager(),
                     new PasswordSlotManager());
@@ -672,13 +680,14 @@ public class LockSettingsService extends ILockSettings.Stub {
         mNotificationManager = injector.getNotificationManager();
         mUserManager = injector.getUserManager();
         mStorageManager = injector.getStorageManager();
+        mStorageManagerInternal = injector.getStorageManagerInternal();
         mStrongAuthTracker = injector.getStrongAuthTracker();
         mStrongAuthTracker.register(mStrongAuth);
         mGatekeeperPasswords = new LongSparseArray<>();
 
         mSpManager = injector.getSyntheticPasswordManager(mStorage);
         mUnifiedProfilePasswordCache = injector.getUnifiedProfilePasswordCache(mKeyStore);
-        mBiometricDeferredQueue = new BiometricDeferredQueue(mSpManager, mHandler);
+        mBiometricDeferredQueue = new BiometricDeferredQueue(mSpManager);
 
         mRebootEscrowManager = injector.getRebootEscrowManager(new RebootEscrowCallbacks(),
                 mStorage);
@@ -828,7 +837,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         // storage is locked, instead of when the user is stopped.  This would ensure the flags get
         // reset if CE storage is locked later for a user that allows delayed locking.
         if (android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             UserProperties userProperties = mUserManager.getUserProperties(UserHandle.of(userId));
             if (userProperties != null && userProperties.getAllowStoppingUserWithDelayedLocking()) {
                 return;
@@ -932,7 +942,38 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage.prefetchUser(UserHandle.USER_SYSTEM);
         mBiometricDeferredQueue.systemReady(mInjector.getFingerprintManager(),
                 mInjector.getFaceManager(), mInjector.getBiometricManager());
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+            mStorageManagerInternal.registerStorageLockEventListener(mCeStorageLockEventListener);
+        }
     }
+
+    private final ICeStorageLockEventListener mCeStorageLockEventListener =
+            new ICeStorageLockEventListener() {
+                @Override
+                public void onStorageLocked(int userId) {
+                    Slog.i(TAG, "Storage lock event received for " + userId);
+                    if (android.os.Flags.allowPrivateProfile()
+                            && android.multiuser.Flags.enablePrivateSpaceFeatures()
+                            && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+                        mHandler.post(() -> {
+                            try {
+                                UserProperties userProperties =
+                                        mUserManager.getUserProperties(UserHandle.of(userId));
+                                if (userProperties != null && userProperties
+                                        .getAllowStoppingUserWithDelayedLocking()) {
+                                    int strongAuthRequired = LockPatternUtils.StrongAuthTracker
+                                            .getDefaultFlags(mContext);
+                                    requireStrongAuth(strongAuthRequired, userId);
+                                }
+                            } catch (IllegalArgumentException e) {
+                                Slogf.d(TAG, "User %d does not exist or has been removed",
+                                        userId);
+                            }
+                        });
+                    }
+                }};
 
     private void loadEscrowData() {
         mRebootEscrowManager.loadRebootEscrowDataIfAvailable(mHandler);
@@ -1202,23 +1243,24 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void enforceFrpResolved() {
+    private void enforceFrpNotActive() {
         final int mainUserId = mInjector.getUserManagerInternal().getMainUserId();
         if (mainUserId < 0) {
-            Slog.d(TAG, "No Main user on device; skipping enforceFrpResolved");
+            Slog.d(TAG, "No Main user on device; skipping enforceFrpNotActive");
             return;
         }
-        final ContentResolver cr = mContext.getContentResolver();
 
+        final ContentResolver cr = mContext.getContentResolver();
         final boolean inSetupWizard = Settings.Secure.getIntForUser(cr,
                 Settings.Secure.USER_SETUP_COMPLETE, 0, mainUserId) == 0;
-        final boolean secureFrp = android.security.Flags.frpEnforcement()
+        final boolean isFrpActive = android.security.Flags.frpEnforcement()
                 ? mStorage.isFactoryResetProtectionActive()
-                : (Settings.Global.getInt(cr, Settings.Global.SECURE_FRP_MODE, 0) == 1);
+                : (Settings.Global.getInt(cr, Settings.Global.SECURE_FRP_MODE, 0) == 1)
+                        && inSetupWizard;
 
-        if (inSetupWizard && secureFrp) {
-            throw new SecurityException("Cannot change credential in SUW while factory reset"
-                    + " protection is not resolved yet");
+        if (isFrpActive) {
+            throw new SecurityException("Cannot change credential while factory reset protection"
+                    + " is active");
         }
     }
 
@@ -1790,7 +1832,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            enforceFrpResolved();
+            enforceFrpNotActive();
             // When changing credential for profiles with unified challenge, some callers
             // will pass in empty credential while others will pass in the credential of
             // the parent user. setLockCredentialInternal() handles the formal case (empty

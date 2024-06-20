@@ -16,6 +16,8 @@
 
 package com.android.server.inputmethod;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -25,11 +27,14 @@ import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
-import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
+import com.android.internal.inputmethod.InlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.server.LocalServices;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +42,16 @@ import java.util.List;
  * Input method manager local system service interface.
  */
 public abstract class InputMethodManagerInternal {
+    /**
+     * Indicates that the method is guaranteed to not require {@link ImfLock}.
+     *
+     * <p>You can call this method without worrying about system_server lock layering.</p>
+     */
+    @Retention(SOURCE)
+    @Target({ElementType.METHOD})
+    public @interface ImfLockFree {
+    }
+
     /**
      * Listener for input method list changed events.
      */
@@ -53,6 +68,7 @@ public abstract class InputMethodManagerInternal {
      *
      * @param interactive the interactive mode parameter
      */
+    @ImfLockFree
     public abstract void setInteractive(boolean interactive);
 
     /**
@@ -61,6 +77,7 @@ public abstract class InputMethodManagerInternal {
      * @param reason               the reason for hiding the current input method
      * @param originatingDisplayId the display ID the request is originated
      */
+    @ImfLockFree
     public abstract void hideAllInputMethods(@SoftInputShowHideReason int reason,
             int originatingDisplayId);
 
@@ -86,11 +103,11 @@ public abstract class InputMethodManagerInternal {
      *
      * @param userId      the user ID to be queried
      * @param requestInfo information needed to create an {@link InlineSuggestionsRequest}.
-     * @param cb          {@link IInlineSuggestionsRequestCallback} used to pass back the request
+     * @param cb          {@link InlineSuggestionsRequestCallback} used to pass back the request
      *                    object
      */
     public abstract void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
-            InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb);
+            InlineSuggestionsRequestInfo requestInfo, InlineSuggestionsRequestCallback cb);
 
     /**
      * Force switch to the enabled input method by {@code imeId} for current user. If the input
@@ -143,6 +160,7 @@ public abstract class InputMethodManagerInternal {
      *
      * @param listener the listener to add
      */
+    @ImfLockFree
     public abstract void registerInputMethodListListener(InputMethodListListener listener);
 
     /**
@@ -150,10 +168,11 @@ public abstract class InputMethodManagerInternal {
      *
      * @param sourceInputToken the source token.
      * @param displayId        the display hosting the IME window
+     * @param userId           the user ID this request is about
      * @return {@code true} if the transfer is successful
      */
     public abstract boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
-            int displayId);
+            int displayId, @UserIdInt int userId);
 
     /**
      * Reports that IME control has transferred to the given window token, or if null that
@@ -177,6 +196,7 @@ public abstract class InputMethodManagerInternal {
      *
      * @param displayId the display hosting the IME window
      */
+    @ImfLockFree
     public abstract void removeImeSurface(int displayId);
 
     /**
@@ -187,12 +207,14 @@ public abstract class InputMethodManagerInternal {
      * @param disableImeIcon indicates whether IME icon should be enabled or not
      * @param displayId      the display for which to update the IME window status
      */
+    @ImfLockFree
     public abstract void updateImeWindowStatus(boolean disableImeIcon, int displayId);
 
     /**
      * Finish stylus handwriting by calling {@link InputMethodService#finishStylusHandwriting()} if
      * there is an ongoing handwriting session.
      */
+    @ImfLockFree
     public abstract void maybeFinishStylusHandwriting();
 
     /**
@@ -235,20 +257,16 @@ public abstract class InputMethodManagerInternal {
             IBinder targetWindowToken);
 
     /**
-     * Returns true if any InputConnection is currently active.
-     * {@hide}
-     */
-    public abstract boolean isAnyInputConnectionActive();
-
-    /**
      * Fake implementation of {@link InputMethodManagerInternal}. All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
             new InputMethodManagerInternal() {
+                @ImfLockFree
                 @Override
                 public void setInteractive(boolean interactive) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void hideAllInputMethods(@SoftInputShowHideReason int reason,
                         int originatingDisplayId) {
@@ -268,7 +286,7 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
                         InlineSuggestionsRequestInfo requestInfo,
-                        IInlineSuggestionsRequestCallback cb) {
+                        InlineSuggestionsRequestCallback cb) {
                 }
 
                 @Override
@@ -287,13 +305,14 @@ public abstract class InputMethodManagerInternal {
                         int deviceId, @Nullable String imeId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void registerInputMethodListListener(InputMethodListListener listener) {
                 }
 
                 @Override
                 public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
-                        int displayId) {
+                        int displayId, @UserIdInt int userId) {
                     return false;
                 }
 
@@ -305,10 +324,12 @@ public abstract class InputMethodManagerInternal {
                 public void onImeParentChanged(int displayId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void removeImeSurface(int displayId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void updateImeWindowStatus(boolean disableImeIcon, int displayId) {
                 }
@@ -323,6 +344,7 @@ public abstract class InputMethodManagerInternal {
                         @UserIdInt int userId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void maybeFinishStylusHandwriting() {
                 }
@@ -330,11 +352,6 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public void onSwitchKeyboardLayoutShortcut(int direction, int displayId,
                         IBinder targetWindowToken) {
-                }
-
-                @Override
-                public boolean isAnyInputConnectionActive() {
-                    return false;
                 }
             };
 

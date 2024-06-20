@@ -23,19 +23,21 @@ import com.android.settingslib.spa.widget.ui.SettingsSwitch
 @Composable
 fun TwoTargetSwitchPreference(
     model: SwitchPreferenceModel,
-    icon: @Composable (() -> Unit)? = null,
-    onClick: () -> Unit,
+    primaryEnabled: () -> Boolean = { true },
+    primaryOnClick: (() -> Unit)?,
 ) {
     EntryHighlight {
         TwoTargetPreference(
             title = model.title,
             summary = model.summary,
-            onClick = onClick,
-            icon = icon,
+            primaryEnabled = primaryEnabled,
+            primaryOnClick = primaryOnClick,
+            icon = model.icon,
         ) {
             SettingsSwitch(
                 checked = model.checked(),
                 changeable = model.changeable,
+                contentDescription = model.title,
                 onCheckedChange = model.onCheckedChange,
             )
         }

@@ -229,6 +229,17 @@ public final class LongArrayMultiStateCounter implements Parcelable {
     }
 
     /**
+     * Copies time-in-state and timestamps from the supplied counter.
+     */
+    public void copyStatesFrom(LongArrayMultiStateCounter counter) {
+        if (mStateCount != counter.mStateCount) {
+            throw new IllegalArgumentException(
+                    "State count is not the same: " + mStateCount + " vs. " + counter.mStateCount);
+        }
+        native_copyStatesFrom(mNativeObject, counter.mNativeObject);
+    }
+
+    /**
      * Sets the new values for the given state.
      */
     public void setValues(int state, long[] values) {
@@ -374,6 +385,10 @@ public final class LongArrayMultiStateCounter implements Parcelable {
 
     @CriticalNative
     private static native void native_setState(long nativeObject, int state, long timestampMs);
+
+    @CriticalNative
+    private static native void native_copyStatesFrom(long nativeObjectTarget,
+            long nativeObjectSource);
 
     @CriticalNative
     private static native void native_setValues(long nativeObject, int state,

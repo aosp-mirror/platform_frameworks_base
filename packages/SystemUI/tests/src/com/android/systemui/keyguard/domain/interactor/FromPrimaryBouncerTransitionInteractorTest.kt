@@ -16,35 +16,49 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
-import junit.framework.Assert.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.spy
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
-    val kosmos = testKosmos()
+    val kosmos =
+        testKosmos().apply {
+            this.fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+        }
     val underTest = kosmos.fromPrimaryBouncerTransitionInteractor
     val testScope = kosmos.testScope
     val selectedUserInteractor = kosmos.selectedUserInteractor
     val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
 
     @Test
     fun testSurfaceBehindVisibility() =
@@ -128,69 +142,83 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun testSurfaceBehindModel() =
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testReturnToLockscreen_whenBouncerHides() =
         testScope.runTest {
-            val values by collectValues(underTest.surfaceBehindModel)
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.LOCKSCREEN,
-                )
+            underTest.start()
+            bouncerRepository.setPrimaryShow(true)
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.PRIMARY_BOUNCER,
+                testScope
             )
+
+            reset(transitionRepository)
+
+            bouncerRepository.setPrimaryShow(false)
             runCurrent()
 
-            assertEquals(
-                listOf(
-                    null, // PRIMARY_BOUNCER -> LOCKSCREEN does not have specific view params.
-                ),
-                values
+            assertThat(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.LOCKSCREEN
+                )
+        }
+
+    @Test
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testReturnToGlanceableHub_whenBouncerHides_ifIdleOnCommunal() =
+        testScope.runTest {
+            underTest.start()
+            kosmos.fakeCommunalSceneRepository.setTransitionState(
+                flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
+            )
+            bouncerRepository.setPrimaryShow(true)
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.PRIMARY_BOUNCER,
+                testScope
             )
 
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.GONE,
-                )
-            )
+            reset(transitionRepository)
+
+            bouncerRepository.setPrimaryShow(false)
             runCurrent()
 
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.RUNNING,
+            assertThat(transitionRepository)
+                .startedTransition(
                     from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.GONE,
-                    value = 0.01f,
+                    to = KeyguardState.GLANCEABLE_HUB
                 )
+        }
+
+    @Test
+    @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionToOccluded_bouncerHide_occludingActivityOnTop() =
+        testScope.runTest {
+            underTest.start()
+            bouncerRepository.setPrimaryShow(true)
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.PRIMARY_BOUNCER,
+                testScope
             )
+
+            reset(transitionRepository)
+
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true)
             runCurrent()
 
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.RUNNING,
-                    from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.GONE,
-                    value = 0.99f,
-                )
-            )
+            // Shouldn't transition to OCCLUDED until the bouncer hides.
+            assertThat(transitionRepository).noTransitionsStarted()
+
+            bouncerRepository.setPrimaryShow(false)
             runCurrent()
 
-            assertEquals(3, values.size)
-            val model1percent = values[1]
-            val model99percent = values[2]
-
-            try {
-                // We should initially have an alpha of 0f when unlocking, so the surface is not
-                // visible
-                // while lockscreen UI animates out.
-                assertEquals(0f, model1percent!!.alpha)
-
-                // By the end it should probably be visible.
-                assertTrue(model99percent!!.alpha > 0f)
-            } catch (e: NullPointerException) {
-                fail("surfaceBehindModel was unexpectedly null.")
-            }
+            assertThat(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.OCCLUDED
+                )
         }
 }

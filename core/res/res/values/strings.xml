@@ -231,8 +231,10 @@
     <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
     <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
-    <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningSummary">Can\u2019t make emergency calls over Wi\u2011Fi</string>
+    <!-- Displayed to tell the user that emergency calls might not be available; this is shown to
+         the user when only WiFi calling is available and the carrier does not support emergency
+         calls over WiFi calling. -->
+    <string name="EmergencyCallWarningSummary">Emergency calls require a mobile network</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>
@@ -397,25 +399,37 @@
     <string name="cfTemplateRegisteredTime"><xliff:g id="bearer_service_code">{0}</xliff:g>: Not forwarded</string>
 
     <!-- Title of the cellular network security safety center source's status. -->
-    <string name="scCellularNetworkSecurityTitle">Cellular network security</string>
+    <string name="scCellularNetworkSecurityTitle">Mobile network security</string>
     <!-- Summary of the cellular network security safety center source's status. -->
-    <string name="scCellularNetworkSecuritySummary">Review settings</string>
+    <string name="scCellularNetworkSecuritySummary">Encryption, notifications for unencrypted networks</string>
+    <!-- Link passed to safety center for the Learn More button on notifications -->
+    <!-- DO NOT TRANSLATE -->
+    <string name="scCellularNetworkSecurityLearnMore" translatable="false"></string>
     <!-- Title of the safety center issue and notification when the phone's identifier is shared over the network. -->
-    <string name="scIdentifierDisclosureIssueTitle">Device identifier accessed</string>
-    <!-- Summary of the safety center issue and notification when the phone's identifier is shared over the network. -->
-    <string name="scIdentifierDisclosureIssueSummary">A network on the <xliff:g id="disclosure_network">%4$s</xliff:g> connection recorded your device\'s unique identifier (IMSI) <xliff:g id="disclosure_count">%1$d</xliff:g> times in the period between <xliff:g id="disclosure_window_start_time">%2$tr</xliff:g> and <xliff:g id="disclosure_window_end_time">%3$tr</xliff:g>.</string>
+    <string name="scIdentifierDisclosureIssueTitle">Device ID accessed</string>
+    <!-- Summary of the safety center notification when the phone's identifier is shared over the network. -->
+    <string name="scIdentifierDisclosureIssueSummaryNotification">At <xliff:g id="disclosure_time">%1$s</xliff:g>, a nearby network recorded your device\'s unique ID (IMSI or IMEI) while using your <xliff:g id="disclosure_network">%2$s</xliff:g> SIM</string>
+    <!-- Summary of the safety center detail card when the phone's identifier is shared over the network. -->
+    <string name="scIdentifierDisclosureIssueSummary">At <xliff:g id="disclosure_time">%1$s</xliff:g>, a nearby network recorded your device\'s unique ID (IMSI or IMEI) while using your <xliff:g id="disclosure_network">%2$s</xliff:g> SIM.\n\nThis means that your location, activity, or identity have been logged. This is common practice but may be an issue for people concerned about privacy.</string>
+
     <!-- Title of the safety center issue and notification when the phone restores an encrypted connection to the network. -->
-    <string name="scNullCipherIssueEncryptedTitle">Encrypted connection to <xliff:g id="network_name">%1$s</xliff:g></string>
+    <string name="scNullCipherIssueEncryptedTitle">Connected to encrypted network <xliff:g id="network_name">%1$s</xliff:g></string>
     <!-- Summary of the safety center issue and notification when the phone restores an encrypted connection to the network. -->
-    <string name="scNullCipherIssueEncryptedSummary">You\'re now connected to a more secure cellular network.</string>
+    <string name="scNullCipherIssueEncryptedSummary"><xliff:g id="network_name">%1$s</xliff:g> SIM connection is more secure now</string>
     <!-- Title of the safety center issue and notification when a connected network is not using encryption. -->
-    <string name="scNullCipherIssueNonEncryptedTitle">Non-encrypted connection to <xliff:g id="network_name">%1$s</xliff:g></string>
-    <!-- Summary of the safety center issue and notification when a connected network is not using encryption.  -->
-    <string name="scNullCipherIssueNonEncryptedSummary">You\'re connected to a non-encrypted cellular network. Your calls, messages, and data are vulnerable to interception.</string>
+
+    <string name="scNullCipherIssueNonEncryptedTitle">Connected to unencrypted network</string>
+    <!-- Summary of the safety center notification when a connected network is not using encryption.  -->
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification">Calls, messages, and data are currently more vulnerable while using your <xliff:g id="network_name">%1$s</xliff:g> SIM</string>
+    <!-- Summary of the safety center issue when a connected network is not using encryption.  -->
+    <string name="scNullCipherIssueNonEncryptedSummary">Calls, messages, and data are currently more vulnerable while using your <xliff:g id="network_name">%1$s</xliff:g> SIM.\n\nWhen your connection is encrypted again, you\'ll get another notification.</string>
+
     <!-- Label for the button that links to the cellular network security settings. -->
-    <string name="scNullCipherIssueActionSettings">Cellular security settings</string>
-    <!-- Label for the button that link to education resourcess about cellular network security settings. -->
+    <string name="scNullCipherIssueActionSettings">Mobile network security settings</string>
+    <!-- Label for the button that links to education resourcess about cellular network security settings. -->
     <string name="scNullCipherIssueActionLearnMore">Learn more</string>
+    <!-- Label for the button to acknowledge the user is connected to an encrypted network again in cellular network security settings. -->
+    <string name="scNullCipherIssueActionGotIt">Got it</string>
 
     <!-- android.net.http Error strings --> <skip />
     <!-- Displayed when a feature code (non-phone number) is dialed and completes successfully. -->
@@ -513,6 +527,13 @@
     <string name="work_profile_deleted_reason_maximum_password_failure">Too many password attempts</string>
     <!-- Shows up as the reason for the work profile deletion when the admin of an organization-owend device relinquishes it. [CHAR LIMIT=NONE] -->
     <string name="device_ownership_relinquished">Admin relinquished device for personal use</string>
+
+    <!-- Private space deleted by IT admin notification--> <skip />
+    <!-- Shows up in the notification's title when the system deletes the private space due to admin policy. [CHAR LIMIT=NONE] -->
+    <string name="private_space_deleted_by_admin">Private space removed</string>
+    <!-- Content text for an expanded notification. The Title of the notification is "Private space removed".
+        This further explains that the private space is deleted by the system as a result of the current admin policy. [CHAR LIMIT=NONE]-->
+    <string name="private_space_deleted_by_admin_details">Your organisation does not allow private spaces on this managed device.</string>
 
     <!-- Content title for a notification. This notification indicates that the device is managed
          and network logging was activated by a device owner. [CHAR LIMIT=NONE]-->
@@ -780,6 +801,9 @@
     <!-- The divider symbol between different parts of the notification header including spaces. not translatable [CHAR LIMIT=3] -->
     <string name="notification_header_divider_symbol_with_spaces" translatable="false">" • "</string>
 
+    <!-- Text for inline reply button for compact conversation heads ups -->
+    <string name="notification_compact_heads_up_reply">Reply</string>
+
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">New notification</string>
 
@@ -1012,6 +1036,9 @@
 
     <!-- The title to use when a dream is opened in preview mode. [CHAR LIMIT=NONE] -->
     <string name="dream_preview_title">Preview, <xliff:g id="dream_name" example="Clock">%1$s</xliff:g></string>
+
+    <!-- The title to use when a dream is open in accessibility mode to let users know to double tap to dismiss the dream  [CHAR LIMIT=32] -->
+    <string name="dream_accessibility_action_click">dismiss</string>
 
     <!--  Permissions -->
 
@@ -1883,7 +1910,7 @@
     <!-- Message shown when UDFPS fails to match -->
     <string name="fingerprint_udfps_error_not_match">Fingerprint not recognized</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
-    <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead">Face not recognized. Use fingerprint instead.</string>
 
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
@@ -3243,6 +3270,12 @@
 
     <!-- Title for EditText context menu [CHAR LIMIT=20] -->
     <string name="editTextMenuTitle">Text actions</string>
+
+    <!-- Error shown when a user uses a stylus to try handwriting on a text field which doesn't support stylus handwriting. [CHAR LIMIT=TOAST] -->
+    <string name="error_handwriting_unsupported">Handwriting is not supported in this field</string>
+
+    <!-- Error shown when a user uses a stylus to try handwriting on a password text field which doesn't support stylus handwriting. [CHAR LIMIT=TOAST] -->
+    <string name="error_handwriting_unsupported_password">Handwriting is not supported in password fields</string>
 
     <!-- Content description of the back button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="input_method_nav_back_button_desc">Back</string>
@@ -5092,7 +5125,7 @@
     <string name="immersive_cling_title">Viewing full screen</string>
 
     <!-- Cling help message description when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
-    <string name="immersive_cling_description">To exit, swipe down from the top.</string>
+    <string name="immersive_cling_description">To exit, swipe down from the top of your screen</string>
 
     <!-- Cling help message confirmation button when hiding the navigation bar entering immersive mode [CHAR LIMIT=30] -->
     <string name="immersive_cling_positive">Got it</string>
@@ -5177,7 +5210,7 @@
     <string name="lock_to_app_unlock_password">Ask for password before unpinning</string>
 
     <!-- Notification shown when device owner silently installs a package [CHAR LIMIT=NONE] -->
-    <string name="package_installed_device_owner">Installed by your admin</string>
+    <string name="package_installed_device_owner">Installed by your admin.\nGo to settings to view granted permissions</string>
     <!-- Notification shown when device owner silently updates a package [CHAR LIMIT=NONE] -->
     <string name="package_updated_device_owner">Updated by your admin</string>
     <!-- Notification shown when device owner silently deletes a package [CHAR LIMIT=NONE] -->
@@ -5300,6 +5333,13 @@
     <string name="zen_mode_implicit_activated">On</string>
     <!-- Zen mode - Condition summary when a rule is deactivated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
     <string name="zen_mode_implicit_deactivated">Off</string>
+
+    <!-- [CHAR LIMIT=40] General divider text when concatenating multiple items in a text summary, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_summary_divider_text">,\u0020</string>
+    <!-- [CHAR LIMIT=40] General template for a symbolic start - end range in a text summary, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_summary_range_symbol_combination"><xliff:g id="start" example="Sun">%1$s</xliff:g> - <xliff:g id="end" example="Thu">%2$s</xliff:g></string>
+    <!-- [CHAR LIMIT=40] Event-based rule calendar option value for any calendar, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_event_calendar_any">Any calendar</string>
 
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
     <string name="muted_by"><xliff:g id="third_party">%1$s</xliff:g> is muting some sounds</string>
@@ -5452,7 +5492,7 @@
     <string name="set_up_screen_lock_title">Set a screen lock</string>
     <!-- Action label for the dialog prompting the user to set up a screen lock [CHAR LIMIT=30] -->
     <string name="set_up_screen_lock_action_label">Set screen lock</string>
-    <!-- Message shown in the dialog prompting the user to set up a screen lock to access private space [CHAR LIMIT=30] -->
+    <!-- Message shown in the dialog prompting the user to set up a screen lock to access private space [CHAR LIMIT=120] -->
     <string name="private_space_set_up_screen_lock_message">To use your private space, set a screen lock on this device</string>
 
     <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
@@ -5829,6 +5869,10 @@
     <string name="dynamic_mode_notification_title">Battery Saver turned on</string>
     <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
     <string name="dynamic_mode_notification_summary">Reducing battery usage to extend battery life</string>
+    <!-- Title of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
+    <string name="dynamic_mode_notification_title_v2">Battery Saver is on</string>
+    <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
+    <string name="dynamic_mode_notification_summary_v2">Battery Saver is turned on to extend battery life</string>
 
     <!-- Battery saver strings -->
     <!-- The user visible name of the notification channel for battery saver notifications [CHAR_LIMIT=80] -->
@@ -5947,8 +5991,6 @@
     <string name="accessibility_system_action_dpad_right_label">Dpad Right</string>
     <!-- Label for Dpad center action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dpad_center_label">Dpad Center</string>
-    <!-- Accessibility description of caption view -->
-    <string name="accessibility_freeform_caption">Caption bar of <xliff:g id="app_name">%1$s</xliff:g>.</string>
 
     <!-- Text to tell the user that a package has been forced by themselves in the RESTRICTED bucket. [CHAR LIMIT=NONE] -->
     <string name="as_app_forced_to_restricted_bucket">
@@ -6020,6 +6062,10 @@
     <!-- Dialog text.  Shown when the user is unable to send a text message from a personal app due to restrictions set
          by their organization, and so must switch to a work app or cancel. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_sms_information">Your organization only allows you to send messages from work apps</string>
+    <!-- Dialog text. Shown as when redirecting Calls from Private Space to the main user. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_private_space_phone_information">"You can only make phone calls from your personal Phone app. Calls made with personal Phone will be added to your personal call history."</string>
+    <!-- Dialog text. Shown as when redirecting SMS and MMS messages from Private Space to the main user. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_private_space_messages_information">"You can only send SMS messages from your personal Messages app."</string>
     <!-- Button option. Open the link in the personal browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_use_personal_browser">Use personal browser</string>
     <!-- Button option. Open the link in the work browser. [CHAR LIMIT=NONE] -->
@@ -6418,12 +6464,25 @@ ul.</string>
     <!-- Communal profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
     <string name="profile_label_communal">Communal</string>
 
-    <!-- Notification message used when a notification's normal message contains sensitive information. -->
-    <!-- TODO b/301960090: replace with redacted message string and action title, when/if UX provides one -->
-    <!-- DO NOT TRANSLATE -->
-    <string name="redacted_notification_message"></string>
+    <!-- Accessibility label for managed profile user type [CHAR LIMIT=30] -->
+    <string name="accessibility_label_managed_profile">Work profile</string>
+    <!-- Accessibility label for private profile user type [CHAR LIMIT=30] -->
+    <string name="accessibility_label_private_profile">Private space</string>
+    <!-- Accessibility label for clone profile user type [CHAR LIMIT=30] -->
+    <string name="accessibility_label_clone_profile">Clone</string>
+    <!-- Accessibility label for clone profile user type [CHAR LIMIT=30] -->
+    <string name="accessibility_label_communal_profile">Communal</string>
+
+    <!-- Label for private space biometric prompt logo description [CHAR LIMIT=30] -->
+    <string name="private_space_biometric_prompt_title">Private space</string>
+
+    <!-- Notification message used when a notification's normal message contains sensitive information [CHAR_LIMIT=NOTIF_BODY] -->
+    <string name="redacted_notification_message">Sensitive notification content hidden</string>
     <!-- Notification action title used instead of a notification's normal title sensitive [CHAR_LIMIT=NOTIF_BODY] -->
     <string name="redacted_notification_action_title"></string>
+
+    <!-- Toast when an app's content is hidden from screen share (user can still see content) due to potential security risks of showing the content (such as a password or OTP) - [CHAR_LIMIT=TOAST] -->
+    <string name="screen_not_shared_sensitive_content">App content hidden from screen share for security</string>
 
     <!-- Satellite related messages -->
     <!-- Notification title when satellite service is connected. -->
@@ -6434,4 +6493,25 @@ ul.</string>
     <string name="satellite_notification_open_message">Open Messages</string>
     <!-- Invoke Satellite setting activity of Settings -->
     <string name="satellite_notification_how_it_works">How it works</string>
+    <!-- Initial/System provided label shown for an app which gets unarchived. [CHAR LIMIT=64]. -->
+    <string name="unarchival_session_app_label">Pending...</string>
+
+    <!-- Fingerprint dangling notification title -->
+    <string name="fingerprint_dangling_notification_title">Set up Fingerprint Unlock again</string>
+    <!-- Fingerprint dangling notification content for only 1 fingerprint deleted -->
+    <string name="fingerprint_dangling_notification_msg_1"><xliff:g id="fingerprint">%s</xliff:g> wasn\'t working well and was deleted</string>
+    <!-- Fingerprint dangling notification content for more than 1 fingerprints deleted -->
+    <string name="fingerprint_dangling_notification_msg_2"><xliff:g id="fingerprint">%1$s</xliff:g> and <xliff:g id="fingerprint">%2$s</xliff:g> weren\'t working well and were deleted</string>
+    <!-- Fingerprint dangling notification content for only 1 fingerprint deleted and no fingerprint left-->
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1"><xliff:g id="fingerprint">%s</xliff:g> wasn\'t working well and was deleted. Set it up again to unlock your phone with fingerprint.</string>
+    <!-- Fingerprint dangling notification content for more than 1 fingerprints deleted and no fingerprint left  -->
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2"><xliff:g id="fingerprint">%1$s</xliff:g> and <xliff:g id="fingerprint">%2$s</xliff:g> weren\'t working well and were deleted. Set them up again to unlock your phone with your fingerprint.</string>
+    <!-- Face dangling notification title -->
+    <string name="face_dangling_notification_title">Set up Face Unlock again</string>
+    <!-- Face dangling notification content -->
+    <string name="face_dangling_notification_msg">Your face model wasn\'t working well and was deleted. Set it up again to unlock your phone with face.</string>
+    <!-- Biometric dangling notification "set up" action button -->
+    <string name="biometric_dangling_notification_action_set_up">Set up</string>
+    <!-- Biometric dangling notification "Not now" action button -->
+    <string name="biometric_dangling_notification_action_not_now">Not now</string>
 </resources>

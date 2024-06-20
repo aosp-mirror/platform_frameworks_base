@@ -19,9 +19,9 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.app.admin.PolicyValue;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 final class MostRestrictive<V> extends ResolutionMechanism<V> {
 
@@ -33,18 +33,21 @@ final class MostRestrictive<V> extends ResolutionMechanism<V> {
 
     @Override
     PolicyValue<V> resolve(@NonNull LinkedHashMap<EnforcingAdmin, PolicyValue<V>> adminPolicies) {
+        return resolve(new ArrayList<>(adminPolicies.values()));
+    }
+
+    @Override
+    PolicyValue<V> resolve(List<PolicyValue<V>> adminPolicies) {
         if (adminPolicies.isEmpty()) {
             return null;
         }
         for (PolicyValue<V> value : mMostToLeastRestrictive) {
-            if (adminPolicies.containsValue(value)) {
+            if (adminPolicies.contains(value)) {
                 return value;
             }
         }
         // Return first set policy if none can be found in known values
-        Map.Entry<EnforcingAdmin, PolicyValue<V>> policy =
-                adminPolicies.entrySet().stream().findFirst().get();
-        return policy.getValue();
+        return adminPolicies.get(0);
     }
 
     @Override

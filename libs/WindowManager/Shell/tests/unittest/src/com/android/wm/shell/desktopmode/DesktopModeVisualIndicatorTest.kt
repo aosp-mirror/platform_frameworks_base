@@ -56,31 +56,29 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
             context, taskSurface, taskDisplayAreaOrganizer)
         whenever(displayLayout.width()).thenReturn(DISPLAY_BOUNDS.width())
         whenever(displayLayout.height()).thenReturn(DISPLAY_BOUNDS.height())
+        whenever(displayLayout.stableInsets()).thenReturn(STABLE_INSETS)
     }
 
     @Test
     fun testFullscreenRegionCalculation() {
         val transitionHeight = context.resources.getDimensionPixelSize(
-            R.dimen.desktop_mode_transition_area_height)
+            R.dimen.desktop_mode_fullscreen_from_desktop_height)
         val fromFreeformWidth = mContext.resources.getDimensionPixelSize(
             R.dimen.desktop_mode_fullscreen_from_desktop_width
         )
-        val fromFreeformHeight = mContext.resources.getDimensionPixelSize(
-            R.dimen.desktop_mode_fullscreen_from_desktop_height
-        )
         var testRegion = visualIndicator.calculateFullscreenRegion(displayLayout,
             WINDOWING_MODE_FULLSCREEN, CAPTION_HEIGHT)
-        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, transitionHeight))
+        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, 2 * STABLE_INSETS.top))
         testRegion = visualIndicator.calculateFullscreenRegion(displayLayout,
             WINDOWING_MODE_FREEFORM, CAPTION_HEIGHT)
         assertThat(testRegion.bounds).isEqualTo(Rect(
             DISPLAY_BOUNDS.width() / 2 - fromFreeformWidth / 2,
             -50,
             DISPLAY_BOUNDS.width() / 2 + fromFreeformWidth / 2,
-            fromFreeformHeight))
+            transitionHeight))
         testRegion = visualIndicator.calculateFullscreenRegion(displayLayout,
             WINDOWING_MODE_MULTI_WINDOW, CAPTION_HEIGHT)
-        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, transitionHeight))
+        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, 2 * STABLE_INSETS.top))
     }
 
     @Test
@@ -135,5 +133,12 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
         private const val TRANSITION_AREA_WIDTH = 32
         private const val CAPTION_HEIGHT = 50
         private val DISPLAY_BOUNDS = Rect(0, 0, 2400, 1600)
+        private const val NAVBAR_HEIGHT = 50
+        private val STABLE_INSETS = Rect(
+            DISPLAY_BOUNDS.left,
+            DISPLAY_BOUNDS.top + CAPTION_HEIGHT,
+            DISPLAY_BOUNDS.right,
+            DISPLAY_BOUNDS.bottom - NAVBAR_HEIGHT
+        )
     }
 }

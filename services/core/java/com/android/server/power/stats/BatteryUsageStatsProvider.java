@@ -27,6 +27,7 @@ import android.os.UidBatteryConsumer;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
@@ -43,7 +44,7 @@ import java.util.List;
 public class BatteryUsageStatsProvider {
     private static final String TAG = "BatteryUsageStatsProv";
     private final Context mContext;
-    private boolean mPowerStatsExporterEnabled;
+    private final SparseBooleanArray mPowerStatsExporterEnabled = new SparseBooleanArray();
     private final PowerStatsExporter mPowerStatsExporter;
     private final PowerStatsStore mPowerStatsStore;
     private final PowerProfile mPowerProfile;
@@ -71,25 +72,44 @@ public class BatteryUsageStatsProvider {
 
                 // Power calculators are applied in the order of registration
                 mPowerCalculators.add(new BatteryChargeCalculator());
-                if (!mPowerStatsExporterEnabled) {
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_CPU)) {
                     mPowerCalculators.add(
                             new CpuPowerCalculator(mCpuScalingPolicies, mPowerProfile));
                 }
                 mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
                 if (!BatteryStats.checkWifiOnly(mContext)) {
-                    mPowerCalculators.add(new MobileRadioPowerCalculator(mPowerProfile));
+                    if (!mPowerStatsExporterEnabled.get(
+                            BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)) {
+                        mPowerCalculators.add(new MobileRadioPowerCalculator(mPowerProfile));
+                    }
+                    if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_PHONE)) {
+                        mPowerCalculators.add(new PhonePowerCalculator(mPowerProfile));
+                    }
                 }
-                mPowerCalculators.add(new WifiPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new BluetoothPowerCalculator(mPowerProfile));
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_WIFI)) {
+                    mPowerCalculators.add(new WifiPowerCalculator(mPowerProfile));
+                }
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_BLUETOOTH)) {
+                    mPowerCalculators.add(new BluetoothPowerCalculator(mPowerProfile));
+                }
                 mPowerCalculators.add(new SensorPowerCalculator(
                         mContext.getSystemService(SensorManager.class)));
-                mPowerCalculators.add(new GnssPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new CameraPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new FlashlightPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new AudioPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new VideoPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new PhonePowerCalculator(mPowerProfile));
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_GNSS)) {
+                    mPowerCalculators.add(new GnssPowerCalculator(mPowerProfile));
+                }
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_CAMERA)) {
+                    mPowerCalculators.add(new CameraPowerCalculator(mPowerProfile));
+                }
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT)) {
+                    mPowerCalculators.add(new FlashlightPowerCalculator(mPowerProfile));
+                }
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_AUDIO)) {
+                    mPowerCalculators.add(new AudioPowerCalculator(mPowerProfile));
+                }
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_VIDEO)) {
+                    mPowerCalculators.add(new VideoPowerCalculator(mPowerProfile));
+                }
                 mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));
@@ -228,7 +248,7 @@ public class BatteryUsageStatsProvider {
             }
         }
 
-        if (mPowerStatsExporterEnabled) {
+        if (mPowerStatsExporterEnabled.indexOfValue(true) >= 0) {
             mPowerStatsExporter.exportAggregatedPowerStats(batteryUsageStatsBuilder,
                     monotonicStartTime, monotonicEndTime);
         }
@@ -393,7 +413,10 @@ public class BatteryUsageStatsProvider {
         return builder.build();
     }
 
-    public void setPowerStatsExporterEnabled(boolean enabled) {
-        mPowerStatsExporterEnabled = enabled;
+    /**
+     * Specify whether PowerStats based attribution is supported for the specified component.
+     */
+    public void setPowerStatsExporterEnabled(int powerComponentId, boolean enabled) {
+        mPowerStatsExporterEnabled.put(powerComponentId, enabled);
     }
 }

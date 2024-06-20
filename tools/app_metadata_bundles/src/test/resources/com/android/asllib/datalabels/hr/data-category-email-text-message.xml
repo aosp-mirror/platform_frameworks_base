@@ -1,0 +1,8 @@
+<data-labels>
+    <data-shared dataType="email_text_message_data_type_emails"
+        purposes="analytics" />
+    <data-shared dataType="email_text_message_data_type_text_messages"
+        purposes="analytics" />
+    <data-shared dataType="email_text_message_data_type_other"
+        purposes="analytics" />
+</data-labels>

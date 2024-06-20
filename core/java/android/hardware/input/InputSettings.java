@@ -16,6 +16,9 @@
 
 package android.hardware.input;
 
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG;
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG;
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG;
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
@@ -23,11 +26,13 @@ import static com.android.hardware.input.Flags.touchpadTapDragging;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
+import android.app.AppGlobals;
 import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -393,15 +398,34 @@ public class InputSettings {
      *
      * @hide
      */
-    public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
+    public static boolean isStylusPointerIconEnabled(@NonNull Context context,
+            boolean forceReloadSetting) {
         if (InputProperties.force_enable_stylus_pointer_icon().orElse(false)) {
+            // Sysprop override is set
             return true;
         }
-        return context.getResources()
-                        .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon)
-                && Settings.Secure.getIntForUser(context.getContentResolver(),
-                        Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
-                        DEFAULT_STYLUS_POINTER_ICON_ENABLED, UserHandle.USER_CURRENT_OR_SELF) != 0;
+        if (!context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableStylusPointerIcon)) {
+            // Stylus pointer icons are disabled for the build
+            return false;
+        }
+        if (forceReloadSetting) {
+            return Settings.Secure.getIntForUser(context.getContentResolver(),
+                    Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+                    DEFAULT_STYLUS_POINTER_ICON_ENABLED, UserHandle.USER_CURRENT_OR_SELF) != 0;
+        }
+        return AppGlobals.getIntCoreSetting(Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+                DEFAULT_STYLUS_POINTER_ICON_ENABLED) != 0;
+    }
+
+    /**
+     * Whether a pointer icon will be shown over the location of a stylus pointer.
+     *
+     * @hide
+     * @see #isStylusPointerIconEnabled(Context, boolean)
+     */
+    public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
+        return isStylusPointerIconEnabled(context, false /* forceReloadSetting */);
     }
 
     /**
@@ -445,6 +469,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG)
     public static int getAccessibilityBounceKeysThreshold(@NonNull Context context) {
         if (!isAccessibilityBounceKeysFeatureEnabled()) {
             return 0;
@@ -467,6 +493,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG)
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setAccessibilityBounceKeysThreshold(@NonNull Context context,
             int thresholdTimeMillis) {
@@ -525,6 +553,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG)
     public static int getAccessibilitySlowKeysThreshold(@NonNull Context context) {
         if (!isAccessibilitySlowKeysFeatureFlagEnabled()) {
             return 0;
@@ -547,6 +577,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG)
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setAccessibilitySlowKeysThreshold(@NonNull Context context,
             int thresholdTimeMillis) {
@@ -594,6 +626,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG)
     public static boolean isAccessibilityStickyKeysEnabled(@NonNull Context context) {
         if (!isAccessibilityStickyKeysFeatureEnabled()) {
             return false;
@@ -615,6 +649,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG)
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setAccessibilityStickyKeysEnabled(@NonNull Context context,
             boolean enabled) {

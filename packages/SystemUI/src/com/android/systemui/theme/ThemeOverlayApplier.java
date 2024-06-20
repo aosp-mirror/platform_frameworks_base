@@ -15,7 +15,6 @@
  */
 package com.android.systemui.theme;
 
-import static com.android.systemui.shared.Flags.enableHomeDelay;
 
 import android.annotation.AnyThread;
 import android.content.om.FabricatedOverlay;
@@ -251,7 +250,7 @@ public class ThemeOverlayApplier implements Dumpable {
 
             try {
                 mOverlayManager.commit(transaction.build());
-                if (enableHomeDelay() && onComplete != null) {
+                if (onComplete != null) {
                     Log.d(TAG, "Executing onComplete runnable");
                     mMainExecutor.execute(onComplete);
                 }

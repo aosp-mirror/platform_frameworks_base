@@ -18,25 +18,37 @@ package com.android.server.power.stats;
 
 import static android.os.BatteryStats.STATS_SINCE_CHARGED;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.app.ActivityManager;
 import android.os.BatteryStats;
 import android.os.WorkSource;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArrayMap;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
 
 /**
  * Test BatteryStatsImpl onBatteryBackgroundTimeBase TimeBase.
  */
-public class BatteryStatsBackgroundStatsTest extends TestCase {
+public class BatteryStatsBackgroundStatsTest {
+
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
 
     private static final int UID = 10500;
 
     /** Test that BatteryStatsImpl.Uid.mOnBatteryBackgroundTimeBase works correctly. */
     @SmallTest
+    @Test
     public void testBgTimeBase() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -105,6 +117,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
 
     /** Test that BatteryStatsImpl.Uid.mOnBatteryScreenOffBackgroundTimeBase works correctly. */
     @SmallTest
+    @Test
     public void testScreenOffBgTimeBase() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -153,6 +166,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
     }
 
     @SmallTest
+    @Test
     public void testWifiScan() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -195,11 +209,13 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
     }
 
     @SmallTest
+    @Test
     public void testAppBluetoothScan() throws Exception {
         doTestAppBluetoothScanInternal(new WorkSource(UID));
     }
 
     @SmallTest
+    @Test
     public void testAppBluetoothScan_workChain() throws Exception {
         WorkSource ws = new WorkSource();
         ws.createWorkChain().addNode(UID, "foo");
@@ -275,6 +291,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
     }
 
     @SmallTest
+    @Test
     public void testJob() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -336,6 +353,7 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
     }
 
     @SmallTest
+    @Test
     public void testSyncs() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);

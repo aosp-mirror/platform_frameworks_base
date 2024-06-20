@@ -43,131 +43,189 @@ import android.window.ScreenCapture;
  */
 interface IAccessibilityServiceConnection {
 
+    @RequiresNoPermission
     void setServiceInfo(in AccessibilityServiceInfo info);
 
+    @RequiresNoPermission
     void setAttributionTag(in String attributionTag);
 
+    @RequiresNoPermission
     String[] findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
         long accessibilityNodeId, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, long threadId,
         in Bundle arguments);
 
+    @RequiresNoPermission
     String[] findAccessibilityNodeInfosByText(int accessibilityWindowId, long accessibilityNodeId,
         String text, int interactionId, IAccessibilityInteractionConnectionCallback callback,
         long threadId);
 
+    @RequiresNoPermission
     String[] findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
         long accessibilityNodeId, String viewId, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, long threadId);
 
+    @RequiresNoPermission
     String[] findFocus(int accessibilityWindowId, long accessibilityNodeId, int focusType,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, long threadId);
 
+    @RequiresNoPermission
     String[] focusSearch(int accessibilityWindowId, long accessibilityNodeId, int direction,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, long threadId);
 
+    @RequiresNoPermission
     boolean performAccessibilityAction(int accessibilityWindowId, long accessibilityNodeId,
         int action, in Bundle arguments, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, long threadId);
 
+    @RequiresNoPermission
     AccessibilityWindowInfo getWindow(int windowId);
 
+    @RequiresNoPermission
     AccessibilityWindowInfo.WindowListSparseArray getWindows();
 
+    @RequiresNoPermission
     AccessibilityServiceInfo getServiceInfo();
 
+    @RequiresNoPermission
     boolean performGlobalAction(int action);
+
+    @RequiresNoPermission
     List<AccessibilityNodeInfo.AccessibilityAction> getSystemActions();
 
+    @RequiresNoPermission
     void disableSelf();
 
+    @RequiresNoPermission
     oneway void setOnKeyEventResult(boolean handled, int sequence);
 
+    @RequiresNoPermission
     MagnificationConfig getMagnificationConfig(int displayId);
 
+    @RequiresNoPermission
     float getMagnificationScale(int displayId);
 
+    @RequiresNoPermission
     float getMagnificationCenterX(int displayId);
 
+    @RequiresNoPermission
     float getMagnificationCenterY(int displayId);
 
+    @RequiresNoPermission
     Region getMagnificationRegion(int displayId);
 
+    @RequiresNoPermission
     Region getCurrentMagnificationRegion(int displayId);
 
+    @RequiresNoPermission
     boolean resetMagnification(int displayId, boolean animate);
 
+    @RequiresNoPermission
     boolean resetCurrentMagnification(int displayId, boolean animate);
 
+    @RequiresNoPermission
     boolean setMagnificationConfig(int displayId, in MagnificationConfig config, boolean animate);
 
+    @RequiresNoPermission
     void setMagnificationCallbackEnabled(int displayId, boolean enabled);
 
+    @RequiresNoPermission
     boolean setSoftKeyboardShowMode(int showMode);
 
+    @RequiresNoPermission
     int getSoftKeyboardShowMode();
 
+    @RequiresNoPermission
     void setSoftKeyboardCallbackEnabled(boolean enabled);
 
-    boolean switchToInputMethod(String imeId);
+    @RequiresNoPermission
+        boolean switchToInputMethod(String imeId);
 
-    int setInputMethodEnabled(String imeId, boolean enabled);
+    @RequiresNoPermission
+        int setInputMethodEnabled(String imeId, boolean enabled);
 
+    @RequiresNoPermission
     boolean isAccessibilityButtonAvailable();
 
+    @RequiresNoPermission
     void sendGesture(int sequence, in ParceledListSlice gestureSteps);
 
+    @RequiresNoPermission
     void dispatchGesture(int sequence, in ParceledListSlice gestureSteps, int displayId);
 
+    @RequiresNoPermission
     boolean isFingerprintGestureDetectionAvailable();
 
+    @RequiresNoPermission
     IBinder getOverlayWindowToken(int displayid);
 
+    @RequiresNoPermission
     int getWindowIdForLeashToken(IBinder token);
 
+    @RequiresNoPermission
     void takeScreenshot(int displayId, in RemoteCallback callback);
 
+    @RequiresNoPermission
     void takeScreenshotOfWindow(int accessibilityWindowId, int interactionId,
         in ScreenCapture.ScreenCaptureListener listener,
         IAccessibilityInteractionConnectionCallback callback);
 
+    @RequiresNoPermission
     void setGestureDetectionPassthroughRegion(int displayId, in Region region);
 
+    @RequiresNoPermission
     void setTouchExplorationPassthroughRegion(int displayId, in Region region);
 
+    @RequiresNoPermission
     void setFocusAppearance(int strokeWidth, int color);
 
+    @RequiresNoPermission
     void setCacheEnabled(boolean enabled);
 
+    @RequiresNoPermission
     oneway void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
         int processId, long threadId, int callingUid, in Bundle serializedCallingStackInBundle);
 
+    @RequiresNoPermission
     void setServiceDetectsGesturesEnabled(int displayId, boolean mode);
 
+    @RequiresNoPermission
     void requestTouchExploration(int displayId);
 
+    @RequiresNoPermission
     void requestDragging(int displayId, int pointerId);
 
+    @RequiresNoPermission
     void requestDelegating(int displayId);
 
+    @RequiresNoPermission
     void onDoubleTap(int displayId);
 
+    @RequiresNoPermission
     void onDoubleTapAndHold(int displayId);
 
+    @RequiresNoPermission
     void setAnimationScale(float scale);
 
+    @RequiresNoPermission
     void setInstalledAndEnabledServices(in List<AccessibilityServiceInfo> infos);
 
-    List<AccessibilityServiceInfo> getInstalledAndEnabledServices();
+    @RequiresNoPermission
+        List<AccessibilityServiceInfo> getInstalledAndEnabledServices();
+
+    @RequiresNoPermission
     void attachAccessibilityOverlayToDisplay(int interactionId, int displayId, in SurfaceControl sc, IAccessibilityInteractionConnectionCallback callback);
 
+    @RequiresNoPermission
     void attachAccessibilityOverlayToWindow(int interactionId, int accessibilityWindowId, in SurfaceControl sc, IAccessibilityInteractionConnectionCallback callback);
 
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)")
+    @EnforcePermission("BLUETOOTH_CONNECT")
     void connectBluetoothBrailleDisplay(in String bluetoothAddress, in IBrailleDisplayController controller);
 
+
+    @RequiresNoPermission
     void connectUsbBrailleDisplay(in UsbDevice usbDevice, in IBrailleDisplayController controller);
 
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
     void setTestBrailleDisplayData(in List<Bundle> brailleDisplays);
 }

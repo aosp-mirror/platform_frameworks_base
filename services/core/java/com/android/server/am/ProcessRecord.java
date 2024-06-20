@@ -69,7 +69,6 @@ import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -261,6 +260,12 @@ class ProcessRecord implements WindowProcessListener {
     private long[] mDisabledCompatChanges;
 
     /**
+     * Set of compat changes for the process that are intended to be logged to logcat.
+     */
+    @GuardedBy("mService")
+    private long[] mLoggableCompatChanges;
+
+    /**
      * Who is watching for the death.
      */
     @GuardedBy("mService")
@@ -441,6 +446,7 @@ class ProcessRecord implements WindowProcessListener {
     final ProcessRecordNode[] mLinkedNodes = new ProcessRecordNode[NUM_NODE_TYPE];
 
     /** Whether the app was launched from a stopped state and is being unstopped. */
+    @GuardedBy("mService")
     volatile boolean mWasForceStopped;
 
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
@@ -686,6 +692,11 @@ class ProcessRecord implements WindowProcessListener {
 
     @GuardedBy({"mService", "mProcLock"})
     void setPid(int pid) {
+        // If the pid is changing and not the first time pid is being assigned, clear stopped state
+        // So if the process record is re-used for a different pid, it wouldn't keep the state.
+        if (pid != mPid && mPid != 0) {
+            setWasForceStopped(false);
+        }
         mPid = pid;
         mWindowProcessController.setPid(pid);
         mShortStringName = null;
@@ -735,6 +746,9 @@ class ProcessRecord implements WindowProcessListener {
             mOnewayThread = thread;
         }
         mWindowProcessController.setThread(thread);
+        if (mWindowProcessController.useFifoUiScheduling()) {
+            mService.mSpecifiedFifoProcesses.add(this);
+        }
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -742,7 +756,17 @@ class ProcessRecord implements WindowProcessListener {
         mThread = null;
         mOnewayThread = null;
         mWindowProcessController.setThread(null);
+        if (mWindowProcessController.useFifoUiScheduling()) {
+            mService.mSpecifiedFifoProcesses.remove(this);
+        }
         mProfile.onProcessInactive(tracker);
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    boolean useFifoUiScheduling() {
+        return mService.mUseFifoUiScheduling
+                || (mService.mAllowSpecifiedFifoScheduling
+                        && mWindowProcessController.useFifoUiScheduling());
     }
 
     @GuardedBy("mService")
@@ -931,8 +955,18 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @GuardedBy("mService")
+    long[] getLoggableCompatChanges() {
+        return mLoggableCompatChanges;
+    }
+
+    @GuardedBy("mService")
     void setDisabledCompatChanges(long[] disabledCompatChanges) {
         mDisabledCompatChanges = disabledCompatChanges;
+    }
+
+    @GuardedBy("mService")
+    void setLoggableCompatChanges(long[] loggableCompatChanges) {
+        mLoggableCompatChanges = loggableCompatChanges;
     }
 
     @GuardedBy("mService")
@@ -1660,33 +1694,21 @@ class ProcessRecord implements WindowProcessListener {
                 && mState.getCurAdj() >= ProcessList.FREEZER_CUTOFF_ADJ;
     }
 
-    /**
-     * Traverses all client processes and feed them to consumer.
-     */
-    @GuardedBy("mProcLock")
-    void forEachClient(@NonNull Consumer<ProcessRecord> consumer) {
-        for (int i = mServices.numberOfRunningServices() - 1; i >= 0; i--) {
-            final ServiceRecord s = mServices.getRunningServiceAt(i);
-            final ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections =
-                    s.getConnections();
-            for (int j = serviceConnections.size() - 1; j >= 0; j--) {
-                final ArrayList<ConnectionRecord> clist = serviceConnections.valueAt(j);
-                for (int k = clist.size() - 1; k >= 0; k--) {
-                    final ConnectionRecord cr = clist.get(k);
-                    if (isSdkSandbox && cr.binding.attributedClient != null) {
-                        consumer.accept(cr.binding.attributedClient);
-                    } else {
-                        consumer.accept(cr.binding.client);
-                    }
-                }
-            }
+    public void forEachConnectionHost(Consumer<ProcessRecord> consumer) {
+        for (int i = mServices.numberOfConnections() - 1; i >= 0; i--) {
+            final ConnectionRecord cr = mServices.getConnectionAt(i);
+            final ProcessRecord service = cr.binding.service.app;
+            consumer.accept(service);
         }
-        for (int i = mProviders.numberOfProviders() - 1; i >= 0; i--) {
-            final ContentProviderRecord cpr = mProviders.getProviderAt(i);
-            for (int j = cpr.connections.size() - 1; j >= 0; j--) {
-                final ContentProviderConnection conn = cpr.connections.get(j);
-                consumer.accept(conn.client);
-            }
+        for (int i = mServices.numberOfSdkSandboxConnections() - 1; i >= 0; i--) {
+            final ConnectionRecord cr = mServices.getSdkSandboxConnectionAt(i);
+            final ProcessRecord service = cr.binding.service.app;
+            consumer.accept(service);
+        }
+        for (int i = mProviders.numberOfProviderConnections() - 1; i >= 0; i--) {
+            ContentProviderConnection cpc = mProviders.getProviderConnectionAt(i);
+            ProcessRecord provider = cpc.provider.proc;
+            consumer.accept(provider);
         }
     }
 }

@@ -169,7 +169,7 @@ constructor(
         mediaListeners[key] = PlaybackStateListener(key, data)
     }
 
-    override fun onMediaDataRemoved(key: String) {
+    override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
         mediaListeners.remove(key)?.destroy()
     }
 

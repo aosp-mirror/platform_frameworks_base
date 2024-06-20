@@ -109,6 +109,12 @@ data class ClockMessageBuffers(
     val largeClockMessageBuffer: MessageBuffer,
 )
 
+data class AodClockBurnInModel(
+    val scale: Float,
+    val translationX: Float,
+    val translationY: Float,
+)
+
 /** Specifies layout information for the */
 interface ClockFaceLayout {
     /** All clock views to add to the root constraint layout before applying constraints. */
@@ -118,6 +124,8 @@ interface ClockFaceLayout {
     fun applyConstraints(constraints: ConstraintSet): ConstraintSet
 
     fun applyPreviewConstraints(constraints: ConstraintSet): ConstraintSet
+
+    fun applyAodBurnIn(aodBurnInModel: AodClockBurnInModel)
 }
 
 /** A ClockFaceLayout that applies the default lockscreen layout to a single view */
@@ -137,10 +145,17 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
     override fun applyPreviewConstraints(constraints: ConstraintSet): ConstraintSet {
         return constraints
     }
+
+    override fun applyAodBurnIn(aodBurnInModel: AodClockBurnInModel) {
+        // Default clock doesn't need detailed control of view
+    }
 }
 
 /** Events that should call when various rendering parameters change */
 interface ClockEvents {
+    /** Set to enable or disable swipe interaction */
+    var isReactiveTouchInteractionEnabled: Boolean
+
     /** Call whenever timezone changes */
     fun onTimeZoneChanged(timeZone: TimeZone)
 
@@ -188,8 +203,19 @@ interface ClockAnimations {
      *   negative means left.
      * @param fraction fraction of the clock movement. 0 means it is at the beginning, and 1 means
      *   it finished moving.
+     * @deprecated use {@link #onPositionUpdated(float, float)} instead.
      */
     fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float)
+
+    /**
+     * Runs when the clock's position changed during the move animation.
+     *
+     * @param distance is the total distance in pixels to offset the glyphs when animation
+     *   completes. Negative distance means we are animating the position towards the center.
+     * @param fraction fraction of the clock movement. 0 means it is at the beginning, and 1 means
+     *   it finished moving.
+     */
+    fun onPositionUpdated(distance: Float, fraction: Float)
 
     /**
      * Runs when swiping clock picker, swipingFraction: 1.0 -> clock is scaled up in the preview,
@@ -256,6 +282,9 @@ data class ClockConfig(
 
     /** True if the clock will react to tone changes in the seed color. */
     val isReactiveToTone: Boolean = true,
+
+    /** True if the clock is large frame clock, which will use weather in compose. */
+    val useCustomClockScene: Boolean = false,
 )
 
 /** Render configuration options for a clock face. Modifies the way SystemUI behaves. */
@@ -272,6 +301,9 @@ data class ClockFaceConfig(
      * animation will be used (e.g. a simple translation).
      */
     val hasCustomPositionUpdatedAnimation: Boolean = false,
+
+    /** True if the clock is large frame clock, which will use weatherBlueprint in compose. */
+    val useCustomClockScene: Boolean = false,
 )
 
 /** Structure for keeping clock-specific settings */

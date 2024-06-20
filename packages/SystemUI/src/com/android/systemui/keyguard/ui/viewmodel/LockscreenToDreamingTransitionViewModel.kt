@@ -19,7 +19,9 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor.Companion.TO_DREAMING_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
@@ -40,8 +42,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_DREAMING_DURATION,
-            from = KeyguardState.LOCKSCREEN,
-            to = KeyguardState.DREAMING,
+            edge = Edge.create(from = LOCKSCREEN, to = DREAMING),
         )
 
     /** Lockscreen views y-translation */

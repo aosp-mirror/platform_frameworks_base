@@ -16,14 +16,10 @@
 
 package com.android.internal.accessibility.util;
 
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType.INVISIBLE_TOGGLE;
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
 import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
@@ -33,7 +29,8 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
+
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 import java.util.Collections;
 import java.util.List;
@@ -53,10 +50,13 @@ public final class ShortcutUtils {
      * Opts in component id into colon-separated {@link UserShortcutType}
      * key's string from Settings.
      *
-     * @param context The current context.
+     * @param context      The current context.
      * @param shortcutType The preferred shortcut type user selected.
-     * @param componentId The component id that need to be opted in Settings.
+     * @param componentId  The component id that need to be opted in Settings.
+     * @deprecated Use
+     * {@link AccessibilityManager#enableShortcutsForTargets(boolean, int, Set, int)}
      */
+    @Deprecated
     public static void optInValueToSettings(Context context, @UserShortcutType int shortcutType,
             @NonNull String componentId) {
         final StringJoiner joiner = new StringJoiner(String.valueOf(SERVICES_SEPARATOR));
@@ -83,7 +83,11 @@ public final class ShortcutUtils {
      * @param context The current context.
      * @param shortcutType The preferred shortcut type user selected.
      * @param componentId The component id that need to be opted out of Settings.
+     *
+     * @deprecated Use
+     * {@link AccessibilityManager#enableShortcutForTargets(boolean, int, Set, int)}
      */
+    @Deprecated
     public static void optOutValueFromSettings(
             Context context, @UserShortcutType int shortcutType, @NonNull String componentId) {
         final StringJoiner joiner = new StringJoiner(String.valueOf(SERVICES_SEPARATOR));
@@ -144,7 +148,7 @@ public final class ShortcutUtils {
      * @param componentId The component id that need to be checked.
      * @return {@code true} if a component id is contained.
      */
-    public static boolean isShortcutContained(Context context, @ShortcutType int shortcutType,
+    public static boolean isShortcutContained(Context context, @UserShortcutType int shortcutType,
             @NonNull String componentId) {
         final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
@@ -166,27 +170,13 @@ public final class ShortcutUtils {
                 return Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
             case UserShortcutType.TRIPLETAP:
                 return Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED;
+            case UserShortcutType.TWOFINGER_DOUBLETAP:
+                return Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED;
+            case UserShortcutType.QUICK_SETTINGS:
+                return Settings.Secure.ACCESSIBILITY_QS_TARGETS;
             default:
                 throw new IllegalArgumentException(
                         "Unsupported user shortcut type: " + type);
-        }
-    }
-
-    /**
-     * Converts {@link ShortcutType} to {@link UserShortcutType}.
-     *
-     * @param type The shortcut type.
-     * @return Mapping type from {@link UserShortcutType}.
-     */
-    public static @UserShortcutType int convertToUserType(@ShortcutType int type) {
-        switch (type) {
-            case ACCESSIBILITY_BUTTON:
-                return UserShortcutType.SOFTWARE;
-            case ACCESSIBILITY_SHORTCUT_KEY:
-                return UserShortcutType.HARDWARE;
-            default:
-                throw new IllegalArgumentException(
-                        "Unsupported shortcut type:" + type);
         }
     }
 
@@ -252,10 +242,13 @@ public final class ShortcutUtils {
      * If you just want to know the current state, you can use
      * {@link AccessibilityManager#getAccessibilityShortcutTargets(int)}
      */
+    @NonNull
     public static Set<String> getShortcutTargetsFromSettings(
             Context context, @UserShortcutType int shortcutType, int userId) {
         final String targetKey = convertToKey(shortcutType);
-        if (Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED.equals(targetKey)) {
+        if (Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED.equals(targetKey)
+                || Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED
+                .equals(targetKey)) {
             boolean magnificationEnabled = Settings.Secure.getIntForUser(
                     context.getContentResolver(), targetKey, /* def= */ 0, userId) == 1;
             return magnificationEnabled ? Set.of(MAGNIFICATION_CONTROLLER_NAME)

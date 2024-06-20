@@ -5,7 +5,6 @@ import android.os.Trace
 import android.util.Log
 import android.view.Display
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
-import com.android.app.tracing.coroutines.launch
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.dagger.SysUISingleton
@@ -18,6 +17,23 @@ import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+
+interface TakeScreenshotExecutor {
+    suspend fun executeScreenshots(
+        screenshotRequest: ScreenshotRequest,
+        onSaved: (Uri?) -> Unit,
+        requestCallback: RequestCallback
+    )
+    fun onCloseSystemDialogsReceived()
+    fun removeWindows()
+    fun onDestroy()
+    fun executeScreenshotsAsync(
+        screenshotRequest: ScreenshotRequest,
+        onSaved: Consumer<Uri?>,
+        requestCallback: RequestCallback
+    )
+}
 
 /**
  * Receives the signal to take a screenshot from [TakeScreenshotService], and calls back with the
@@ -26,7 +42,7 @@ import kotlinx.coroutines.flow.first
  * Captures a screenshot for each [Display] available.
  */
 @SysUISingleton
-class TakeScreenshotExecutor
+class TakeScreenshotExecutorImpl
 @Inject
 constructor(
     private val screenshotControllerFactory: ScreenshotController.Factory,
@@ -35,7 +51,7 @@ constructor(
     private val screenshotRequestProcessor: ScreenshotRequestProcessor,
     private val uiEventLogger: UiEventLogger,
     private val screenshotNotificationControllerFactory: ScreenshotNotificationsController.Factory,
-) {
+) : TakeScreenshotExecutor {
 
     private val displays = displayRepository.displays
     private val screenshotControllers = mutableMapOf<Int, ScreenshotController>()
@@ -47,16 +63,18 @@ constructor(
      * [onSaved] is invoked only on the default display result. [RequestCallback.onFinish] is
      * invoked only when both screenshot UIs are removed.
      */
-    suspend fun executeScreenshots(
+    override suspend fun executeScreenshots(
         screenshotRequest: ScreenshotRequest,
-        onSaved: (Uri) -> Unit,
+        onSaved: (Uri?) -> Unit,
         requestCallback: RequestCallback
     ) {
-        val displayIds = getDisplaysToScreenshot(screenshotRequest.type)
+        val displays = getDisplaysToScreenshot(screenshotRequest.type)
         val resultCallbackWrapper = MultiResultCallbackWrapper(requestCallback)
-        displayIds.forEach { displayId: Int ->
+        displays.forEach { display ->
+            val displayId = display.displayId
             Log.d(TAG, "Executing screenshot for display $displayId")
             dispatchToController(
+                display = display,
                 rawScreenshotData = ScreenshotData.fromRequest(screenshotRequest, displayId),
                 onSaved =
                     if (displayId == Display.DEFAULT_DISPLAY) {
@@ -69,27 +87,27 @@ constructor(
 
     /** All logging should be triggered only by this method. */
     private suspend fun dispatchToController(
+        display: Display,
         rawScreenshotData: ScreenshotData,
-        onSaved: (Uri) -> Unit,
+        onSaved: (Uri?) -> Unit,
         callback: RequestCallback
     ) {
         // Let's wait before logging "screenshot requested", as we should log the processed
         // ScreenshotData.
         val screenshotData =
-            try {
-                screenshotRequestProcessor.process(rawScreenshotData)
-            } catch (e: RequestProcessorException) {
-                Log.e(TAG, "Failed to process screenshot request!", e)
-                logScreenshotRequested(rawScreenshotData)
-                onFailedScreenshotRequest(rawScreenshotData, callback)
-                return
-            }
+            runCatching { screenshotRequestProcessor.process(rawScreenshotData) }
+                .onFailure {
+                    Log.e(TAG, "Failed to process screenshot request!", it)
+                    logScreenshotRequested(rawScreenshotData)
+                    onFailedScreenshotRequest(rawScreenshotData, callback)
+                }
+                .getOrNull()
+                ?: return
 
         logScreenshotRequested(screenshotData)
         Log.d(TAG, "Screenshot request: $screenshotData")
         try {
-            getScreenshotController(screenshotData.displayId)
-                .handleScreenshot(screenshotData, onSaved, callback)
+            getScreenshotController(display).handleScreenshot(screenshotData, onSaved, callback)
         } catch (e: IllegalStateException) {
             Log.e(TAG, "Error while ScreenshotController was handling ScreenshotData!", e)
             onFailedScreenshotRequest(screenshotData, callback)
@@ -119,30 +137,27 @@ constructor(
         callback.reportError()
     }
 
-    private suspend fun getDisplaysToScreenshot(requestType: Int): List<Int> {
+    private suspend fun getDisplaysToScreenshot(requestType: Int): List<Display> {
+        val allDisplays = displays.first()
         return if (requestType == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
             // If this is a provided image, let's show the UI on the default display only.
-            listOf(Display.DEFAULT_DISPLAY)
+            allDisplays.filter { it.displayId == Display.DEFAULT_DISPLAY }
         } else {
-            displays.first().filter { it.type in ALLOWED_DISPLAY_TYPES }.map { it.displayId }
+            allDisplays.filter { it.type in ALLOWED_DISPLAY_TYPES }
         }
     }
 
-    /**
-     * Propagates the close system dialog signal to all controllers.
-     *
-     * TODO(b/295143676): Move the receiver in this class once the flag is flipped.
-     */
-    fun onCloseSystemDialogsReceived() {
+    /** Propagates the close system dialog signal to all controllers. */
+    override fun onCloseSystemDialogsReceived() {
         screenshotControllers.forEach { (_, screenshotController) ->
             if (!screenshotController.isPendingSharedTransition) {
-                screenshotController.dismissScreenshot(ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER)
+                screenshotController.requestDismissal(ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER)
             }
         }
     }
 
     /** Removes all screenshot related windows. */
-    fun removeWindows() {
+    override fun removeWindows() {
         screenshotControllers.forEach { (_, screenshotController) ->
             screenshotController.removeWindow()
         }
@@ -151,16 +166,16 @@ constructor(
     /**
      * Destroys the executor. Afterwards, this class is not expected to work as intended anymore.
      */
-    fun onDestroy() {
+    override fun onDestroy() {
         screenshotControllers.forEach { (_, screenshotController) ->
             screenshotController.onDestroy()
         }
         screenshotControllers.clear()
     }
 
-    private fun getScreenshotController(id: Int): ScreenshotController {
-        return screenshotControllers.computeIfAbsent(id) {
-            screenshotControllerFactory.create(id, /* showUIOnExternalDisplay= */ false)
+    private fun getScreenshotController(display: Display): ScreenshotController {
+        return screenshotControllers.computeIfAbsent(display.displayId) {
+            screenshotControllerFactory.create(display, /* showUIOnExternalDisplay= */ false)
         }
     }
 
@@ -171,12 +186,12 @@ constructor(
     }
 
     /** For java compatibility only. see [executeScreenshots] */
-    fun executeScreenshotsAsync(
+    override fun executeScreenshotsAsync(
         screenshotRequest: ScreenshotRequest,
-        onSaved: Consumer<Uri>,
+        onSaved: Consumer<Uri?>,
         requestCallback: RequestCallback
     ) {
-        mainScope.launch("TakeScreenshotService#executeScreenshotsAsync") {
+        mainScope.launch {
             executeScreenshots(screenshotRequest, { uri -> onSaved.accept(uri) }, requestCallback)
         }
     }

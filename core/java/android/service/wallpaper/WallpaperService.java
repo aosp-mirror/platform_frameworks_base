@@ -27,12 +27,17 @@ import static android.graphics.Matrix.MSKEW_Y;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import static com.android.window.flags.Flags.FLAG_OFFLOAD_COLOR_EXTRACTION;
 import static com.android.window.flags.Flags.noConsecutiveVisibilityEvents;
+import static com.android.window.flags.Flags.noVisibilityEventOnDisplayStateChange;
+import static com.android.window.flags.Flags.offloadColorExtraction;
+import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
 
 import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -102,9 +107,12 @@ import android.view.WindowInsets;
 import android.view.WindowLayout;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowRelayoutResult;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.ScreenCapture;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.HandlerCaller;
@@ -211,7 +219,7 @@ public abstract class WallpaperService extends Service {
      * @hide
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     public static final long WEAROS_WALLPAPER_HANDLES_SCALING = 272527315L;
 
     static final class WallpaperCommand {
@@ -294,7 +302,14 @@ public abstract class WallpaperService extends Service {
         final InsetsState mInsetsState = new InsetsState();
         final InsetsSourceControl.Array mTempControls = new InsetsSourceControl.Array();
         final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
-        final Bundle mSyncSeqIdBundle = new Bundle();
+        final Bundle mSyncSeqIdBundle = windowSessionRelayoutInfo() ? null : new Bundle();
+
+        SurfaceControl mSurfaceControl = new SurfaceControl();
+        WindowRelayoutResult mRelayoutResult = windowSessionRelayoutInfo()
+                ? new WindowRelayoutResult(mWinFrames, mMergedConfiguration, mSurfaceControl,
+                        mInsetsState, mTempControls)
+                : null;
+
         private final Point mSurfaceSize = new Point();
         private final Point mLastSurfaceSize = new Point();
         private final Matrix mTmpMatrix = new Matrix();
@@ -352,8 +367,6 @@ public abstract class WallpaperService extends Service {
         private float mWallpaperDimAmount = 0f;
         private float mPreviousWallpaperDimAmount = mWallpaperDimAmount;
         private float mDefaultDimAmount = 0.05f;
-
-        SurfaceControl mSurfaceControl = new SurfaceControl();
         SurfaceControl mBbqSurfaceControl;
         BLASTBufferQueue mBlastBufferQueue;
         private SurfaceControl mScreenshotSurfaceControl;
@@ -459,7 +472,8 @@ public abstract class WallpaperService extends Service {
             public void resized(ClientWindowFrames frames, boolean reportDraw,
                     MergedConfiguration mergedConfiguration, InsetsState insetsState,
                     boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
-                    int syncSeqId, boolean dragResizing) {
+                    int syncSeqId, boolean dragResizing,
+                    @Nullable ActivityWindowInfo activityWindowInfo) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0,
                         mergedConfiguration);
@@ -829,6 +843,15 @@ public abstract class WallpaperService extends Service {
         }
 
         /**
+         * Called when the dim amount of the wallpaper changed. This can be used to recompute the
+         * wallpaper colors based on the new dim, and call {@link #notifyColorsChanged()}.
+         * @hide
+         */
+        @FlaggedApi(FLAG_OFFLOAD_COLOR_EXTRACTION)
+        public void onDimAmountChanged(float dimAmount) {
+        }
+
+        /**
          * Called when an application has changed the desired virtual size of
          * the wallpaper.
          */
@@ -1003,7 +1026,8 @@ public abstract class WallpaperService extends Service {
             mWallpaperDimAmount = (!mShouldDimByDefault) ? mCustomDimAmount
                     : Math.max(mDefaultDimAmount, mCustomDimAmount);
 
-            if (!ENABLE_WALLPAPER_DIMMING || mBbqSurfaceControl == null
+            if (!ENABLE_WALLPAPER_DIMMING
+                    || mBbqSurfaceControl == null || !mBbqSurfaceControl.isValid()
                     || mWallpaperDimAmount == mPreviousWallpaperDimAmount) {
                 return;
             }
@@ -1040,6 +1064,10 @@ public abstract class WallpaperService extends Service {
             }
 
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;
+
+            // after the dim changes, allow colors to be immediately recomputed
+            mLastColorInvalidation = 0;
+            if (offloadColorExtraction()) onDimAmountChanged(mWallpaperDimAmount);
         }
 
         /**
@@ -1249,9 +1277,15 @@ public abstract class WallpaperService extends Service {
                     } else {
                         mLayout.surfaceInsets.set(0, 0, 0, 0);
                     }
-                    final int relayoutResult = mSession.relayout(mWindow, mLayout, mWidth, mHeight,
-                            View.VISIBLE, 0, 0, 0, mWinFrames, mMergedConfiguration,
-                            mSurfaceControl, mInsetsState, mTempControls, mSyncSeqIdBundle);
+                    final int relayoutResult;
+                    if (windowSessionRelayoutInfo()) {
+                        relayoutResult = mSession.relayout(mWindow, mLayout, mWidth, mHeight,
+                                View.VISIBLE, 0, 0, 0, mRelayoutResult);
+                    } else {
+                        relayoutResult = mSession.relayoutLegacy(mWindow, mLayout, mWidth, mHeight,
+                                View.VISIBLE, 0, 0, 0, mWinFrames, mMergedConfiguration,
+                                mSurfaceControl, mInsetsState, mTempControls, mSyncSeqIdBundle);
+                    }
                     final Rect outMaxBounds = mMergedConfiguration.getMergedConfiguration()
                             .windowConfiguration.getMaxBounds();
                     if (!outMaxBounds.equals(maxBounds)) {
@@ -1281,8 +1315,14 @@ public abstract class WallpaperService extends Service {
                                     .build();
                             SurfaceControl.Transaction transaction =
                                     new SurfaceControl.Transaction();
+                            final int frameRateCompat = getResources().getInteger(
+                                    R.integer.config_wallpaperFrameRateCompatibility);
+                            if (DEBUG) {
+                                Log.d(TAG, "Set frame rate compatibility value for Wallpaper: "
+                                        + frameRateCompat);
+                            }
                             transaction.setDefaultFrameRateCompatibility(mBbqSurfaceControl,
-                                Surface.FRAME_RATE_COMPATIBILITY_MIN).apply();
+                                    frameRateCompat).apply();
                         }
                         // Propagate transform hint from WM, so we can use the right hint for the
                         // first frame.
@@ -2339,6 +2379,7 @@ public abstract class WallpaperService extends Service {
             if (mSurfaceControl != null) {
                 mSurfaceControl.release();
                 mSurfaceControl = null;
+                mRelayoutResult = null;
             }
         }
 
@@ -2347,8 +2388,10 @@ public abstract class WallpaperService extends Service {
                     @Override
                     public void onDisplayChanged(int displayId) {
                         if (mDisplay.getDisplayId() == displayId) {
-                            boolean forceReport = mIsWearOs
-                                    && mDisplay.getState() != Display.STATE_DOZE_SUSPEND;
+                            boolean forceReport =
+                                    !noVisibilityEventOnDisplayStateChange()
+                                            && mIsWearOs
+                                            && mDisplay.getState() != Display.STATE_DOZE_SUSPEND;
                             reportVisibility(forceReport);
                         }
                     }

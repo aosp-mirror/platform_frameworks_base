@@ -19,4 +19,5 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="settingslib_category_personal" msgid="1142302328104700620">"개인"</string>
     <string name="settingslib_category_work" msgid="4867750733682444676">"업무"</string>
+    <string name="settingslib_category_private" msgid="5039276873477591386">"비공개"</string>
 </resources>

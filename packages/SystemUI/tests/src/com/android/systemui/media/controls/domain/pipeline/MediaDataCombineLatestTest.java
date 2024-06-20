@@ -26,9 +26,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
@@ -48,7 +48,7 @@ import org.mockito.junit.MockitoRule;
 import java.util.ArrayList;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class MediaDataCombineLatestTest extends SysuiTestCase {
 
@@ -202,24 +202,24 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
     @Test
     public void mediaDataRemoved() {
         // WHEN media data is removed without first receiving device or data
-        mManager.onMediaDataRemoved(KEY);
+        mManager.onMediaDataRemoved(KEY, false);
         // THEN a removed event isn't emitted
-        verify(mListener, never()).onMediaDataRemoved(eq(KEY));
+        verify(mListener, never()).onMediaDataRemoved(eq(KEY), anyBoolean());
     }
 
     @Test
     public void mediaDataRemovedAfterMediaEvent() {
         mManager.onMediaDataLoaded(KEY, null, mMediaData, true /* immediately */,
                 0 /* receivedSmartspaceCardLatency */, false /* isSsReactivated */);
-        mManager.onMediaDataRemoved(KEY);
-        verify(mListener).onMediaDataRemoved(eq(KEY));
+        mManager.onMediaDataRemoved(KEY, false);
+        verify(mListener).onMediaDataRemoved(eq(KEY), eq(false));
     }
 
     @Test
     public void mediaDataRemovedAfterDeviceEvent() {
         mManager.onMediaDeviceChanged(KEY, null, mDeviceData);
-        mManager.onMediaDataRemoved(KEY);
-        verify(mListener).onMediaDataRemoved(eq(KEY));
+        mManager.onMediaDataRemoved(KEY, false);
+        verify(mListener).onMediaDataRemoved(eq(KEY), eq(false));
     }
 
     @Test

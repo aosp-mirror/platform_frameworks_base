@@ -1,0 +1,11 @@
+package: "com.android.internal.os"
+container: "system"
+
+flag {
+    name: "enable_apache_http_legacy_preload"
+    namespace: "system_performance"
+    description: "Enables zygote preload of non-BCP org.apache.http.legacy.jar library."
+    # Fixed read-only is required as the flag is read during zygote init.
+    is_fixed_read_only: true
+    bug: "241474956"
+}

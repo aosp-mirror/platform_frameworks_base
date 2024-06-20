@@ -76,7 +76,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -86,7 +86,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, -4447034859795564700L, 9, "test %d %f " + "abc %s\n test", protoLogParam0, protoLogParam1, protoLogParam2); 
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, -4447034859795564700L, 9, "test %d %f " + "abc %s\n test", protoLogParam0, protoLogParam1, protoLogParam2); 
             
             }
                 }
@@ -98,8 +98,8 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); } /* ProtoLog.w(TEST_GROUP, "test %d %f", 100, 0.1); */ { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); }
-                    { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); } /* ProtoLog.w(TEST_GROUP, "test %d %f", 100, 0.1); */ if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -109,7 +109,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    { org.example.ProtoLogImpl.w(TEST_GROUP, 3218600869538902408L, 0, "test", (Object[]) null); }
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { org.example.ProtoLogImpl.w(TEST_GROUP, 3218600869538902408L, 0, "test", (Object[]) null); }
                 }
             }
             """.trimIndent()
@@ -119,7 +119,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, null, protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, null, protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -129,7 +129,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, -4447034859795564700L, 9, null, protoLogParam0, protoLogParam1, protoLogParam2); 
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, -4447034859795564700L, 9, null, protoLogParam0, protoLogParam1, protoLogParam2); 
             
             }
                 }

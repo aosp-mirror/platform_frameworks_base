@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.content.Context
+import android.graphics.Rect
 import android.hardware.biometrics.SensorLocationInternal
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.SensorLocation
@@ -24,22 +25,36 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 @SysUISingleton
 class FingerprintPropertyInteractor
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     @Application private val context: Context,
     repository: FingerprintPropertyRepository,
     configurationInteractor: ConfigurationInteractor,
     displayStateInteractor: DisplayStateInteractor,
+    udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
-    val isUdfps: Flow<Boolean> = repository.sensorType.map { it.isUdfps() }
+    val propertiesInitialized: Flow<Boolean> = repository.propertiesInitialized
+    val isUdfps: StateFlow<Boolean> =
+        repository.sensorType
+            .map { it.isUdfps() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = repository.sensorType.value.isUdfps(),
+            )
 
     /**
      * Devices with multiple physical displays use unique display ids to determine which sensor is
@@ -83,11 +98,20 @@ constructor(
         ) { unscaledSensorLocation, scale ->
             val sensorLocation =
                 SensorLocation(
-                    unscaledSensorLocation.sensorLocationX,
-                    unscaledSensorLocation.sensorLocationY,
-                    unscaledSensorLocation.sensorRadius,
+                    naturalCenterX = unscaledSensorLocation.sensorLocationX,
+                    naturalCenterY = unscaledSensorLocation.sensorLocationY,
+                    naturalRadius = unscaledSensorLocation.sensorRadius,
+                    scale = scale
                 )
-            sensorLocation.scale = scale
             sensorLocation
         }
+
+    /**
+     * Sensor location for the:
+     * - current physical display
+     * - current screen resolution
+     * - device's current orientation
+     */
+    val udfpsSensorBounds: Flow<Rect> =
+        udfpsOverlayInteractor.udfpsOverlayParams.map { it.sensorBounds }.distinctUntilChanged()
 }

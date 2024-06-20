@@ -23,7 +23,6 @@ import java.lang.annotation.Retention;
 
 import javax.inject.Qualifier;
 
-
 /**
  * An annotation for injecting whether or not we are running in a test environment.
  */

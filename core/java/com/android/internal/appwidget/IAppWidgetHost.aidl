@@ -23,6 +23,7 @@ import android.widget.RemoteViews;
 
 /** {@hide} */
 oneway interface IAppWidgetHost {
+    void updateAppWidgetDeferred(int appWidgetId);
     void updateAppWidget(int appWidgetId, in RemoteViews views);
     void providerChanged(int appWidgetId, in AppWidgetProviderInfo info);
     void providersChanged();

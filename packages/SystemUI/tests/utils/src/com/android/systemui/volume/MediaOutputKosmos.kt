@@ -18,32 +18,26 @@ package com.android.systemui.volume
 
 import android.content.packageManager
 import android.content.pm.ApplicationInfo
-import android.media.session.MediaController
-import android.os.Handler
-import android.testing.TestableLooper
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.media.mediaOutputDialogFactory
-import com.android.systemui.plugins.activityStarter
+import com.android.systemui.media.mediaOutputDialogManager
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.volume.data.repository.FakeLocalMediaRepository
 import com.android.systemui.volume.data.repository.FakeMediaControllerRepository
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.FakeLocalMediaRepositoryFactory
-import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputActionsInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
-
-var Kosmos.mediaController: MediaController by Kosmos.Fixture { mock {} }
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.mediaControllerInteractor
 
 val Kosmos.localMediaRepository by Kosmos.Fixture { FakeLocalMediaRepository() }
-val Kosmos.localMediaRepositoryFactory: LocalMediaRepositoryFactory by
+val Kosmos.localMediaRepositoryFactory by
     Kosmos.Fixture { FakeLocalMediaRepositoryFactory { localMediaRepository } }
 
 val Kosmos.mediaOutputActionsInteractor by
-    Kosmos.Fixture { MediaOutputActionsInteractor(mediaOutputDialogFactory, activityStarter) }
+    Kosmos.Fixture { MediaOutputActionsInteractor(mediaOutputDialogManager) }
 val Kosmos.mediaControllerRepository by Kosmos.Fixture { FakeMediaControllerRepository() }
 val Kosmos.mediaOutputInteractor by
     Kosmos.Fixture {
@@ -57,7 +51,16 @@ val Kosmos.mediaOutputInteractor by
             },
             testScope.backgroundScope,
             testScope.testScheduler,
-            Handler(TestableLooper.get(testCase).looper),
+            mediaControllerRepository,
+            mediaControllerInteractor,
+        )
+    }
+
+val Kosmos.mediaDeviceSessionInteractor by
+    Kosmos.Fixture {
+        MediaDeviceSessionInteractor(
+            testScope.testScheduler,
+            mediaControllerInteractor,
             mediaControllerRepository,
         )
     }

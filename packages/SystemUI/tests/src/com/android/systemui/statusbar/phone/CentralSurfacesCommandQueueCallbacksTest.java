@@ -30,9 +30,9 @@ import android.content.ComponentName;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
-import android.testing.AndroidTestingRunner;
 import android.view.HapticFeedbackConstants;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -40,6 +40,7 @@ import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
@@ -48,9 +49,11 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -69,7 +72,7 @@ import org.mockito.stubbing.Answer;
 import java.util.Optional;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
     @Mock private CentralSurfaces mCentralSurfaces;
@@ -78,6 +81,9 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private CommandQueue mCommandQueue;
     @Mock private QuickSettingsController mQuickSettingsController;
     @Mock private ShadeViewController mShadeViewController;
+    @Mock private PanelExpansionInteractor mPanelExpansionInteractor;
+    @Mock private Lazy<ShadeInteractor> mShadeInteractorLazy;
+    @Mock private ShadeHeaderController mShadeHeaderController;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -96,6 +102,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private UserTracker mUserTracker;
     @Mock private QSHost mQSHost;
     @Mock private ActivityStarter mActivityStarter;
+    @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -111,7 +118,9 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mScreenPinningRequest,
                 mShadeController,
                 mCommandQueue,
-                mShadeViewController,
+                mPanelExpansionInteractor,
+                mShadeInteractorLazy,
+                mShadeHeaderController,
                 mRemoteInputQuickSettingsDisabler,
                 mMetricsLogger,
                 mKeyguardUpdateMonitor,
@@ -126,12 +135,12 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mStatusBarHideIconsForBouncerManager,
                 mPowerManager,
                 Optional.of(mVibrator),
-                new DisableFlagsLogger(),
                 DEFAULT_DISPLAY,
                 mCameraLauncherLazy,
                 mUserTracker,
                 mQSHost,
-                mActivityStarter);
+                mActivityStarter,
+                mEmergencyGestureIntentFactory);
 
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));
@@ -187,7 +196,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     public void vibrateOnNavigationKeyDown_usesPerformHapticFeedback() {
         mSbcqCallbacks.vibrateOnNavigationKeyDown();
 
-        verify(mShadeViewController).performHapticFeedback(
+        verify(mShadeController).performHapticFeedback(
                 HapticFeedbackConstants.GESTURE_START
         );
     }

@@ -54,6 +54,7 @@ import com.android.internal.app.ProcessMap;
 import com.android.server.IoThread;
 import com.android.server.ServiceThread;
 import com.android.server.SystemServiceManager;
+import com.android.server.wm.WindowProcessController;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -72,6 +74,7 @@ import java.util.function.BiFunction;
 /** A class to manage all the {@link android.app.ApplicationStartInfo} records. */
 public final class AppStartInfoTracker {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppStartInfoTracker" : TAG_AM;
+    private static final boolean DEBUG = false;
 
     /** Interval of persisting the app start info to persistent storage. */
     private static final long APP_START_INFO_PERSIST_INTERVAL = TimeUnit.MINUTES.toMillis(30);
@@ -80,8 +83,21 @@ public final class AppStartInfoTracker {
     private static final int FOREACH_ACTION_NONE = 0;
     private static final int FOREACH_ACTION_REMOVE_ITEM = 1;
     private static final int FOREACH_ACTION_STOP_ITERATION = 2;
+    private static final int FOREACH_ACTION_REMOVE_AND_STOP_ITERATION = 3;
+
+    private static final String MONITORING_MODE_EMPTY_TEXT = "No records";
 
     @VisibleForTesting static final int APP_START_INFO_HISTORY_LIST_SIZE = 16;
+
+    /**
+     * The max number of records that can be present in {@link mInProgressRecords}.
+     *
+     * The magic number of 5 records is expected to be enough because this covers in progress
+     * activity starts only, of which more than a 1-2 at a time is very uncommon/unlikely.
+     */
+    @VisibleForTesting static final int MAX_IN_PROGRESS_RECORDS = 5;
+
+    private static final int APP_START_INFO_MONITORING_MODE_LIST_SIZE = 100;
 
     @VisibleForTesting static final String APP_START_STORE_DIR = "procstartstore";
 
@@ -139,7 +155,6 @@ public final class AppStartInfoTracker {
     /** The path to the historical proc start info file, persisted in the storage. */
     @VisibleForTesting File mProcStartInfoFile;
 
-
     /**
      * Temporary list of records that have not been completed.
      *
@@ -147,7 +162,12 @@ public final class AppStartInfoTracker {
      */
     @GuardedBy("mLock")
     @VisibleForTesting
-    final ArrayMap<Long, ApplicationStartInfo> mInProgRecords = new ArrayMap<>();
+    final ArrayMap<Long, ApplicationStartInfo> mInProgressRecords = new ArrayMap<>();
+
+    /** Temporary list of keys present in {@link mInProgressRecords} for sorting. */
+    @GuardedBy("mLock")
+    @VisibleForTesting
+    final ArrayList<Integer> mTemporaryInProgressIndexes = new ArrayList<>();
 
     AppStartInfoTracker() {
         mCallbacks = new SparseArray<>();
@@ -185,6 +205,60 @@ public final class AppStartInfoTracker {
         });
     }
 
+    /**
+     * Trim in progress records structure to acceptable size. To be called after each time a new
+     * record is added.
+     *
+     * This is necessary both for robustness, as well as because the call to
+     * {@link onReportFullyDrawn} which triggers the removal in the success case is not guaranteed.
+     *
+     * <p class="note"> Note: this is the expected path for removal of in progress records for
+     * successful activity triggered starts that don't report fully drawn. It is *not* only an edge
+     * case.</p>
+     */
+    @GuardedBy("mLock")
+    private void maybeTrimInProgressRecordsLocked() {
+        if (mInProgressRecords.size() <= MAX_IN_PROGRESS_RECORDS) {
+            // Size is acceptable, do nothing.
+            return;
+        }
+
+        // Make sure the temporary list is empty.
+        mTemporaryInProgressIndexes.clear();
+
+        // Populate the list with indexes for size of {@link mInProgressRecords}.
+        for (int i = 0; i < mInProgressRecords.size(); i++) {
+            mTemporaryInProgressIndexes.add(i, i);
+        }
+
+        // Sort the index collection by value of the corresponding key in {@link mInProgressRecords}
+        // from smallest to largest.
+        Collections.sort(mTemporaryInProgressIndexes, (a, b) -> Long.compare(
+                mInProgressRecords.keyAt(a), mInProgressRecords.keyAt(b)));
+
+        if (mTemporaryInProgressIndexes.size() == MAX_IN_PROGRESS_RECORDS + 1) {
+            // Only removing a single record so don't bother sorting again as we don't have to worry
+            // about indexes changing.
+            mInProgressRecords.removeAt(mTemporaryInProgressIndexes.get(0));
+        } else {
+            // Removing more than 1 record, remove the records we want to keep from the list and
+            // then sort again so we can remove in reverse order of indexes.
+            mTemporaryInProgressIndexes.subList(
+                    mTemporaryInProgressIndexes.size() - MAX_IN_PROGRESS_RECORDS,
+                    mTemporaryInProgressIndexes.size()).clear();
+            Collections.sort(mTemporaryInProgressIndexes);
+
+            // Remove all remaining record indexes in reverse order to avoid changing the already
+            // calculated indexes.
+            for (int i = mTemporaryInProgressIndexes.size() - 1; i >= 0; i--) {
+                mInProgressRecords.removeAt(mTemporaryInProgressIndexes.get(i));
+            }
+        }
+
+        // Clear the temorary list.
+        mTemporaryInProgressIndexes.clear();
+    }
+
     void onIntentStarted(@NonNull Intent intent, long timestampNanos) {
         synchronized (mLock) {
             if (!mEnabled) {
@@ -195,13 +269,16 @@ public final class AppStartInfoTracker {
             start.setIntent(intent);
             start.setStartType(ApplicationStartInfo.START_TYPE_UNSET);
             start.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_LAUNCH, timestampNanos);
+
+            // TODO: handle possible alarm activity start.
             if (intent != null && intent.getCategories() != null
                     && intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)) {
                 start.setReason(ApplicationStartInfo.START_REASON_LAUNCHER);
             } else {
                 start.setReason(ApplicationStartInfo.START_REASON_START_ACTIVITY);
             }
-            mInProgRecords.put(timestampNanos, start);
+            mInProgressRecords.put(timestampNanos, start);
+            maybeTrimInProgressRecordsLocked();
         }
     }
 
@@ -210,11 +287,17 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            if (!mInProgRecords.containsKey(id)) {
+            int index = mInProgressRecords.indexOfKey(id);
+            if (index < 0) {
                 return;
             }
-            mInProgRecords.get(id).setStartupState(ApplicationStartInfo.STARTUP_STATE_ERROR);
-            mInProgRecords.remove(id);
+            ApplicationStartInfo info = mInProgressRecords.valueAt(index);
+            if (info == null) {
+                mInProgressRecords.removeAt(index);
+                return;
+            }
+            info.setStartupState(ApplicationStartInfo.STARTUP_STATE_ERROR);
+            mInProgressRecords.removeAt(index);
         }
     }
 
@@ -223,16 +306,24 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            if (!mInProgRecords.containsKey(id)) {
+            int index = mInProgressRecords.indexOfKey(id);
+            if (index < 0) {
                 return;
             }
-            if (app != null) {
-                ApplicationStartInfo info = mInProgRecords.get(id);
-                info.setStartType((int) temperature);
-                addBaseFieldsFromProcessRecord(info, app);
-                mInProgRecords.put(id, addStartInfoLocked(info));
+            ApplicationStartInfo info = mInProgressRecords.valueAt(index);
+            if (info == null || app == null) {
+                mInProgressRecords.removeAt(index);
+                return;
+            }
+            info.setStartType((int) temperature);
+            addBaseFieldsFromProcessRecord(info, app);
+            ApplicationStartInfo newInfo = addStartInfoLocked(info);
+            if (newInfo == null) {
+                // newInfo can be null if records are added before load from storage is
+                // complete. In this case the newly added record will be lost.
+                mInProgressRecords.removeAt(index);
             } else {
-                mInProgRecords.remove(id);
+                mInProgressRecords.setValueAt(index, newInfo);
             }
         }
     }
@@ -242,12 +333,17 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            if (!mInProgRecords.containsKey(id)) {
+            int index = mInProgressRecords.indexOfKey(id);
+            if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.get(id);
+            ApplicationStartInfo info = mInProgressRecords.valueAt(index);
+            if (info == null) {
+                mInProgressRecords.removeAt(index);
+                return;
+            }
             info.setStartupState(ApplicationStartInfo.STARTUP_STATE_ERROR);
-            mInProgRecords.remove(id);
+            mInProgressRecords.removeAt(index);
         }
     }
 
@@ -257,13 +353,20 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            if (!mInProgRecords.containsKey(id)) {
+            int index = mInProgressRecords.indexOfKey(id);
+            if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.get(id);
-            info.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
+            ApplicationStartInfo info = mInProgressRecords.valueAt(index);
+            if (info == null) {
+                mInProgressRecords.removeAt(index);
+                return;
+            }
             info.setLaunchMode(launchMode);
-            checkCompletenessAndCallback(info);
+            if (!android.app.Flags.appStartInfoTimestamps()) {
+                info.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
+                checkCompletenessAndCallback(info);
+            }
         }
     }
 
@@ -272,18 +375,23 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            if (!mInProgRecords.containsKey(id)) {
+            int index = mInProgressRecords.indexOfKey(id);
+            if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.get(id);
+            ApplicationStartInfo info = mInProgressRecords.valueAt(index);
+            if (info == null) {
+                mInProgressRecords.removeAt(index);
+                return;
+            }
             info.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN,
                     timestampNanos);
-            mInProgRecords.remove(id);
+            mInProgressRecords.removeAt(index);
         }
     }
 
     public void handleProcessServiceStart(long startTimeNs, ProcessRecord app,
-                ServiceRecord serviceRecord, boolean cold) {
+                ServiceRecord serviceRecord) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -293,8 +401,9 @@ public final class AppStartInfoTracker {
             start.setStartupState(ApplicationStartInfo.STARTUP_STATE_STARTED);
             start.addStartupTimestamp(
                     ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
-            start.setStartType(cold ? ApplicationStartInfo.START_TYPE_COLD
-                    : ApplicationStartInfo.START_TYPE_WARM);
+            start.setStartType(ApplicationStartInfo.START_TYPE_COLD);
+
+            // TODO: handle possible alarm service start.
             start.setReason(serviceRecord.permission != null
                     && serviceRecord.permission.contains("android.permission.BIND_JOB_SERVICE")
                     ? ApplicationStartInfo.START_REASON_JOB
@@ -306,8 +415,9 @@ public final class AppStartInfoTracker {
         }
     }
 
-    public void handleProcessBroadcastStart(long startTimeNs, ProcessRecord app,
-                BroadcastRecord broadcast, boolean cold) {
+    /** Process a broadcast triggered app start. */
+    public void handleProcessBroadcastStart(long startTimeNs, ProcessRecord app, Intent intent,
+                boolean isAlarm) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -317,26 +427,19 @@ public final class AppStartInfoTracker {
             start.setStartupState(ApplicationStartInfo.STARTUP_STATE_STARTED);
             start.addStartupTimestamp(
                     ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
-            start.setStartType(cold ? ApplicationStartInfo.START_TYPE_COLD
-                    : ApplicationStartInfo.START_TYPE_WARM);
-            if (broadcast == null) {
-                start.setReason(ApplicationStartInfo.START_REASON_BROADCAST);
-            } else if (broadcast.alarm) {
+            start.setStartType(ApplicationStartInfo.START_TYPE_COLD);
+            if (isAlarm) {
                 start.setReason(ApplicationStartInfo.START_REASON_ALARM);
-            } else if (broadcast.pushMessage || broadcast.pushMessageOverQuota) {
-                start.setReason(ApplicationStartInfo.START_REASON_PUSH);
-            } else if (Intent.ACTION_BOOT_COMPLETED.equals(broadcast.intent.getAction())) {
-                start.setReason(ApplicationStartInfo.START_REASON_BOOT_COMPLETE);
             } else {
                 start.setReason(ApplicationStartInfo.START_REASON_BROADCAST);
             }
-            start.setIntent(broadcast != null ? broadcast.intent : null);
+            start.setIntent(intent);
             addStartInfoLocked(start);
         }
     }
 
-    public void handleProcessContentProviderStart(long startTimeNs, ProcessRecord app,
-                boolean cold) {
+    /** Process a content provider triggered app start. */
+    public void handleProcessContentProviderStart(long startTimeNs, ProcessRecord app) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
@@ -346,8 +449,7 @@ public final class AppStartInfoTracker {
             start.setStartupState(ApplicationStartInfo.STARTUP_STATE_STARTED);
             start.addStartupTimestamp(
                     ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
-            start.setStartType(cold ? ApplicationStartInfo.START_TYPE_COLD
-                    : ApplicationStartInfo.START_TYPE_WARM);
+            start.setStartType(ApplicationStartInfo.START_TYPE_COLD);
             start.setReason(ApplicationStartInfo.START_REASON_CONTENT_PROVIDER);
             addStartInfoLocked(start);
         }
@@ -385,58 +487,63 @@ public final class AppStartInfoTracker {
         start.setPackageName(app.info.packageName);
         if (android.content.pm.Flags.stayStopped()) {
             // TODO: Verify this is created at the right time to have the correct force-stopped
-            // state in the ProcessRecord. Also use the WindowProcessRecord if activity.
-            start.setForceStopped(app.wasForceStopped());
+            // state in the ProcessRecord.
+            final WindowProcessController wpc = app.getWindowProcessController();
+            start.setForceStopped(app.wasForceStopped()
+                    || (wpc != null ? wpc.wasForceStopped() : false));
         }
     }
 
-    void reportApplicationOnCreateTimeNanos(ProcessRecord app, long timeNs) {
-        if (!mEnabled) {
-            return;
+    /**
+     * Helper functions for monitoring shell command.
+     * > adb shell am start-info-detailed-monitoring [package-name]
+     */
+    void configureDetailedMonitoring(PrintWriter pw, String packageName, int userId) {
+        synchronized (mLock) {
+            if (!mEnabled) {
+                return;
+            }
+
+            forEachPackageLocked((name, records) -> {
+                for (int i = 0; i < records.size(); i++) {
+                    records.valueAt(i).disableAppMonitoringMode();
+                }
+                return AppStartInfoTracker.FOREACH_ACTION_NONE;
+            });
+
+            if (TextUtils.isEmpty(packageName)) {
+                pw.println("ActivityManager AppStartInfo detailed monitoring disabled");
+            } else {
+                SparseArray<AppStartInfoContainer> array = mData.getMap().get(packageName);
+                if (array != null) {
+                    for (int i = 0; i < array.size(); i++) {
+                        array.valueAt(i).enableAppMonitoringModeForUser(userId);
+                    }
+                    pw.println("ActivityManager AppStartInfo detailed monitoring enabled for "
+                            + packageName);
+                } else {
+                    pw.println("Package " + packageName + " not found");
+                }
+            }
         }
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_APPLICATION_ONCREATE);
     }
 
-    /** Report a bind application timestamp to add to {@link ApplicationStartInfo}. */
-    public void reportBindApplicationTimeNanos(ProcessRecord app, long timeNs) {
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_BIND_APPLICATION);
-    }
-
-    void reportFirstFrameTimeNanos(ProcessRecord app, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME);
-    }
-
-    void reportFullyDrawnTimeNanos(ProcessRecord app, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN);
-    }
-
-    void reportFullyDrawnTimeNanos(String processName, int uid, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(processName, uid, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN);
-    }
-
-    private void addTimestampToStart(ProcessRecord app, long timeNs, int key) {
+    void addTimestampToStart(ProcessRecord app, long timeNs, int key) {
         addTimestampToStart(app.info.packageName, app.uid, timeNs, key);
     }
 
-    private void addTimestampToStart(String packageName, int uid, long timeNs, int key) {
+    void addTimestampToStart(String packageName, int uid, long timeNs, int key) {
+        if (!mEnabled) {
+            return;
+        }
         synchronized (mLock) {
             AppStartInfoContainer container = mData.get(packageName, uid);
             if (container == null) {
                 // Record was not created, discard new data.
+                if (DEBUG) {
+                    Slog.d(TAG, "No container found for package=" + packageName + " and uid=" + uid
+                            + ". Discarding timestamp key=" + key + " val=" + timeNs);
+                }
                 return;
             }
             container.addTimestampToStartLocked(key, timeNs);
@@ -467,9 +574,9 @@ public final class AppStartInfoTracker {
     }
 
     /**
-     * Called whenever data is added to a {@link ApplicationStartInfo} object. Checks for
-     * completeness and triggers callback if a callback has been registered and the object
-     * is complete.
+     * Called whenever a potentially final piece of data is added to a {@link ApplicationStartInfo}
+     * object. Checks for completeness and triggers callback if a callback has been registered and
+     * the object is complete.
      */
     private void checkCompletenessAndCallback(ApplicationStartInfo startInfo) {
         synchronized (mLock) {
@@ -620,8 +727,13 @@ public final class AppStartInfoTracker {
         }
     }
 
+    /**
+     * Run provided callback for each packake in start info dataset.
+     *
+     * @return whether the for each completed naturally, false if it was stopped manually.
+     */
     @GuardedBy("mLock")
-    private void forEachPackageLocked(
+    private boolean forEachPackageLocked(
             BiFunction<String, SparseArray<AppStartInfoContainer>, Integer> callback) {
         if (callback != null) {
             ArrayMap<String, SparseArray<AppStartInfoContainer>> map = mData.getMap();
@@ -631,14 +743,17 @@ public final class AppStartInfoTracker {
                         map.removeAt(i);
                         break;
                     case FOREACH_ACTION_STOP_ITERATION:
-                        i = 0;
-                        break;
+                        return false;
+                    case FOREACH_ACTION_REMOVE_AND_STOP_ITERATION:
+                        map.removeAt(i);
+                        return false;
                     case FOREACH_ACTION_NONE:
                     default:
                         break;
                 }
             }
         }
+        return true;
     }
 
     @GuardedBy("mLock")
@@ -831,13 +946,14 @@ public final class AppStartInfoTracker {
         }
         AtomicFile af = new AtomicFile(mProcStartInfoFile);
         FileOutputStream out = null;
+        boolean succeeded;
         long now = System.currentTimeMillis();
         try {
             out = af.startWrite();
             ProtoOutputStream proto = new ProtoOutputStream(out);
             proto.write(AppsStartInfoProto.LAST_UPDATE_TIMESTAMP, now);
             synchronized (mLock) {
-                forEachPackageLocked(
+                succeeded = forEachPackageLocked(
                         (packageName, records) -> {
                             long token = proto.start(AppsStartInfoProto.PACKAGES);
                             proto.write(AppsStartInfoProto.Package.PACKAGE_NAME, packageName);
@@ -845,19 +961,30 @@ public final class AppStartInfoTracker {
                             for (int j = 0; j < uidArraySize; j++) {
                                 try {
                                     records.valueAt(j)
-                                        .writeToProto(proto, AppsStartInfoProto.Package.USERS);
+                                            .writeToProto(proto, AppsStartInfoProto.Package.USERS);
                                 } catch (IOException e) {
                                     Slog.w(TAG, "Unable to write app start info into persistent"
                                             + "storage: " + e);
+                                    // There was likely an issue with this record that won't resolve
+                                    // next time we try to persist so remove it. Also stop iteration
+                                    // as we failed the write and need to start again from scratch.
+                                    return AppStartInfoTracker
+                                            .FOREACH_ACTION_REMOVE_AND_STOP_ITERATION;
                                 }
                             }
                             proto.end(token);
                             return AppStartInfoTracker.FOREACH_ACTION_NONE;
                         });
-                mLastAppStartInfoPersistTimestamp = now;
+                if (succeeded) {
+                    mLastAppStartInfoPersistTimestamp = now;
+                }
             }
-            proto.flush();
-            af.finishWrite(out);
+            if (succeeded) {
+                proto.flush();
+                af.finishWrite(out);
+            } else {
+                af.failWrite(out);
+            }
         } catch (IOException e) {
             Slog.w(TAG, "Unable to write historical app start info into persistent storage: " + e);
             af.failWrite(out);
@@ -904,7 +1031,7 @@ public final class AppStartInfoTracker {
                 mProcStartInfoFile.delete();
             }
             mData.getMap().clear();
-            mInProgRecords.clear();
+            mInProgressRecords.clear();
         }
     }
 
@@ -983,13 +1110,44 @@ public final class AppStartInfoTracker {
 
     /** A container class of (@link android.app.ApplicationStartInfo) */
     final class AppStartInfoContainer {
-        private List<ApplicationStartInfo> mInfos; // Always kept sorted by first timestamp.
+        private ArrayList<ApplicationStartInfo> mInfos; // Always kept sorted by first timestamp.
         private int mMaxCapacity;
         private int mUid;
+        private boolean mMonitoringModeEnabled = false;
 
         AppStartInfoContainer(final int maxCapacity) {
             mInfos = new ArrayList<ApplicationStartInfo>();
             mMaxCapacity = maxCapacity;
+        }
+
+        int getMaxCapacity() {
+            return mMonitoringModeEnabled ? APP_START_INFO_MONITORING_MODE_LIST_SIZE : mMaxCapacity;
+        }
+
+        @GuardedBy("mLock")
+        void enableAppMonitoringModeForUser(int userId) {
+            if (UserHandle.getUserId(mUid) == userId) {
+                mMonitoringModeEnabled = true;
+            }
+        }
+
+        @GuardedBy("mLock")
+        void disableAppMonitoringMode() {
+            mMonitoringModeEnabled = false;
+
+            // Capacity is reduced by turning off monitoring mode. Check if array size is within
+            // new lower limits and trim extraneous records if it is not.
+            if (mInfos.size() <= getMaxCapacity()) {
+                return;
+            }
+
+            // Sort records so we can remove the least recent ones.
+            Collections.sort(mInfos, (a, b) ->
+                    Long.compare(getStartTimestamp(b), getStartTimestamp(a)));
+
+            // Remove records and trim list object back to size.
+            mInfos.subList(0, mInfos.size() - getMaxCapacity()).clear();
+            mInfos.trimToSize();
         }
 
         @GuardedBy("mLock")
@@ -1001,7 +1159,7 @@ public final class AppStartInfoTracker {
         @GuardedBy("mLock")
         void addStartInfoLocked(ApplicationStartInfo info) {
             int size = mInfos.size();
-            if (size >= mMaxCapacity) {
+            if (size >= getMaxCapacity()) {
                 // Remove oldest record if size is over max capacity.
                 int oldestIndex = -1;
                 long oldestTimeStamp = Long.MAX_VALUE;
@@ -1021,22 +1179,138 @@ public final class AppStartInfoTracker {
                     Long.compare(getStartTimestamp(b), getStartTimestamp(a)));
         }
 
+        /**
+         * Add the provided key/timestamp to the most recent start record, if it is currently
+         * accepting new timestamps.
+         *
+         * Will also update the start records startup state and trigger the completion listener when
+         * appropriate.
+         */
         @GuardedBy("mLock")
         void addTimestampToStartLocked(int key, long timestampNs) {
-            int index = mInfos.size() - 1;
-            int startupState = mInfos.get(index).getStartupState();
-            if (startupState == ApplicationStartInfo.STARTUP_STATE_STARTED
-                    || key == ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN) {
-                mInfos.get(index).addStartupTimestamp(key, timestampNs);
+            if (mInfos.isEmpty()) {
+                if (DEBUG) Slog.d(TAG, "No records to add to.");
+                return;
             }
+
+            // Records are sorted newest to oldest, grab record at index 0.
+            ApplicationStartInfo startInfo = mInfos.get(0);
+
+            if (!isAddTimestampAllowed(startInfo, key, timestampNs)) {
+                return;
+            }
+
+            startInfo.addStartupTimestamp(key, timestampNs);
+
+            if (key == ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME
+                    && android.app.Flags.appStartInfoTimestamps()) {
+                startInfo.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
+                checkCompletenessAndCallback(startInfo);
+            }
+        }
+
+        private boolean isAddTimestampAllowed(ApplicationStartInfo startInfo, int key,
+                long timestampNs) {
+            int startupState = startInfo.getStartupState();
+
+            // If startup state is error then don't accept any further timestamps.
+            if (startupState == ApplicationStartInfo.STARTUP_STATE_ERROR) {
+                if (DEBUG) Slog.d(TAG, "Startup state is error, not accepting new timestamps.");
+                return false;
+            }
+
+            Map<Integer, Long> timestamps = startInfo.getStartupTimestamps();
+
+            if (startupState == ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN) {
+                switch (key) {
+                    case ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN:
+                        // Allowed, continue to confirm it's not already added.
+                        break;
+                    case ApplicationStartInfo.START_TIMESTAMP_INITIAL_RENDERTHREAD_FRAME:
+                        Long firstFrameTimeNs = timestamps
+                                .get(ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME);
+                        if (firstFrameTimeNs == null) {
+                            // This should never happen. State can't be first frame drawn if first
+                            // frame timestamp was not provided.
+                            return false;
+                        }
+
+                        if (timestampNs > firstFrameTimeNs) {
+                            // Initial renderthread frame has to occur before first frame.
+                            return false;
+                        }
+
+                        // Allowed, continue to confirm it's not already added.
+                        break;
+                    case ApplicationStartInfo.START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE:
+                        // Allowed, continue to confirm it's not already added.
+                        break;
+                    default:
+                        return false;
+                }
+            }
+
+            if (timestamps.get(key) != null) {
+                // Timestamp should not occur more than once for a given start.
+                return false;
+            }
+
+            return true;
         }
 
         @GuardedBy("mLock")
         void dumpLocked(PrintWriter pw, String prefix, SimpleDateFormat sdf) {
+            if (mMonitoringModeEnabled) {
+                // For monitoring mode, calculate the average start time for each start state to
+                // add to output.
+                List<Long> coldStartTimes = new ArrayList<>();
+                List<Long> warmStartTimes = new ArrayList<>();
+                List<Long> hotStartTimes = new ArrayList<>();
+
+                for (int i = 0; i < mInfos.size(); i++) {
+                    ApplicationStartInfo startInfo = mInfos.get(i);
+                    Map<Integer, Long> timestamps = startInfo.getStartupTimestamps();
+
+                    // Confirm required timestamps exist.
+                    if (timestamps.containsKey(ApplicationStartInfo.START_TIMESTAMP_LAUNCH)
+                            && timestamps.containsKey(
+                            ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME)) {
+                        // Add timestamp to correct collection.
+                        long time = timestamps.get(ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME)
+                                - timestamps.get(ApplicationStartInfo.START_TIMESTAMP_LAUNCH);
+                        switch (startInfo.getStartType()) {
+                            case ApplicationStartInfo.START_TYPE_COLD:
+                                coldStartTimes.add(time);
+                                break;
+                            case ApplicationStartInfo.START_TYPE_WARM:
+                                warmStartTimes.add(time);
+                                break;
+                            case ApplicationStartInfo.START_TYPE_HOT:
+                                hotStartTimes.add(time);
+                                break;
+                        }
+                    }
+                }
+
+                pw.println(prefix + "  Average Start Time in ns for Cold Starts: "
+                        + (coldStartTimes.isEmpty()  ? MONITORING_MODE_EMPTY_TEXT
+                                : calculateAverage(coldStartTimes)));
+                pw.println(prefix + "  Average Start Time in ns for Warm Starts: "
+                        + (warmStartTimes.isEmpty() ? MONITORING_MODE_EMPTY_TEXT
+                                : calculateAverage(warmStartTimes)));
+                pw.println(prefix + "  Average Start Time in ns for Hot Starts: "
+                        + (hotStartTimes.isEmpty() ? MONITORING_MODE_EMPTY_TEXT
+                                : calculateAverage(hotStartTimes)));
+            }
+
             int size = mInfos.size();
             for (int i = 0; i < size; i++) {
                 mInfos.get(i).dump(pw, prefix + "  ", "#" + i, sdf);
             }
+        }
+
+        private long calculateAverage(List<Long> vals) {
+            return (long) vals.stream().mapToDouble(a -> a).average().orElse(0.0);
         }
 
         @GuardedBy("mLock")
@@ -1048,6 +1322,7 @@ public final class AppStartInfoTracker {
                 mInfos.get(i)
                         .writeToProto(proto, AppsStartInfoProto.Package.User.APP_START_INFO);
             }
+            proto.write(AppsStartInfoProto.Package.User.MONITORING_ENABLED, mMonitoringModeEnabled);
             proto.end(token);
         }
 
@@ -1065,6 +1340,10 @@ public final class AppStartInfoTracker {
                         ApplicationStartInfo info = new ApplicationStartInfo();
                         info.readFromProto(proto, AppsStartInfoProto.Package.User.APP_START_INFO);
                         mInfos.add(info);
+                        break;
+                    case (int) AppsStartInfoProto.Package.User.MONITORING_ENABLED:
+                        mMonitoringModeEnabled = proto.readBoolean(
+                            AppsStartInfoProto.Package.User.MONITORING_ENABLED);
                         break;
                 }
             }

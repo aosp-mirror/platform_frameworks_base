@@ -40,6 +40,7 @@ import java.util.List;
 public class DragSession {
     private final ActivityTaskManager mActivityTaskManager;
     private final ClipData mInitialDragData;
+    private final int mInitialDragFlags;
 
     final DisplayLayout displayLayout;
     // The activity info associated with the activity in the appData or the launchableIntent
@@ -62,9 +63,10 @@ public class DragSession {
     boolean dragItemSupportsSplitscreen;
 
     DragSession(ActivityTaskManager activityTaskManager,
-            DisplayLayout dispLayout, ClipData data) {
+            DisplayLayout dispLayout, ClipData data, int dragFlags) {
         mActivityTaskManager = activityTaskManager;
         mInitialDragData = data;
+        mInitialDragFlags = dragFlags;
         displayLayout = dispLayout;
     }
 
@@ -94,6 +96,6 @@ public class DragSession {
         dragItemSupportsSplitscreen = activityInfo == null
                 || ActivityInfo.isResizeableMode(activityInfo.resizeMode);
         appData = mInitialDragData.getItemAt(0).getIntent();
-        launchableIntent = DragUtils.getLaunchIntent(mInitialDragData);
+        launchableIntent = DragUtils.getLaunchIntent(mInitialDragData, mInitialDragFlags);
     }
 }

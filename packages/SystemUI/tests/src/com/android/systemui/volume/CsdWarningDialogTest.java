@@ -27,9 +27,10 @@ import static org.mockito.Mockito.verify;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.media.AudioManager;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.SysuiTestCase;
@@ -41,7 +42,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class CsdWarningDialogTest extends SysuiTestCase {
 

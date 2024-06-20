@@ -324,6 +324,44 @@ public class DragDropControllerTests extends WindowTestsBase {
                 });
     }
 
+    @Test
+    public void testPrivateInterceptGlobalDragDropGetsDragFlags() {
+        mWindow.mAttrs.privateFlags |= PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
+        mWindow.setViewVisibility(View.GONE);
+
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG,
+                ClipData.newPlainText("label", "text"), () -> {
+                    // Verify the start-drag event has the drag flags
+                    final DragEvent dragEvent = dragEvents.get(0);
+                    assertTrue(dragEvent.getAction() == ACTION_DRAG_STARTED);
+                    assertTrue(dragEvent.getDragFlags() ==
+                            (View.DRAG_FLAG_GLOBAL
+                                    | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG));
+
+                    try {
+                        mTarget.mDeferDragStateClosed = true;
+                        mTarget.reportDropWindow(mWindow.mInputChannelToken, 0, 0);
+                        // // Verify the drop event does not have the drag flags
+                        mTarget.handleMotionEvent(false, 0, 0);
+                        final DragEvent dropEvent = dragEvents.get(dragEvents.size() - 1);
+                        assertTrue(dropEvent.getDragFlags() ==
+                                (View.DRAG_FLAG_GLOBAL
+                                        | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG));
+
+                        mTarget.reportDropResult(iwindow, true);
+                    } finally {
+                        mTarget.mDeferDragStateClosed = false;
+                    }
+                });
+    }
+
     private DragEvent last(ArrayList<DragEvent> list) {
         return list.get(list.size() - 1);
     }

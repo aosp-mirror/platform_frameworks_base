@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"ഉപകരണം"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"നിങ്ങളുടെ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> എന്നതിൽ ഇനിപ്പറയുന്ന അനുമതികൾ ആക്സസ് ചെയ്യാൻ ഈ ആപ്പിനെ അനുവദിക്കും"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"നിങ്ങളുടെ ഫോണിൽ നിന്ന് ഈ വിവരങ്ങൾ ആക്‌സസ് ചെയ്യാൻ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ആപ്പിനെ അനുവദിക്കുക"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"നിങ്ങളുടെ ഫോണിലെ ആപ്പുകൾ സ്ട്രീം ചെയ്യാൻ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിനെ അനുവദിക്കണോ?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"ഓഡിയോ, ഫോട്ടോകൾ, പാസ്‌വേഡുകൾ, സന്ദേശങ്ങൾ എന്നിവ ഉൾപ്പെടെ ഫോണിൽ ദൃശ്യമാകുന്നതോ പ്ലേ ചെയ്യുന്നതോ ആയ എല്ലാത്തിലേക്കും %1$s-ന് ആക്‌സസ് ഉണ്ടായിരിക്കും.&lt;br/&gt;&lt;br/&gt;നിങ്ങൾ ഈ അനുമതിയിലേക്കുള്ള ആക്സസ് നീക്കം ചെയ്യുന്നത് വരെ %1$s-ന് ആപ്പുകൾ സ്ട്രീം ചെയ്യാനാകും."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"ക്രോസ്-ഉപകരണ സേവനങ്ങൾ"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"നിങ്ങളുടെ ഉപകരണങ്ങളിൽ ഒന്നിൽ നിന്ന് അടുത്തതിലേക്ക് ആപ്പുകൾ സ്ട്രീം ചെയ്യാൻ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> എന്ന ഉപകരണത്തിന് വേണ്ടി <xliff:g id="APP_NAME">%1$s</xliff:g> എന്നത് അനുമതി അഭ്യർത്ഥിക്കുന്നു"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"നിങ്ങളുടെ ഉപകരണങ്ങൾക്കിടയിൽ ആപ്പുകൾ സ്ട്രീം ചെയ്യാനും പ്രദർശിപ്പിക്കാനും നിങ്ങളുടെ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> എന്ന ഉപകരണത്തിന് വേണ്ടി <xliff:g id="APP_NAME">%1$s</xliff:g> എന്നത് അനുമതി അഭ്യർത്ഥിക്കുന്നു"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"നിങ്ങളുടെ ഫോണിൽ നിന്ന് ഈ വിവരങ്ങൾ ആക്‌സസ് ചെയ്യാൻ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ആപ്പിനെ അനുവദിക്കുക"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play സേവനങ്ങൾ"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"നിങ്ങളുടെ ഫോണിലെ ഫോട്ടോകൾ, മീഡിയ, അറിയിപ്പുകൾ എന്നിവ ആക്സസ് ചെയ്യാൻ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> എന്ന ഉപകരണത്തിന് വേണ്ടി <xliff:g id="APP_NAME">%1$s</xliff:g> അനുമതി അഭ്യർത്ഥിക്കുന്നു"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"ഈ പ്രവർത്തനം നടത്താൻ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിനെ അനുവദിക്കണോ?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"നിങ്ങളുടെ ഫോണിലെ ആപ്പുകളും സിസ്റ്റം ഫീച്ചറുകളെയും സ്ട്രീം ചെയ്യാൻ, &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിനെ അനുവദിക്കണോ?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"ഓഡിയോ, ഫോട്ടോകൾ, പേയ്മെന്റ് വിവരങ്ങൾ, പാസ്‌വേഡുകൾ, സന്ദേശങ്ങൾ എന്നിവ ഉൾപ്പെടെ ഫോണിൽ ദൃശ്യമാകുന്നതോ പ്ലേ ചെയ്യുന്നതോ ആയ എല്ലാത്തിലേക്കും %1$s-ന് ആക്‌സസ് ഉണ്ടായിരിക്കും.&lt;br/&gt;&lt;br/&gt;നിങ്ങൾ ഈ അനുമതിയിലേക്കുള്ള ആക്സസ് നീക്കം ചെയ്യുന്നത് വരെ %1$s-ന് ആപ്പുകളും സിസ്റ്റം ഫീച്ചറുകളും സ്ട്രീം ചെയ്യാനാകും."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"സമീപമുള്ള ഉപകരണങ്ങളിൽ ആപ്പുകളും മറ്റ് സിസ്റ്റം ഫീച്ചറുകളും സ്ട്രീം ചെയ്യാൻ നിങ്ങളുടെ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> എന്നതിന് വേണ്ടി <xliff:g id="APP_NAME">%1$s</xliff:g> അനുമതി അഭ്യർത്ഥിക്കുന്നു"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ഉപകരണം"</string>
     <string name="summary_generic" msgid="1761976003668044801">"വിളിക്കുന്നയാളുടെ പേര് പോലുള്ള വിവരങ്ങൾ നിങ്ങളുടെ ഫോണിനും തിരഞ്ഞെടുത്ത ഉപകരണത്തിനും ഇടയിൽ സമന്വയിപ്പിക്കുന്നതിന് ഈ ആപ്പിന് കഴിയും"</string>

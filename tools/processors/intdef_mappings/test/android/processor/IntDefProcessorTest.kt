@@ -24,7 +24,7 @@ import junit.framework.Assert.assertEquals
 import org.junit.Test
 import java.io.StringWriter
 import javax.tools.JavaFileObject
-import javax.tools.StandardLocation.CLASS_OUTPUT
+import javax.tools.StandardLocation.SOURCE_OUTPUT
 
 /**
  * Tests for [IntDefProcessor]
@@ -112,7 +112,7 @@ class IntDefProcessorTest {
                 .compile(filesToCompile.toMutableList())
 
         assertThat(compilation).succeeded()
-        assertThat(compilation).generatedFile(CLASS_OUTPUT, "com.android.winscope",
+        assertThat(compilation).generatedFile(SOURCE_OUTPUT, "com.android.winscope",
                 "intDefMapping.json").contentsAsUtf8String().isEqualTo(expectedFile)
     }
 

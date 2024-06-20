@@ -3256,6 +3256,14 @@ public abstract class Context {
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
      *
+     * <p>As of {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system can <a
+     * href="{@docRoot}develop/background-work/background-tasks/broadcasts#android-14">place
+     * context-registered broadcasts in a queue while the app is in the <a
+     * href="{@docRoot}guide/components/activities/process-lifecycle">cached state</a>.
+     * When the app leaves the cached state, such as returning to the
+     * foreground, the system delivers any queued broadcasts. Multiple instances
+     * of certain broadcasts might be merged into one broadcast.
+     *
      * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
      * registered with this method will correctly respect the
      * {@link Intent#setPackage(String)} specified for an Intent being broadcast.
@@ -3301,6 +3309,14 @@ public abstract class Context {
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
      *
+     * <p>As of {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system can <a
+     * href="{@docRoot}develop/background-work/background-tasks/broadcasts#android-14">place
+     * context-registered broadcasts in a queue while the app is in the <a
+     * href="{@docRoot}guide/components/activities/process-lifecycle">cached state</a>.
+     * When the app leaves the cached state, such as returning to the
+     * foreground, the system delivers any queued broadcasts. Multiple instances
+     * of certain broadcasts might be merged into one broadcast.
+     *
      * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
      * registered with this method will correctly respect the
      * {@link Intent#setPackage(String)} specified for an Intent being broadcast.
@@ -3341,6 +3357,14 @@ public abstract class Context {
      * a different thread than the main application thread.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system can <a
+     * href="{@docRoot}develop/background-work/background-tasks/broadcasts#android-14">place
+     * context-registered broadcasts in a queue while the app is in the <a
+     * href="{@docRoot}guide/components/activities/process-lifecycle">cached state</a>.
+     * When the app leaves the cached state, such as returning to the
+     * foreground, the system delivers any queued broadcasts. Multiple instances
+     * of certain broadcasts might be merged into one broadcast.
      *
      * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
      * registered with this method will correctly respect the
@@ -3384,6 +3408,14 @@ public abstract class Context {
      * for more information.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system can <a
+     * href="{@docRoot}develop/background-work/background-tasks/broadcasts#android-14">place
+     * context-registered broadcasts in a queue while the app is in the <a
+     * href="{@docRoot}guide/components/activities/process-lifecycle">cached state</a>.
+     * When the app leaves the cached state, such as returning to the
+     * foreground, the system delivers any queued broadcasts. Multiple instances
+     * of certain broadcasts might be merged into one broadcast.
      *
      * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
      * registered with this method will correctly respect the
@@ -4208,7 +4240,7 @@ public abstract class Context {
             MEDIA_COMMUNICATION_SERVICE,
             BATTERY_SERVICE,
             JOB_SCHEDULER_SERVICE,
-            //@hide: PERSISTENT_DATA_BLOCK_SERVICE,
+            PERSISTENT_DATA_BLOCK_SERVICE,
             //@hide: OEM_LOCK_SERVICE,
             MEDIA_PROJECTION_SERVICE,
             MIDI_SERVICE,
@@ -5395,6 +5427,19 @@ public abstract class Context {
     public static final String SMARTSPACE_SERVICE = "smartspace";
 
     /**
+     * Used for getting the contextual search service.
+     *
+     * <p><b>NOTE: </b> this service is optional; callers of
+     * {@code Context.getSystemServiceName(CONTEXTUAL_SEARCH_SERVICE)} must check for {@code null}.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @FlaggedApi(android.app.contextualsearch.flags.Flags.FLAG_ENABLE_SERVICE)
+    @SystemApi
+    public static final String CONTEXTUAL_SEARCH_SERVICE = "contextual_search";
+
+    /**
      * Used for getting the cloudsearch service.
      *
      * <p><b>NOTE: </b> this service is optional; callers of
@@ -5901,24 +5946,14 @@ public abstract class Context {
     public static final String JOB_SCHEDULER_SERVICE = "jobscheduler";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.app.tare.EconomyManager} instance for understanding economic standing.
-     * @see #getSystemService(String)
-     * @hide
-     * @see android.app.tare.EconomyManager
-     */
-    public static final String RESOURCE_ECONOMY_SERVICE = "tare";
-
-    /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.service.persistentdata.PersistentDataBlockManager} instance
      * for interacting with a storage device that lives across factory resets.
      *
      * @see #getSystemService(String)
      * @see android.service.persistentdata.PersistentDataBlockManager
-     * @hide
      */
-    @SystemApi
+    @FlaggedApi(android.security.Flags.FLAG_FRP_ENFORCEMENT)
     public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
 
     /**
@@ -6594,6 +6629,19 @@ public abstract class Context {
     public static final String WEBVIEW_UPDATE_SERVICE = "webviewupdate";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.provider.BlockedNumbersManager} for accessing the blocked number service.
+     *
+     * @see #getSystemService(String)
+     * @see android.provider.BlockedNumbersManager
+     * @hide
+     */
+    @FlaggedApi(
+            com.android.server.telecom.flags.Flags.FLAG_TELECOM_MAINLINE_BLOCKED_NUMBERS_MANAGER)
+    @SystemApi
+    public static final String BLOCKED_NUMBERS_SERVICE = "blocked_numbers";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
@@ -7140,9 +7188,10 @@ public abstract class Context {
      * as the package remains in the foreground, or has any active manifest components (e.g. when
      * another app is accessing a content provider in the package).
      * <p>
-     * If you want to revoke the permissions right away, you could call {@code System.exit()}, but
-     * this could affect other apps that are accessing your app at the moment. For example, apps
-     * accessing a content provider in your app will all crash.
+     * If you want to revoke the permissions right away, you could call {@code System.exit()} in
+     * {@code Handler.postDelayed} with a delay to allow completion of async IPC, But
+     * {@code System.exit()} could affect other apps that are accessing your app at the moment.
+     * For example, apps accessing a content provider in your app will all crash.
      * <p>
      * Note that the settings UI shows a permission group as granted as long as at least one
      * permission in the group is granted. If you want the user to observe the revocation in the

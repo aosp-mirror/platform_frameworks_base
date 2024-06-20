@@ -24,7 +24,6 @@ import android.text.TextUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.feature.DisplayManagerFlags;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class SensorData {
     public final String name;
     public final float minRefreshRate;
     public final float maxRefreshRate;
-    public final List<SupportedMode> supportedModes;
+    public final List<SupportedModeData> supportedModes;
 
     @VisibleForTesting
     public SensorData() {
@@ -61,7 +60,7 @@ public class SensorData {
 
     @VisibleForTesting
     public SensorData(String type, String name, float minRefreshRate, float maxRefreshRate,
-            List<SupportedMode> supportedModes) {
+            List<SupportedModeData> supportedModes) {
         this.type = type;
         this.name = name;
         this.minRefreshRate = minRefreshRate;
@@ -129,21 +128,46 @@ public class SensorData {
      * Loads proximity sensor data from DisplayConfiguration
      */
     @Nullable
-    public static SensorData loadProxSensorConfig(DisplayConfiguration config) {
-        SensorDetails sensorDetails = config.getProxSensor();
-        if (sensorDetails != null) {
-            String name = sensorDetails.getName();
-            String type = sensorDetails.getType();
-            if ("".equals(name) && "".equals(type)) {
+    public static SensorData loadProxSensorConfig(
+            DisplayManagerFlags flags, DisplayConfiguration config) {
+        SensorData DEFAULT_SENSOR = new SensorData();
+        List<SensorDetails> sensorDetailsList = config.getProxSensor();
+        if (sensorDetailsList.isEmpty()) {
+            return DEFAULT_SENSOR;
+        }
+
+        SensorData selectedSensor = DEFAULT_SENSOR;
+        // Prioritize flagged sensors.
+        for (SensorDetails sensorDetails : sensorDetailsList) {
+            String flagStr = sensorDetails.getFeatureFlag();
+            if (flags.isUseFusionProxSensorEnabled() &&
+                flags.getUseFusionProxSensorFlagName().equals(flagStr)) {
+                selectedSensor = loadSensorData(sensorDetails);
+                break;
+            }
+        }
+
+        // Check for normal un-flagged sensor if a flagged one wasn't found.
+        if (DEFAULT_SENSOR == selectedSensor) {
+            for (SensorDetails sensorDetails : sensorDetailsList) {
+                if (sensorDetails.getFeatureFlag() != null) {
+                    continue;
+                }
+                selectedSensor = loadSensorData(sensorDetails);
+                break;
+            }
+        }
+
+        // Check if we shouldn't use a sensor at all.
+        if (DEFAULT_SENSOR != selectedSensor) {
+            if ("".equals(selectedSensor.name) && "".equals(selectedSensor.type)) {
                 // <proxSensor> with empty values to the config means no sensor should be used.
                 // See also {@link com.android.server.display.utils.SensorUtils}
-                return null;
-            } else {
-                return loadSensorData(sensorDetails);
+                selectedSensor = null;
             }
-        } else {
-            return new SensorData();
         }
+
+        return selectedSensor;
     }
 
     /**
@@ -189,26 +213,11 @@ public class SensorData {
             minRefreshRate = rr.getMinimum().floatValue();
             maxRefreshRate = rr.getMaximum().floatValue();
         }
-        ArrayList<SupportedMode> supportedModes = new ArrayList<>();
-        NonNegativeFloatToFloatMap configSupportedModes = sensorDetails.getSupportedModes();
-        if (configSupportedModes != null) {
-            for (NonNegativeFloatToFloatPoint supportedMode : configSupportedModes.getPoint()) {
-                supportedModes.add(new SupportedMode(supportedMode.getFirst().floatValue(),
-                        supportedMode.getSecond().floatValue()));
-            }
-        }
+        List<SupportedModeData> supportedModes = SupportedModeData.load(
+                sensorDetails.getSupportedModes());
 
         return new SensorData(sensorDetails.getType(), sensorDetails.getName(), minRefreshRate,
                 maxRefreshRate, supportedModes);
     }
 
-    public static class SupportedMode {
-        public final float refreshRate;
-        public final float vsyncRate;
-
-        public SupportedMode(float refreshRate, float vsyncRate) {
-            this.refreshRate = refreshRate;
-            this.vsyncRate = vsyncRate;
-        }
-    }
 }

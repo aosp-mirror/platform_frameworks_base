@@ -19,38 +19,33 @@ package com.android.systemui.surfaceeffects.loadingeffect
 import android.graphics.Paint
 import android.graphics.RenderEffect
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
-import com.android.systemui.model.SysUiStateTest
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState.EASE_IN
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState.EASE_OUT
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState.MAIN
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState.NOT_PLAYING
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationStateChangedCallback
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.PaintDrawCallback
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.RenderEffectDrawCallback
+import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
+import com.android.systemui.surfaceeffects.PaintDrawCallback
+import com.android.systemui.surfaceeffects.RenderEffectDrawCallback
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimationConfig
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader
-import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class LoadingEffectTest : SysUiStateTest() {
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
+class LoadingEffectTest : SysuiTestCase() {
 
-    private val fakeSystemClock = FakeSystemClock()
-    private val fakeExecutor = FakeExecutor(fakeSystemClock)
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     @Test
     fun play_paintCallback_triggersDrawCallback() {
         var paintFromCallback: Paint? = null
         val drawCallback =
             object : PaintDrawCallback {
-                override fun onDraw(loadingPaint: Paint) {
-                    paintFromCallback = loadingPaint
+                override fun onDraw(paint: Paint) {
+                    paintFromCallback = paint
                 }
             }
         val loadingEffect =
@@ -61,14 +56,12 @@ class LoadingEffectTest : SysUiStateTest() {
                 animationStateChangedCallback = null
             )
 
-        fakeExecutor.execute {
-            assertThat(paintFromCallback).isNull()
+        assertThat(paintFromCallback).isNull()
 
-            loadingEffect.play()
-            fakeSystemClock.advanceTime(500L)
+        loadingEffect.play()
+        animatorTestRule.advanceTimeBy(500L)
 
-            assertThat(paintFromCallback).isNotNull()
-        }
+        assertThat(paintFromCallback).isNotNull()
     }
 
     @Test
@@ -76,8 +69,8 @@ class LoadingEffectTest : SysUiStateTest() {
         var renderEffectFromCallback: RenderEffect? = null
         val drawCallback =
             object : RenderEffectDrawCallback {
-                override fun onDraw(loadingRenderEffect: RenderEffect) {
-                    renderEffectFromCallback = loadingRenderEffect
+                override fun onDraw(renderEffect: RenderEffect) {
+                    renderEffectFromCallback = renderEffect
                 }
             }
         val loadingEffect =
@@ -88,30 +81,30 @@ class LoadingEffectTest : SysUiStateTest() {
                 animationStateChangedCallback = null
             )
 
-        fakeExecutor.execute {
-            assertThat(renderEffectFromCallback).isNull()
+        assertThat(renderEffectFromCallback).isNull()
 
-            loadingEffect.play()
-            fakeSystemClock.advanceTime(500L)
+        loadingEffect.play()
+        animatorTestRule.advanceTimeBy(500L)
 
-            assertThat(renderEffectFromCallback).isNotNull()
-        }
+        assertThat(renderEffectFromCallback).isNotNull()
     }
 
     @Test
     fun play_animationStateChangesInOrder() {
         val config = TurbulenceNoiseAnimationConfig()
-        val expectedStates = arrayOf(NOT_PLAYING, EASE_IN, MAIN, EASE_OUT, NOT_PLAYING)
-        val actualStates = mutableListOf(NOT_PLAYING)
+        val states = mutableListOf(LoadingEffect.AnimationState.NOT_PLAYING)
         val stateChangedCallback =
-            object : AnimationStateChangedCallback {
-                override fun onStateChanged(oldState: AnimationState, newState: AnimationState) {
-                    actualStates.add(newState)
+            object : LoadingEffect.AnimationStateChangedCallback {
+                override fun onStateChanged(
+                    oldState: LoadingEffect.AnimationState,
+                    newState: LoadingEffect.AnimationState
+                ) {
+                    states.add(newState)
                 }
             }
         val drawCallback =
             object : PaintDrawCallback {
-                override fun onDraw(loadingPaint: Paint) {}
+                override fun onDraw(paint: Paint) {}
             }
         val loadingEffect =
             LoadingEffect(
@@ -121,16 +114,22 @@ class LoadingEffectTest : SysUiStateTest() {
                 stateChangedCallback
             )
 
-        val timeToAdvance =
-            config.easeInDuration + config.maxDuration + config.easeOutDuration + 100
+        loadingEffect.play()
 
-        fakeExecutor.execute {
-            loadingEffect.play()
+        // Execute all the animators by advancing each duration with some buffer.
+        animatorTestRule.advanceTimeBy(config.easeInDuration.toLong())
+        animatorTestRule.advanceTimeBy(config.maxDuration.toLong())
+        animatorTestRule.advanceTimeBy(config.easeOutDuration.toLong())
+        animatorTestRule.advanceTimeBy(500)
 
-            fakeSystemClock.advanceTime(timeToAdvance.toLong())
-
-            assertThat(actualStates).isEqualTo(expectedStates)
-        }
+        assertThat(states)
+            .containsExactly(
+                LoadingEffect.AnimationState.NOT_PLAYING,
+                LoadingEffect.AnimationState.EASE_IN,
+                LoadingEffect.AnimationState.MAIN,
+                LoadingEffect.AnimationState.EASE_OUT,
+                LoadingEffect.AnimationState.NOT_PLAYING
+            )
     }
 
     @Test
@@ -138,16 +137,22 @@ class LoadingEffectTest : SysUiStateTest() {
         val config = TurbulenceNoiseAnimationConfig()
         var numPlay = 0
         val stateChangedCallback =
-            object : AnimationStateChangedCallback {
-                override fun onStateChanged(oldState: AnimationState, newState: AnimationState) {
-                    if (oldState == NOT_PLAYING && newState == EASE_IN) {
+            object : LoadingEffect.AnimationStateChangedCallback {
+                override fun onStateChanged(
+                    oldState: LoadingEffect.AnimationState,
+                    newState: LoadingEffect.AnimationState
+                ) {
+                    if (
+                        oldState == LoadingEffect.AnimationState.NOT_PLAYING &&
+                            newState == LoadingEffect.AnimationState.EASE_IN
+                    ) {
                         numPlay++
                     }
                 }
             }
         val drawCallback =
             object : PaintDrawCallback {
-                override fun onDraw(loadingPaint: Paint) {}
+                override fun onDraw(paint: Paint) {}
             }
         val loadingEffect =
             LoadingEffect(
@@ -157,17 +162,15 @@ class LoadingEffectTest : SysUiStateTest() {
                 stateChangedCallback
             )
 
-        fakeExecutor.execute {
-            assertThat(numPlay).isEqualTo(0)
+        assertThat(numPlay).isEqualTo(0)
 
-            loadingEffect.play()
-            loadingEffect.play()
-            loadingEffect.play()
-            loadingEffect.play()
-            loadingEffect.play()
+        loadingEffect.play()
+        loadingEffect.play()
+        loadingEffect.play()
+        loadingEffect.play()
+        loadingEffect.play()
 
-            assertThat(numPlay).isEqualTo(1)
-        }
+        assertThat(numPlay).isEqualTo(1)
     }
 
     @Test
@@ -179,9 +182,15 @@ class LoadingEffectTest : SysUiStateTest() {
             }
         var isFinished = false
         val stateChangedCallback =
-            object : AnimationStateChangedCallback {
-                override fun onStateChanged(oldState: AnimationState, newState: AnimationState) {
-                    if (oldState == MAIN && newState == NOT_PLAYING) {
+            object : LoadingEffect.AnimationStateChangedCallback {
+                override fun onStateChanged(
+                    oldState: LoadingEffect.AnimationState,
+                    newState: LoadingEffect.AnimationState
+                ) {
+                    if (
+                        oldState == LoadingEffect.AnimationState.EASE_OUT &&
+                            newState == LoadingEffect.AnimationState.NOT_PLAYING
+                    ) {
                         isFinished = true
                     }
                 }
@@ -194,18 +203,17 @@ class LoadingEffectTest : SysUiStateTest() {
                 stateChangedCallback
             )
 
-        fakeExecutor.execute {
-            assertThat(isFinished).isFalse()
+        assertThat(isFinished).isFalse()
 
-            loadingEffect.play()
-            fakeSystemClock.advanceTime(config.easeInDuration.toLong() + 500L)
+        loadingEffect.play()
+        animatorTestRule.advanceTimeBy(config.easeInDuration.toLong() + 500L)
 
-            assertThat(isFinished).isFalse()
+        assertThat(isFinished).isFalse()
 
-            loadingEffect.finish()
+        loadingEffect.finish()
+        animatorTestRule.advanceTimeBy(config.easeOutDuration.toLong() + 500L)
 
-            assertThat(isFinished).isTrue()
-        }
+        assertThat(isFinished).isTrue()
     }
 
     @Test
@@ -213,13 +221,19 @@ class LoadingEffectTest : SysUiStateTest() {
         val config = TurbulenceNoiseAnimationConfig(maxDuration = 1000f)
         val drawCallback =
             object : PaintDrawCallback {
-                override fun onDraw(loadingPaint: Paint) {}
+                override fun onDraw(paint: Paint) {}
             }
         var isFinished = false
         val stateChangedCallback =
-            object : AnimationStateChangedCallback {
-                override fun onStateChanged(oldState: AnimationState, newState: AnimationState) {
-                    if (oldState == MAIN && newState == NOT_PLAYING) {
+            object : LoadingEffect.AnimationStateChangedCallback {
+                override fun onStateChanged(
+                    oldState: LoadingEffect.AnimationState,
+                    newState: LoadingEffect.AnimationState
+                ) {
+                    if (
+                        oldState == LoadingEffect.AnimationState.MAIN &&
+                            newState == LoadingEffect.AnimationState.NOT_PLAYING
+                    ) {
                         isFinished = true
                     }
                 }
@@ -232,13 +246,11 @@ class LoadingEffectTest : SysUiStateTest() {
                 stateChangedCallback
             )
 
-        fakeExecutor.execute {
-            assertThat(isFinished).isFalse()
+        assertThat(isFinished).isFalse()
 
-            loadingEffect.finish()
+        loadingEffect.finish()
 
-            assertThat(isFinished).isFalse()
-        }
+        assertThat(isFinished).isFalse()
     }
 
     @Test
@@ -252,7 +264,7 @@ class LoadingEffectTest : SysUiStateTest() {
             )
         val drawCallback =
             object : PaintDrawCallback {
-                override fun onDraw(loadingPaint: Paint) {}
+                override fun onDraw(paint: Paint) {}
             }
         val loadingEffect =
             LoadingEffect(

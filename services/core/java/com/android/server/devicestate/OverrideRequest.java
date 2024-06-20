@@ -72,8 +72,9 @@ final class OverrideRequest {
     @Retention(RetentionPolicy.SOURCE)
     public @interface OverrideRequestType {}
 
-    OverrideRequest(IBinder token, int pid, int uid, @NonNull DeviceState requestedState,
-            @DeviceStateRequest.RequestFlags int flags, @OverrideRequestType int requestType) {
+    OverrideRequest(IBinder token, int pid, int uid,
+            @NonNull DeviceState requestedState, @DeviceStateRequest.RequestFlags int flags,
+            @OverrideRequestType int requestType) {
         mToken = token;
         mPid = pid;
         mUid = uid;

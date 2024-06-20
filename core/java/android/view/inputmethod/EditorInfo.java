@@ -720,6 +720,20 @@ public class EditorInfo implements InputType, Parcelable {
 
     private boolean mIsStylusHandwritingEnabled;
 
+
+    /**
+     * AndroidX Core library 1.13.0 introduced EditorInfoCompat#setStylusHandwritingEnabled and
+     * EditorInfoCompat#isStylusHandwritingEnabled which used a boolean value in the EditorInfo
+     * extras bundle. These methods do not set or check the Android V property since the Android V
+     * SDK was not yet available. In order for EditorInfoCompat#isStylusHandwritingEnabled to return
+     * the correct value for EditorInfo created by Android V TextView, the extras bundle value
+     * should be set. This is the extras bundle key.
+     *
+     * @hide
+     */
+    public static final String STYLUS_HANDWRITING_ENABLED_ANDROIDX_EXTRAS_KEY =
+            "androidx.core.view.inputmethod.EditorInfoCompat.STYLUS_HANDWRITING_ENABLED";
+
     /**
      * Set {@code true} if the {@code Editor} has
      * {@link InputMethodManager#startStylusHandwriting stylus handwriting} enabled.

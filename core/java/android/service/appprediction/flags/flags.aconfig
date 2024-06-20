@@ -3,6 +3,7 @@ container: "system"
 
 flag {
   name: "service_features_api"
+  is_exported: true
   namespace: "systemui"
   description: "Guards the new requestServiceFeatures api"
   bug: "292565550"

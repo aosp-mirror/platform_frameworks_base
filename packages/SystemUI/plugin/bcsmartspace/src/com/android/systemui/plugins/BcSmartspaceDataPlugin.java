@@ -129,6 +129,17 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void setDozeAmount(float amount);
 
         /**
+         * Set if the screen is on.
+         */
+        default void setScreenOn(boolean screenOn) {}
+
+        /**
+         * Sets a delegate to handle clock event registration. Should be called immediately after
+         * the view is created.
+         */
+        default void setTimeChangedDelegate(TimeChangedDelegate delegate) {}
+
+        /**
          * Set if dozing is true or false
          */
         default void setDozing(boolean dozing) {}
@@ -222,5 +233,14 @@ public interface BcSmartspaceDataPlugin extends Plugin {
 
         /** Start the PendingIntent */
         void startPendingIntent(View v, PendingIntent pi, boolean showOnLockscreen);
+    }
+
+    /** Interface for delegating time updates */
+    interface TimeChangedDelegate {
+        /** Register the callback to be called when time is updated **/
+        void register(Runnable callback);
+
+        /** Unegister the callback **/
+        void unregister();
     }
 }

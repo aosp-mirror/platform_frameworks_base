@@ -37,21 +37,22 @@ import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.RadioTuner;
 import android.os.ParcelableException;
-import android.util.Slog;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.SparseArray;
+
+import com.android.server.utils.Slogf;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-class Convert {
+final class Convert {
 
     private static final String TAG = "BcRadio2Srv.convert";
 
@@ -111,7 +112,7 @@ class Convert {
             elem.key = entry.getKey();
             elem.value = entry.getValue();
             if (elem.key == null || elem.value == null) {
-                Slog.w(TAG, "VendorKeyValue contains null pointers");
+                Slogf.w(TAG, "VendorKeyValue contains null pointers");
                 continue;
             }
             list.add(elem);
@@ -120,20 +121,21 @@ class Convert {
         return list;
     }
 
-    static @NonNull Map<String, String>
-    vendorInfoFromHal(@Nullable List<VendorKeyValue> info) {
-        if (info == null) return Collections.emptyMap();
-
-        Map<String, String> map = new HashMap<>();
-        for (VendorKeyValue kvp : info) {
-            if (kvp.key == null || kvp.value == null) {
-                Slog.w(TAG, "VendorKeyValue contains null pointers");
-                continue;
-            }
-            map.put(kvp.key, kvp.value);
+    static @NonNull Map<String, String> vendorInfoFromHal(@Nullable List<VendorKeyValue> info) {
+        Map<String, String> vendorInfoMap = new ArrayMap<>();
+        if (info == null) {
+            return vendorInfoMap;
         }
 
-        return map;
+        for (VendorKeyValue kvp : info) {
+            if (kvp.key == null || kvp.value == null) {
+                Slogf.w(TAG, "VendorKeyValue contains null pointers");
+                continue;
+            }
+            vendorInfoMap.put(kvp.key, kvp.value);
+        }
+
+        return vendorInfoMap;
     }
 
     private static @ProgramSelector.ProgramType int identifierTypeToProgramType(
@@ -168,7 +170,7 @@ class Convert {
 
     private static @NonNull int[]
     identifierTypesToProgramTypes(@NonNull int[] idTypes) {
-        Set<Integer> pTypes = new HashSet<>();
+        Set<Integer> pTypes = new ArraySet<>();
 
         for (int idType : idTypes) {
             int pType = identifierTypeToProgramType(idType);
@@ -202,7 +204,7 @@ class Convert {
         for (AmFmBandRange range : config.ranges) {
             FrequencyBand bandType = Utils.getBand(range.lowerBound);
             if (bandType == FrequencyBand.UNKNOWN) {
-                Slog.e(TAG, "Unknown frequency band at " + range.lowerBound + "kHz");
+                Slogf.e(TAG, "Unknown frequency band at " + range.lowerBound + "kHz");
                 continue;
             }
             if (bandType == FrequencyBand.FM) {
@@ -302,10 +304,7 @@ class Convert {
 
     private static boolean isEmpty(
             @NonNull android.hardware.broadcastradio.V2_0.ProgramSelector sel) {
-        if (sel.primaryId.type != 0) return false;
-        if (sel.primaryId.value != 0) return false;
-        if (sel.secondaryIds.size() != 0) return false;
-        return true;
+        return sel.primaryId.type == 0 && sel.primaryId.value == 0 && sel.secondaryIds.isEmpty();
     }
 
     static @Nullable ProgramSelector programSelectorFromHal(
@@ -319,7 +318,7 @@ class Convert {
         return new ProgramSelector(
                 identifierTypeToProgramType(sel.primaryId.type),
                 Objects.requireNonNull(programIdentifierFromHal(sel.primaryId)),
-                secondaryIds, null);
+                secondaryIds, /* vendorIds= */ null);
     }
 
     private enum MetadataType {
@@ -335,40 +334,40 @@ class Convert {
         }
     }
 
-    private static final Map<Integer, MetadataDef> metadataKeys;
+    private static final SparseArray<MetadataDef> METADATA_KEYS;
     static {
-        metadataKeys = new HashMap<>();
-        metadataKeys.put(MetadataKey.RDS_PS, new MetadataDef(
+        METADATA_KEYS = new SparseArray<>();
+        METADATA_KEYS.put(MetadataKey.RDS_PS, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_RDS_PS));
-        metadataKeys.put(MetadataKey.RDS_PTY, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.RDS_PTY, new MetadataDef(
                 MetadataType.INT, RadioMetadata.METADATA_KEY_RDS_PTY));
-        metadataKeys.put(MetadataKey.RBDS_PTY, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.RBDS_PTY, new MetadataDef(
                 MetadataType.INT, RadioMetadata.METADATA_KEY_RBDS_PTY));
-        metadataKeys.put(MetadataKey.RDS_RT, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.RDS_RT, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_RDS_RT));
-        metadataKeys.put(MetadataKey.SONG_TITLE, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.SONG_TITLE, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_TITLE));
-        metadataKeys.put(MetadataKey.SONG_ARTIST, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.SONG_ARTIST, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_ARTIST));
-        metadataKeys.put(MetadataKey.SONG_ALBUM, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.SONG_ALBUM, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_ALBUM));
-        metadataKeys.put(MetadataKey.STATION_ICON, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.STATION_ICON, new MetadataDef(
                 MetadataType.INT, RadioMetadata.METADATA_KEY_ICON));
-        metadataKeys.put(MetadataKey.ALBUM_ART, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.ALBUM_ART, new MetadataDef(
                 MetadataType.INT, RadioMetadata.METADATA_KEY_ART));
-        metadataKeys.put(MetadataKey.PROGRAM_NAME, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.PROGRAM_NAME, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_PROGRAM_NAME));
-        metadataKeys.put(MetadataKey.DAB_ENSEMBLE_NAME, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.DAB_ENSEMBLE_NAME, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_ENSEMBLE_NAME));
-        metadataKeys.put(MetadataKey.DAB_ENSEMBLE_NAME_SHORT, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.DAB_ENSEMBLE_NAME_SHORT, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_ENSEMBLE_NAME_SHORT));
-        metadataKeys.put(MetadataKey.DAB_SERVICE_NAME, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.DAB_SERVICE_NAME, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_SERVICE_NAME));
-        metadataKeys.put(MetadataKey.DAB_SERVICE_NAME_SHORT, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.DAB_SERVICE_NAME_SHORT, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_SERVICE_NAME_SHORT));
-        metadataKeys.put(MetadataKey.DAB_COMPONENT_NAME, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.DAB_COMPONENT_NAME, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_COMPONENT_NAME));
-        metadataKeys.put(MetadataKey.DAB_COMPONENT_NAME_SHORT, new MetadataDef(
+        METADATA_KEYS.put(MetadataKey.DAB_COMPONENT_NAME_SHORT, new MetadataDef(
                 MetadataType.STRING, RadioMetadata.METADATA_KEY_DAB_COMPONENT_NAME_SHORT));
     }
 
@@ -376,9 +375,9 @@ class Convert {
         RadioMetadata.Builder builder = new RadioMetadata.Builder();
 
         for (Metadata entry : meta) {
-            MetadataDef keyDef = metadataKeys.get(entry.key);
+            MetadataDef keyDef = METADATA_KEYS.get(entry.key);
             if (keyDef == null) {
-                Slog.i(TAG, "Ignored unknown metadata entry: " + MetadataKey.toString(entry.key));
+                Slogf.i(TAG, "Ignored unknown metadata entry: " + MetadataKey.toString(entry.key));
                 continue;
             }
             if (keyDef.type == MetadataType.STRING) {

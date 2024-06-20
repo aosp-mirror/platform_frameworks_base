@@ -26,7 +26,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
  * Parameters for {@link RowContentBindStage}.
  */
 public final class RowContentBindParams {
-    private boolean mUseLowPriority;
+    private boolean mUseMinimized;
     private boolean mUseIncreasedHeight;
     private boolean mUseIncreasedHeadsUpHeight;
     private boolean mViewsNeedReinflation;
@@ -35,23 +35,26 @@ public final class RowContentBindParams {
     /**
      * Content views that are out of date and need to be rebound.
      *
-     * TODO: This should go away once {@link NotificationContentInflater} is broken down into
+     * TODO: This should go away once {@link NotificationRowContentBinder} is broken down into
      * smaller stages as then the stage itself would be invalidated.
      */
     private @InflationFlag int mDirtyContentViews = mContentViews;
 
     /**
-     * Set whether content should use a low priority version of its content views.
+     * Set whether content should use a minimized version of its content views.
      */
-    public void setUseLowPriority(boolean useLowPriority) {
-        if (mUseLowPriority != useLowPriority) {
+    public void setUseMinimized(boolean useMinimized) {
+        if (mUseMinimized != useMinimized) {
             mDirtyContentViews |= (FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED);
         }
-        mUseLowPriority = useLowPriority;
+        mUseMinimized = useMinimized;
     }
 
-    public boolean useLowPriority() {
-        return mUseLowPriority;
+    /**
+     * @return Whether the row uses the minimized style.
+     */
+    public boolean useMinimized() {
+        return mUseMinimized;
     }
 
     /**
@@ -149,9 +152,9 @@ public final class RowContentBindParams {
     @Override
     public String toString() {
         return String.format("RowContentBindParams[mContentViews=%x mDirtyContentViews=%x "
-                + "mUseLowPriority=%b mUseIncreasedHeight=%b "
+                + "mUseMinimized=%b mUseIncreasedHeight=%b "
                 + "mUseIncreasedHeadsUpHeight=%b mViewsNeedReinflation=%b]",
-                mContentViews, mDirtyContentViews, mUseLowPriority, mUseIncreasedHeight,
+                mContentViews, mDirtyContentViews, mUseMinimized, mUseIncreasedHeight,
                 mUseIncreasedHeadsUpHeight, mViewsNeedReinflation);
     }
 

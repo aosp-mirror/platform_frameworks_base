@@ -31,12 +31,11 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.notification.domain.interactor.notificationsSoundPolicyInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.notificationsSoundPolicyRepository
 import com.android.systemui.testKosmos
-import com.android.systemui.volume.audioRepository
+import com.android.systemui.volume.data.repository.audioRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -47,19 +46,8 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
 
-    private lateinit var underTest: AudioVolumeInteractor
-
-    @Before
-    fun setup() {
-        with(kosmos) {
-            underTest = AudioVolumeInteractor(audioRepository, notificationsSoundPolicyInteractor)
-
-            audioRepository.setRingerMode(RingerMode(AudioManager.RINGER_MODE_NORMAL))
-
-            notificationsSoundPolicyRepository.updateNotificationPolicy()
-            notificationsSoundPolicyRepository.updateZenMode(ZenMode(Settings.Global.ZEN_MODE_OFF))
-        }
-    }
+    private val underTest: AudioVolumeInteractor =
+        with(kosmos) { AudioVolumeInteractor(audioRepository, notificationsSoundPolicyInteractor) }
 
     @Test
     fun setMuted_mutesStream() {
@@ -113,7 +101,29 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun streamIsMuted_getStream_volumeZero() {
+    fun zenMuted_cantChange() {
+        with(kosmos) {
+            testScope.runTest {
+                notificationsSoundPolicyRepository.updateNotificationPolicy()
+                notificationsSoundPolicyRepository.updateZenMode(
+                    ZenMode(Settings.Global.ZEN_MODE_NO_INTERRUPTIONS)
+                )
+
+                val canChangeVolume by
+                    collectLastValue(
+                        underTest.canChangeVolume(AudioStream(AudioManager.STREAM_NOTIFICATION))
+                    )
+
+                underTest.setMuted(AudioStream(AudioManager.STREAM_RING), true)
+                runCurrent()
+
+                assertThat(canChangeVolume).isFalse()
+            }
+        }
+    }
+
+    @Test
+    fun streamIsMuted_getStream_volumeMin() {
         with(kosmos) {
             testScope.runTest {
                 val model by collectLastValue(underTest.getAudioStream(audioStream))
@@ -144,7 +154,7 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun ringerModeVibrateAndMuted_getNotificationStream_volumeIsZero() {
+    fun ringerModeVibrateAndMuted_getNotificationStream_volumeIsMin() {
         with(kosmos) {
             testScope.runTest {
                 audioRepository.setRingerMode(RingerMode(AudioManager.RINGER_MODE_VIBRATE))
@@ -162,7 +172,7 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun ringerModeVibrate_getRingerStream_volumeIsZero() {
+    fun ringerModeVibrate_getRingerStream_volumeIsMin() {
         with(kosmos) {
             testScope.runTest {
                 audioRepository.setRingerMode(RingerMode(AudioManager.RINGER_MODE_VIBRATE))
@@ -177,6 +187,94 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
             }
         }
     }
+
+    @Test
+    fun streamNotAffectedByMute_isNotMutable() {
+        with(kosmos) {
+            testScope.runTest {
+                val audioStreamModel by collectLastValue(underTest.getAudioStream(audioStream))
+                audioRepository.setAudioStreamModel(
+                    audioStreamModel!!.copy(isAffectedByMute = false)
+                )
+
+                assertThat(audioStreamModel!!.isAffectedByMute).isFalse()
+            }
+        }
+    }
+
+    @Test
+    fun muteRingerStream_ringerMode_vibrate() {
+        with(kosmos) {
+            testScope.runTest {
+                val ringerMode by collectLastValue(audioRepository.ringerMode)
+                underTest.setMuted(AudioStream(AudioManager.STREAM_RING), true)
+
+                assertThat(ringerMode).isEqualTo(RingerMode(AudioManager.RINGER_MODE_VIBRATE))
+            }
+        }
+    }
+
+    @Test
+    fun unMuteRingerStream_ringerMode_normal() {
+        with(kosmos) {
+            testScope.runTest {
+                val ringerMode by collectLastValue(audioRepository.ringerMode)
+                underTest.setMuted(AudioStream(AudioManager.STREAM_RING), false)
+
+                assertThat(ringerMode).isEqualTo(RingerMode(AudioManager.RINGER_MODE_NORMAL))
+            }
+        }
+    }
+
+    @Test
+    fun testReducingVolumeToMin_mutes() =
+        with(kosmos) {
+            testScope.runTest {
+                val audioStreamModel by
+                    collectLastValue(audioRepository.getAudioStream(audioStream))
+                underTest.setVolume(audioStream, audioStreamModel!!.maxVolume)
+                runCurrent()
+
+                underTest.setVolume(audioStream, audioStreamModel!!.minVolume)
+                runCurrent()
+
+                assertThat(audioStreamModel!!.isMuted).isTrue()
+            }
+        }
+
+    @Test
+    fun testIncreasingVolumeFromMin_unmutes() =
+        with(kosmos) {
+            testScope.runTest {
+                val audioStreamModel by
+                    collectLastValue(audioRepository.getAudioStream(audioStream))
+                audioRepository.setMuted(audioStream, true)
+                audioRepository.setVolume(audioStream, audioStreamModel!!.minVolume)
+                runCurrent()
+
+                underTest.setVolume(audioStream, audioStreamModel!!.maxVolume)
+                runCurrent()
+
+                assertThat(audioStreamModel!!.isMuted).isFalse()
+            }
+        }
+
+    @Test
+    fun testUnmutingMinVolume_increasesVolume() =
+        with(kosmos) {
+            testScope.runTest {
+                val audioStreamModel by
+                    collectLastValue(audioRepository.getAudioStream(audioStream))
+                audioRepository.setMuted(audioStream, true)
+                audioRepository.setVolume(audioStream, audioStreamModel!!.minVolume)
+                runCurrent()
+
+                underTest.setMuted(audioStream, false)
+                runCurrent()
+
+                assertThat(audioStreamModel!!.volume).isGreaterThan(audioStreamModel!!.minVolume)
+            }
+        }
 
     private companion object {
         val audioStream = AudioStream(AudioManager.STREAM_SYSTEM)

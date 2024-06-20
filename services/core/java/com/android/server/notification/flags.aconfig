@@ -80,3 +80,65 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "polite_notifications_attn_update"
+  namespace: "systemui"
+  description: "This flag controls the polite notification attention behavior updates as per UXR feedback"
+  bug: "270456865"
+}
+
+flag {
+  name: "all_notifs_need_ttl"
+  namespace: "systemui"
+  description: "This flag sets a TTL on all notifications that don't already have an app provided one"
+  bug: "331967355"
+}
+
+flag {
+  name: "persist_incomplete_restore_data"
+  namespace: "systemui"
+  description: "Stores restore data for not-yet-installed pkgs for 48 hours"
+  bug: "334999659"
+}
+
+flag {
+  name: "trace_cancel_events"
+  namespace: "systemui"
+  description: "Adds performance tracing for binder cancel calls"
+  bug: "331677193"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "exit_invalid_cancel_early"
+  namespace: "systemui"
+  description: "aborts cancel binder events early if notif doesn't exist"
+  bug: "331677193"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "use_ipcdatacache_channels"
+  namespace: "systemui"
+  description: "Adds an IPCDataCache for notification channel/group lookups"
+  bug: "331677193"
+}
+
+flag {
+  name: "use_ssm_user_switch_signal"
+  namespace: "systemui"
+  description: "This flag controls which signal is used to handle a user switch system event"
+  bug: "337077643"
+}
+
+flag {
+  name: "reject_old_notifications"
+  namespace: "systemui"
+  description: "This flag does not allow notifications older than 2 weeks old to be posted"
+  bug: "339833083"
+}

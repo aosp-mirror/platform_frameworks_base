@@ -71,7 +71,7 @@ class HelperTest {
             addClass(cn)
         }
 
-        fun check(from: MethodNode?, to: MethodNode?, expected: Boolean) {
+        fun check(from: MethodNode?, to: MethodNode?, expected: Int) {
             assertThat(checkSubstitutionMethodCompatibility(
                 classes,
                 cn.name,
@@ -82,21 +82,21 @@ class HelperTest {
             )).isEqualTo(expected)
         }
 
-        check(staticPublic, staticPublic, true)
-        check(staticPrivate, staticPrivate, true)
-        check(nonStaticPublic, nonStaticPublic, true)
-        check(nonStaticPProtected, nonStaticPProtected, true)
+        check(staticPublic, staticPublic, Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC)
+        check(staticPrivate, staticPrivate, Opcodes.ACC_PRIVATE or Opcodes.ACC_STATIC)
+        check(nonStaticPublic, nonStaticPublic, Opcodes.ACC_PUBLIC)
+        check(nonStaticPProtected, nonStaticPProtected, 0)
 
-        check(staticPublic, null, false)
-        check(null, staticPublic, false)
+        check(staticPublic, null, NOT_COMPATIBLE)
+        check(null, staticPublic, NOT_COMPATIBLE)
 
-        check(staticPublic, nonStaticPublic, false)
-        check(nonStaticPublic, staticPublic, false)
+        check(staticPublic, nonStaticPublic, NOT_COMPATIBLE)
+        check(nonStaticPublic, staticPublic, NOT_COMPATIBLE)
 
-        check(staticPublic, staticPrivate, false)
-        check(staticPrivate, staticPublic, true)
+        check(staticPublic, staticPrivate, Opcodes.ACC_PUBLIC or Opcodes.ACC_STATIC)
+        check(staticPrivate, staticPublic, Opcodes.ACC_PRIVATE or Opcodes.ACC_STATIC)
 
-        check(nonStaticPublic, nonStaticPProtected, false)
-        check(nonStaticPProtected, nonStaticPublic, true)
+        check(nonStaticPublic, nonStaticPProtected, Opcodes.ACC_PUBLIC)
+        check(nonStaticPProtected, nonStaticPublic, 0)
     }
 }

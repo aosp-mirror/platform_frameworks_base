@@ -187,18 +187,15 @@ public class KeyguardIndicationRotateTextViewController extends
             return;
         }
 
-        // current indication is updated to empty
+        // Current indication is updated to empty.
+        // Update to empty even if `currMsgShownForMinTime` is false.
         if (mCurrIndicationType == type
                 && !hasNewIndication
                 && showAsap) {
-            if (currMsgShownForMinTime) {
-                if (mShowNextIndicationRunnable != null) {
-                    mShowNextIndicationRunnable.runImmediately();
-                } else {
-                    showIndication(INDICATION_TYPE_NONE);
-                }
+            if (mShowNextIndicationRunnable != null) {
+                mShowNextIndicationRunnable.runImmediately();
             } else {
-                scheduleShowNextIndication(minShowDuration - timeSinceLastIndicationSwitch);
+                showIndication(INDICATION_TYPE_NONE);
             }
         }
     }

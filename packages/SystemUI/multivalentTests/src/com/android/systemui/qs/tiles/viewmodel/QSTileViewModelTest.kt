@@ -60,7 +60,9 @@ class QSTileViewModelTest : SysuiTestCase() {
     @Mock private lateinit var qsTileAnalytics: QSTileAnalytics
 
     private val tileConfig =
-        QSTileConfigTestBuilder.build { policy = QSTilePolicy.Restricted("test_restriction") }
+        QSTileConfigTestBuilder.build {
+            policy = QSTilePolicy.Restricted(listOf("test_restriction"))
+        }
 
     private val userRepository = FakeUserRepository()
     private val tileDataInteractor = FakeQSTileDataInteractor<String>()

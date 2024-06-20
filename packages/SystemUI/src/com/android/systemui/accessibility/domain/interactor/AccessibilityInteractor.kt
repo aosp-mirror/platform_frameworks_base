@@ -28,6 +28,8 @@ constructor(
     private val a11yRepo: AccessibilityRepository,
 ) {
     /** @see [android.view.accessibility.AccessibilityManager.isTouchExplorationEnabled] */
-    val isTouchExplorationEnabled: Flow<Boolean>
-        get() = a11yRepo.isTouchExplorationEnabled
+    val isTouchExplorationEnabled: Flow<Boolean> = a11yRepo.isTouchExplorationEnabled
+
+    /** @see [android.view.accessibility.AccessibilityManager.isEnabled] */
+    val isEnabled: Flow<Boolean> = a11yRepo.isEnabled
 }

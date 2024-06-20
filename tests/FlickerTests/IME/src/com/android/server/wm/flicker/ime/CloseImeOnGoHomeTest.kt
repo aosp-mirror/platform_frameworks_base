@@ -33,8 +33,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window closing to home transitions. To run this test: `atest
- * FlickerTests:CloseImeWindowToHomeTest`
+ * Test IME window closing to home transitions.
+ * To run this test: `atest FlickerTestsIme1:CloseImeOnGoHomeTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

@@ -84,7 +84,6 @@ public final class RoutingSessionInfo implements Parcelable {
      *
      * @hide
      */
-    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
     @IntDef(value = {TRANSFER_REASON_FALLBACK, TRANSFER_REASON_SYSTEM_REQUEST, TRANSFER_REASON_APP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TransferReason {}
@@ -108,7 +107,7 @@ public final class RoutingSessionInfo implements Parcelable {
     @NonNull
     final List<String> mTransferableRoutes;
 
-    final int mVolumeHandling;
+    @MediaRoute2Info.PlaybackVolume final int mVolumeHandling;
     final int mVolumeMax;
     final int mVolume;
 
@@ -208,9 +207,10 @@ public final class RoutingSessionInfo implements Parcelable {
         return controlHints;
     }
 
+    @MediaRoute2Info.PlaybackVolume
     private static int defineVolumeHandling(
             boolean isSystemSession,
-            int volumeHandling,
+            @MediaRoute2Info.PlaybackVolume int volumeHandling,
             List<String> selectedRoutes,
             boolean volumeAdjustmentForRemoteGroupSessions) {
         if (!isSystemSession
@@ -382,14 +382,12 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     /** @hide */
-    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
     @Nullable
     public UserHandle getTransferInitiatorUserHandle() {
         return mTransferInitiatorUserHandle;
     }
 
     /** @hide */
-    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
     @Nullable
     public String getTransferInitiatorPackageName() {
         return mTransferInitiatorPackageName;
@@ -442,9 +440,7 @@ public final class RoutingSessionInfo implements Parcelable {
         pw.println(indent + "mSelectableRoutes=" + mSelectableRoutes);
         pw.println(indent + "mDeselectableRoutes=" + mDeselectableRoutes);
         pw.println(indent + "mTransferableRoutes=" + mTransferableRoutes);
-        pw.println(indent + "mVolumeHandling=" + mVolumeHandling);
-        pw.println(indent + "mVolumeMax=" + mVolumeMax);
-        pw.println(indent + "mVolume=" + mVolume);
+        pw.println(indent + MediaRoute2Info.getVolumeString(mVolume, mVolumeMax, mVolumeHandling));
         pw.println(indent + "mControlHints=" + mControlHints);
         pw.println(indent + "mIsSystemSession=" + mIsSystemSession);
         pw.println(indent + "mTransferReason=" + mTransferReason);
@@ -506,41 +502,36 @@ public final class RoutingSessionInfo implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder result =
-                new StringBuilder()
-                        .append("RoutingSessionInfo{ ")
-                        .append("sessionId=")
-                        .append(getId())
-                        .append(", name=")
-                        .append(getName())
-                        .append(", clientPackageName=")
-                        .append(getClientPackageName())
-                        .append(", selectedRoutes={")
-                        .append(String.join(",", getSelectedRoutes()))
-                        .append("}")
-                        .append(", selectableRoutes={")
-                        .append(String.join(",", getSelectableRoutes()))
-                        .append("}")
-                        .append(", deselectableRoutes={")
-                        .append(String.join(",", getDeselectableRoutes()))
-                        .append("}")
-                        .append(", transferableRoutes={")
-                        .append(String.join(",", getTransferableRoutes()))
-                        .append("}")
-                        .append(", volumeHandling=")
-                        .append(getVolumeHandling())
-                        .append(", volumeMax=")
-                        .append(getVolumeMax())
-                        .append(", volume=")
-                        .append(getVolume())
-                        .append(", transferReason=")
-                        .append(getTransferReason())
-                        .append(", transferInitiatorUserHandle=")
-                        .append(getTransferInitiatorUserHandle())
-                        .append(", transferInitiatorPackageName=")
-                        .append(getTransferInitiatorPackageName())
-                        .append(" }");
-        return result.toString();
+        return new StringBuilder()
+                .append("RoutingSessionInfo{ ")
+                .append("sessionId=")
+                .append(getId())
+                .append(", name=")
+                .append(getName())
+                .append(", clientPackageName=")
+                .append(getClientPackageName())
+                .append(", selectedRoutes={")
+                .append(String.join(",", getSelectedRoutes()))
+                .append("}")
+                .append(", selectableRoutes={")
+                .append(String.join(",", getSelectableRoutes()))
+                .append("}")
+                .append(", deselectableRoutes={")
+                .append(String.join(",", getDeselectableRoutes()))
+                .append("}")
+                .append(", transferableRoutes={")
+                .append(String.join(",", getTransferableRoutes()))
+                .append("}")
+                .append(", ")
+                .append(MediaRoute2Info.getVolumeString(mVolume, mVolumeMax, mVolumeHandling))
+                .append(", transferReason=")
+                .append(getTransferReason())
+                .append(", transferInitiatorUserHandle=")
+                .append(getTransferInitiatorUserHandle())
+                .append(", transferInitiatorPackageName=")
+                .append(getTransferInitiatorPackageName())
+                .append(" }")
+                .toString();
     }
 
     /**
@@ -589,6 +580,7 @@ public final class RoutingSessionInfo implements Parcelable {
         private final List<String> mDeselectableRoutes;
         @NonNull
         private final List<String> mTransferableRoutes;
+        @MediaRoute2Info.PlaybackVolume
         private int mVolumeHandling = MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
         private int mVolumeMax;
         private int mVolume;
@@ -909,6 +901,14 @@ public final class RoutingSessionInfo implements Parcelable {
          * <p>By default the transfer initiation user handle and package name are set to {@code
          * null}.
          */
+        // The UserHandleName warning suggests the name should be "doFooAsUser". But the UserHandle
+        // parameter of this function is stored in a field, and not used to execute an operation on
+        // a specific user.
+        // The MissingGetterMatchingBuilder requires a getTransferInitiator function. But said
+        // getter is not included because the returned package name and user handle is always either
+        // null or the values that correspond to the calling app, and that information is obtainable
+        // via RoutingController#wasTransferInitiatedBySelf.
+        @SuppressWarnings({"UserHandleName", "MissingGetterMatchingBuilder"})
         @NonNull
         @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
         public Builder setTransferInitiator(

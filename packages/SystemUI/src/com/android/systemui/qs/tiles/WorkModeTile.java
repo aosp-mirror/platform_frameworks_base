@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.MainThread;
@@ -32,7 +31,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.res.R;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -43,6 +42,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 
 import javax.inject.Inject;
@@ -88,7 +88,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    public void handleClick(@Nullable View view) {
+    public void handleClick(@Nullable Expandable expandable) {
         mProfileController.setWorkModeEnabled(!mState.value);
     }
 

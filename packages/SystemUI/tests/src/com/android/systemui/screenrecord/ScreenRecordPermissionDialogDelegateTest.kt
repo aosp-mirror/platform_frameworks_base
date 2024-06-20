@@ -49,6 +49,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.eq
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -71,6 +72,8 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
+
         val systemUIDialogFactory =
             SystemUIDialog.Factory(
                 context,
@@ -79,6 +82,7 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
                 Dependency.get(BroadcastDispatcher::class.java),
                 Dependency.get(DialogTransitionAnimator::class.java),
             )
+
         val delegate =
             ScreenRecordPermissionDialogDelegate(
                 UserHandle.of(0),
@@ -88,11 +92,10 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
                 userContextProvider,
                 onStartRecordingClicked,
                 mediaProjectionMetricsLogger,
-                systemUIDialogFactory
+                systemUIDialogFactory,
+                context,
             )
         dialog = delegate.createDialog()
-        delegate.onCreate(dialog, savedInstanceState = null)
-        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
     }
 
     @After
@@ -184,6 +187,17 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
         dismissDialog()
 
         verify(mediaProjectionMetricsLogger).notifyProjectionRequestCancelled(TEST_HOST_UID)
+    }
+
+    @Test
+    fun showDialog_singleAppSelected_clickOnStart_projectionRequestCancelledIsNotLoggedOnce() {
+        showDialog()
+        onSpinnerItemSelected(SINGLE_APP)
+
+        clickOnStart()
+
+        verify(mediaProjectionMetricsLogger, never())
+            .notifyProjectionRequestCancelled(TEST_HOST_UID)
     }
 
     private fun showDialog() {

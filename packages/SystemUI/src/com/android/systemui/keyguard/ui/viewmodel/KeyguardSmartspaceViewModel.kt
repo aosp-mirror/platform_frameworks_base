@@ -16,14 +16,17 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -39,8 +42,8 @@ constructor(
     /** Whether the smartspace section is available in the build. */
     val isSmartspaceEnabled: Boolean = smartspaceController.isEnabled()
     /** Whether the weather area is available in the build. */
-    // TODO(b/317891876): this should be a Flow as the value can change over time.
-    val isWeatherEnabled: Boolean = smartspaceController.isWeatherEnabled()
+    private val isWeatherEnabled: StateFlow<Boolean> = smartspaceInteractor.isWeatherEnabled
+
     /** Whether the data and weather areas are decoupled in the build. */
     val isDateWeatherDecoupled: Boolean = smartspaceController.isDateWeatherDecoupled()
 
@@ -56,8 +59,10 @@ constructor(
 
     /** Whether the weather area should be visible. */
     val isWeatherVisible: StateFlow<Boolean> =
-        keyguardClockViewModel.hasCustomWeatherDataDisplay
-            .map { clockIncludesCustomWeatherDisplay ->
+        combine(
+                isWeatherEnabled,
+                keyguardClockViewModel.hasCustomWeatherDataDisplay,
+            ) { isWeatherEnabled, clockIncludesCustomWeatherDisplay ->
                 isWeatherVisible(
                     clockIncludesCustomWeatherDisplay = clockIncludesCustomWeatherDisplay,
                     isWeatherEnabled = isWeatherEnabled,
@@ -70,7 +75,7 @@ constructor(
                     isWeatherVisible(
                         clockIncludesCustomWeatherDisplay =
                             keyguardClockViewModel.hasCustomWeatherDataDisplay.value,
-                        isWeatherEnabled = isWeatherEnabled,
+                        isWeatherEnabled = smartspaceInteractor.isWeatherEnabled.value,
                     )
             )
 
@@ -82,5 +87,17 @@ constructor(
     }
 
     /* trigger clock and smartspace constraints change when smartspace appears */
-    var bcSmartspaceVisibility: StateFlow<Int> = smartspaceInteractor.bcSmartspaceVisibility
+    val bcSmartspaceVisibility: StateFlow<Int> = smartspaceInteractor.bcSmartspaceVisibility
+
+    companion object {
+        fun getSmartspaceStartMargin(context: Context): Int {
+            return context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+        }
+
+        fun getSmartspaceEndMargin(context: Context): Int {
+            return context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end) +
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+        }
+    }
 }

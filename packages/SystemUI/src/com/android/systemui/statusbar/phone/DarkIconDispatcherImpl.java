@@ -14,8 +14,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.plugins.DarkIconDispatcher.getTint;
 import static com.android.settingslib.flags.Flags.newStatusBarIcons;
+import static com.android.systemui.plugins.DarkIconDispatcher.getTint;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -28,15 +28,15 @@ import android.widget.ImageView;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-
-import javax.inject.Inject;
-
 import kotlinx.coroutines.flow.FlowKt;
 import kotlinx.coroutines.flow.MutableStateFlow;
 import kotlinx.coroutines.flow.StateFlow;
 import kotlinx.coroutines.flow.StateFlowKt;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
+import javax.inject.Inject;
 
 /**
  */

@@ -27,6 +27,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_C
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+import static android.view.inputmethod.EditorInfo.STYLUS_HANDWRITING_ENABLED_ANDROIDX_EXTRAS_KEY;
 
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
@@ -4816,7 +4817,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mFontWeightAdjustment != 0
                 && mFontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED) {
             if (tf == null) {
-                tf = Typeface.DEFAULT;
+                if (Flags.fixNullTypefaceBolding()) {
+                    tf = Typeface.DEFAULT_BOLD;
+                } else {
+                    tf = Typeface.DEFAULT;
+                }
             } else {
                 int newWeight = Math.min(
                         Math.max(tf.getWeight() + mFontWeightAdjustment, FontStyle.FONT_WEIGHT_MIN),
@@ -9733,7 +9738,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         return KEY_EVENT_HANDLED;
                     }
                     if (hasFocus()) {
-                        clearFocus();
+                        clearFocusInternal(null, /* propagate */ true, /* refocus */ false);
                         InputMethodManager imm = getInputMethodManager();
                         if (imm != null) {
                             imm.hideSoftInputFromView(this, 0);
@@ -10062,9 +10067,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.initialCapsMode = ic.getCursorCapsMode(getInputType());
                 outAttrs.setInitialSurroundingText(mText);
                 outAttrs.contentMimeTypes = getReceiveContentMimeTypes();
-                if (android.view.inputmethod.Flags.editorinfoHandwritingEnabled()
-                        && isAutoHandwritingEnabled()) {
-                    outAttrs.setStylusHandwritingEnabled(true);
+                if (android.view.inputmethod.Flags.editorinfoHandwritingEnabled()) {
+                    boolean handwritingEnabled = isAutoHandwritingEnabled();
+                    outAttrs.setStylusHandwritingEnabled(handwritingEnabled);
+                    // AndroidX Core library 1.13.0 introduced
+                    // EditorInfoCompat#setStylusHandwritingEnabled and
+                    // EditorInfoCompat#isStylusHandwritingEnabled which used a boolean value in the
+                    // EditorInfo extras bundle. These methods do not set or check the Android V
+                    // property since the Android V SDK was not yet available. In order for
+                    // EditorInfoCompat#isStylusHandwritingEnabled to return the correct value for
+                    // EditorInfo created by Android V TextView, the extras bundle value is also set
+                    // here.
+                    if (outAttrs.extras == null) {
+                        outAttrs.extras = new Bundle();
+                    }
+                    outAttrs.extras.putBoolean(
+                            STYLUS_HANDWRITING_ENABLED_ANDROIDX_EXTRAS_KEY, handwritingEnabled);
                 }
                 ArrayList<Class<? extends HandwritingGesture>> gestures = new ArrayList<>();
                 gestures.add(SelectGesture.class);
@@ -11254,8 +11272,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 width = des;
             } else {
                 if (mUseBoundsForWidth) {
-                    width = Math.max(boring.width,
-                            (int) Math.ceil(boring.getDrawingBoundingBox().width()));
+                    RectF bbox = boring.getDrawingBoundingBox();
+                    float rightMax = Math.max(bbox.right, boring.width);
+                    float leftMin = Math.min(bbox.left, 0);
+                    width = Math.max(boring.width, (int) Math.ceil(rightMax - leftMin));
                 } else {
                     width = boring.width;
                 }
@@ -13118,6 +13138,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return superResult;
         }
 
+        // At this point, the event is not a long press, otherwise it would be handled above.
+        if (Flags.handwritingEndOfLineTap() && action == MotionEvent.ACTION_UP
+                && shouldStartHandwritingForEndOfLineTap(event)) {
+            InputMethodManager imm = getInputMethodManager();
+            if (imm != null) {
+                imm.startStylusHandwriting(this);
+                return true;
+            }
+        }
+
         final boolean touchIsFinished = (action == MotionEvent.ACTION_UP)
                 && (mEditor == null || !mEditor.mIgnoreActionUpEvent) && isFocused();
 
@@ -13164,6 +13194,46 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return superResult;
+    }
+
+    /**
+     * If handwriting is supported, the TextView is already focused and not empty, and the cursor is
+     * at the end of a line, a stylus tap after the end of the line will trigger handwriting.
+     */
+    private boolean shouldStartHandwritingForEndOfLineTap(MotionEvent actionUpEvent) {
+        if (!onCheckIsTextEditor()
+                || !isEnabled()
+                || !isAutoHandwritingEnabled()
+                || TextUtils.isEmpty(mText)
+                || didTouchFocusSelect()
+                || mLayout == null
+                || !actionUpEvent.isStylusPointer()) {
+            return false;
+        }
+        int cursorOffset = getSelectionStart();
+        if (cursorOffset < 0 || getSelectionEnd() != cursorOffset) {
+            return false;
+        }
+        int cursorLine = mLayout.getLineForOffset(cursorOffset);
+        int cursorLineEnd = mLayout.getLineEnd(cursorLine);
+        if (cursorLine != mLayout.getLineCount() - 1) {
+            cursorLineEnd--;
+        }
+        if (cursorLineEnd != cursorOffset) {
+            return false;
+        }
+        // Check that the stylus down point is within the same line as the cursor.
+        if (getLineAtCoordinate(actionUpEvent.getY()) != cursorLine) {
+            return false;
+        }
+        // Check that the stylus down point is after the end of the line.
+        float localX = convertToLocalHorizontalCoordinate(actionUpEvent.getX());
+        if (mLayout.getParagraphDirection(cursorLine) == Layout.DIR_RIGHT_TO_LEFT
+                ? localX >= mLayout.getLineLeft(cursorLine)
+                : localX <= mLayout.getLineRight(cursorLine)) {
+            return false;
+        }
+        return isStylusHandwritingAvailable();
     }
 
     /**
@@ -13561,6 +13631,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean isAutoHandwritingEnabled() {
         return super.isAutoHandwritingEnabled() && !isAnyPasswordInputType();
+    }
+
+    /** @hide */
+    @Override
+    public boolean shouldTrackHandwritingArea() {
+        // The handwriting initiator tracks all editable TextViews regardless of whether handwriting
+        // is supported, so that it can show an error message for unsupported editable TextViews.
+        return super.shouldTrackHandwritingArea()
+                || (Flags.handwritingUnsupportedMessage() && onCheckIsTextEditor());
     }
 
     /** @hide */
@@ -13972,6 +14051,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public void autofill(AutofillValue value) {
+        if (android.view.autofill.Helper.sVerbose) {
+            Log.v(LOG_TAG, "autofill() called on textview for id:" + getAutofillId());
+        }
         if (!isTextAutofillable()) {
             Log.w(LOG_TAG, "cannot autofill non-editable TextView: " + this);
             return;
@@ -15490,8 +15572,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return x;
     }
 
+    /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    int getLineAtCoordinate(float y) {
+    public int getLineAtCoordinate(float y) {
         y -= getTotalPaddingTop();
         // Clamp the position to inside of the view.
         y = Math.max(0.0f, y);

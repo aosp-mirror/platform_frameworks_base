@@ -16,54 +16,54 @@
 
 package com.android.compose.animation.scene.transformation
 
+import android.platform.test.annotations.MotionTest
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TestElements
-import com.android.compose.animation.scene.testTransition
-import com.android.compose.test.assertSizeIsEqualTo
+import com.android.compose.animation.scene.TransitionBuilder
+import com.android.compose.animation.scene.TransitionRecordingSpec
+import com.android.compose.animation.scene.featureOfElement
+import com.android.compose.animation.scene.recordTransition
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.motion.compose.ComposeFeatureCaptures
+import platform.test.motion.compose.createComposeMotionTestRule
+import platform.test.motion.testing.createGoldenPathManager
 
 @RunWith(AndroidJUnit4::class)
+@MotionTest
 class AnchoredSizeTest {
-    @get:Rule val rule = createComposeRule()
+    private val goldenPaths =
+        createGoldenPathManager("frameworks/base/packages/SystemUI/compose/scene/tests/goldens")
+
+    @get:Rule val motionRule = createComposeMotionTestRule(goldenPaths)
 
     @Test
     fun testAnchoredSizeEnter() {
-        rule.testTransition(
+        assertBarSizeMatchesGolden(
             fromSceneContent = { Box(Modifier.size(100.dp, 100.dp).element(TestElements.Foo)) },
             toSceneContent = {
                 Box(Modifier.size(50.dp, 50.dp).element(TestElements.Foo))
                 Box(Modifier.size(200.dp, 60.dp).element(TestElements.Bar))
             },
             transition = {
-                // Scale during 4 frames.
                 spec = tween(16 * 4, easing = LinearEasing)
                 anchoredSize(TestElements.Bar, TestElements.Foo)
-            },
-        ) {
-            // Bar is entering. It starts at the same size as Foo in scene A in and scales to its
-            // final size in scene B.
-            before { onElement(TestElements.Bar).assertDoesNotExist() }
-            at(0) { onElement(TestElements.Bar).assertSizeIsEqualTo(100.dp, 100.dp) }
-            at(16) { onElement(TestElements.Bar).assertSizeIsEqualTo(125.dp, 90.dp) }
-            at(32) { onElement(TestElements.Bar).assertSizeIsEqualTo(150.dp, 80.dp) }
-            at(48) { onElement(TestElements.Bar).assertSizeIsEqualTo(175.dp, 70.dp) }
-            at(64) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 60.dp) }
-            after { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 60.dp) }
-        }
+            }
+        )
     }
 
     @Test
     fun testAnchoredSizeExit() {
-        rule.testTransition(
+        assertBarSizeMatchesGolden(
             fromSceneContent = {
                 Box(Modifier.size(100.dp, 100.dp).element(TestElements.Foo))
                 Box(Modifier.size(100.dp, 100.dp).element(TestElements.Bar))
@@ -73,22 +73,13 @@ class AnchoredSizeTest {
                 // Scale during 4 frames.
                 spec = tween(16 * 4, easing = LinearEasing)
                 anchoredSize(TestElements.Bar, TestElements.Foo)
-            },
-        ) {
-            // Bar is leaving. It starts at 100dp x 100dp in scene A and is scaled to 200dp x 60dp,
-            // the size of Foo in scene B.
-            before { onElement(TestElements.Bar).assertSizeIsEqualTo(100.dp, 100.dp) }
-            at(0) { onElement(TestElements.Bar).assertSizeIsEqualTo(100.dp, 100.dp) }
-            at(16) { onElement(TestElements.Bar).assertSizeIsEqualTo(125.dp, 90.dp) }
-            at(32) { onElement(TestElements.Bar).assertSizeIsEqualTo(150.dp, 80.dp) }
-            at(48) { onElement(TestElements.Bar).assertSizeIsEqualTo(175.dp, 70.dp) }
-            after { onElement(TestElements.Bar).assertDoesNotExist() }
-        }
+            }
+        )
     }
 
     @Test
     fun testAnchoredWidthOnly() {
-        rule.testTransition(
+        assertBarSizeMatchesGolden(
             fromSceneContent = { Box(Modifier.size(100.dp, 100.dp).element(TestElements.Foo)) },
             toSceneContent = {
                 Box(Modifier.size(50.dp, 50.dp).element(TestElements.Foo))
@@ -98,20 +89,12 @@ class AnchoredSizeTest {
                 spec = tween(16 * 4, easing = LinearEasing)
                 anchoredSize(TestElements.Bar, TestElements.Foo, anchorHeight = false)
             },
-        ) {
-            before { onElement(TestElements.Bar).assertDoesNotExist() }
-            at(0) { onElement(TestElements.Bar).assertSizeIsEqualTo(100.dp, 60.dp) }
-            at(16) { onElement(TestElements.Bar).assertSizeIsEqualTo(125.dp, 60.dp) }
-            at(32) { onElement(TestElements.Bar).assertSizeIsEqualTo(150.dp, 60.dp) }
-            at(48) { onElement(TestElements.Bar).assertSizeIsEqualTo(175.dp, 60.dp) }
-            at(64) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 60.dp) }
-            after { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 60.dp) }
-        }
+        )
     }
 
     @Test
     fun testAnchoredHeightOnly() {
-        rule.testTransition(
+        assertBarSizeMatchesGolden(
             fromSceneContent = { Box(Modifier.size(100.dp, 100.dp).element(TestElements.Foo)) },
             toSceneContent = {
                 Box(Modifier.size(50.dp, 50.dp).element(TestElements.Foo))
@@ -120,15 +103,23 @@ class AnchoredSizeTest {
             transition = {
                 spec = tween(16 * 4, easing = LinearEasing)
                 anchoredSize(TestElements.Bar, TestElements.Foo, anchorWidth = false)
-            },
-        ) {
-            before { onElement(TestElements.Bar).assertDoesNotExist() }
-            at(0) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 100.dp) }
-            at(16) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 90.dp) }
-            at(32) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 80.dp) }
-            at(48) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 70.dp) }
-            at(64) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 60.dp) }
-            after { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 60.dp) }
-        }
+            }
+        )
+    }
+
+    private fun assertBarSizeMatchesGolden(
+        fromSceneContent: @Composable SceneScope.() -> Unit,
+        toSceneContent: @Composable SceneScope.() -> Unit,
+        transition: TransitionBuilder.() -> Unit,
+    ) {
+        val recordingSpec =
+            TransitionRecordingSpec(recordAfter = true) {
+                featureOfElement(TestElements.Bar, ComposeFeatureCaptures.dpSize)
+            }
+
+        val motion =
+            motionRule.recordTransition(fromSceneContent, toSceneContent, transition, recordingSpec)
+
+        motionRule.assertThat(motion).timeSeriesMatchesGolden()
     }
 }

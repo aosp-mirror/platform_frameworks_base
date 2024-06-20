@@ -24,14 +24,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
@@ -58,12 +59,12 @@ private constructor(
     private val statusBarWindowStateController: StatusBarWindowStateController,
     private val shadeController: ShadeController,
     private val shadeViewController: ShadeViewController,
+    private val panelExpansionInteractor: PanelExpansionInteractor,
     private val windowRootView: Provider<WindowRootView>,
     private val shadeLogger: ShadeLogger,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
     private val userChipViewModel: StatusBarUserChipViewModel,
     private val viewUtil: ViewUtil,
-    private val sceneContainerFlags: SceneContainerFlags,
     private val configurationController: ConfigurationController,
     private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
 ) : ViewController<PhoneStatusBarView>(view) {
@@ -203,7 +204,7 @@ private constructor(
 
             // If scene framework is enabled, route the touch to it and
             // ignore the rest of the gesture.
-            if (sceneContainerFlags.isEnabled()) {
+            if (SceneContainerFlag.isEnabled) {
                 windowRootView.get().dispatchTouchEvent(event)
                 return true
             }
@@ -218,7 +219,7 @@ private constructor(
                     )
                     return true
                 }
-                if (shadeViewController.isFullyCollapsed && event.y < 1f) {
+                if (panelExpansionInteractor.isFullyCollapsed && event.y < 1f) {
                     // b/235889526 Eat events on the top edge of the phone when collapsed
                     shadeLogger.logMotionEvent(event, "top edge touch ignored")
                     return true
@@ -265,12 +266,12 @@ private constructor(
         @Named(UNFOLD_STATUS_BAR)
         private val progressProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
         private val featureFlags: FeatureFlags,
-        private val sceneContainerFlags: SceneContainerFlags,
         private val userChipViewModel: StatusBarUserChipViewModel,
         private val centralSurfaces: CentralSurfaces,
         private val statusBarWindowStateController: StatusBarWindowStateController,
         private val shadeController: ShadeController,
         private val shadeViewController: ShadeViewController,
+        private val panelExpansionInteractor: PanelExpansionInteractor,
         private val windowRootView: Provider<WindowRootView>,
         private val shadeLogger: ShadeLogger,
         private val viewUtil: ViewUtil,
@@ -292,12 +293,12 @@ private constructor(
                 statusBarWindowStateController,
                 shadeController,
                 shadeViewController,
+                panelExpansionInteractor,
                 windowRootView,
                 shadeLogger,
                 statusBarMoveFromCenterAnimationController,
                 userChipViewModel,
                 viewUtil,
-                sceneContainerFlags,
                 configurationController,
                 statusOverlayHoverListenerFactory,
             )

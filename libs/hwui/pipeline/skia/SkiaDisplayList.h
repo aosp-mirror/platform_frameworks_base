@@ -17,6 +17,7 @@
 #pragma once
 
 #include <deque>
+#include <memory>
 
 #include "Mesh.h"
 #include "RecordingCanvas.h"
@@ -172,7 +173,7 @@ public:
     std::deque<RenderNodeDrawable> mChildNodes;
     std::deque<FunctorDrawable*> mChildFunctors;
     std::vector<SkImage*> mMutableImages;
-    std::vector<const Mesh*> mMeshes;
+    std::vector<std::shared_ptr<const MeshBufferData>> mMeshBufferData;
 
 private:
     std::vector<Pair<VectorDrawableRoot*, SkMatrix>> mVectorDrawables;

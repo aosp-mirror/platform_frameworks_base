@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.testapp;
 
-import androidx.annotation.NonNull;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -103,18 +102,13 @@ public class ActivityEmbeddingMainActivity extends Activity {
     }
 
     private static SplitPairRule createSplitPairRules(@NonNull String layoutDirection) {
-        final Set<SplitPairFilter> pairFilters = new HashSet<>();
-        final SplitPairFilter activitiesPair = new SplitPairFilter(
-                ActivityOptions.ActivityEmbedding.MainActivity.COMPONENT,
-                ActivityOptions.ActivityEmbedding.SecondaryActivity.COMPONENT,
-                null /* secondaryActivityIntentAction */);
-        pairFilters.add(activitiesPair);
+        final Set<SplitPairFilter> pairFilters = getSplitPairFilters();
         final SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(SplitAttributes.SplitType.SPLIT_TYPE_EQUAL)
                 .setLayoutDirection(parseLayoutDirection(layoutDirection))
                 .build();
         // Setting thresholds to ALWAYS_ALLOW values to make it easy for running on all devices.
-        final SplitPairRule rule = new SplitPairRule.Builder(pairFilters)
+        return new SplitPairRule.Builder(pairFilters)
                 .setDefaultSplitAttributes(splitAttributes)
                 .setMinWidthDp(SplitRule.SPLIT_MIN_DIMENSION_ALWAYS_ALLOW)
                 .setMinHeightDp(SplitRule.SPLIT_MIN_DIMENSION_ALWAYS_ALLOW)
@@ -122,7 +116,22 @@ public class ActivityEmbeddingMainActivity extends Activity {
                 .setMaxAspectRatioInPortrait(EmbeddingAspectRatio.ALWAYS_ALLOW)
                 .setMaxAspectRatioInLandscape(EmbeddingAspectRatio.ALWAYS_ALLOW)
                 .build();
-        return rule;
+    }
+
+    @NonNull
+    private static Set<SplitPairFilter> getSplitPairFilters() {
+        final Set<SplitPairFilter> pairFilters = new HashSet<>();
+        final SplitPairFilter mainAndSecondaryActivitiesPair = new SplitPairFilter(
+                ActivityOptions.ActivityEmbedding.MainActivity.COMPONENT,
+                ActivityOptions.ActivityEmbedding.SecondaryActivity.COMPONENT,
+                null /* secondaryActivityIntentAction */);
+        pairFilters.add(mainAndSecondaryActivitiesPair);
+        final SplitPairFilter mainAndTrampolineActivitiesPair = new SplitPairFilter(
+                ActivityOptions.ActivityEmbedding.MainActivity.COMPONENT,
+                ActivityOptions.ActivityEmbedding.TrampolineActivity.COMPONENT,
+                null /* secondaryActivityIntentAction */);
+        pairFilters.add(mainAndTrampolineActivitiesPair);
+        return pairFilters;
     }
 
     private static SplitPlaceholderRule createSplitPlaceholderRules(

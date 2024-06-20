@@ -8,8 +8,12 @@
     <option name="isolated-storage" value="false"/>
 
     <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
+        <!-- disable DeprecatedTargetSdk warning -->
+        <option name="run-command" value="setprop debug.wm.disable_deprecated_target_sdk_dialog 1"/>
         <!-- keeps the screen on during tests -->
         <option name="screen-always-on" value="on"/>
+        <!-- enable AOD -->
+        <option name="set-secure-setting" key="doze_always_on" value="1" />
         <!-- prevents the phone from restarting -->
         <option name="force-skip-system-props" value="true"/>
         <!-- set WM tracing verbose level to all -->
@@ -78,6 +82,7 @@
                 value="trace_config.textproto"
         />
         <option name="instrumentation-arg" key="per_run" value="true"/>
+        <option name="instrumentation-arg" key="perfetto_persist_pid_track" value="true"/>
     </test>
     <!-- Needed for pulling the collected trace config on to the host -->
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">

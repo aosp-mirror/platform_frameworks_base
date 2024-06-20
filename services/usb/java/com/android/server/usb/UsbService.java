@@ -60,6 +60,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
@@ -220,6 +221,21 @@ public class UsbService extends IUsbManager.Stub {
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         mContext.registerReceiverAsUser(receiver, UserHandle.ALL, filter, null, null);
+    }
+
+    // Ideally we should use the injector pattern so we wouldn't need this constructor  for test
+    @VisibleForTesting
+    UsbService(Context context,
+                      UsbPortManager usbPortManager,
+                      UsbAlsaManager usbAlsaManager,
+                      UserManager userManager,
+                      UsbSettingsManager usbSettingsManager) {
+        mContext = context;
+        mPortManager = usbPortManager;
+        mAlsaManager = usbAlsaManager;
+        mUserManager = userManager;
+        mSettingsManager = usbSettingsManager;
+        mPermissionManager = new UsbPermissionManager(context, this);
     }
 
     /**
@@ -886,7 +902,16 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public boolean enableUsbData(String portId, boolean enable, int operationId,
-            IUsbOperationInternal callback) {
+                                 IUsbOperationInternal callback) {
+        return enableUsbDataInternal(portId, enable, operationId, callback, Binder.getCallingUid());
+    }
+
+    /**
+     *  Internal function abstracted for testing with callerUid
+     */
+    @VisibleForTesting
+    boolean enableUsbDataInternal(String portId, boolean enable, int operationId,
+            IUsbOperationInternal callback, int callerUid) {
         Objects.requireNonNull(portId, "enableUsbData: portId must not be null. opId:"
                 + operationId);
         Objects.requireNonNull(callback, "enableUsbData: callback must not be null. opId:"
@@ -894,7 +919,14 @@ public class UsbService extends IUsbManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
         if (android.hardware.usb.flags.Flags.enableUsbDataSignalStaking()) {
-            if (!shouldUpdateUsbSignaling(portId, enable, Binder.getCallingUid())) return false;
+            if (!shouldUpdateUsbSignaling(portId, enable, callerUid)) {
+                try {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "enableUsbData: Failed to call onOperationComplete", e);
+                }
+                return false;
+            }
         }
 
         final long ident = Binder.clearCallingIdentity();
@@ -943,15 +975,35 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public void enableUsbDataWhileDocked(String portId, int operationId,
-            IUsbOperationInternal callback) {
+                                         IUsbOperationInternal callback) {
+        enableUsbDataWhileDockedInternal(portId, operationId, callback, Binder.getCallingUid());
+    }
+
+    /**
+     *  Internal function abstracted for testing with callerUid
+     */
+    @VisibleForTesting
+     void enableUsbDataWhileDockedInternal(String portId, int operationId,
+            IUsbOperationInternal callback, int callerUid) {
         Objects.requireNonNull(portId, "enableUsbDataWhileDocked: portId must not be null. opId:"
                 + operationId);
         Objects.requireNonNull(callback,
                 "enableUsbDataWhileDocked: callback must not be null. opId:"
                 + operationId);
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        if (android.hardware.usb.flags.Flags.enableUsbDataSignalStaking()) {
+            if (!shouldUpdateUsbSignaling(portId, true, callerUid)) {
+                try {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "enableUsbDataWhileDocked: Failed to call onOperationComplete", e);
+                }
+                return;
+            }
+        }
+
         final long ident = Binder.clearCallingIdentity();
-        boolean wait;
         try {
             if (mPortManager != null) {
                 mPortManager.enableUsbDataWhileDocked(portId, operationId, callback, null);

@@ -816,30 +816,41 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void enterStageSplitFromRunningApp(boolean leftOrTop) {
+        public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
-                    bar.enterStageSplitFromRunningApp(leftOrTop);
+                    bar.moveFocusedTaskToStageSplit(displayId, leftOrTop);
                 } catch (RemoteException ex) { }
             }
         }
 
         @Override
-        public void enterDesktop(int displayId) {
+        public void setSplitscreenFocus(boolean leftOrTop) {
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
-                    bar.enterDesktop(displayId);
+                    bar.setSplitscreenFocus(leftOrTop);
                 } catch (RemoteException ex) { }
             }
         }
+
         @Override
-        public void showMediaOutputSwitcher(String packageName) {
+        public void moveFocusedTaskToDesktop(int displayId) {
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
-                    bar.showMediaOutputSwitcher(packageName);
+                    bar.moveFocusedTaskToDesktop(displayId);
+                } catch (RemoteException ex) { }
+            }
+        }
+
+        @Override
+        public void showMediaOutputSwitcher(String targetPackageName, UserHandle targetUserHandle) {
+            IStatusBar bar = mBar;
+            if (bar != null) {
+                try {
+                    bar.showMediaOutputSwitcher(targetPackageName, targetUserHandle);
                 } catch (RemoteException ex) {
                 }
             }
@@ -939,7 +950,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         if (mBar != null) {
             try {
-                mBar.togglePanel();
+                mBar.toggleNotificationsPanel();
             } catch (RemoteException ex) {
             }
         }
@@ -1285,7 +1296,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         synchronized (mIcons) {
             StatusBarIcon icon = new StatusBarIcon(iconPackage, UserHandle.SYSTEM, iconId,
-                    iconLevel, 0, contentDescription);
+                    iconLevel, 0, contentDescription, StatusBarIcon.Type.SystemIcon);
             //Slog.d(TAG, "setIcon slot=" + slot + " index=" + index + " icon=" + icon);
             mIcons.put(slot, icon);
 

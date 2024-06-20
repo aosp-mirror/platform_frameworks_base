@@ -25,6 +25,8 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.hardware.DataSpace;
+import android.hardware.HardwareBuffer;
 import android.hardware.OverlayProperties;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
@@ -1417,7 +1419,14 @@ public class HardwareRenderer {
             nInitDisplayInfo(largestWidth, largestHeight, defaultDisplay.getRefreshRate(),
                     wideColorDataspace, defaultDisplay.getAppVsyncOffsetNanos(),
                     defaultDisplay.getPresentationDeadlineNanos(),
-                    overlayProperties.isFp16SupportedForHdr(),
+                    overlayProperties.isCombinationSupported(
+                            DataSpace.DATASPACE_SCRGB, HardwareBuffer.RGBA_FP16),
+                    overlayProperties.isCombinationSupported(
+                            DataSpace.pack(
+                                    DataSpace.STANDARD_DCI_P3,
+                                    DataSpace.TRANSFER_SRGB,
+                                    DataSpace.RANGE_EXTENDED),
+                            HardwareBuffer.RGBA_10101010),
                     overlayProperties.isMixedColorSpacesSupported());
 
             mDisplayInitialized = true;
@@ -1603,7 +1612,8 @@ public class HardwareRenderer {
 
     private static native void nInitDisplayInfo(int width, int height, float refreshRate,
             int wideColorDataspace, long appVsyncOffsetNanos, long presentationDeadlineNanos,
-            boolean supportsFp16ForHdr, boolean nInitDisplayInfo);
+            boolean supportsFp16ForHdr, boolean isRgba10101010SupportedForHdr,
+            boolean nSupportMixedColorSpaces);
 
     private static native void nSetDrawingEnabled(boolean drawingEnabled);
 

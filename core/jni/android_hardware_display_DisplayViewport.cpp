@@ -59,7 +59,8 @@ status_t android_hardware_display_DisplayViewport_toNative(JNIEnv* env, jobject 
     static const jclass intClass = FindClassOrDie(env, "java/lang/Integer");
     static const jmethodID byteValue = env->GetMethodID(intClass, "byteValue", "()B");
 
-    viewport->displayId = env->GetIntField(viewportObj, gDisplayViewportClassInfo.displayId);
+    viewport->displayId = ui::LogicalDisplayId{
+            env->GetIntField(viewportObj, gDisplayViewportClassInfo.displayId)};
     viewport->isActive = env->GetBooleanField(viewportObj, gDisplayViewportClassInfo.isActive);
     jint orientation = env->GetIntField(viewportObj, gDisplayViewportClassInfo.orientation);
     viewport->orientation = static_cast<ui::Rotation>(orientation);

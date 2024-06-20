@@ -25,6 +25,9 @@ data class SceneContainerConfig(
      * The keys to all scenes in the container, sorted by z-order such that the last one renders on
      * top of all previous ones. Scene keys within the same container must not repeat but it's okay
      * to have the same scene keys in different containers.
+     *
+     * Note that this doesn't control how back navigation works; for that, we have
+     * [navigationDistances].
      */
     val sceneKeys: List<SceneKey>,
 
@@ -33,12 +36,34 @@ data class SceneContainerConfig(
      * before taking any application state in to account.
      */
     val initialSceneKey: SceneKey,
+
+    /**
+     * Navigation distance of each scene.
+     *
+     * The navigation distance is a measure of how many non-back user action "steps" away from the
+     * starting scene, each scene is.
+     *
+     * The framework uses these to help scene implementations decide which scene to go back to when
+     * the user attempts to navigate back on them, if they need that.
+     *
+     * In general, the more non-back user actions are needed to get to a scene, the greater that
+     * scene's distance should be. Navigating "back" then goes from scenes with a higher distance to
+     * scenes with a lower distance.
+     *
+     * Note that this is not the z-order of rendering; that's determined by the order of declaration
+     * of scenes in the [sceneKeys] list.
+     */
+    val navigationDistances: Map<SceneKey, Int>
 ) {
     init {
         check(sceneKeys.isNotEmpty()) { "A container must have at least one scene key." }
 
         check(sceneKeys.contains(initialSceneKey)) {
             "The initial key \"$initialSceneKey\" is not present in this container."
+        }
+
+        check(navigationDistances.keys == sceneKeys.toSet()) {
+            "Scene keys and distance map must match."
         }
     }
 }

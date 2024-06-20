@@ -19,7 +19,13 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
@@ -55,6 +61,9 @@ interface CollapsedStatusBarViewModel {
     /** Emits whenever a transition from lockscreen to dream has started. */
     val transitionFromLockscreenToDreamStartedEvent: Flow<Unit>
 
+    /** The ongoing activity chip that should be shown on the left-hand side of the status bar. */
+    val ongoingActivityChip: StateFlow<OngoingActivityChipModel>
+
     /**
      * Apps can request a low profile mode [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE] where
      * status bar and navigation icons dim. In this mode, a notification dot appears where the
@@ -74,20 +83,21 @@ constructor(
     private val lightsOutInteractor: LightsOutInteractor,
     private val notificationsInteractor: ActiveNotificationsInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    ongoingActivityChipsViewModel: OngoingActivityChipsViewModel,
     @Application coroutineScope: CoroutineScope,
 ) : CollapsedStatusBarViewModel {
     override val isTransitioningFromLockscreenToOccluded: StateFlow<Boolean> =
-        keyguardTransitionInteractor.lockscreenToOccludedTransition
-            .map {
-                it.transitionState == TransitionState.STARTED ||
-                    it.transitionState == TransitionState.RUNNING
-            }
+        keyguardTransitionInteractor
+            .isInTransition(Edge.create(from = LOCKSCREEN, to = OCCLUDED))
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), initialValue = false)
 
     override val transitionFromLockscreenToDreamStartedEvent: Flow<Unit> =
-        keyguardTransitionInteractor.lockscreenToDreamingTransition
+        keyguardTransitionInteractor
+            .transition(Edge.create(from = LOCKSCREEN, to = DREAMING))
             .filter { it.transitionState == TransitionState.STARTED }
             .map {}
+
+    override val ongoingActivityChip = ongoingActivityChipsViewModel.chip
 
     override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> =
         if (NotificationsLiveDataStoreRefactor.isUnexpectedlyInLegacyMode()) {

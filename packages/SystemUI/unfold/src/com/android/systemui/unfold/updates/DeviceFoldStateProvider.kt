@@ -20,6 +20,7 @@ import android.os.Handler
 import android.util.Log
 import androidx.annotation.FloatRange
 import androidx.annotation.VisibleForTesting
+import androidx.annotation.WorkerThread
 import androidx.core.util.Consumer
 import com.android.systemui.unfold.compat.INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
@@ -215,6 +216,7 @@ constructor(
     }
 
     private inner class FoldRotationListener : RotationChangeProvider.RotationListener {
+        @WorkerThread
         override fun onRotationChanged(newRotation: Int) {
             assertInProgressThread()
             if (isTransitionInProgress) cancelAnimation()

@@ -19,7 +19,9 @@ package com.android.server.wm;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -60,7 +62,6 @@ import android.window.TaskSnapshot;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.server.wm.utils.InsetUtils;
 import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
@@ -166,33 +167,12 @@ class BackNavigationController {
             }
 
             // Move focus to the top embedded window if possible
-            if (mWindowManagerService.moveFocusToTopEmbeddedWindow(window)) {
+            if (mWindowManagerService.moveFocusToAdjacentEmbeddedWindow(window)) {
                 window = wmService.getFocusedWindowLocked();
                 if (window == null) {
                     Slog.e(TAG, "New focused window is null, returning null.");
                     return null;
                 }
-            }
-
-            // This is needed to bridge the old and new back behavior with recents.  While in
-            // Overview with live tile enabled, the previous app is technically focused but we
-            // add an input consumer to capture all input that would otherwise go to the apps
-            // being controlled by the animation. This means that the window resolved is not
-            // the right window to consume back while in overview, so we need to route it to
-            // launcher and use the legacy behavior of injecting KEYCODE_BACK since the existing
-            // compat callback in VRI only works when the window is focused.
-            // This symptom also happen while shell transition enabled, we can check that by
-            // isTransientLaunch to know whether the focus window is point to live tile.
-            final RecentsAnimationController recentsAnimationController =
-                    wmService.getRecentsAnimationController();
-            final ActivityRecord tmpAR = window.mActivityRecord;
-            if ((tmpAR != null && tmpAR.isActivityTypeHomeOrRecents()
-                    && tmpAR.mTransitionController.isTransientLaunch(tmpAR))
-                    || (recentsAnimationController != null
-                    && recentsAnimationController.shouldApplyInputConsumer(tmpAR))) {
-                ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Current focused window being animated by "
-                        + "recents. Overriding back callback to recents controller callback.");
-                return null;
             }
 
             if (!window.isDrawn()) {
@@ -221,6 +201,9 @@ class BackNavigationController {
             }
             infoBuilder.setOnBackInvokedCallback(callbackInfo.getCallback());
             infoBuilder.setAnimationCallback(callbackInfo.isAnimationCallback());
+            infoBuilder.setTouchableRegion(window.getFrame());
+            infoBuilder.setAppProgressAllowed((window.getAttrs().privateFlags
+                    & PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED) != 0);
             mNavigationMonitor.startMonitor(window, navigationObserver);
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
@@ -290,6 +273,8 @@ class BackNavigationController {
                                     customAppTransition.mBackgroundColor);
                         }
                     }
+                    infoBuilder.setLetterboxColor(currentActivity.mLetterboxUiController
+                            .getLetterboxBackgroundColor().toArgb());
                     removedWindowContainer = currentActivity;
                     prevTask = prevActivities.get(0).getTask();
                     backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
@@ -321,7 +306,8 @@ class BackNavigationController {
                 } else if (prevTask.isActivityTypeHome()) {
                     removedWindowContainer = currentTask;
                     backType = BackNavigationInfo.TYPE_RETURN_TO_HOME;
-                    mShowWallpaper = true;
+                    final ActivityRecord ar = prevTask.getTopNonFinishingActivity();
+                    mShowWallpaper = ar != null && ar.hasWallpaper();
                 } else {
                     // If it reaches the top activity, we will check the below task from parent.
                     // If it's null or multi-window and has different parent task, fallback the type
@@ -329,7 +315,9 @@ class BackNavigationController {
                     // another task.
                     final Task prevParent = prevTask.getParent().asTask();
                     final Task currParent = currentTask.getParent().asTask();
-                    if (prevTask.inMultiWindowMode() && prevParent != currParent) {
+                    if ((prevTask.inMultiWindowMode() && prevParent != currParent)
+                            // Do not animate to translucent task, it could be trampoline.
+                            || hasTranslucentActivity(currentActivity, prevActivities)) {
                         backType = BackNavigationInfo.TYPE_CALLBACK;
                     } else {
                         removedWindowContainer = prevTask;
@@ -360,6 +348,7 @@ class BackNavigationController {
                         mAnimationHandler.prepareAnimation(
                                 backType,
                                 adapter,
+                                mNavigationMonitor,
                                 currentTask,
                                 prevTask,
                                 currentActivity,
@@ -423,7 +412,6 @@ class BackNavigationController {
         // Searching previous
         final ActivityRecord prevActivity = currentTask.getActivity((below) -> !below.finishing,
                 currentActivity, false /*includeBoundary*/, true /*traverseTopToBottom*/);
-
         final TaskFragment currTF = currentActivity.getTaskFragment();
         if (currTF != null && currTF.asTask() == null) {
             // The currentActivity is embedded, search for the candidate previous activities.
@@ -432,13 +420,34 @@ class BackNavigationController {
                 outPrevActivities.add(prevActivity);
                 return true;
             }
-            if (currTF.getAdjacentTaskFragment() != null) {
-                // The two TFs are adjacent (visually displayed side-by-side), search if any
-                // activity below the lowest one
-                // If companion, those two TF will be closed together.
-                if (currTF.getCompanionTaskFragment() != null) {
+            if (currTF.getAdjacentTaskFragment() == null) {
+                final TaskFragment nextTF = findNextTaskFragment(currentTask, currTF);
+                if (isSecondCompanionToFirst(currTF, nextTF)) {
+                    // TF is isStacked, search bottom activity from companion TF.
+                    //
+                    // Sample hierarchy: search for underPrevious if any.
+                    //     Current TF
+                    //     Companion TF (bottomActivityInCompanion)
+                    //     Bottom Activity not inside companion TF (underPrevious)
+                    // find bottom activity in Companion TF.
+                    final ActivityRecord bottomActivityInCompanion = nextTF.getActivity(
+                            (below) -> !below.finishing, false /* traverseTopToBottom */);
+                    final ActivityRecord underPrevious = currentTask.getActivity(
+                            (below) -> !below.finishing, bottomActivityInCompanion,
+                            false /*includeBoundary*/, true /*traverseTopToBottom*/);
+                    if (underPrevious != null) {
+                        outPrevActivities.add(underPrevious);
+                        addPreviousAdjacentActivityIfExist(underPrevious, outPrevActivities);
+                    }
+                    return true;
+                }
+            } else {
+                // If adjacent TF has companion to current TF, those two TF will be closed together.
+                final TaskFragment adjacentTF = currTF.getAdjacentTaskFragment();
+                if (isSecondCompanionToFirst(currTF, adjacentTF)) {
+                    // The two TFs are adjacent (visually displayed side-by-side), search if any
+                    // activity below the lowest one.
                     final WindowContainer commonParent = currTF.getParent();
-                    final TaskFragment adjacentTF = currTF.getAdjacentTaskFragment();
                     final TaskFragment lowerTF = commonParent.mChildren.indexOf(currTF)
                             < commonParent.mChildren.indexOf(adjacentTF)
                             ? currTF : adjacentTF;
@@ -452,25 +461,6 @@ class BackNavigationController {
                 // Unable to predict if no companion, it can only close current activity and make
                 // prev Activity full screened.
                 return false;
-            } else if (currTF.getCompanionTaskFragment() != null) {
-                // TF is isStacked, search bottom activity from companion TF.
-                //
-                // Sample hierarchy: search for underPrevious if any.
-                //     Current TF
-                //     Companion TF (bottomActivityInCompanion)
-                //     Bottom Activity not inside companion TF (underPrevious)
-                final TaskFragment companionTF = currTF.getCompanionTaskFragment();
-                // find bottom activity in Companion TF.
-                final ActivityRecord bottomActivityInCompanion = companionTF.getActivity(
-                        (below) -> !below.finishing, false /* traverseTopToBottom */);
-                final ActivityRecord underPrevious = currentTask.getActivity(
-                        (below) -> !below.finishing, bottomActivityInCompanion,
-                        false /*includeBoundary*/, true /*traverseTopToBottom*/);
-                if (underPrevious != null) {
-                    outPrevActivities.add(underPrevious);
-                    addPreviousAdjacentActivityIfExist(underPrevious, outPrevActivities);
-                }
-                return true;
             }
         }
 
@@ -483,6 +473,24 @@ class BackNavigationController {
         addPreviousAdjacentActivityIfExist(prevActivity, outPrevActivities);
         outPrevActivities.add(prevActivity);
         return true;
+    }
+
+    private static TaskFragment findNextTaskFragment(@NonNull Task currentTask,
+            @NonNull TaskFragment topTF) {
+        final int topIndex = currentTask.mChildren.indexOf(topTF);
+        if (topIndex <= 0) {
+            return null;
+        }
+        final WindowContainer next = currentTask.mChildren.get(topIndex - 1);
+        return next.asTaskFragment();
+    }
+
+    /**
+     * Whether the second TF has set companion to first TF.
+     * When set, the second TF will be removed by organizer if the first TF is removed.
+     */
+    private static boolean isSecondCompanionToFirst(TaskFragment first, TaskFragment second) {
+        return second != null && second.getCompanionTaskFragment() == first;
     }
 
     private static void addPreviousAdjacentActivityIfExist(@NonNull ActivityRecord prevActivity,
@@ -524,7 +532,7 @@ class BackNavigationController {
         }
         for (int i = prevActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord test = prevActivities.get(i);
-            if (!test.occludesParent() || test.showWallpaper()) {
+            if (!test.occludesParent() || test.hasWallpaper()) {
                 return true;
             }
         }
@@ -649,7 +657,8 @@ class BackNavigationController {
         mAnimationHandler.markWindowHasDrawn(openActivity);
     }
 
-    private class NavigationMonitor {
+    @VisibleForTesting
+    class NavigationMonitor {
         // The window which triggering the back navigation.
         private WindowState mNavigatingWindow;
         private RemoteCallback mObserver;
@@ -749,10 +758,18 @@ class BackNavigationController {
         if (!isMonitoringTransition() || targets.isEmpty()) {
             return;
         }
+        if (mAnimationHandler.hasTargetDetached()) {
+            mNavigationMonitor.cancelBackNavigating("targetDetached");
+            return;
+        }
         for (int i = targets.size() - 1; i >= 0; --i) {
             final WindowContainer wc = targets.get(i).mContainer;
             if (wc.asActivityRecord() == null && wc.asTask() == null
                     && wc.asTaskFragment() == null) {
+                continue;
+            }
+            // Only care if visibility changed.
+            if (targets.get(i).getTransitMode(wc) == TRANSIT_CHANGE) {
                 continue;
             }
             // WC can be visible due to setLaunchBehind
@@ -803,6 +820,13 @@ class BackNavigationController {
         return mAnimationHandler.isTarget(wc, wc.isVisibleRequested() /* open */);
     }
 
+    boolean shouldPauseTouch(WindowContainer wc) {
+        // Once the close transition is ready, it means the onBackInvoked callback has invoked, and
+        // app is ready to trigger next transition, no matter what it will be.
+        return mAnimationHandler.mComposed && mWaitTransitionFinish == null
+                && mAnimationHandler.isTarget(wc, wc.isVisibleRequested() /* open */);
+    }
+
     /**
      * Cleanup animation, this can either happen when legacy transition ready, or when the Shell
      * transition finish.
@@ -819,14 +843,14 @@ class BackNavigationController {
      * @param targets The final animation targets derived in transition.
      * @param finishedTransition The finished transition target.
     */
-    boolean onTransitionFinish(ArrayList<Transition.ChangeInfo> targets,
+    void onTransitionFinish(ArrayList<Transition.ChangeInfo> targets,
             @NonNull Transition finishedTransition) {
         if (finishedTransition == mWaitTransitionFinish) {
             clearBackAnimations();
         }
 
         if (!mBackAnimationInProgress || mPendingAnimationBuilder == null) {
-            return false;
+            return;
         }
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "Handling the deferred animation after transition finished");
@@ -854,7 +878,7 @@ class BackNavigationController {
                     + " open: " + Arrays.toString(mPendingAnimationBuilder.mOpenTargets)
                     + " close: " + mPendingAnimationBuilder.mCloseTarget);
             cancelPendingAnimation();
-            return false;
+            return;
         }
 
         // Ensure the final animation targets which hidden by transition could be visible.
@@ -863,9 +887,14 @@ class BackNavigationController {
             wc.prepareSurfaces();
         }
 
-        scheduleAnimation(mPendingAnimationBuilder);
-        mPendingAnimationBuilder = null;
-        return true;
+        // The pending builder could be cleared due to prepareSurfaces
+        // => updateNonSystemOverlayWindowsVisibilityIfNeeded
+        // => setForceHideNonSystemOverlayWindowIfNeeded
+        // => updateFocusedWindowLocked => onFocusWindowChanged.
+        if (mPendingAnimationBuilder != null) {
+            scheduleAnimation(mPendingAnimationBuilder);
+            mPendingAnimationBuilder = null;
+        }
     }
 
     private void cancelPendingAnimation() {
@@ -1074,10 +1103,6 @@ class BackNavigationController {
         }
 
         void finishPresentAnimations() {
-            if (!mComposed) {
-                return;
-            }
-
             if (mCloseAdaptor != null) {
                 mCloseAdaptor.mTarget.cancelAnimation();
                 mCloseAdaptor = null;
@@ -1106,8 +1131,10 @@ class BackNavigationController {
         }
 
         void clearBackAnimateTarget() {
-            finishPresentAnimations();
-            mComposed = false;
+            if (mComposed) {
+                mComposed = false;
+                finishPresentAnimations();
+            }
             mWaitTransition = false;
             mStartingSurfaceTargetMatch = false;
             mSwitchType = UNKNOWN;
@@ -1121,6 +1148,21 @@ class BackNavigationController {
             return containTarget(closeApps, false /* open */)
                     && (containTarget(openApps, true /* open */)
                     || containTarget(openApps, false /* open */));
+        }
+
+        /**
+         * Check if any animation target is detached, possibly due to app crash.
+         */
+        boolean hasTargetDetached() {
+            if (!mComposed) {
+                return false;
+            }
+            for (int i = mOpenAnimAdaptor.mAdaptors.length - 1; i >= 0; --i) {
+                if (!mOpenAnimAdaptor.mAdaptors[i].mTarget.isAttached()) {
+                    return true;
+                }
+            }
+            return !mCloseAdaptor.mTarget.isAttached();
         }
 
         @Override
@@ -1230,6 +1272,8 @@ class BackNavigationController {
                         .setContainerLayer()
                         .setHidden(false)
                         .setParent(task.getSurfaceControl())
+                        .setCallsite(
+                                "BackWindowAnimationAdaptorWrapper.getOrCreateAnimationTarget")
                         .build();
                 mCloseTransaction = new SurfaceControl.Transaction();
                 mCloseTransaction.reparent(leashSurface, null);
@@ -1325,8 +1369,6 @@ class BackNavigationController {
                                         ? task.getSurfaceControl()
                                         : mAdaptors[0].mTarget.getSurfaceControl());
                     }
-                    // remove starting surface.
-                    mStartingSurface = null;
                 }
             }
 
@@ -1343,7 +1385,10 @@ class BackNavigationController {
                         .removeWindowlessStartingSurface(mRequestedStartingSurfaceId,
                                 !openTransitionMatch);
                 mRequestedStartingSurfaceId = INVALID_TASK_ID;
-                mStartingSurface = null;
+                if (mStartingSurface != null && mStartingSurface.isValid()) {
+                    mStartingSurface.release();
+                    mStartingSurface = null;
+                }
             }
         }
 
@@ -1436,15 +1481,11 @@ class BackNavigationController {
                     return null;
                 }
                 final WindowState mainWindow = r.findMainWindow();
-                Rect insets;
-                if (mainWindow != null) {
-                    insets = mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
-                            mBounds, WindowInsets.Type.tappableElement(),
-                            false /* ignoreVisibility */).toRect();
-                    InsetUtils.addInsets(insets, mainWindow.mActivityRecord.getLetterboxInsets());
-                } else {
-                    insets = new Rect();
-                }
+                final Rect insets = mainWindow != null
+                        ? mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
+                                mBounds, WindowInsets.Type.tappableElement(),
+                                false /* ignoreVisibility */).toRect()
+                        : new Rect();
                 final int mode = mIsOpen ? MODE_OPENING : MODE_CLOSING;
                 mAnimationTarget = new RemoteAnimationTarget(t.mTaskId, mode, mCapturedLeash,
                         !r.fillsParent(), new Rect(),
@@ -1459,28 +1500,31 @@ class BackNavigationController {
         ScheduleAnimationBuilder prepareAnimation(
                 int backType,
                 BackAnimationAdapter adapter,
+                NavigationMonitor monitor,
                 Task currentTask,
                 Task previousTask,
                 ActivityRecord currentActivity,
                 ArrayList<ActivityRecord> previousActivity,
                 WindowContainer removedWindowContainer) {
+            final ScheduleAnimationBuilder builder =
+                    new ScheduleAnimationBuilder(backType, adapter, monitor);
             switch (backType) {
                 case BackNavigationInfo.TYPE_RETURN_TO_HOME:
-                    return new ScheduleAnimationBuilder(backType, adapter)
+                    return builder
                             .setIsLaunchBehind(true)
                             .setComposeTarget(currentTask, previousTask);
                 case BackNavigationInfo.TYPE_CROSS_ACTIVITY:
                     ActivityRecord[] prevActs = new ActivityRecord[previousActivity.size()];
                     prevActs = previousActivity.toArray(prevActs);
-                    return new ScheduleAnimationBuilder(backType, adapter)
+                    return builder
                             .setComposeTarget(currentActivity, prevActs)
                             .setIsLaunchBehind(false);
                 case BackNavigationInfo.TYPE_CROSS_TASK:
-                    return new ScheduleAnimationBuilder(backType, adapter)
+                    return builder
                             .setComposeTarget(currentTask, previousTask)
                             .setIsLaunchBehind(false);
                 case BackNavigationInfo.TYPE_DIALOG_CLOSE:
-                    return new ScheduleAnimationBuilder(backType, adapter)
+                    return builder
                             .setComposeTarget(removedWindowContainer, currentActivity)
                             .setIsLaunchBehind(false);
             }
@@ -1490,13 +1534,16 @@ class BackNavigationController {
         class ScheduleAnimationBuilder {
             final int mType;
             final BackAnimationAdapter mBackAnimationAdapter;
+            final NavigationMonitor mNavigationMonitor;
             WindowContainer mCloseTarget;
             WindowContainer[] mOpenTargets;
             boolean mIsLaunchBehind;
 
-            ScheduleAnimationBuilder(int type, BackAnimationAdapter backAnimationAdapter) {
+            ScheduleAnimationBuilder(int type, BackAnimationAdapter adapter,
+                    NavigationMonitor monitor) {
                 mType = type;
-                mBackAnimationAdapter = backAnimationAdapter;
+                mBackAnimationAdapter = adapter;
+                mNavigationMonitor = monitor;
             }
 
             ScheduleAnimationBuilder setComposeTarget(@NonNull WindowContainer close,
@@ -1511,15 +1558,17 @@ class BackNavigationController {
                 return this;
             }
 
+            // WC must be Activity/TaskFragment/Task
             boolean containTarget(@NonNull WindowContainer wc) {
                 if (mOpenTargets != null) {
                     for (int i = mOpenTargets.length - 1; i >= 0; --i) {
-                        if (wc == mOpenTargets[i] || mOpenTargets[i].hasChild(wc)) {
+                        if (wc == mOpenTargets[i] || mOpenTargets[i].hasChild(wc)
+                                || wc.hasChild(mOpenTargets[i])) {
                             return true;
                         }
                     }
                 }
-                return wc == mCloseTarget || mCloseTarget.hasChild(wc);
+                return wc == mCloseTarget || mCloseTarget.hasChild(wc) || wc.hasChild(mCloseTarget);
             }
 
             /**
@@ -1577,8 +1626,13 @@ class BackNavigationController {
 
                 return () -> {
                     try {
-                        mBackAnimationAdapter.getRunner().onAnimationStart(
-                                targets, null, null, callback);
+                        if (hasTargetDetached() || !validateAnimationTargets(targets)) {
+                            mNavigationMonitor.cancelBackNavigating("cancelAnimation");
+                            mBackAnimationAdapter.getRunner().onAnimationCancelled();
+                        } else {
+                            mBackAnimationAdapter.getRunner().onAnimationStart(
+                                    targets, null, null, callback);
+                        }
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -1605,6 +1659,21 @@ class BackNavigationController {
                 };
             }
         }
+    }
+
+    /**
+     * Validate animation targets.
+     */
+    private static boolean validateAnimationTargets(RemoteAnimationTarget[] apps) {
+        if (apps == null || apps.length == 0) {
+            return false;
+        }
+        for (int i = apps.length - 1; i >= 0; --i) {
+            if (!apps[i].leash.isValid()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -1664,7 +1733,14 @@ class BackNavigationController {
     }
 
     private static void restoreLaunchBehind(@NonNull ActivityRecord activity) {
-        activity.mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
+        if (!activity.isAttached()) {
+            // The activity was detached from hierarchy.
+            return;
+        }
+
+        if (activity.mDisplayContent.isFixedRotationLaunchingApp(activity)) {
+            activity.mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
+        }
 
         // Restore the launch-behind state.
         activity.mTaskSupervisor.scheduleLaunchTaskBehindComplete(activity.token);
@@ -1686,7 +1762,7 @@ class BackNavigationController {
                 || (wallpaperController.getWallpaperTarget() != null
                 && wallpaperController.wallpaperTransitionReady());
         if (wallpaperReady && mPendingAnimation != null) {
-            startAnimation();
+            mWindowManagerService.mAnimator.addAfterPrepareSurfacesRunnable(this::startAnimation);
         }
     }
 
@@ -1706,18 +1782,39 @@ class BackNavigationController {
     }
 
     private void onBackNavigationDone(Bundle result, int backType) {
-        boolean triggerBack = result != null && result.getBoolean(
-                BackNavigationInfo.KEY_TRIGGER_BACK);
-        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "onBackNavigationDone backType=%s, "
-                + "triggerBack=%b", backType, triggerBack);
+        if (result == null) {
+            return;
+        }
+        if (result.containsKey(BackNavigationInfo.KEY_NAVIGATION_FINISHED)) {
+            final boolean triggerBack = result.getBoolean(
+                    BackNavigationInfo.KEY_NAVIGATION_FINISHED);
+            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "onBackNavigationDone backType=%s, "
+                    + "triggerBack=%b", backType, triggerBack);
 
-        synchronized (mWindowManagerService.mGlobalLock) {
-            mNavigationMonitor.stopMonitorForRemote();
-            mBackAnimationInProgress = false;
-            mShowWallpaper = false;
-            // All animation should be done, clear any un-send animation.
-            mPendingAnimation = null;
-            mPendingAnimationBuilder = null;
+            synchronized (mWindowManagerService.mGlobalLock) {
+                mNavigationMonitor.stopMonitorForRemote();
+                mBackAnimationInProgress = false;
+                mShowWallpaper = false;
+                // All animation should be done, clear any un-send animation.
+                mPendingAnimation = null;
+                mPendingAnimationBuilder = null;
+            }
+        }
+        if (result.getBoolean(BackNavigationInfo.KEY_GESTURE_FINISHED)) {
+            synchronized (mWindowManagerService.mGlobalLock) {
+                final AnimationHandler ah = mAnimationHandler;
+                if (!ah.mComposed || ah.mWaitTransition || ah.mOpenActivities == null
+                        || (ah.mSwitchType != AnimationHandler.TASK_SWITCH
+                        && ah.mSwitchType != AnimationHandler.ACTIVITY_SWITCH)) {
+                    return;
+                }
+                for (int i = mAnimationHandler.mOpenActivities.length - 1; i >= 0; --i) {
+                    final ActivityRecord preDrawActivity = mAnimationHandler.mOpenActivities[i];
+                    if (!preDrawActivity.mLaunchTaskBehind) {
+                        setLaunchBehind(preDrawActivity);
+                    }
+                }
+            }
         }
     }
 

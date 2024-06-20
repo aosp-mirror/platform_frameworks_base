@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"सुलभता मेन्यू"</string>
-    <string name="accessibility_menu_intro" msgid="3164193281544042394">"सुलभता मेन्यू, स्क्रीन पर दिखने वाला एक बड़ा मेन्यू होता है. इसकी मदद से, अपने डिवाइस को कंट्रोल किया जा सकता है. इस मेन्यू में जाकर, अपना डिवाइस लॉक करने, स्क्रीनशॉट लेने, स्क्रीन की रोशनी और आवाज़ कंट्रोल करने जैसे कई दूसरे काम किए जा सकते हैं."</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"सुलभता मेन्यू, डिवाइस की स्क्रीन पर दिखने वाला एक बड़ा मेन्यू होता है. इस मेन्यू में जाकर, डिवाइस को लॉक करने, स्क्रीनशॉट लेने, स्क्रीन की रोशनी और आवाज़ को कंट्रोल करने जैसे कई काम किए जा सकते हैं."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"सुलभता सेटिंग"</string>
@@ -20,7 +20,7 @@
     <string name="brightness_down_label" msgid="7115662941913272072">"स्क्रीन की रोशनी कम करें"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"पिछली स्क्रीन पर जाएं"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"अगली स्क्रीन पर जाएं"</string>
-    <string name="accessibility_menu_description" msgid="4458354794093858297">"सुलभता मेन्यू, स्क्रीन पर दिखने वाला एक बड़ा मेन्यू होता है. इसकी मदद से, अपने डिवाइस को कंट्रोल किया जा सकता है. इस मेन्यू में जाकर, अपना डिवाइस लॉक करने, स्क्रीनशॉट लेने, स्क्रीन की रोशनी और आवाज़ कंट्रोल करने जैसे कई दूसरे काम किए जा सकते हैं."</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"सुलभता मेन्यू, डिवाइस की स्क्रीन पर दिखने वाला एक बड़ा मेन्यू होता है. इस मेन्यू में जाकर, डिवाइस को लॉक करने, स्क्रीनशॉट लेने, स्क्रीन की रोशनी और आवाज़ को कंट्रोल करने जैसे कई काम किए जा सकते हैं."</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"बड़े मेन्यू की मदद से डिवाइस को कंट्रोल करें"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"सुलभता मेन्यू सेटिंग"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"बड़े बटन"</string>

@@ -17,7 +17,6 @@
 package android.service.voice;
 
 import android.annotation.DurationMillisLong;
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -36,7 +35,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
-import android.service.voice.flags.Flags;
 import android.speech.IRecognitionServiceManager;
 import android.util.Log;
 import android.view.contentcapture.ContentCaptureManager;
@@ -262,7 +260,6 @@ public abstract class VisualQueryDetectionService extends Service
     public void onStopDetection() {
     }
 
-    // TODO(b/324341724): Properly deprecate this API.
     /**
      * Informs the system that the attention is gained for the interaction intention
      * {@link VisualQueryAttentionResult#INTERACTION_INTENTION_AUDIO_VISUAL} with
@@ -273,14 +270,10 @@ public abstract class VisualQueryDetectionService extends Service
      *
      */
     public final void gainedAttention() {
-        if (Flags.allowVariousAttentionTypes()) {
-            gainedAttention(new VisualQueryAttentionResult.Builder().build());
-        } else {
-            try {
-                mRemoteCallback.onAttentionGained(null);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        try {
+            mRemoteCallback.onAttentionGained(null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -300,7 +293,7 @@ public abstract class VisualQueryDetectionService extends Service
      *
      * @param attentionResult Attention result of type {@link VisualQueryAttentionResult}.
      */
-    @FlaggedApi(Flags.FLAG_ALLOW_VARIOUS_ATTENTION_TYPES)
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
     public final void gainedAttention(@NonNull VisualQueryAttentionResult attentionResult) {
         try {
             mRemoteCallback.onAttentionGained(attentionResult);
@@ -313,15 +306,10 @@ public abstract class VisualQueryDetectionService extends Service
      * Informs the system that all attention has lost to stop streaming.
      */
     public final void lostAttention() {
-        if (Flags.allowVariousAttentionTypes()) {
-            lostAttention(VisualQueryAttentionResult.INTERACTION_INTENTION_AUDIO_VISUAL);
-            lostAttention(VisualQueryAttentionResult.INTERACTION_INTENTION_VISUAL_ACCESSIBILITY);
-        } else {
-            try {
-                mRemoteCallback.onAttentionLost(0); // placeholder
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        try {
+            mRemoteCallback.onAttentionLost(0); // placeholder
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -333,7 +321,7 @@ public abstract class VisualQueryDetectionService extends Service
      * @param interactionIntention Interaction intention, one of
      *        {@link VisualQueryAttentionResult#InteractionIntention}.
      */
-    @FlaggedApi(Flags.FLAG_ALLOW_VARIOUS_ATTENTION_TYPES)
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
     public final void lostAttention(
             @VisualQueryAttentionResult.InteractionIntention int interactionIntention) {
         try {
@@ -343,7 +331,6 @@ public abstract class VisualQueryDetectionService extends Service
         }
     }
 
-    // TODO(b/324341724): Properly deprecate this API.
     /**
      * Informs the {@link VisualQueryDetector} with the text content being captured about the
      * query from the audio source. {@code partialQuery} is provided to the
@@ -377,7 +364,7 @@ public abstract class VisualQueryDetectionService extends Service
      * @param partialResult Partially detected result in the format of
      * {@link VisualQueryDetectedResult}.
      */
-    @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
     public final void streamQuery(@NonNull VisualQueryDetectedResult partialResult) {
         Objects.requireNonNull(partialResult);
         try {

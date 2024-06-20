@@ -34,7 +34,6 @@ import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.PowerExemptionManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.Button;
@@ -42,6 +41,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.graphics.drawable.IconCompat;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
@@ -67,7 +67,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
@@ -123,11 +123,23 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         mMediaControllers.add(mMediaController);
         when(mMediaSessionManager.getActiveSessions(any())).thenReturn(mMediaControllers);
 
-        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
-                mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogTransitionAnimator,
-                mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
-                mKeyguardManager, mFlags, mUserTracker);
+        mMediaOutputController =
+                new MediaOutputController(
+                        mContext,
+                        TEST_PACKAGE,
+                        mContext.getUser(),
+                        /* token */ null,
+                        mMediaSessionManager,
+                        mLocalBluetoothManager,
+                        mStarter,
+                        mNotifCollection,
+                        mDialogTransitionAnimator,
+                        mNearbyMediaDevicesManager,
+                        mAudioManager,
+                        mPowerExemptionManager,
+                        mKeyguardManager,
+                        mFlags,
+                        mUserTracker);
 
         // Using a fake package will cause routing operations to fail, so we intercept
         // scanning-related operations.

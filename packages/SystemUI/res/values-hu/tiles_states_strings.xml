@@ -186,4 +186,9 @@
     <item msgid="2478289035899842865">"Ki"</item>
     <item msgid="5137565285664080143">"Be"</item>
   </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"Nem áll rendelkezésre"</item>
+    <item msgid="3079622119444911877">"Ki"</item>
+    <item msgid="3028994095749238254">"Be"</item>
+  </string-array>
 </resources>

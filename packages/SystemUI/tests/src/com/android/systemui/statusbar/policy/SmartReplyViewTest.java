@@ -47,11 +47,11 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
@@ -59,6 +59,9 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
+
+import kotlin.sequences.Sequence;
+import kotlin.sequences.SequencesKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -75,9 +78,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import kotlin.sequences.Sequence;
-import kotlin.sequences.SequencesKt;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper

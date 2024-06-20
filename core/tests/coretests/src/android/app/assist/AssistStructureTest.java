@@ -266,8 +266,8 @@ public class AssistStructureTest {
         assertThat(view.getViewRootImpl()).isNotNull();
         ViewNodeBuilder viewStructure = new ViewNodeBuilder();
         viewStructure.setAutofillId(view.getAutofillId());
-        viewStructure.setCredentialManagerRequest(view.getCredentialManagerRequest(),
-                view.getCredentialManagerCallback());
+        viewStructure.setPendingCredentialRequest(view.getPendingCredentialRequest(),
+                view.getPendingCredentialCallback());
         view.onProvideAutofillStructure(viewStructure, /* flags= */ 0);
         ViewNodeParcelable viewNodeParcelable = new ViewNodeParcelable(viewStructure.getViewNode());
 
@@ -289,17 +289,20 @@ public class AssistStructureTest {
 
         assertThat(view.getViewRootImpl()).isNotNull();
         ViewNodeBuilder viewStructure = new ViewNodeBuilder();
-        viewStructure.setCredentialManagerRequest(view.getCredentialManagerRequest(),
-                view.getCredentialManagerCallback());
+        if (view.getPendingCredentialRequest() != null
+                && view.getPendingCredentialCallback() != null) {
+            viewStructure.setPendingCredentialRequest(view.getPendingCredentialRequest(),
+                    view.getPendingCredentialCallback());
+        }
 
-        assertEquals(viewStructure.getCredentialManagerRequest(), GET_CREDENTIAL_REQUEST);
-        assertEquals(viewStructure.getCredentialManagerCallback(),
+        assertEquals(viewStructure.getPendingCredentialRequest(), GET_CREDENTIAL_REQUEST);
+        assertEquals(viewStructure.getPendingCredentialCallback(),
                 GET_CREDENTIAL_REQUEST_CALLBACK);
 
         viewStructure.clearCredentialManagerRequest();
 
-        assertNull(viewStructure.getCredentialManagerRequest());
-        assertNull(viewStructure.getCredentialManagerCallback());
+        assertNull(viewStructure.getPendingCredentialRequest());
+        assertNull(viewStructure.getPendingCredentialCallback());
     }
 
     @Test
@@ -386,14 +389,14 @@ public class AssistStructureTest {
         EditText view = new EditText(mContext);
         view.setText("Big Hint in Little View");
         view.setAutofillHints(BIG_STRING);
-        view.setCredentialManagerRequest(GET_CREDENTIAL_REQUEST, GET_CREDENTIAL_REQUEST_CALLBACK);
+        view.setPendingCredentialRequest(GET_CREDENTIAL_REQUEST, GET_CREDENTIAL_REQUEST_CALLBACK);
         return view;
     }
 
     private EditText newCredentialView() {
         EditText view = new EditText(mContext);
         view.setText("Credential Request");
-        view.setCredentialManagerRequest(GET_CREDENTIAL_REQUEST, GET_CREDENTIAL_REQUEST_CALLBACK);
+        view.setPendingCredentialRequest(GET_CREDENTIAL_REQUEST, GET_CREDENTIAL_REQUEST_CALLBACK);
         return view;
     }
 
@@ -421,8 +424,8 @@ public class AssistStructureTest {
         assertThat(view.getAutofillId()).isNotNull();
         assertThat(view.getText().toString()).isEqualTo("Big Hint in Little View");
 
-        assertThat(view.getCredentialManagerRequest()).isEqualTo(GET_CREDENTIAL_REQUEST);
-        assertThat(view.getCredentialManagerCallback()).isEqualTo(GET_CREDENTIAL_REQUEST_CALLBACK);
+        assertThat(view.getPendingCredentialRequest()).isEqualTo(GET_CREDENTIAL_REQUEST);
+        assertThat(view.getPendingCredentialCallback()).isEqualTo(GET_CREDENTIAL_REQUEST_CALLBACK);
     }
 
     /**

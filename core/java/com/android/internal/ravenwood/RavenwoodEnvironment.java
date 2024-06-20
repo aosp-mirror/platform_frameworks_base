@@ -15,14 +15,24 @@
  */
 package com.android.internal.ravenwood;
 
+import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
+
 /**
  * Class to interact with the Ravenwood environment.
  */
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
-public class RavenwoodEnvironment {
+@RavenwoodNativeSubstitutionClass(
+        "com.android.platform.test.ravenwood.nativesubstitution.RavenwoodEnvironment_host")
+public final class RavenwoodEnvironment {
+    public static final String TAG = "RavenwoodEnvironment";
+
     private static RavenwoodEnvironment sInstance = new RavenwoodEnvironment();
+    private static Workaround sWorkaround = new Workaround();
 
     private RavenwoodEnvironment() {
+        if (isRunningOnRavenwood()) {
+            ensureRavenwoodInitializedInternal();
+        }
     }
 
     /**
@@ -31,6 +41,21 @@ public class RavenwoodEnvironment {
     public static RavenwoodEnvironment getInstance() {
         return sInstance;
     }
+
+    /**
+     * Initialize the ravenwood environment if it hasn't happened already, if running on Ravenwood.
+     *
+     * No-op if called on the device side.
+     */
+    public static void ensureRavenwoodInitialized() {
+    }
+
+    private static void ensureRavenwoodInitialized$ravenwood() {
+        getInstance(); // This is enough to initialize the environment.
+    }
+
+    /** Initialize the ravenwood environment */
+    private static native void ensureRavenwoodInitializedInternal();
 
     /**
      * USE IT SPARINGLY! Returns true if it's running on Ravenwood, hostside test environment.
@@ -49,7 +74,33 @@ public class RavenwoodEnvironment {
         return false;
     }
 
-    public boolean isRunningOnRavenwood$ravenwood() {
+    private boolean isRunningOnRavenwood$ravenwood() {
         return true;
+    }
+
+    /**
+     * See {@link Workaround}. It's only usablke on Ravenwood.
+     */
+    public static Workaround workaround() {
+        if (getInstance().isRunningOnRavenwood()) {
+            return sWorkaround;
+        }
+        throw new IllegalStateException("Workaround can only be used on Ravenwood");
+    }
+
+    /**
+     * A set of APIs used to work around missing features on Ravenwood. Ideally, this class should
+     * be empty, and all its APIs should be able to be implemented properly.
+     */
+    public static class Workaround {
+        Workaround() {
+        }
+
+        /**
+         * @return whether the app's target SDK level is at least Q.
+         */
+        public boolean isTargetSdkAtLeastQ() {
+            return true;
+        }
     }
 }

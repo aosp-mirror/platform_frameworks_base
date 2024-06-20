@@ -53,7 +53,7 @@
     <EditText
         android:id="@+id/user_name"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/user_name_height_in_user_info_dialog"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:minWidth="200dp"
         android:layout_marginStart="6dp"

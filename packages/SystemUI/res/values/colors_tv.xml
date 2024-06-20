@@ -28,8 +28,6 @@
 
     <color name="red">#FFCC0000</color>
     <color name="tv_volume_dialog_circle">#08FFFFFF</color>
-    <color name="tv_volume_dialog_seek_thumb_focus_ring">#1AFFFFFF</color>
-    <color name="tv_volume_dialog_seek_thumb_shadow">#40000000</color>
     <color name="tv_volume_dialog_seek_bar_background">#A03C4043</color>
     <color name="tv_volume_dialog_seek_bar_fill">#FFF8F9FA</color>
     <color name="tv_volume_dialog_accent">#FFDADCE0</color>

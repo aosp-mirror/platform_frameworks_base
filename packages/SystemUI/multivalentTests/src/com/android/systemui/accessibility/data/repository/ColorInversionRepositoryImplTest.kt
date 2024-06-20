@@ -24,7 +24,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.util.settings.FakeSettings
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -66,7 +65,7 @@ class ColorInversionRepositoryImplTest : SysuiTestCase() {
 
             runCurrent()
 
-            Truth.assertThat(actualValue).isFalse()
+            assertThat(actualValue).isFalse()
         }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,9 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class SupportedModesVoteTest {
-    private val supportedModes = listOf(
-            SupportedModesVote.SupportedMode(60f, 90f ),
-            SupportedModesVote.SupportedMode(120f, 240f )
-    )
+    private val supportedModes = listOf(1, 2, 4)
 
-    private val otherMode = SupportedModesVote.SupportedMode(120f, 120f )
+    private val otherMode = 5
 
     private lateinit var supportedModesVote: SupportedModesVote
 
@@ -42,31 +39,31 @@ class SupportedModesVoteTest {
     }
 
     @Test
-    fun `adds supported modes if supportedModes in summary is null`() {
+    fun `adds supported mode ids if supportedModeIds in summary is null`() {
         val summary = createVotesSummary()
 
         supportedModesVote.updateSummary(summary)
 
-        assertThat(summary.supportedModes).containsExactlyElementsIn(supportedModes)
+        assertThat(summary.supportedModeIds).containsExactlyElementsIn(supportedModes)
     }
 
     @Test
-    fun `does not add supported modes if summary has empty list of modes`() {
+    fun `does not add supported mode ids if summary has empty list of modeIds`() {
         val summary = createVotesSummary()
-        summary.supportedModes = ArrayList()
+        summary.supportedModeIds = ArrayList()
 
         supportedModesVote.updateSummary(summary)
 
-        assertThat(summary.supportedModes).isEmpty()
+        assertThat(summary.supportedModeIds).isEmpty()
     }
 
     @Test
     fun `filters out modes that does not match vote`() {
         val summary = createVotesSummary()
-        summary.supportedModes = ArrayList(listOf(otherMode, supportedModes[0]))
+        summary.supportedModeIds = ArrayList(listOf(otherMode, supportedModes[0]))
 
         supportedModesVote.updateSummary(summary)
 
-        assertThat(summary.supportedModes).containsExactly(supportedModes[0])
+        assertThat(summary.supportedModeIds).containsExactly(supportedModes[0])
     }
 }

@@ -110,7 +110,7 @@ public class EnabledComponentsObserver implements SettingChangeListener {
         final EnabledComponentsObserver o = new EnabledComponentsObserver(context, settingName,
                 servicePermission, serviceName, lock, listeners);
 
-        PackageMonitor packageMonitor = new PackageMonitor() {
+        PackageMonitor packageMonitor = new PackageMonitor(true) {
             @Override
             public void onSomePackagesChanged() {
                 o.onPackagesChanged();

@@ -21,9 +21,6 @@
   <!-- Title of a screen prompting if the user would like to use their saved passkey.
   [CHAR LIMIT=80] -->
   <string name="use_passkey_title">Use passkey?</string>
-  <!-- Title of a screen prompting if the user would like to use their saved passkey.
-[CHAR LIMIT=80] -->
-  <string name="use_sign_in_with_provider_title">Use your sign in for %1$s</string>
   <!-- Title of a screen prompting if the user would like to sign in with provider
   [CHAR LIMIT=80] -->
   <string name="use_password_title">Use password?</string>
@@ -35,6 +32,8 @@
   <string name="dialog_sign_in_options_button">Sign-in Options</string>
   <!-- Title for multiple credentials folded screen. [CHAR LIMIT=NONE] -->
   <string name="sign_in_options_title">Sign-in Options</string>
+  <!-- Provider settings list title. [CHAR LIMIT=NONE] -->
+  <string name="provider_list_title">Manage sign-ins</string>
   <!-- Title for multiple credentials screen. [CHAR LIMIT=NONE] -->
   <string name="choose_sign_in_title">Choose a sign in</string>
   <!-- Title for multiple credentials screen with only passkeys. [CHAR LIMIT=NONE] -->

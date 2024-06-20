@@ -157,7 +157,6 @@ interface IActivityTaskManager {
     ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
             int userId);
     boolean isTopActivityImmersive();
-    ActivityManager.TaskDescription getTaskDescription(int taskId);
     void reportAssistContextExtras(in IBinder assistToken, in Bundle extras,
             in AssistStructure structure, in AssistContent content, in Uri referrer);
 

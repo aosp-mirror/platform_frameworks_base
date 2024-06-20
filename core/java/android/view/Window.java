@@ -334,7 +334,12 @@ public abstract class Window {
     private boolean mOverlayWithDecorCaptionEnabled = true;
     private boolean mCloseOnSwipeEnabled = false;
 
-    private static boolean sToolkitSetFrameRateReadOnlyFlagValue =
+    /**
+     * To check if toolkitSetFrameRateReadOnly flag is enabled
+     *
+     * @hide
+     */
+    protected static boolean sToolkitSetFrameRateReadOnlyFlagValue =
                 android.view.flags.Flags.toolkitSetFrameRateReadOnly();
 
     // The current window attributes.
@@ -666,7 +671,7 @@ public abstract class Window {
          * Update the status bar appearance.
          */
 
-        void updateStatusBarAppearance(int appearance);
+        void updateSystemBarsAppearance(int appearance);
 
         /**
          * Update the navigation bar color to a forced one.
@@ -1038,6 +1043,11 @@ public abstract class Window {
     }
 
     /** @hide */
+    public final void setSystemBarAppearance(@WindowInsetsController.Appearance int appearance) {
+        mSystemBarAppearance = appearance;
+    }
+
+    /** @hide */
     @WindowInsetsController.Appearance
     public final int getSystemBarAppearance() {
         return mSystemBarAppearance;
@@ -1046,12 +1056,12 @@ public abstract class Window {
     /** @hide */
     public final void dispatchOnSystemBarAppearanceChanged(
             @WindowInsetsController.Appearance int appearance) {
-        mSystemBarAppearance = appearance;
+        setSystemBarAppearance(appearance);
         if (mDecorCallback != null) {
             mDecorCallback.onSystemBarAppearanceChanged(appearance);
         }
         if (mWindowControllerCallback != null) {
-            mWindowControllerCallback.updateStatusBarAppearance(appearance);
+            mWindowControllerCallback.updateSystemBarsAppearance(appearance);
         }
     }
 
@@ -2944,6 +2954,15 @@ public abstract class Window {
      * There is a second caption drawn underneath it that will be fast enough. By default the
      * caption is constructed from the theme. You can provide a drawable, that will be drawn instead
      * to better match your application.
+     *
+     * Starting in Android 15, this API is a no-op. New window decorations introduced in Android 14
+     * are drawn in SystemUI process, and OEMs are responsible to make them responsive to resizing.
+     * There is no need to set a background drawable to improve UX anymore since then. Additionally,
+     * the foremost activity can draw in caption areas starting in Android 15. Check
+     * {@link WindowInsetsController#APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND},
+     * {@link WindowInsetsController#APPEARANCE_LIGHT_CAPTION_BARS},
+     * {@link WindowInsetsController#setSystemBarsAppearance(int, int)} and
+     * {@link WindowInsets#getBoundingRects(int)}.
      */
     public abstract void setResizingCaptionDrawable(Drawable drawable);
 

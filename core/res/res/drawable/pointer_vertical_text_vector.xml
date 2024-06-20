@@ -19,7 +19,7 @@
     android:viewportHeight="24"
     android:viewportWidth="24">
     <path
-        android:fillColor="#000000"
+        android:fillColor="?attr/pointerIconVectorFill"
         android:pathData="M19 11H5a1 1 0 0 0 0 2h14a1 1 0 0 0 0-2" />
     <path
         android:fillColor="#FFFFFF"

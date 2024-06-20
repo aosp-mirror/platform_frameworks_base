@@ -32,6 +32,7 @@ import android.view.SurfaceControlViewHost
 import android.view.SurfaceSession
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
+import androidx.annotation.WorkerThread
 import com.android.app.tracing.traceSection
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -235,8 +236,10 @@ constructor(
     }
 
     private inner class RotationWatcher : RotationChangeProvider.RotationListener {
+        @WorkerThread
         override fun onRotationChanged(newRotation: Int) {
             traceSection("$TAG#onRotationChanged") {
+                ensureInBackground()
                 if (currentRotation != newRotation) {
                     currentRotation = newRotation
                     scrimView?.revealEffect = lightRevealEffectFactory(currentRotation)

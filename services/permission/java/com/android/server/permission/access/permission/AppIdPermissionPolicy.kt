@@ -63,6 +63,9 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
     private val privilegedPermissionAllowlistViolations = MutableIndexedSet<String>()
 
+    /** Test-only switch to enforce signature permission allowlist even on debuggable builds. */
+    @Volatile var isSignaturePermissionAllowlistForceEnforced = false
+
     override val subjectScheme: String
         get() = UidUri.SCHEME
 
@@ -73,48 +76,11 @@ class AppIdPermissionPolicy : SchemePolicy() {
         onPermissionFlagsChangedListeners.forEachIndexed { _, it -> it.onStateMutated() }
     }
 
-    override fun MutateStateScope.onInitialized() {
-        if (!Flags.newPermissionGidEnabled()) {
-            newState.externalState.configPermissions.forEach { (permissionName, permissionEntry) ->
-                val oldPermission = newState.systemState.permissions[permissionName]
-                val newPermission =
-                    if (oldPermission != null) {
-                        if (permissionEntry.gids != null) {
-                            oldPermission.copy(
-                                gids = permissionEntry.gids,
-                                areGidsPerUser = permissionEntry.perUser
-                            )
-                        } else {
-                            return@forEach
-                        }
-                    } else {
-                        @Suppress("DEPRECATION")
-                        val permissionInfo =
-                            PermissionInfo().apply {
-                                name = permissionName
-                                packageName = PLATFORM_PACKAGE_NAME
-                                protectionLevel = PermissionInfo.PROTECTION_SIGNATURE
-                            }
-                        if (permissionEntry.gids != null) {
-                            Permission(
-                                permissionInfo,
-                                false,
-                                Permission.TYPE_CONFIG,
-                                0,
-                                permissionEntry.gids,
-                                permissionEntry.perUser
-                            )
-                        } else {
-                            Permission(permissionInfo, false, Permission.TYPE_CONFIG, 0)
-                        }
-                    }
-                newState.mutateSystemState().mutatePermissions()[permissionName] = newPermission
-            }
-        }
-    }
-
     override fun MutateStateScope.onUserAdded(userId: Int) {
         newState.externalState.packageStates.forEach { (_, packageState) ->
+            if (packageState.isApex) {
+                return@forEach
+            }
             evaluateAllPermissionStatesForPackageAndUser(packageState, userId, null)
         }
         newState.externalState.appIdPackageNames.forEachIndexed { _, appId, _ ->
@@ -139,8 +105,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
         val changedPermissionNames = MutableIndexedSet<String>()
         packageNames.forEachIndexed { _, packageName ->
             // The package may still be removed even if it was once notified as installed.
-            val packageState = newState.externalState.packageStates[packageName]
-                ?: return@forEachIndexed
+            val packageState =
+                newState.externalState.packageStates[packageName] ?: return@forEachIndexed
             adoptPermissions(packageState, changedPermissionNames)
             addPermissionGroups(packageState)
             addPermissions(packageState, changedPermissionNames)
@@ -153,14 +119,14 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
 
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]
-                ?: return@forEachIndexed
+            val packageState =
+                newState.externalState.packageStates[packageName] ?: return@forEachIndexed
             val installedPackageState = if (isSystemUpdated) packageState else null
             evaluateAllPermissionStatesForPackage(packageState, installedPackageState)
         }
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]
-                ?: return@forEachIndexed
+            val packageState =
+                newState.externalState.packageStates[packageName] ?: return@forEachIndexed
             newState.externalState.userIds.forEachIndexed { _, userId ->
                 inheritImplicitPermissionStates(packageState.appId, userId)
             }
@@ -227,23 +193,76 @@ class AppIdPermissionPolicy : SchemePolicy() {
             if (isRequestedBySystemPackage) {
                 return@forEach
             }
-            val oldFlags = getPermissionFlags(appId, userId, permissionName)
-            var newFlags = oldFlags andInv PermissionFlags.UPGRADE_EXEMPT
-            val isExempt = newFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
-            newFlags =
-                if (permission.isHardRestricted && !isExempt) {
-                    newFlags or PermissionFlags.RESTRICTION_REVOKED
-                } else {
-                    newFlags andInv PermissionFlags.RESTRICTION_REVOKED
-                }
-            newFlags =
-                if (permission.isSoftRestricted && !isExempt) {
-                    newFlags or PermissionFlags.SOFT_RESTRICTED
-                } else {
-                    newFlags andInv PermissionFlags.SOFT_RESTRICTED
-                }
-            setPermissionFlags(appId, userId, permissionName, newFlags)
+            updatePermissionExemptFlags(
+                appId,
+                userId,
+                permission,
+                PermissionFlags.UPGRADE_EXEMPT,
+                0
+            )
         }
+    }
+
+    fun MutateStateScope.updatePermissionExemptFlags(
+        appId: Int,
+        userId: Int,
+        permission: Permission,
+        exemptFlagMask: Int,
+        exemptFlagValues: Int
+    ) {
+        val permissionName = permission.name
+        val oldFlags = getPermissionFlags(appId, userId, permissionName)
+        var newFlags = (oldFlags andInv exemptFlagMask) or (exemptFlagValues and exemptFlagMask)
+        if (oldFlags == newFlags) {
+            return
+        }
+        val isExempt = newFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
+        if (permission.isHardRestricted && !isExempt) {
+            newFlags = newFlags or PermissionFlags.RESTRICTION_REVOKED
+            // If the permission was policy fixed as granted but it is no longer on any of the
+            // allowlists we need to clear the policy fixed flag as allowlisting trumps policy i.e.
+            // policy cannot grant a non grantable permission.
+            if (PermissionFlags.isPermissionGranted(oldFlags)) {
+                newFlags = newFlags andInv PermissionFlags.POLICY_FIXED
+            }
+        } else {
+            newFlags = newFlags andInv PermissionFlags.RESTRICTION_REVOKED
+        }
+        val isSoftRestricted =
+            if (permission.isSoftRestricted && !isExempt) {
+                val targetSdkVersion =
+                    reducePackageInAppId(appId, Build.VERSION_CODES.CUR_DEVELOPMENT) {
+                        targetSdkVersion,
+                        packageState ->
+                        if (permissionName in packageState.androidPackage!!.requestedPermissions) {
+                            targetSdkVersion.coerceAtMost(
+                                packageState.androidPackage!!.targetSdkVersion
+                            )
+                        } else {
+                            targetSdkVersion
+                        }
+                    }
+                !anyPackageInAppId(appId) {
+                    permissionName in it.androidPackage!!.requestedPermissions &&
+                        isSoftRestrictedPermissionExemptForPackage(
+                            it,
+                            targetSdkVersion,
+                            permissionName
+                        )
+                }
+            } else {
+                false
+            }
+        newFlags =
+            if (isSoftRestricted) {
+                newFlags or PermissionFlags.SOFT_RESTRICTED
+            } else {
+                newFlags andInv PermissionFlags.SOFT_RESTRICTED
+            }
+        if (oldFlags == newFlags) {
+            return
+        }
+        setPermissionFlags(appId, userId, permissionName, newFlags)
     }
 
     override fun MutateStateScope.onPackageUninstalled(
@@ -448,6 +467,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 } else {
                     newState.systemState.permissions[permissionName]
                 }
+
             // Different from the old implementation, which may add an (incomplete) signature
             // permission inside another package's permission tree, we now consistently ignore such
             // permissions.
@@ -462,8 +482,9 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 )
                 return@forEachIndexed
             }
-            var newPermission =
-                if (oldPermission != null && newPackageName != oldPermission.packageName) {
+
+            if (oldPermission != null) {
+                if (newPackageName != oldPermission.packageName) {
                     val oldPackageName = oldPermission.packageName
                     // Only allow system apps to redefine non-system permissions.
                     if (!packageState.isSystem) {
@@ -475,45 +496,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                         )
                         return@forEachIndexed
                     }
-                    if (
-                        oldPermission.type == Permission.TYPE_CONFIG && !oldPermission.isReconciled
-                    ) {
-                        // It's a config permission and has no owner, take ownership now.
-                        oldPermission.copy(
-                            permissionInfo = newPermissionInfo,
-                            isReconciled = true,
-                            type = Permission.TYPE_MANIFEST,
-                            appId = packageState.appId
-                        )
-                    } else if (
-                        newState.externalState.packageStates[oldPackageName]?.isSystem != true
-                    ) {
-                        Slog.w(
-                            LOG_TAG,
-                            "Overriding permission $permissionName with new declaration in" +
-                                " system package $newPackageName: originally declared in another" +
-                                " package $oldPackageName"
-                        )
-                        // Remove permission state on owner change.
-                        newState.externalState.userIds.forEachIndexed { _, userId ->
-                            newState.externalState.appIdPackageNames.forEachIndexed { _, appId, _ ->
-                                setPermissionFlags(appId, userId, permissionName, 0)
-                            }
-                        }
-                        // Different from the old implementation, which removes the GIDs upon
-                        // permission
-                        // override, but adds them back on the next boot, we now just consistently
-                        // keep
-                        // the GIDs.
-                        Permission(
-                            newPermissionInfo,
-                            true,
-                            Permission.TYPE_MANIFEST,
-                            packageState.appId,
-                            oldPermission.gids,
-                            oldPermission.areGidsPerUser
-                        )
-                    } else {
+                    if (newState.externalState.packageStates[oldPackageName]?.isSystem == true) {
                         Slog.w(
                             LOG_TAG,
                             "Ignoring permission $permissionName declared in system package" +
@@ -522,84 +505,72 @@ class AppIdPermissionPolicy : SchemePolicy() {
                         )
                         return@forEachIndexed
                     }
-                } else {
-                    if (oldPermission != null && oldPermission.isReconciled) {
-                        val isPermissionGroupChanged =
-                            newPermissionInfo.isRuntime &&
-                                newPermissionInfo.group != null &&
-                                newPermissionInfo.group != oldPermission.groupName
-                        val isPermissionProtectionChanged =
-                            oldPermission.type != Permission.TYPE_CONFIG &&
-                                ((newPermissionInfo.isRuntime && !oldPermission.isRuntime) ||
-                                    (newPermissionInfo.isInternal && !oldPermission.isInternal))
-                        if (isPermissionGroupChanged || isPermissionProtectionChanged) {
-                            newState.externalState.userIds.forEachIndexed { _, userId ->
-                                newState.externalState.appIdPackageNames.forEachIndexed {
-                                    _,
-                                    appId,
-                                    _ ->
-                                    if (isPermissionGroupChanged) {
-                                        // We might auto-grant permissions if any permission of
-                                        // the group is already granted. Hence if the group of
-                                        // a granted permission changes we need to revoke it to
-                                        // avoid having permissions of the new group auto-granted.
-                                        Slog.w(
-                                            LOG_TAG,
-                                            "Revoking runtime permission $permissionName for" +
-                                                " appId $appId and userId $userId as the permission" +
-                                                " group changed from ${oldPermission.groupName}" +
-                                                " to ${newPermissionInfo.group}"
-                                        )
-                                    }
-                                    if (isPermissionProtectionChanged) {
-                                        Slog.w(
-                                            LOG_TAG,
-                                            "Revoking permission $permissionName for" +
-                                                " appId $appId and userId $userId as the permission" +
-                                                " protection changed."
-                                        )
-                                    }
-                                    setPermissionFlags(appId, userId, permissionName, 0)
+                    Slog.w(
+                        LOG_TAG,
+                        "Overriding permission $permissionName with new declaration in" +
+                            " system package $newPackageName: originally declared in another" +
+                            " package $oldPackageName"
+                    )
+                    // Remove permission state on owner change.
+                    newState.externalState.userIds.forEachIndexed { _, userId ->
+                        newState.externalState.appIdPackageNames.forEachIndexed { _, appId, _ ->
+                            setPermissionFlags(appId, userId, permissionName, 0)
+                        }
+                    }
+                } else if (oldPermission.isReconciled) {
+                    val isPermissionGroupChanged =
+                        newPermissionInfo.isRuntime &&
+                            newPermissionInfo.group != null &&
+                            newPermissionInfo.group != oldPermission.groupName
+                    val isPermissionProtectionChanged =
+                        (newPermissionInfo.isRuntime && !oldPermission.isRuntime) ||
+                            (newPermissionInfo.isInternal && !oldPermission.isInternal)
+                    if (isPermissionGroupChanged || isPermissionProtectionChanged) {
+                        newState.externalState.userIds.forEachIndexed { _, userId ->
+                            newState.externalState.appIdPackageNames.forEachIndexed { _, appId, _ ->
+                                if (isPermissionGroupChanged) {
+                                    // We might auto-grant permissions if any permission of
+                                    // the group is already granted. Hence if the group of
+                                    // a granted permission changes we need to revoke it to
+                                    // avoid having permissions of the new group auto-granted.
+                                    Slog.w(
+                                        LOG_TAG,
+                                        "Revoking runtime permission $permissionName for" +
+                                            " appId $appId and userId $userId as the permission" +
+                                            " group changed from ${oldPermission.groupName}" +
+                                            " to ${newPermissionInfo.group}"
+                                    )
                                 }
+                                if (isPermissionProtectionChanged) {
+                                    Slog.w(
+                                        LOG_TAG,
+                                        "Revoking permission $permissionName for" +
+                                            " appId $appId and userId $userId as the permission" +
+                                            " protection changed."
+                                    )
+                                }
+                                setPermissionFlags(appId, userId, permissionName, 0)
                             }
                         }
                     }
+                }
+            }
 
-                    // Different from the old implementation, which doesn't update the permission
-                    // definition upon app update, but does update it on the next boot, we now
-                    // consistently update the permission definition upon app update.
-                    @Suppress("IfThenToElvis")
-                    if (oldPermission != null) {
-                        oldPermission.copy(
-                            permissionInfo = newPermissionInfo,
-                            isReconciled = true,
-                            type = Permission.TYPE_MANIFEST,
-                            appId = packageState.appId
-                        )
-                    } else {
-                        Permission(
-                            newPermissionInfo,
-                            true,
-                            Permission.TYPE_MANIFEST,
-                            packageState.appId
-                        )
+            var gids = EmptyArray.INT
+            var areGidsPerUser = false
+            if (!parsedPermission.isTree && packageState.isSystem) {
+                newState.externalState.configPermissions[permissionName]?.let {
+                    // PermissionEntry.gids may return null when parsing legacy config trying
+                    // to work around an issue about upgrading from L platfrm. We can just
+                    // ignore such entries now.
+                    if (it.gids != null) {
+                        gids = it.gids
+                        areGidsPerUser = it.perUser
                     }
                 }
-            if (Flags.newPermissionGidEnabled()) {
-                var gids = EmptyArray.INT
-                var areGidsPerUser = false
-                if (!parsedPermission.isTree && packageState.isSystem) {
-                    newState.externalState.configPermissions[permissionName]?.let {
-                        // PermissionEntry.gids may return null when parsing legacy config trying
-                        // to work around an issue about upgrading from L platfrm. We can just
-                        // ignore such entries now.
-                        if (it.gids != null) {
-                            gids = it.gids
-                            areGidsPerUser = it.perUser
-                        }
-                    }
-                }
-                newPermission = Permission(
+            }
+            val newPermission =
+                Permission(
                     newPermissionInfo,
                     true,
                     Permission.TYPE_MANIFEST,
@@ -607,7 +578,6 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     gids,
                     areGidsPerUser
                 )
-            }
 
             if (parsedPermission.isTree) {
                 newState.mutateSystemState().mutatePermissionTrees()[permissionName] = newPermission
@@ -1118,7 +1088,17 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     newFlags andInv PermissionFlags.RESTRICTION_REVOKED
                 }
             newFlags =
-                if (permission.isSoftRestricted && !isExempt) {
+                if (
+                    permission.isSoftRestricted &&
+                        !isExempt &&
+                        !requestingPackageStates.anyIndexed { _, it ->
+                            isSoftRestrictedPermissionExemptForPackage(
+                                it,
+                                targetSdkVersion,
+                                permissionName
+                            )
+                        }
+                ) {
                     newFlags or PermissionFlags.SOFT_RESTRICTED
                 } else {
                     newFlags andInv PermissionFlags.SOFT_RESTRICTED
@@ -1235,7 +1215,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     SigningDetails.CertCapabilities.PERMISSION
                 )
         if (!Flags.signaturePermissionAllowlistEnabled()) {
-            return hasCommonSigner;
+            return hasCommonSigner
         }
         if (!hasCommonSigner) {
             return false
@@ -1269,7 +1249,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                         " ${packageState.packageName} (${packageState.path}) not in" +
                         " signature permission allowlist"
                 )
-                if (!Build.isDebuggable()) {
+                if (!Build.isDebuggable() || isSignaturePermissionAllowlistForceEnforced) {
                     return false
                 }
             }
@@ -1296,7 +1276,24 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     packageName,
                     permissionName
                 )
-            else -> permissionAllowlist.getSignatureAppAllowlistState(packageName, permissionName)
+            else ->
+                permissionAllowlist.getApexSignatureAppAllowlistState(packageName, permissionName)
+                    ?: permissionAllowlist.getProductSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
+                    ?: permissionAllowlist.getVendorSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
+                    ?: permissionAllowlist.getSystemExtSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
+                    ?: permissionAllowlist.getSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
         }
     }
 
@@ -1397,6 +1394,24 @@ class AppIdPermissionPolicy : SchemePolicy() {
             else -> permissionAllowlist.getPrivilegedAppAllowlistState(packageName, permissionName)
         }
     }
+
+    // See also SoftRestrictedPermissionPolicy.mayGrantPermission()
+    // Note: we need the appIdTargetSdkVersion parameter here because we are OR-ing the exempt
+    // status for all packages in a shared UID, but the storage soft restriction logic needs to NOT
+    // exempt when the target SDK version is low, which is the opposite of what most of our code do,
+    // and thus can't check the individual package's target SDK version and rely on the OR among
+    // them.
+    private fun isSoftRestrictedPermissionExemptForPackage(
+        packageState: PackageState,
+        appIdTargetSdkVersion: Int,
+        permissionName: String
+    ): Boolean =
+        when (permissionName) {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE ->
+                appIdTargetSdkVersion >= Build.VERSION_CODES.Q
+            else -> false
+        }
 
     private inline fun MutateStateScope.anyPackageInAppId(
         appId: Int,
@@ -1774,6 +1789,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 Manifest.permission.READ_MEDIA_AUDIO,
                 Manifest.permission.READ_MEDIA_IMAGES,
                 Manifest.permission.READ_MEDIA_VIDEO,
+                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
             )
 
         private val NEARBY_DEVICES_PERMISSIONS =

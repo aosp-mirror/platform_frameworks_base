@@ -32,6 +32,9 @@ data class AuthenticationFlags(val userId: Int, val flag: Int) {
     val isPrimaryAuthRequiredAfterTimeout =
         containsFlag(flag, LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT)
 
+    val isPrimaryAuthRequiredAfterLockout =
+        containsFlag(flag, LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT)
+
     val isPrimaryAuthRequiredAfterDpmLockdown =
         containsFlag(
             flag,
@@ -47,7 +50,7 @@ data class AuthenticationFlags(val userId: Int, val flag: Int) {
             LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED
         )
 
-    val primaryAuthRequiredForUnattendedUpdate =
+    val isPrimaryAuthRequiredForUnattendedUpdate =
         containsFlag(
             flag,
             LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE

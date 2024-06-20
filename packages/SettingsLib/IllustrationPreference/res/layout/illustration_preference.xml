@@ -19,7 +19,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:importantForAccessibility="noHideDescendants"
+    android:importantForAccessibility="no"
     android:gravity="center"
     android:orientation="horizontal">
 

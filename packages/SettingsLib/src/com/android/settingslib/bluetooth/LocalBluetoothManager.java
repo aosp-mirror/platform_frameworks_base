@@ -21,10 +21,10 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.util.Log;
 
-import java.lang.ref.WeakReference;
-
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
+
+import java.lang.ref.WeakReference;
 
 /**
  * LocalBluetoothManager provides a simplified interface on top of a subset of
@@ -111,10 +111,17 @@ public class LocalBluetoothManager {
         mContext = context.getApplicationContext();
         mLocalAdapter = adapter;
         mCachedDeviceManager = new CachedBluetoothDeviceManager(mContext, this);
-        mEventManager = new BluetoothEventManager(mLocalAdapter, mCachedDeviceManager, mContext,
-                handler, userHandle);
-        mProfileManager = new LocalBluetoothProfileManager(mContext,
-                mLocalAdapter, mCachedDeviceManager, mEventManager);
+        mEventManager =
+                new BluetoothEventManager(
+                        mLocalAdapter,
+                        this,
+                        mCachedDeviceManager,
+                        mContext,
+                        handler,
+                        userHandle);
+        mProfileManager =
+                new LocalBluetoothProfileManager(
+                        mContext, mLocalAdapter, mCachedDeviceManager, mEventManager);
 
         mProfileManager.updateLocalProfiles();
         mEventManager.readPairedDevices();

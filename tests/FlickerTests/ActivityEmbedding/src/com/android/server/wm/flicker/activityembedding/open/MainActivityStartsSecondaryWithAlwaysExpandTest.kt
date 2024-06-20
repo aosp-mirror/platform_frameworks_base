@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.activityembedding.open
 
+import android.graphics.Rect
 import android.platform.test.annotations.Presubmit
-import android.tools.datatypes.Rect
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -132,7 +132,7 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
 
     companion object {
         /** {@inheritDoc} */
-        private var startDisplayBounds = Rect.EMPTY
+        private var startDisplayBounds = Rect()
 
         /**
          * Creates the test configurations.

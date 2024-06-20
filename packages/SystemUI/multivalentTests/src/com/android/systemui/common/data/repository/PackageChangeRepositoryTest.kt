@@ -50,6 +50,7 @@ class PackageChangeRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var context: Context
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var handler: Handler
+    @Mock private lateinit var packageInstallerMonitor: PackageInstallerMonitor
 
     private lateinit var repository: PackageChangeRepository
     private lateinit var updateMonitor: PackageUpdateMonitor
@@ -60,19 +61,20 @@ class PackageChangeRepositoryTest : SysuiTestCase() {
             MockitoAnnotations.initMocks(this@PackageChangeRepositoryTest)
             whenever(context.packageManager).thenReturn(packageManager)
 
-            repository = PackageChangeRepositoryImpl { user ->
-                updateMonitor =
-                    PackageUpdateMonitor(
-                        user = user,
-                        bgDispatcher = testDispatcher,
-                        scope = applicationCoroutineScope,
-                        context = context,
-                        bgHandler = handler,
-                        logger = PackageUpdateLogger(logcatLogBuffer()),
-                        systemClock = fakeSystemClock,
-                    )
-                updateMonitor
-            }
+            repository =
+                PackageChangeRepositoryImpl(packageInstallerMonitor) { user ->
+                    updateMonitor =
+                        PackageUpdateMonitor(
+                            user = user,
+                            bgDispatcher = testDispatcher,
+                            scope = applicationCoroutineScope,
+                            context = context,
+                            bgHandler = handler,
+                            logger = PackageUpdateLogger(logcatLogBuffer()),
+                            systemClock = fakeSystemClock,
+                        )
+                    updateMonitor
+                }
         }
 
     @Test

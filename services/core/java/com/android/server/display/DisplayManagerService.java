@@ -22,6 +22,7 @@ import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_DISPLAYS;
+import static android.Manifest.permission.RESTRICT_DISPLAY_MODES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
 import static android.hardware.display.DisplayManager.EventsMask;
@@ -44,6 +45,11 @@ import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_UNSUPPOR
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.ROOT_UID;
+import static android.provider.Settings.Secure.RESOLUTION_MODE_FULL;
+import static android.provider.Settings.Secure.RESOLUTION_MODE_HIGH;
+import static android.provider.Settings.Secure.RESOLUTION_MODE_UNKNOWN;
+
+import static com.android.server.display.layout.Layout.Display.POSITION_REAR;
 
 import android.Manifest;
 import android.annotation.EnforcePermission;
@@ -75,6 +81,7 @@ import android.graphics.Point;
 import android.hardware.OverlayProperties;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManagerInternal;
 import android.hardware.display.AmbientBrightnessDayStats;
@@ -126,6 +133,7 @@ import android.sysprop.DisplayProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -145,12 +153,12 @@ import android.window.ScreenCapture;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
+import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.foldables.FoldLockSettingAvailabilityProvider;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.SettingsWrapper;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
@@ -227,6 +235,7 @@ import java.util.function.Consumer;
  * avoid this by making all potentially reentrant out-calls asynchronous.
  * </p>
  */
+@SuppressWarnings("MissingPermission")
 public final class DisplayManagerService extends SystemService {
     private static final String TAG = "DisplayManagerService";
 
@@ -267,13 +276,13 @@ public final class DisplayManagerService extends SystemService {
     private WindowManagerInternal mWindowManagerInternal;
     private InputManagerInternal mInputManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
-    private ActivityManager mActivityManager;
-    private UidImportanceListener mUidImportanceListener = new UidImportanceListener();
+    private final UidImportanceListener mUidImportanceListener = new UidImportanceListener();
     @Nullable
     private IMediaProjectionManager mProjectionService;
     private DeviceStateManagerInternal mDeviceStateManager;
     @GuardedBy("mSyncRoot")
     private int[] mUserDisabledHdrTypes = {};
+    @Display.HdrCapabilities.HdrType
     private int[] mSupportedHdrOutputType;
     @GuardedBy("mSyncRoot")
     private boolean mAreUserDisabledHdrTypesAllowed = true;
@@ -284,6 +293,8 @@ public final class DisplayManagerService extends SystemService {
 
     // Display mode chosen by user.
     private Display.Mode mUserPreferredMode;
+    @HdrConversionMode.ConversionMode
+    private final int mDefaultHdrConversionMode;
     // HDR conversion mode chosen by user
     @GuardedBy("mSyncRoot")
     private HdrConversionMode mHdrConversionMode = null;
@@ -305,8 +316,7 @@ public final class DisplayManagerService extends SystemService {
     public boolean mSafeMode;
 
     // All callback records indexed by calling process id.
-    public final SparseArray<CallbackRecord> mCallbacks =
-            new SparseArray<CallbackRecord>();
+    private final SparseArray<CallbackRecord> mCallbacks = new SparseArray<>();
 
     /**
      *  All {@link IVirtualDevice} and {@link DisplayWindowPolicyController}s indexed by
@@ -322,7 +332,7 @@ public final class DisplayManagerService extends SystemService {
             new HighBrightnessModeMetadataMapper();
 
     // List of all currently registered display adapters.
-    private final ArrayList<DisplayAdapter> mDisplayAdapters = new ArrayList<DisplayAdapter>();
+    private final ArrayList<DisplayAdapter> mDisplayAdapters = new ArrayList<>();
 
     /**
      * Repository of all active {@link DisplayDevice}s.
@@ -338,7 +348,7 @@ public final class DisplayManagerService extends SystemService {
 
     // List of all display transaction listeners.
     private final CopyOnWriteArrayList<DisplayTransactionListener> mDisplayTransactionListeners =
-            new CopyOnWriteArrayList<DisplayTransactionListener>();
+            new CopyOnWriteArrayList<>();
 
     /** List of all display group listeners. */
     private final CopyOnWriteArrayList<DisplayGroupListener> mDisplayGroupListeners =
@@ -455,12 +465,13 @@ public final class DisplayManagerService extends SystemService {
 
     // Temporary callback list, used when sending display events to applications.
     // May be used outside of the lock but only on the handler thread.
-    private final ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<CallbackRecord>();
+    private final ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<>();
 
-    // Pending callback records indexed by calling process uid.
-    // Must be used outside of the lock mSyncRoot and should be selflocked.
+    // Pending callback records indexed by calling process uid and pid.
+    // Must be used outside of the lock mSyncRoot and should be self-locked.
     @GuardedBy("mPendingCallbackSelfLocked")
-    public final SparseArray<PendingCallback> mPendingCallbackSelfLocked = new SparseArray<>();
+    private final SparseArray<SparseArray<PendingCallback>> mPendingCallbackSelfLocked =
+            new SparseArray<>();
 
     // Temporary viewports, used when sending new viewport information to the
     // input system.  May be used outside of the lock but only on the handler thread.
@@ -508,8 +519,6 @@ public final class DisplayManagerService extends SystemService {
     private final BroadcastReceiver mIdleModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final DisplayManagerInternal dmi =
-                    LocalServices.getService(DisplayManagerInternal.class);
             if (Intent.ACTION_DOCK_EVENT.equals(intent.getAction())) {
                 int dockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                         Intent.EXTRA_DOCK_STATE_UNDOCKED);
@@ -526,6 +535,29 @@ public final class DisplayManagerService extends SystemService {
                     Display.DEFAULT_DISPLAY);
         }
     };
+
+    private final BroadcastReceiver mResolutionRestoreReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_SETTING_RESTORED.equals(intent.getAction())) {
+                if (Settings.Secure.SCREEN_RESOLUTION_MODE.equals(
+                        intent.getExtra(Intent.EXTRA_SETTING_NAME))) {
+                    restoreResolutionFromBackup();
+                }
+            }
+        }
+    };
+
+    private final DisplayModeDirector.DisplayDeviceConfigProvider mDisplayDeviceConfigProvider =
+            displayId -> {
+                synchronized (mSyncRoot) {
+                    final DisplayDevice device = getDeviceForDisplayLocked(displayId);
+                    if (device == null) {
+                        return null;
+                    }
+                    return device.getDisplayDeviceConfig();
+                }
+            };
 
     private final BrightnessSynchronizer mBrightnessSynchronizer;
 
@@ -573,15 +605,20 @@ public final class DisplayManagerService extends SystemService {
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContext,
-                foldSettingProvider,
+                foldSettingProvider, new FoldGracePeriodProvider(),
                 mDisplayDeviceRepo, new LogicalDisplayListener(), mSyncRoot, mHandler, mFlags);
-        mDisplayModeDirector = new DisplayModeDirector(context, mHandler, mFlags);
+        mDisplayModeDirector = new DisplayModeDirector(
+                context, mHandler, mFlags, mDisplayDeviceConfigProvider);
         mBrightnessSynchronizer = new BrightnessSynchronizer(mContext,
                 mFlags.isBrightnessIntRangeUserPerceptionEnabled());
         Resources resources = mContext.getResources();
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultDisplayDefaultColorMode);
         mDefaultDisplayTopInset = SystemProperties.getInt(PROP_DEFAULT_DISPLAY_TOP_INSET, -1);
+        mDefaultHdrConversionMode = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableDefaultHdrConversionPassthrough)
+                        ? HdrConversionMode.HDR_CONVERSION_PASSTHROUGH
+                        : HdrConversionMode.HDR_CONVERSION_SYSTEM;
         float[] lux = getFloatArray(resources.obtainTypedArray(
                 com.android.internal.R.array.config_minimumBrightnessCurveLux));
         float[] nits = getFloatArray(resources.obtainTypedArray(
@@ -722,13 +759,14 @@ public final class DisplayManagerService extends SystemService {
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
-            mActivityManager = mContext.getSystemService(ActivityManager.class);
-            mActivityManager.addOnUidImportanceListener(mUidImportanceListener, IMPORTANCE_CACHED);
+            ActivityManager activityManager = mContext.getSystemService(ActivityManager.class);
+            activityManager.addOnUidImportanceListener(mUidImportanceListener, IMPORTANCE_CACHED);
 
             mDeviceStateManager = LocalServices.getService(DeviceStateManagerInternal.class);
             mContext.getSystemService(DeviceStateManager.class).registerCallback(
                     new HandlerExecutor(mHandler), new DeviceStateListener());
 
+            mLogicalDisplayMapper.onWindowManagerReady();
             scheduleTraversalLocked(false);
         }
     }
@@ -773,6 +811,11 @@ public final class DisplayManagerService extends SystemService {
         filter.addAction(Intent.ACTION_DOCK_EVENT);
 
         mContext.registerReceiver(mIdleModeReceiver, filter);
+
+        if (mFlags.isResolutionBackupRestoreEnabled()) {
+            final IntentFilter restoreFilter = new IntentFilter(Intent.ACTION_SETTING_RESTORED);
+            mContext.registerReceiver(mResolutionRestoreReceiver, restoreFilter);
+        }
 
         mSmallAreaDetectionController = (mFlags.isSmallAreaDetectionEnabled())
                 ? SmallAreaDetectionController.create(mContext) : null;
@@ -980,8 +1023,8 @@ public final class DisplayManagerService extends SystemService {
                 }
 
                 // Do we care about this uid?
-                PendingCallback pendingCallback = mPendingCallbackSelfLocked.get(uid);
-                if (pendingCallback == null) {
+                SparseArray<PendingCallback> pendingCallbacks = mPendingCallbackSelfLocked.get(uid);
+                if (pendingCallbacks == null) {
                     return;
                 }
 
@@ -989,7 +1032,12 @@ public final class DisplayManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "Uid " + uid + " becomes " + importance);
                 }
-                pendingCallback.sendPendingDisplayEvent();
+                for (int i = 0; i < pendingCallbacks.size(); i++) {
+                    PendingCallback pendingCallback = pendingCallbacks.valueAt(i);
+                    if (pendingCallback != null) {
+                        pendingCallback.sendPendingDisplayEvent();
+                    }
+                }
                 mPendingCallbackSelfLocked.delete(uid);
             }
         }
@@ -1021,6 +1069,44 @@ public final class DisplayManagerService extends SystemService {
         setMinimalPostProcessingAllowed(Settings.Secure.getIntForUser(
                 mContext.getContentResolver(), Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED,
                 1, UserHandle.USER_CURRENT) != 0);
+    }
+
+    private void restoreResolutionFromBackup() {
+        int savedMode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.SCREEN_RESOLUTION_MODE,
+                RESOLUTION_MODE_UNKNOWN, UserHandle.USER_CURRENT);
+        if (savedMode == RESOLUTION_MODE_UNKNOWN) {
+            // Nothing to restore.
+            return;
+        }
+
+        synchronized (mSyncRoot) {
+            LogicalDisplay display =
+                    mLogicalDisplayMapper.getDisplayLocked(Display.DEFAULT_DISPLAY);
+            DisplayDevice device = display == null ? null : display.getPrimaryDisplayDeviceLocked();
+            if (device == null) {
+                Slog.w(TAG, "No default display device present to restore resolution mode");
+                return;
+            }
+
+            Point[] supportedRes = device.getSupportedResolutionsLocked();
+            if (supportedRes.length != 2) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Skipping resolution restore - " + supportedRes.length);
+                }
+                return;
+            }
+
+            // We follow the same logic as Settings but in reverse. If the display supports 2
+            // resolutions, we treat the small (index=0) one as HIGH and the larger (index=1)
+            // one as FULL and restore the correct resolution accordingly.
+            int index = savedMode == RESOLUTION_MODE_HIGH ? 0 : 1;
+            Point res = supportedRes[index];
+            Display.Mode newMode = new Display.Mode(res.x, res.y, /*refreshRate=*/ 0);
+            Slog.i(TAG, "Restoring resolution from backup: (" + savedMode + ") "
+                    + res.x + "x" + res.y);
+            setUserPreferredDisplayModeInternal(Display.DEFAULT_DISPLAY, newMode);
+        }
     }
 
     private void updateUserDisabledHdrTypesFromSettingsLocked() {
@@ -1081,9 +1167,7 @@ public final class DisplayManagerService extends SystemService {
                 device.setUserPreferredDisplayModeLocked(mode);
             });
         } else {
-            mLogicalDisplayMapper.forEachLocked((LogicalDisplay display) -> {
-                configurePreferredDisplayModeLocked(display);
-            });
+            mLogicalDisplayMapper.forEachLocked(this::configurePreferredDisplayModeLocked);
         }
     }
 
@@ -1663,6 +1747,7 @@ public final class DisplayManagerService extends SystemService {
                 if (projection != null) {
                     IBinder taskWindowContainerToken = projection.getLaunchCookie() == null ? null
                             : projection.getLaunchCookie().binder;
+                    int taskId = projection.getTaskId();
                     if (taskWindowContainerToken == null) {
                         // Record a particular display.
                         session = ContentRecordingSession.createDisplaySession(
@@ -1670,7 +1755,7 @@ public final class DisplayManagerService extends SystemService {
                     } else {
                         // Record a single task indicated by the launch cookie.
                         session = ContentRecordingSession.createTaskSession(
-                                taskWindowContainerToken);
+                                taskWindowContainerToken, taskId);
                     }
                 }
             } catch (RemoteException e) {
@@ -2236,7 +2321,7 @@ public final class DisplayManagerService extends SystemService {
     @GuardedBy("mSyncRoot")
     void updateHdrConversionModeSettingsLocked() {
         final int conversionMode = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.HDR_CONVERSION_MODE, HdrConversionMode.HDR_CONVERSION_SYSTEM);
+                Settings.Global.HDR_CONVERSION_MODE, mDefaultHdrConversionMode);
         final int preferredHdrOutputType = conversionMode == HdrConversionMode.HDR_CONVERSION_FORCE
                 ? Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.HDR_FORCE_CONVERSION_TYPE,
@@ -2340,6 +2425,28 @@ public final class DisplayManagerService extends SystemService {
         if (displayDevice == null) {
             return;
         }
+
+        // We do not yet support backup and restore for our PersistentDataStore, however, we want to
+        // preserve the user's choice for HIGH/FULL resolution setting, so we when we are given a
+        // a new resolution for the default display (normally stored in PDS), we will also save it
+        // to a setting that is backed up.
+        // TODO(b/330943343) - Consider a full fidelity DisplayBackupHelper for this instead.
+        if (mFlags.isResolutionBackupRestoreEnabled() && displayId == Display.DEFAULT_DISPLAY) {
+            // Checks to see which of the two resolutions is selected
+            // TODO(b/330906790) Uses the same logic as Settings, but should be made to support
+            //     more than two resolutions using explicit mode enums long-term.
+            Point[] resolutions = displayDevice.getSupportedResolutionsLocked();
+            if (resolutions.length == 2) {
+                Point newMode = new Point(mode.getPhysicalWidth(), mode.getPhysicalHeight());
+                int resolutionMode = newMode.equals(resolutions[0]) ? RESOLUTION_MODE_HIGH
+                        : newMode.equals(resolutions[1]) ? RESOLUTION_MODE_FULL
+                        : RESOLUTION_MODE_UNKNOWN;
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.SCREEN_RESOLUTION_MODE, resolutionMode,
+                        UserHandle.USER_CURRENT);
+            }
+        }
+
         displayDevice.setUserPreferredDisplayModeLocked(mode);
     }
 
@@ -2461,7 +2568,7 @@ public final class DisplayManagerService extends SystemService {
                 return mHdrConversionMode;
             }
         }
-        return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM);
+        return new HdrConversionMode(mDefaultHdrConversionMode);
     }
 
     HdrConversionMode getHdrConversionModeInternal() {
@@ -2473,6 +2580,14 @@ public final class DisplayManagerService extends SystemService {
             mode = mOverrideHdrConversionMode != null
                     ? mOverrideHdrConversionMode
                     : mHdrConversionMode;
+            // Handle default: PASSTHROUGH. Don't include the system-preferred type.
+            if (mode == null
+                    && mDefaultHdrConversionMode == HdrConversionMode.HDR_CONVERSION_PASSTHROUGH) {
+                return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_PASSTHROUGH);
+            }
+            // Handle default or current mode: SYSTEM. Include the system preferred type.
+            // mOverrideHdrConversionMode and mHdrConversionMode do not include the system
+            // preferred type, it is kept separately in mSystemPreferredHdrOutputType.
             if (mode == null
                     || mode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM) {
                 return new HdrConversionMode(
@@ -2645,20 +2760,9 @@ public final class DisplayManagerService extends SystemService {
                 display.setHasContentLocked(hasContent);
                 shouldScheduleTraversal = true;
             }
-            if (requestedModeId == 0 && requestedRefreshRate != 0) {
-                // Scan supported modes returned by display.getInfo() to find a mode with the same
-                // size as the default display mode but with the specified refresh rate instead.
-                Display.Mode mode = display.getDisplayInfoLocked().findDefaultModeByRefreshRate(
-                        requestedRefreshRate);
-                if (mode != null) {
-                    requestedModeId = mode.getModeId();
-                } else {
-                    Slog.e(TAG, "Couldn't find a mode for the requestedRefreshRate: "
-                            + requestedRefreshRate + " on Display: " + displayId);
-                }
-            }
-            mDisplayModeDirector.getAppRequestObserver().setAppRequest(
-                    displayId, requestedModeId, requestedMinRefreshRate, requestedMaxRefreshRate);
+
+            mDisplayModeDirector.getAppRequestObserver().setAppRequest(displayId, requestedModeId,
+                    requestedRefreshRate, requestedMinRefreshRate, requestedMaxRefreshRate);
 
             // TODO(b/202378408) set minimal post-processing only if it's supported once we have a
             // separate API for disabling on-device processing.
@@ -2666,7 +2770,7 @@ public final class DisplayManagerService extends SystemService {
             // If HDR conversion introduces latency, disable that in case minimal
             // post-processing is requested
             boolean disableHdrConversionForLatency =
-                    mppRequest ? hdrConversionIntroducesLatencyLocked() : false;
+                    mppRequest && hdrConversionIntroducesLatencyLocked();
 
             if (display.getRequestedMinimalPostProcessingLocked() != mppRequest) {
                 display.setRequestedMinimalPostProcessingLocked(mppRequest);
@@ -3094,16 +3198,23 @@ public final class DisplayManagerService extends SystemService {
         for (int i = 0; i < mTempCallbacks.size(); i++) {
             CallbackRecord callbackRecord = mTempCallbacks.get(i);
             final int uid = callbackRecord.mUid;
+            final int pid = callbackRecord.mPid;
             if (isUidCached(uid)) {
                 // For cached apps, save the pending event until it becomes non-cached
                 synchronized (mPendingCallbackSelfLocked) {
-                    PendingCallback pendingCallback = mPendingCallbackSelfLocked.get(uid);
+                    SparseArray<PendingCallback> pendingCallbacks = mPendingCallbackSelfLocked.get(
+                            uid);
                     if (extraLogging(callbackRecord.mPackageName)) {
-                        Slog.i(TAG,
-                                "Uid is cached: " + uid + ", pendingCallback: " + pendingCallback);
+                        Slog.i(TAG, "Uid is cached: " + uid
+                                + ", pendingCallbacks: " + pendingCallbacks);
                     }
+                    if (pendingCallbacks == null) {
+                        pendingCallbacks = new SparseArray<>();
+                        mPendingCallbackSelfLocked.put(uid, pendingCallbacks);
+                    }
+                    PendingCallback pendingCallback = pendingCallbacks.get(pid);
                     if (pendingCallback == null) {
-                        mPendingCallbackSelfLocked.put(uid,
+                        pendingCallbacks.put(pid,
                                 new PendingCallback(callbackRecord, displayId, event));
                     } else {
                         pendingCallback.addDisplayEvent(displayId, event);
@@ -3295,6 +3406,31 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    boolean requestDisplayPower(int displayId, boolean on) {
+        synchronized (mSyncRoot) {
+            final var display = mLogicalDisplayMapper.getDisplayLocked(displayId);
+            if (display == null) {
+                Slog.w(TAG, "requestDisplayPower: Cannot find a display with displayId="
+                        + displayId);
+                return false;
+            }
+            final BrightnessPair brightnessPair = mDisplayBrightnesses.get(displayId);
+            var runnable = display.getPrimaryDisplayDeviceLocked().requestDisplayStateLocked(
+                    on ? Display.STATE_ON : Display.STATE_OFF,
+                    on ? brightnessPair.brightness : PowerManager.BRIGHTNESS_OFF_FLOAT,
+                    brightnessPair.sdrBrightness,
+                    display.getDisplayOffloadSessionLocked());
+            if (runnable == null) {
+                Slog.w(TAG, "requestDisplayPower: Cannot update the power state to ON=" + on
+                        + " for a display with displayId=" + displayId + ", runnable is null");
+                return false;
+            }
+            runnable.run();
+            Slog.i(TAG, "requestDisplayPower(displayId=" + displayId + ", on=" + on + ")");
+        }
+        return true;
+    }
+
     /**
      * This is the object that everything in the display manager locks on.
      * We make it an inner class within the {@link DisplayManagerService} to so that it is
@@ -3331,6 +3467,7 @@ public final class DisplayManagerService extends SystemService {
                     autoHdrTypes);
         }
 
+        @Display.HdrCapabilities.HdrType
         int[] getSupportedHdrOutputTypes() {
             return DisplayControl.getSupportedHdrOutputTypes();
         }
@@ -4038,7 +4175,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+        public void dump(@NonNull FileDescriptor fd, @NonNull final PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             final long token = Binder.clearCallingIdentity();
@@ -4314,8 +4451,8 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
-                FileDescriptor err, String[] args, ShellCallback callback,
-                ResultReceiver resultReceiver) {
+                FileDescriptor err, @NonNull String[] args, ShellCallback callback,
+                @NonNull ResultReceiver resultReceiver) {
             new DisplayManagerShellCommand(DisplayManagerService.this, mFlags).exec(this, in, out,
                     err, args, callback, resultReceiver);
         }
@@ -4516,20 +4653,26 @@ public final class DisplayManagerService extends SystemService {
             disableConnectedDisplay_enforcePermission();
             DisplayManagerService.this.enableConnectedDisplay(displayId, false);
         }
+
+        @EnforcePermission(MANAGE_DISPLAYS)
+        public boolean requestDisplayPower(int displayId, boolean on) {
+            requestDisplayPower_enforcePermission();
+            return DisplayManagerService.this.requestDisplayPower(displayId, on);
+        }
+
+        @EnforcePermission(RESTRICT_DISPLAY_MODES)
+        @Override // Binder call
+        public void requestDisplayModes(IBinder token, int displayId, @Nullable int[] modeIds) {
+            requestDisplayModes_enforcePermission();
+            DisplayManagerService.this.mDisplayModeDirector.requestDisplayModes(
+                    token, displayId, modeIds);
+        }
     }
 
     private static boolean isValidBrightness(float brightness) {
         return !Float.isNaN(brightness)
                 && (brightness >= PowerManager.BRIGHTNESS_MIN)
                 && (brightness <= PowerManager.BRIGHTNESS_MAX);
-    }
-
-    private static boolean isValidResolution(Point resolution) {
-        return (resolution != null) && (resolution.x > 0) && (resolution.y > 0);
-    }
-
-    private static boolean isValidRefreshRate(float refreshRate) {
-        return !Float.isNaN(refreshRate) && (refreshRate > 0.0f);
     }
 
     @VisibleForTesting
@@ -4862,8 +5005,9 @@ public final class DisplayManagerService extends SystemService {
                 }
 
                 final DisplayDevice displayDevice = display.getPrimaryDisplayDeviceLocked();
-                final boolean ownContent = (displayDevice.getDisplayDeviceInfoLocked().flags
-                        & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0;
+                final boolean isRearDisplay = display.getDevicePositionLocked() == POSITION_REAR;
+                final boolean ownContent = ((displayDevice.getDisplayDeviceInfoLocked().flags
+                        & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0) || isRearDisplay;
                 // If the display has enabled mirroring, but specified that it will be managed by
                 // WindowManager, return an invalid display id. This is to ensure we don't
                 // accidentally select the display id to mirror based on DM logic and instead allow
@@ -5020,33 +5164,25 @@ public final class DisplayManagerService extends SystemService {
      * Listens to changes in device state and reports the state to LogicalDisplayMapper.
      */
     class DeviceStateListener implements DeviceStateManager.DeviceStateCallback {
-        // Base state corresponds to the physical state of the device
-        private int mBaseState = DeviceStateManager.INVALID_DEVICE_STATE;
 
         @Override
-        public void onStateChanged(int deviceState) {
-            boolean isDeviceStateOverrideActive = deviceState != mBaseState;
+        public void onDeviceStateChanged(DeviceState deviceState) {
             synchronized (mSyncRoot) {
                 // Notify WindowManager that we are about to handle new device state, this should
                 // be sent before any work related to the device state in DisplayManager, so
                 // WindowManager could do implement that depends on the device state and display
                 // changes (serializes device state update and display change events)
                 Message msg = mHandler.obtainMessage(MSG_RECEIVED_DEVICE_STATE);
-                msg.arg1 = deviceState;
+                msg.arg1 = deviceState.getIdentifier();
                 mHandler.sendMessage(msg);
 
                 mLogicalDisplayMapper
-                        .setDeviceStateLocked(deviceState, isDeviceStateOverrideActive);
+                        .setDeviceStateLocked(deviceState.getIdentifier());
             }
-        }
-
-        @Override
-        public void onBaseStateChanged(int state) {
-            mBaseState = state;
         }
     };
 
-    private class BrightnessPair {
+    private static class BrightnessPair {
         public float brightness;
         public float sdrBrightness;
 

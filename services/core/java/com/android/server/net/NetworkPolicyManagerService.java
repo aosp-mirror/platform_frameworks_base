@@ -4016,8 +4016,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // allow override without having plans defined.
         synchronized (mNetworkPoliciesSecondLock) {
             final SubscriptionPlan plan = getPrimarySubscriptionPlanLocked(subId);
-            if (overrideMask != SUBSCRIPTION_OVERRIDE_UNMETERED && plan == null
-                    || plan.getDataLimitBehavior() == SubscriptionPlan.LIMIT_BEHAVIOR_UNKNOWN) {
+            if (overrideMask != SUBSCRIPTION_OVERRIDE_UNMETERED && (plan == null
+                    || plan.getDataLimitBehavior() == SubscriptionPlan.LIMIT_BEHAVIOR_UNKNOWN)) {
                 throw new IllegalStateException(
                         "Must provide valid SubscriptionPlan to enable overriding");
             }

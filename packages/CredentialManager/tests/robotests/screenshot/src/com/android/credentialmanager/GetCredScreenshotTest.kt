@@ -60,7 +60,7 @@ class GetCredScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     @get:Rule
     val screenshotRule = ComposeScreenshotTestRule(
             emulationSpec,
-            CredentialManagerGoldenImagePathManager(getEmulatedDevicePathConfig(emulationSpec))
+            CredentialManagerGoldenPathManager(getEmulatedDevicePathConfig(emulationSpec))
     )
 
     @get:Rule val setFlagsRule: SetFlagsRule = SetFlagsRule()

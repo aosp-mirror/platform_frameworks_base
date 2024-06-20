@@ -583,13 +583,16 @@ public class SurfaceControlViewHost {
      * associated host {@link InputTransferToken}.
      *
      * @return Whether the touch stream was transferred.
+     * @deprecated Use {@link WindowManager#transferTouchGesture(InputTransferToken,
+     * InputTransferToken)} instead.
      */
+    @Deprecated
     public boolean transferTouchGestureToHost() {
         if (mViewRoot == null) {
             return false;
         }
-        final WindowManager wm =
-                (WindowManager) mViewRoot.mContext.getSystemService(Context.WINDOW_SERVICE);
+        final WindowManager wm = (WindowManager) mViewRoot.mContext.getSystemService(
+                Context.WINDOW_SERVICE);
         InputTransferToken embeddedToken = getInputTransferToken();
         InputTransferToken hostToken = mWm.mHostInputTransferToken;
         if (embeddedToken == null || hostToken == null) {

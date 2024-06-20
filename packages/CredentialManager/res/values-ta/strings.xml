@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"கடவுச்சொல்லற்ற எதிர்காலத்தை நோக்கி நாம் பயணிக்கிறோம். கடவுச்சாவிகளைப் பயன்படுத்தும் இதே வேளையில் கடவுச்சொற்களையும் பயன்படுத்த முடியும்."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"உங்கள் <xliff:g id="CREATETYPES">%1$s</xliff:g> எங்கே சேமிக்கப்பட வேண்டும் என்பதைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"உங்கள் தகவல்களைச் சேமித்து அடுத்த முறை விரைவாக உள்நுழைய ஒரு கடவுச்சொல் நிர்வாகியைத் தேர்வுசெய்யுங்கள்"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸில் உள்நுழைய கடவுச்சாவியை உருவாக்கவா?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸில் உள்நுழைய கடவுச்சொல்லைச் சேமிக்கவா?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸுக்கான உள்நுழைவு விவரங்களைச் சேமிக்கவா?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸில் உள்நுழைய கடவுச்சாவியை உருவாக்கவா?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸில் உள்நுழைய கடவுச்சொல்லைச் சேமிக்கவா?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான உள்நுழைவுத் தகவலைச் சேமிக்கவா?"</string>
     <string name="passkey" msgid="632353688396759522">"கடவுச்சாவி"</string>
     <string name="password" msgid="6738570945182936667">"கடவுச்சொல்"</string>
     <string name="passkeys" msgid="5733880786866559847">"கடவுச்சாவிகள்"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"முந்தைய பக்கத்திற்குச் செல்லும்"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"மூடும்"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"நிராகரிக்கும்"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு ஏற்கெனவே சேமிக்கப்பட்ட கடவுக்குறியீட்டைப் பயன்படுத்தவா?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்குச் சேமித்த கடவுச்சொல்லைப் பயன்படுத்தவா?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு உங்கள் உள்நுழைவு விவரங்களைப் பயன்படுத்தவா?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான உள்நுழைவு விருப்பங்களை அன்லாக் செய்யவா?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான சேமிக்கப்பட்ட கடவுச்சாவியைப் பயன்படுத்துங்கள்"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான சேமிக்கப்பட்ட கடவுச்சொல்லைப் பயன்படுத்துங்கள்"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான உங்கள் கணக்கைப் பயன்படுத்துங்கள்"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="USERNAME">%2$s</xliff:g> ஐப் பயன்படுத்தி <xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸில் உள்நுழைய உங்கள் திரைப் பூட்டைப் பயன்படுத்துங்கள்"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான உள்நுழைவு விருப்பங்களை அன்லாக் செய்யுங்கள்"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான சேமிக்கப்பட்ட கடவுச்சாவியைத் தேர்ந்தெடுங்கள்"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான சேமிக்கப்பட்ட கடவுச்சொல்லைத் தேர்ந்தெடுங்கள்"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான சேமிக்கப்பட்ட உள்நுழைவுத் தகவல்களைத் தேர்ந்தெடுங்கள்"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான உள்நுழைவு விவரங்களைத் தேர்வுசெய்யுங்கள்"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான கணக்கைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான விருப்பத்தைத் தேர்வுசெய்யவா?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸில் இந்தத் தகவல்களைப் பயன்படுத்தவா?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"வேறு முறையில் உள்நுழைக"</string>

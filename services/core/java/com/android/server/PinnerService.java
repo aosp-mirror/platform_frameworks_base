@@ -21,6 +21,7 @@ import static android.app.ActivityManager.UID_OBSERVER_GONE;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.flags.Flags.pinWebview;
+import static com.android.server.flags.Flags.skipHomeArtPins;
 
 import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
@@ -29,7 +30,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
-import android.app.SearchManager;
 import android.app.UidObserver;
 import android.app.pinner.IPinnerService;
 import android.app.pinner.PinnedFileStat;
@@ -53,7 +53,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
@@ -123,7 +122,6 @@ public final class PinnerService extends SystemService {
             SystemProperties.getBoolean("pinner.use_pinlist", true);
 
     private static final int MAX_CAMERA_PIN_SIZE = 80 * (1 << 20); // 80MB max for camera app.
-    private static final int MAX_HOME_PIN_SIZE = 6 * (1 << 20); // 6MB max for home app.
     private static final int MAX_ASSISTANT_PIN_SIZE = 60 * (1 << 20); // 60MB max for assistant app.
 
     public static final String ANON_REGION_STAT_NAME = "[anon]";
@@ -139,7 +137,6 @@ public final class PinnerService extends SystemService {
     private final ActivityManagerInternal mAmInternal;
     private final IActivityManager mAm;
     private final UserManager mUserManager;
-    private SearchManager mSearchManager;
 
     /** The list of the statically pinned files. */
     @GuardedBy("this") private final ArrayMap<String, PinnedFile> mPinnedFiles = new ArrayMap<>();
@@ -179,7 +176,7 @@ public final class PinnerService extends SystemService {
 
     // Resource-configured pinner flags;
     private final boolean mConfiguredToPinCamera;
-    private final boolean mConfiguredToPinHome;
+    private final int mConfiguredHomePinBytes;
     private final boolean mConfiguredToPinAssistant;
     private final int mConfiguredWebviewPinBytes;
 
@@ -241,8 +238,8 @@ public final class PinnerService extends SystemService {
         mDeviceConfigInterface = mInjector.getDeviceConfigInterface();
         mConfiguredToPinCamera = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerCameraApp);
-        mConfiguredToPinHome = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_pinnerHomeApp);
+        mConfiguredHomePinBytes = context.getResources().getInteger(
+                com.android.internal.R.integer.config_pinnerHomePinBytes);
         mConfiguredToPinAssistant = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerAssistantApp);
         mConfiguredWebviewPinBytes = context.getResources().getInteger(
@@ -283,15 +280,6 @@ public final class PinnerService extends SystemService {
         sendPinAppsMessage(UserHandle.USER_SYSTEM);
     }
 
-    @Override
-    public void onBootPhase(int phase) {
-        // SearchManagerService is started after PinnerService, wait for PHASE_SYSTEM_SERVICES_READY
-        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
-            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
-            sendPinAppsMessage(UserHandle.USER_SYSTEM);
-        }
-    }
-
     /**
      * Repin apps on user switch.
      * <p>
@@ -308,8 +296,9 @@ public final class PinnerService extends SystemService {
 
     @Override
     public void onUserUnlocking(@NonNull TargetUser user) {
-        int userId = user.getUserIdentifier();
-        if (!mUserManager.isManagedProfile(userId)) {
+        final int userId = user.getUserIdentifier();
+        if (userId != UserHandle.USER_SYSTEM && !mUserManager.isManagedProfile(userId)) {
+            // App pinning for the system should have already been triggered from onStart().
             sendPinAppsMessage(userId);
         }
     }
@@ -401,7 +390,7 @@ public final class PinnerService extends SystemService {
                     @Override
                     public void onChange(boolean selfChange, Uri uri) {
                         if (userSetupCompleteUri.equals(uri)) {
-                            if (mConfiguredToPinHome) {
+                            if (mConfiguredHomePinBytes > 0) {
                                 sendPinAppMessage(KEY_HOME, ActivityManager.getCurrentUser(),
                                         true /* force */);
                             }
@@ -532,11 +521,8 @@ public final class PinnerService extends SystemService {
     }
 
     private ApplicationInfo getAssistantInfo(int userHandle) {
-        if (mSearchManager != null) {
-            Intent intent = mSearchManager.getAssistIntent(false);
-            return getApplicationInfoForIntent(intent, userHandle, true);
-        }
-        return null;
+        Intent intent = new Intent(Intent.ACTION_ASSIST);
+        return getApplicationInfoForIntent(intent, userHandle, true);
     }
 
     private ApplicationInfo getApplicationInfoForIntent(Intent intent, int userHandle,
@@ -608,7 +594,7 @@ public final class PinnerService extends SystemService {
             Slog.i(TAG, "Pinner - skip pinning camera app");
         }
 
-        if (mConfiguredToPinHome) {
+        if (mConfiguredHomePinBytes > 0) {
             pinKeys.add(KEY_HOME);
         }
         if (mConfiguredToPinAssistant) {
@@ -829,7 +815,7 @@ public final class PinnerService extends SystemService {
             case KEY_CAMERA:
                 return MAX_CAMERA_PIN_SIZE;
             case KEY_HOME:
-                return MAX_HOME_PIN_SIZE;
+                return mConfiguredHomePinBytes;
             case KEY_ASSISTANT:
                 return MAX_ASSISTANT_PIN_SIZE;
             default:
@@ -866,6 +852,9 @@ public final class PinnerService extends SystemService {
         }
 
         int apkPinSizeLimit = pinSizeLimit;
+
+        boolean shouldSkipArtPins = key == KEY_HOME && skipHomeArtPins();
+
         for (String apk: apks) {
             if (apkPinSizeLimit <= 0) {
                 Slog.w(TAG, "Reached to the pin size limit. Skipping: " + apk);
@@ -889,8 +878,8 @@ public final class PinnerService extends SystemService {
             }
 
             apkPinSizeLimit -= pf.bytesPinned;
-            if (apk.equals(appInfo.sourceDir)) {
-                pinOptimizedDexDependencies(pf, apkPinSizeLimit, appInfo);
+            if (apk.equals(appInfo.sourceDir) && !shouldSkipArtPins) {
+                pinOptimizedDexDependencies(pf, Integer.MAX_VALUE, appInfo);
             }
         }
     }
@@ -936,8 +925,8 @@ public final class PinnerService extends SystemService {
         }
         pf.groupName = groupName != null ? groupName : "";
 
-        maxBytesToPin -= bytesPinned;
         bytesPinned += pf.bytesPinned;
+        maxBytesToPin -= bytesPinned;
 
         synchronized (this) {
             mPinnedFiles.put(pf.fileName, pf);
@@ -985,7 +974,7 @@ public final class PinnerService extends SystemService {
                 // Unpin if it was already pinned prior to re-pinning.
                 unpinFile(file);
 
-                PinnedFile df = mInjector.pinFileInternal(file, Integer.MAX_VALUE,
+                PinnedFile df = mInjector.pinFileInternal(file, maxBytesToPin,
                         /*attemptPinIntrospection=*/false);
                 if (df == null) {
                     Slog.i(TAG, "Failed to pin ART file = " + file);

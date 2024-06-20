@@ -19,14 +19,4 @@
 <resources>
     <!-- Name of the activity for Settings storage. -->
     <string name="app_label">Settings Storage</string>
-
-    <!-- A notification is shown when the user's softap config has been changed due to underlying
-     hardware restrictions. This is the notifications's title.
-     [CHAR_LIMIT=NONE] -->
-    <string name="wifi_softap_config_change">Hotspot settings have changed</string>
-
-    <!-- A notification is shown when the user's softap config has been changed due to underlying
-         hardware restrictions. This is the notification's summary message.
-         [CHAR_LIMIT=NONE] -->
-    <string name="wifi_softap_config_change_summary">Tap to see details</string>
 </resources>

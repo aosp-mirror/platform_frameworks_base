@@ -21,4 +21,6 @@
     <string name="settingslib_category_personal">Personal</string>
     <!-- Header for items under the work user [CHAR LIMIT=30] -->
     <string name="settingslib_category_work">Work</string>
+    <!-- Header for items under the private profile user [CHAR LIMIT=30] -->
+    <string name="settingslib_category_private">Private</string>
 </resources>

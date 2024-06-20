@@ -45,15 +45,17 @@ public class FontFamily {
 
     private static String TAG = "FontFamily";
 
-    private static final NativeAllocationRegistry sBuilderRegistry =
-            NativeAllocationRegistry.createMalloced(
-            FontFamily.class.getClassLoader(), nGetBuilderReleaseFunc());
-
     private @Nullable Runnable mNativeBuilderCleaner;
 
-    private static final NativeAllocationRegistry sFamilyRegistry =
-            NativeAllocationRegistry.createMalloced(
-            FontFamily.class.getClassLoader(), nGetFamilyReleaseFunc());
+    private static class NoImagePreloadHolder {
+        private static final NativeAllocationRegistry sBuilderRegistry =
+                NativeAllocationRegistry.createMalloced(
+                        FontFamily.class.getClassLoader(), nGetBuilderReleaseFunc());
+
+        private static final NativeAllocationRegistry sFamilyRegistry =
+                NativeAllocationRegistry.createMalloced(
+                        FontFamily.class.getClassLoader(), nGetFamilyReleaseFunc());
+    }
 
     /**
      * @hide
@@ -74,7 +76,8 @@ public class FontFamily {
             publicAlternatives = "Use {@link android.graphics.fonts.FontFamily} instead.")
     public FontFamily() {
         mBuilderPtr = nInitBuilder(null, 0);
-        mNativeBuilderCleaner = sBuilderRegistry.registerNativeAllocation(this, mBuilderPtr);
+        mNativeBuilderCleaner = NoImagePreloadHolder.sBuilderRegistry.registerNativeAllocation(this,
+                mBuilderPtr);
     }
 
     /**
@@ -92,7 +95,8 @@ public class FontFamily {
             langsString = TextUtils.join(",", langs);
         }
         mBuilderPtr = nInitBuilder(langsString, variant);
-        mNativeBuilderCleaner = sBuilderRegistry.registerNativeAllocation(this, mBuilderPtr);
+        mNativeBuilderCleaner = NoImagePreloadHolder.sBuilderRegistry.registerNativeAllocation(this,
+                mBuilderPtr);
     }
 
     /**
@@ -113,7 +117,7 @@ public class FontFamily {
         mNativeBuilderCleaner.run();
         mBuilderPtr = 0;
         if (mNativePtr != 0) {
-            sFamilyRegistry.registerNativeAllocation(this, mNativePtr);
+            NoImagePreloadHolder.sFamilyRegistry.registerNativeAllocation(this, mNativePtr);
         }
         return mNativePtr != 0;
     }

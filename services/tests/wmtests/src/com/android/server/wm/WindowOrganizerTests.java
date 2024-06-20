@@ -31,6 +31,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -1235,6 +1236,12 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertNotNull(o.mInfo);
         assertNotNull(o.mInfo.pictureInPictureParams);
 
+        // Bypass the quota check, which causes NPE in current test setup.
+        if (mWm.mAtmService.mActivityClientController.mSetPipAspectRatioQuotaTracker != null) {
+            mWm.mAtmService.mActivityClientController.mSetPipAspectRatioQuotaTracker
+                    .setEnabled(false);
+        }
+
         final PictureInPictureParams p2 = new PictureInPictureParams.Builder()
                 .setAspectRatio(new Rational(3, 4)).build();
         mWm.mAtmService.mActivityClientController.setPictureInPictureParams(record.token, p2);
@@ -1376,8 +1383,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(w1.syncNextBuffer());
         assertTrue(w2.syncNextBuffer());
 
-        // A drawn window can complete the sync state automatically.
+        // A drawn window in non-explicit sync can complete the sync state automatically.
         w1.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        w1.mPrepareSyncSeqId = 0;
         makeLastConfigReportedToClient(w1, true /* visible */);
         mWm.mSyncEngine.onSurfacePlacement();
         verify(mockCallback).onTransactionReady(anyInt(), any());
@@ -1445,6 +1453,53 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertEquals(PendingTaskEvent.EVENT_APPEARED, pendingEvents.get(0).mEventType);
         assertEquals("TestDescription",
                 pendingEvents.get(0).mTask.getTaskInfo().taskDescription.getLabel());
+    }
+
+    @Test
+    public void testReorderWithParents() {
+        /*
+                  root
+               ____|______
+               |         |
+           firstTda    secondTda
+               |             |
+         firstRootTask    secondRootTask
+
+         */
+        final TaskDisplayArea firstTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
+        final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "TestTaskDisplayArea",
+                FEATURE_VENDOR_FIRST);
+        final Task firstRootTask = firstTaskDisplayArea.createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final Task secondRootTask = secondTaskDisplayArea.createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
+                .setTask(firstRootTask).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
+                .setTask(secondRootTask).build();
+        // This assertion is just a defense to ensure that firstRootTask is not the top most
+        // by default
+        assertThat(mDisplayContent.getTopRootTask()).isEqualTo(secondRootTask);
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+
+        // Reorder to top
+        wct.reorder(firstRootTask.mRemoteToken.toWindowContainerToken(), true /* onTop */,
+                true /* includingParents */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+
+        // firstRootTask can only be on the top if its TDA was also reordered to the Top which
+        // in-turn ensures that the reorder happened including the parents.
+        assertThat(mDisplayContent.getTopRootTask()).isEqualTo(firstRootTask);
+
+        // Reorder to bottom
+        wct.reorder(firstRootTask.mRemoteToken.toWindowContainerToken(), false /* onTop */,
+                true /* includingParents */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+
+        // firstRootTask can only be on the bottom if its TDA was also reordered to the bottom
+        // which in-turn ensures that the reorder happened including the parents.
+        assertThat(mDisplayContent.getBottomMostTask()).isEqualTo(firstRootTask);
     }
 
     @Test

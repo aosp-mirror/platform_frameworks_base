@@ -18,6 +18,7 @@ package android.view;
 
 import static android.content.res.Resources.ID_NULL;
 import static android.os.Trace.TRACE_TAG_APP;
+import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
 import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
@@ -25,6 +26,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
@@ -38,10 +40,16 @@ import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
+import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateViewEnablingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
+import static android.view.inputmethod.Flags.initiationWithoutInputConnection;
 
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
@@ -152,6 +160,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.StateSet;
 import android.util.SuperNotCalledException;
+import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.AccessibilityIterators.CharacterTextSegmentIterator;
 import android.view.AccessibilityIterators.ParagraphTextSegmentIterator;
@@ -195,7 +204,6 @@ import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 import android.widget.Checkable;
-import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 import android.window.OnBackInvokedDispatcher;
 
@@ -219,6 +227,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -952,21 +961,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public HapticScrollFeedbackProvider mScrollFeedbackProvider = null;
 
     /**
-     * Use the old (broken) way of building MeasureSpecs.
-     */
-    private static boolean sUseBrokenMakeMeasureSpec = false;
-
-    /**
-     * Always return a size of 0 for MeasureSpec values with a mode of UNSPECIFIED
-     */
-    static boolean sUseZeroUnspecifiedMeasureSpec = false;
-
-    /**
-     * Ignore any optimizations using the measure cache.
-     */
-    private static boolean sIgnoreMeasureCache = false;
-
-    /**
      * Ignore an optimization that skips unnecessary EXACTLY layout passes.
      */
     private static boolean sAlwaysRemeasureExactly = false;
@@ -1124,7 +1118,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int FOCUSABLE_MASK = 0x00000011;
 
     /**
-     * This view will adjust its padding to fit sytem windows (e.g. status bar)
+     * This view will adjust its padding to fit system windows (e.g. status bar)
      */
     private static final int FITS_SYSTEM_WINDOWS = 0x00000002;
 
@@ -1974,9 +1968,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public @interface ContentSensitivity {}
 
     /**
-     * Automatically determine whether a view displays sensitive content. For example, available
-     * autofill hints (or some other signal) can be used to determine if this view
-     * displays sensitive content.
+     * Content sensitivity is determined by the framework. The framework uses a heuristic to
+     * determine if this view displays sensitive content.
+     * Autofill hints i.e. {@link #getAutofillHints()}  are used in the heuristic
+     * to determine if this view should be considered as a sensitive view.
+     * <p>
+     * {@link #AUTOFILL_HINT_USERNAME},
+     * {@link #AUTOFILL_HINT_PASSWORD},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_NUMBER},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR}
+     * are considered sensitive hints by the framework, and the list may include more hints
+     * in the future.
+     *
+     * <p> The window hosting a sensitive view will be marked as secure during an active media
+     * projection session. This would be equivalent to applying
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} to the window.
      *
      * @see #getContentSensitivity()
      */
@@ -1985,6 +1995,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * The view displays sensitive content.
+     *
+     * <p> The window hosting a sensitive view will be marked as secure during an active media
+     * projection session. This would be equivalent to applying
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} to the window.
      *
      * @see #getContentSensitivity()
      */
@@ -2370,8 +2384,88 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
 
-    private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
+    /**
+     * This indicates that the frame rate category was chosen for an unknown reason.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_UNKNOWN = 0x0000_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it was a small area update.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_SMALL = 0x0100_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it was an intermittent update.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_INTERMITTENT = 0x0200_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it was a large View.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_LARGE = 0x03000000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it was requested.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_REQUESTED = 0x0400_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because an invalid frame rate was
+     * requested.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_INVALID = 0x0500_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because the view has a velocity
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_VELOCITY = 0x0600_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it is currently boosting.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_BOOST = 0x0800_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it is currently having
+     * touch boost.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_TOUCH = 0x0900_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it is currently having
+     * touch boost.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_CONFLICTED = 0x0A00_0000;
+
+    private static final int FRAME_RATE_CATEGORY_REASON_MASK = 0xFFFF_0000;
+
+    /**
+     * @hide
+     */
+    protected static boolean sToolkitSetFrameRateReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
+    private static final boolean sToolkitFrameRateDefaultNormalReadOnlyFlagValue =
+            toolkitFrameRateDefaultNormalReadOnly();
+    private static final boolean sToolkitFrameRateBySizeReadOnlyFlagValue =
+            toolkitFrameRateBySizeReadOnly();
+
+    private static final boolean sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue =
+            toolkitFrameRateSmallUsesPercentReadOnly();
+    private static final boolean sToolkitFrameRateViewEnablingReadOnlyFlagValue =
+            toolkitFrameRateViewEnablingReadOnly();
+    private static boolean sToolkitFrameRateVelocityMappingReadOnlyFlagValue =
+            toolkitFrameRateVelocityMappingReadOnly();
+
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
             FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
@@ -3263,16 +3357,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int ACCESSIBILITY_LIVE_REGION_NONE = 0x00000000;
 
     /**
-     * Live region mode specifying that accessibility services should announce
-     * changes to this view.
+     * Live region mode specifying that accessibility services should notify users of changes to
+     * this view.
      * <p>
      * Use with {@link #setAccessibilityLiveRegion(int)}.
      */
     public static final int ACCESSIBILITY_LIVE_REGION_POLITE = 0x00000001;
 
     /**
-     * Live region mode specifying that accessibility services should interrupt
-     * ongoing speech to immediately announce changes to this view.
+     * Live region mode specifying that accessibility services should immediately notify users of
+     * changes to this view. For example, a screen reader may interrupt ongoing speech to
+     * immediately announce these changes.
      * <p>
      * Use with {@link #setAccessibilityLiveRegion(int)}.
      */
@@ -3705,6 +3800,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         1                        PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT
      *       11                         PFLAG4_CONTENT_SENSITIVITY_MASK
      *      1                           PFLAG4_IS_COUNTED_AS_SENSITIVE
+     *     1                            PFLAG4_HAS_DRAWN
+     *    1                             PFLAG4_HAS_MOVED
+     *   1                              PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION
      * |-------|-------|-------|-------|
      */
 
@@ -3837,6 +3935,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see AttachInfo#mSensitiveViewsCount
      */
     private static final int PFLAG4_IS_COUNTED_AS_SENSITIVE = 0x4000000;
+
+    /**
+     * Whether this view has been drawn once with updateDisplayListIfDirty() or not.
+     * Used by VRR to for quick detection of scrolling.
+     */
+    private static final int PFLAG4_HAS_DRAWN = 0x8000000;
+
+    /**
+     * Whether this view has been moved with either setTranslationX/Y or setLeft/Top.
+     * Used by VRR to for quick detection of scrolling.
+     */
+    private static final int PFLAG4_HAS_MOVED = 0x10000000;
+
+    /**
+     * Whether the invalidateViewProperty is involked at current frame.
+     */
+    private static final int PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION = 0x20000000;
+
     /* End of masks for mPrivateFlags4 */
 
     /** @hide */
@@ -4621,6 +4737,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mLeft;
     /**
+     * The mLeft from the previous frame. Used for detecting movement for purposes of variable
+     * refresh rate.
+     */
+    private int mLastFrameLeft;
+    /**
      * The distance in pixels from the left edge of this view's parent
      * to the right edge of this view.
      * {@hide}
@@ -4636,6 +4757,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty(category = "layout")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mTop;
+    /**
+     * The mTop from the previous frame. Used for detecting movement for purposes of variable
+     * refresh rate.
+     */
+    private int mLastFrameTop;
     /**
      * The distance in pixels from the top edge of this view's parent
      * to the bottom edge of this view.
@@ -5629,35 +5755,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     private ViewTranslationCallback mViewTranslationCallback;
 
-    private float mFrameContentVelocity = 0;
+    private float mFrameContentVelocity = -1;
 
     @Nullable
 
     private ViewTranslationResponse mViewTranslationResponse;
 
     /**
+     * The size in DP that is considered small for VRR purposes, if square.
+     */
+    private static final float FRAME_RATE_SQUARE_SMALL_SIZE_DP = 40f;
+
+    /**
+     * The size in DP that is considered small for VRR purposes in the narrow dimension. Used for
+     * narrow Views like a progress bar.
+     */
+    private static final float FRAME_RATE_NARROW_SIZE_DP = 10f;
+
+    /**
      * A threshold value to determine the frame rate category of the View based on the size.
      */
     private static final float FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD = 0.07f;
 
-
-    private static final long INFREQUENT_UPDATE_INTERVAL_MILLIS = 100;
-    private static final int INFREQUENT_UPDATE_COUNTS = 2;
+    static final float MAX_FRAME_RATE = 120;
 
     // The preferred frame rate of the view that is mainly used for
     // touch boosting, view velocity handling, and TextureView.
     private float mPreferredFrameRate = REQUESTED_FRAME_RATE_CATEGORY_DEFAULT;
 
-    private int mInfrequentUpdateCount = 0;
-    private long mLastUpdateTimeMillis = 0;
-    /**
-     * @hide
-     */
-    protected long mMinusOneFrameIntervalMillis = 0;
-    /**
-     * @hide
-     */
-    protected long mMinusTwoFrameIntervalMillis = 0;
     private int mLastFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
 
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
@@ -5670,6 +5795,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final float REQUESTED_FRAME_RATE_CATEGORY_NORMAL = -3;
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public static final float REQUESTED_FRAME_RATE_CATEGORY_HIGH = -4;
+
+    private int mSizeBasedFrameRateCategoryAndReason;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -5701,20 +5828,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (!sCompatibilityDone && context != null) {
             final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
-
-            // Older apps may need this compatibility hack for measurement.
-            sUseBrokenMakeMeasureSpec = targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN_MR1;
-
-            // Older apps expect onMeasure() to always be called on a layout pass, regardless
-            // of whether a layout was requested on that View.
-            sIgnoreMeasureCache = targetSdkVersion < Build.VERSION_CODES.KITKAT;
-
-            // In M and newer, our widgets can pass a "hint" value in the size
-            // for UNSPECIFIED MeasureSpecs. This lets child views of scrolling containers
-            // know what the expected parent size is going to be, so e.g. list items can size
-            // themselves at 1/3 the size of their container. It breaks older apps though,
-            // specifically apps that use some popular open source libraries.
-            sUseZeroUnspecifiedMeasureSpec = targetSdkVersion < Build.VERSION_CODES.M;
 
             // Old versions of the platform would give different results from
             // LinearLayout measurement passes using EXACTLY and non-EXACTLY
@@ -5891,8 +6004,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean endPaddingDefined = false;
         boolean leftPaddingDefined = false;
         boolean rightPaddingDefined = false;
-
-        final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
 
         // Set default values.
         viewFlagValues |= FOCUSABLE_AUTO;
@@ -6114,11 +6225,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 //noinspection deprecation
                 case R.styleable.View_fadingEdge:
-                    if (targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                        // Ignore the attribute starting with ICS
-                        break;
-                    }
-                    // With builds < ICS, fall through and apply fading edges
+                    break;
                 case R.styleable.View_requiresFadingEdge:
                     final int fadingEdge = a.getInt(attr, FADING_EDGE_NONE);
                     if (fadingEdge != FADING_EDGE_NONE) {
@@ -6256,35 +6363,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             PROVIDER_BACKGROUND));
                     break;
                 case R.styleable.View_foreground:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForeground(a.getDrawable(attr));
-                    }
+                    setForeground(a.getDrawable(attr));
                     break;
                 case R.styleable.View_foregroundGravity:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
-                    }
+                    setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
                     break;
                 case R.styleable.View_foregroundTintMode:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundTintBlendMode(
-                                Drawable.parseBlendMode(a.getInt(attr, -1),
-                                        null));
-                    }
+                    setForegroundTintBlendMode(
+                            Drawable.parseBlendMode(a.getInt(attr, -1),
+                                    null));
                     break;
                 case R.styleable.View_foregroundTint:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundTintList(a.getColorStateList(attr));
-                    }
+                    setForegroundTintList(a.getColorStateList(attr));
                     break;
                 case R.styleable.View_foregroundInsidePadding:
-                    if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        if (mForegroundInfo == null) {
-                            mForegroundInfo = new ForegroundInfo();
-                        }
-                        mForegroundInfo.mInsidePadding = a.getBoolean(attr,
-                                mForegroundInfo.mInsidePadding);
+                    if (mForegroundInfo == null) {
+                        mForegroundInfo = new ForegroundInfo();
                     }
+                    mForegroundInfo.mInsidePadding = a.getBoolean(attr,
+                            mForegroundInfo.mInsidePadding);
                     break;
                 case R.styleable.View_scrollIndicators:
                     final int scrollIndicators =
@@ -7013,16 +7110,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Clears the request and callback previously set
-     * through {@link View#setCredentialManagerRequest}.
+     * through {@link View#setPendingCredentialRequest}.
      * Once this API is invoked, there will be no request fired to {@link CredentialManager}
      * on future view focus events.
      *
-     * @see #setCredentialManagerRequest
+     * @see #setPendingCredentialRequest
      */
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
-    public void clearCredentialManagerRequest() {
+    public void clearPendingCredentialRequest() {
         if (Log.isLoggable(AUTOFILL_LOG_TAG, Log.VERBOSE)) {
-            Log.v(AUTOFILL_LOG_TAG, "clearCredentialManagerRequest called");
+            Log.v(AUTOFILL_LOG_TAG, "clearPendingCredentialRequest called");
         }
         mViewCredentialHandler = null;
     }
@@ -7052,10 +7149,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                 propagated for the given view
      */
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
-    public void setCredentialManagerRequest(@NonNull GetCredentialRequest request,
+    public void setPendingCredentialRequest(@NonNull GetCredentialRequest request,
             @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
         Preconditions.checkNotNull(request, "request must not be null");
-        Preconditions.checkNotNull(callback, "request must not be null");
+        Preconditions.checkNotNull(callback, "callback must not be null");
 
         for (CredentialOption option : request.getCredentialOptions()) {
             ArrayList<AutofillId> ids = option.getCandidateQueryData()
@@ -8430,8 +8527,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *            hierarchy
      * @param refocus when propagate is true, specifies whether to request the
      *            root view place new focus
+     * @hide
      */
-    void clearFocusInternal(View focused, boolean propagate, boolean refocus) {
+    public void clearFocusInternal(View focused, boolean propagate, boolean refocus) {
         if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
             mPrivateFlags &= ~PFLAG_FOCUSED;
             clearParentsWantFocus();
@@ -8578,6 +8676,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     protected void onFocusChanged(boolean gainFocus, @FocusDirection int direction,
             @Nullable Rect previouslyFocusedRect) {
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "onFocusChanged() entered. gainFocus: "
+                    + gainFocus);
+        }
         if (gainFocus) {
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         } else {
@@ -8598,11 +8700,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             onFocusLost();
         } else if (hasWindowFocus()) {
             notifyFocusChangeToImeFocusController(true /* hasFocus */);
-
-            if (mIsHandwritingDelegate) {
-                ViewRootImpl viewRoot = getViewRootImpl();
-                if (viewRoot != null) {
+            ViewRootImpl viewRoot = getViewRootImpl();
+            if (viewRoot != null) {
+                if (mIsHandwritingDelegate) {
                     viewRoot.getHandwritingInitiator().onDelegateViewFocused(this);
+                } else if (initiationWithoutInputConnection() && onCheckIsTextEditor()) {
+                    viewRoot.getHandwritingInitiator().onEditorFocused(this);
                 }
             }
         }
@@ -8642,6 +8745,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (canNotifyAutofillEnterExitEvent()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
+                if (DBG) {
+                    Log.d(VIEW_LOG_TAG, this + " afm is not null");
+                }
                 if (enter) {
                     // We have not been laid out yet, hence cannot evaluate
                     // whether this view is visible to the user, we will do
@@ -8653,6 +8759,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // animation beginning. On the time, the view is not visible
                     // to the user. And then as the animation progresses, the view
                     // becomes visible to the user.
+                    if (DBG) {
+                        Log.d(VIEW_LOG_TAG,
+                                "notifyEnterOrExitForAutoFillIfNeeded:"
+                                + " isLaidOut(): " + isLaidOut()
+                                + " isVisibleToUser(): " + isVisibleToUser()
+                                + " isFocused(): " + isFocused());
+                    }
                     if (!isLaidOut() || !isVisibleToUser()) {
                         mPrivateFlags3 |= PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
                     } else if (isVisibleToUser()) {
@@ -8683,14 +8796,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * <p>
      * When transitioning from one Activity to another, instead of using
-     * setAccessibilityPaneTitle(), set a descriptive title for its window by using android:label
-     * for the matching <activity> entry in your application’s manifest or updating the title at
-     * runtime with{@link android.app.Activity#setTitle(CharSequence)}.
+     * {@code setAccessibilityPaneTitle()}, set a descriptive title for its window by using
+     * {@code android:label}
+     * for the matching Activity entry in your application's manifest or updating the title at
+     * runtime with {@link android.app.Activity#setTitle(CharSequence)}.
      *
      * <p>
+     * <aside>
      * <b>Note:</b> Use
      * {@link androidx.core.view.ViewCompat#setAccessibilityPaneTitle(View, CharSequence)}
-     * for backwards-compatibility. </aside>
+     * for backwards-compatibility.
+     * </aside>
      * @param accessibilityPaneTitle The pane's title. Setting to {@code null} indicates that this
      *                               View is not a pane.
      *
@@ -8798,7 +8914,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * They should not need to specify what exactly is announced to users.
      *
      * <p>
-     * In general, only announce transitions and don’t generate a confirmation message for simple
+     * In general, only announce transitions and don't generate a confirmation message for simple
      * actions like a button press. Label your controls concisely and precisely instead, and for
      * significant UI changes like window changes, use
      * {@link android.app.Activity#setTitle(CharSequence)} and
@@ -9546,7 +9662,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setIsCredential(isCredential());
             }
             if (getViewCredentialHandler() != null) {
-                structure.setCredentialManagerRequest(
+                structure.setPendingCredentialRequest(
                         getViewCredentialHandler().getRequest(),
                         getViewCredentialHandler().getCallback());
             }
@@ -9951,22 +10067,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void onGetCredentialResponse(GetCredentialResponse response) {
-        if (getCredentialManagerCallback() == null) {
+        if (getPendingCredentialCallback() == null) {
             Log.w(AUTOFILL_LOG_TAG, "onGetCredentialResponse called but no callback found");
             return;
         }
-        getCredentialManagerCallback().onResult(response);
+        getPendingCredentialCallback().onResult(response);
     }
 
     /**
      * @hide
      */
     public void onGetCredentialException(String errorType, String errorMsg) {
-        if (getCredentialManagerCallback() == null) {
+        if (getPendingCredentialCallback() == null) {
             Log.w(AUTOFILL_LOG_TAG, "onGetCredentialException called but no callback found");
             return;
         }
-        getCredentialManagerCallback().onError(new GetCredentialException(errorType, errorMsg));
+        getPendingCredentialCallback().onError(new GetCredentialException(errorType, errorMsg));
     }
 
     /**
@@ -9997,13 +10113,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the active {@link android.service.autofill.AutofillService} on
      * the device.
      *
-     * <p>See {@link #setCredentialManagerRequest} for more info.
+     * <p>See {@link #setPendingCredentialRequest} for more info.
      *
      * @return The credential request associated with this View.
      */
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     @Nullable
-    public final GetCredentialRequest getCredentialManagerRequest() {
+    public final GetCredentialRequest getPendingCredentialRequest() {
         if (mViewCredentialHandler == null) {
             return null;
         }
@@ -10013,14 +10129,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Returns the callback that has previously been set up on this view through
-     * the {@link #setCredentialManagerRequest} API.
+     * the {@link #setPendingCredentialRequest} API.
      * If the return value is null, that means no callback, or request, has been set
      * on the view and no {@link CredentialManager} flow will be invoked
      * when this view is focused. Traditioanl autofill flows will still
      * work, and autofillable content will still be returned through the
      * {@link #autofill(AutofillValue)} )} API.
      *
-     * <p>See {@link #setCredentialManagerRequest} for more info.
+     * <p>See {@link #setPendingCredentialRequest} for more info.
      *
      * @return The callback associated with this view that will be invoked on a response from
      * {@link CredentialManager} .
@@ -10028,7 +10144,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     @Nullable
     public final OutcomeReceiver<GetCredentialResponse,
-            GetCredentialException> getCredentialManagerCallback() {
+            GetCredentialException> getPendingCredentialCallback() {
         if (mViewCredentialHandler == null) {
             return null;
         }
@@ -10406,8 +10522,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Sets content sensitivity mode to determine whether this view displays sensitive content
-     * (e.g. username, password etc.). The system may improve user privacy i.e. hide content
+     * (e.g. username, password etc.). The system will improve user privacy i.e. hide content
      * drawn by a sensitive view from screen sharing and recording.
+     *
+     * <p> The window hosting a sensitive view will be marked as secure during an active media
+     * projection session. This would be equivalent to applying
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} to the window.
      *
      * @param mode {@link #CONTENT_SENSITIVITY_AUTO}, {@link #CONTENT_SENSITIVITY_NOT_SENSITIVE}
      *                                            or {@link #CONTENT_SENSITIVITY_SENSITIVE}
@@ -10432,8 +10552,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setContentSensitivity(int)}.
      */
     @FlaggedApi(FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API)
-    public @ContentSensitivity
-    final int getContentSensitivity() {
+    public @ContentSensitivity final int getContentSensitivity() {
         return (mPrivateFlags4 & PFLAG4_CONTENT_SENSITIVITY_MASK)
                 >> PFLAG4_CONTENT_SENSITIVITY_SHIFT;
     }
@@ -10876,15 +10995,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private boolean isAutofillable() {
-        if (getAutofillType() == AUTOFILL_TYPE_NONE) return false;
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "isAutofillable() entered.");
+        }
+        if (getAutofillType() == AUTOFILL_TYPE_NONE) {
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "getAutofillType() returns AUTOFILL_TYPE_NONE");
+            }
+            return false;
+        }
 
         final AutofillManager afm = getAutofillManager();
         if (afm == null) {
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "AutofillManager is null");
+            }
             return false;
         }
 
         // Check whether view is not part of an activity. If it's not, return false.
         if (getAutofillViewId() <= LAST_APP_AUTOFILL_ID) {
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "getAutofillViewId()<=LAST_APP_AUTOFILL_ID");
+            }
             return false;
         }
 
@@ -10894,11 +11027,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((isImportantForAutofill() && afm.isTriggerFillRequestOnFilteredImportantViewsEnabled())
                 || (!isImportantForAutofill()
                     && afm.isTriggerFillRequestOnUnimportantViewEnabled())) {
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "isImportantForAutofill(): " + isImportantForAutofill()
+                        + "afm.isAutofillable(): " + afm.isAutofillable(this));
+            }
             return afm.isAutofillable(this) ? true : notifyAugmentedAutofillIfNeeded(afm);
         }
 
         // If the previous condition is not met, fall back to the previous way to trigger fill
         // request based on autofill importance instead.
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "isImportantForAutofill(): " + isImportantForAutofill());
+        }
         return isImportantForAutofill() ? true : notifyAugmentedAutofillIfNeeded(afm);
     }
 
@@ -10913,6 +11053,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /** @hide */
     public boolean canNotifyAutofillEnterExitEvent() {
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "canNotifyAutofillEnterExitEvent() entered. "
+                    + " isAutofillable(): " + isAutofillable()
+                    + " isAttachedToWindow(): " + isAttachedToWindow());
+        }
         return isAutofillable() && isAttachedToWindow();
     }
 
@@ -10958,7 +11103,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId())));
         }
         if (getViewCredentialHandler() != null) {
-            structure.setCredentialManagerRequest(
+            structure.setPendingCredentialRequest(
                     getViewCredentialHandler().getRequest(),
                     getViewCredentialHandler().getCallback());
         }
@@ -12589,7 +12734,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (getSystemGestureExclusionRects().isEmpty()
                 && collectPreferKeepClearRects().isEmpty()
                 && collectUnrestrictedPreferKeepClearRects().isEmpty()
-                && (info.mHandwritingArea == null || !shouldInitiateHandwriting())) {
+                && (info.mHandwritingArea == null || !shouldTrackHandwritingArea())) {
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
                 info.mPositionUpdateListener = null;
@@ -12956,7 +13101,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     void updateHandwritingArea() {
         // If autoHandwritingArea is not enabled, do nothing.
-        if (!shouldInitiateHandwriting()) return;
+        if (!shouldTrackHandwritingArea()) return;
         final AttachInfo ai = mAttachInfo;
         if (ai != null) {
             ai.mViewRootImpl.getHandwritingInitiator().updateHandwritingAreasForView(this);
@@ -12971,6 +13116,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     boolean shouldInitiateHandwriting() {
         return isAutoHandwritingEnabled() || getHandwritingDelegatorCallback() != null;
+    }
+
+    /**
+     * Returns whether the handwriting initiator should track the handwriting area for this view,
+     * either to initiate handwriting mode, or to prepare handwriting delegation, or to show the
+     * handwriting unsupported message.
+     * @hide
+     */
+    public boolean shouldTrackHandwritingArea() {
+        return shouldInitiateHandwriting();
     }
 
     /**
@@ -13260,6 +13415,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             outLocalInsets.set(in.getSystemWindowInsetsAsRect());
             return in.consumeSystemWindowInsets().inset(outLocalInsets);
         }
+    }
+
+    /**
+     * @return True if the window has the {@link OnContentApplyWindowInsetsListener}, and this means
+     *         the framework will apply window insets on the content of the window.
+     * @hide
+     */
+    protected boolean hasContentOnApplyWindowInsetsListener() {
+        return mAttachInfo != null && mAttachInfo.mContentOnApplyWindowInsetsListener != null;
     }
 
     /**
@@ -13695,11 +13859,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     })
     @ResolvedLayoutDir
     public int getLayoutDirection() {
-        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        if (targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED;
-            return LAYOUT_DIRECTION_RESOLVED_DEFAULT;
-        }
         return ((mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ==
                 PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL) ? LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR;
     }
@@ -15155,33 +15314,56 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * to the view's content description or text, or to the content descriptions
      * or text of the view's children (where applicable).
      * <p>
-     * To indicate that the user should be notified of changes, use
-     * {@link #ACCESSIBILITY_LIVE_REGION_POLITE}. Announcements from this region are queued and
-     * do not disrupt ongoing speech.
+     * Different priority levels are available:
+     * <ul>
+     *   <li>
+     *       {@link #ACCESSIBILITY_LIVE_REGION_POLITE}:
+     *       Indicates that updates to the region should be presented to the user. Suitable in most
+     *       cases for prominent updates within app content that don't require the user's immediate
+     *       attention.
+     *   </li>
+     *   <li>
+     *       {@link #ACCESSIBILITY_LIVE_REGION_ASSERTIVE}: Indicates that updates to the region have
+     *       the highest priority and should be presented to the user immediately. This may result
+     *       in disruptive notifications from an accessibility service, which may potentially
+     *       interrupt other feedback or user actions, so it should generally be used only for
+     *       critical, time-sensitive information.
+     *   </li>
+     *   <li>
+     *       {@link #ACCESSIBILITY_LIVE_REGION_NONE}: Disables change announcements (the default for
+     *       most views).
+     *   </li>
+     * </ul>
      * <p>
-     * For example, selecting an option in a dropdown menu may update a panel below with the updated
-     * content. This panel may be marked as a live region with
-     * {@link #ACCESSIBILITY_LIVE_REGION_POLITE} to notify users of the change.
+     * Examples:
+     * <ul>
+     *     <li>
+     *         Selecting an option in a dropdown menu updates a panel below with the updated
+     *         content. This panel may be marked as a live region with
+     *         {@link #ACCESSIBILITY_LIVE_REGION_POLITE} to notify users of the change. A screen
+     *         reader may queue changes as announcements that don't disrupt ongoing speech.
+     *      </li>
+     *      <li>
+     *          An emergency alert may be marked with {@link #ACCESSIBILITY_LIVE_REGION_ASSERTIVE}
+     *          to immediately inform users of the emergency.
+     *      </li>
+     * </ul>
      * <p>
-     * For notifying users about errors, such as in a login screen with text that displays an
-     * "incorrect password" notification, that view should send an AccessibilityEvent of type
+     * For error notifications, like an "incorrect password" warning in a login screen, views
+     * should send a {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED}
+     * {@code AccessibilityEvent} with a content change type
      * {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_ERROR} and set
-     * {@link AccessibilityNodeInfo#setError(CharSequence)} instead. Custom widgets should expose
-     * error-setting methods that support accessibility automatically. For example, instead of
-     * explicitly sending this event when using a TextView, use
-     * {@link android.widget.TextView#setError(CharSequence)}.
+     * {@link AccessibilityNodeInfo#setError(CharSequence)}. Custom widgets should provide
+     * error-setting methods that support accessibility. For example, use
+     * {@link android.widget.TextView#setError(CharSequence)} instead of explicitly sending events.
      * <p>
-     * To disable change notifications for this view, use
-     * {@link #ACCESSIBILITY_LIVE_REGION_NONE}. This is the default live region
-     * mode for most views.
+     * Don't use live regions for frequently-updating UI elements (e.g., progress bars), as this can
+     * overwhelm the user with feedback from accessibility services. If necessary, use
+     * {@link AccessibilityNodeInfo#setMinDurationBetweenContentChanges(Duration)} to throttle
+     * feedback and reduce disruptions.
      * <p>
-     * If the view's changes should interrupt ongoing speech and notify the user
-     * immediately, use {@link #ACCESSIBILITY_LIVE_REGION_ASSERTIVE}. This may result in disruptive
-     * announcements from an accessibility service, so it should generally be used only to convey
-     * information that is time-sensitive or critical for use of the application. Examples may
-     * include an incoming call or an emergency alert.
-     * <p>
-     * <b>Note:</b> Use {@link androidx.core.view.ViewCompat#setAccessibilityLiveRegion(View, int)}
+     * <aside><b>Note:</b> Use
+     * {@link androidx.core.view.ViewCompat#setAccessibilityLiveRegion(View, int)}
      * for backwards-compatibility. </aside>
      *
      * @param mode The live region mode for this view, one of:
@@ -16251,20 +16433,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED) {
             try {
-                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "View.onTouchListener#onTouch");
+                Trace.traceBegin(TRACE_TAG_VIEW, "View.onTouchListener#onTouch");
                 handled = li.mOnTouchListener.onTouch(this, event);
             } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                Trace.traceEnd(TRACE_TAG_VIEW);
             }
         }
         if (handled) {
             return true;
         }
         try {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "View#onTouchEvent");
+            Trace.traceBegin(TRACE_TAG_VIEW, "View#onTouchEvent");
             return onTouchEvent(event);
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            Trace.traceEnd(TRACE_TAG_VIEW);
         }
     }
 
@@ -16585,6 +16767,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             onFocusLost();
         } else if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
             notifyFocusChangeToImeFocusController(true /* hasFocus */);
+            ViewRootImpl viewRoot = getViewRootImpl();
+            if (viewRoot != null && initiationWithoutInputConnection() && onCheckIsTextEditor()) {
+                viewRoot.getHandwritingInitiator().onEditorFocused(this);
+            }
         }
 
         refreshDrawableState();
@@ -16939,10 +17125,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Handle a key event before it is processed by any input method
-     * associated with the view hierarchy.  This can be used to intercept
+     * associated with the view hierarchy. This can be used to intercept
      * key events in special situations before the IME consumes them; a
      * typical example would be handling the BACK key to update the application's
-     * UI instead of allowing the IME to see it and close itself.
+     * UI instead of allowing the IME to see it and close itself. Due to a bug,
+     * this function is not called for BACK key events on Android T and U, when
+     * the IME is shown.
      *
      * @param keyCode The value in event.getKeyCode().
      * @param event Description of the key event.
@@ -17878,6 +18066,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return false;
+    }
+
+    /**
+     * Called by {@link #measure(int, int)} to check if the current frame presentation got
+     * delayed by an expensive view mesures during the input event dispatching. (e.g. scrolling)
+     */
+    private boolean hasExpensiveMeasuresDuringInputEvent() {
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo == null || attachInfo.mRootView == null) {
+            return false;
+        }
+        if (!attachInfo.mHandlingPointerEvent) {
+            return false;
+        }
+        final ViewFrameInfo info = attachInfo.mViewRootImpl.mViewFrameInfo;
+        final long durationFromVsyncTimeMs = (System.nanoTime()
+                - Choreographer.getInstance().getLastFrameTimeNanos()) / TimeUtils.NANOS_PER_MS;
+        return durationFromVsyncTimeMs > 3L || info.getAndIncreaseViewMeasuredCount() > 10;
     }
 
     /**
@@ -19424,6 +19630,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setLeft(int left) {
         if (left != mLeft) {
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
@@ -19680,6 +19887,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @RemotableViewMethod
     public void setTranslationX(float translationX) {
         if (translationX != getTranslationX()) {
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             invalidateViewProperty(true, false);
             mRenderNode.setTranslationX(translationX);
             invalidateViewProperty(false, true);
@@ -19716,6 +19924,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @RemotableViewMethod
     public void setTranslationY(float translationY) {
         if (translationY != getTranslationY()) {
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             invalidateViewProperty(true, false);
             mRenderNode.setTranslationY(translationY);
             invalidateViewProperty(false, true);
@@ -20636,12 +20845,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
 
-        // For VRR to vote the preferred frame rate
-        if (sToolkitSetFrameRateReadOnlyFlagValue) {
-            updateInfrequentCount();
-            votePreferredFrameRate();
-        }
-
         // Reset content capture caches
         mPrivateFlags4 &= ~PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK;
         mContentCaptureSessionCached = false;
@@ -20735,6 +20938,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             damageInParent();
         }
+        mPrivateFlags4 |= PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION;
     }
 
     /**
@@ -20744,11 +20948,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected void damageInParent() {
         if (mParent != null && mAttachInfo != null) {
-            // For VRR to vote the preferred frame rate
-            if (sToolkitSetFrameRateReadOnlyFlagValue) {
-                updateInfrequentCount();
-                votePreferredFrameRate();
-            }
             mParent.onDescendantInvalidated(this, this);
         }
     }
@@ -22230,8 +22429,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * RTL not supported)
      */
     private boolean isRtlCompatibilityMode() {
-        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-        return targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR1 || !hasRtlSupport();
+        return !hasRtlSupport();
     }
 
     /**
@@ -23478,6 +23676,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
                     mPrivateFlags &= ~PFLAG_DIRTY_MASK;
 
+                    mPrivateFlags4 |= PFLAG4_HAS_DRAWN;
+
                     // Fast path for layouts with no backgrounds
                     if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
                         dispatchDraw(canvas);
@@ -23492,14 +23692,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         draw(canvas);
                     }
                 }
+
+                // For VRR to vote the preferred frame rate
+                if (sToolkitSetFrameRateReadOnlyFlagValue
+                        && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+                    votePreferredFrameRate();
+                }
             } finally {
                 renderNode.endRecording();
                 setDisplayListProperties(renderNode);
             }
         } else {
+            if ((mPrivateFlags4 & PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION)
+                    == PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION) {
+                // For VRR to vote the preferred frame rate
+                if (sToolkitSetFrameRateReadOnlyFlagValue
+                        && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+                    votePreferredFrameRate();
+                }
+                mPrivateFlags4 &= ~PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION;
+            }
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
         }
+        mPrivateFlags4 &= ~PFLAG4_HAS_MOVED;
+        mFrameContentVelocity = -1;
         return renderNode;
     }
 
@@ -23741,14 +23958,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void buildDrawingCache(boolean autoScale) {
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0 || (autoScale ?
                 mDrawingCache == null : mUnscaledDrawingCache == null)) {
-            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+            if (Trace.isTagEnabled(TRACE_TAG_VIEW)) {
+                Trace.traceBegin(TRACE_TAG_VIEW,
                         "buildDrawingCache/SW Layer for " + getClass().getSimpleName());
             }
             try {
                 buildDrawingCacheImpl(autoScale);
             } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                Trace.traceEnd(TRACE_TAG_VIEW);
             }
         }
     }
@@ -24597,7 +24814,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void draw(@NonNull Canvas canvas) {
         final int privateFlags = mPrivateFlags;
         mPrivateFlags = (privateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
-        mFrameContentVelocity = 0;
 
         /*
          * Draw traversal performs several drawing steps which must be executed
@@ -25346,6 +25562,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void sizeChange(int newWidth, int newHeight, int oldWidth, int oldHeight) {
+        if (mAttachInfo != null && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+            boolean isSmall;
+            if (sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue) {
+                int size = newWidth * newHeight;
+                float percent = size / mAttachInfo.mDisplayPixelCount;
+                isSmall = percent <= FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD;
+            } else {
+                float density = mAttachInfo.mDensity;
+                int narrowSize = (int) (density * FRAME_RATE_NARROW_SIZE_DP);
+                int smallSize = (int) (density * FRAME_RATE_SQUARE_SMALL_SIZE_DP);
+                isSmall = newWidth <= narrowSize || newHeight <= narrowSize
+                        || (newWidth <= smallSize && newHeight <= smallSize);
+            }
+            if (isSmall) {
+                int category = sToolkitFrameRateBySizeReadOnlyFlagValue
+                        ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
+                mSizeBasedFrameRateCategoryAndReason = category | FRAME_RATE_CATEGORY_REASON_SMALL;
+            } else {
+                int category = sToolkitFrameRateDefaultNormalReadOnlyFlagValue
+                        ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+                mSizeBasedFrameRateCategoryAndReason = category | FRAME_RATE_CATEGORY_REASON_LARGE;
+            }
+        }
+
         onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
         if (mOverlay != null) {
             mOverlay.getOverlayView().setRight(newWidth);
@@ -27857,9 +28097,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 cacheIndex = forceLayout ? -1 : mMeasureCache.indexOfKey(key);
             }
 
-            if (cacheIndex < 0 || sIgnoreMeasureCache) {
+            if (cacheIndex < 0) {
                 if (isTraversalTracingEnabled()) {
                     Trace.beginSection(mTracingStrings.onMeasure);
+                }
+                if (android.os.Flags.adpfMeasureDuringInputEventBoost()) {
+                    final boolean notifyRenderer = hasExpensiveMeasuresDuringInputEvent();
+                    if (notifyRenderer) {
+                        Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                                "CPU_LOAD_UP: " + "hasExpensiveMeasuresDuringInputEvent");
+                        getViewRootImpl().notifyRendererOfExpensiveFrame();
+                        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                    }
                 }
                 // measure ourselves, this should set the measured dimension flag back
                 onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -28872,6 +29121,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         surface.copyFrom(surfaceControl);
         IBinder token = null;
         try {
+            Trace.traceBegin(TRACE_TAG_VIEW, "startDragAndDrop#drawDragShadow");
             final Canvas canvas = isHardwareAccelerated()
                     ? surface.lockHardwareCanvas()
                     : surface.lockCanvas(null);
@@ -28880,33 +29130,40 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 shadowBuilder.onDrawShadow(canvas);
             } finally {
                 surface.unlockCanvasAndPost(canvas);
+                Trace.traceEnd(TRACE_TAG_VIEW);
             }
 
-            token = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, flags, surfaceControl,
-                    root.getLastTouchSource(), root.getLastTouchDeviceId(),
-                    root.getLastTouchPointerId(), lastTouchPoint.x, lastTouchPoint.y,
-                    shadowTouchPoint.x, shadowTouchPoint.y, data);
-            if (ViewDebug.DEBUG_DRAG) {
-                Log.d(VIEW_LOG_TAG, "performDrag returned " + token);
+            Trace.traceBegin(TRACE_TAG_VIEW, "startDragAndDrop#performDrag");
+            try {
+                token = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, flags, surfaceControl,
+                        root.getLastTouchSource(), root.getLastTouchDeviceId(),
+                        root.getLastTouchPointerId(), lastTouchPoint.x, lastTouchPoint.y,
+                        shadowTouchPoint.x, shadowTouchPoint.y, data);
+                if (ViewDebug.DEBUG_DRAG) {
+                    Log.d(VIEW_LOG_TAG, "performDrag returned " + token);
+                }
+                if (token != null) {
+                    if (mAttachInfo.mDragSurface != null) {
+                        mAttachInfo.mDragSurface.release();
+                    }
+                    if (mAttachInfo.mDragData != null) {
+                        // Clean up previous drag data intents
+                        View.cleanUpPendingIntents(mAttachInfo.mDragData);
+                    }
+                    mAttachInfo.mDragSurface = surface;
+                    mAttachInfo.mDragToken = token;
+                    mAttachInfo.mDragData = data;
+                    // Cache the local state object for delivery with DragEvents
+                    root.setLocalDragState(myLocalState);
+                    if (a11yEnabled) {
+                        // Set for AccessibilityEvents
+                        mAttachInfo.mViewRootImpl.setDragStartedViewForAccessibility(this);
+                    }
+                }
+                return token != null;
+            } finally {
+                Trace.traceEnd(TRACE_TAG_VIEW);
             }
-            if (token != null) {
-                if (mAttachInfo.mDragSurface != null) {
-                    mAttachInfo.mDragSurface.release();
-                }
-                if (mAttachInfo.mDragData != null) {
-                    View.cleanUpPendingIntents(mAttachInfo.mDragData);
-                }
-                mAttachInfo.mDragSurface = surface;
-                mAttachInfo.mDragToken = token;
-                mAttachInfo.mDragData = data;
-                // Cache the local state object for delivery with DragEvents
-                root.setLocalDragState(myLocalState);
-                if (a11yEnabled) {
-                    // Set for AccessibilityEvents
-                    mAttachInfo.mViewRootImpl.setDragStartedViewForAccessibility(this);
-                }
-            }
-            return token != null;
         } catch (Exception e) {
             Log.e(VIEW_LOG_TAG, "Unable to initiate drag", e);
             return false;
@@ -30409,21 +30666,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setPointerIcon(PointerIcon pointerIcon) {
         mMousePointerIcon = pointerIcon;
-        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
-            final ViewRootImpl viewRootImpl = getViewRootImpl();
-            if (viewRootImpl == null) {
-                return;
-            }
-            viewRootImpl.refreshPointerIcon();
-        } else {
-            if (mAttachInfo == null || mAttachInfo.mHandlingPointerEvent) {
-                return;
-            }
-            try {
-                mAttachInfo.mSession.updatePointerIcon(mAttachInfo.mWindow);
-            } catch (RemoteException e) {
-            }
+        final ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl == null) {
+            return;
         }
+        viewRootImpl.refreshPointerIcon();
     }
 
     /**
@@ -30836,11 +31083,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public static int makeMeasureSpec(@IntRange(from = 0, to = (1 << MeasureSpec.MODE_SHIFT) - 1) int size,
                                           @MeasureSpecMode int mode) {
-            if (sUseBrokenMakeMeasureSpec) {
-                return size + mode;
-            } else {
-                return (size & ~MODE_MASK) | (mode & MODE_MASK);
-            }
+            return (size & ~MODE_MASK) | (mode & MODE_MASK);
         }
 
         /**
@@ -30851,9 +31094,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         @UnsupportedAppUsage
         public static int makeSafeMeasureSpec(int size, int mode) {
-            if (sUseZeroUnspecifiedMeasureSpec && mode == UNSPECIFIED) {
-                return 0;
-            }
             return makeMeasureSpec(size, mode);
         }
 
@@ -31904,6 +32144,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int mSensitiveViewsCount;
 
         /**
+         * The value of viewVelocityApi(), read only once per ViewRootImpl
+         */
+        final boolean mViewVelocityApi = viewVelocityApi();
+
+        /**
+         * Density so that it doesn't need to be retrieved on every invalidation.
+         */
+        final float mDensity;
+
+        /**
+         * The number of pixels in the display (width * height).
+         */
+        final float mDisplayPixelCount;
+
+        /**
          * Creates a new set of attachment information with the specified
          * events handler and thread.
          *
@@ -31920,11 +32175,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mHandler = handler;
             mRootCallbacks = effectPlayer;
             mTreeObserver = new ViewTreeObserver(context);
+            DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+            mDensity = displayMetrics.density;
+            float pixelCount = (float) displayMetrics.widthPixels * displayMetrics.heightPixels;
+            mDisplayPixelCount = pixelCount == 0f ? Float.POSITIVE_INFINITY : pixelCount;
         }
 
         void increaseSensitiveViewsCount() {
             if (mSensitiveViewsCount == 0) {
-                mViewRootImpl.notifySensitiveContentAppProtection(true);
+                mViewRootImpl.addSensitiveContentAppProtection();
             }
             mSensitiveViewsCount++;
         }
@@ -31932,7 +32191,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         void decreaseSensitiveViewsCount() {
             mSensitiveViewsCount--;
             if (mSensitiveViewsCount == 0) {
-                mViewRootImpl.notifySensitiveContentAppProtection(false);
+                mViewRootImpl.removeSensitiveContentAppProtection();
             }
             if (mSensitiveViewsCount < 0) {
                 Log.wtf(VIEW_LOG_TAG, "mSensitiveViewsCount is negative" + mSensitiveViewsCount);
@@ -32562,6 +32821,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_USERNAME);
             SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_PASSWORD_AUTO);
             SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_PASSWORD);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_CREDENTIAL_MANAGER);
         }
 
         /**
@@ -33624,75 +33890,148 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return null;
     }
 
-    private float getSizePercentage() {
-        float alpha = mTransformationInfo != null ? mTransformationInfo.mAlpha : 1;
-        int visibility = mViewFlags & VISIBILITY_MASK;
-
-        if (mResources == null || alpha == 0 || visibility != VISIBLE) {
-            return 0;
-        }
-
-        DisplayMetrics displayMetrics = mResources.getDisplayMetrics();
-        int screenSize = displayMetrics.widthPixels
-                * displayMetrics.heightPixels;
-        int viewSize = getWidth() * getHeight();
-
-        if (screenSize == 0 || viewSize == 0) {
-            return 0f;
-        }
-        return (float) viewSize / screenSize;
-    }
-
     /**
      * Used to calculate the frame rate category of a View.
      *
      * @hide
      */
-    protected int calculateFrameRateCategory(float sizePercentage) {
-        if (mMinusTwoFrameIntervalMillis + mMinusOneFrameIntervalMillis
-                < INFREQUENT_UPDATE_INTERVAL_MILLIS) {
-            if (sizePercentage <= FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD) {
-                return FRAME_RATE_CATEGORY_NORMAL;
-            } else {
-                return FRAME_RATE_CATEGORY_HIGH;
-            }
+    protected int calculateFrameRateCategory() {
+        int category;
+        switch (getViewRootImpl().intermittentUpdateState()) {
+            case ViewRootImpl.INTERMITTENT_STATE_INTERMITTENT -> category =
+                    FRAME_RATE_CATEGORY_NORMAL | FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
+            case ViewRootImpl.INTERMITTENT_STATE_NOT_INTERMITTENT ->
+                    category = mSizeBasedFrameRateCategoryAndReason;
+            default -> category = mLastFrameRateCategory;
         }
-
-        if (mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS) {
-            return FRAME_RATE_CATEGORY_NORMAL;
-        }
-        return mLastFrameRateCategory;
+        return category;
     }
 
-    private void votePreferredFrameRate() {
+    /**
+     * Used to vote the preferred frame rate and frame rate category to ViewRootImpl
+     *
+     * @hide
+     */
+    protected void votePreferredFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
         ViewRootImpl viewRootImpl = getViewRootImpl();
-        float sizePercentage = getSizePercentage();
-        int frameRateCateogry = calculateFrameRateCategory(sizePercentage);
-        if (viewRootImpl != null && sizePercentage > 0) {
-            if (sToolkitMetricsForFrameRateDecisionFlagValue) {
-                viewRootImpl.recordViewPercentage(sizePercentage);
+        if (viewRootImpl == null) {
+            return; // can't vote if not connected
+        }
+        float velocity = mFrameContentVelocity;
+        final float frameRate = mPreferredFrameRate;
+        ViewParent parent = mParent;
+        if (velocity <= 0 && Float.isNaN(frameRate)) {
+            // The most common case is when nothing is set, so this special case is called
+            // often.
+            if (mAttachInfo.mViewVelocityApi
+                    && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                    PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
+                    || mLastFrameTop != mTop)
+                    && viewRootImpl.shouldCheckFrameRate(false)
+                    && parent instanceof View
+                    && ((View) parent).mFrameContentVelocity <= 0) {
+                viewRootImpl.votePreferredFrameRate(MAX_FRAME_RATE, FRAME_RATE_COMPATIBILITY_GTE);
             }
-            if (!Float.isNaN(mPreferredFrameRate)) {
-                if (mPreferredFrameRate < 0) {
-                    if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
-                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
-                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
-                    }
-                } else {
-                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate,
-                            mFrameRateCompatibility);
-                    return;
+            if (viewRootImpl.shouldCheckFrameRateCategory()) {
+                int frameRateCategory = calculateFrameRateCategory();
+                int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
+                int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
+                viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
+                mLastFrameRateCategory = frameRateCategory;
+            }
+            mLastFrameLeft = mLeft;
+            mLastFrameTop = mTop;
+            return;
+        }
+        if (viewRootImpl.shouldCheckFrameRate(frameRate > 0f)) {
+            float velocityFrameRate = 0f;
+            if (mAttachInfo.mViewVelocityApi) {
+                if (velocity < 0f
+                        && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                        PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
+                        || mLastFrameTop != mTop)
+                        && mParent instanceof View
+                        && ((View) mParent).mFrameContentVelocity <= 0
+                ) {
+                    // This current calculation is very simple. If something on the screen
+                    // moved, then it votes for the highest velocity.
+                    velocityFrameRate = MAX_FRAME_RATE;
+                } else if (velocity > 0f) {
+                    velocityFrameRate = convertVelocityToFrameRate(velocity);
                 }
             }
-            viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
-            mLastFrameRateCategory = frameRateCateogry;
+            if (velocityFrameRate > 0f || frameRate > 0f) {
+                int compatibility;
+                float frameRateToSet;
+                if (frameRate >= velocityFrameRate) {
+                    compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+                    frameRateToSet = frameRate;
+                } else {
+                    compatibility = FRAME_RATE_COMPATIBILITY_GTE;
+                    frameRateToSet = velocityFrameRate;
+                }
+                viewRootImpl.votePreferredFrameRate(frameRateToSet, compatibility);
+            }
         }
+
+        if (viewRootImpl.shouldCheckFrameRateCategory()) {
+            if (sToolkitMetricsForFrameRateDecisionFlagValue) {
+                int width = mRight - mLeft;
+                int height = mBottom - mTop;
+                float sizePercentage = width * height / mAttachInfo.mDisplayPixelCount;
+                viewRootImpl.recordViewPercentage(sizePercentage);
+            }
+
+            int frameRateCategory;
+            if (Float.isNaN(frameRate)) {
+                frameRateCategory = calculateFrameRateCategory();
+            } else if (frameRate < 0) {
+                switch ((int) frameRate) {
+                    case (int) REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE ->
+                            frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE
+                                    | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                    case (int) REQUESTED_FRAME_RATE_CATEGORY_LOW ->
+                            frameRateCategory = FRAME_RATE_CATEGORY_LOW
+                                    | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                    case (int) REQUESTED_FRAME_RATE_CATEGORY_NORMAL ->
+                            frameRateCategory = FRAME_RATE_CATEGORY_NORMAL
+                                    | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                    case (int) REQUESTED_FRAME_RATE_CATEGORY_HIGH ->
+                            frameRateCategory = FRAME_RATE_CATEGORY_HIGH
+                                    | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                    default -> {
+                        // invalid frame rate, use default
+                        int category = sToolkitFrameRateDefaultNormalReadOnlyFlagValue
+                                ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+                        frameRateCategory = category
+                                | FRAME_RATE_CATEGORY_REASON_INVALID;
+                    }
+                }
+            } else {
+                // Category doesn't control it. It is directly controlled by frame rate
+                frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE
+                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+            }
+
+            int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
+            int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
+            viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
+            mLastFrameRateCategory = frameRateCategory;
+        }
+        mLastFrameLeft = mLeft;
+        mLastFrameTop = mTop;
+    }
+
+    private float convertVelocityToFrameRate(float velocityPps) {
+        // From UXR study, premium experience is:
+        // 1500+    dp/s: 120fps
+        // 0 - 1500 dp/s:  80fps
+        // OEMs are likely to modify this to balance battery and user experience for their
+        // specific device.
+        float density = mAttachInfo.mDensity;
+        float velocityDps = velocityPps / density;
+        return (velocityDps >= 1500f) ? MAX_FRAME_RATE : 80f;
     }
 
     /**
@@ -33706,7 +34045,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @FlaggedApi(FLAG_VIEW_VELOCITY_API)
     public void setFrameContentVelocity(float pixelsPerSecond) {
-        if (viewVelocityApi()) {
+        if (mAttachInfo != null && mAttachInfo.mViewVelocityApi) {
             mFrameContentVelocity = Math.abs(pixelsPerSecond);
 
             if (sToolkitMetricsForFrameRateDecisionFlagValue) {
@@ -33724,8 +34063,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @FlaggedApi(FLAG_VIEW_VELOCITY_API)
     public float getFrameContentVelocity() {
-        if (viewVelocityApi()) {
-            return mFrameContentVelocity;
+        if (mAttachInfo != null && mAttachInfo.mViewVelocityApi) {
+            return Math.max(mFrameContentVelocity, 0f);
         }
         return 0;
     }
@@ -33766,31 +34105,5 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return mPreferredFrameRate;
         }
         return 0;
-    }
-
-    /**
-     * This function is mainly used for migrating infrequent layer lagic
-     * from SurfaceFlinger to Toolkit.
-     * The infrequent layter logic includes:
-     * - NORMAL for infrequent update: FT2-FT1 > 100 && FT3-FT2 > 100.
-     * - HIGH/NORMAL based on size for frequent update: (FT3-FT2) + (FT2 - FT1) < 100.
-     * - otherwise, use the previous category value.
-     */
-    private void updateInfrequentCount() {
-        long currentTimeMillis = AnimationUtils.currentAnimationTimeMillis();
-        long timeIntervalMillis = currentTimeMillis - mLastUpdateTimeMillis;
-        mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
-        mMinusOneFrameIntervalMillis = timeIntervalMillis;
-
-        mLastUpdateTimeMillis = currentTimeMillis;
-        if (mMinusTwoFrameIntervalMillis >= 30 && timeIntervalMillis < 2) {
-            return;
-        }
-        if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
-            mInfrequentUpdateCount = mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS
-                        ? mInfrequentUpdateCount : mInfrequentUpdateCount + 1;
-        } else {
-            mInfrequentUpdateCount = 0;
-        }
     }
 }

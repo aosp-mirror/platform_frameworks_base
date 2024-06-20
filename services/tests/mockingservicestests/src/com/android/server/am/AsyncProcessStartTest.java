@@ -197,7 +197,7 @@ public class AsyncProcessStartTest {
                     + Arrays.toString(invocation.getArguments()));
             if (!wedge) {
                 if (mRealAms.mConstants.mEnableWaitForFinishAttachApplication) {
-                    mRealAms.finishAttachApplication(0);
+                    mRealAms.finishAttachApplication(0, 0);
                 }
             }
             return null;
@@ -213,7 +213,7 @@ public class AsyncProcessStartTest {
                 any(), any(), any(),
                 any(), any(),
                 any(), any(),
-                any(),
+                any(), any(),
                 anyLong(), anyLong());
 
         final ProcessRecord r = spy(new ProcessRecord(mAms, ai, ai.processName, ai.uid));
@@ -277,7 +277,7 @@ public class AsyncProcessStartTest {
                 null, null,
                 null,
                 null, null, null,
-                null, null,
+                null, null, null,
                 0, 0);
 
         // Sleep until timeout should have triggered

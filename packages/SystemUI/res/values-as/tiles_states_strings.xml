@@ -186,4 +186,9 @@
     <item msgid="2478289035899842865">"অফ আছে"</item>
     <item msgid="5137565285664080143">"অন আছে"</item>
   </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"উপলব্ধ নহয়"</item>
+    <item msgid="3079622119444911877">"অফ আছে"</item>
+    <item msgid="3028994095749238254">"অন আছে"</item>
+  </string-array>
 </resources>

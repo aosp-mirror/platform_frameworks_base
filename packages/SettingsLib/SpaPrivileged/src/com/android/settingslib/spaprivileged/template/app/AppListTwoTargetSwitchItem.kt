@@ -33,11 +33,13 @@ fun <T : AppRecord> AppListItemModel<T>.AppListTwoTargetSwitchItem(
         model = object : SwitchPreferenceModel {
             override val title = label
             override val summary = this@AppListTwoTargetSwitchItem.summary
+            override val icon = @Composable {
+                AppIcon(record.app, SettingsDimension.appIconItemSize)
+            }
             override val checked = checked
             override val changeable = changeable
             override val onCheckedChange = onCheckedChange
         },
-        icon = { AppIcon(record.app, SettingsDimension.appIconItemSize) },
-        onClick = onClick,
+        primaryOnClick = onClick,
     )
 }

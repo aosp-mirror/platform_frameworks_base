@@ -18,7 +18,9 @@ package com.android.server.display.brightness;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.PowerManager;
 import android.util.IndentingPrintWriter;
@@ -26,11 +28,14 @@ import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.AutomaticBrightnessController;
 import com.android.server.display.BrightnessMappingStrategy;
 import com.android.server.display.BrightnessSetting;
 import com.android.server.display.DisplayBrightnessState;
-import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
+import com.android.server.display.DisplayDeviceConfig;
+import com.android.server.display.brightness.strategy.AutoBrightnessFallbackStrategy;
+import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy2;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.feature.DisplayManagerFlags;
 
@@ -75,6 +80,10 @@ public final class DisplayBrightnessController {
     @GuardedBy("mLock")
     private float mLastUserSetScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
+    // Represents if the system has adjusted the brightness based on the user suggested value. Will
+    // be false if the brightness change is coming from a non-user source
+    private boolean mUserSetScreenBrightnessUpdated;
+
     // The listener which is to be notified everytime there is a change in the brightness in the
     // BrightnessSetting.
     private BrightnessSetting.BrightnessSettingListener mBrightnessSettingListener;
@@ -98,7 +107,8 @@ public final class DisplayBrightnessController {
     // The controller for the automatic brightness level.
     // TODO(b/265415257): Move to the automatic brightness strategy
     @Nullable
-    private AutomaticBrightnessController mAutomaticBrightnessController;
+    @VisibleForTesting
+    AutomaticBrightnessController mAutomaticBrightnessController;
 
     /**
      * The constructor of DisplayBrightnessController.
@@ -136,13 +146,15 @@ public final class DisplayBrightnessController {
      */
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
-            int targetDisplayState) {
-
+            int targetDisplayState,
+            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
         DisplayBrightnessState state;
         synchronized (mLock) {
             mDisplayBrightnessStrategy = mDisplayBrightnessStrategySelector.selectStrategy(
-                    displayPowerRequest, targetDisplayState);
-            state = mDisplayBrightnessStrategy.updateBrightness(displayPowerRequest);
+                    constructStrategySelectionRequest(displayPowerRequest, targetDisplayState,
+                            displayOffloadSession));
+            state = mDisplayBrightnessStrategy
+                        .updateBrightness(constructStrategyExecutionRequest(displayPowerRequest));
         }
 
         // This is a temporary measure until AutomaticBrightnessStrategy works as a traditional
@@ -175,19 +187,34 @@ public final class DisplayBrightnessController {
 
     /**
      * Sets the brightness from the offload session.
+     * @return Whether the offload brightness has changed
      */
-    public void setBrightnessFromOffload(float brightness) {
+    public boolean setBrightnessFromOffload(float brightness) {
         synchronized (mLock) {
-            if (mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy() != null) {
+            if (mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy() != null
+                    && !BrightnessSynchronizer.floatEquals(mDisplayBrightnessStrategySelector
+                    .getOffloadBrightnessStrategy().getOffloadScreenBrightness(), brightness)) {
                 mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy()
                         .setOffloadScreenBrightness(brightness);
+                return true;
             }
         }
+        return false;
     }
 
     /**
      * Returns a boolean flag indicating if the light sensor is to be used to decide the screen
      * brightness when dozing
+     */
+    public boolean isAllowAutoBrightnessWhileDozing() {
+        synchronized (mLock) {
+            return mDisplayBrightnessStrategySelector.isAllowAutoBrightnessWhileDozing();
+        }
+    }
+
+    /**
+     * Returns the config value indicating the auto brightness while dozing is to be
+     * allowed ot not. Note that this is a config value, but the actual status can differ from this.
      */
     public boolean isAllowAutoBrightnessWhileDozingConfig() {
         synchronized (mLock) {
@@ -240,28 +267,14 @@ public final class DisplayBrightnessController {
     }
 
     /**
-     * We want to return true if the user has set the screen brightness.
-     * RBC on, off, and intensity changes will return false.
-     * Slider interactions whilst in RBC will return true, just as when in non-rbc.
+     * Returns if the system has adjusted the brightness based on the user suggested value. Will
+     * be false if the brightness change is coming from a non-user source.
+     *
+     * Todo: 294444204 This is a temporary workaround, and should be moved to the manual brightness
+     * strategy once that is introduced
      */
-    public boolean updateUserSetScreenBrightness() {
-        synchronized (mLock) {
-            if (!BrightnessUtils.isValidBrightnessValue(mPendingScreenBrightness)) {
-                return false;
-            }
-            if (mCurrentScreenBrightness == mPendingScreenBrightness) {
-                mPendingScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-                setTemporaryBrightnessLocked(PowerManager.BRIGHTNESS_INVALID_FLOAT);
-                return false;
-            }
-            setCurrentScreenBrightnessLocked(mPendingScreenBrightness);
-            mLastUserSetScreenBrightness = mPendingScreenBrightness;
-            mPendingScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            setTemporaryBrightnessLocked(PowerManager.BRIGHTNESS_INVALID_FLOAT);
-        }
-        notifyCurrentScreenBrightness();
-        return true;
-
+    public boolean getIsUserSetScreenBrightnessUpdated() {
+        return mUserSetScreenBrightnessUpdated;
     }
 
     /**
@@ -336,20 +349,22 @@ public final class DisplayBrightnessController {
     }
 
     /**
-     * Set the {@link AutomaticBrightnessController} which is needed to perform nit-to-float-scale
-     * conversion.
-     * @param automaticBrightnessController The ABC
+     * Sets up the auto brightness and the relevant state for the associated display
      */
-    public void setAutomaticBrightnessController(
-            AutomaticBrightnessController automaticBrightnessController) {
-        mAutomaticBrightnessController = automaticBrightnessController;
-        loadNitBasedBrightnessSetting();
+    public void setUpAutoBrightness(AutomaticBrightnessController automaticBrightnessController,
+            SensorManager sensorManager,
+            DisplayDeviceConfig displayDeviceConfig, Handler handler,
+            BrightnessMappingStrategy brightnessMappingStrategy, boolean isEnabled,
+            int leadDisplayId) {
+        setAutomaticBrightnessController(automaticBrightnessController);
+        setUpAutoBrightnessFallbackStrategy(sensorManager, displayDeviceConfig, handler,
+                brightnessMappingStrategy, isEnabled, leadDisplayId);
     }
 
     /**
      * TODO(b/253226419): Remove once auto-brightness is a fully-functioning strategy.
      */
-    public AutomaticBrightnessStrategy getAutomaticBrightnessStrategy() {
+    public AutomaticBrightnessStrategy2 getAutomaticBrightnessStrategy() {
         return mDisplayBrightnessStrategySelector.getAutomaticBrightnessStrategy();
     }
 
@@ -408,6 +423,17 @@ public final class DisplayBrightnessController {
         if (mBrightnessSetting != null) {
             mBrightnessSetting.unregisterListener(mBrightnessSettingListener);
         }
+        AutoBrightnessFallbackStrategy autoBrightnessFallbackStrategy =
+                getAutoBrightnessFallbackStrategy();
+        if (autoBrightnessFallbackStrategy != null) {
+            autoBrightnessFallbackStrategy.stop();
+        }
+    }
+
+    private AutoBrightnessFallbackStrategy getAutoBrightnessFallbackStrategy() {
+        synchronized (mLock) {
+            return mDisplayBrightnessStrategySelector.getAutoBrightnessFallbackStrategy();
+        }
     }
 
     /**
@@ -436,6 +462,33 @@ public final class DisplayBrightnessController {
         }
     }
 
+    /**
+     * We want to return true if the user has set the screen brightness.
+     * RBC on, off, and intensity changes will return false.
+     * Slider interactions whilst in RBC will return true, just as when in non-rbc.
+     */
+    @VisibleForTesting
+    boolean updateUserSetScreenBrightness() {
+        mUserSetScreenBrightnessUpdated = false;
+        synchronized (mLock) {
+            if (!BrightnessUtils.isValidBrightnessValue(mPendingScreenBrightness)) {
+                return false;
+            }
+            if (mCurrentScreenBrightness == mPendingScreenBrightness) {
+                mPendingScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+                setTemporaryBrightnessLocked(PowerManager.BRIGHTNESS_INVALID_FLOAT);
+                return false;
+            }
+            setCurrentScreenBrightnessLocked(mPendingScreenBrightness);
+            mLastUserSetScreenBrightness = mPendingScreenBrightness;
+            mPendingScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            setTemporaryBrightnessLocked(PowerManager.BRIGHTNESS_INVALID_FLOAT);
+        }
+        notifyCurrentScreenBrightness();
+        mUserSetScreenBrightnessUpdated = true;
+        return true;
+    }
+
     @VisibleForTesting
     static class Injector {
         DisplayBrightnessStrategySelector getDisplayBrightnessStrategySelector(Context context,
@@ -461,10 +514,37 @@ public final class DisplayBrightnessController {
     }
 
     /**
+     * Set the {@link AutomaticBrightnessController} which is needed to perform nit-to-float-scale
+     * conversion.
+     * @param automaticBrightnessController The ABC
+     */
+    @VisibleForTesting
+    void setAutomaticBrightnessController(
+            AutomaticBrightnessController automaticBrightnessController) {
+        mAutomaticBrightnessController = automaticBrightnessController;
+        getAutomaticBrightnessStrategy()
+                .setAutomaticBrightnessController(automaticBrightnessController);
+        loadNitBasedBrightnessSetting();
+    }
+
+    private void setUpAutoBrightnessFallbackStrategy(SensorManager sensorManager,
+            DisplayDeviceConfig displayDeviceConfig, Handler handler,
+            BrightnessMappingStrategy brightnessMappingStrategy, boolean isEnabled,
+            int leadDisplayId) {
+        AutoBrightnessFallbackStrategy autoBrightnessFallbackStrategy =
+                getAutoBrightnessFallbackStrategy();
+        if (autoBrightnessFallbackStrategy != null) {
+            autoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(
+                    sensorManager, displayDeviceConfig, handler, brightnessMappingStrategy,
+                    isEnabled, leadDisplayId);
+        }
+    }
+
+    /**
      * TODO(b/253226419): Remove once auto-brightness is a fully-functioning strategy.
      */
     private DisplayBrightnessState addAutomaticBrightnessState(DisplayBrightnessState state) {
-        AutomaticBrightnessStrategy autoStrat = getAutomaticBrightnessStrategy();
+        AutomaticBrightnessStrategy2 autoStrat = getAutomaticBrightnessStrategy();
 
         DisplayBrightnessState.Builder builder = DisplayBrightnessState.Builder.from(state);
         builder.setShouldUseAutoBrightness(
@@ -515,5 +595,25 @@ public final class DisplayBrightnessController {
         synchronized (mLock) {
             mCurrentScreenBrightness = currentBrightnessSetting;
         }
+    }
+
+    private StrategySelectionRequest constructStrategySelectionRequest(
+            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
+            int targetDisplayState,
+            DisplayManagerInternal.DisplayOffloadSession displayOffloadSession) {
+        boolean userSetBrightnessChanged = updateUserSetScreenBrightness();
+        float lastUserSetScreenBrightness;
+        synchronized (mLock) {
+            lastUserSetScreenBrightness = mLastUserSetScreenBrightness;
+        }
+        return new StrategySelectionRequest(displayPowerRequest, targetDisplayState,
+                lastUserSetScreenBrightness, userSetBrightnessChanged, displayOffloadSession);
+    }
+
+    private StrategyExecutionRequest constructStrategyExecutionRequest(
+            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
+        float currentScreenBrightness = getCurrentBrightness();
+        return new StrategyExecutionRequest(displayPowerRequest, currentScreenBrightness,
+                mUserSetScreenBrightnessUpdated);
     }
 }

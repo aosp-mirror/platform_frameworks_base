@@ -15,7 +15,8 @@
  */
 package com.android.hoststubgen
 
-import com.android.hoststubgen.asm.toHumanReadableClassName
+import com.android.hoststubgen.asm.getOuterClassNameFromFullClassName
+import com.android.hoststubgen.asm.getPackageNameFromFullClassName
 import com.android.hoststubgen.filters.FilterPolicyWithReason
 import org.objectweb.asm.Opcodes
 import java.io.PrintWriter
@@ -29,8 +30,25 @@ open class HostStubGenStats {
 
     private val stats = mutableMapOf<String, Stats>()
 
-    fun onVisitPolicyForMethod(fullClassName: String, methodName: String, descriptor: String,
-                               policy: FilterPolicyWithReason, access: Int) {
+    data class Api(
+        val fullClassName: String,
+        val methodName: String,
+        val methodDesc: String,
+    )
+
+    private val apis = mutableListOf<Api>()
+
+    fun onVisitPolicyForMethod(
+        fullClassName: String,
+        methodName: String,
+        descriptor: String,
+        policy: FilterPolicyWithReason,
+        access: Int
+    ) {
+        if (policy.policy.isSupported) {
+            apis.add(Api(fullClassName, methodName, descriptor))
+        }
+
         // Ignore methods that aren't public
         if ((access and Opcodes.ACC_PUBLIC) == 0) return
         // Ignore methods that are abstract
@@ -38,8 +56,8 @@ open class HostStubGenStats {
         // Ignore methods where policy isn't relevant
         if (policy.isIgnoredForStats) return
 
-        val packageName = resolvePackageName(fullClassName)
-        val className = resolveClassName(fullClassName)
+        val packageName = getPackageNameFromFullClassName(fullClassName)
+        val className = getOuterClassNameFromFullClassName(fullClassName)
 
         // Ignore methods for certain generated code
         if (className.endsWith("Proto")
@@ -60,30 +78,15 @@ open class HostStubGenStats {
         classStats.total += 1
     }
 
-    fun dump(pw: PrintWriter) {
+    fun dumpOverview(pw: PrintWriter) {
         pw.printf("PackageName,ClassName,SupportedMethods,TotalMethods\n")
-        stats.forEach { (packageName, packageStats) ->
+        stats.toSortedMap().forEach { (packageName, packageStats) ->
             if (packageStats.supported > 0) {
-                packageStats.children.forEach { (className, classStats) ->
+                packageStats.children.toSortedMap().forEach { (className, classStats) ->
                     pw.printf("%s,%s,%d,%d\n", packageName, className,
                             classStats.supported, classStats.total)
                 }
             }
-        }
-    }
-
-    private fun resolvePackageName(fullClassName: String): String {
-        val start = fullClassName.lastIndexOf('/')
-        return fullClassName.substring(0, start).toHumanReadableClassName()
-    }
-
-    private fun resolveClassName(fullClassName: String): String {
-        val start = fullClassName.lastIndexOf('/')
-        val end = fullClassName.indexOf('$')
-        if (end == -1) {
-            return fullClassName.substring(start + 1)
-        } else {
-            return fullClassName.substring(start + 1, end)
         }
     }
 }

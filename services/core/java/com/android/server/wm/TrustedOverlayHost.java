@@ -54,6 +54,7 @@ class TrustedOverlayHost {
             final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(null)
                 .setContainerLayer()
                 .setHidden(true)
+                .setCallsite("TrustedOverlayHost.requireOverlaySurfaceControl")
                 .setName("Overlay Host Leash");
 
             mSurfaceControl = b.build();

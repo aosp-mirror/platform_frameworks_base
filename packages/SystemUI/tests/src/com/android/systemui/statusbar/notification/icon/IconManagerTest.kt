@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.statusbar.notification.icon
 
 import android.app.ActivityManager
@@ -28,8 +30,8 @@ import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.SystemClock
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
 import androidx.test.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapperTest.Companion.any
@@ -38,6 +40,10 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +53,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class IconManagerTest : SysuiTestCase() {
     companion object {
         private const val TEST_PACKAGE_NAME = "test"
@@ -69,6 +75,11 @@ class IconManagerTest : SysuiTestCase() {
     @Mock private lateinit var notifCollection: CommonNotifCollection
     @Mock private lateinit var launcherApps: LauncherApps
 
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
+    private val mainContext = testScope.coroutineContext
+    private val bgContext = testScope.backgroundScope.coroutineContext
+
     private val iconBuilder = IconBuilder(context)
 
     private lateinit var iconManager: IconManager
@@ -85,7 +96,15 @@ class IconManagerTest : SysuiTestCase() {
         `when`(shortcut.icon).thenReturn(shortcutIc)
         `when`(launcherApps.getShortcutIcon(shortcut)).thenReturn(shortcutIc)
 
-        iconManager = IconManager(notifCollection, launcherApps, iconBuilder)
+        iconManager =
+            IconManager(
+                notifCollection,
+                launcherApps,
+                iconBuilder,
+                testScope,
+                bgContext,
+                mainContext,
+            )
     }
 
     @Test
@@ -94,6 +113,7 @@ class IconManagerTest : SysuiTestCase() {
             notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = true)
         entry?.channel?.isImportantConversation = true
         entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
         assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(shortcutIc)
     }
 
@@ -103,6 +123,7 @@ class IconManagerTest : SysuiTestCase() {
             notificationEntry(hasShortcut = false, hasMessageSenderIcon = true, hasLargeIcon = true)
         entry?.channel?.isImportantConversation = true
         entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
         assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(messageIc)
     }
 
@@ -116,6 +137,7 @@ class IconManagerTest : SysuiTestCase() {
             )
         entry?.channel?.isImportantConversation = true
         entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
         assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(largeIc)
     }
 
@@ -129,6 +151,7 @@ class IconManagerTest : SysuiTestCase() {
             )
         entry?.channel?.isImportantConversation = true
         entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
         assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(smallIc)
     }
 
@@ -143,6 +166,7 @@ class IconManagerTest : SysuiTestCase() {
             )
         entry?.channel?.isImportantConversation = true
         entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
         assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(smallIc)
     }
 
@@ -161,6 +185,7 @@ class IconManagerTest : SysuiTestCase() {
         entry?.setSensitive(true, true)
         entry?.channel?.isImportantConversation = true
         entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
         assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(shortcutIc)
         assertThat(entry?.icons?.shelfIcon?.sourceIcon).isEqualTo(smallIc)
         assertThat(entry?.icons?.aodIcon?.sourceIcon).isEqualTo(smallIc)
@@ -175,6 +200,7 @@ class IconManagerTest : SysuiTestCase() {
         entry?.let { iconManager.createIcons(it) }
         // Updating the icons after creation shouldn't break anything
         entry?.let { iconManager.updateIcons(it) }
+        testScope.runCurrent()
         assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(shortcutIc)
         assertThat(entry?.icons?.shelfIcon?.sourceIcon).isEqualTo(smallIc)
         assertThat(entry?.icons?.aodIcon?.sourceIcon).isEqualTo(smallIc)
@@ -187,9 +213,11 @@ class IconManagerTest : SysuiTestCase() {
         entry?.channel?.isImportantConversation = true
         entry?.setSensitive(true, true)
         entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
         assertThat(entry?.icons?.aodIcon?.sourceIcon).isEqualTo(smallIc)
         entry?.setSensitive(false, false)
         entry?.let { iconManager.updateIcons(it) }
+        testScope.runCurrent()
         assertThat(entry?.icons?.shelfIcon?.sourceIcon).isEqualTo(shortcutIc)
     }
 

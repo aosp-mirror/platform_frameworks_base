@@ -200,7 +200,7 @@ public class BugreportReceiverTest {
             mBugreportFd = ParcelFileDescriptor.dup(invocation.getArgument(2));
             return null;
         }).when(mMockIDumpstate).startBugreport(anyInt(), any(), any(), any(), anyInt(), anyInt(),
-                any(), anyBoolean());
+                any(), anyBoolean(), anyBoolean());
 
         setWarningState(mContext, STATE_HIDE);
 
@@ -543,7 +543,7 @@ public class BugreportReceiverTest {
         getInstrumentation().waitForIdleSync();
 
         verify(mMockIDumpstate, times(1)).startBugreport(anyInt(), any(), any(), any(),
-                anyInt(), anyInt(), any(), anyBoolean());
+                anyInt(), anyInt(), any(), anyBoolean(), anyBoolean());
         sendBugreportFinished();
     }
 
@@ -608,7 +608,7 @@ public class BugreportReceiverTest {
         ArgumentCaptor<IDumpstateListener> listenerCap = ArgumentCaptor.forClass(
                 IDumpstateListener.class);
         verify(mMockIDumpstate, timeout(TIMEOUT)).startBugreport(anyInt(), any(), any(), any(),
-                anyInt(), anyInt(), listenerCap.capture(), anyBoolean());
+                anyInt(), anyInt(), listenerCap.capture(), anyBoolean(), anyBoolean());
         mIDumpstateListener = listenerCap.getValue();
         assertNotNull("Dumpstate listener should not be null", mIDumpstateListener);
         mIDumpstateListener.onProgress(0);

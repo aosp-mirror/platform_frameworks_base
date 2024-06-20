@@ -38,7 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -57,7 +57,6 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.telecom.TelecomManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
@@ -73,6 +72,7 @@ import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -99,6 +99,7 @@ import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
@@ -110,6 +111,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.DeviceConfigProxyFake;
@@ -130,7 +132,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class NavigationBarTest extends SysuiTestCase {
@@ -274,8 +276,8 @@ public class NavigationBarTest extends SysuiTestCase {
                     mKeyguardStateController, mock(NavigationModeController.class),
                     mEdgeBackGestureHandlerFactory, mock(IWindowManager.class),
                     mock(UserTracker.class), mock(DisplayTracker.class),
-                    mNotificationShadeWindowController, mock(DumpManager.class),
-                    mock(CommandQueue.class), mSynchronousExecutor));
+                    mNotificationShadeWindowController, mock(ConfigurationController.class),
+                    mock(DumpManager.class), mock(CommandQueue.class), mSynchronousExecutor));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
         });
@@ -298,7 +300,7 @@ public class NavigationBarTest extends SysuiTestCase {
         doNothing().when(mWindowManager).addView(any(), any());
         doNothing().when(mWindowManager).removeViewImmediate(any());
         mMockSysUiState = mock(SysUiState.class);
-        when(mMockSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mMockSysUiState);
+        when(mMockSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mMockSysUiState);
 
         mContext.addMockSystemService(WindowManager.class, mWindowManager);
         mSysuiTestableContextExternal.addMockSystemService(WindowManager.class, mWindowManager);
@@ -580,6 +582,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 () -> Optional.of(mCentralSurfaces),
                 mKeyguardStateController,
                 mock(ShadeViewController.class),
+                mock(PanelExpansionInteractor.class),
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationShadeDepthController.class),
                 mHandler,

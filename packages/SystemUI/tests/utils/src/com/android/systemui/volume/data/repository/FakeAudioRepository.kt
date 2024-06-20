@@ -17,6 +17,7 @@
 package com.android.systemui.volume.data.repository
 
 import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
@@ -29,17 +30,15 @@ import kotlinx.coroutines.flow.update
 
 class FakeAudioRepository : AudioRepository {
 
-    private val mutableMode = MutableStateFlow(0)
-    override val mode: StateFlow<Int>
-        get() = mutableMode.asStateFlow()
+    private val mutableMode = MutableStateFlow(AudioManager.MODE_NORMAL)
+    override val mode: StateFlow<Int> = mutableMode.asStateFlow()
 
-    private val mutableRingerMode = MutableStateFlow(RingerMode(0))
-    override val ringerMode: StateFlow<RingerMode>
-        get() = mutableRingerMode.asStateFlow()
+    private val mutableRingerMode = MutableStateFlow(RingerMode(AudioManager.RINGER_MODE_NORMAL))
+    override val ringerMode: StateFlow<RingerMode> = mutableRingerMode.asStateFlow()
 
     private val mutableCommunicationDevice = MutableStateFlow<AudioDeviceInfo?>(null)
-    override val communicationDevice: StateFlow<AudioDeviceInfo?>
-        get() = mutableCommunicationDevice.asStateFlow()
+    override val communicationDevice: StateFlow<AudioDeviceInfo?> =
+        mutableCommunicationDevice.asStateFlow()
 
     private val models: MutableMap<AudioStream, MutableStateFlow<AudioStreamModel>> = mutableMapOf()
     private val lastAudibleVolumes: MutableMap<AudioStream, Int> = mutableMapOf()
@@ -53,7 +52,8 @@ class FakeAudioRepository : AudioRepository {
                     audioStream = audioStream,
                     volume = 0,
                     minVolume = 0,
-                    maxVolume = 0,
+                    maxVolume = 10,
+                    isAffectedByMute = false,
                     isAffectedByRingerMode = false,
                     isMuted = false,
                 )
@@ -67,8 +67,14 @@ class FakeAudioRepository : AudioRepository {
         getAudioStreamModelState(audioStream).update { it.copy(volume = volume) }
     }
 
-    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) {
-        getAudioStreamModelState(audioStream).update { it.copy(isMuted = isMuted) }
+    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean {
+        val modelState = getAudioStreamModelState(audioStream)
+        return if (modelState.value.isMuted == isMuted) {
+            false
+        } else {
+            modelState.update { it.copy(isMuted = isMuted) }
+            true
+        }
     }
 
     override suspend fun getLastAudibleVolume(audioStream: AudioStream): Int =
@@ -92,5 +98,9 @@ class FakeAudioRepository : AudioRepository {
 
     fun setLastAudibleVolume(audioStream: AudioStream, volume: Int) {
         lastAudibleVolumes[audioStream] = volume
+    }
+
+    override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
+        mutableRingerMode.value = mode
     }
 }

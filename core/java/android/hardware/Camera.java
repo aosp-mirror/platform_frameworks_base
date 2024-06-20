@@ -16,14 +16,21 @@
 
 package android.hardware;
 
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
+import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.system.OsConstants.EACCES;
 import static android.system.OsConstants.ENODEV;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.ImageFormat;
@@ -56,6 +63,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The Camera class is used to set image capture settings, start/stop preview,
@@ -271,7 +279,24 @@ public class Camera {
      * @return total number of accessible camera devices, or 0 if there are no
      *   cameras or an error was encountered enumerating them.
      */
-    public native static int getNumberOfCameras();
+    public static int getNumberOfCameras() {
+        return getNumberOfCameras(ActivityThread.currentApplication().getApplicationContext());
+    }
+
+    /**
+     * Returns the number of physical cameras available on this device for the given context.
+     * The return value of this method might change dynamically if the device supports external
+     * cameras and an external camera is connected or disconnected.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    public static int getNumberOfCameras(@NonNull Context context) {
+        return _getNumberOfCameras(context.getDeviceId(), getDevicePolicyFromContext(context));
+    }
+
+    private static native int _getNumberOfCameras(int deviceId, int devicePolicy);
 
     /**
      * Returns the information about a particular camera.
@@ -282,10 +307,22 @@ public class Camera {
      *    low-level failure).
      */
     public static void getCameraInfo(int cameraId, CameraInfo cameraInfo) {
-        boolean overrideToPortrait = CameraManager.shouldOverrideToPortrait(
-                ActivityThread.currentApplication().getApplicationContext());
+        Context context = ActivityThread.currentApplication().getApplicationContext();
+        final int rotationOverride = CameraManager.getRotationOverride(context);
+        getCameraInfo(cameraId, context, rotationOverride, cameraInfo);
+    }
 
-        _getCameraInfo(cameraId, overrideToPortrait, cameraInfo);
+    /**
+     * Returns the information about a particular camera for the given context.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    public static void getCameraInfo(int cameraId, @NonNull Context context,
+            int rotationOverride, CameraInfo cameraInfo) {
+        _getCameraInfo(cameraId, rotationOverride, context.getDeviceId(),
+                getDevicePolicyFromContext(context), cameraInfo);
         IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
         IAudioService audioService = IAudioService.Stub.asInterface(b);
         try {
@@ -298,8 +335,20 @@ public class Camera {
             Log.e(TAG, "Audio service is unavailable for queries");
         }
     }
-    private native static void _getCameraInfo(int cameraId, boolean overrideToPortrait,
-            CameraInfo cameraInfo);
+
+    private native static void _getCameraInfo(int cameraId, int rotationOverride,
+            int deviceId, int devicePolicy, CameraInfo cameraInfo);
+
+    private static int getDevicePolicyFromContext(Context context) {
+        if (context.getDeviceId() == DEVICE_ID_DEFAULT
+                || !android.companion.virtual.flags.Flags.virtualCamera()) {
+            return DEVICE_POLICY_DEFAULT;
+        }
+
+        VirtualDeviceManager virtualDeviceManager =
+                context.getSystemService(VirtualDeviceManager.class);
+        return virtualDeviceManager.getDevicePolicy(context.getDeviceId(), POLICY_TYPE_CAMERA);
+    }
 
     /**
      * Information about a camera
@@ -359,7 +408,7 @@ public class Camera {
          * when {@link Camera#takePicture takePicture} is called.</p>
          */
         public boolean canDisableShutterSound;
-    };
+    }
 
     /**
      * Creates a new Camera object to access a particular hardware camera. If
@@ -391,7 +440,20 @@ public class Camera {
      * @see android.app.admin.DevicePolicyManager#getCameraDisabled(android.content.ComponentName)
      */
     public static Camera open(int cameraId) {
-        return new Camera(cameraId);
+        Context context = ActivityThread.currentApplication().getApplicationContext();
+        final int rotationOverride = CameraManager.getRotationOverride(context);
+        return open(cameraId, context, rotationOverride);
+    }
+
+    /**
+     * Creates a new Camera object for a given camera id for the given context.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    public static Camera open(int cameraId, @NonNull Context context, int rotationOverride) {
+        return new Camera(cameraId, context, rotationOverride);
     }
 
     /**
@@ -409,7 +471,7 @@ public class Camera {
         for (int i = 0; i < numberOfCameras; i++) {
             getCameraInfo(i, cameraInfo);
             if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
-                return new Camera(i);
+                return open(i);
             }
         }
         return null;
@@ -459,10 +521,10 @@ public class Camera {
             throw new IllegalArgumentException("Unsupported HAL version " + halVersion);
         }
 
-        return new Camera(cameraId);
+        return open(cameraId);
     }
 
-    private int cameraInit(int cameraId) {
+    private int cameraInit(int cameraId, Context context, int rotationOverride) {
         mShutterCallback = null;
         mRawImageCallback = null;
         mJpegCallback = null;
@@ -480,11 +542,10 @@ public class Camera {
             mEventHandler = null;
         }
 
-        boolean overrideToPortrait = CameraManager.shouldOverrideToPortrait(
-                ActivityThread.currentApplication().getApplicationContext());
         boolean forceSlowJpegMode = shouldForceSlowJpegMode();
-        return native_setup(new WeakReference<Camera>(this), cameraId,
-                ActivityThread.currentOpPackageName(), overrideToPortrait, forceSlowJpegMode);
+        return native_setup(new WeakReference<>(this), cameraId,
+                ActivityThread.currentOpPackageName(), rotationOverride, forceSlowJpegMode,
+                context.getDeviceId(), getDevicePolicyFromContext(context));
     }
 
     private boolean shouldForceSlowJpegMode() {
@@ -501,8 +562,9 @@ public class Camera {
     }
 
     /** used by Camera#open, Camera#open(int) */
-    Camera(int cameraId) {
-        int err = cameraInit(cameraId);
+    Camera(int cameraId, @NonNull Context context, int rotationOverride) {
+        Objects.requireNonNull(context);
+        final int err = cameraInit(cameraId, context, rotationOverride);
         if (checkInitErrors(err)) {
             if (err == -EACCES) {
                 throw new RuntimeException("Fail to connect to camera service");
@@ -514,7 +576,6 @@ public class Camera {
         }
         initAppOps();
     }
-
 
     /**
      * @hide
@@ -568,10 +629,9 @@ public class Camera {
 
     @UnsupportedAppUsage
     private native int native_setup(Object cameraThis, int cameraId, String packageName,
-            boolean overrideToPortrait, boolean forceSlowJpegMode);
+            int rotationOverride, boolean forceSlowJpegMode, int deviceId, int devicePolicy);
 
     private native final void native_release();
-
 
     /**
      * Disconnects and releases the Camera object resources.
@@ -672,13 +732,15 @@ public class Camera {
         if (holder != null) {
             setPreviewSurface(holder.getSurface());
         } else {
-            setPreviewSurface((Surface)null);
+            setPreviewSurface(null);
         }
     }
 
     /**
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public native final void setPreviewSurface(Surface surface) throws IOException;
 

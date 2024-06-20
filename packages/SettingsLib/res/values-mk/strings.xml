@@ -94,18 +94,34 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без телефон), ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без аудиовизуелни содржини), ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без телефон и аудиовизуелни содржини), ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Активен, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Активен, Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија"</string>
-    <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Активно. Батерија: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Активно. Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија."</string>
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Активно. Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Активно. Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија."</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батерија: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Батерија: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија"</string>
-    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Одлево: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Оддесно: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија."</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Лево: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Десно: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Одлево: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Оддесно: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Активен"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Зачувано"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Активно, само лево"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Активно, само десно"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Активно, лево и десно"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Активно (само лево)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Активно (само десно)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Активно (лево и десно)"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Активно (само аудиовизуелни содржини). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија."</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Активно (само аудиовизуелни содржини). Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија."</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Поврзано (поддржува споделување аудио). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија."</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Поврзано (поддржува споделување аудио). Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија."</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Поврзано (поддржува споделување аудио). Лево: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија."</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Поврзано (поддржува споделување аудио). Десно: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија."</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Поврзано (поддржува споделување аудио)"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Активно (само аудиовизуелни содржини)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Поддржува споделување аудио"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Активно (само аудиовизуелни содржини), само лево"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Активно (само аудиовизуелни содржини), само десно"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Активно (само аудиовизуелни содржини), лево и десно"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Звук на аудио/видео"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефонски повици"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Пренос на датотека"</string>
@@ -145,7 +161,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Откажи"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Кога е поврзано, спарувањето одобрува пристап до контактите и историјата на повиците."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради погрешен PIN или лозинка."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради погрешен PIN или криптографски клуч."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не може да комуницира со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Спарувањето е одбиено од <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компјутер"</string>
@@ -219,9 +235,9 @@
     <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Изберете профил"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Лични"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Лично"</string>
     <string name="category_work" msgid="4014193632325996115">"Работа"</string>
-    <string name="category_private" msgid="4244892185452788977">"Приватен"</string>
+    <string name="category_private" msgid="4244892185452788977">"Приватно"</string>
     <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Програмерски опции"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Овозможете ги програмерските опции"</string>
@@ -357,7 +373,7 @@
     <string name="media_category" msgid="8122076702526144053">"Аудиовизуелни содржини"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Следење"</string>
     <string name="strict_mode" msgid="889864762140862437">"Овозможен е строг режим"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Осветли екран при долги операции на главна нишка"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Трепкај со екранот при долги операции на главна нишка"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Локација на покажувач"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Прекривката на екран ги покажува тековните податоци на допир"</string>
     <string name="show_touches" msgid="8437666942161289025">"Прикажувај допири"</string>
@@ -437,9 +453,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Претпостави дека апликациите поддржуваат модерни формати"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Прикажувај известувања за транскодирање"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Оневозможи го кешот на транскодирањето"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Поставки за Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Наметни алтернативно безбедносно ниво L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Изберете за да се наметне алтернативно безбедносно ниво L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Активни услуги"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Погледнете и контролирајте услуги што се моментално активни"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Примена на WebView"</string>
@@ -479,6 +492,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до полна батерија"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – полнењето е оптимизирано"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – се полни"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Ќе се наполни целосно до <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ќе се наполни целосно до <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Ќе се наполни целосно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Ќе се наполни целосно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Непознато"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Се полни"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Брзо полнење"</string>
@@ -490,12 +507,14 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Полна"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Целосно полна"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Полнењето е паузирано"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"Се полни"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Се полни брзо"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Контролирано од администраторот"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Контролирано со ограничени поставки"</string>
     <string name="disabled" msgid="8017887509554714950">"Оневозможено"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Со дозвола"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Без дозвола"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Непознати апликации"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Инсталирање непознати апликации"</string>
     <string name="home" msgid="973834627243661438">"Почетна страница за поставки"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0 %"</item>
@@ -619,7 +638,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Не успеа да создаде нов корисник"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Не успеа создавањето нов гостин"</string>
     <string name="user_nickname" msgid="262624187455825083">"Прекар"</string>
-    <string name="edit_user_info_message" msgid="5199468585059260053">"Вашето име и слика ќе бидат видливи за секој што го користи уредов."</string>
+    <string name="edit_user_info_message" msgid="6677556031419002895">"Името и сликата што ќе ги изберете ќе бидат видливи за секого што го користи уредов."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Додајте корисник"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Додајте гостин"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Отстрани гостин"</string>
@@ -646,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Целата активност ќе се избрише при излегувањето"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Може да ја зачувате или избришете вашата активност при излегувањето"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Ресетирајте за да ја избришете активноста на сесијата сега или може да ја зачувате или избришете активноста при излегувањето"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Фотографирајте"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Одберете слика"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Изберете фотографија"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Премногу неточни обиди. Податоците на уредов ќе се избришат."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Премногу погрешни обиди. Корисников ќе се избрише."</string>
@@ -678,6 +695,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Телефон една цртичка.."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Телефон две цртички."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Телефон три цртички."</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"Телефон со четири цртички."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Сигналот за телефон е исполнет."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Нема податоци."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Податоци една цртичка."</string>
@@ -687,14 +705,12 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Етернетот е исклучен."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Етернет."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Без повици."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Изберете профилна слика"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Икона за стандарден корисник"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Физичка тастатура"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Избери распоред на тастатура"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Стандардно"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Вклучување на екранот"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Контрола за вклучување на екранот"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволи вклучување на екранот"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозволува одредена апликација да го вклучува екранот. Ако е дозволено, апликацијата може да го вклучува екранот во секое време без ваша намера."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозволете одредена апликација да го вклучува екранот. Ако е дозволено, апликацијата ќе може да го вклучува екранот во секое време без ваша намера."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Да се прекине емитувањето на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ако емитувате на <xliff:g id="SWITCHAPP">%1$s</xliff:g> или го промените излезот, тековното емитување ќе запре"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Емитување на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
@@ -707,4 +723,5 @@
     <string name="neuter" msgid="2075249330106127310">"Среден род"</string>
     <string name="feminine" msgid="1529155595310784757">"Женски род"</string>
     <string name="masculine" msgid="4653978041013996303">"Машки род"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Системски ажурирања"</string>
 </resources>

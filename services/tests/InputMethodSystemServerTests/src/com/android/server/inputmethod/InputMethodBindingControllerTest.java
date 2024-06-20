@@ -77,9 +77,13 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         mCountDownLatch = new CountDownLatch(1);
         // Remove flag Context.BIND_SCHEDULE_LIKE_TOP_APP because in tests we are not calling
         // from system.
-        mBindingController =
-                new InputMethodBindingController(
-                        mInputMethodManagerService, mImeConnectionBindFlags, mCountDownLatch);
+        synchronized (ImfLock.class) {
+            mBindingController =
+                    new InputMethodBindingController(
+                            mInputMethodManagerService.getCurrentImeUserIdLocked(),
+                            mInputMethodManagerService, mImeConnectionBindFlags,
+                            mCountDownLatch);
+        }
     }
 
     @Test

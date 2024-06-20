@@ -21,7 +21,6 @@ import android.content.Context
 import android.hardware.biometrics.BiometricFaceConstants
 import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.biometrics.shared.model.SensorStrength
@@ -37,6 +36,12 @@ import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStat
 import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.DevicePosture
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -51,6 +56,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
@@ -84,7 +90,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val trustManager: TrustManager,
-) : CoreStartable, DeviceEntryFaceAuthInteractor {
+) : DeviceEntryFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
 
@@ -121,9 +127,9 @@ constructor(
             .launchIn(applicationScope)
 
         merge(
-                keyguardTransitionInteractor.aodToLockscreenTransition,
-                keyguardTransitionInteractor.offToLockscreenTransition,
-                keyguardTransitionInteractor.dozingToLockscreenTransition
+                keyguardTransitionInteractor.transition(Edge.create(AOD, LOCKSCREEN)),
+                keyguardTransitionInteractor.transition(Edge.create(OFF, LOCKSCREEN)),
+                keyguardTransitionInteractor.transition(Edge.create(DOZING, LOCKSCREEN)),
             )
             .filter { it.transitionState == TransitionState.STARTED }
             .sample(powerInteractor.detailedWakefulness)
@@ -244,6 +250,12 @@ constructor(
         }
     }
 
+    override fun onDeviceUnfolded() {
+        if (facePropertyRepository.supportedPostures.contains(DevicePosture.OPENED)) {
+            runFaceAuth(FaceAuthUiEvent.FACE_AUTH_UPDATED_POSTURE_CHANGED, true)
+        }
+    }
+
     override fun registerListener(listener: FaceAuthenticationListener) {
         listeners.add(listener)
     }
@@ -251,8 +263,6 @@ constructor(
     override fun unregisterListener(listener: FaceAuthenticationListener) {
         listeners.remove(listener)
     }
-
-    override fun isLockedOut(): Boolean = repository.isLockedOut.value
 
     override fun isRunning(): Boolean = repository.isAuthRunning.value
 
@@ -272,6 +282,9 @@ constructor(
 
     /** Provide the status of face detection */
     override val detectionStatus = repository.detectionStatus
+    override val isLockedOut: StateFlow<Boolean> = repository.isLockedOut
+    override val isAuthenticated: StateFlow<Boolean> = repository.isAuthenticated
+    override val isBypassEnabled: Flow<Boolean> = repository.isBypassEnabled
 
     private fun runFaceAuth(uiEvent: FaceAuthUiEvent, fallbackToDetect: Boolean) {
         if (repository.isLockedOut.value) {
@@ -289,8 +302,6 @@ constructor(
 
     override fun isFaceAuthEnabledAndEnrolled(): Boolean =
         biometricSettingsRepository.isFaceAuthEnrolledAndEnabled.value
-
-    override fun isAuthenticated(): Boolean = repository.isAuthenticated.value
 
     private fun observeFaceAuthStateUpdates() {
         authenticationStatus

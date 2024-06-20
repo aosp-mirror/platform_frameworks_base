@@ -37,6 +37,7 @@ import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
 import static android.net.NetworkTemplate.OEM_MANAGED_PAID;
 import static android.net.NetworkTemplate.OEM_MANAGED_PRIVATE;
 import static android.os.Debug.getIonHeapsSizeKb;
+import static android.os.Process.INVALID_UID;
 import static android.os.Process.LAST_SHARED_APPLICATION_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.getUidForPid;
@@ -48,10 +49,13 @@ import static android.util.MathUtils.constrain;
 import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
-import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
-import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
-import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
-import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__GESTURE_SHORTCUT_TYPE__TRIPLE_TAP;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__HARDWARE_SHORTCUT_TYPE__VOLUME_KEY;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__QS_SHORTCUT_TYPE__QUICK_SETTINGS;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_BUTTON;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_GESTURE;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__UNKNOWN_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__NOT_OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__GEO;
@@ -354,7 +358,17 @@ public class StatsPullAtomService extends SystemService {
     private TelephonyManager mTelephony;
     private UwbManager mUwbManager;
     private SubscriptionManager mSubscriptionManager;
-    private NetworkStatsManager mNetworkStatsManager;
+
+    /**
+     * NetworkStatsManager initialization happens from one thread before any worker thread
+     * is going to access the networkStatsManager instance:
+     * - @initNetworkStatsManager() - initialization happens no worker thread to access are
+     *   active yet
+     * - @initAndRegisterNetworkStatsPullers Network stats dependant pullers can only be
+     *   initialized after service is ready. Worker thread is spawn here only after the
+     *   initialization is completed in a thread safe way (no async access expected)
+     */
+    private NetworkStatsManager mNetworkStatsManager = null;
 
     @GuardedBy("mKernelWakelockLock")
     private KernelWakelockReader mKernelWakelockReader;
@@ -781,7 +795,7 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.KEYSTORE2_CRASH_STATS:
                         return pullKeystoreAtoms(atomTag, data);
                     case FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS:
-                        return pullAccessibilityShortcutStatsLocked(atomTag, data);
+                        return pullAccessibilityShortcutStatsLocked(data);
                     case FrameworkStatsLog.ACCESSIBILITY_FLOATING_MENU_STATS:
                         return pullAccessibilityFloatingMenuStatsLocked(atomTag, data);
                     case FrameworkStatsLog.MEDIA_CAPABILITIES:
@@ -822,6 +836,7 @@ public class StatsPullAtomService extends SystemService {
                 registerEventListeners();
             });
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+            initNetworkStatsManager();
             BackgroundThread.getHandler().post(() -> {
                 // Network stats related pullers can only be initialized after service is ready.
                 initAndRegisterNetworkStatsPullers();
@@ -842,9 +857,6 @@ public class StatsPullAtomService extends SystemService {
                 mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         mStatsSubscriptionsListener = new StatsSubscriptionsListener(mSubscriptionManager);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
-        mNetworkStatsManager = mContext.getSystemService(NetworkStatsManager.class);
-
-        initMobileDataStatsPuller();
 
         // Initialize DiskIO
         mStoragedUidIoStatsReader = new StoragedUidIoStatsReader();
@@ -1015,8 +1027,25 @@ public class StatsPullAtomService extends SystemService {
         }
         if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
             mAggregatedMobileDataStatsPuller =
-                    new AggregatedMobileDataStatsPuller(mNetworkStatsManager);
+                    new AggregatedMobileDataStatsPuller(
+                            mContext.getSystemService(NetworkStatsManager.class));
         }
+    }
+
+    /**
+     * Calling getNetworkStatsManager() before PHASE_THIRD_PARTY_APPS_CAN_START is unexpected
+     * Callers use before PHASE_THIRD_PARTY_APPS_CAN_START stage is not legit
+     */
+    @NonNull
+    private NetworkStatsManager getNetworkStatsManager() {
+        if (mNetworkStatsManager == null) {
+            throw new IllegalStateException("NetworkStatsManager is not ready");
+        }
+        return mNetworkStatsManager;
+    }
+
+    private void initNetworkStatsManager() {
+        mNetworkStatsManager = mContext.getSystemService(NetworkStatsManager.class);
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -1061,6 +1090,7 @@ public class StatsPullAtomService extends SystemService {
         registerMobileBytesTransfer();
         registerMobileBytesTransferBackground();
         if (ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            initMobileDataStatsPuller();
             registerMobileBytesTransferByProcState();
         }
         registerBytesTransferByTagAndMetered();
@@ -1513,11 +1543,11 @@ public class StatsPullAtomService extends SystemService {
         //  I/O and also block main thread when polling.
         //  Consider making perfd queries NetworkStatsService directly.
         if (template.getMatchRule() == MATCH_WIFI && template.getSubscriberIds().isEmpty()) {
-            mNetworkStatsManager.forceUpdate();
+            getNetworkStatsManager().forceUpdate();
         }
 
         final android.app.usage.NetworkStats queryNonTaggedStats =
-                mNetworkStatsManager.querySummary(
+                getNetworkStatsManager().querySummary(
                         template, currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
                         currentTimeInMillis);
 
@@ -1527,7 +1557,7 @@ public class StatsPullAtomService extends SystemService {
         if (!includeTags) return nonTaggedStats;
 
         final android.app.usage.NetworkStats queryTaggedStats =
-                mNetworkStatsManager.queryTaggedSummary(template,
+                getNetworkStatsManager().queryTaggedSummary(template,
                         currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
                         currentTimeInMillis);
         final NetworkStats taggedStats =
@@ -3537,17 +3567,23 @@ public class StatsPullAtomService extends SystemService {
                     String roleName = roleEntry.getKey();
                     Set<String> packageNames = roleEntry.getValue();
 
-                    for (String packageName : packageNames) {
-                        PackageInfo pkg;
-                        try {
-                            pkg = pm.getPackageInfoAsUser(packageName, 0, userId);
-                        } catch (PackageManager.NameNotFoundException e) {
-                            Slog.w(TAG, "Role holder " + packageName + " not found");
-                            return StatsManager.PULL_SKIP;
-                        }
+                    if (!packageNames.isEmpty()) {
+                        for (String packageName : packageNames) {
+                            PackageInfo pkg;
+                            try {
+                                pkg = pm.getPackageInfoAsUser(packageName, 0, userId);
+                            } catch (PackageManager.NameNotFoundException e) {
+                                Slog.w(TAG, "Role holder " + packageName + " not found");
+                                return StatsManager.PULL_SKIP;
+                            }
 
+                            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                                    atomTag, pkg.applicationInfo.uid, packageName, roleName));
+                        }
+                    } else {
+                        // Ensure that roles set to None are logged with an empty state.
                         pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                                atomTag, pkg.applicationInfo.uid, packageName, roleName));
+                                atomTag, INVALID_UID, "", roleName));
                     }
                 }
             }
@@ -4727,7 +4763,10 @@ public class StatsPullAtomService extends SystemService {
         }
     }
 
-    int pullAccessibilityShortcutStatsLocked(int atomTag, List<StatsEvent> pulledData) {
+    /**
+     * Pulls ACCESSIBILITY_SHORTCUT_STATS atom
+     */
+    int pullAccessibilityShortcutStatsLocked(List<StatsEvent> pulledData) {
         UserManager userManager = mContext.getSystemService(UserManager.class);
         if (userManager == null) {
             return StatsManager.PULL_SKIP;
@@ -4735,10 +4774,6 @@ public class StatsPullAtomService extends SystemService {
         final long token = Binder.clearCallingIdentity();
         try {
             final ContentResolver resolver = mContext.getContentResolver();
-            final int hardware_shortcut_type =
-                    FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
-            final int triple_tap_shortcut =
-                    FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TRIPLE_TAP;
             for (UserInfo userInfo : userManager.getUsers()) {
                 final int userId = userInfo.getUserHandle().getIdentifier();
 
@@ -4756,15 +4791,22 @@ public class StatsPullAtomService extends SystemService {
                     final int hardware_shortcut_service_num = countAccessibilityServices(
                             hardware_shortcut_list);
 
+                    final String qs_shortcut_list = Settings.Secure.getStringForUser(resolver,
+                            Settings.Secure.ACCESSIBILITY_QS_TARGETS, userId);
+                    final boolean qs_shortcut_enabled = !TextUtils.isEmpty(qs_shortcut_list);
+
                     // only allow magnification to use it for now
                     final int triple_tap_service_num = Settings.Secure.getIntForUser(resolver,
                             Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED, 0, userId);
-
-                    pulledData.add(
-                            FrameworkStatsLog.buildStatsEvent(atomTag,
-                                    software_shortcut_type, software_shortcut_service_num,
-                                    hardware_shortcut_type, hardware_shortcut_service_num,
-                                    triple_tap_shortcut, triple_tap_service_num));
+                    pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                            FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS,
+                            software_shortcut_type, software_shortcut_service_num,
+                            ACCESSIBILITY_SHORTCUT_STATS__HARDWARE_SHORTCUT_TYPE__VOLUME_KEY,
+                            hardware_shortcut_service_num,
+                            ACCESSIBILITY_SHORTCUT_STATS__GESTURE_SHORTCUT_TYPE__TRIPLE_TAP,
+                            triple_tap_service_num,
+                            ACCESSIBILITY_SHORTCUT_STATS__QS_SHORTCUT_TYPE__QUICK_SETTINGS,
+                            qs_shortcut_enabled));
                 }
             }
         } catch (RuntimeException e) {
@@ -5103,16 +5145,19 @@ public class StatsPullAtomService extends SystemService {
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
         final String hardware_shortcut_list = Settings.Secure.getStringForUser(resolver,
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userId);
+        final String qs_shortcut_list = Settings.Secure.getStringForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_QS_TARGETS, userId);
         final boolean hardware_shortcut_dialog_shown = Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, userId) == 1;
         final boolean software_shortcut_enabled = !TextUtils.isEmpty(software_shortcut_list);
         final boolean hardware_shortcut_enabled =
                 hardware_shortcut_dialog_shown && !TextUtils.isEmpty(hardware_shortcut_list);
+        final boolean qs_shortcut_enabled = !TextUtils.isEmpty(qs_shortcut_list);
         final boolean triple_tap_shortcut_enabled = Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED, 0, userId) == 1;
 
         return software_shortcut_enabled || hardware_shortcut_enabled
-                || triple_tap_shortcut_enabled;
+                || triple_tap_shortcut_enabled || qs_shortcut_enabled;
     }
 
     private boolean isAccessibilityFloatingMenuUser(Context context, @UserIdInt int userId) {
@@ -5129,13 +5174,13 @@ public class StatsPullAtomService extends SystemService {
     private int convertToAccessibilityShortcutType(int shortcutType) {
         switch (shortcutType) {
             case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR:
-                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
+                return ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_BUTTON;
             case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU:
-                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+                return ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_FLOATING_MENU;
             case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE:
-                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
+                return ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_GESTURE;
             default:
-                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
+                return ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__UNKNOWN_TYPE;
         }
     }
 

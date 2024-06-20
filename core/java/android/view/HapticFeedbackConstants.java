@@ -83,11 +83,7 @@ public class HapticFeedbackConstants {
      */
     public static final int TEXT_HANDLE_MOVE = 9;
 
-    /**
-     * The user unlocked the device
-     * @hide
-     */
-    public static final int ENTRY_BUMP = 10;
+    // REMOVED: ENTRY_BUMP = 10
 
     /**
      * The user has moved the dragged object within a droppable area.
@@ -228,6 +224,22 @@ public class HapticFeedbackConstants {
      * @hide
      */
     public static final int LONG_PRESS_POWER_BUTTON = 10003;
+
+    /**
+     * A haptic effect to signal the confirmation of a user biometric authentication
+     * (e.g. fingerprint reading).
+     * This is a private constant to be used only by system apps.
+     * @hide
+     */
+    public static final int BIOMETRIC_CONFIRM = 10004;
+
+    /**
+     * A haptic effect to signal the rejection of a user biometric authentication attempt
+     * (e.g. fingerprint reading).
+     * This is a private constant to be used only by system apps.
+     * @hide
+     */
+    public static final int BIOMETRIC_REJECT = 10005;
 
     /**
      * Flag for {@link View#performHapticFeedback(int, int)

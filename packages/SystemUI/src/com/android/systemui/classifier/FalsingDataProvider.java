@@ -20,6 +20,7 @@ import static com.android.systemui.classifier.FalsingModule.IS_FOLDABLE_DEVICE;
 
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
@@ -41,6 +42,7 @@ import javax.inject.Named;
 public class FalsingDataProvider {
 
     private static final long MOTION_EVENT_AGE_MS = 1000;
+    private static final long KEY_EVENT_AGE_MS = 500;
     private static final long DROP_EVENT_THRESHOLD_MS = 50;
     private static final float THREE_HUNDRED_SIXTY_DEG = (float) (2 * Math.PI);
 
@@ -56,8 +58,10 @@ public class FalsingDataProvider {
     private final List<MotionEventListener> mMotionEventListeners = new ArrayList<>();
     private final List<GestureFinalizedListener> mGestureFinalizedListeners = new ArrayList<>();
 
-    private TimeLimitedMotionEventBuffer mRecentMotionEvents =
-            new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
+    private TimeLimitedInputEventBuffer<MotionEvent> mRecentMotionEvents =
+            new TimeLimitedInputEventBuffer<>(MOTION_EVENT_AGE_MS);
+    private final TimeLimitedInputEventBuffer<KeyEvent> mRecentKeyEvents =
+            new TimeLimitedInputEventBuffer<>(KEY_EVENT_AGE_MS);
     private List<MotionEvent> mPriorMotionEvents = new ArrayList<>();
 
     private boolean mDirty = true;
@@ -89,6 +93,10 @@ public class FalsingDataProvider {
         FalsingClassifier.logInfo("width, height: " + getWidthPixels() + ", " + getHeightPixels());
     }
 
+    void onKeyEvent(KeyEvent keyEvent) {
+        mRecentKeyEvents.add(keyEvent);
+    }
+
     void onMotionEvent(MotionEvent motionEvent) {
         List<MotionEvent> motionEvents = unpackMotionEvent(motionEvent);
         FalsingClassifier.logVerbose("Unpacked into: " + motionEvents.size());
@@ -108,6 +116,10 @@ public class FalsingDataProvider {
         // The reason is that the closing ACTION_UP event of  a swipe can be a bit offseted from the
         // previous ACTION_MOVE event and when it happens, it makes some classifiers fail.
         mDropLastEvent = shouldDropEvent(motionEvent);
+
+        if (!motionEvents.isEmpty() && !mRecentKeyEvents.isEmpty()) {
+            recycleAndClearRecentKeyEvents();
+        }
 
         mRecentMotionEvents.addAll(motionEvents);
 
@@ -141,7 +153,7 @@ public class FalsingDataProvider {
                     mRecentMotionEvents.get(mRecentMotionEvents.size() - 1).getEventTime()));
 
             mPriorMotionEvents = mRecentMotionEvents;
-            mRecentMotionEvents = new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
+            mRecentMotionEvents = new TimeLimitedInputEventBuffer<>(MOTION_EVENT_AGE_MS);
         }
         mDropLastEvent = false;
         mA11YAction = false;
@@ -261,6 +273,13 @@ public class FalsingDataProvider {
         return mLastMotionEvent.getY() < mFirstRecentMotionEvent.getY();
     }
 
+    /**
+     * If it's a specific set of keys as collected from {@link FalsingCollector}
+     */
+    public boolean isFromKeyboard() {
+        return !mRecentKeyEvents.isEmpty();
+    }
+
     public boolean isFromTrackpad() {
         if (mRecentMotionEvents.isEmpty()) {
             return false;
@@ -316,6 +335,14 @@ public class FalsingDataProvider {
                 mAngle -= THREE_HUNDRED_SIXTY_DEG;
             }
         }
+    }
+
+    private void recycleAndClearRecentKeyEvents() {
+        for (KeyEvent ev : mRecentKeyEvents) {
+            ev.recycle();
+        }
+
+        mRecentKeyEvents.clear();
     }
 
     private List<MotionEvent> unpackMotionEvent(MotionEvent motionEvent) {
@@ -415,6 +442,8 @@ public class FalsingDataProvider {
         }
 
         mRecentMotionEvents.clear();
+
+        recycleAndClearRecentKeyEvents();
 
         mDirty = true;
 

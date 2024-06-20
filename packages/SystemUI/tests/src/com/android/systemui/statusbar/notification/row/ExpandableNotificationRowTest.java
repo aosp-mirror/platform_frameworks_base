@@ -46,20 +46,20 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.widget.CachingIconView;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
-import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -87,24 +87,24 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class ExpandableNotificationRowTest extends SysuiTestCase {
 
-    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
+    private final FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
     private NotificationTestHelper mNotificationTestHelper;
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
 
     @Before
     public void setUp() throws Exception {
         allowTestableLooperAsMainThread();
+        mFeatureFlags.set(Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE, false);
         mNotificationTestHelper = new NotificationTestHelper(
                 mContext,
                 mDependency,
                 TestableLooper.get(this),
                 mFeatureFlags);
         mNotificationTestHelper.setDefaultInflationFlags(FLAG_CONTENT_VIEW_ALL);
-        mFeatureFlags.setDefault(Flags.SENSITIVE_REVEAL_ANIM);
     }
 
     @Test
@@ -186,14 +186,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetSensitiveOnNotifRowNotifiesOfHeightChange_withOtherFlagValue()
-            throws Exception {
-        FakeFeatureFlags flags = mFeatureFlags;
-        flags.set(Flags.SENSITIVE_REVEAL_ANIM, !flags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
-        testSetSensitiveOnNotifRowNotifiesOfHeightChange();
-    }
-
-    @Test
     public void testSetSensitiveOnNotifRowNotifiesOfHeightChange() throws Exception {
         // GIVEN a sensitive notification row that's currently redacted
         ExpandableNotificationRow row = mNotificationTestHelper.createRow();
@@ -210,19 +202,10 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         // WHEN the row is set to no longer be sensitive
         row.setSensitive(false, true);
 
-        boolean expectAnimation = mFeatureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         // VERIFY that the height change listener is invoked
         assertThat(row.getShowingLayout()).isSameInstanceAs(row.getPrivateLayout());
         assertThat(row.getIntrinsicHeight()).isGreaterThan(0);
-        verify(listener).onHeightChanged(eq(row), eq(expectAnimation));
-    }
-
-    @Test
-    public void testSetSensitiveOnGroupRowNotifiesOfHeightChange_withOtherFlagValue()
-            throws Exception {
-        FakeFeatureFlags flags = mFeatureFlags;
-        flags.set(Flags.SENSITIVE_REVEAL_ANIM, !flags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
-        testSetSensitiveOnGroupRowNotifiesOfHeightChange();
+        verify(listener).onHeightChanged(eq(row), eq(true));
     }
 
     @Test
@@ -242,19 +225,10 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         // WHEN the row is set to no longer be sensitive
         group.setSensitive(false, true);
 
-        boolean expectAnimation = mFeatureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         // VERIFY that the height change listener is invoked
         assertThat(group.getShowingLayout()).isSameInstanceAs(group.getPrivateLayout());
         assertThat(group.getIntrinsicHeight()).isGreaterThan(0);
-        verify(listener).onHeightChanged(eq(group), eq(expectAnimation));
-    }
-
-    @Test
-    public void testSetSensitiveOnPublicRowDoesNotNotifyOfHeightChange_withOtherFlagValue()
-            throws Exception {
-        FakeFeatureFlags flags = mFeatureFlags;
-        flags.set(Flags.SENSITIVE_REVEAL_ANIM, !flags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
-        testSetSensitiveOnPublicRowDoesNotNotifyOfHeightChange();
+        verify(listener).onHeightChanged(eq(group), eq(true));
     }
 
     @Test
@@ -424,7 +398,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAboveShelfChangedListenerCalledHeadsUpGoingAway() throws Exception {
+    public void testAboveShelfChangedListenerCalledHeadsUpAnimatingAway() throws Exception {
         ExpandableNotificationRow row = mNotificationTestHelper.createRow();
         AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
         row.setAboveShelfChangedListener(listener);
@@ -769,7 +743,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         when(mockViewWrapper.getIcon()).thenReturn(mockIcon);
 
         NotificationViewWrapper mockLowPriorityViewWrapper = mock(NotificationViewWrapper.class);
-        when(mockContainer.getLowPriorityViewWrapper()).thenReturn(mockLowPriorityViewWrapper);
+        when(mockContainer.getMinimizedGroupHeaderWrapper()).thenReturn(mockLowPriorityViewWrapper);
         CachingIconView mockLowPriorityIcon = mock(CachingIconView.class);
         when(mockLowPriorityViewWrapper.getIcon()).thenReturn(mockLowPriorityIcon);
 
@@ -798,8 +772,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.setUserExpanded(true);
         row.setOnKeyguard(false);
         row.setSensitive(/* sensitive= */true, /* hideSensitive= */false);
-        row.setHideSensitive(/* hideSensitive= */true, /* animated= */false,
-                /* delay= */0L, /* duration= */0L);
+        row.setHideSensitiveForIntrinsicHeight(/* hideSensitive= */true);
 
         // THEN
         assertThat(row.isExpanded()).isFalse();
@@ -813,8 +786,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.setUserExpanded(true);
         row.setOnKeyguard(false);
         row.setSensitive(/* sensitive= */true, /* hideSensitive= */false);
-        row.setHideSensitive(/* hideSensitive= */false, /* animated= */false,
-                /* delay= */0L, /* duration= */0L);
+        row.setHideSensitiveForIntrinsicHeight(/* hideSensitive= */false);
 
         // THEN
         assertThat(row.isExpanded()).isTrue();

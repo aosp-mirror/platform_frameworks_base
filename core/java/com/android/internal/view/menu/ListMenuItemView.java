@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.text.ClientFlags;
 import android.text.TextFlags;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -290,7 +291,8 @@ public class ListMenuItemView extends LinearLayout
     private void insertIconView() {
         LayoutInflater inflater = getInflater();
         mIconView = (ImageView) inflater.inflate(
-                mUseNewContextMenu ? com.android.internal.R.layout.list_menu_item_fixed_size_icon :
+                mUseNewContextMenu && !ClientFlags.fixMisalignedContextMenu()
+                        ? com.android.internal.R.layout.list_menu_item_fixed_size_icon :
                         com.android.internal.R.layout.list_menu_item_icon,
                 this, false);
         addContentView(mIconView, 0);

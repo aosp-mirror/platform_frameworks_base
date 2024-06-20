@@ -1,0 +1,6 @@
+<data-labels>
+    <data-shared dataType="personal_data_type_name"
+        purposes="analytics|developer_communications" />
+    <data-shared dataType="personal_data_type_email_address"
+    purposes="analytics" />
+</data-labels>

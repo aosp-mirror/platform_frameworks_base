@@ -37,4 +37,9 @@
     <!-- Material next track off color-->
     <color name="settingslib_track_off_color">@android:color/system_surface_container_highest_dark
     </color>
+
+    <!--Deprecated. After sdk 35 don't use it. using materialColorOnSurface-->
+    <color name="settingslib_text_color_primary_device_default">@android:color/system_on_surface_dark</color>
+    <!--Deprecated. After sdk 35 don't use it. using materialColorOnSurfaceVariant-->
+    <color name="settingslib_text_color_secondary_device_default">@android:color/system_on_surface_variant_dark</color>
 </resources>

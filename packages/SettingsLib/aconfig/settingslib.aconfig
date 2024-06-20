@@ -36,14 +36,14 @@ flag {
   name: "enable_le_audio_sharing"
   namespace: "pixel_cross_device_control"
   description: "Gates whether to enable LE audio sharing"
-  bug: "305620450"
+  bug: "323125723"
 }
 
 flag {
   name: "enable_le_audio_qr_code_private_broadcast_sharing"
   namespace: "pixel_cross_device_control"
   description: "Gates whether to enable LE audio private broadcast sharing via QR code"
-  bug: "308368124"
+  bug: "323125723"
 }
 
 flag {
@@ -51,4 +51,31 @@ flag {
   namespace: "dck_framework"
   description: "Hide exclusively managed Bluetooth devices in BT settings menu."
   bug: "324475542"
+}
+
+flag {
+    name: "enable_set_preferred_transport_for_le_audio_device"
+    namespace: "bluetooth"
+    description: "Enable setting preferred transport for Le Audio device"
+    bug: "330581926"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "allow_all_widgets_on_lockscreen_by_default"
+  namespace: "systemui"
+  description: "Allow all widgets on the lock screen by default."
+  bug: "328261690"
+}
+
+flag {
+    name: "enable_determining_advanced_details_header_with_metadata"
+    namespace: "pixel_cross_device_control"
+    description: "Use metadata instead of device type to determine whether a bluetooth device should use advanced details header."
+    bug: "328556903"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

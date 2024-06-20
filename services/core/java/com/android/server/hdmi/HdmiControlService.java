@@ -40,6 +40,7 @@ import static com.android.server.power.ShutdownThread.SHUTDOWN_ACTION_PROPERTY;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -303,6 +304,10 @@ public class HdmiControlService extends SystemService {
 
     // Make sure HdmiCecConfig is instantiated and the XMLs are read.
     private HdmiCecConfig mHdmiCecConfig;
+
+    // Timeout value for start ARC action after an established eARC connection was terminated,
+    // e.g. because eARC was disabled in Settings.
+    private static final int EARC_TRIGGER_START_ARC_ACTION_DELAY = 500;
 
     /**
      * Interface to report send result.
@@ -867,6 +872,60 @@ public class HdmiControlService extends SystemService {
                         }
                     }
                 }, mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(true);
+                    }
+                },
+                mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(false);
+                    }
+                },
+                mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(false);
+                    }
+                },
+                mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(false);
+                    }
+                },
+                mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(false);
+                    }
+                },
+                mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager
+                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(false);
+                    }
+                },
+                mServiceThreadExecutor);
 
         if (isTvDevice()) {
             mDeviceConfig.addOnPropertiesChangedListener(getContext().getMainExecutor(),
@@ -964,6 +1023,25 @@ public class HdmiControlService extends SystemService {
                 for (HdmiCecLocalDevice localDevice : getAllCecLocalDevices()) {
                     localDevice.startQueuedActions();
                 }
+            }
+        }
+    }
+
+    /** Helper method for sending feature discovery command */
+    private void reportFeatures(boolean isTvDeviceSetting) {
+        // <Report Features> should only be sent for HDMI 2.0
+        if (getCecVersion() < HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+            return;
+        }
+        // check if tv device is enabled for tv device specific RC profile setting
+        if (isTvDeviceSetting) {
+            if (isTvDeviceEnabled()) {
+                tv().reportFeatures();
+            }
+        } else { // check for source device setting
+            HdmiCecLocalDeviceSource source = isAudioSystemDevice() ? audioSystem() : playback();
+            if (source != null) {
+                source.reportFeatures();
             }
         }
     }
@@ -1493,7 +1571,7 @@ public class HdmiControlService extends SystemService {
      * Returns physical address of the device.
      */
     int getPhysicalAddress() {
-        return mCecController.getPhysicalAddress();
+        return mHdmiCecNetwork.getPhysicalAddress();
     }
 
     /**
@@ -1572,6 +1650,13 @@ public class HdmiControlService extends SystemService {
             case Constants.MESSAGE_ROUTING_CHANGE:
             case Constants.MESSAGE_SET_STREAM_PATH:
             case Constants.MESSAGE_TEXT_VIEW_ON:
+                // RequestActiveSourceAction is started after the TV finished logical address
+                // allocation. This action is used by the TV to get the active source from the CEC
+                // network. If the TV sent a source changing CEC message, this action does not have
+                // to continue anymore.
+                if (isTvDeviceEnabled()) {
+                    tv().removeAction(RequestActiveSourceAction.class);
+                }
                 sendCecCommandWithRetries(command, callback);
                 break;
             default:
@@ -1823,10 +1908,10 @@ public class HdmiControlService extends SystemService {
      */
     @ServiceThreadOnly
     void pollDevices(DevicePollingCallback callback, int sourceAddress, int pickStrategy,
-            int retryCount) {
+            int retryCount, long pollingMessageInterval) {
         assertRunOnServiceThread();
         mCecController.pollDevices(callback, sourceAddress, checkPollStrategy(pickStrategy),
-                retryCount);
+                retryCount, pollingMessageInterval);
     }
 
     private int checkPollStrategy(int pickStrategy) {
@@ -3699,7 +3784,6 @@ public class HdmiControlService extends SystemService {
         return mWakeUpMessageReceived;
     }
 
-    @VisibleForTesting
     protected boolean isStandbyMessageReceived() {
         return mStandbyMessageReceived;
     }
@@ -4205,10 +4289,12 @@ public class HdmiControlService extends SystemService {
         // playback will claim active source. Otherwise audio system will.
         if (deviceType == HdmiDeviceInfo.DEVICE_PLAYBACK) {
             HdmiCecLocalDevicePlayback playback = playback();
+            playback.dismissUiOnActiveSourceStatusRecovered();
             playback.setActiveSource(playback.getDeviceInfo().getLogicalAddress(), physicalAddress,
                     caller);
             playback.wakeUpIfActiveSource();
             playback.maySendActiveSource(source);
+            playback.mDelayedStandbyOnActiveSourceLostHandler.removeCallbacksAndMessages(null);
         }
 
         if (deviceType == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
@@ -4318,8 +4404,7 @@ public class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
-        getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                HdmiControlService.PERMISSION);
+        sendBroadcastAsUser(intent);
     }
 
     @ServiceThreadOnly
@@ -4328,8 +4413,17 @@ public class HdmiControlService extends SystemService {
         Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_EXTRA_PARAM1, extra);
-        getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                HdmiControlService.PERMISSION);
+        sendBroadcastAsUser(intent);
+    }
+
+    // This method is used such that we can override it inside unit tests to avoid a
+    // SecurityException.
+    @ServiceThreadOnly
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+        assertRunOnServiceThread();
+        getContext().sendBroadcastAsUser(intent, UserHandle.ALL, HdmiControlService.PERMISSION);
     }
 
     @VisibleForTesting
@@ -4665,15 +4759,27 @@ public class HdmiControlService extends SystemService {
         public void onAudioDeviceVolumeChanged(
                 @NonNull AudioDeviceAttributes audioDevice,
                 @NonNull VolumeInfo volumeInfo) {
+            int localDeviceAddress = mLocalDevice.getDeviceInfo().getLogicalAddress();
 
-            // Do nothing if the System Audio device does not support <Set Audio Volume Level>
+            // We can't send <Set Audio Volume Level> if the System Audio device doesn't support it.
+            // But AudioService has already updated its volume and expects us to set it.
+            // So the best we can do is to send <Give Audio Status>, which triggers
+            // <Report Audio Status>, which should update AudioService with its correct volume.
             if (mSystemAudioDevice.getDeviceFeatures().getSetAudioVolumeLevelSupport()
                     != DeviceFeatures.FEATURE_SUPPORTED) {
+                // Update the volume tracked in AbsoluteVolumeAudioStatusAction
+                // so it correctly processes the next <Report Audio Status>
+                HdmiCecLocalDevice avbDevice = isTvDevice() ? tv() : playback();
+                avbDevice.updateAvbVolume(volumeInfo.getVolumeIndex());
+                // Send <Give Audio Status>
+                sendCecCommand(HdmiCecMessageBuilder.buildGiveAudioStatus(
+                        localDeviceAddress,
+                        mSystemAudioDevice.getLogicalAddress()
+                ));
                 return;
             }
 
             // Send <Set Audio Volume Level> to notify the System Audio device of the volume change
-            int localDeviceAddress = mLocalDevice.getDeviceInfo().getLogicalAddress();
             sendCecCommand(SetAudioVolumeLevelMessage.build(
                             localDeviceAddress,
                             mSystemAudioDevice.getLogicalAddress(),
@@ -4959,7 +5065,12 @@ public class HdmiControlService extends SystemService {
             // AudioService here that the eARC connection is terminated.
             HdmiLogger.debug("eARC state change [new: HDMI_EARC_STATUS_ARC_PENDING(2)]");
             notifyEarcStatusToAudioService(false, new ArrayList<>());
-            startArcAction(true, null);
+            mHandler.postDelayed( new Runnable() {
+                @Override
+                public void run() {
+                    startArcAction(true, null);
+                }
+            }, EARC_TRIGGER_START_ARC_ACTION_DELAY);
             getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(),
                     oldEarcStatus, status, HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED);
         } else {

@@ -20,6 +20,7 @@ import android.app.smartspace.SmartspaceAction
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Process
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -30,23 +31,23 @@ import com.android.internal.logging.InstanceId
 /** State of a Smartspace media recommendations view. */
 data class SmartspaceMediaData(
     /** Unique id of a Smartspace media target. */
-    val targetId: String,
+    val targetId: String = "INVALID",
     /** Indicates if the status is active. */
-    val isActive: Boolean,
+    val isActive: Boolean = false,
     /** Package name of the media recommendations' provider-app. */
-    val packageName: String,
+    val packageName: String = "INVALID",
     /** Action to perform when the card is tapped. Also contains the target's extra info. */
-    val cardAction: SmartspaceAction?,
+    val cardAction: SmartspaceAction? = null,
     /** List of media recommendations. */
-    val recommendations: List<SmartspaceAction>,
+    val recommendations: List<SmartspaceAction> = emptyList(),
     /** Intent for the user's initiated dismissal. */
-    val dismissIntent: Intent?,
+    val dismissIntent: Intent? = null,
     /** The timestamp in milliseconds that the card was generated */
-    val headphoneConnectionTimeMillis: Long,
+    val headphoneConnectionTimeMillis: Long = 0L,
     /** Instance ID for [MediaUiEventLogger] */
-    val instanceId: InstanceId,
+    val instanceId: InstanceId? = null,
     /** The timestamp in milliseconds indicating when the card should be removed */
-    val expiryTimeMs: Long,
+    val expiryTimeMs: Long = 0L,
 ) {
     /**
      * Indicates if all the data is valid.
@@ -85,6 +86,15 @@ data class SmartspaceMediaData(
             packageManager.getApplicationLabel(applicationInfo)
         } catch (e: PackageManager.NameNotFoundException) {
             null
+        }
+    }
+
+    fun getUid(context: Context): Int {
+        return try {
+            context.packageManager.getApplicationInfo(packageName, 0 /* flags */).uid
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(TAG, "Fail to get media recommendation's app info", e)
+            Process.INVALID_UID
         }
     }
 }

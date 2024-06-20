@@ -35,7 +35,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.BundleMerger;
 import android.os.Debug;
 import android.os.DropBoxManager;
@@ -176,6 +175,16 @@ public final class DropBoxManagerService extends SystemService {
         }
     };
 
+    private static final BundleMerger sDropboxEntryAddedExtrasMerger;
+    static {
+        sDropboxEntryAddedExtrasMerger = new BundleMerger();
+        sDropboxEntryAddedExtrasMerger.setDefaultMergeStrategy(BundleMerger.STRATEGY_FIRST);
+        sDropboxEntryAddedExtrasMerger.setMergeStrategy(DropBoxManager.EXTRA_TIME,
+                BundleMerger.STRATEGY_COMPARABLE_MAX);
+        sDropboxEntryAddedExtrasMerger.setMergeStrategy(DropBoxManager.EXTRA_DROPPED_COUNT,
+                BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD);
+    }
+
     private final IDropBoxManagerService.Stub mStub = new IDropBoxManagerService.Stub() {
         @Override
         public void addData(String tag, byte[] data, int flags) {
@@ -284,7 +293,7 @@ public final class DropBoxManagerService extends SystemService {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SEND_BROADCAST:
-                    prepareAndSendBroadcast((Intent) msg.obj, null);
+                    prepareAndSendBroadcast((Intent) msg.obj, false);
                     break;
                 case MSG_SEND_DEFERRED_BROADCAST:
                     Intent deferredIntent;
@@ -292,31 +301,42 @@ public final class DropBoxManagerService extends SystemService {
                         deferredIntent = mDeferredMap.remove((String) msg.obj);
                     }
                     if (deferredIntent != null) {
-                        prepareAndSendBroadcast(deferredIntent,
-                                createBroadcastOptions(deferredIntent));
+                        prepareAndSendBroadcast(deferredIntent, true);
                     }
                     break;
             }
         }
 
-        private void prepareAndSendBroadcast(Intent intent, Bundle options) {
+        private void prepareAndSendBroadcast(Intent intent, boolean deferrable) {
             if (!DropBoxManagerService.this.mBooted) {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             }
+            final BroadcastOptions options = BroadcastOptions.makeBasic();
             if (Flags.enableReadDropboxPermission()) {
-                BroadcastOptions unbundledOptions = (options == null)
-                        ? BroadcastOptions.makeBasic() : BroadcastOptions.fromBundle(options);
-
-                unbundledOptions.setRequireCompatChange(ENFORCE_READ_DROPBOX_DATA, true);
+                options.setRequireCompatChange(ENFORCE_READ_DROPBOX_DATA, true);
+                if (deferrable) {
+                    final String matchingKey = intent.getStringExtra(DropBoxManager.EXTRA_TAG)
+                            + "-READ_DROPBOX_DATA";
+                    setBroadcastOptionsForDeferral(options, matchingKey);
+                }
                 getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                        Manifest.permission.READ_DROPBOX_DATA, unbundledOptions.toBundle());
+                        Manifest.permission.READ_DROPBOX_DATA, options.toBundle());
 
-                unbundledOptions.setRequireCompatChange(ENFORCE_READ_DROPBOX_DATA, false);
+                options.setRequireCompatChange(ENFORCE_READ_DROPBOX_DATA, false);
+                if (deferrable) {
+                    final String matchingKey = intent.getStringExtra(DropBoxManager.EXTRA_TAG)
+                            + "-READ_LOGS";
+                    setBroadcastOptionsForDeferral(options, matchingKey);
+                }
                 getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                        Manifest.permission.READ_LOGS, unbundledOptions.toBundle());
+                        Manifest.permission.READ_LOGS, options.toBundle());
             } else {
+                if (deferrable) {
+                    final String matchingKey = intent.getStringExtra(DropBoxManager.EXTRA_TAG);
+                    setBroadcastOptionsForDeferral(options, matchingKey);
+                }
                 getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                        android.Manifest.permission.READ_LOGS, options);
+                        android.Manifest.permission.READ_LOGS, options.toBundle());
             }
         }
 
@@ -328,21 +348,12 @@ public final class DropBoxManagerService extends SystemService {
             return dropboxIntent;
         }
 
-        private Bundle createBroadcastOptions(Intent intent) {
-            final BundleMerger extrasMerger = new BundleMerger();
-            extrasMerger.setDefaultMergeStrategy(BundleMerger.STRATEGY_FIRST);
-            extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_TIME,
-                    BundleMerger.STRATEGY_COMPARABLE_MAX);
-            extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_DROPPED_COUNT,
-                    BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD);
-
-            return BroadcastOptions.makeBasic()
-                    .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED)
+        private void setBroadcastOptionsForDeferral(BroadcastOptions options, String matchingKey) {
+            options.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED)
                     .setDeliveryGroupMatchingKey(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED,
-                            intent.getStringExtra(DropBoxManager.EXTRA_TAG))
-                    .setDeliveryGroupExtrasMerger(extrasMerger)
-                    .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
-                    .toBundle();
+                            matchingKey)
+                    .setDeliveryGroupExtrasMerger(sDropboxEntryAddedExtrasMerger)
+                    .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
         }
 
         /**

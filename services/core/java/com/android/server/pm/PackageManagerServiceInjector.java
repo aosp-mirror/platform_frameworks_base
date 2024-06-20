@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.backup.IBackupManager;
 import android.content.ComponentName;
@@ -87,7 +86,7 @@ public class PackageManagerServiceInjector {
     private final Context mContext;
     private final PackageManagerTracedLock mLock;
     private final Installer mInstaller;
-    private final Object mInstallLock;
+    private final PackageManagerTracedLock mInstallLock;
     private final Handler mBackgroundHandler;
     private final Executor mBackgroundExecutor;
     private final List<ScanPartition> mSystemPartitions;
@@ -138,8 +137,6 @@ public class PackageManagerServiceInjector {
     private final Singleton<DomainVerificationManagerInternal>
             mDomainVerificationManagerInternalProducer;
     private final Singleton<Handler> mHandlerProducer;
-    private final Singleton<BackgroundDexOptService>
-            mBackgroundDexOptService; // TODO(b/260124949): Remove this.
     private final Singleton<IBackupManager> mIBackupManager;
     private final Singleton<SharedLibrariesImpl> mSharedLibrariesProducer;
     private final Singleton<CrossProfileIntentFilterHelper> mCrossProfileIntentFilterHelperProducer;
@@ -147,7 +144,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<PackageMonitorCallbackHelper> mPackageMonitorCallbackHelper;
 
     PackageManagerServiceInjector(Context context, PackageManagerTracedLock lock,
-            Installer installer, Object installLock, PackageAbiHelper abiHelper,
+            Installer installer, PackageManagerTracedLock installLock, PackageAbiHelper abiHelper,
             Handler backgroundHandler,
             List<ScanPartition> systemPartitions,
             Producer<ComponentResolver> componentResolverProducer,
@@ -180,7 +177,6 @@ public class PackageManagerServiceInjector {
             SystemWrapper systemWrapper,
             ServiceProducer getLocalServiceProducer,
             ServiceProducer getSystemServiceProducer,
-            Producer<BackgroundDexOptService> backgroundDexOptService,
             Producer<IBackupManager> iBackupManager,
             Producer<SharedLibrariesImpl> sharedLibrariesProducer,
             Producer<CrossProfileIntentFilterHelper> crossProfileIntentFilterHelperProducer,
@@ -234,7 +230,6 @@ public class PackageManagerServiceInjector {
                 new Singleton<>(
                         domainVerificationManagerInternalProducer);
         mHandlerProducer = new Singleton<>(handlerProducer);
-        mBackgroundDexOptService = new Singleton<>(backgroundDexOptService);
         mIBackupManager = new Singleton<>(iBackupManager);
         mSharedLibrariesProducer = new Singleton<>(sharedLibrariesProducer);
         mCrossProfileIntentFilterHelperProducer = new Singleton<>(
@@ -259,7 +254,7 @@ public class PackageManagerServiceInjector {
         return mAbiHelper;
     }
 
-    public Object getInstallLock() {
+    public PackageManagerTracedLock getInstallLock() {
         return mInstallLock;
     }
 
@@ -407,11 +402,6 @@ public class PackageManagerServiceInjector {
 
     public ActivityManagerInternal getActivityManagerInternal() {
         return getLocalService(ActivityManagerInternal.class);
-    }
-
-    @Nullable
-    public BackgroundDexOptService getBackgroundDexOptService() {
-        return mBackgroundDexOptService.get(this, mPackageManager);
     }
 
     public IBackupManager getIBackupManager() {

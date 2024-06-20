@@ -18,19 +18,18 @@
 
 package com.android.systemui.shade
 
-import android.view.WindowManager
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.concurrency.fakeExecutor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.windowRootViewVisibilityInteractor
@@ -50,13 +49,13 @@ val Kosmos.shadeControllerSceneImpl by
             shadeInteractor = shadeInteractor,
             sceneInteractor = sceneInteractor,
             notificationStackScrollLayout = mock<NotificationStackScrollLayout>(),
-            deviceEntryInteractor = deviceEntryInteractor,
-            touchLog = mock<LogBuffer>(),
+            vibratorHelper = mock<VibratorHelper>(),
             commandQueue = mock<CommandQueue>(),
             statusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>(),
             notificationShadeWindowController = mock<NotificationShadeWindowController>(),
-            assistManagerLazy = { mock<AssistManager>() },
-        )
+        ) {
+            mock<AssistManager>()
+        }
     }
 
 val Kosmos.shadeControllerImpl by
@@ -64,7 +63,6 @@ val Kosmos.shadeControllerImpl by
         ShadeControllerImpl(
             mock<CommandQueue>(),
             fakeExecutor,
-            mock<LogBuffer>(),
             windowRootViewVisibilityInteractor,
             mock<KeyguardStateController>(),
             statusBarStateController,
@@ -72,10 +70,17 @@ val Kosmos.shadeControllerImpl by
             mock<StatusBarWindowController>(),
             deviceProvisionedController,
             mock<NotificationShadeWindowController>(),
-            mock<WindowManager>(),
+            0,
             { mock<NotificationPanelViewController>() },
             { mock<AssistManager>() },
             { mock<NotificationGutsManager>() },
         )
     }
-var Kosmos.shadeController: ShadeController by Kosmos.Fixture { shadeControllerImpl }
+var Kosmos.shadeController: ShadeController by
+    Kosmos.Fixture {
+        if (SceneContainerFlag.isEnabled) {
+            shadeControllerSceneImpl
+        } else {
+            shadeControllerImpl
+        }
+    }

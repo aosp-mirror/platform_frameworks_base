@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.activityembedding.pip
 
+import android.graphics.Rect
 import android.platform.test.annotations.Presubmit
-import android.tools.datatypes.Rect
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -79,11 +79,11 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
             // Compare dimensions of two splits, given we're using default split attributes,
             // both activities take up the same visible size on the display.
             check { "height" }
-                .that(leftLayerRegion.region.height)
-                .isEqual(rightLayerRegion.region.height)
+                .that(leftLayerRegion.region.bounds.height())
+                .isEqual(rightLayerRegion.region.bounds.height())
             check { "width" }
-                .that(leftLayerRegion.region.width)
-                .isEqual(rightLayerRegion.region.width)
+                .that(leftLayerRegion.region.bounds.width())
+                .isEqual(rightLayerRegion.region.bounds.width())
             leftLayerRegion.notOverlaps(rightLayerRegion.region)
             leftLayerRegion.plus(rightLayerRegion.region).coversExactly(startDisplayBounds)
         }
@@ -136,9 +136,11 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
             val pipWindowRegion =
                 visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
             check { "height" }
-                .that(pipWindowRegion.region.height)
-                .isLower(startDisplayBounds.height / 2)
-            check { "width" }.that(pipWindowRegion.region.width).isLower(startDisplayBounds.width)
+                .that(pipWindowRegion.region.bounds.height())
+                .isLower(startDisplayBounds.height() / 2)
+            check { "width" }
+                .that(pipWindowRegion.region.bounds.width())
+                .isLower(startDisplayBounds.width())
         }
     }
 
@@ -151,7 +153,7 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
                 ComponentNameMatcher.PIP_CONTENT_OVERLAY.layerMatchesAnyOf(it) && it.isVisible
             }
             pipLayerList.zipWithNext { previous, current ->
-                if (startDisplayBounds.width > startDisplayBounds.height) {
+                if (startDisplayBounds.width() > startDisplayBounds.height()) {
                     // Only verify when the display is landscape, because otherwise the final pip
                     // window can be to the left of the original secondary activity.
                     current.screenBounds.isToTheRightBottom(previous.screenBounds.region, 3)
@@ -162,8 +164,12 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
         }
         flicker.assertLayersEnd {
             val pipRegion = visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-            check { "height" }.that(pipRegion.region.height).isLower(startDisplayBounds.height / 2)
-            check { "width" }.that(pipRegion.region.width).isLower(startDisplayBounds.width)
+            check { "height" }
+                .that(pipRegion.region.bounds.height())
+                .isLower(startDisplayBounds.height() / 2)
+            check { "width" }
+                .that(pipRegion.region.bounds.width())
+                .isLower(startDisplayBounds.width())
         }
     }
 
@@ -175,7 +181,7 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
             invoke("secondaryLayerNotJumpToLeft") {
                 val secondaryVisibleRegion =
                     it.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                if (secondaryVisibleRegion.region.isNotEmpty) {
+                if (!secondaryVisibleRegion.region.isEmpty) {
                     check { "left" }.that(secondaryVisibleRegion.region.bounds.left).isGreater(0)
                 }
             }
@@ -199,7 +205,8 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
                         it.visibleRegion(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
                     val secondaryVisibleRegion =
                         it.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    overlayVisibleRegion.coversExactly(secondaryVisibleRegion.region)
+                    // TODO(b/340992001): replace coverAtLeast with coverExactly
+                    overlayVisibleRegion.coversAtLeast(secondaryVisibleRegion.region)
                 }
                 .then()
                 .isInvisible(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
@@ -222,7 +229,7 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
 
     companion object {
         /** {@inheritDoc} */
-        private var startDisplayBounds = Rect.EMPTY
+        private var startDisplayBounds = Rect()
         /**
          * Creates the test configurations.
          *

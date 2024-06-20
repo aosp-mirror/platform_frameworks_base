@@ -55,6 +55,7 @@ import android.window.TransitionInfo;
 import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.TransitionUtil;
 
@@ -71,7 +72,12 @@ public class TransitionAnimationHelper {
         final int changeFlags = change.getFlags();
         final boolean enter = TransitionUtil.isOpeningType(changeMode);
         final boolean isTask = change.getTaskInfo() != null;
-        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
+        final TransitionInfo.AnimationOptions options;
+        if (Flags.moveAnimationOptionsToChange()) {
+            options = change.getAnimationOptions();
+        } else {
+            options = info.getAnimationOptions();
+        }
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
         int animAttr = 0;
         boolean translucent = false;
@@ -246,7 +252,7 @@ public class TransitionAnimationHelper {
         if (!a.getShowBackdrop()) {
             return defaultColor;
         }
-        if (info.getAnimationOptions() != null
+        if (!Flags.moveAnimationOptionsToChange() && info.getAnimationOptions() != null
                 && info.getAnimationOptions().getBackgroundColor() != 0) {
             // If available use the background color provided through AnimationOptions
             return info.getAnimationOptions().getBackgroundColor();
@@ -280,6 +286,7 @@ public class TransitionAnimationHelper {
                 .setParent(rootLeash)
                 .setColorLayer()
                 .setOpaque(true)
+                .setCallsite("TransitionAnimationHelper.addBackgroundToTransition")
                 .build();
         startTransaction
                 .setLayer(animationBackgroundSurface, Integer.MIN_VALUE)

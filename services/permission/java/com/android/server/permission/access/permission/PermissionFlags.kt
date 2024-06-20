@@ -346,9 +346,18 @@ object PermissionFlags {
         return flags.hasBits(RUNTIME_GRANTED)
     }
 
-    fun isAppOpGranted(flags: Int): Boolean =
-        isPermissionGranted(flags) && !flags.hasBits(RESTRICTION_REVOKED) &&
-            !flags.hasBits(APP_OP_REVOKED)
+    fun isAppOpGranted(flags: Int): Boolean {
+        if (!isPermissionGranted(flags)) {
+            return false
+        }
+        if (flags.hasAnyBit(MASK_RESTRICTED)) {
+            return false
+        }
+        if (flags.hasBits(APP_OP_REVOKED)) {
+            return false
+        }
+        return true
+    }
 
     fun toApiFlags(flags: Int): Int {
         var apiFlags = 0
@@ -468,9 +477,7 @@ object PermissionFlags {
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT)) {
             flags = flags or UPGRADE_EXEMPT
         }
-        // We ignore whether FLAG_PERMISSION_APPLY_RESTRICTION is set here because previously
-        // platform may be relying on the old restorePermissionState() to get it correct later.
-        if (!flags.hasAnyBit(MASK_EXEMPT)) {
+        if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION)) {
             if (permission.isHardRestricted) {
                 flags = flags or RESTRICTION_REVOKED
             }

@@ -46,12 +46,67 @@ public class DataSourceParams {
     // after a while.
     public static final int PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT = 1;
 
-    public static DataSourceParams DEFAULTS =
-            new DataSourceParams(PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP);
+    public static DataSourceParams DEFAULTS = new DataSourceParams.Builder().build();
 
-    public DataSourceParams(@PerfettoDsBufferExhausted int bufferExhaustedPolicy) {
+    private DataSourceParams(@PerfettoDsBufferExhausted int bufferExhaustedPolicy,
+            boolean willNotifyOnStop, boolean noFlush) {
         this.bufferExhaustedPolicy = bufferExhaustedPolicy;
+        this.willNotifyOnStop = willNotifyOnStop;
+        this.noFlush = noFlush;
     }
 
     public final @PerfettoDsBufferExhausted int bufferExhaustedPolicy;
+    public final boolean willNotifyOnStop;
+    public final boolean noFlush;
+
+    /**
+     * DataSource Parameters builder
+     *
+     * @hide
+     */
+    public static final class Builder {
+        /**
+         * Specify behavior when running out of shared memory buffer space.
+         */
+        public Builder setBufferExhaustedPolicy(@PerfettoDsBufferExhausted int value) {
+            this.mBufferExhaustedPolicy = value;
+            return this;
+        }
+
+        /**
+         * If true, the data source is expected to ack the stop request through the
+         * NotifyDataSourceStopped() IPC. If false, the service won't wait for an ack.
+         * Set this parameter to false when dealing with potentially frozen producers
+         * that wouldn't be able to quickly ack the stop request.
+         *
+         * Default value: true
+         */
+        public Builder setWillNotifyOnStop(boolean value) {
+            this.mWillNotifyOnStop = value;
+            return this;
+        }
+
+        /**
+         * If true, the service won't emit flush requests for this data source. This
+         * allows the service to reduce the flush-related IPC traffic and better deal
+         * with frozen producers (see go/perfetto-frozen).
+         */
+        public Builder setNoFlush(boolean value) {
+            this.mNoFlush = value;
+            return this;
+        }
+
+        /**
+         * Build the DataSource parameters.
+         */
+        public DataSourceParams build() {
+            return new DataSourceParams(
+                    this.mBufferExhaustedPolicy, this.mWillNotifyOnStop, this.mNoFlush);
+        }
+
+        private @PerfettoDsBufferExhausted int mBufferExhaustedPolicy =
+                PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP;
+        private boolean mWillNotifyOnStop = true;
+        private boolean mNoFlush = false;
+    }
 }

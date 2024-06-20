@@ -35,18 +35,12 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
+import androidx.compose.ui.util.fastForEachReversed
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 
-/**
- * The type for the content of movable elements.
- *
- * TODO(b/317972419): Revert back to make this movable content have a single @Composable lambda
- *   parameter.
- */
-internal typealias MovableElementContent =
-    @Composable
-    (MovableElementContentScope, @Composable MovableElementContentScope.() -> Unit) -> Unit
+/** The type for the content of movable elements. */
+internal typealias MovableElementContent = @Composable (@Composable () -> Unit) -> Unit
 
 @Stable
 internal class SceneTransitionLayoutImpl(
@@ -55,7 +49,7 @@ internal class SceneTransitionLayoutImpl(
     internal var swipeSourceDetector: SwipeSourceDetector,
     internal var transitionInterceptionThreshold: Float,
     builder: SceneTransitionLayoutScope.() -> Unit,
-    private val coroutineScope: CoroutineScope,
+    internal val coroutineScope: CoroutineScope,
 ) {
     /**
      * The map of [Scene]s.
@@ -91,20 +85,20 @@ internal class SceneTransitionLayoutImpl(
      * The different values of a shared value keyed by a a [ValueKey] and the different elements and
      * scenes it is associated to.
      */
-    private var _sharedValues:
-        MutableMap<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>? =
+    private var _sharedValues: MutableMap<ValueKey, MutableMap<ElementKey?, SharedValue<*, *>>>? =
         null
-    internal val sharedValues:
-        MutableMap<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>
+    internal val sharedValues: MutableMap<ValueKey, MutableMap<ElementKey?, SharedValue<*, *>>>
         get() =
             _sharedValues
-                ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>()
-                    .also { _sharedValues = it }
+                ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SharedValue<*, *>>>().also {
+                    _sharedValues = it
+                }
 
     // TODO(b/317958526): Lazily allocate scene gesture handlers the first time they are needed.
     private val horizontalDraggableHandler: DraggableHandlerImpl
     private val verticalDraggableHandler: DraggableHandlerImpl
 
+    internal val elementStateScope = ElementStateScopeImpl(this)
     private var _userActionDistanceScope: UserActionDistanceScope? = null
     internal val userActionDistanceScope: UserActionDistanceScope
         get() =
@@ -112,6 +106,13 @@ internal class SceneTransitionLayoutImpl(
                 ?: UserActionDistanceScopeImpl(layoutImpl = this).also {
                     _userActionDistanceScope = it
                 }
+
+    /**
+     * The [LookaheadScope] of this layout, that can be used to compute offsets relative to the
+     * layout.
+     */
+    internal lateinit var lookaheadScope: LookaheadScope
+        private set
 
     init {
         updateScenes(builder)
@@ -131,6 +132,10 @@ internal class SceneTransitionLayoutImpl(
                 orientation = Orientation.Vertical,
                 coroutineScope = coroutineScope,
             )
+
+        // Make sure that the state is created on the same thread (most probably the main thread)
+        // than this STLImpl.
+        state.checkThread()
     }
 
     internal fun draggableHandler(orientation: Orientation): DraggableHandlerImpl =
@@ -186,48 +191,57 @@ internal class SceneTransitionLayoutImpl(
     }
 
     @Composable
-    internal fun Content(modifier: Modifier) {
+    internal fun Content(modifier: Modifier, swipeDetector: SwipeDetector) {
         Box(
             modifier
                 // Handle horizontal and vertical swipes on this layout.
                 // Note: order here is important and will give a slight priority to the vertical
                 // swipes.
-                .swipeToScene(horizontalDraggableHandler)
-                .swipeToScene(verticalDraggableHandler)
+                .swipeToScene(horizontalDraggableHandler, swipeDetector)
+                .swipeToScene(verticalDraggableHandler, swipeDetector)
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
-                val scenesToCompose =
-                    when (val state = state.transitionState) {
-                        is TransitionState.Idle -> listOf(scene(state.currentScene))
-                        is TransitionState.Transition -> {
-                            if (state.toScene != state.fromScene) {
-                                listOf(scene(state.toScene), scene(state.fromScene))
-                            } else {
-                                listOf(scene(state.fromScene))
-                            }
-                        }
-                    }
+                lookaheadScope = this
 
-                // Handle back events.
-                // TODO(b/290184746): Make sure that this works with SystemUI once we use
-                // SceneTransitionLayout in Flexiglass.
-                scene(state.transitionState.currentScene).userActions[Back]?.let { result ->
-                    // TODO(b/290184746): Handle predictive back and use result.distance if
-                    // specified.
-                    BackHandler {
-                        val targetScene = result.toScene
-                        if (state.canChangeScene(targetScene)) {
-                            with(state) { coroutineScope.onChangeScene(targetScene) }
-                        }
+                BackHandler()
+
+                scenesToCompose().fastForEach { scene -> key(scene.key) { scene.Content() } }
+            }
+        }
+    }
+
+    @Composable
+    private fun BackHandler() {
+        val targetSceneForBackOrNull =
+            scene(state.transitionState.currentScene).userActions[Back]?.toScene
+        BackHandler(enabled = targetSceneForBackOrNull != null) {
+            targetSceneForBackOrNull?.let { targetSceneForBack ->
+                // TODO(b/290184746): Handle predictive back and use result.distance if specified.
+                if (state.canChangeScene(targetSceneForBack)) {
+                    with(state) { coroutineScope.onChangeScene(targetSceneForBack) }
+                }
+            }
+        }
+    }
+
+    private fun scenesToCompose(): List<Scene> {
+        val transitions = state.currentTransitions
+        return if (transitions.isEmpty()) {
+            listOf(scene(state.transitionState.currentScene))
+        } else {
+            buildList {
+                val visited = mutableSetOf<SceneKey>()
+                fun maybeAdd(sceneKey: SceneKey) {
+                    if (visited.add(sceneKey)) {
+                        add(scene(sceneKey))
                     }
                 }
 
-                Box {
-                    scenesToCompose.fastForEach { scene ->
-                        val key = scene.key
-                        key(key) { scene.Content() }
-                    }
+                // Compose the new scene we are going to first.
+                transitions.fastForEachReversed { transition ->
+                    maybeAdd(transition.toScene)
+                    maybeAdd(transition.fromScene)
                 }
             }
         }
@@ -279,7 +293,15 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
                 width = fromSize.width
                 height = fromSize.height
             } else {
-                val size = lerp(fromSize, toSize, transition.progress)
+                val overscrollSpec = transition.currentOverscrollSpec
+                val progress =
+                    when {
+                        overscrollSpec == null -> transition.progress
+                        overscrollSpec.scene == transition.toScene -> 1f
+                        else -> 0f
+                    }
+
+                val size = lerp(fromSize, toSize, progress)
                 width = size.width.coerceAtLeast(0)
                 height = size.height.coerceAtLeast(0)
             }

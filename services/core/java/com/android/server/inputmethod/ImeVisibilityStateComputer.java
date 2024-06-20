@@ -47,6 +47,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
@@ -424,7 +425,8 @@ public final class ImeVisibilityStateComputer {
 
         switch (softInputVisibility) {
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
-                if (state.hasImeFocusChanged() && (!state.hasEditorFocused() || !doAutoShow)) {
+                if (state.hasImeFocusChanged() && (!state.hasEditorFocused() || (!doAutoShow
+                        && !Flags.refactorInsetsController()))) {
                     if (WindowManager.LayoutParams.mayUseInputMethod(state.getWindowFlags())) {
                         // There is no focus view, and this window will
                         // be behind any soft input window, so hide the
@@ -455,14 +457,22 @@ public final class ImeVisibilityStateComputer {
                 }
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
-                if (isForwardNavigation) {
+                if (Flags.refactorInsetsController()) {
+                    // In this case, we don't have to manipulate the requested visible types of
+                    // the WindowState, as they're already in the correct state
+                    break;
+                } else if (isForwardNavigation) {
                     if (DEBUG) Slog.v(TAG, "Window asks to hide input going forward");
                     return new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT,
                             SoftInputShowHideReason.HIDE_STATE_HIDDEN_FORWARD_NAV);
                 }
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
-                if (state.hasImeFocusChanged()) {
+                if (Flags.refactorInsetsController()) {
+                    // In this case, we don't have to manipulate the requested visible types of
+                    // the WindowState, as they're already in the correct state
+                    break;
+                } else if (state.hasImeFocusChanged()) {
                     if (DEBUG) Slog.v(TAG, "Window asks to hide input");
                     return new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT,
                             SoftInputShowHideReason.HIDE_ALWAYS_HIDDEN_STATE);
@@ -519,6 +529,9 @@ public final class ImeVisibilityStateComputer {
             // 2) SOFT_INPUT_STATE_VISIBLE state without an editor
             // 3) SOFT_INPUT_STATE_ALWAYS_VISIBLE state without an editor
             if (DEBUG) Slog.v(TAG, "Window without editor will hide input");
+            if (Flags.refactorInsetsController()) {
+                state.setRequestedImeVisible(false);
+            }
             return new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT,
                     SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR);
         }
@@ -548,7 +561,7 @@ public final class ImeVisibilityStateComputer {
             }
         }
         // Fallback to the focused window for some edge cases (e.g. relaunching the activity)
-        return mService.mCurFocusedWindow;
+        return mService.mImeBindingState.mFocusedWindow;
     }
 
     IBinder getWindowTokenFrom(ImeTargetWindowState windowState) {

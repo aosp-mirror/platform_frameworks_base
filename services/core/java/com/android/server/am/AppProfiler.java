@@ -711,7 +711,7 @@ public class AppProfiler {
                 }
             }
             if (profile != null) {
-                long startTime = SystemClock.currentThreadTimeMillis();
+                long startTime = SystemClock.uptimeMillis();
                 // skip background PSS calculation under the following situations:
                 //  - app is capturing camera imagery
                 //  - app is frozen and we have already collected PSS once.
@@ -721,7 +721,7 @@ public class AppProfiler {
                         || mService.isCameraActiveForUid(profile.mApp.uid)
                         || mService.mConstants.APP_PROFILER_PSS_PROFILING_DISABLED;
                 long pss = skipPSSCollection ? 0 : Debug.getPss(pid, tmp, null);
-                long endTime = SystemClock.currentThreadTimeMillis();
+                long endTime = SystemClock.uptimeMillis();
                 synchronized (mProfilerLock) {
                     if (pss != 0 && profile.getThread() != null
                             && profile.getSetProcState() == procState
@@ -852,7 +852,7 @@ public class AppProfiler {
                 }
             }
             if (profile != null) {
-                long startTime = SystemClock.currentThreadTimeMillis();
+                long startTime = SystemClock.uptimeMillis();
                 // skip background RSS calculation under the following situations:
                 //  - app is capturing camera imagery
                 //  - app is frozen and we have already collected RSS once.
@@ -862,7 +862,7 @@ public class AppProfiler {
                         || mService.isCameraActiveForUid(profile.mApp.uid)
                         || mService.mConstants.APP_PROFILER_PSS_PROFILING_DISABLED;
                 long rss = skipRSSCollection ? 0 : Debug.getRss(pid, null);
-                long endTime = SystemClock.currentThreadTimeMillis();
+                long endTime = SystemClock.uptimeMillis();
                 synchronized (mProfilerLock) {
                     if (rss != 0 && profile.getThread() != null
                             && profile.getSetProcState() == procState
@@ -1359,7 +1359,7 @@ public class AppProfiler {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    boolean updateLowMemStateLSP(int numCached, int numEmpty, int numTrimming, long now) {
+    void updateLowMemStateLSP(int numCached, int numEmpty, int numTrimming, long now) {
         int memFactor;
         if (mLowMemDetector != null && mLowMemDetector.isAvailable()) {
             memFactor = mLowMemDetector.getMemFactor();
@@ -1424,114 +1424,37 @@ public class AppProfiler {
 
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
-        if (mService.mConstants.USE_MODERN_TRIM) {
-            // Modern trim is not sent based on lowmem state
-            // Dispatch UI_HIDDEN to processes that need it
-            mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
-                final ProcessProfileRecord profile = app.mProfile;
-                final IApplicationThread thread;
-                final ProcessStateRecord state = app.mState;
-                if (state.hasProcStateChanged()) {
-                    state.setProcStateChanged(false);
-                }
-                int procState = app.mState.getCurProcState();
-                if (((procState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-                        && procState < ActivityManager.PROCESS_STATE_CACHED_ACTIVITY)
-                        || app.mState.isSystemNoUi()) && app.mProfile.hasPendingUiClean()) {
-                    // If this application is now in the background and it
-                    // had done UI, then give it the special trim level to
-                    // have it free UI resources.
-                    if ((thread = app.getThread()) != null) {
-                        try {
-                            thread.scheduleTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
-                            app.mProfile.setPendingUiClean(false);
-                        } catch (RemoteException e) {
 
+        // Dispatch UI_HIDDEN to processes that need it
+        mService.mProcessList.forEachLruProcessesLOSP(
+                true,
+                app -> {
+                    final ProcessProfileRecord profile = app.mProfile;
+                    final IApplicationThread thread;
+                    final ProcessStateRecord state = app.mState;
+                    if (state.hasProcStateChanged()) {
+                        state.setProcStateChanged(false);
+                    }
+                    int procState = app.mState.getCurProcState();
+                    if (((procState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+                                            && procState
+                                                    < ActivityManager.PROCESS_STATE_CACHED_ACTIVITY)
+                                    || app.mState.isSystemNoUi())
+                            && app.mProfile.hasPendingUiClean()) {
+                        // If this application is now in the background and it
+                        // had done UI, then give it the special trim level to
+                        // have it free UI resources.
+                        if ((thread = app.getThread()) != null) {
+                            try {
+                                thread.scheduleTrimMemory(
+                                        ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                                app.mProfile.setPendingUiClean(false);
+                            } catch (RemoteException e) {
+
+                            }
                         }
                     }
-                }
-            });
-            return false;
-        }
-
-        if (memFactor != ADJ_MEM_FACTOR_NORMAL) {
-            if (mLowRamStartTime == 0) {
-                mLowRamStartTime = now;
-            }
-            int fgTrimLevel;
-            switch (memFactor) {
-                case ADJ_MEM_FACTOR_CRITICAL:
-                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
-                    break;
-                case ADJ_MEM_FACTOR_LOW:
-                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
-                    break;
-                default:
-                    fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
-                    break;
-            }
-            int factor = numTrimming / 3;
-            int minFactor = 2;
-            if (mHasHomeProcess) minFactor++;
-            if (mHasPreviousProcess) minFactor++;
-            if (factor < minFactor) factor = minFactor;
-            final int actualFactor = factor;
-            final int[] step = {0};
-            final int[] curLevel = {ComponentCallbacks2.TRIM_MEMORY_COMPLETE};
-            mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
-                final ProcessProfileRecord profile = app.mProfile;
-                final int trimMemoryLevel = profile.getTrimMemoryLevel();
-                final ProcessStateRecord state = app.mState;
-                final int curProcState = state.getCurProcState();
-                IApplicationThread thread;
-                if (allChanged || state.hasProcStateChanged()) {
-                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor);
-                    state.setProcStateChanged(false);
-                }
-                trimMemoryUiHiddenIfNecessaryLSP(app);
-                if (curProcState >= ActivityManager.PROCESS_STATE_HOME && !app.isKilledByAm()) {
-                    scheduleTrimMemoryLSP(app, curLevel[0], "Trimming memory of ");
-                    profile.setTrimMemoryLevel(curLevel[0]);
-                    step[0]++;
-                    if (step[0] >= actualFactor) {
-                        step[0] = 0;
-                        switch (curLevel[0]) {
-                            case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                                curLevel[0] = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
-                                break;
-                            case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
-                                curLevel[0] = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
-                                break;
-                        }
-                    }
-                } else if (curProcState == ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
-                        && !app.isKilledByAm()) {
-                    scheduleTrimMemoryLSP(app, ComponentCallbacks2.TRIM_MEMORY_BACKGROUND,
-                            "Trimming memory of heavy-weight ");
-                    profile.setTrimMemoryLevel(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-                } else {
-                    scheduleTrimMemoryLSP(app, fgTrimLevel, "Trimming memory of fg ");
-                    profile.setTrimMemoryLevel(fgTrimLevel);
-                }
-            });
-        } else {
-            if (mLowRamStartTime != 0) {
-                mLowRamTimeSinceLastIdle += now - mLowRamStartTime;
-                mLowRamStartTime = 0;
-            }
-            mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
-                final ProcessProfileRecord profile = app.mProfile;
-                final IApplicationThread thread;
-                final ProcessStateRecord state = app.mState;
-                if (allChanged || state.hasProcStateChanged()) {
-                    mService.setProcessTrackerStateLOSP(app, trackerMemFactor);
-                    state.setProcStateChanged(false);
-                }
-                trimMemoryUiHiddenIfNecessaryLSP(app);
-                profile.setTrimMemoryLevel(0);
-            });
-        }
-        return allChanged;
+                });
     }
 
     @GuardedBy({"mService", "mProcLock"})

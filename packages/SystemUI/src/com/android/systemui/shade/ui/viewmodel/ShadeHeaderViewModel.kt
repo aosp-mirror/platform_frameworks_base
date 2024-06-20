@@ -22,14 +22,20 @@ import android.content.IntentFilter
 import android.icu.text.DateFormat
 import android.icu.text.DisplayContext
 import android.os.UserHandle
+import android.provider.Settings
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.SceneFamilies
+import com.android.systemui.scene.shared.model.TransitionKeys
 import com.android.systemui.shade.domain.interactor.PrivacyChipInteractor
 import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import java.util.Date
@@ -53,6 +59,9 @@ class ShadeHeaderViewModel
 constructor(
     @Application private val applicationScope: CoroutineScope,
     context: Context,
+    private val activityStarter: ActivityStarter,
+    private val sceneInteractor: SceneInteractor,
+    shadeInteractor: ShadeInteractor,
     mobileIconsInteractor: MobileIconsInteractor,
     val mobileIconsViewModel: MobileIconsViewModel,
     private val privacyChipInteractor: PrivacyChipInteractor,
@@ -84,6 +93,12 @@ constructor(
 
     /** Whether or not the privacy chip is enabled in the device privacy config. */
     val isPrivacyChipEnabled: StateFlow<Boolean> = privacyChipInteractor.isChipEnabled
+
+    /** Whether or not the Shade Header should be disabled based on disableFlags. */
+    val isDisabled: StateFlow<Boolean> =
+        shadeInteractor.isQsEnabled
+            .map { !it }
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
 
     private val longerPattern = context.getString(R.string.abbrev_wday_month_day_no_year_alarm)
     private val shorterPattern = context.getString(R.string.abbrev_month_day_no_year)
@@ -126,6 +141,23 @@ constructor(
     /** Notifies that the clock was clicked. */
     fun onClockClicked() {
         clockInteractor.launchClockActivity()
+    }
+
+    /** Notifies that the system icons container was clicked. */
+    fun onSystemIconContainerClicked() {
+        sceneInteractor.changeScene(
+            SceneFamilies.Home,
+            "ShadeHeaderViewModel.onSystemIconContainerClicked",
+            TransitionKeys.SlightlyFasterShadeCollapse,
+        )
+    }
+
+    /** Notifies that the shadeCarrierGroup was clicked. */
+    fun onShadeCarrierGroupClicked() {
+        activityStarter.postStartActivityDismissingKeyguard(
+            Intent(Settings.ACTION_WIRELESS_SETTINGS),
+            0
+        )
     }
 
     private fun updateDateTexts(invalidateFormats: Boolean) {

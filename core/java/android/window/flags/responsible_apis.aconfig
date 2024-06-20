@@ -49,3 +49,10 @@ flag {
     description: "Prevent BAL based on it is bound by foreground Uid but the app switch is stopped."
     bug: "283801068"
 }
+
+flag {
+    name: "bal_improved_metrics"
+    namespace: "responsible_apis"
+    description: "Improved metrics."
+    bug: "339245692"
+}

@@ -1497,6 +1497,36 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- @hide -->
+    <style name="PointerIconVectorStyleFillBlack">
+        <item name="pointerIconVectorFill">@color/black</item>
+        <item name="pointerIconVectorFillInverse">@color/white</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillGreen">
+        <item name="pointerIconVectorFill">#6DD58C</item>
+        <item name="pointerIconVectorFillInverse">#6DD58C</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillYellow">
+        <item name="pointerIconVectorFill">#FDD663</item>
+        <item name="pointerIconVectorFillInverse">#FDD663</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillPink">
+        <item name="pointerIconVectorFill">#F2B8B5</item>
+        <item name="pointerIconVectorFillInverse">#F2B8B5</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillBlue">
+        <item name="pointerIconVectorFill">#8AB4F8</item>
+        <item name="pointerIconVectorFillInverse">#8AB4F8</item>
+    </style>
+
+    <!-- @hide -->
     <style name="aerr_list_item" parent="Widget.Material.Light.Button.Borderless">
         <item name="minHeight">?attr/listPreferredItemHeightSmall</item>
         <item name="textAppearance">?attr/textAppearanceListItemSmall</item>
@@ -1684,5 +1714,18 @@ please see styles_device_defaults.xml.
         <item name="android:paddingEnd">8dp</item>
         <item name="android:paddingStart">8dp</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="AccessibilityButtonChooserDialog"
+           parent="@style/Theme.DeviceDefault.Resolver">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+
+    <!--
+        TODO(b/309578419): Make activities go edge-to-edge properly and then remove this.
+    -->
+    <style name="GrantCredentialsPermissionActivity"
+           parent="@style/Theme.DeviceDefault.Light.DialogWhenLarge">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 </resources>

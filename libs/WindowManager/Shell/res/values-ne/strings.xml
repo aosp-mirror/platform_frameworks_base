@@ -69,7 +69,7 @@
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> कोल्याप्स गर्नुहोस्"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> का सेटिङहरू"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"बबल खारेज गर्नुहोस्"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"वार्तालाप बबलको रूपमा नदेखाइयोस्"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"वार्तालाप बबलको रूपमा नदेखाउनुहोस्"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"बबलहरू प्रयोग गरी कुराकानी गर्नुहोस्"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"नयाँ वार्तालापहरू तैरने आइकन वा बबलका रूपमा देखिन्छन्। बबल खोल्न ट्याप गर्नुहोस्। बबल सार्न सो बबललाई ड्र्याग गर्नुहोस्।"</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"जुनसुकै बेला बबलहरू नियन्त्रण गर्नुहोस्"</string>
@@ -99,7 +99,7 @@
     <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"यो एप तपाईंको स्क्रिनमा अझ राम्रोसँग देखियोस् भन्नाका लागि तपाईं सो एप रिस्टार्ट गर्न सक्नुहुन्छ तर तपाईंले अहिलेसम्म गरेका क्रियाकलाप वा सेभ गर्न बाँकी परिवर्तनहरू हट्न सक्छन्"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"रद्द गर्नुहोस्"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"रिस्टार्ट गर्नुहोस्"</string>
-    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"फेरि नदेखाइयोस्"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"फेरि नदेखाउनुहोस्"</string>
     <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"यो एप सार्न डबल\nट्याप गर्नुहोस्"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ठुलो बनाउनुहोस्"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"मिनिमाइज गर्नुहोस्"</string>
@@ -117,4 +117,6 @@
     <string name="close_text" msgid="4986518933445178928">"बन्द गर्नुहोस्"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"मेनु बन्द गर्नुहोस्"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"मेनु खोल्नुहोस्"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"स्क्रिन ठुलो बनाउनुहोस्"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"स्क्रिन स्न्याप गर्नुहोस्"</string>
 </resources>

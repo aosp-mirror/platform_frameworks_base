@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "enable_rlp_callbacks_in_media_router2"
+    is_exported: true
     namespace: "media_solutions"
     description: "Make RouteListingPreference getter and callbacks public in MediaRouter2."
     bug: "281067101"
@@ -17,16 +18,10 @@ flag {
 
 flag {
     name: "enable_audio_policies_device_and_bluetooth_controller"
+    is_exported: true
     namespace: "media_solutions"
     description: "Use Audio Policies implementation for device and Bluetooth route controllers."
     bug: "280576228"
-}
-
-flag {
-    name: "disable_screen_off_broadcast_receiver"
-    namespace: "media_solutions"
-    description: "Disables the broadcast receiver that prevents scanning when the screen is off."
-    bug: "304234628"
 }
 
 flag {
@@ -45,6 +40,7 @@ flag {
 
 flag {
     name: "enable_new_media_route_2_info_types"
+    is_exported: true
     namespace: "media_solutions"
     description: "Enables the following type constants in MediaRoute2Info: CAR, COMPUTER, GAME_CONSOLE, SMARTPHONE, SMARTWATCH, TABLET, TABLET_DOCKED. Note that this doesn't gate any behavior. It only guards some API int symbols."
     bug: "301713440"
@@ -52,6 +48,7 @@ flag {
 
 flag {
     name: "enable_privileged_routing_for_media_routing_control"
+    is_exported: true
     namespace: "media_solutions"
     description: "Allow access to privileged routing capabilities to MEDIA_ROUTING_CONTROL holders."
     bug: "305919655"
@@ -59,6 +56,7 @@ flag {
 
 flag {
     name: "enable_cross_user_routing_in_media_router2"
+    is_exported: true
     namespace: "media_solutions"
     description: "Allows clients of privileged MediaRouter2 that hold INTERACT_ACROSS_USERS_FULL to control routing across users."
     bug: "288580225"
@@ -73,6 +71,7 @@ flag {
 
 flag {
      name: "enable_built_in_speaker_route_suitability_statuses"
+     is_exported: true
      namespace: "media_solutions"
      description: "Make MediaRoute2Info provide information about routes suitability for transfer."
      bug: "279555229"
@@ -80,6 +79,7 @@ flag {
 
 flag {
     name: "enable_notifying_activity_manager_with_media_session_status_change"
+    is_exported: true
     namespace: "media_solutions"
     description: "Notify ActivityManager with the changes in playback state of the media session."
     bug: "295518668"
@@ -87,6 +87,7 @@ flag {
 
 flag {
     name: "enable_get_transferable_routes"
+    is_exported: true
     namespace: "media_solutions"
     description: "Exposes RoutingController#getTransferableRoutes() (previously hidden) to the public API."
     bug: "323154573"
@@ -100,7 +101,18 @@ flag {
 }
 
 flag {
+    name: "enable_mr2_service_non_main_bg_thread"
+    namespace: "media_solutions"
+    description: "Enables the use of a background thread in the media routing framework, instead of using the main thread."
+    bug: "310145678"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_screen_off_scanning"
+    is_exported: true
     namespace: "media_solutions"
     description: "Enable new MediaRouter2 API to enable watch companion apps to scan while the phone screen is off."
     bug: "281072508"
@@ -110,5 +122,15 @@ flag {
     name: "enable_null_session_in_media_browser_service"
     namespace: "media_solutions"
     description: "Enables apps owning a MediaBrowserService to disconnect all connected browsers."
-    bug: "263520343"
+    bug: "185136506"
+}
+
+flag {
+    name: "enable_prevention_of_manager_scans_when_no_apps_scan"
+    namespace: "media_solutions"
+    description: "Prevents waking up route providers when no apps are scanning, even if SysUI or Settings are scanning."
+    bug: "319604673"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

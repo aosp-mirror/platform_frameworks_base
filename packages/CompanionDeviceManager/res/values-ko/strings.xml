@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"기기"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"앱이 <xliff:g id="DEVICE_NAME">%1$s</xliff:g>에서 이러한 권한에 액세스할 수 있게 됩니다."</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;이 휴대전화의 이 정보에 액세스하도록 허용합니다."</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;에서 휴대전화의 앱을 스트리밍하도록 허용하시겠습니까?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s에서 오디오, 사진, 비밀번호, 메시지 등 휴대전화에 표시되거나 휴대전화에서 재생되는 모든 항목에 액세스할 수 있습니다.&lt;br/&gt;&lt;br/&gt;이 권한에 대한 액세스를 삭제할 때까지 %1$s에서 앱을 스트리밍할 수 있습니다."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"교차 기기 서비스"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> 대신 기기 간에 앱을 스트리밍할 수 있는 권한을 요청하고 있습니다."</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> 대신 연결된 기기의 앱을 표시하고 스트리밍할 권한을 요청하고 있습니다."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;이 휴대전화에서 이 정보에 액세스하도록 허용"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play 서비스"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> 대신 휴대전화의 사진, 미디어, 알림에 액세스할 수 있는 권한을 요청하고 있습니다."</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; 기기가 이 작업을 수행하도록 허용하시겠습니까?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;에서 휴대전화의 앱 및 시스템 기능을 스트리밍하도록 허용하시겠습니까?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s에서 오디오, 사진, 결제 정보, 비밀번호, 메시지 등 휴대전화에 표시되거나 휴대전화에서 재생되는 모든 항목에 액세스할 수 있습니다.&lt;br/&gt;&lt;br/&gt;이 권한에 대한 액세스를 삭제할 때까지 %1$s에서 앱 및 시스템 기능을 스트리밍할 수 있습니다."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 <xliff:g id="DEVICE_NAME">%2$s</xliff:g> 대신 근처 기기로 앱 및 기타 시스템 기능을 스트리밍할 권한을 요청하고 있습니다."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"기기"</string>
     <string name="summary_generic" msgid="1761976003668044801">"이 앱에서 휴대전화와 선택한 기기 간에 정보(예: 발신자 이름)를 동기화할 수 있게 됩니다."</string>

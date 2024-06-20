@@ -40,9 +40,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 
@@ -56,6 +60,9 @@ interface DeviceEntryFingerprintAuthRepository {
      * actively authenticating.
      */
     val isRunning: Flow<Boolean>
+
+    /** Whether the fingerprint sensor is actively authenticating. */
+    val isEngaged: StateFlow<Boolean>
 
     /**
      * Fingerprint sensor type present on the device, null if fingerprint sensor is not available.
@@ -176,6 +183,17 @@ constructor(
                     mainDispatcher
                 ) // keyguardUpdateMonitor requires registration on main thread.
 
+    override val isEngaged: StateFlow<Boolean> =
+        authenticationStatus
+            .map { it.isEngaged }
+            .filterNotNull()
+            .map { it }
+            .stateIn(
+                scope = scope,
+                started = WhileSubscribed(),
+                initialValue = false,
+            )
+
     // TODO(b/322555228) Remove after consolidating device entry auth messages with BP auth messages
     //  in BiometricStatusRepository
     /**
@@ -259,7 +277,6 @@ constructor(
                                 if (biometricSourceType != BiometricSourceType.FINGERPRINT) {
                                     return
                                 }
-
                                 trySendWithFailureLogging(
                                     authenticationStatus,
                                     TAG,

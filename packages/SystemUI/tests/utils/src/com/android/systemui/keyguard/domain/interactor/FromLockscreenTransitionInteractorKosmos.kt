@@ -16,13 +16,13 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 
 var Kosmos.fromLockscreenTransitionInteractor by
     Kosmos.Fixture {
@@ -33,10 +33,10 @@ var Kosmos.fromLockscreenTransitionInteractor by
             bgDispatcher = testDispatcher,
             mainDispatcher = testDispatcher,
             keyguardInteractor = keyguardInteractor,
-            flags = featureFlagsClassic,
             shadeRepository = shadeRepository,
             powerInteractor = powerInteractor,
             glanceableHubTransitions = glanceableHubTransitions,
             swipeToDismissInteractor = swipeToDismissInteractor,
+            keyguardOcclusionInteractor = keyguardOcclusionInteractor,
         )
     }

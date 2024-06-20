@@ -16,78 +16,73 @@
 
 package com.android.systemui.biometrics
 
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
-import com.android.systemui.flags.Flags
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.user.domain.UserDomainLayerModule
-import dagger.BindsInstance
-import dagger.Component
+import com.android.systemui.flags.andSceneContainer
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.shadeTestUtil
+import com.android.systemui.testKosmos
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.verifyZeroInteractions
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class AuthDialogPanelInteractionDetectorTest(flags: FlagsParameterization?) : SysuiTestCase() {
 
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent : SysUITestComponent<AuthDialogPanelInteractionDetector> {
-
-        val shadeRepository: FakeShadeRepository
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-            ): TestComponent
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
         }
     }
 
-    private val testComponent: TestComponent =
-        DaggerAuthDialogPanelInteractionDetectorTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule { set(Flags.FULL_SCREEN_USER_SWITCHER, true) },
-            )
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
-    private val detector: AuthDialogPanelInteractionDetector = testComponent.underTest
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
 
     @Mock private lateinit var action: Runnable
+
+    lateinit var detector: AuthDialogPanelInteractionDetector
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        detector =
+            AuthDialogPanelInteractionDetector(
+                kosmos.applicationCoroutineScope,
+                { kosmos.shadeInteractor },
+            )
     }
 
     @Test
     fun enableDetector_expand_shouldRunAction() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN shade is closed and detector is enabled
-            shadeRepository.setLegacyShadeExpansion(0f)
+            shadeTestUtil.setShadeExpansion(0f)
             detector.enable(action)
             runCurrent()
 
             // WHEN shade expands
-            shadeRepository.setLegacyShadeTracking(true)
-            shadeRepository.setLegacyShadeExpansion(.5f)
+            shadeTestUtil.setTracking(true)
+            shadeTestUtil.setShadeExpansion(.5f)
             runCurrent()
 
             // THEN action was run
@@ -96,9 +91,9 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
 
     @Test
     fun enableDetector_isUserInteractingTrue_shouldNotPostRunnable() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN isInteracting starts true
-            shadeRepository.setLegacyShadeTracking(true)
+            shadeTestUtil.setTracking(true)
             runCurrent()
             detector.enable(action)
 
@@ -108,33 +103,34 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
 
     @Test
     fun enableDetector_shadeExpandImmediate_shouldNotPostRunnable() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN shade is closed and detector is enabled
-            shadeRepository.setLegacyShadeExpansion(0f)
+            shadeTestUtil.setShadeExpansion(0f)
             detector.enable(action)
             runCurrent()
 
             // WHEN shade expands fully instantly
-            shadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             runCurrent()
 
             // THEN action not run
             verifyZeroInteractions(action)
+            detector.disable()
         }
 
     @Test
     fun disableDetector_shouldNotPostRunnable() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN shade is closed and detector is enabled
-            shadeRepository.setLegacyShadeExpansion(0f)
+            shadeTestUtil.setShadeExpansion(0f)
             detector.enable(action)
             runCurrent()
 
             // WHEN detector is disabled and shade opens
             detector.disable()
             runCurrent()
-            shadeRepository.setLegacyShadeTracking(true)
-            shadeRepository.setLegacyShadeExpansion(.5f)
+            shadeTestUtil.setTracking(true)
+            shadeTestUtil.setShadeExpansion(.5f)
             runCurrent()
 
             // THEN action not run
@@ -143,17 +139,18 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
 
     @Test
     fun enableDetector_beginCollapse_shouldNotPostRunnable() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN shade is open and detector is enabled
-            shadeRepository.setLegacyShadeExpansion(1f)
+            shadeTestUtil.setShadeExpansion(1f)
             detector.enable(action)
             runCurrent()
 
             // WHEN shade begins to collapse
-            shadeRepository.setLegacyShadeExpansion(.5f)
+            shadeTestUtil.programmaticCollapseShade()
             runCurrent()
 
             // THEN action not run
             verifyZeroInteractions(action)
+            detector.disable()
         }
 }

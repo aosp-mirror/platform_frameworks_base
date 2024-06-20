@@ -21,8 +21,8 @@ import android.content.Context
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.UserHandle
-import android.test.suitebuilder.annotation.SmallTest
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
@@ -43,7 +43,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.util.concurrent.Executor
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @SmallTest
 class UserBroadcastDispatcherTest : SysuiTestCase() {

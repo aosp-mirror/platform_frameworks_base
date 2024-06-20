@@ -23,7 +23,6 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
-import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
@@ -49,7 +48,6 @@ import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils;
 import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -85,7 +83,7 @@ final class RemovePackageHelper {
     }
 
     public void removeCodePath(File codePath) {
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             removeCodePathLI(codePath);
         }
     }
@@ -135,7 +133,7 @@ final class RemovePackageHelper {
 
     // Used for system apps only
     public void removePackage(AndroidPackage pkg, boolean chatty) {
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             removePackageLI(pkg, chatty);
         }
     }
@@ -263,11 +261,6 @@ final class RemovePackageHelper {
         // Step 1: always destroy app profiles.
         mAppDataHelper.destroyAppProfilesLIF(packageName);
 
-        // Everything else is preserved if the DELETE_KEEP_DATA flag is on
-        if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
-            return;
-        }
-
         final AndroidPackage pkg;
         final SharedUserSetting sus;
         synchronized (mPm.mLock) {
@@ -284,9 +277,20 @@ final class RemovePackageHelper {
             resolvedPkg = PackageImpl.buildFakeForDeletion(packageName, ps.getVolumeUuid());
         }
 
+        int appDataDeletionFlags = FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL;
+        // Personal data is preserved if the DELETE_KEEP_DATA flag is on
+        if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
+            if ((flags & PackageManager.DELETE_ARCHIVE) != 0) {
+                mAppDataHelper.clearAppDataLIF(resolvedPkg, userId,
+                        appDataDeletionFlags | Installer.FLAG_CLEAR_CACHE_ONLY);
+                mAppDataHelper.clearAppDataLIF(resolvedPkg, userId,
+                        appDataDeletionFlags | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+            }
+            return;
+        }
+
         // Step 2: destroy app data.
-        mAppDataHelper.destroyAppDataLIF(resolvedPkg, userId,
-                FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
+        mAppDataHelper.destroyAppDataLIF(resolvedPkg, userId, appDataDeletionFlags);
         if (userId != UserHandle.USER_ALL) {
             ps.setCeDataInode(-1, userId);
             ps.setDeDataInode(-1, userId);
@@ -352,7 +356,7 @@ final class RemovePackageHelper {
 
     // Called to clean up disabled system packages
     public void removePackageData(final PackageSetting deletedPs, @NonNull int[] allUserHandles) {
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             removePackageDataLIF(deletedPs, UserHandle.USER_ALL, allUserHandles,
                     new PackageRemovedInfo(), /* flags= */ 0, /* writeSettings= */ false);
         }
@@ -372,11 +376,14 @@ final class RemovePackageHelper {
             @NonNull PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
         String packageName = deletedPs.getPackageName();
         if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + deletedPs);
+        final boolean shouldDeletePackageSetting =
+                shouldDeletePackageSetting(deletedPs, targetUserId, allUserHandles, flags);
         // Retrieve object to delete permissions for shared user later on
         final AndroidPackage deletedPkg = deletedPs.getPkg();
 
         // Delete all the data and states related to this package.
-        clearPackageStateForUserLIF(deletedPs, targetUserId, flags);
+        clearPackageStateForUserLIF(deletedPs,
+                shouldDeletePackageSetting ? UserHandle.USER_ALL : targetUserId, flags);
 
         // Delete from mPackages
         removePackageLI(packageName, (flags & PackageManager.DELETE_CHATTY) != 0);
@@ -388,7 +395,7 @@ final class RemovePackageHelper {
             deletedPs.setPkg(null);
         }
 
-        if (shouldDeletePackageSetting(deletedPs, targetUserId, allUserHandles, flags)) {
+        if (shouldDeletePackageSetting) {
             // Delete from mSettings
             final SparseBooleanArray changedUsers = new SparseBooleanArray();
             synchronized (mPm.mLock) {
@@ -481,7 +488,7 @@ final class RemovePackageHelper {
 
     void cleanUpResources(@Nullable String packageName, @Nullable File codeFile,
                           @Nullable String[] instructionSets) {
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             cleanUpResourcesLI(codeFile, instructionSets);
         }
         if (packageName == null) {
@@ -511,32 +518,9 @@ final class RemovePackageHelper {
         }
 
         removeCodePathLI(codeFile);
-        removeDexFilesLI(allCodePaths, instructionSets);
-    }
 
-    @GuardedBy("mPm.mInstallLock")
-    private void removeDexFilesLI(@NonNull List<String> allCodePaths,
-                                  @Nullable  String[] instructionSets) {
-        if (!allCodePaths.isEmpty()) {
-            if (instructionSets == null) {
-                throw new IllegalStateException("instructionSet == null");
-            }
-            // TODO(b/265813358): ART Service currently doesn't support deleting optimized artifacts
-            // relative to an arbitrary APK path. Skip this and rely on its file GC instead.
-            if (!DexOptHelper.useArtService()) {
-                String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-                for (String codePath : allCodePaths) {
-                    for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                        try {
-                            mPm.mInstaller.rmdex(codePath, dexCodeInstructionSet);
-                        } catch (LegacyDexoptDisabledException e) {
-                            throw new RuntimeException(e);
-                        } catch (Installer.InstallerException ignored) {
-                        }
-                    }
-                }
-            }
-        }
+        // TODO(b/265813358): ART Service currently doesn't support deleting optimized artifacts
+        // relative to an arbitrary APK path. Skip this and rely on its file GC instead.
     }
 
     void cleanUpForMoveInstall(String volumeUuid, String packageName, String fromCodePath) {
@@ -544,7 +528,7 @@ final class RemovePackageHelper {
         final File codeFile = new File(Environment.getDataAppDirectory(volumeUuid), toPathName);
         Slog.d(TAG, "Cleaning up " + packageName + " on " + volumeUuid);
         final int[] userIds = mPm.mUserManager.getUserIds();
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             // Clean up both app data and code
             // All package moves are frozen until finished
 

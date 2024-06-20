@@ -48,18 +48,7 @@ class SettingsGlobalChangeFlowTest {
     }
 
     @Test
-    fun settingsGlobalChangeFlow_collectAfterValueChanged_onlyKeepLatest() = runBlocking {
-        var value by context.settingsGlobalBoolean(TEST_NAME)
-        value = false
-
-        val flow = context.settingsGlobalChangeFlow(TEST_NAME)
-        value = true
-
-        assertThat(flow.toListWithTimeout()).hasSize(1)
-    }
-
-    @Test
-    fun settingsGlobalChangeFlow_collectBeforeValueChanged_getBoth() = runBlocking {
+    fun settingsGlobalChangeFlow_changed() = runBlocking {
         var value by context.settingsGlobalBoolean(TEST_NAME)
         value = false
 
@@ -69,7 +58,7 @@ class SettingsGlobalChangeFlowTest {
         delay(100)
         value = true
 
-        assertThat(listDeferred.await()).hasSize(2)
+        assertThat(listDeferred.await().size).isAtLeast(2)
     }
 
     private companion object {

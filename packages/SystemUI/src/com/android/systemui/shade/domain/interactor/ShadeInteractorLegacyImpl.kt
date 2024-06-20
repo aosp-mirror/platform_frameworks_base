@@ -21,6 +21,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -45,8 +46,11 @@ constructor(
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
 ) : BaseShadeInteractor {
-    /** The amount [0-1] that the shade has been opened */
-    override val shadeExpansion: Flow<Float> =
+    /**
+     * The amount [0-1] that the shade has been opened. Uses stateIn to avoid redundant calculations
+     * in downstream flows.
+     */
+    override val shadeExpansion: StateFlow<Float> =
         combine(
                 repository.lockscreenShadeExpansion,
                 keyguardRepository.statusBarState,
@@ -62,7 +66,8 @@ constructor(
                 when (statusBarState) {
                     // legacyShadeExpansion is 1 instead of 0 when QS is expanded
                     StatusBarState.SHADE ->
-                        if (!splitShadeEnabled && qsExpansion > 0f) 0f else legacyShadeExpansion
+                        if (!splitShadeEnabled && qsExpansion > 0f) 1f - qsExpansion
+                        else legacyShadeExpansion
                     StatusBarState.KEYGUARD -> lockscreenShadeExpansion
                     // dragDownAmount, which drives lockscreenShadeExpansion resets to 0f when
                     // the pointer is lifted and the lockscreen shade is fully expanded
@@ -70,6 +75,7 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Eagerly, 0f)
 
     override val qsExpansion: StateFlow<Float> = repository.qsExpansion
 
@@ -98,6 +104,8 @@ constructor(
 
     override val isUserInteractingWithQs: Flow<Boolean> =
         userInteractingFlow(repository.legacyQsTracking, repository.qsExpansion)
+
+    override val shadeMode: StateFlow<ShadeMode> = repository.shadeMode
 
     /**
      * Return a flow for whether a user is interacting with an expandable shade component using

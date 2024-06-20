@@ -21,9 +21,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.platform.test.annotations.DisableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -49,7 +49,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Optional;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
 public class LegacyNotificationIconAreaControllerImplTest extends SysuiTestCase {

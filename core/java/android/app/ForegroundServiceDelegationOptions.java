@@ -92,6 +92,16 @@ public class ForegroundServiceDelegationOptions {
      */
     public final @DelegationService int mDelegationService;
 
+    /**
+     * The optional notification Id of the foreground service delegation.
+     */
+    public final int mClientNotificationId;
+
+    /**
+     * The optional notification of the foreground service delegation.
+     */
+    public final @Nullable Notification mClientNotification;
+
     public ForegroundServiceDelegationOptions(int clientPid,
             int clientUid,
             @NonNull String clientPackageName,
@@ -100,6 +110,21 @@ public class ForegroundServiceDelegationOptions {
             @NonNull String clientInstanceName,
             int foregroundServiceTypes,
             @DelegationService int delegationService) {
+        this(clientPid, clientUid, clientPackageName, clientAppThread, isSticky,
+                clientInstanceName, foregroundServiceTypes, delegationService,
+                0 /* notificationId */, null /* notification */);
+    }
+
+    public ForegroundServiceDelegationOptions(int clientPid,
+            int clientUid,
+            @NonNull String clientPackageName,
+            @NonNull IApplicationThread clientAppThread,
+            boolean isSticky,
+            @NonNull String clientInstanceName,
+            int foregroundServiceTypes,
+            @DelegationService int delegationService,
+            int clientNotificationId,
+            @Nullable Notification clientNotification) {
         mClientPid = clientPid;
         mClientUid = clientUid;
         mClientPackageName = clientPackageName;
@@ -108,6 +133,8 @@ public class ForegroundServiceDelegationOptions {
         mClientInstanceName = clientInstanceName;
         mForegroundServiceTypes = foregroundServiceTypes;
         mDelegationService = delegationService;
+        mClientNotificationId = clientNotificationId;
+        mClientNotification = clientNotification;
     }
 
     /**
@@ -201,7 +228,8 @@ public class ForegroundServiceDelegationOptions {
         int mClientPid; // The actual app PID
         int mClientUid; // The actual app UID
         String mClientPackageName; // The actual app's package name
-        int mClientNotificationId; // The actual app's notification
+        int mClientNotificationId; // The actual app's notification id
+        Notification mClientNotification; // The actual app's notification
         IApplicationThread mClientAppThread; // The actual app's app thread
         boolean mSticky; // Is it a sticky service
         String mClientInstanceName; // The delegation service instance name
@@ -233,10 +261,12 @@ public class ForegroundServiceDelegationOptions {
         }
 
         /**
-         * Set the notification ID from the client app.
+         * Set the notification from the client app.
          */
-        public Builder setClientNotificationId(int clientNotificationId) {
+        public Builder setClientNotification(int clientNotificationId,
+                @Nullable Notification clientNotification) {
             mClientNotificationId = clientNotificationId;
+            mClientNotification = clientNotification;
             return this;
         }
 
@@ -291,7 +321,9 @@ public class ForegroundServiceDelegationOptions {
                 mSticky,
                 mClientInstanceName,
                 mForegroundServiceTypes,
-                mDelegationService
+                mDelegationService,
+                mClientNotificationId,
+                mClientNotification
             );
         }
     }

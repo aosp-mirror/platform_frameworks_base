@@ -20,10 +20,13 @@ import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromGlanceableHubTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,7 +34,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 
 /**
  * Breaks down GLANCEABLE_HUB->LOCKSCREEN transition into discrete steps for corresponding views to
@@ -46,23 +48,27 @@ constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_LOCKSCREEN_DURATION,
-            from = KeyguardState.GLANCEABLE_HUB,
-            to = KeyguardState.LOCKSCREEN,
-        )
+        animationFlow
+            .setup(
+                duration = TO_LOCKSCREEN_DURATION,
+                edge = Edge.create(from = Scenes.Communal, to = LOCKSCREEN),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = GLANCEABLE_HUB, to = LOCKSCREEN),
+            )
 
     val keyguardAlpha: Flow<Float> =
-        transitionAnimation
-            .sharedFlow(
-                duration = 167.milliseconds,
-                startTime = 167.milliseconds,
-                onStep = { it },
-                onFinish = { 1f },
-                onCancel = { 0f },
-                name = "GLANCEABLE_HUB->LOCKSCREEN: keyguardAlpha",
-            )
-            .onStart { emit(0f) }
+        transitionAnimation.sharedFlow(
+            duration = 167.milliseconds,
+            startTime = 167.milliseconds,
+            onStep = { it },
+            onFinish = { 1f },
+            onCancel = { 0f },
+            name = "GLANCEABLE_HUB->LOCKSCREEN: keyguardAlpha",
+        )
+
+    // Show UMO as long as keyguard is not visible.
+    val showUmo: Flow<Boolean> = keyguardAlpha.map { alpha -> alpha == 0f }
 
     val keyguardTranslationX: Flow<StateToValue> =
         configurationInteractor
@@ -72,12 +78,18 @@ constructor(
                     duration = TO_LOCKSCREEN_DURATION,
                     onStep = { value -> -translatePx + value * translatePx },
                     interpolator = EMPHASIZED,
-                    onCancel = { -translatePx.toFloat() },
+                    // Move notifications back to their original position since they can be
+                    // accessed from the shade, and also keyguard elements in case the animation
+                    // is cancelled.
+                    onFinish = { 0f },
+                    onCancel = { 0f },
                     name = "GLANCEABLE_HUB->LOCKSCREEN: keyguardTranslationX"
                 )
             }
 
     val notificationAlpha: Flow<Float> = keyguardAlpha
+
+    val shortcutsAlpha: Flow<Float> = keyguardAlpha
 
     val notificationTranslationX: Flow<Float> =
         keyguardTranslationX.map { it.value }.filterNotNull()

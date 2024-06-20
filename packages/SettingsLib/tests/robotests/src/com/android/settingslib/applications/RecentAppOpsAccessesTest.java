@@ -32,14 +32,17 @@ import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserProperties;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.LongSparseArray;
 
 import com.android.settingslib.testutils.shadow.ShadowPermissionChecker;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -58,6 +61,8 @@ import java.util.concurrent.TimeUnit;
 @Config(shadows = {ShadowPermissionChecker.class})
 public class RecentAppOpsAccessesTest {
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     private static final int TEST_UID = 1234;
     private static final long NOW = 1_000_000_000;  // Approximately 9/8/2001
     private static final long ONE_MIN_AGO = NOW - TimeUnit.MINUTES.toMillis(1);
@@ -72,6 +77,8 @@ public class RecentAppOpsAccessesTest {
     private AppOpsManager mAppOpsManager;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private UserProperties mUserProperties;
     @Mock
     private Clock mClock;
     private Context mContext;
@@ -129,6 +136,58 @@ public class RecentAppOpsAccessesTest {
         assertThat(requests.get(0).accessFinishTime).isEqualTo(ONE_MIN_AGO);
         assertThat(requests.get(1).packageName).isEqualTo(TEST_PACKAGE_NAMES[1]);
         assertThat(requests.get(1).accessFinishTime).isEqualTo(TWENTY_THREE_HOURS_AGO);
+    }
+
+    @Test
+    public void testGetAppList_quietModeDisabled_shouldFilterRecentAccesses() {
+        mSetFlagsRule.enableFlags(
+                android.multiuser.Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_HANDLE_INTERLEAVED_SETTINGS_FOR_PRIVATE_SPACE);
+        when(mUserManager.isQuietModeEnabled(any())).thenReturn(false);
+
+        List<RecentAppOpsAccess.Access> requests = mRecentAppOpsAccess.getAppList(false);
+        // Only two of the apps have requested location within 15 min.
+        assertThat(requests).hasSize(2);
+        // Make sure apps are ordered by recency
+        assertThat(requests.get(0).packageName).isEqualTo(TEST_PACKAGE_NAMES[0]);
+        assertThat(requests.get(0).accessFinishTime).isEqualTo(ONE_MIN_AGO);
+        assertThat(requests.get(1).packageName).isEqualTo(TEST_PACKAGE_NAMES[1]);
+        assertThat(requests.get(1).accessFinishTime).isEqualTo(TWENTY_THREE_HOURS_AGO);
+    }
+
+    @Test
+    public void testGetAppList_quietModeEnabledShowInQuietDefault_shouldFilterRecentAccesses() {
+        mSetFlagsRule.enableFlags(
+                android.multiuser.Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_HANDLE_INTERLEAVED_SETTINGS_FOR_PRIVATE_SPACE);
+        when(mUserManager.isQuietModeEnabled(any())).thenReturn(true);
+        when(mUserManager.getUserProperties(any())).thenReturn(mUserProperties);
+        when(mUserProperties.getShowInQuietMode())
+                .thenReturn(UserProperties.SHOW_IN_QUIET_MODE_DEFAULT);
+
+        List<RecentAppOpsAccess.Access> requests = mRecentAppOpsAccess.getAppList(false);
+        // Only two of the apps have requested location within 15 min.
+        assertThat(requests).hasSize(2);
+        // Make sure apps are ordered by recency
+        assertThat(requests.get(0).packageName).isEqualTo(TEST_PACKAGE_NAMES[0]);
+        assertThat(requests.get(0).accessFinishTime).isEqualTo(ONE_MIN_AGO);
+        assertThat(requests.get(1).packageName).isEqualTo(TEST_PACKAGE_NAMES[1]);
+        assertThat(requests.get(1).accessFinishTime).isEqualTo(TWENTY_THREE_HOURS_AGO);
+    }
+
+    @Test
+    public void testGetAppList_quietModeEnabledShowInQuietHidden_shouldNotFilterRecentAccesses() {
+        mSetFlagsRule.enableFlags(
+                android.multiuser.Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_HANDLE_INTERLEAVED_SETTINGS_FOR_PRIVATE_SPACE);
+        when(mUserManager.isQuietModeEnabled(any())).thenReturn(true);
+        when(mUserManager.getUserProperties(any())).thenReturn(mUserProperties);
+        when(mUserProperties.getShowInQuietMode())
+                .thenReturn(UserProperties.SHOW_IN_QUIET_MODE_HIDDEN);
+
+        List<RecentAppOpsAccess.Access> requests = mRecentAppOpsAccess.getAppList(false);
+        // Apps doesn't show up in the list of apps.
+        assertThat(requests).hasSize(0);
     }
 
     @Test

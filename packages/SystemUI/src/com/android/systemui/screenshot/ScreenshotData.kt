@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Insets
 import android.graphics.Rect
 import android.net.Uri
+import android.os.Process
 import android.os.UserHandle
 import android.view.Display
 import android.view.WindowManager.ScreenshotSource
@@ -30,6 +31,10 @@ data class ScreenshotData(
 ) {
     val packageNameString: String
         get() = if (topComponent == null) "" else topComponent!!.packageName
+
+    fun getUserOrDefault(): UserHandle {
+        return userHandle ?: Process.myUserHandle()
+    }
 
     companion object {
         @JvmStatic

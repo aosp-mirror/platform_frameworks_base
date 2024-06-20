@@ -19,10 +19,13 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -30,42 +33,53 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
 class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
 
-    private val kosmos = Kosmos()
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val underTest = kosmos.notificationStackAppearanceInteractor
 
     @Test
     fun stackBounds() =
         testScope.runTest {
-            val stackBounds by collectLastValue(underTest.stackBounds)
+            val stackBounds by collectLastValue(underTest.shadeScrimBounds)
 
             val bounds1 =
-                NotificationContainerBounds(
+                ShadeScrimBounds(
                     top = 100f,
                     bottom = 200f,
-                    isAnimated = true,
                 )
-            underTest.setStackBounds(bounds1)
+            underTest.setShadeScrimBounds(bounds1)
             assertThat(stackBounds).isEqualTo(bounds1)
 
             val bounds2 =
-                NotificationContainerBounds(
+                ShadeScrimBounds(
                     top = 200f,
                     bottom = 300f,
-                    isAnimated = false,
                 )
-            underTest.setStackBounds(bounds2)
+            underTest.setShadeScrimBounds(bounds2)
             assertThat(stackBounds).isEqualTo(bounds2)
+        }
+
+    @Test
+    fun stackRounding() =
+        testScope.runTest {
+            val stackRounding by collectLastValue(underTest.shadeScrimRounding)
+
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
+            assertThat(stackRounding)
+                .isEqualTo(ShadeScrimRounding(isTopRounded = true, isBottomRounded = false))
+
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            assertThat(stackRounding)
+                .isEqualTo(ShadeScrimRounding(isTopRounded = true, isBottomRounded = true))
         }
 
     @Test(expected = IllegalStateException::class)
     fun setStackBounds_withImproperBounds_throwsException() =
         testScope.runTest {
-            underTest.setStackBounds(
-                NotificationContainerBounds(
+            underTest.setShadeScrimBounds(
+                ShadeScrimBounds(
                     top = 100f,
                     bottom = 99f,
                 )

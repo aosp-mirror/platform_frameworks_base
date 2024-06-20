@@ -36,7 +36,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.onSubscriberAdded
@@ -186,7 +186,6 @@ class AuthenticationRepositoryImpl
 constructor(
     @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
-    flags: SceneContainerFlags,
     private val clock: SystemClock,
     private val getSecurityMode: Function<Int, KeyguardSecurityModel.SecurityMode>,
     private val userRepository: UserRepository,
@@ -255,7 +254,7 @@ constructor(
     override val hasLockoutOccurred: StateFlow<Boolean> = _hasLockoutOccurred.asStateFlow()
 
     init {
-        if (flags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             // Hydrate failedAuthenticationAttempts initially and whenever the selected user
             // changes.
             applicationScope.launch {

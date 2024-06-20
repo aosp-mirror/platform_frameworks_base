@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"dispozitiv"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Aplicația va putea să acceseze următoarele permisiuni pe <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Permite ca &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; să acceseze aceste informații de pe telefon"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Permiți ca &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; să poată reda în stream aplicațiile de pe telefonul tău?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s va avea acces la tot ce este vizibil sau redat pe telefon, inclusiv conținutul audio, fotografii, parole și mesaje.&lt;br/&gt;&lt;br/&gt;%1$s va putea reda în stream aplicații până când elimini accesul la această permisiune."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Servicii pe mai multe dispozitive"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> solicită permisiunea pentru <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> de a reda în stream aplicații între dispozitivele tale"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> solicită permisiunea pentru <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> de a afișa și a reda în stream aplicații între dispozitive"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Permite ca &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; să acceseze aceste informații de pe telefon"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Servicii Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> solicită permisiunea pentru <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> de a accesa fotografiile, conținutul media și notificările de pe telefon"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Permiți ca &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; să realizeze această acțiune?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Permiți ca &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; să poată reda în stream aplicațiile și funcțiile de sistem de pe telefonul tău?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s va avea acces la tot ce este vizibil sau redat pe telefon, inclusiv conținutul audio, fotografii, informații de plată, parole și mesaje.&lt;br/&gt;&lt;br/&gt;%1$s va putea reda în stream aplicații și funcții de sistem până când elimini accesul la această permisiune."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> solicită permisiunea pentru <xliff:g id="DEVICE_NAME">%2$s</xliff:g> de a reda în stream conținut din aplicații și alte funcții de sistem pe dispozitivele din apropiere"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"dispozitiv"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Aplicația va putea să sincronizeze informații, cum ar fi numele unui apelant, între telefonul tău și dispozitivul ales"</string>

@@ -97,6 +97,10 @@ public class CryptoObject {
         mCrypto = keyAgreement;
     }
 
+    public CryptoObject(long operationHandle) {
+        mCrypto = operationHandle;
+    }
+
     /**
      * Get {@link Signature} object.
      * @return {@link Signature} object or null if this doesn't contain one.
@@ -157,6 +161,8 @@ public class CryptoObject {
     public long getOpId() {
         if (mCrypto == null) {
             return 0;
+        } else if (mCrypto instanceof Long) {
+            return (long) mCrypto;
         } else if (mCrypto instanceof IdentityCredential) {
             return ((IdentityCredential) mCrypto).getCredstoreOperationHandle();
         } else if (mCrypto instanceof PresentationSession) {

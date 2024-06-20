@@ -100,6 +100,16 @@ public class LongArrayMultiStateCounter_host {
             mLastStateChangeTimestampMs = timestampMs;
         }
 
+        public void copyStatesFrom(LongArrayMultiStateCounterRavenwood source) {
+            for (int i = 0; i < mStateCount; i++) {
+                mStates[i].mTimeInStateSinceUpdate = source.mStates[i].mTimeInStateSinceUpdate;
+                Arrays.fill(mStates[i].mCounter, 0);
+            }
+            mCurrentState = source.mCurrentState;
+            mLastStateChangeTimestampMs = source.mLastStateChangeTimestampMs;
+            mLastUpdateTimestampMs = source.mLastUpdateTimestampMs;
+        }
+
         public void setValue(int state, long[] values) {
             System.arraycopy(values, 0, mStates[state].mCounter, 0, mArrayLength);
         }
@@ -333,6 +343,10 @@ public class LongArrayMultiStateCounter_host {
 
     public static void native_setState(long instanceId, int state, long timestampMs) {
         getInstance(instanceId).setState(state, timestampMs);
+    }
+
+    public static void native_copyStatesFrom(long targetInstanceId, long sourceInstanceId) {
+        getInstance(targetInstanceId).copyStatesFrom(getInstance(sourceInstanceId));
     }
 
     public static void native_incrementValues(long instanceId, long containerInstanceId,

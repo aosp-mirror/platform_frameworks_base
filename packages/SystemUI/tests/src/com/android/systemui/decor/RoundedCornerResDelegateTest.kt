@@ -18,9 +18,9 @@ package com.android.systemui.decor
 
 import android.content.res.TypedArray
 import android.graphics.drawable.Drawable
-import android.testing.AndroidTestingRunner
 import android.util.Size
 import androidx.annotation.DrawableRes
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R as InternalR
 import com.android.systemui.res.R as SystemUIR
@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class RoundedCornerResDelegateTest : SysuiTestCase() {
 

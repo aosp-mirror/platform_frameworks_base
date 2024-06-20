@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
-import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -58,12 +57,6 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
         client.handleActivityConfigurationChanged(r, mConfiguration, INVALID_DISPLAY,
                 mActivityWindowInfo);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
-    }
-
-    @Nullable
-    @Override
-    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
-        return client.getActivity(getActivityToken());
     }
 
     // ObjectPoolItem implementation

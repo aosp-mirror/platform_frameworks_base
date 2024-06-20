@@ -47,8 +47,11 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
     SetArcTransmissionStateAction(HdmiCecLocalDevice source, int avrAddress,
             boolean enabled) {
         super(source);
-        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiDeviceInfo.DEVICE_TV);
-        HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        if (!HdmiUtils.verifyAddressType(getSourceAddress(), HdmiDeviceInfo.DEVICE_TV) ||
+                !HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)) {
+            Slog.w(TAG, "Device type mismatch, stop the action.");
+            finish();
+        }
         mAvrAddress = avrAddress;
         mEnabled = enabled;
     }
