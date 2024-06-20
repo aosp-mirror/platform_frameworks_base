@@ -1382,6 +1382,15 @@
     <!-- Text which is shown in the expanded notification shade when there are currently no notifications visible that the user hasn't already seen. [CHAR LIMIT=30] -->
     <string name="no_unseen_notif_text">No new notifications</string>
 
+    <!-- Title of heads up notification for adaptive notifications user education. [CHAR LIMIT=30] -->
+    <string name="adaptive_notification_edu_hun_title">Adaptive notifications is on</string>
+
+    <!-- Text of heads up notification for adaptive notifications user education. [CHAR LIMIT=100] -->
+    <string name="adaptive_notification_edu_hun_text">Your device now lowers the volume and reduces pop-ups on the screen for up to two minutes when you receive many notifications in a short time span.</string>
+
+    <!-- Action label for going to adaptive notification settings [CHAR LIMIT=20] -->
+    <string name="go_to_adaptive_notification_settings">Turn off</string>
+
     <!-- Text which is shown in the locked notification shade when there are currently no notifications, but if the user were to unlock, notifications would appear. [CHAR LIMIT=40] -->
     <string name="unlock_to_see_notif_text">Unlock to see older notifications</string>
 
