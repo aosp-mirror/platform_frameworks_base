@@ -521,6 +521,7 @@
   <java-symbol type="bool" name="config_preferKeepClearForFocus" />
   <java-symbol type="bool" name="config_hibernationDeletesOatArtifactsEnabled"/>
   <java-symbol type="integer" name="config_defaultAnalogClockSecondsHandFps"/>
+  <java-symbol type="bool" name="config_notificationCloseButtonSupported"/>
   <java-symbol type="bool" name="config_enableGaiaEducationInPrivateSpace"/>
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
@@ -3171,6 +3172,7 @@
   <java-symbol type="id" name="header_text_secondary_divider" />
   <java-symbol type="drawable" name="ic_expand_notification" />
   <java-symbol type="drawable" name="ic_collapse_notification" />
+  <java-symbol type="drawable" name="notification_close_button_icon" />
   <java-symbol type="drawable" name="ic_expand_bundle" />
   <java-symbol type="drawable" name="ic_collapse_bundle" />
   <java-symbol type="drawable" name="ic_notification_summary_auto" />
@@ -3877,6 +3879,7 @@
 
   <java-symbol type="string" name="expand_button_content_description_collapsed" />
   <java-symbol type="string" name="expand_button_content_description_expanded" />
+  <java-symbol type="string" name="close_button_text" />
 
   <java-symbol type="string" name="content_description_collapsed" />
   <java-symbol type="string" name="content_description_expanded" />
@@ -5042,6 +5045,9 @@
   <java-symbol type="string" name="ui_translation_accessibility_translation_finished" />
 
   <java-symbol type="layout" name="notification_expand_button"/>
+  <java-symbol type="id" name="close_button" />
+  <java-symbol type="layout" name="notification_close_button"/>
+  <java-symbol type="id" name="notification_buttons_column" />
 
   <java-symbol type="bool" name="config_supportsMicToggle" />
   <java-symbol type="bool" name="config_supportsCamToggle" />

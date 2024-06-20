@@ -7092,6 +7092,9 @@
     <!-- Whether the system uses auto-suspend mode. -->
     <bool name="config_useAutoSuspend">true</bool>
 
+    <!-- Whether close/dismiss buttons are supported on notifications. -->
+    <bool name="config_notificationCloseButtonSupported">false</bool>
+
     <!-- Whether to show GAIA education screen during account login of private space setup.
          OEM/Partner can explicitly opt to disable the screen. -->
     <bool name="config_enableGaiaEducationInPrivateSpace">true</bool>
