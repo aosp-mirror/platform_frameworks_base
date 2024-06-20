@@ -5058,6 +5058,7 @@ public class Notification implements Parcelable
          * @see Notification#fullScreenIntent
          */
         @NonNull
+        @RequiresPermission(android.Manifest.permission.USE_FULL_SCREEN_INTENT)
         public Builder setFullScreenIntent(PendingIntent intent, boolean highPriority) {
             mN.fullScreenIntent = intent;
             setFlag(FLAG_HIGH_PRIORITY, highPriority);
