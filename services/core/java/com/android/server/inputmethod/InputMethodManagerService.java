@@ -3519,10 +3519,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         mVisibilityStateComputer.requestImeVisibility(windowToken, true);
 
+        final int userId = mCurrentUserId;
         // Ensure binding the connection when IME is going to show.
-        final var bindingController = getInputMethodBindingController(mCurrentUserId);
+        final var bindingController = getInputMethodBindingController(userId);
         bindingController.setCurrentMethodVisible();
-        final IInputMethodInvoker curMethod = getCurMethodLocked();
+        final IInputMethodInvoker curMethod = bindingController.getCurMethod();
         ImeTracker.forLogging().onCancelled(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
         final boolean readyToDispatchToIme;
         if (Flags.deferShowSoftInputUntilSessionCreation()) {
@@ -3542,7 +3543,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
             mVisibilityApplier.performShowIme(windowToken, statsToken,
                     mVisibilityStateComputer.getShowFlagsForInputMethodServiceOnly(),
-                    resultReceiver, reason);
+                    resultReceiver, reason, userId);
             mVisibilityStateComputer.setInputShown(true);
             return true;
         } else {
@@ -3654,7 +3655,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // since Android Eclair.  That's why we need to accept IMM#hideSoftInput() even when only
         // IMMS#InputShown indicates that the software keyboard is shown.
         // TODO(b/246309664): Clean up IMMS#mImeWindowVis
-        IInputMethodInvoker curMethod = getCurMethodLocked();
+        final int userId = mCurrentUserId;
+        final var bindingController = getInputMethodBindingController(userId);
+        IInputMethodInvoker curMethod = bindingController.getCurMethod();
         final boolean shouldHideSoftInput = curMethod != null
                 && (isInputShownLocked() || (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
 
@@ -3665,11 +3668,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // IMMS#mInputShown and IMMS#mImeWindowVis should be resolved spontaneously in
             // the final state.
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_SHOULD_HIDE);
-            mVisibilityApplier.performHideIme(windowToken, statsToken, resultReceiver, reason);
+            mVisibilityApplier.performHideIme(windowToken, statsToken, resultReceiver, reason,
+                    userId);
         } else {
             ImeTracker.forLogging().onCancelled(statsToken, ImeTracker.PHASE_SERVER_SHOULD_HIDE);
         }
-        final var bindingController = getInputMethodBindingController(mCurrentUserId);
         bindingController.setCurrentMethodNotVisible();
         mVisibilityStateComputer.clearImeShowFlags();
         // Cancel existing statsToken for show IME as we got a hide request.
@@ -4735,12 +4738,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      */
     @GuardedBy("ImfLock.class")
     void onShowHideSoftInputRequested(boolean show, IBinder requestImeToken,
-            @SoftInputShowHideReason int reason, @Nullable ImeTracker.Token statsToken) {
+            @SoftInputShowHideReason int reason, @Nullable ImeTracker.Token statsToken,
+            @UserIdInt int userId) {
         final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(requestImeToken);
+        final var bindingController = getInputMethodBindingController(userId);
         final WindowManagerInternal.ImeTargetInfo info =
                 mWindowManagerInternal.onToggleImeRequested(
                         show, mImeBindingState.mFocusedWindow, requestToken,
-                        getCurTokenDisplayIdLocked());
+                        bindingController.getCurTokenDisplayId());
         mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
                 mImeBindingState.mFocusedWindowClient, mImeBindingState.mFocusedWindowEditorInfo,
                 info.focusedWindowName, mImeBindingState.mFocusedWindowSoftInputMode, reason,
