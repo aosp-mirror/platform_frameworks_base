@@ -309,14 +309,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mWasStoppedLogged;
 
     // The bits used for mActivityStateFlags.
-    private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
-    private static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 1 << 17;
-    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING = 1 << 18;
-    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING = 1 << 19;
-    private static final int ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE = 1 << 20;
-    private static final int ACTIVITY_STATE_FLAG_HAS_RESUMED = 1 << 21;
-    private static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
-    private static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
+    public static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
+    public static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 1 << 17;
+    public static final int ACTIVITY_STATE_FLAG_IS_STOPPING = 1 << 18;
+    public static final int ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING = 1 << 19;
+    public static final int ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE = 1 << 20;
+    public static final int ACTIVITY_STATE_FLAG_HAS_RESUMED = 1 << 21;
+    public static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
+    public static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
 
     /**
      * The state for oom-adjustment calculation. The higher 16 bits are the activity states, and the
@@ -1211,31 +1211,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    public interface ComputeOomAdjCallback {
-        void onVisibleActivity();
-        void onPausedActivity();
-        void onStoppingActivity(boolean finishing);
-        void onOtherActivity();
-    }
-
     /**
-     * Returns the minimum task layer rank. It should only be called if {@link #hasActivities}
-     * returns {@code true}.
+     * Returns the current ACTIVITY_STATE_FLAG_* of this process. It should only be called if
+     * {@link #hasActivities} returns {@code true}.
      */
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
-    public int computeOomAdjFromActivities(ComputeOomAdjCallback callback) {
-        final int flags = mActivityStateFlags;
-        if ((flags & ACTIVITY_STATE_FLAG_IS_VISIBLE) != 0) {
-            callback.onVisibleActivity();
-        } else if ((flags & ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED) != 0) {
-            callback.onPausedActivity();
-        } else if ((flags & ACTIVITY_STATE_FLAG_IS_STOPPING) != 0) {
-            callback.onStoppingActivity(
-                    (flags & ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING) != 0);
-        } else {
-            callback.onOtherActivity();
-        }
-        return flags & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
+    public int getActivityStateFlags() {
+        return mActivityStateFlags;
     }
 
     void computeProcessActivityState() {
