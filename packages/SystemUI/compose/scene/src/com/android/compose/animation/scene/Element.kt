@@ -306,7 +306,6 @@ internal class ElementNode(
         return layout(placeable.width, placeable.height) { place(transition, placeable) }
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
     private fun Placeable.PlacementScope.place(
         transition: TransitionState.Transition?,
         placeable: Placeable,
@@ -561,10 +560,20 @@ private fun reconcileStates(
 }
 
 private fun Element.SceneState.selfUpdateValuesBeforeInterruption() {
-    offsetBeforeInterruption = lastOffset
     sizeBeforeInterruption = lastSize
-    scaleBeforeInterruption = lastScale
-    alphaBeforeInterruption = lastAlpha
+
+    if (lastAlpha > 0f) {
+        offsetBeforeInterruption = lastOffset
+        scaleBeforeInterruption = lastScale
+        alphaBeforeInterruption = lastAlpha
+    } else {
+        // Consider the element as not placed in this scene if it was fully transparent.
+        // TODO(b/290930950): Look into using derived state inside place() instead to not even place
+        // the element at all when alpha == 0f.
+        offsetBeforeInterruption = Offset.Unspecified
+        scaleBeforeInterruption = Scale.Unspecified
+        alphaBeforeInterruption = Element.AlphaUnspecified
+    }
 }
 
 private fun Element.SceneState.updateValuesBeforeInterruption(lastState: Element.SceneState) {

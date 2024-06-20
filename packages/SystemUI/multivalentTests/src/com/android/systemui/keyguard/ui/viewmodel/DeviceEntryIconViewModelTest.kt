@@ -227,6 +227,15 @@ class DeviceEntryIconViewModelTest : SysuiTestCase() {
             assertThat(accessibilityDelegateHint)
                 .isEqualTo(DeviceEntryIconView.AccessibilityHintType.BOUNCER)
 
+            // udfps running
+            setUpState(
+                isUdfpsSupported = true,
+                isUdfpsRunning = true,
+            )
+
+            assertThat(accessibilityDelegateHint)
+                .isEqualTo(DeviceEntryIconView.AccessibilityHintType.BOUNCER)
+
             // non-interactive lock icon
             fingerprintPropertyRepository.supportsRearFps()
 

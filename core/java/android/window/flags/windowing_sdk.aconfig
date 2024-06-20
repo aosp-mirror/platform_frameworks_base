@@ -103,17 +103,6 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "window_session_relayout_info"
-    description: "Pass an out RelayoutInfo instead of Bundle to fix the Parcel recycle bug"
-    bug: "335601427"
-    is_fixed_read_only: true
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "fix_pip_restore_to_overlay"
     description: "Restore exit-pip activity back to ActivityEmbedding overlay"
     bug: "297887697"
@@ -176,6 +165,17 @@ flag {
     name: "rear_display_disable_force_desktop_system_decorations"
     description: "Block system decorations from being added to a rear display when desktop mode is forced"
     bug: "346103150"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "fix_no_container_update_without_resize"
+    description: "Fix the containers not being updated when the Task is brought to front and has the same configuration"
+    bug: "344721335"
     is_fixed_read_only: true
     metadata {
         purpose: PURPOSE_BUGFIX
