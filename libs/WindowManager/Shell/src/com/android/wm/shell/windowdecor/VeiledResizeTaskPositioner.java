@@ -18,6 +18,8 @@ package com.android.wm.shell.windowdecor;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
+import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_RESIZE_WINDOW;
+
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -33,6 +35,7 @@ import androidx.annotation.Nullable;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.function.Supplier;
@@ -89,6 +92,10 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
                 mDesktopWindowDecoration.mTaskInfo.configuration.windowConfiguration.getBounds());
         mRepositionStartPoint.set(x, y);
         if (isResizing()) {
+            // Capture CUJ for re-sizing window in DW mode.
+            InteractionJankMonitorUtils.beginTracing(CUJ_DESKTOP_MODE_RESIZE_WINDOW,
+                    mDesktopWindowDecoration.mContext, mDesktopWindowDecoration.mTaskSurface,
+                    /* tag= */ null);
             if (!mDesktopWindowDecoration.mTaskInfo.isFocused) {
                 WindowContainerTransaction wct = new WindowContainerTransaction();
                 wct.reorder(mDesktopWindowDecoration.mTaskInfo.token, true);
@@ -146,6 +153,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
                 // won't be called.
                 resetVeilIfVisible();
             }
+            InteractionJankMonitorUtils.endTracing(CUJ_DESKTOP_MODE_RESIZE_WINDOW);
         } else {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             DragPositioningCallbackUtility.updateTaskBounds(mRepositionTaskBounds,
