@@ -205,6 +205,10 @@ public final class MediaDrm implements AutoCloseable {
      * media container format specified by mimeType at the requested
      * security level.
      *
+     * Calling this method while the application is running on the physical Android device or a
+     * {@link android.companion.virtual.VirtualDevice} may lead to different results, based on
+     * the different DRM capabilities of the devices.
+     *
      * @param uuid The UUID of the crypto scheme.
      * @param mimeType The MIME type of the media container, e.g. "video/mp4"
      *   or "video/webm"
@@ -1400,6 +1404,10 @@ public final class MediaDrm implements AutoCloseable {
      * Open a new session with the MediaDrm object. A session ID is returned.
      * By default, sessions are opened at the native security level of the device.
      *
+     * If the application is currently running on a {@link android.companion.virtual.VirtualDevice}
+     * the security level will be adjusted accordingly to the maximum supported level for the
+     * display.
+     *
      * @throws NotProvisionedException if provisioning is needed
      * @throws ResourceBusyException if required resources are in use
      */
@@ -1421,6 +1429,10 @@ public final class MediaDrm implements AutoCloseable {
      * supported, the next lower supported security level will be set. The level
      * can be queried using {@link #getSecurityLevel}. A session
      * ID is returned.
+     *
+     * If the application is currently running on a {@link android.companion.virtual.VirtualDevice}
+     * the security level will be adjusted accordingly to the maximum supported level for the
+     * display.
      *
      * @param level the new security level
      * @throws NotProvisionedException if provisioning is needed
@@ -2180,6 +2192,11 @@ public final class MediaDrm implements AutoCloseable {
      * Returns a value that may be passed as a parameter to {@link #openSession(int)}
      * requesting that the session be opened at the maximum security level of
      * the device.
+     *
+     * This security level is only valid for the application running on the physical Android
+     * device (e.g. {@link android.content.Context#DEVICE_ID_DEFAULT}). While running on a
+     * {@link android.companion.virtual.VirtualDevice} the maximum supported security level
+     * might be different.
      */
     public static final int getMaxSecurityLevel() {
         return SECURITY_LEVEL_MAX;

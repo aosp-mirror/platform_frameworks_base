@@ -16,38 +16,49 @@
 
 package com.android.systemui.communal.widgets
 
+import android.app.ActivityOptions
 import android.app.PendingIntent
+import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
 import com.android.systemui.animation.ActivityTransitionAnimator
-import com.android.systemui.common.ui.view.getNearestParent
+import com.android.systemui.communal.util.InteractionHandlerDelegate
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
 
+@SysUISingleton
 class WidgetInteractionHandler
 @Inject
 constructor(
     private val activityStarter: ActivityStarter,
 ) : RemoteViews.InteractionHandler {
+
+    private val delegate = InteractionHandlerDelegate(
+        findViewToAnimate = { view -> view is CommunalAppWidgetHostView },
+        intentStarter = this::startIntent,
+    )
+
     override fun onInteraction(
         view: View,
         pendingIntent: PendingIntent,
         response: RemoteViews.RemoteResponse
-    ): Boolean =
-        when {
-            pendingIntent.isActivity -> startActivity(view, pendingIntent)
-            else ->
-                RemoteViews.startPendingIntent(view, pendingIntent, response.getLaunchOptions(view))
-        }
+    ): Boolean = delegate.onInteraction(view, pendingIntent, response)
 
-    private fun startActivity(view: View, pendingIntent: PendingIntent): Boolean {
-        val hostView = view.getNearestParent<CommunalAppWidgetHostView>()
-        val animationController = hostView?.let(ActivityTransitionAnimator.Controller::fromView)
 
+    private fun startIntent(
+        pendingIntent: PendingIntent,
+        fillInIntent: Intent,
+        extraOptions: ActivityOptions,
+        controller: ActivityTransitionAnimator.Controller?
+    ): Boolean {
         activityStarter.startPendingIntentMaybeDismissingKeyguard(
             pendingIntent,
+            /* dismissShade = */ false,
             /* intentSentUiThreadCallback = */ null,
-            animationController
+            controller,
+            fillInIntent,
+            extraOptions.toBundle(),
         )
         return true
     }

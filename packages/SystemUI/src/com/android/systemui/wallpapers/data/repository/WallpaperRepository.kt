@@ -28,7 +28,9 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.utils.coroutines.flow.mapLatestConflated
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +42,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /** A repository storing information about the current wallpaper. */
 interface WallpaperRepository {
@@ -55,6 +58,7 @@ class WallpaperRepositoryImpl
 @Inject
 constructor(
     @Background scope: CoroutineScope,
+    @Background private val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     userRepository: UserRepository,
     private val wallpaperManager: WallpaperManager,
@@ -87,14 +91,15 @@ constructor(
         if (!wallpaperManager.isWallpaperSupported || !deviceSupportsAodWallpaper) {
             MutableStateFlow(null).asStateFlow()
         } else {
-            combine(wallpaperChanged, selectedUser) { _, selectedUser ->
-                    getWallpaper(selectedUser)
-                }
+            combine(wallpaperChanged, selectedUser, ::Pair)
+                .mapLatestConflated { (_, selectedUser) -> getWallpaper(selectedUser) }
                 .stateIn(
                     scope,
                     // Always be listening for wallpaper changes.
                     SharingStarted.Eagerly,
-                    initialValue = getWallpaper(userRepository.selectedUser.value),
+                    // The initial value is null, but it should get updated pretty quickly because
+                    // the `combine` should immediately kick off a fetch.
+                    initialValue = null,
                 )
         }
 
@@ -111,7 +116,9 @@ constructor(
                 initialValue = wallpaperInfo.value?.supportsAmbientMode() == true,
             )
 
-    private fun getWallpaper(selectedUser: SelectedUserModel): WallpaperInfo? {
-        return wallpaperManager.getWallpaperInfoForUser(selectedUser.userInfo.id)
+    private suspend fun getWallpaper(selectedUser: SelectedUserModel): WallpaperInfo? {
+        return withContext(bgDispatcher) {
+            wallpaperManager.getWallpaperInfoForUser(selectedUser.userInfo.id)
+        }
     }
 }

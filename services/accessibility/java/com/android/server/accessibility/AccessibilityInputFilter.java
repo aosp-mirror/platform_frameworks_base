@@ -347,8 +347,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         final int eventSource = event.getSource();
         final int displayId = event.getDisplayId();
         if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) == 0) {
-            state.reset();
-            clearEventStreamHandler(displayId, eventSource);
+            if (!Flags.doNotResetKeyEventState()) {
+                state.reset();
+                clearEventStreamHandler(displayId, eventSource);
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Not processing event " + event);
+            }
             super.onInputEvent(event, policyFlags);
             return;
         }
@@ -503,8 +508,14 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private void processKeyEvent(EventStreamState state, KeyEvent event, int policyFlags) {
         if (!state.shouldProcessKeyEvent(event)) {
+            if (DEBUG) {
+                Slog.d(TAG, "processKeyEvent: not processing: " + event);
+            }
             super.onInputEvent(event, policyFlags);
             return;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "processKeyEvent: " + event);
         }
         // Since the display id of KeyEvent always would be -1 and there is only one
         // KeyboardInterceptor for all display, pass KeyEvent to the mEventHandler of

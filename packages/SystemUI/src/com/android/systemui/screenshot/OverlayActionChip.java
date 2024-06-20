@@ -32,7 +32,6 @@ import android.widget.TextView;
 
 import com.android.systemui.res.R;
 
-
 /**
  * View for a chip with an icon and text.
  */

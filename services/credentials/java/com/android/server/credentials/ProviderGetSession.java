@@ -22,6 +22,7 @@ import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
@@ -61,7 +62,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         BeginGetCredentialResponse>
         implements
         RemoteCredentialService.ProviderCallbacks<BeginGetCredentialResponse> {
-    private static final String TAG = "ProviderGetSession";
+    private static final String TAG = CredentialManager.TAG;
     // Key to be used as the entry key for an action entry
     public static final String ACTION_ENTRY_KEY = "action_key";
     // Key to be used as the entry key for the authentication entry
@@ -182,7 +183,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             CredentialProviderInfo info,
             String hybridService) {
         Slog.i(TAG, "Filtering request options for: " + info.getComponentName());
-        if (android.credentials.flags.Flags.hybridFilterFixEnabled()) {
+        if (android.credentials.flags.Flags.hybridFilterOptFixEnabled()) {
             ComponentName hybridComponentName = ComponentName.unflattenFromString(hybridService);
             if (hybridComponentName != null && hybridComponentName
                     .equals(info.getComponentName())) {

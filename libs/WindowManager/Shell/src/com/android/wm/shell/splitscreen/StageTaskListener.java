@@ -177,9 +177,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskAppeared: task=%d taskParent=%d rootTask=%d",
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskAppeared: taskId=%d taskParent=%d rootTask=%d "
+                        + "taskActivity=%s",
                 taskInfo.taskId, taskInfo.parentTaskId,
-                mRootTaskInfo != null ? mRootTaskInfo.taskId : -1);
+                mRootTaskInfo != null ? mRootTaskInfo.taskId : -1,
+                taskInfo.baseActivity);
         if (mRootTaskInfo == null) {
             mRootLeash = leash;
             mRootTaskInfo = taskInfo;
@@ -213,13 +215,14 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskInfoChanged: taskId=%d taskAct=%s",
+                taskInfo.taskId, taskInfo.baseActivity);
         mWindowDecorViewModel.ifPresent(viewModel -> viewModel.onTaskInfoChanged(taskInfo));
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             // Inflates split decor view only when the root task is visible.
             if (!ENABLE_SHELL_TRANSITIONS && mRootTaskInfo.isVisible != taskInfo.isVisible) {
                 if (taskInfo.isVisible) {
-                    mSplitDecorManager.inflate(mContext, mRootLeash,
-                            taskInfo.configuration.windowConfiguration.getBounds());
+                    mSplitDecorManager.inflate(mContext, mRootLeash);
                 } else {
                     mSyncQueue.runInSync(t -> mSplitDecorManager.release(t));
                 }
@@ -261,6 +264,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskVanished: task=%d", taskInfo.taskId);
         final int taskId = taskInfo.taskId;
+        mWindowDecorViewModel.ifPresent(vm -> vm.onTaskVanished(taskInfo));
         if (mRootTaskInfo.taskId == taskId) {
             mCallbacks.onRootTaskVanished();
             mRootTaskInfo = null;
@@ -310,10 +314,10 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     void onResizing(Rect newBounds, Rect sideBounds, SurfaceControl.Transaction t, int offsetX,
-            int offsetY, boolean immediately) {
+            int offsetY, boolean immediately, float[] veilColor) {
         if (mSplitDecorManager != null && mRootTaskInfo != null) {
             mSplitDecorManager.onResizing(mRootTaskInfo, newBounds, sideBounds, t, offsetX,
-                    offsetY, immediately);
+                    offsetY, immediately, veilColor);
         }
     }
 

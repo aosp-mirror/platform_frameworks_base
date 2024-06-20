@@ -16,27 +16,32 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
-import com.android.systemui.keyguard.data.repository.TrustRepository
+import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason
+import com.android.systemui.flags.SystemPropertiesHelper
+import com.android.systemui.keyguard.domain.interactor.TrustInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.Quad
+import com.android.systemui.utils.coroutines.flow.mapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -55,10 +60,13 @@ constructor(
     private val repository: DeviceEntryRepository,
     private val authenticationInteractor: AuthenticationInteractor,
     private val sceneInteractor: SceneInteractor,
-    deviceEntryFaceAuthRepository: DeviceEntryFaceAuthRepository,
-    trustRepository: TrustRepository,
-    flags: SceneContainerFlags,
-    deviceUnlockedInteractor: DeviceUnlockedInteractor,
+    faceAuthInteractor: DeviceEntryFaceAuthInteractor,
+    private val fingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
+    private val biometricSettingsInteractor: DeviceEntryBiometricSettingsInteractor,
+    private val trustInteractor: TrustInteractor,
+    private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
+    private val systemPropertiesHelper: SystemPropertiesHelper,
+    private val alternateBouncerInteractor: AlternateBouncerInteractor,
 ) {
     /**
      * Whether the device is unlocked.
@@ -69,7 +77,14 @@ constructor(
      * of this flow will always be `true`, even if the lockscreen is showing and still needs to be
      * dismissed by the user to proceed.
      */
-    val isUnlocked: StateFlow<Boolean> = deviceUnlockedInteractor.isDeviceUnlocked
+    val isUnlocked: StateFlow<Boolean> =
+        deviceUnlockedInteractor.deviceUnlockStatus
+            .map { it.isUnlocked }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked,
+            )
 
     /**
      * Whether the device has been entered (i.e. the lockscreen has been dismissed, by any method).
@@ -83,23 +98,21 @@ constructor(
             .filter { currentScene ->
                 currentScene == Scenes.Gone || currentScene == Scenes.Lockscreen
             }
-            .map { it == Scenes.Gone }
+            .mapLatestConflated { scene ->
+                if (scene == Scenes.Gone) {
+                    // Make sure device unlock status is definitely unlocked before we consider the
+                    // device "entered".
+                    deviceUnlockedInteractor.deviceUnlockStatus.first { it.isUnlocked }
+                    true
+                } else {
+                    false
+                }
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
                 initialValue = false,
             )
-
-    /**
-     * Whether the user is currently authenticated by a TrustAgent like trusted device, location,
-     * etc., or by face auth.
-     */
-    private val isPassivelyAuthenticated =
-        merge(
-                trustRepository.isCurrentUserTrusted,
-                deviceEntryFaceAuthRepository.isAuthenticated,
-            )
-            .onStart { emit(false) }
 
     /**
      * Whether it's currently possible to swipe up to enter the device without requiring
@@ -120,10 +133,13 @@ constructor(
                 authenticationInteractor.authenticationMethod.map {
                     it == AuthenticationMethodModel.None && repository.isLockscreenEnabled()
                 },
-                isPassivelyAuthenticated,
+                deviceUnlockedInteractor.deviceUnlockStatus,
                 isDeviceEntered
-            ) { isSwipeAuthMethod, isPassivelyAuthenticated, isDeviceEntered ->
-                (isSwipeAuthMethod || isPassivelyAuthenticated) && !isDeviceEntered
+            ) { isSwipeAuthMethod, deviceUnlockStatus, isDeviceEntered ->
+                (isSwipeAuthMethod ||
+                    (deviceUnlockStatus.isUnlocked &&
+                        deviceUnlockStatus.deviceUnlockSource?.dismissesLockscreen == false)) &&
+                    !isDeviceEntered
             }
             .stateIn(
                 scope = applicationScope,
@@ -133,6 +149,67 @@ constructor(
                 // from upstream data sources.
                 initialValue = null,
             )
+
+    private val faceEnrolledAndEnabled = biometricSettingsInteractor.isFaceAuthEnrolledAndEnabled
+    private val fingerprintEnrolledAndEnabled =
+        biometricSettingsInteractor.isFingerprintAuthEnrolledAndEnabled
+    private val trustAgentEnabled = trustInteractor.isEnrolledAndEnabled
+
+    private val faceOrFingerprintOrTrustEnabled: Flow<Triple<Boolean, Boolean, Boolean>> =
+        combine(faceEnrolledAndEnabled, fingerprintEnrolledAndEnabled, trustAgentEnabled, ::Triple)
+
+    /**
+     * Reason why device entry is restricted to certain authentication methods for the current user.
+     *
+     * Emits null when there are no device entry restrictions active.
+     */
+    val deviceEntryRestrictionReason: Flow<DeviceEntryRestrictionReason?> =
+        faceOrFingerprintOrTrustEnabled.flatMapLatest {
+            (faceEnabled, fingerprintEnabled, trustEnabled) ->
+            if (faceEnabled || fingerprintEnabled || trustEnabled) {
+                combine(
+                        biometricSettingsInteractor.authenticationFlags,
+                        faceAuthInteractor.isLockedOut,
+                        fingerprintAuthInteractor.isLockedOut,
+                        trustInteractor.isTrustAgentCurrentlyAllowed,
+                        ::Quad
+                    )
+                    .map { (authFlags, isFaceLockedOut, isFingerprintLockedOut, trustManaged) ->
+                        when {
+                            authFlags.isPrimaryAuthRequiredAfterReboot &&
+                                wasRebootedForMainlineUpdate ->
+                                DeviceEntryRestrictionReason.DeviceNotUnlockedSinceMainlineUpdate
+                            authFlags.isPrimaryAuthRequiredAfterReboot ->
+                                DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot
+                            authFlags.isPrimaryAuthRequiredAfterDpmLockdown ->
+                                DeviceEntryRestrictionReason.PolicyLockdown
+                            authFlags.isInUserLockdown -> DeviceEntryRestrictionReason.UserLockdown
+                            authFlags.isPrimaryAuthRequiredForUnattendedUpdate ->
+                                DeviceEntryRestrictionReason.UnattendedUpdate
+                            authFlags.isPrimaryAuthRequiredAfterTimeout ->
+                                DeviceEntryRestrictionReason.SecurityTimeout
+                            authFlags.isPrimaryAuthRequiredAfterLockout ->
+                                DeviceEntryRestrictionReason.BouncerLockedOut
+                            isFingerprintLockedOut ->
+                                DeviceEntryRestrictionReason.StrongBiometricsLockedOut
+                            isFaceLockedOut && faceAuthInteractor.isFaceAuthStrong() ->
+                                DeviceEntryRestrictionReason.StrongBiometricsLockedOut
+                            isFaceLockedOut -> DeviceEntryRestrictionReason.NonStrongFaceLockedOut
+                            authFlags.isSomeAuthRequiredAfterAdaptiveAuthRequest ->
+                                DeviceEntryRestrictionReason.AdaptiveAuthRequest
+                            (trustEnabled && !trustManaged) &&
+                                (authFlags.someAuthRequiredAfterTrustAgentExpired ||
+                                    authFlags.someAuthRequiredAfterUserRequest) ->
+                                DeviceEntryRestrictionReason.TrustAgentDisabled
+                            authFlags.strongerAuthRequiredAfterNonStrongBiometricsTimeout ->
+                                DeviceEntryRestrictionReason.NonStrongBiometricsSecurityTimeout
+                            else -> null
+                        }
+                    }
+            } else {
+                flowOf(null)
+            }
+        }
 
     /**
      * Attempt to enter the device and dismiss the lockscreen. If authentication is required to
@@ -147,10 +224,14 @@ constructor(
         //       4. Transition to bouncer scene
         applicationScope.launch {
             if (isAuthenticationRequired()) {
-                sceneInteractor.changeScene(
-                    toScene = Scenes.Bouncer,
-                    loggingReason = "request to unlock device while authentication required",
-                )
+                if (alternateBouncerInteractor.canShowAlternateBouncer.value) {
+                    alternateBouncerInteractor.forceShow()
+                } else {
+                    sceneInteractor.changeScene(
+                        toScene = Scenes.Bouncer,
+                        loggingReason = "request to unlock device while authentication required",
+                    )
+                }
             } else {
                 sceneInteractor.changeScene(
                     toScene = Scenes.Gone,
@@ -165,7 +246,17 @@ constructor(
      * `false` if the device can be entered without authenticating first.
      */
     suspend fun isAuthenticationRequired(): Boolean {
-        return !isUnlocked.value && authenticationInteractor.getAuthenticationMethod().isSecure
+        return !deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked &&
+            authenticationInteractor.getAuthenticationMethod().isSecure
+    }
+
+    /**
+     * Whether the lockscreen is enabled for the current user. This is `true` whenever the user has
+     * chosen any secure authentication method and even if they set the lockscreen to be dismissed
+     * when the user swipes on it.
+     */
+    suspend fun isLockscreenEnabled(): Boolean {
+        return repository.isLockscreenEnabled()
     }
 
     /**
@@ -176,15 +267,11 @@ constructor(
      */
     val isBypassEnabled: StateFlow<Boolean> = repository.isBypassEnabled
 
-    init {
-        if (flags.isEnabled()) {
-            applicationScope.launch {
-                authenticationInteractor.onAuthenticationResult.collectLatest { isSuccessful ->
-                    if (isSuccessful) {
-                        repository.reportSuccessfulAuthentication()
-                    }
-                }
-            }
-        }
+    private val wasRebootedForMainlineUpdate
+        get() = systemPropertiesHelper.get(SYS_BOOT_REASON_PROP) == REBOOT_MAINLINE_UPDATE
+
+    companion object {
+        @VisibleForTesting const val SYS_BOOT_REASON_PROP = "sys.boot.reason.last"
+        @VisibleForTesting const val REBOOT_MAINLINE_UPDATE = "reboot,mainline_update"
     }
 }

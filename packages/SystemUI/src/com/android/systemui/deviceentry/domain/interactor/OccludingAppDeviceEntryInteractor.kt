@@ -24,9 +24,12 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.model.BiometricMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintLockoutMessage
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -60,17 +63,28 @@ constructor(
     private val context: Context,
     activityStarter: ActivityStarter,
     powerInteractor: PowerInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
     private val keyguardOccludedByApp: Flow<Boolean> =
-        combine(
-                keyguardInteractor.isKeyguardOccluded,
-                keyguardInteractor.isKeyguardShowing,
-                primaryBouncerInteractor.isShowing,
-                alternateBouncerInteractor.isVisible,
-            ) { occluded, showing, primaryBouncerShowing, alternateBouncerVisible ->
-                occluded && showing && !primaryBouncerShowing && !alternateBouncerVisible
-            }
-            .distinctUntilChanged()
+        if (KeyguardWmStateRefactor.isEnabled) {
+            keyguardTransitionInteractor.currentKeyguardState.map { it == KeyguardState.OCCLUDED }
+        } else {
+            combine(
+                    keyguardInteractor.isKeyguardOccluded,
+                    keyguardInteractor.isKeyguardShowing,
+                    primaryBouncerInteractor.isShowing,
+                    alternateBouncerInteractor.isVisible,
+                    keyguardInteractor.isDozing,
+                ) { occluded, showing, primaryBouncerShowing, alternateBouncerVisible, dozing ->
+                    occluded &&
+                        showing &&
+                        !primaryBouncerShowing &&
+                        !alternateBouncerVisible &&
+                        !dozing
+                }
+                .distinctUntilChanged()
+        }
+
     private val fingerprintUnlockSuccessEvents: Flow<Unit> =
         fingerprintAuthRepository.authenticationStatus
             .ifKeyguardOccludedByApp()

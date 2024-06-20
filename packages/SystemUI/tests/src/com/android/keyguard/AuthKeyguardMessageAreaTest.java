@@ -18,10 +18,11 @@ package com.android.keyguard;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 

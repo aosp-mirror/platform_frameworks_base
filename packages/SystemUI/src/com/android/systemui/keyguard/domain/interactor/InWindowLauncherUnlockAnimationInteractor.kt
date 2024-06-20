@@ -20,7 +20,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository
 import com.android.systemui.keyguard.data.repository.KeyguardSurfaceBehindRepository
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.smartspace.SmartspaceState
 import javax.inject.Inject
@@ -50,7 +52,10 @@ constructor(
      */
     val transitioningToGoneWithInWindowAnimation: StateFlow<Boolean> =
         transitionInteractor
-            .isInTransitionToState(KeyguardState.GONE)
+            .isInTransition(
+                edge = Edge.create(to = Scenes.Gone),
+                edgeWithoutSceneContainer = Edge.create(to = GONE)
+            )
             .map { transitioningToGone -> transitioningToGone && isLauncherUnderneath() }
             .stateIn(scope, SharingStarted.Eagerly, false)
 

@@ -16,18 +16,17 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
-import android.platform.test.annotations.EnabledOnRavenwood
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import com.android.settingslib.RestrictedLockUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
-import com.android.systemui.qs.tiles.base.interactor.DisabledByPolicyInteractor
 import com.android.systemui.qs.tiles.base.interactor.FakeDisabledByPolicyInteractor
+import com.android.systemui.qs.tiles.base.interactor.FakeDisabledByPolicyInteractor.Companion.DISABLED_RESTRICTION
+import com.android.systemui.qs.tiles.base.interactor.FakeDisabledByPolicyInteractor.Companion.ENABLED_RESTRICTION
 import com.android.systemui.qs.tiles.base.interactor.FakeQSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.FakeQSTileUserActionInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
@@ -54,7 +53,6 @@ import org.mockito.MockitoAnnotations
 
 /** Tests all possible [QSTileUserAction]s. If you need */
 @MediumTest
-@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class QSTileViewModelUserInputTest : SysuiTestCase() {
@@ -65,8 +63,10 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
     // TODO(b/299909989): this should be parametrised. b/299096521 blocks this.
     private val userAction: QSTileUserAction = QSTileUserAction.Click(null)
 
-    private val tileConfig =
-        QSTileConfigTestBuilder.build { policy = QSTilePolicy.Restricted("test_restriction") }
+    private var tileConfig =
+        QSTileConfigTestBuilder.build {
+            policy = QSTilePolicy.Restricted(listOf(ENABLED_RESTRICTION))
+        }
 
     private val userRepository = FakeUserRepository()
     private val tileDataInteractor = FakeQSTileDataInteractor<String>()
@@ -112,11 +112,13 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
     @Test
     fun disabledByPolicyUserInputIsSkipped() =
         testScope.runTest {
+            tileConfig =
+                QSTileConfigTestBuilder.build {
+                    policy = QSTilePolicy.Restricted(listOf(DISABLED_RESTRICTION))
+                }
+            underTest = createViewModel(testScope)
             underTest.state.launchIn(backgroundScope)
-            disabledByPolicyInteractor.policyResult =
-                DisabledByPolicyInteractor.PolicyResult.TileDisabled(
-                    RestrictedLockUtils.EnforcedAdmin()
-                )
+
             runCurrent()
 
             underTest.onActionPerformed(userAction)
@@ -125,7 +127,81 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
             assertThat(tileDataInteractor.triggers.last())
                 .isNotInstanceOf(DataUpdateTrigger.UserInput::class.java)
             verify(qsTileLogger)
-                .logUserActionRejectedByPolicy(eq(userAction), eq(tileConfig.tileSpec))
+                .logUserActionRejectedByPolicy(
+                    eq(userAction),
+                    eq(tileConfig.tileSpec),
+                    eq(DISABLED_RESTRICTION)
+                )
+            verify(qsTileAnalytics, never()).trackUserAction(any(), any())
+        }
+
+    @Test
+    fun disabledByPolicySecondRestriction_userInputIsSkipped() =
+        testScope.runTest {
+            tileConfig =
+                QSTileConfigTestBuilder.build {
+                    policy =
+                        QSTilePolicy.Restricted(listOf(ENABLED_RESTRICTION, DISABLED_RESTRICTION))
+                }
+
+            underTest = createViewModel(testScope)
+
+            underTest.state.launchIn(backgroundScope)
+
+            runCurrent()
+
+            underTest.onActionPerformed(userAction)
+            runCurrent()
+
+            assertThat(tileDataInteractor.triggers.last())
+                .isNotInstanceOf(DataUpdateTrigger.UserInput::class.java)
+            verify(qsTileLogger)
+                .logUserActionRejectedByPolicy(
+                    eq(userAction),
+                    eq(tileConfig.tileSpec),
+                    eq(DISABLED_RESTRICTION)
+                )
+            verify(qsTileAnalytics, never()).trackUserAction(any(), any())
+        }
+
+    /** This tests that the policies are applied sequentially */
+    @Test
+    fun disabledByPolicySecondRestriction_onlyFirstIsTriggered() =
+        testScope.runTest {
+            tileConfig =
+                QSTileConfigTestBuilder.build {
+                    policy =
+                        QSTilePolicy.Restricted(
+                            listOf(
+                                DISABLED_RESTRICTION,
+                                FakeDisabledByPolicyInteractor.DISABLED_RESTRICTION_2
+                            )
+                        )
+                }
+
+            underTest = createViewModel(testScope)
+
+            underTest.state.launchIn(backgroundScope)
+
+            runCurrent()
+
+            underTest.onActionPerformed(userAction)
+            runCurrent()
+
+            assertThat(tileDataInteractor.triggers.last())
+                .isNotInstanceOf(DataUpdateTrigger.UserInput::class.java)
+            verify(qsTileLogger)
+                .logUserActionRejectedByPolicy(
+                    eq(userAction),
+                    eq(tileConfig.tileSpec),
+                    eq(DISABLED_RESTRICTION)
+                )
+            verify(qsTileLogger, never())
+                .logUserActionRejectedByPolicy(
+                    eq(userAction),
+                    eq(tileConfig.tileSpec),
+                    eq(FakeDisabledByPolicyInteractor.DISABLED_RESTRICTION_2)
+                )
             verify(qsTileAnalytics, never()).trackUserAction(any(), any())
         }
 

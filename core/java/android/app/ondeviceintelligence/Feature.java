@@ -34,7 +34,6 @@ import android.os.PersistableBundle;
 @SystemApi
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
 public final class Feature implements Parcelable {
-    // TODO(b/325315604) - Check if we can expose non-hidden IntDefs in Framework.
     private final int mId;
     @Nullable
     private final String mName;
@@ -138,8 +137,8 @@ public final class Feature implements Parcelable {
         if (mModelName != null) flg |= 0x4;
         dest.writeByte(flg);
         dest.writeInt(mId);
-        if (mName != null) dest.writeString8(mName);
-        if (mModelName != null) dest.writeString8(mModelName);
+        if (mName != null) dest.writeString(mName);
+        if (mModelName != null) dest.writeString(mModelName);
         dest.writeInt(mType);
         dest.writeInt(mVariant);
         dest.writeTypedObject(mFeatureParams, flags);
@@ -199,24 +198,13 @@ public final class Feature implements Parcelable {
 
         private long mBuilderFieldsSet = 0L;
 
-        public Builder(
-                int id,
-                int type,
-                int variant,
-                @NonNull PersistableBundle featureParams) {
+        /**
+         * Provides a builder instance to create a feature for given id.
+         * @param id the unique identifier for the feature.
+         */
+        public Builder(int id) {
             mId = id;
-            mType = type;
-            mVariant = variant;
-            mFeatureParams = featureParams;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mFeatureParams);
-        }
-
-        public @NonNull Builder setId(int value) {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x1;
-            mId = value;
-            return this;
+            mFeatureParams = new PersistableBundle();
         }
 
         public @NonNull Builder setName(@NonNull String value) {

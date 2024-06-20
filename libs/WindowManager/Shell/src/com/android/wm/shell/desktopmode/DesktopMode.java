@@ -18,7 +18,8 @@ package com.android.wm.shell.desktopmode;
 
 import android.graphics.Region;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -49,8 +50,11 @@ public interface DesktopMode {
 
 
     /** Called when requested to go to desktop mode from the current focused app. */
-    void enterDesktop(int displayId);
+    void moveFocusedTaskToDesktop(int displayId, DesktopModeTransitionSource transitionSource);
 
     /** Called when requested to go to fullscreen from the current focused desktop app. */
-    void moveFocusedTaskToFullscreen(int displayId);
+    void moveFocusedTaskToFullscreen(int displayId, DesktopModeTransitionSource transitionSource);
+
+    /** Called when requested to go to split screen from the current focused desktop app. */
+    void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop);
 }

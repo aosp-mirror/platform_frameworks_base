@@ -16,9 +16,11 @@
 
 package com.android.server.power.stats;
 
-
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
+
+import android.content.Context;
 import android.os.BatteryManager;
 import android.os.BatteryUsageStats;
 import android.platform.test.ravenwood.RavenwoodRule;
@@ -28,6 +30,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.PowerProfile;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +48,11 @@ public class BatteryChargeCalculatorTest {
     @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
                     .setAveragePower(PowerProfile.POWER_BATTERY_CAPACITY, 4000.0);
+
+    @Before
+    public void setup() {
+        mStatsRule.getBatteryStats().onSystemReady(mock(Context.class));
+    }
 
     @Test
     public void testDischargeTotals() {

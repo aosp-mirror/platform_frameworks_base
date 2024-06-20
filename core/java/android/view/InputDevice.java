@@ -78,6 +78,7 @@ public final class InputDevice implements Parcelable {
     private final InputDeviceIdentifier mIdentifier;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private final boolean mIsExternal;
+    @Source
     private final int mSources;
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
@@ -92,6 +93,7 @@ public final class InputDevice implements Parcelable {
     private final boolean mHasBattery;
     private final HostUsiVersion mHostUsiVersion;
     private final int mAssociatedDisplayId;
+    private final boolean mEnabled;
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
     private final ViewBehavior mViewBehavior = new ViewBehavior(this);
@@ -359,6 +361,28 @@ public final class InputDevice implements Parcelable {
      */
     public static final int SOURCE_ANY = 0xffffff00;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "SOURCE_" }, value = {
+            SOURCE_UNKNOWN,
+            SOURCE_KEYBOARD,
+            SOURCE_DPAD,
+            SOURCE_GAMEPAD,
+            SOURCE_TOUCHSCREEN,
+            SOURCE_MOUSE,
+            SOURCE_STYLUS,
+            SOURCE_BLUETOOTH_STYLUS,
+            SOURCE_TRACKBALL,
+            SOURCE_MOUSE_RELATIVE,
+            SOURCE_TOUCHPAD,
+            SOURCE_TOUCH_NAVIGATION,
+            SOURCE_ROTARY_ENCODER,
+            SOURCE_JOYSTICK,
+            SOURCE_HDMI,
+            SOURCE_SENSOR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Source {}
+
     /**
      * Constant for retrieving the range of values for {@link MotionEvent#AXIS_X}.
      *
@@ -479,7 +503,7 @@ public final class InputDevice implements Parcelable {
             int keyboardType, KeyCharacterMap keyCharacterMap, @Nullable String keyboardLanguageTag,
             @Nullable String keyboardLayoutType, boolean hasVibrator, boolean hasMicrophone,
             boolean hasButtonUnderPad, boolean hasSensor, boolean hasBattery, int usiVersionMajor,
-            int usiVersionMinor, int associatedDisplayId) {
+            int usiVersionMinor, int associatedDisplayId, boolean enabled) {
         mId = id;
         mGeneration = generation;
         mControllerNumber = controllerNumber;
@@ -510,6 +534,7 @@ public final class InputDevice implements Parcelable {
         mIdentifier = new InputDeviceIdentifier(descriptor, vendorId, productId);
         mHostUsiVersion = new HostUsiVersion(usiVersionMajor, usiVersionMinor);
         mAssociatedDisplayId = associatedDisplayId;
+        mEnabled = enabled;
     }
 
     private InputDevice(Parcel in) {
@@ -534,6 +559,7 @@ public final class InputDevice implements Parcelable {
         mHasBattery = in.readInt() != 0;
         mHostUsiVersion = HostUsiVersion.CREATOR.createFromParcel(in);
         mAssociatedDisplayId = in.readInt();
+        mEnabled = in.readInt() != 0;
         mIdentifier = new InputDeviceIdentifier(mDescriptor, mVendorId, mProductId);
 
         int numRanges = in.readInt();
@@ -578,6 +604,8 @@ public final class InputDevice implements Parcelable {
         private int mUsiVersionMajor = -1;
         private int mUsiVersionMinor = -1;
         private int mAssociatedDisplayId = Display.INVALID_DISPLAY;
+        // The default is true, the same as the native default state.
+        private boolean mEnabled = true;
         private List<MotionRange> mMotionRanges = new ArrayList<>();
         private boolean mShouldSmoothScroll;
 
@@ -708,6 +736,12 @@ public final class InputDevice implements Parcelable {
             return this;
         }
 
+        /** @see InputDevice#isEnabled() */
+        public Builder setEnabled(boolean enabled) {
+            mEnabled = enabled;
+            return this;
+        }
+
         /** @see InputDevice#getMotionRanges() */
         public Builder addMotionRange(int axis, int source,
                 float min, float max, float flat, float fuzz, float resolution) {
@@ -749,7 +783,8 @@ public final class InputDevice implements Parcelable {
                     mHasBattery,
                     mUsiVersionMajor,
                     mUsiVersionMinor,
-                    mAssociatedDisplayId);
+                    mAssociatedDisplayId,
+                    mEnabled);
 
             final int numRanges = mMotionRanges.size();
             for (int i = 0; i < numRanges; i++) {
@@ -1298,7 +1333,7 @@ public final class InputDevice implements Parcelable {
      * @return Whether the input device is enabled.
      */
     public boolean isEnabled() {
-        return InputManagerGlobal.getInstance().isInputDeviceEnabled(mId);
+        return mEnabled;
     }
 
     /**
@@ -1588,6 +1623,7 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mHasBattery ? 1 : 0);
         mHostUsiVersion.writeToParcel(out, flags);
         out.writeInt(mAssociatedDisplayId);
+        out.writeInt(mEnabled ? 1 : 0);
 
         int numRanges = mMotionRanges.size();
         numRanges = numRanges > MAX_RANGES ? MAX_RANGES : numRanges;
@@ -1619,6 +1655,7 @@ public final class InputDevice implements Parcelable {
         description.append("  Generation: ").append(mGeneration).append("\n");
         description.append("  Location: ").append(mIsExternal ? "external" : "built-in").append(
                 "\n");
+        description.append("  Enabled: ").append(isEnabled()).append("\n");
 
         description.append("  Keyboard Type: ");
         switch (mKeyboardType) {

@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Per maggior sicurezza, usa invece la sequenza"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Per maggior sicurezza, usa invece il PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Per maggior sicurezza, usa invece la password"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"PIN obbligatorio per maggiore sicurezza"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Sequenza obbligatoria per maggiore sicurezza"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Password obbligatoria per maggiore sicurezza"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispositivo bloccato dall\'amministratore"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Il dispositivo è stato bloccato manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non riconosciuto"</string>

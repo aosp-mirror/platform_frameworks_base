@@ -21,6 +21,8 @@
 
 #include "SafeMath.h"
 
+namespace android {
+
 static size_t min_vcount_for_mode(SkMesh::Mode mode) {
     switch (mode) {
         case SkMesh::Mode::kTriangles:
@@ -28,6 +30,7 @@ static size_t min_vcount_for_mode(SkMesh::Mode mode) {
         case SkMesh::Mode::kTriangleStrip:
             return 3;
     }
+    return 1;
 }
 
 // Re-implementation of SkMesh::validate to validate user side that their mesh is valid.
@@ -36,29 +39,30 @@ std::tuple<bool, SkString> Mesh::validate() {
     if (!mMeshSpec) {
         FAIL_MESH_VALIDATE("MeshSpecification is required.");
     }
-    if (mVertexBufferData.empty()) {
+    if (mBufferData->vertexData().empty()) {
         FAIL_MESH_VALIDATE("VertexBuffer is required.");
     }
 
-    auto meshStride = mMeshSpec->stride();
-    auto meshMode = SkMesh::Mode(mMode);
+    size_t vertexStride = mMeshSpec->stride();
+    size_t vertexCount = mBufferData->vertexCount();
+    size_t vertexOffset = mBufferData->vertexOffset();
     SafeMath sm;
-    size_t vsize = sm.mul(meshStride, mVertexCount);
-    if (sm.add(vsize, mVertexOffset) > mVertexBufferData.size()) {
+    size_t vertexSize = sm.mul(vertexStride, vertexCount);
+    if (sm.add(vertexSize, vertexOffset) > mBufferData->vertexData().size()) {
         FAIL_MESH_VALIDATE(
                 "The vertex buffer offset and vertex count reads beyond the end of the"
                 " vertex buffer.");
     }
 
-    if (mVertexOffset % meshStride != 0) {
+    if (vertexOffset % vertexStride != 0) {
         FAIL_MESH_VALIDATE("The vertex offset (%zu) must be a multiple of the vertex stride (%zu).",
-                           mVertexOffset, meshStride);
+                           vertexOffset, vertexStride);
     }
 
     if (size_t uniformSize = mMeshSpec->uniformSize()) {
-        if (!mBuilder->fUniforms || mBuilder->fUniforms->size() < uniformSize) {
+        if (!mUniformBuilder.fUniforms || mUniformBuilder.fUniforms->size() < uniformSize) {
             FAIL_MESH_VALIDATE("The uniform data is %zu bytes but must be at least %zu.",
-                               mBuilder->fUniforms->size(), uniformSize);
+                               mUniformBuilder.fUniforms->size(), uniformSize);
         }
     }
 
@@ -69,29 +73,33 @@ std::tuple<bool, SkString> Mesh::validate() {
             case SkMesh::Mode::kTriangleStrip:
                 return "triangle-strip";
         }
+        return "unknown";
     };
-    if (!mIndexBufferData.empty()) {
-        if (mIndexCount < min_vcount_for_mode(meshMode)) {
+
+    size_t indexCount = mBufferData->indexCount();
+    size_t indexOffset = mBufferData->indexOffset();
+    if (!mBufferData->indexData().empty()) {
+        if (indexCount < min_vcount_for_mode(mMode)) {
             FAIL_MESH_VALIDATE("%s mode requires at least %zu indices but index count is %zu.",
-                               modeToStr(meshMode), min_vcount_for_mode(meshMode), mIndexCount);
+                               modeToStr(mMode), min_vcount_for_mode(mMode), indexCount);
         }
-        size_t isize = sm.mul(sizeof(uint16_t), mIndexCount);
-        if (sm.add(isize, mIndexOffset) > mIndexBufferData.size()) {
+        size_t isize = sm.mul(sizeof(uint16_t), indexCount);
+        if (sm.add(isize, indexOffset) > mBufferData->indexData().size()) {
             FAIL_MESH_VALIDATE(
                     "The index buffer offset and index count reads beyond the end of the"
                     " index buffer.");
         }
         // If we allow 32 bit indices then this should enforce 4 byte alignment in that case.
-        if (!SkIsAlign2(mIndexOffset)) {
+        if (!SkIsAlign2(indexOffset)) {
             FAIL_MESH_VALIDATE("The index offset must be a multiple of 2.");
         }
     } else {
-        if (mVertexCount < min_vcount_for_mode(meshMode)) {
+        if (vertexCount < min_vcount_for_mode(mMode)) {
             FAIL_MESH_VALIDATE("%s mode requires at least %zu vertices but vertex count is %zu.",
-                               modeToStr(meshMode), min_vcount_for_mode(meshMode), mVertexCount);
+                               modeToStr(mMode), min_vcount_for_mode(mMode), vertexCount);
         }
-        LOG_ALWAYS_FATAL_IF(mIndexCount != 0);
-        LOG_ALWAYS_FATAL_IF(mIndexOffset != 0);
+        LOG_ALWAYS_FATAL_IF(indexCount != 0);
+        LOG_ALWAYS_FATAL_IF(indexOffset != 0);
     }
 
     if (!sm.ok()) {
@@ -100,3 +108,5 @@ std::tuple<bool, SkString> Mesh::validate() {
 #undef FAIL_MESH_VALIDATE
     return {true, {}};
 }
+
+}  // namespace android

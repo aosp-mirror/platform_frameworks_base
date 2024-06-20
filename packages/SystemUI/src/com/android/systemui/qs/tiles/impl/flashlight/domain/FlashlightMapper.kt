@@ -37,14 +37,16 @@ constructor(
 
     override fun map(config: QSTileConfig, data: FlashlightTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
+            iconRes =
+                if (data is FlashlightTileModel.FlashlightAvailable && data.isEnabled) {
+                    R.drawable.qs_flashlight_icon_on
+                } else {
+                    R.drawable.qs_flashlight_icon_off
+                }
             val icon =
                 Icon.Loaded(
                     resources.getDrawable(
-                        if (data is FlashlightTileModel.FlashlightAvailable && data.isEnabled) {
-                            R.drawable.qs_flashlight_icon_on
-                        } else {
-                            R.drawable.qs_flashlight_icon_off
-                        },
+                        iconRes!!,
                         theme,
                     ),
                     contentDescription = null

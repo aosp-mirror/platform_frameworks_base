@@ -366,6 +366,14 @@ public final class ContentCaptureManager {
             "enable_content_protection_receiver";
 
     /**
+     * Whether AssistContent snapshot should be sent on activity start.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_ENABLE_ACTIVITY_START_ASSIST_CONTENT =
+            "enable_activity_start_assist_content";
+
+    /**
      * Sets the size of the in-memory ring buffer for the content protection flow.
      *
      * @hide

@@ -17,8 +17,8 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.service.notification.NotificationListenerService.REASON_APP_CANCEL
 import android.service.notification.NotificationListenerService.REASON_CANCEL
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.logcatLogBuffer
@@ -40,7 +40,7 @@ import java.util.concurrent.Executor
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class ShadeEventCoordinatorTest : SysuiTestCase() {
     private lateinit var coordinator: ShadeEventCoordinator

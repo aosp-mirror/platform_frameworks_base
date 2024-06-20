@@ -22,8 +22,7 @@
     android:focusable="true"
     android:clickable="true"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:visibility="invisible">
+    android:layout_height="match_parent">
 
     <com.android.systemui.scrim.ScrimView
         android:id="@+id/alternate_bouncer_scrim"

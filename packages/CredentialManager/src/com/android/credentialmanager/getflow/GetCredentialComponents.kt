@@ -16,9 +16,11 @@
 
 package com.android.credentialmanager.getflow
 
+import android.credentials.flags.Flags.credmanBiometricApiEnabled
 import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.graphics.drawable.Drawable
-import android.text.TextUtils
+import android.hardware.biometrics.BiometricPrompt
+import android.os.CancellationSignal
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -31,6 +33,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.Divider
 import androidx.compose.material3.TextButton
@@ -42,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
@@ -50,30 +55,34 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
-import com.android.credentialmanager.model.EntryInfo
-import com.android.credentialmanager.model.CredentialType
-import com.android.credentialmanager.model.get.ProviderInfo
+import com.android.credentialmanager.common.BiometricError
+import com.android.credentialmanager.common.BiometricFlowType
+import com.android.credentialmanager.common.BiometricPromptState
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
+import com.android.credentialmanager.common.runBiometricFlowForGet
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.ActionEntry
 import com.android.credentialmanager.common.ui.ConfirmButton
 import com.android.credentialmanager.common.ui.CredentialContainerCard
+import com.android.credentialmanager.common.ui.CredentialListSectionHeader
 import com.android.credentialmanager.common.ui.CtaButtonRow
 import com.android.credentialmanager.common.ui.Entry
+import com.android.credentialmanager.common.ui.HeadlineIcon
+import com.android.credentialmanager.common.ui.HeadlineText
+import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ModalBottomSheet
 import com.android.credentialmanager.common.ui.MoreOptionTopAppBar
 import com.android.credentialmanager.common.ui.SheetContainerCard
-import com.android.credentialmanager.common.ui.SnackbarActionText
-import com.android.credentialmanager.common.ui.HeadlineText
-import com.android.credentialmanager.common.ui.CredentialListSectionHeader
-import com.android.credentialmanager.common.ui.HeadlineIcon
-import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.Snackbar
+import com.android.credentialmanager.common.ui.SnackbarActionText
 import com.android.credentialmanager.logging.GetCredentialEvent
+import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.get.ActionEntryInfo
 import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
+import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.credentialmanager.userAndDisplayNameForPasskey
 import com.android.internal.logging.UiEventLogger.UiEventEnum
@@ -83,7 +92,7 @@ import kotlin.math.max
 fun GetCredentialScreen(
     viewModel: CredentialSelectorViewModel,
     getCredentialUiState: GetCredentialUiState,
-    providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
+    providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>,
 ) {
     if (getCredentialUiState.currentScreenState == GetScreenState.REMOTE_ONLY) {
         RemoteCredentialSnackBarScreen(
@@ -138,6 +147,50 @@ fun GetCredentialScreen(
                             }
                             viewModel.uiMetrics.log(GetCredentialEvent
                                     .CREDMAN_GET_CRED_SCREEN_PRIMARY_SELECTION)
+                        } else if (credmanBiometricApiEnabled() && getCredentialUiState
+                                .currentScreenState == GetScreenState.BIOMETRIC_SELECTION) {
+                            BiometricSelectionPage(
+                                biometricEntry = getCredentialUiState.activeEntry,
+                                onMoreOptionSelected = viewModel::getFlowOnMoreOptionOnlySelected,
+                                onCancelFlowAndFinish = viewModel::onUserCancel,
+                                onIllegalStateAndFinish = viewModel::onIllegalUiState,
+                                requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
+                                providerInfoList = getCredentialUiState.providerInfoList,
+                                providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
+                                onBiometricEntrySelected =
+                                viewModel::getFlowOnEntrySelected,
+                                fallbackToOriginalFlow =
+                                viewModel::fallbackFromBiometricToNormalFlow,
+                                getBiometricPromptState =
+                                viewModel::getBiometricPromptStateStatus,
+                                onBiometricPromptStateChange =
+                                viewModel::onBiometricPromptStateChange,
+                                getBiometricCancellationSignal =
+                                viewModel::getBiometricCancellationSignal,
+                                onLog = { viewModel.logUiEvent(it) },
+                            )
+                        } else if (credmanBiometricApiEnabled() &&
+                                getCredentialUiState.currentScreenState
+                                == GetScreenState.ALL_SIGN_IN_OPTIONS_ONLY) {
+                            AllSignInOptionCard(
+                                    providerInfoList = getCredentialUiState.providerInfoList,
+                                    providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
+                                    onEntrySelected = viewModel::getFlowOnEntrySelected,
+                                    onBackButtonClicked = viewModel::onUserCancel,
+                                    onCancel = viewModel::onUserCancel,
+                                    onLog = { viewModel.logUiEvent(it) },
+                                    customTopBar = { MoreOptionTopAppBar(
+                                            text = stringResource(
+                                                    R.string.get_dialog_title_sign_in_options),
+                                            onNavigationIconClicked = viewModel::onUserCancel,
+                                            navigationIcon = Icons.Filled.Close,
+                                            navigationIconContentDescription =
+                                            stringResource(R.string.accessibility_close_button),
+                                            bottomPadding = 0.dp
+                                    ) }
+                            )
+                            viewModel.uiMetrics.log(GetCredentialEvent
+                                    .CREDMAN_GET_CRED_SCREEN_ALL_SIGN_IN_OPTIONS)
                         } else {
                             AllSignInOptionCard(
                                 providerInfoList = getCredentialUiState.providerInfoList,
@@ -187,6 +240,50 @@ fun GetCredentialScreen(
             isAutoSelectFlow = viewModel.uiState.isAutoSelectFlow,
             onInitialRenderComplete = viewModel::onInitialRenderComplete,
         )
+    }
+}
+
+@Composable
+internal fun BiometricSelectionPage(
+    biometricEntry: EntryInfo?,
+    onCancelFlowAndFinish: () -> Unit,
+    onIllegalStateAndFinish: (String) -> Unit,
+    onMoreOptionSelected: () -> Unit,
+    requestDisplayInfo: RequestDisplayInfo,
+    providerInfoList: List<ProviderInfo>,
+    providerDisplayInfo: ProviderDisplayInfo,
+    onBiometricEntrySelected: (
+        EntryInfo,
+        BiometricPrompt.AuthenticationResult?,
+        BiometricError?
+    ) -> Unit,
+    fallbackToOriginalFlow: (BiometricFlowType) -> Unit,
+    getBiometricPromptState: () -> BiometricPromptState,
+    onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
+    getBiometricCancellationSignal: () -> CancellationSignal,
+    onLog: @Composable (UiEventEnum) -> Unit,
+) {
+    if (biometricEntry == null) {
+        fallbackToOriginalFlow(BiometricFlowType.GET)
+        return
+    }
+    val biometricFlowCalled = runBiometricFlowForGet(
+        biometricEntry = biometricEntry,
+        context = LocalContext.current,
+        openMoreOptionsPage = onMoreOptionSelected,
+        sendDataToProvider = onBiometricEntrySelected,
+        onCancelFlowAndFinish = onCancelFlowAndFinish,
+        onIllegalStateAndFinish = onIllegalStateAndFinish,
+        getBiometricPromptState = getBiometricPromptState,
+        onBiometricPromptStateChange = onBiometricPromptStateChange,
+        getRequestDisplayInfo = requestDisplayInfo,
+        getProviderInfoList = providerInfoList,
+        getProviderDisplayInfo = providerDisplayInfo,
+        onBiometricFailureFallback = fallbackToOriginalFlow,
+        getBiometricCancellationSignal = getBiometricCancellationSignal
+    )
+    if (biometricFlowCalled) {
+        onLog(GetCredentialEvent.CREDMAN_GET_CRED_BIOMETRIC_FLOW_LAUNCHED)
     }
 }
 
@@ -257,13 +354,8 @@ fun PrimarySelectionCard(
                         if (hasSingleEntry) {
                             val singleEntryType = sortedUserNameToCredentialEntryList.firstOrNull()
                                 ?.sortedCredentialEntryList?.firstOrNull()?.credentialType
-                            if (singleEntryType == CredentialType.PASSKEY)
-                                R.string.get_dialog_title_use_passkey_for
-                            else if (singleEntryType == CredentialType.PASSWORD)
-                                R.string.get_dialog_title_use_password_for
-                            else if (authenticationEntryList.isNotEmpty())
-                                R.string.get_dialog_title_unlock_options_for
-                            else R.string.get_dialog_title_use_sign_in_for
+                            generateDisplayTitleTextResCode(singleEntryType!!,
+                                authenticationEntryList)
                         } else {
                             if (authenticationEntryList.isNotEmpty() ||
                                 sortedUserNameToCredentialEntryList.any { perNameEntryList ->
@@ -431,6 +523,14 @@ fun PrimarySelectionCardVImpl(
 
         val hasSingleEntry = primaryPageCredentialEntryList.size +
                 primaryPageLockedEntryList.size == 1
+        val areAllPasswordsOnPrimaryScreen = primaryPageLockedEntryList.isEmpty() &&
+                primaryPageCredentialEntryList.all {
+                    it.sortedCredentialEntryList.first().credentialType == CredentialType.PASSWORD
+                }
+        val areAllPasskeysOnPrimaryScreen = primaryPageLockedEntryList.isEmpty() &&
+                primaryPageCredentialEntryList.all {
+                    it.sortedCredentialEntryList.first().credentialType == CredentialType.PASSKEY
+                }
         item {
             if (requestDisplayInfo.preferIdentityDocUi) {
                 HeadlineText(
@@ -447,29 +547,20 @@ fun PrimarySelectionCardVImpl(
                 HeadlineText(
                     text = stringResource(
                         if (hasSingleEntry) {
-                            val singleEntryType = primaryPageCredentialEntryList.firstOrNull()
-                                ?.sortedCredentialEntryList?.firstOrNull()?.credentialType
-                            if (singleEntryType == CredentialType.PASSKEY)
+                            if (areAllPasskeysOnPrimaryScreen)
                                 R.string.get_dialog_title_use_passkey_for
-                            else if (singleEntryType == CredentialType.PASSWORD)
+                            else if (areAllPasswordsOnPrimaryScreen)
                                 R.string.get_dialog_title_use_password_for
                             else if (authenticationEntryList.isNotEmpty())
                                 R.string.get_dialog_title_unlock_options_for
                             else R.string.get_dialog_title_use_sign_in_for
                         } else {
-                            if (authenticationEntryList.isNotEmpty() ||
-                                sortedUserNameToCredentialEntryList.any { perNameEntryList ->
-                                    perNameEntryList.sortedCredentialEntryList.any { entry ->
-                                        entry.credentialType != CredentialType.PASSWORD &&
-                                            entry.credentialType != CredentialType.PASSKEY
-                                    }
-                                }
-                            ) // For an unknown / locked entry, it's not true that it is
-                            // already saved, strictly speaking. Hence use a different title
-                            // without the mention of "saved"
-                                R.string.get_dialog_title_choose_sign_in_for
+                            if (areAllPasswordsOnPrimaryScreen)
+                                R.string.get_dialog_title_choose_password_for
+                            else if (areAllPasskeysOnPrimaryScreen)
+                                R.string.get_dialog_title_choose_passkey_for
                             else
-                                R.string.get_dialog_title_choose_saved_sign_in_for
+                                R.string.get_dialog_title_choose_sign_in_for
                         },
                         requestDisplayInfo.appName
                     ),
@@ -490,8 +581,11 @@ fun PrimarySelectionCardVImpl(
                                     showMoreForTruncatedEntry.value = it.hasVisualOverflow
                                 },
                                 hasSingleEntry = hasSingleEntry,
+                                hasSingleProvider = singleProviderId != null,
                                 shouldOverrideIcon = entry.isDefaultIconPreferredAsSingleProvider &&
                                         (singleProviderId != null),
+                                shouldRemoveTypeDisplayName = areAllPasswordsOnPrimaryScreen ||
+                                        areAllPasskeysOnPrimaryScreen
                         )
                     }
                     primaryPageLockedEntryList.forEach {
@@ -571,7 +665,13 @@ private fun findSingleProviderIdForPrimaryPage(
     return providerId
 }
 
-/** Draws the secondary credential selection page, where all sign-in options are listed. */
+/**
+ * Draws the secondary credential selection page, where all sign-in options are listed.
+ *
+ * By default, this card has 'back' navigation whereby user can navigate back to invoke
+ * [onBackButtonClicked]. However if a different top bar with possibly a different navigation
+ * is required, then the caller of this Composable can set a [customTopBar].
+ */
 @Composable
 fun AllSignInOptionCard(
     providerInfoList: List<ProviderInfo>,
@@ -580,16 +680,24 @@ fun AllSignInOptionCard(
     onBackButtonClicked: () -> Unit,
     onCancel: () -> Unit,
     onLog: @Composable (UiEventEnum) -> Unit,
+    customTopBar: (@Composable() () -> Unit)? = null
 ) {
     val sortedUserNameToCredentialEntryList =
         providerDisplayInfo.sortedUserNameToCredentialEntryList
     val authenticationEntryList = providerDisplayInfo.authenticationEntryList
     SheetContainerCard(topAppBar = {
-        MoreOptionTopAppBar(
-            text = stringResource(R.string.get_dialog_title_sign_in_options),
-            onNavigationIconClicked = onBackButtonClicked,
-            bottomPadding = 0.dp,
-        )
+        if (customTopBar != null) {
+            customTopBar()
+        } else {
+            MoreOptionTopAppBar(
+                    text = stringResource(R.string.get_dialog_title_sign_in_options),
+                    onNavigationIconClicked = onBackButtonClicked,
+                    bottomPadding = 0.dp,
+                    navigationIcon = Icons.Filled.ArrowBack,
+                    navigationIconContentDescription = stringResource(
+                            R.string.accessibility_back_arrow_button
+            ))
+        }
     }) {
         var isFirstSection = true
         // For username
@@ -754,11 +862,19 @@ fun CredentialEntryRow(
     enforceOneLine: Boolean = false,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     // Make optional since the secondary page doesn't care about this value.
-    hasSingleEntry: Boolean? = null,
+    hasSingleEntry: Boolean = false,
     // For primary page only, if all display entries come from the same provider AND if that
     // provider has opted in via isDefaultIconPreferredAsSingleProvider, then we override the
     // display icon to the default icon for the given credential type.
     shouldOverrideIcon: Boolean = false,
+    // For primary page only, if all entries come from the same provider, then remove that provider
+    // name from each entry, since that provider icon + name will be shown front and central at
+    // the top of the bottom sheet.
+    hasSingleProvider: Boolean = false,
+    // For primary page only, if all visible entrise are of the same type and that type is passkey
+    // or password, then set this bit to true to remove the type display name from each entry for
+    // simplification, since that info is mentioned in the title.
+    shouldRemoveTypeDisplayName: Boolean = false,
 ) {
     val (username, displayName) = if (credentialEntryInfo.credentialType == CredentialType.PASSKEY)
         userAndDisplayNameForPasskey(
@@ -786,19 +902,18 @@ fun CredentialEntryRow(
         else if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
         else null,
         entryHeadlineText = username,
-        entrySecondLineText =
-        (if (hasSingleEntry != null && hasSingleEntry)
-            if (credentialEntryInfo.credentialType == CredentialType.PASSKEY ||
-                    credentialEntryInfo.credentialType == CredentialType.PASSWORD)
-                listOf(displayName)
+        entrySecondLineText = displayName,
+        entryThirdLineText =
+        (if (hasSingleEntry)
+            if (shouldRemoveTypeDisplayName) emptyList()
             // Still show the type display name for all non-password/passkey types since it won't be
             // mentioned in the bottom sheet heading.
-            else listOf(displayName, credentialEntryInfo.credentialTypeDisplayName)
+            else listOf(credentialEntryInfo.credentialTypeDisplayName)
         else listOf(
-                displayName,
-                credentialEntryInfo.credentialTypeDisplayName,
-                credentialEntryInfo.providerDisplayName
-        )).filterNot(TextUtils::isEmpty).let { itemsToDisplay ->
+                if (shouldRemoveTypeDisplayName) null
+                else credentialEntryInfo.credentialTypeDisplayName,
+                if (hasSingleProvider) null else credentialEntryInfo.providerDisplayName
+        )).filterNot{ it.isNullOrBlank() }.let { itemsToDisplay ->
             if (itemsToDisplay.isEmpty()) null
             else itemsToDisplay.joinToString(
                 separator = stringResource(R.string.get_dialog_sign_in_type_username_separator)

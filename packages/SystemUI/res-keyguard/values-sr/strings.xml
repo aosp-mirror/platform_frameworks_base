@@ -57,7 +57,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Погрешан PIN"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Погрешан PIN. Пробајте поново."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Или откључајте отиском прста"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Отисак прста непрепознат"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Отисак прста није препознат"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Лице није препознато"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Пробајте поново или унесите PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Пробајте поново или унесите лозинку"</string>
@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"За додатну безбедност користите шаблон"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"За додатну безбедност користите PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"За додатну безбедност користите лозинку"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Треба да унесете PIN ради додатне безбедности"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Треба да унесете шаблон ради додатне безбедности"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Треба да унесете лозинку ради додатне безбедности"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Администратор је закључао уређај"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Уређај је ручно закључан"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Није препознат"</string>

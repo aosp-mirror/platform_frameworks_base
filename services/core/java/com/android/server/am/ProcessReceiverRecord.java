@@ -95,10 +95,6 @@ final class ProcessReceiverRecord {
         return mReceivers.size();
     }
 
-    ReceiverList getReceiverAt(int index) {
-        return mReceivers.valueAt(index);
-    }
-
     void addReceiver(ReceiverList receiver) {
         mReceivers.add(receiver);
     }

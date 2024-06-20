@@ -286,23 +286,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                     .setName(name)
                     .setCallsite("createSurfaceForGestureMonitor")
                     .setParent(inputOverlay)
+                    .setCallsite("InputManagerCallback.createSurfaceForGestureMonitor")
                     .build();
-        }
-    }
-
-    @Override
-    public void notifyPointerDisplayIdChanged(int displayId, float x, float y) {
-        synchronized (mService.mGlobalLock) {
-            mService.setMousePointerDisplayId(displayId);
-            if (displayId == Display.INVALID_DISPLAY) return;
-
-            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
-            if (dc == null) {
-                Slog.wtf(TAG, "The mouse pointer was moved to display " + displayId
-                        + " that does not have a valid DisplayContent.");
-                return;
-            }
-            mService.restorePointerIconLocked(dc, x, y);
         }
     }
 

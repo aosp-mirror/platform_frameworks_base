@@ -97,7 +97,7 @@ filegroup {
         // AIDL sources from external directories
         ":android.frameworks.location.altitude-V2-java-source",
         ":android.hardware.biometrics.common-V4-java-source",
-        ":android.hardware.biometrics.fingerprint-V3-java-source",
+        ":android.hardware.biometrics.fingerprint-V5-java-source",
         ":android.hardware.biometrics.face-V4-java-source",
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
@@ -354,8 +354,11 @@ java_defaults {
             "packages/modules/Media/apex/aidl/stable",
             "hardware/interfaces/biometrics/common/aidl",
             "hardware/interfaces/biometrics/fingerprint/aidl",
+            "hardware/interfaces/common/aidl",
+            "hardware/interfaces/common/fmq/aidl",
             "hardware/interfaces/graphics/common/aidl",
             "hardware/interfaces/keymaster/aidl",
+            "hardware/interfaces/power/aidl",
             "system/hardware/interfaces/media/aidl",
         ],
     },
@@ -401,6 +404,7 @@ java_defaults {
         "android.hardware.common.fmq-V1-java",
         "bouncycastle-repackaged-unbundled",
         "com.android.sysprop.foldlockbehavior",
+        "com.android.sysprop.view",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
@@ -422,6 +426,7 @@ java_defaults {
         "sounddose-aidl-java",
         "modules-utils-expresslog",
         "perfetto_trace_javastream_protos_jarjar",
+        "libaconfig_java_proto_nano",
     ],
 }
 

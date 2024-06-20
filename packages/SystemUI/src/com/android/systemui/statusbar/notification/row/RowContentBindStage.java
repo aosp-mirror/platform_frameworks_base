@@ -73,7 +73,7 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
         mBinder.unbindContent(entry, row, contentToUnbind);
 
         BindParams bindParams = new BindParams();
-        bindParams.isLowPriority = params.useLowPriority();
+        bindParams.isMinimized = params.useMinimized();
         bindParams.usesIncreasedHeight = params.useIncreasedHeight();
         bindParams.usesIncreasedHeadsUpHeight = params.useIncreasedHeadsUpHeight();
         boolean forceInflate = params.needsReinflation();

@@ -16,13 +16,16 @@
 
 package com.android.systemui.util.animation
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
-import org.junit.Test
 import java.lang.IllegalArgumentException
+import org.junit.runner.RunWith
+import org.junit.Test
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class AnimationUtilTest : SysuiTestCase() {
     @Test
     fun getMsForFrames_5frames_returns83() {

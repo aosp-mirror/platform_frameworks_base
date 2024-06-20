@@ -19,12 +19,10 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
 
 val Kosmos.glanceableHubTransitions by
     Kosmos.Fixture {
         GlanceableHubTransitions(
-            bgDispatcher = testDispatcher,
             transitionRepository = keyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
             communalInteractor = communalInteractor,

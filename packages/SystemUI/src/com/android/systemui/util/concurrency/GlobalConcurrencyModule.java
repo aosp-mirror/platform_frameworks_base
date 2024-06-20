@@ -23,14 +23,14 @@ import android.os.Looper;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 
+import dagger.Binds;
+import dagger.Module;
+import dagger.Provides;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import javax.inject.Singleton;
-
-import dagger.Binds;
-import dagger.Module;
-import dagger.Provides;
 
 /**
  * Dagger Module for classes found within the concurrent package.

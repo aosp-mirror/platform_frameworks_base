@@ -20,16 +20,19 @@ package com.android.systemui.keyguard.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -43,41 +46,35 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BurnInInteractorTest : SysuiTestCase() {
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
+    val configurationRepository = kosmos.fakeConfigurationRepository
+    val fakeKeyguardRepository = kosmos.fakeKeyguardRepository
+
     private val burnInOffset = 7
     private var burnInProgress = 0f
 
     @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
 
-    private lateinit var configurationRepository: FakeConfigurationRepository
-    private lateinit var keyguardInteractor: KeyguardInteractor
-    private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
-    private lateinit var testScope: TestScope
     private lateinit var underTest: BurnInInteractor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        configurationRepository = FakeConfigurationRepository()
 
         context
             .getOrCreateTestableResources()
             .addOverride(R.dimen.burn_in_prevention_offset_y, burnInOffset)
-
-        KeyguardInteractorFactory.create().let {
-            keyguardInteractor = it.keyguardInteractor
-            fakeKeyguardRepository = it.repository
-        }
         whenever(burnInHelperWrapper.burnInOffset(anyInt(), anyBoolean())).thenReturn(burnInOffset)
         setBurnInProgress(.65f)
 
-        testScope = TestScope()
         underTest =
             BurnInInteractor(
                 context,
                 burnInHelperWrapper,
-                testScope.backgroundScope,
-                configurationRepository,
-                keyguardInteractor,
+                kosmos.applicationCoroutineScope,
+                kosmos.configurationInteractor,
+                kosmos.keyguardInteractor,
             )
     }
 

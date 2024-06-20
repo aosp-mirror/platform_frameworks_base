@@ -182,6 +182,12 @@
     <!-- Content description to tell the user a bubble has been dismissed. -->
     <string name="accessibility_bubble_dismissed">Bubble dismissed.</string>
 
+    <!-- Label used to for bubbles shortcut [CHAR_LIMIT=10] -->
+    <string name="bubble_shortcut_label">Bubbles</string>
+
+    <!-- Longer label used to for bubbles shortcut, shown if there is enough space [CHAR_LIMIT=25] -->
+    <string name="bubble_shortcut_long_label">Show Bubbles</string>
+
     <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
     <string name="restart_button_description">Tap to restart this app for a better view</string>
 
@@ -280,4 +286,8 @@
     <string name="collapse_menu_text">Close Menu</string>
     <!-- Accessibility text for the handle menu open menu button [CHAR LIMIT=NONE] -->
     <string name="expand_menu_text">Open Menu</string>
+    <!-- Maximize menu maximize button string. -->
+    <string name="desktop_mode_maximize_menu_maximize_text">Maximize Screen</string>
+    <!-- Maximize menu snap buttons string. -->
+    <string name="desktop_mode_maximize_menu_snap_text">Snap Screen</string>
 </resources>

@@ -19,6 +19,14 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
+import android.view.KeyEvent.KEYCODE_0
+import android.view.KeyEvent.KEYCODE_9
+import android.view.KeyEvent.KEYCODE_DEL
+import android.view.KeyEvent.KEYCODE_NUMPAD_0
+import android.view.KeyEvent.KEYCODE_NUMPAD_9
+import android.view.KeyEvent.isConfirmKey
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
 import com.android.keyguard.PinShapeAdapter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
@@ -41,6 +49,7 @@ class PinBouncerViewModel(
     viewModelScope: CoroutineScope,
     interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
+    private val onIntentionalUserInput: () -> Unit,
     private val simBouncerInteractor: SimBouncerInteractor,
     authenticationMethod: AuthenticationMethodModel,
 ) :
@@ -98,7 +107,7 @@ class PinBouncerViewModel(
             .map { if (it) ActionButtonAppearance.Hidden else ActionButtonAppearance.Shown }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.Eagerly,
+                started = SharingStarted.WhileSubscribed(),
                 initialValue = ActionButtonAppearance.Hidden,
             )
 
@@ -131,14 +140,14 @@ class PinBouncerViewModel(
     /** Notifies that the user clicked on a PIN button with the given digit value. */
     fun onPinButtonClicked(input: Int) {
         val pinInput = mutablePinInput.value
-        if (pinInput.isEmpty()) {
-            interactor.clearMessage()
+
+        onIntentionalUserInput()
+
+        val maxInputLength = hintedPinLength.value ?: Int.MAX_VALUE
+        if (pinInput.getPin().size < maxInputLength) {
+            mutablePinInput.value = pinInput.append(input)
+            tryAuthenticate(useAutoConfirm = true)
         }
-
-        interactor.onIntentionalUserInput()
-
-        mutablePinInput.value = pinInput.append(input)
-        tryAuthenticate(useAutoConfirm = true)
     }
 
     /** Notifies that the user clicked the backspace button. */
@@ -149,7 +158,6 @@ class PinBouncerViewModel(
     /** Notifies that the user long-pressed the backspace button. */
     fun onBackspaceButtonLongPressed() {
         clearInput()
-        interactor.clearMessage()
     }
 
     /** Notifies that the user clicked the "enter" button. */
@@ -157,8 +165,7 @@ class PinBouncerViewModel(
         if (authenticationMethod == AuthenticationMethodModel.Sim) {
             viewModelScope.launch {
                 isSimUnlockingDialogVisible.value = true
-                val msg = simBouncerInteractor.verifySim(getInput())
-                interactor.setMessage(msg)
+                simBouncerInteractor.verifySim(getInput())
                 isSimUnlockingDialogVisible.value = false
                 clearInput()
             }
@@ -174,7 +181,6 @@ class PinBouncerViewModel(
     /** Resets the sim screen and shows a default message. */
     private fun onResetSimFlow() {
         simBouncerInteractor.resetSimPukUserInput()
-        interactor.resetMessage()
         clearInput()
     }
 
@@ -196,6 +202,44 @@ class PinBouncerViewModel(
             isAutoConfirmEnabled && isEmpty -> ActionButtonAppearance.Hidden
             isAutoConfirmEnabled -> ActionButtonAppearance.Subtle
             else -> ActionButtonAppearance.Shown
+        }
+    }
+
+    /**
+     * Notifies that a key event has occurred.
+     *
+     * @return `true` when the [KeyEvent] was consumed as user input on bouncer; `false` otherwise.
+     */
+    fun onKeyEvent(type: KeyEventType, keyCode: Int): Boolean {
+        return when (type) {
+            KeyEventType.KeyUp -> {
+                if (isConfirmKey(keyCode)) {
+                    onAuthenticateButtonClicked()
+                    true
+                } else {
+                    false
+                }
+            }
+            KeyEventType.KeyDown -> {
+                when (keyCode) {
+                    KEYCODE_DEL -> {
+                        onBackspaceButtonClicked()
+                        true
+                    }
+                    in KEYCODE_0..KEYCODE_9 -> {
+                        onPinButtonClicked(keyCode - KEYCODE_0)
+                        true
+                    }
+                    in KEYCODE_NUMPAD_0..KEYCODE_NUMPAD_9 -> {
+                        onPinButtonClicked(keyCode - KEYCODE_NUMPAD_0)
+                        true
+                    }
+                    else -> {
+                        false
+                    }
+                }
+            }
+            else -> false
         }
     }
 }

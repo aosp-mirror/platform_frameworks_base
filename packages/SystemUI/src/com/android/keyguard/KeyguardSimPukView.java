@@ -24,7 +24,6 @@ import android.util.Log;
 
 import com.android.systemui.res.R;
 
-
 /**
  * Displays a PIN pad for entering a PUK (Pin Unlock Kode) provided by a carrier.
  */

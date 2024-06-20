@@ -25,17 +25,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +49,7 @@ import org.mockito.MockitoAnnotations;
  * Tests for {@link SeekBarWithIconButtonsView}
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
 

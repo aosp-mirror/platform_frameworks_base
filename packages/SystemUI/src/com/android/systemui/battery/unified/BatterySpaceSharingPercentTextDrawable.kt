@@ -23,6 +23,7 @@ import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
+import android.view.View
 import com.android.systemui.battery.unified.BatteryLayersDrawable.Companion.Metrics
 
 /**
@@ -94,6 +95,7 @@ class BatterySpaceSharingPercentTextDrawable(font: Typeface) : Drawable() {
     }
 
     override fun draw(canvas: Canvas) {
+        val rtl = layoutDirection == View.LAYOUT_DIRECTION_RTL
         val totalAvailableHeight = CanvasHeight * vScale
 
         // Distribute the vertical whitespace around the text. This is a simplified version of
@@ -107,7 +109,7 @@ class BatterySpaceSharingPercentTextDrawable(font: Typeface) : Drawable() {
 
         canvas.drawText(
             percentText,
-            (ViewportInsetLeft * hScale) + offsetX,
+            ((if (rtl) ViewportInsetLeftRtl else ViewportInsetLeft) * hScale) + offsetX,
             (ViewportInsetTop * vScale) + offsetY,
             textPaint
         )
@@ -128,6 +130,7 @@ class BatterySpaceSharingPercentTextDrawable(font: Typeface) : Drawable() {
 
     companion object {
         private const val ViewportInsetLeft = 4f
+        private const val ViewportInsetLeftRtl = 2f
         private const val ViewportInsetTop = 2f
 
         private const val CanvasWidth = 12f

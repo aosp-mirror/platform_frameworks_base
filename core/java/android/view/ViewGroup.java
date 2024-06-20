@@ -16,7 +16,6 @@
 
 package android.view;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
@@ -49,14 +48,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.service.autofill.Flags;
 import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pools;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimation.Callback.DispatchMode;
 import android.view.accessibility.AccessibilityEvent;
@@ -719,10 +716,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mGroupFlags |= FLAG_ANIMATION_DONE;
         mGroupFlags |= FLAG_ANIMATION_CACHE;
         mGroupFlags |= FLAG_ALWAYS_DRAWN_WITH_CACHE;
-
-        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
-            mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
-        }
+        mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
 
         setDescendantFocusability(FOCUS_BEFORE_DESCENDANTS);
 
@@ -2652,10 +2646,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // Check for interception.
             final boolean intercepted;
-            if (actionMasked == MotionEvent.ACTION_DOWN
-                    || mFirstTouchTarget != null) {
+            ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) {
                 final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
-                if (!disallowIntercept) {
+                final boolean isBackGestureInProgress = (viewRootImpl != null
+                        && viewRootImpl.getOnBackInvokedDispatcher().isBackGestureInProgress());
+                if (!disallowIntercept || isBackGestureInProgress) {
+                    // Allow back to intercept touch
                     intercepted = onInterceptTouchEvent(ev);
                     ev.setAction(action); // restore action in case it was changed
                 } else {
@@ -3597,48 +3594,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
             } catch (IndexOutOfBoundsException e) {
                 childIndex = i;
-                if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.M) {
-                    Log.w(TAG, "Bad getChildDrawingOrder while collecting assist @ "
-                            + i + " of " + childrenCount, e);
-                    // At least one app is failing when we call getChildDrawingOrder
-                    // at this point, so deal semi-gracefully with it by falling back
-                    // on the basic order.
-                    customOrder = false;
-                    if (i > 0) {
-                        // If we failed at the first index, there really isn't
-                        // anything to do -- we will just proceed with the simple
-                        // sequence order.
-                        // Otherwise, we failed in the middle, so need to come up
-                        // with an order for the remaining indices and use that.
-                        // Failed at the first one, easy peasy.
-                        int[] permutation = new int[childrenCount];
-                        SparseBooleanArray usedIndices = new SparseBooleanArray();
-                        // Go back and collected the indices we have done so far.
-                        for (int j = 0; j < i; j++) {
-                            permutation[j] = getChildDrawingOrder(childrenCount, j);
-                            usedIndices.put(permutation[j], true);
-                        }
-                        // Fill in the remaining indices with indices that have not
-                        // yet been used.
-                        int nextIndex = 0;
-                        for (int j = i; j < childrenCount; j++) {
-                            while (usedIndices.get(nextIndex, false)) {
-                                nextIndex++;
-                            }
-                            permutation[j] = nextIndex;
-                            nextIndex++;
-                        }
-                        // Build the final view list.
-                        preorderedList = new ArrayList<>(childrenCount);
-                        for (int j = 0; j < childrenCount; j++) {
-                            final int index = permutation[j];
-                            final View child = mChildren[index];
-                            preorderedList.add(child);
-                        }
-                    }
-                } else {
-                    throw e;
-                }
+                throw e;
             }
             final View child = getAndVerifyPreorderedView(preorderedList, mChildren,
                     childIndex);
@@ -3732,6 +3688,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return afm.shouldAlwaysIncludeWebviewInAssistStructure();
     }
 
+    private boolean shouldIncludeInvisibleView(AutofillManager afm) {
+        if (afm == null) return false;
+        return afm.shouldIncludeInvisibleViewInAssistStructure();
+    }
+
     /** @hide */
     private void populateChildrenForAutofill(ArrayList<View> list, @AutofillFlags int flags) {
         final int childrenCount = mChildrenCount;
@@ -3754,7 +3715,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     || (shouldIncludeAllChildrenViewWithAutofillTypeNotNone(afm)
                         && child.getAutofillType() != AUTOFILL_TYPE_NONE)
                     || shouldIncludeAllChildrenViews(afm)
-                    || (Flags.includeInvisibleViewGroupInAssistStructure()
+                    || (shouldIncludeInvisibleView(afm)
                     && child instanceof ViewGroup && child.getVisibility() != View.VISIBLE)) {
                 // If the child is a ViewGroup object and its visibility is not visible, include
                 // it as part of the assist structure. The children of these invisible ViewGroup
@@ -7102,12 +7063,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             } else if (childDimension == LayoutParams.MATCH_PARENT) {
                 // Child wants to be our size... find out how big it should
                 // be
-                resultSize = View.sUseZeroUnspecifiedMeasureSpec ? 0 : size;
+                resultSize = size;
                 resultMode = MeasureSpec.UNSPECIFIED;
             } else if (childDimension == LayoutParams.WRAP_CONTENT) {
                 // Child wants to determine its own size.... find out how
                 // big it should be
-                resultSize = View.sUseZeroUnspecifiedMeasureSpec ? 0 : size;
+                resultSize = size;
                 resultMode = MeasureSpec.UNSPECIFIED;
             }
             break;
@@ -8655,8 +8616,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
 
             final boolean hasRtlSupport = c.getApplicationInfo().hasRtlSupport();
-            final int targetSdkVersion = c.getApplicationInfo().targetSdkVersion;
-            if (targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport) {
+            if (!hasRtlSupport) {
                 mMarginFlags |= RTL_COMPATIBILITY_MODE_MASK;
             }
 

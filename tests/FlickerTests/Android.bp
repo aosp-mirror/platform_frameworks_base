@@ -63,17 +63,20 @@ java_library {
     ],
 }
 
-android_library_import {
-    name: "wm-flicker-window-extensions_nodeps",
-    aars: ["libs/window-extensions-release.aar"],
-    sdk_version: "current",
-}
-
 java_library {
     name: "wm-flicker-window-extensions",
     sdk_version: "current",
     static_libs: [
-        "wm-flicker-window-extensions_nodeps",
+        "androidx.window.extensions_extensions-nodeps",
+    ],
+    installable: false,
+}
+
+java_library {
+    name: "wm-flicker-window-extensions-core",
+    sdk_version: "current",
+    static_libs: [
+        "androidx.window.extensions.core_core-nodeps",
     ],
     installable: false,
 }

@@ -45,16 +45,18 @@ import androidx.credentials.CreateCredentialRequest
 import androidx.credentials.CreateCustomCredentialRequest
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePublicKeyCredentialRequest
+import androidx.credentials.CredentialOption
 import androidx.credentials.PasswordCredential
-import androidx.credentials.PriorityHints
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.provider.CreateEntry
 import androidx.credentials.provider.RemoteEntry
 import org.json.JSONObject
 import android.credentials.flags.Flags
+import com.android.credentialmanager.createflow.isBiometricFlow
+import com.android.credentialmanager.createflow.isFlowAutoSelectable
 import com.android.credentialmanager.getflow.TopBrandingContent
+import com.android.credentialmanager.ktx.retrieveEntryBiometricRequest
 import java.time.Instant
-
 
 fun getAppLabel(
     pm: PackageManager,
@@ -175,9 +177,9 @@ class GetFlowUtils {
                         "androidx.credentials.BUNDLE_KEY_TYPE_PRIORITY_VALUE",
                         when (option.type) {
                             PasswordCredential.TYPE_PASSWORD_CREDENTIAL ->
-                                PriorityHints.PRIORITY_PASSWORD_OR_SIMILAR
+                                CredentialOption.PRIORITY_PASSWORD_OR_SIMILAR
                             PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL -> 100
-                            else -> PriorityHints.PRIORITY_DEFAULT
+                            else -> CredentialOption.PRIORITY_DEFAULT
                         }
                 )
                 typePriorityMap[option.type] = priority
@@ -237,6 +239,9 @@ class GetFlowUtils {
 
 class CreateFlowUtils {
     companion object {
+
+        private const val CREATE_ENTRY_PREFIX = "androidx.credentials.provider.createEntry."
+
         /**
          * Note: caller required handle empty list due to parsing error.
          */
@@ -344,8 +349,8 @@ class CreateFlowUtils {
                 }
                 is CreateCustomCredentialRequest -> {
                     // TODO: directly use the display info once made public
-                    val displayInfo = CreateCredentialRequest.DisplayInfo
-                        .parseFromCredentialDataBundle(createCredentialRequest.credentialData)
+                    val displayInfo = CreateCredentialRequest.DisplayInfo.createFrom(
+                            createCredentialRequest.credentialData)
                         ?: return null
                     RequestDisplayInfo(
                         title = displayInfo.userId.toString(),
@@ -417,12 +422,26 @@ class CreateFlowUtils {
                 }
             }
             val defaultProvider = defaultProviderPreferredByApp ?: defaultProviderSetByUser
+            val sortedCreateOptionsPairs = createOptionsPairs.sortedWith(
+                compareByDescending { it.first.lastUsedTime }
+            )
+            val activeEntry = toActiveEntry(
+                defaultProvider = defaultProvider,
+                sortedCreateOptionsPairs = sortedCreateOptionsPairs,
+                remoteEntry = remoteEntry,
+                remoteEntryProvider = remoteEntryProvider,
+            )
+            val isBiometricFlow = if (activeEntry == null) false else isBiometricFlow(activeEntry,
+                isFlowAutoSelectable(
+                    requestDisplayInfo = requestDisplayInfo,
+                    activeEntry = activeEntry,
+                    sortedCreateOptionsPairs = sortedCreateOptionsPairs
+                )
+            )
             val initialScreenState = toCreateScreenState(
                 createOptionSize = createOptionsPairs.size,
                 remoteEntry = remoteEntry,
-            )
-            val sortedCreateOptionsPairs = createOptionsPairs.sortedWith(
-                compareByDescending { it.first.lastUsedTime }
+                isBiometricFlow = isBiometricFlow
             )
             return CreateCredentialUiState(
                 enabledProviders = enabledProviders,
@@ -430,12 +449,7 @@ class CreateFlowUtils {
                 currentScreenState = initialScreenState,
                 requestDisplayInfo = requestDisplayInfo,
                 sortedCreateOptionsPairs = sortedCreateOptionsPairs,
-                activeEntry = toActiveEntry(
-                    defaultProvider = defaultProvider,
-                    sortedCreateOptionsPairs = sortedCreateOptionsPairs,
-                    remoteEntry = remoteEntry,
-                    remoteEntryProvider = remoteEntryProvider,
-                ),
+                activeEntry = activeEntry,
                 remoteEntry = remoteEntry,
                 foundCandidateFromUserDefaultProvider = defaultProviderSetByUser != null,
             )
@@ -444,9 +458,12 @@ class CreateFlowUtils {
         fun toCreateScreenState(
             createOptionSize: Int,
             remoteEntry: RemoteInfo?,
+            isBiometricFlow: Boolean,
         ): CreateScreenState {
             return if (createOptionSize == 0 && remoteEntry != null) {
                 CreateScreenState.EXTERNAL_ONLY_SELECTION
+            } else if (isBiometricFlow) {
+                CreateScreenState.BIOMETRIC_SELECTION
             } else {
                 CreateScreenState.CREATION_OPTION_SELECTION
             }
@@ -503,6 +520,8 @@ class CreateFlowUtils {
                         it.hasHint("androidx.credentials.provider.createEntry.SLICE_HINT_AUTO_" +
                             "SELECT_ALLOWED")
                     }?.text == "true",
+                    biometricRequest = retrieveEntryBiometricRequest(it,
+                        CREATE_ENTRY_PREFIX),
                 )
                 )
             }

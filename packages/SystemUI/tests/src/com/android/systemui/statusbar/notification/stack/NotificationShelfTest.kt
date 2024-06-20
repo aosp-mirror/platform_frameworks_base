@@ -1,20 +1,22 @@
 package com.android.systemui.statusbar.notification.stack
 
-import android.testing.AndroidTestingRunner
+import android.platform.test.annotations.DisableFlags
+import android.service.notification.StatusBarNotification
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.res.R
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
@@ -23,7 +25,6 @@ import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,11 +35,10 @@ import org.mockito.Mockito.`when` as whenever
 
 /** Tests for {@link NotificationShelf}. */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 open class NotificationShelfTest : SysuiTestCase() {
 
-    open val useSensitiveReveal: Boolean = false
     private val flags = FakeFeatureFlags()
 
     @Mock private lateinit var largeScreenShadeInterpolator: LargeScreenShadeInterpolator
@@ -53,7 +53,6 @@ open class NotificationShelfTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         mDependency.injectTestDependency(FeatureFlags::class.java, flags)
-        flags.set(Flags.SENSITIVE_REVEAL_ANIM, useSensitiveReveal)
         val root = FrameLayout(context)
         shelf =
             LayoutInflater.from(root.context)
@@ -71,8 +70,8 @@ open class NotificationShelfTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
     fun testShadeWidth_BasedOnFractionToShade() {
-        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         setFractionToShade(0f)
         setOnLockscreen(true)
 
@@ -87,8 +86,8 @@ open class NotificationShelfTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
     fun testShelfIsLong_WhenNotOnLockscreen() {
-        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         setFractionToShade(0f)
         setOnLockscreen(false)
 
@@ -335,7 +334,6 @@ open class NotificationShelfTest : SysuiTestCase() {
     @Test
     fun updateState_withNullLastVisibleBackgroundChild_hideShelf() {
         // GIVEN
-        assumeTrue(useSensitiveReveal)
         whenever(ambientState.stackY).thenReturn(100f)
         whenever(ambientState.stackHeight).thenReturn(100f)
         val paddingBetweenElements =
@@ -362,7 +360,6 @@ open class NotificationShelfTest : SysuiTestCase() {
     @Test
     fun updateState_withNullFirstViewInShelf_hideShelf() {
         // GIVEN
-        assumeTrue(useSensitiveReveal)
         whenever(ambientState.stackY).thenReturn(100f)
         whenever(ambientState.stackHeight).thenReturn(100f)
         val paddingBetweenElements =
@@ -389,7 +386,6 @@ open class NotificationShelfTest : SysuiTestCase() {
     @Test
     fun updateState_withCollapsedShade_hideShelf() {
         // GIVEN
-        assumeTrue(useSensitiveReveal)
         whenever(ambientState.stackY).thenReturn(100f)
         whenever(ambientState.stackHeight).thenReturn(100f)
         val paddingBetweenElements =
@@ -416,7 +412,6 @@ open class NotificationShelfTest : SysuiTestCase() {
     @Test
     fun updateState_withHiddenSectionBeforeShelf_hideShelf() {
         // GIVEN
-        assumeTrue(useSensitiveReveal)
         whenever(ambientState.stackY).thenReturn(100f)
         whenever(ambientState.stackHeight).thenReturn(100f)
         val paddingBetweenElements =
@@ -465,8 +460,13 @@ open class NotificationShelfTest : SysuiTestCase() {
         expansionFraction: Float,
         expectedAlpha: Float
     ) {
+        val sbnMock: StatusBarNotification = mock()
+        val mockEntry = mock<NotificationEntry>().apply {
+            whenever(this.sbn).thenReturn(sbnMock)
+        }
+        val row = ExpandableNotificationRow(mContext, null, mockEntry)
         whenever(ambientState.lastVisibleBackgroundChild)
-            .thenReturn(ExpandableNotificationRow(mContext, null))
+            .thenReturn(row)
         whenever(ambientState.isExpansionChanging).thenReturn(true)
         whenever(ambientState.expansionFraction).thenReturn(expansionFraction)
         whenever(hostLayoutController.speedBumpIndex).thenReturn(0)
@@ -475,11 +475,4 @@ open class NotificationShelfTest : SysuiTestCase() {
 
         assertEquals(expectedAlpha, shelf.viewState.alpha)
     }
-}
-
-@SmallTest
-@RunWith(AndroidTestingRunner::class)
-@RunWithLooper
-class NotificationShelfWithSensitiveRevealTest : NotificationShelfTest() {
-    override val useSensitiveReveal: Boolean = true
 }

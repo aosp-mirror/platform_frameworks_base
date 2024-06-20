@@ -1373,26 +1373,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertTrue(info.supportsMultiWindow);
     }
 
-    @Test
-    public void testRemoveCompatibleRecentTask() {
-        final Task task1 = createTaskBuilder(".Task").setWindowingMode(
-                WINDOWING_MODE_FULLSCREEN).build();
-        mRecentTasks.add(task1);
-        final Task task2 = createTaskBuilder(".Task").setWindowingMode(
-                WINDOWING_MODE_MULTI_WINDOW).build();
-        mRecentTasks.add(task2);
-        assertEquals(2, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
-                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
-
-        // Set windowing mode and ensure the same fullscreen task that created earlier is removed.
-        task2.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        mRecentTasks.removeCompatibleRecentTask(task2);
-        assertEquals(1, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
-                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
-        assertEquals(task2.mTaskId, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
-                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().get(0).taskId);
-    }
-
     private TaskSnapshot createSnapshot(Point taskSize, Point bufferSize) {
         HardwareBuffer buffer = null;
         if (bufferSize != null) {
@@ -1472,7 +1452,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertSecurityException(expectCallable, () -> mAtm.registerTaskStackListener(null));
         assertSecurityException(expectCallable,
                 () -> mAtm.unregisterTaskStackListener(null));
-        assertSecurityException(expectCallable, () -> mAtm.getTaskDescription(0));
         assertSecurityException(expectCallable, () -> mAtm.cancelTaskWindowTransition(0));
         assertSecurityException(expectCallable, () -> mAtm.startRecentsActivity(null, 0,
                 null));

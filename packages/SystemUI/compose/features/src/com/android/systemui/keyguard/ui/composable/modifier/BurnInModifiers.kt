@@ -17,15 +17,18 @@
 package com.android.systemui.keyguard.ui.composable.modifier
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onPlaced
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.BurnInScaleViewModel
+import kotlinx.coroutines.flow.map
 
 /**
  * Modifies the composable to account for anti-burn in translation, alpha, and scaling.
@@ -38,21 +41,30 @@ fun Modifier.burnInAware(
     params: BurnInParameters,
     isClock: Boolean = false,
 ): Modifier {
-    val translationX by viewModel.translationX(params).collectAsState(initial = 0f)
-    val translationY by viewModel.translationY(params).collectAsState(initial = 0f)
-    val scaleViewModel by viewModel.scale(params).collectAsState(initial = BurnInScaleViewModel())
+    val translationYState = remember { mutableStateOf(0F) }
+    val copiedParams = params.copy(translationY = { translationYState.value })
+    val burnIn = viewModel.movement(copiedParams)
+    val translationX by
+        burnIn.map { it.translationX.toFloat() }.collectAsStateWithLifecycle(initialValue = 0f)
+    val translationY by
+        burnIn.map { it.translationY.toFloat() }.collectAsStateWithLifecycle(initialValue = 0f)
+    translationYState.value = translationY
+    val scaleViewModel by
+        burnIn
+            .map {
+                BurnInScaleViewModel(
+                    scale = it.scale,
+                    scaleClockOnly = it.scaleClockOnly,
+                )
+            }
+            .collectAsStateWithLifecycle(initialValue = BurnInScaleViewModel())
 
     return this.graphicsLayer {
-        val scale =
-            when {
-                scaleViewModel.scaleClockOnly && isClock -> scaleViewModel.scale
-                !scaleViewModel.scaleClockOnly -> scaleViewModel.scale
-                else -> 1f
-            }
-
-        this.translationX = translationX
+        this.translationX = if (isClock) 0F else translationX
         this.translationY = translationY
         this.alpha = alpha
+
+        val scale = if (scaleViewModel.scaleClockOnly) scaleViewModel.scale else 1f
         this.scaleX = scale
         this.scaleY = scale
     }

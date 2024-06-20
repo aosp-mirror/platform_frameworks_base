@@ -85,6 +85,7 @@ android_test {
         "kotlin-test",
         "mockito-target-minus-junit4",
         "androidx.test.uiautomator_uiautomator",
+        "platform-parametric-runner-lib",
         "platform-test-annotations",
         "platform-compat-test-rules",
         "truth",
@@ -101,6 +102,7 @@ android_test {
         "flickerlib-trace_processor_shell",
         "mockito-target-extended-minus-junit4",
         "TestParameterInjector",
+        "android.content.res.flags-aconfig-java",
     ],
 
     libs: [
@@ -115,6 +117,7 @@ android_test {
     ],
     jni_libs: [
         "libpowermanagertest_jni",
+        "libviewRootImplTest_jni",
         "libworksourceparceltest_jni",
     ],
 
@@ -259,6 +262,7 @@ android_ravenwood_test {
         "src/com/android/internal/os/**/*.java",
         "src/com/android/internal/util/**/*.java",
         "src/com/android/internal/power/EnergyConsumerStatsTest.java",
+        "src/com/android/internal/ravenwood/**/*.java",
 
         // Pull in R.java from FrameworksCoreTests-resonly, not from FrameworksCoreTests,
         // to avoid having a dependency to FrameworksCoreTests.
@@ -273,5 +277,10 @@ android_ravenwood_test {
         generate_get_transaction_name: true,
         local_include_dirs: ["aidl"],
     },
+    java_resources: [
+        "res/xml/power_profile_test.xml",
+        "res/xml/power_profile_test_cpu_legacy.xml",
+        "res/xml/power_profile_test_modem.xml",
+    ],
     auto_gen_config: true,
 }

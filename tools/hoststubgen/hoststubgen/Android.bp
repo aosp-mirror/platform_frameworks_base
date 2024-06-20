@@ -82,13 +82,30 @@ java_library {
     jarjar_rules: "jarjar-rules.txt",
 }
 
-// Host-side stub generator tool.
-java_binary_host {
-    name: "hoststubgen",
-    main_class: "com.android.hoststubgen.Main",
+// For sharing the code with other tools
+java_library_host {
+    name: "hoststubgen-lib",
+    defaults: ["ravenwood-internal-only-visibility-java"],
     srcs: ["src/**/*.kt"],
     static_libs: [
         "hoststubgen-helper-runtime",
+    ],
+    libs: [
+        "junit",
+        "ow2-asm",
+        "ow2-asm-analysis",
+        "ow2-asm-commons",
+        "ow2-asm-tree",
+        "ow2-asm-util",
+    ],
+}
+
+// Host-side stub generator tool.
+java_binary_host {
+    name: "hoststubgen",
+    main_class: "com.android.hoststubgen.HostStubGenMain",
+    static_libs: [
+        "hoststubgen-lib",
         "junit",
         "ow2-asm",
         "ow2-asm-analysis",

@@ -52,7 +52,7 @@
             android:textStyle="normal"
             android:layout_weight="1"/>
 
-        <ImageButton
+        <com.android.wm.shell.windowdecor.HandleMenuImageButton
             android:id="@+id/collapse_menu_button"
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -134,15 +134,6 @@
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_screenshot"
             android:drawableTint="?androidprv:attr/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton"/>
-
-        <Button
-            android:id="@+id/select_button"
-            android:contentDescription="@string/select_text"
-            android:text="@string/select_text"
-            android:drawableStart="@drawable/desktop_mode_ic_handle_menu_select"
-            android:drawableTint="?androidprv:attr/materialColorOnSurface"
-            style="@style/DesktopModeHandleMenuActionButton"/>
-
     </LinearLayout>
 </LinearLayout>
 

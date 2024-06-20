@@ -309,17 +309,17 @@ public class ActivityThreadClientTest {
 
         private void pauseActivity(ActivityClientRecord r) {
             mThread.handlePauseActivity(r, false /* finished */,
-                    false /* userLeaving */, 0 /* configChanges */, false /* autoEnteringPip */,
+                    false /* userLeaving */, false /* autoEnteringPip */,
                     null /* pendingActions */, "test");
         }
 
         private void stopActivity(ActivityClientRecord r) {
-            mThread.handleStopActivity(r, 0 /* configChanges */,
+            mThread.handleStopActivity(r,
                     new PendingTransactionActions(), false /* finalStateRequest */, "test");
         }
 
         private void destroyActivity(ActivityClientRecord r) {
-            mThread.handleDestroyActivity(r, true /* finishing */, 0 /* configChanges */,
+            mThread.handleDestroyActivity(r, true /* finishing */,
                     false /* getNonConfigInstance */, "test");
         }
 

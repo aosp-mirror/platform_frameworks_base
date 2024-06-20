@@ -19,7 +19,7 @@ package com.android.systemui.shade.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import javax.inject.Inject
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Implementation of ShadeAnimationInteractor for shadeless SysUI variants. */
 @SysUISingleton
@@ -28,5 +28,5 @@ class ShadeAnimationInteractorEmptyImpl
 constructor(
     shadeAnimationRepository: ShadeAnimationRepository,
 ) : ShadeAnimationInteractor(shadeAnimationRepository) {
-    override val isAnyCloseAnimationRunning = flowOf(false)
+    override val isAnyCloseAnimationRunning = MutableStateFlow(false)
 }

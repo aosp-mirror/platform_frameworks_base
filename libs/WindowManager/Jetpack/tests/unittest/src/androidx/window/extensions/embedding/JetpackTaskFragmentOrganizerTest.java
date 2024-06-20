@@ -25,6 +25,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -42,10 +43,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 
@@ -61,6 +64,9 @@ import java.util.ArrayList;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class JetpackTaskFragmentOrganizerTest {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
     @Mock
     private WindowContainerTransaction mTransaction;
     @Mock
@@ -73,7 +79,6 @@ public class JetpackTaskFragmentOrganizerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mOrganizer = new JetpackTaskFragmentOrganizer(Runnable::run, mCallback);
         mOrganizer.registerOrganizer();
         spyOn(mOrganizer);
@@ -101,13 +106,16 @@ public class JetpackTaskFragmentOrganizerTest {
     @Test
     public void testExpandTaskFragment() {
         final TaskContainer taskContainer = createTestTaskContainer();
-        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                new Intent(), taskContainer, mSplitController, null /* pairedPrimaryContainer */);
+        doReturn(taskContainer).when(mSplitController).getTaskContainer(anyInt());
+        final TaskFragmentContainer container =  new TaskFragmentContainer.Builder(mSplitController,
+                taskContainer.getTaskId(), null /* activityInTask */)
+                .setPendingAppearedIntent(new Intent())
+                .build();
         final TaskFragmentInfo info = createMockInfo(container);
         mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
         container.setInfo(mTransaction, info);
 
-        mOrganizer.expandTaskFragment(mTransaction, container.getTaskFragmentToken());
+        mOrganizer.expandTaskFragment(mTransaction, container);
 
         verify(mTransaction).setWindowingMode(container.getInfo().getToken(),
                 WINDOWING_MODE_UNDEFINED);

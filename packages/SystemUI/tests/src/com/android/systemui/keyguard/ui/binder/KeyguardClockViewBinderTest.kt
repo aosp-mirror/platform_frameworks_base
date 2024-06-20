@@ -24,6 +24,7 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
@@ -53,7 +54,7 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
     @Mock private lateinit var smallClockFaceLayout: ClockFaceLayout
     @Mock private lateinit var largeClockFaceLayout: ClockFaceLayout
     @Mock private lateinit var clockViewModel: KeyguardClockViewModel
-    private val clockSize = MutableStateFlow(LARGE)
+    private val clockSize = MutableStateFlow(ClockSize.LARGE)
     private val currentClock: MutableStateFlow<ClockController?> = MutableStateFlow(null)
 
     @Before
@@ -82,17 +83,14 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
     @Test
     fun addClockViewsToBurnInLayer_LargeWeatherClock() {
         setupWeatherClock()
-        clockSize.value = LARGE
-        KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel)
+        KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel, ClockSize.LARGE)
         verify(burnInLayer).removeView(smallClockView)
-        verify(burnInLayer).addView(largeClockView)
     }
 
     @Test
     fun addClockViewsToBurnInLayer_LargeNonWeatherClock() {
         setupNonWeatherClock()
-        clockSize.value = LARGE
-        KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel)
+        KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel, ClockSize.LARGE)
         verify(burnInLayer).removeView(smallClockView)
         verify(burnInLayer, never()).addView(largeClockView)
     }
@@ -100,10 +98,8 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
     @Test
     fun addClockViewsToBurnInLayer_SmallClock() {
         setupNonWeatherClock()
-        clockSize.value = SMALL
-        KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel)
+        KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel, ClockSize.SMALL)
         verify(burnInLayer).addView(smallClockView)
-        verify(burnInLayer).removeView(largeClockView)
     }
 
     private fun setupWeatherClock() {
@@ -113,7 +109,8 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
                 id = "WEATHER_CLOCK",
                 name = "",
                 description = "",
-                useAlternateSmartspaceAODTransition = true
+                useAlternateSmartspaceAODTransition = true,
+                useCustomClockScene = true
             )
         whenever(clock.config).thenReturn(clockConfig)
     }
@@ -131,7 +128,6 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
         whenever(clock.smallClock).thenReturn(smallClock)
         whenever(largeClock.layout).thenReturn(largeClockFaceLayout)
         whenever(smallClock.layout).thenReturn(smallClockFaceLayout)
-        whenever(clockViewModel.clock).thenReturn(clock)
         currentClock.value = clock
     }
 }

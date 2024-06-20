@@ -28,7 +28,6 @@ import static com.android.server.alarm.Alarm.APP_STANDBY_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.NUM_POLICIES;
 import static com.android.server.alarm.Alarm.REQUESTER_POLICY_INDEX;
 import static com.android.server.alarm.AlarmManagerService.isExemptFromAppStandby;
-import static com.android.server.alarm.AlarmManagerService.isExemptFromTare;
 import static com.android.server.alarm.Constants.TEST_CALLING_PACKAGE;
 import static com.android.server.alarm.Constants.TEST_CALLING_UID;
 
@@ -193,22 +192,6 @@ public class AlarmTest {
         assertTrue("ALLOW_WHILE_IDLE_UNRESTRICTED not exempt", isExemptFromAppStandby(
                 createDefaultAlarm(anything, anything, FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED)));
         assertTrue("Alarm clock not exempt", isExemptFromAppStandby(createAlarmClock(anything)));
-    }
-
-    @Test
-    public void testIsExemptFromTare() {
-        final long anything = 54321;    // Arbitrary number, doesn't matter for this test.
-
-        assertFalse("Basic alarm exempt", isExemptFromTare(
-                createDefaultAlarm(anything, anything, 0)));
-        assertFalse("FLAG_ALLOW_WHILE_IDLE_COMPAT exempt", isExemptFromTare(
-                createDefaultAlarm(anything, anything, FLAG_ALLOW_WHILE_IDLE_COMPAT)));
-        assertFalse("ALLOW_WHILE_IDLE exempt", isExemptFromTare(
-                createDefaultAlarm(anything, anything, FLAG_ALLOW_WHILE_IDLE)));
-
-        assertTrue("ALLOW_WHILE_IDLE_UNRESTRICTED not exempt", isExemptFromTare(
-                createDefaultAlarm(anything, anything, FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED)));
-        assertTrue("Alarm clock not exempt", isExemptFromTare(createAlarmClock(anything)));
     }
 
     @Test

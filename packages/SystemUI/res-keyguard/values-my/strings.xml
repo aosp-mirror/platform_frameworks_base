@@ -23,7 +23,7 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"သင့်ပင်နံပါတ် ထည့်ပါ"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"ပင်နံပါတ်ထည့်ပါ"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"သင့်လော့ခ်ဖွင့်ပုံစံ ထည့်ပါ"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ပုံစံဆွဲပါ"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ပုံဖော်ပါ"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"သင့်စကားဝှက် ထည့်ပါ"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"စကားဝှက် ထည့်ပါ"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ကတ် မမှန်ကန်ပါ။"</string>
@@ -111,9 +111,12 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ပုံစံကို အစားထိုးသုံးပါ"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ၎င်းအစား ပင်နံပါတ်သုံးပါ"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ထပ်ဆောင်းလုံခြုံရေးအတွက် ၎င်းအစား စကားဝှက်သုံးပါ"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"ထပ်ဆောင်း လုံခြုံရေးအတွက် ပင်နံပါတ် လိုအပ်သည်"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"ထပ်ဆောင်း လုံခြုံရေးအတွက် ပုံဖော်ခြင်း လိုအပ်သည်"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"ထပ်ဆောင်း လုံခြုံရေးအတွက် စကားဝှက် လိုအပ်သည်"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"စက်ပစ္စည်းကို စီမံခန့်ခွဲသူက လော့ခ်ချထားပါသည်"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"စက်ပစ္စည်းကို ကိုယ်တိုင်ကိုယ်ကျ လော့ခ်ချထားခဲ့သည်"</string>
-    <string name="kg_face_not_recognized" msgid="7903950626744419160">"မသိ"</string>
+    <string name="kg_face_not_recognized" msgid="7903950626744419160">"မသိပါ"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"‘မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း’ သုံးရန် ‘ဆက်တင်များ’ တွင်ကင်မရာသုံးခွင့်ကိုဖွင့်ပါ"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{ဆင်းမ်ပင်နံပါတ် ထည့်သွင်းပါ။ သင့်စက်ကို လော့ခ်ဖွင့်ရန် မိုဘိုင်းဖုန်းကုမ္ပဏီသို့ မဆက်သွယ်မီ # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}other{ဆင်းမ်ပင်နံပါတ် ထည့်သွင်းပါ။ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{ဆင်းမ်ကတ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကတ် အပြီးပိတ်မသွားမီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။ အသေးစိတ်အတွက် မိုဘိုင်းဖုန်းကုမ္ပဏီကို ဆက်သွယ်ပါ။}other{ဆင်းမ်ကတ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကတ် အပြီးပိတ်မသွားမီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။ အသေးစိတ်အတွက် မိုဘိုင်းဖုန်းကုမ္ပဏီကို ဆက်သွယ်ပါ။}}"</string>

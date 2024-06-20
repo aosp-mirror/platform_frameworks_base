@@ -16,11 +16,15 @@
 package com.android.wm.shell.common.pip
 
 import android.app.ActivityTaskManager
+import android.app.AppGlobals
 import android.app.RemoteAction
 import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.os.RemoteException
+import android.os.SystemProperties
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Pair
@@ -135,7 +139,48 @@ object PipUtils {
         }
     }
 
+
+    /**
+     * Returns a fake source rect hint for animation purposes when app-provided one is invalid.
+     * Resulting adjusted source rect hint lets the app icon in the content overlay to stay visible.
+     */
     @JvmStatic
-    val isPip2ExperimentEnabled: Boolean
-        get() = Flags.enablePip2Implementation()
+    fun getEnterPipWithOverlaySrcRectHint(appBounds: Rect, aspectRatio: Float): Rect {
+        val appBoundsAspRatio = appBounds.width().toFloat() / appBounds.height()
+        val width: Int
+        val height: Int
+        var left = 0
+        var top = 0
+        if (appBoundsAspRatio < aspectRatio) {
+            width = appBounds.width()
+            height = Math.round(width / aspectRatio)
+            top = (appBounds.height() - height) / 2
+        } else {
+            height = appBounds.height()
+            width = Math.round(height * aspectRatio)
+            left = (appBounds.width() - width) / 2
+        }
+        return Rect(left, top, left + width, top + height)
+    }
+
+    private var isPip2ExperimentEnabled: Boolean? = null
+
+    /**
+     * Returns true if PiP2 implementation should be used. Besides the trunk stable flag,
+     * system property can be used to override this read only flag during development.
+     * It's currently limited to phone form factor, i.e., not enabled on ARC / TV.
+     */
+    @JvmStatic
+    fun isPip2ExperimentEnabled(): Boolean {
+        if (isPip2ExperimentEnabled == null) {
+            val isArc = AppGlobals.getPackageManager().hasSystemFeature(
+                "org.chromium.arc", 0)
+            val isTv = AppGlobals.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_LEANBACK, 0)
+            isPip2ExperimentEnabled = SystemProperties.getBoolean(
+                    "persist.wm_shell.pip2", false) ||
+                    (Flags.enablePip2Implementation() && !isArc && !isTv)
+        }
+        return isPip2ExperimentEnabled as Boolean
+    }
 }

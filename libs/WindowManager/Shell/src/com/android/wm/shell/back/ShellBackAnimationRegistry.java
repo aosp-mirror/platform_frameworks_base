@@ -18,6 +18,7 @@ package com.android.wm.shell.back;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.Configuration;
 import android.util.Log;
 import android.util.SparseArray;
 import android.window.BackNavigationInfo;
@@ -27,8 +28,9 @@ public class ShellBackAnimationRegistry {
     private static final String TAG = "ShellBackPreview";
 
     private final SparseArray<BackAnimationRunner> mAnimationDefinition = new SparseArray<>();
-    private final ShellBackAnimation mDefaultCrossActivityAnimation;
+    private ShellBackAnimation mDefaultCrossActivityAnimation;
     private final ShellBackAnimation mCustomizeActivityAnimation;
+    private final ShellBackAnimation mCrossTaskAnimation;
 
     public ShellBackAnimationRegistry(
             @ShellBackAnimation.CrossActivity @Nullable ShellBackAnimation crossActivityAnimation,
@@ -57,6 +59,7 @@ public class ShellBackAnimationRegistry {
 
         mDefaultCrossActivityAnimation = crossActivityAnimation;
         mCustomizeActivityAnimation = customizeActivityAnimation;
+        mCrossTaskAnimation = crossTaskAnimation;
 
         // TODO(b/236760237): register dialog close animation when it's completed.
     }
@@ -64,10 +67,18 @@ public class ShellBackAnimationRegistry {
     void registerAnimation(
             @BackNavigationInfo.BackTargetType int type, @NonNull BackAnimationRunner runner) {
         mAnimationDefinition.set(type, runner);
+        // Only happen in test
+        if (BackNavigationInfo.TYPE_CROSS_ACTIVITY == type) {
+            mDefaultCrossActivityAnimation = null;
+        }
     }
 
     void unregisterAnimation(@BackNavigationInfo.BackTargetType int type) {
         mAnimationDefinition.remove(type);
+        // Only happen in test
+        if (BackNavigationInfo.TYPE_CROSS_ACTIVITY == type) {
+            mDefaultCrossActivityAnimation = null;
+        }
     }
 
     /**
@@ -125,17 +136,32 @@ public class ShellBackAnimationRegistry {
                 BackNavigationInfo.TYPE_CROSS_ACTIVITY, mDefaultCrossActivityAnimation.getRunner());
     }
 
+    void onConfigurationChanged(Configuration newConfig) {
+        if (mCustomizeActivityAnimation != null) {
+            mCustomizeActivityAnimation.onConfigurationChanged(newConfig);
+        }
+        if (mDefaultCrossActivityAnimation != null) {
+            mDefaultCrossActivityAnimation.onConfigurationChanged(newConfig);
+        }
+        if (mCrossTaskAnimation != null) {
+            mCrossTaskAnimation.onConfigurationChanged(newConfig);
+        }
+    }
+
     BackAnimationRunner getAnimationRunnerAndInit(BackNavigationInfo backNavigationInfo) {
         int type = backNavigationInfo.getType();
         // Initiate customized cross-activity animation, or fall back to cross activity animation
         if (type == BackNavigationInfo.TYPE_CROSS_ACTIVITY && mAnimationDefinition.contains(type)) {
             if (mCustomizeActivityAnimation != null
                     && mCustomizeActivityAnimation.prepareNextAnimation(
-                            backNavigationInfo.getCustomAnimationInfo())) {
+                            backNavigationInfo.getCustomAnimationInfo(), 0)) {
                 mAnimationDefinition.get(type).resetWaitingAnimation();
                 mAnimationDefinition.set(
                         BackNavigationInfo.TYPE_CROSS_ACTIVITY,
                         mCustomizeActivityAnimation.getRunner());
+            } else if (mDefaultCrossActivityAnimation != null) {
+                mDefaultCrossActivityAnimation.prepareNextAnimation(null,
+                        backNavigationInfo.getLetterboxColor());
             }
         }
         BackAnimationRunner runner = mAnimationDefinition.get(type);

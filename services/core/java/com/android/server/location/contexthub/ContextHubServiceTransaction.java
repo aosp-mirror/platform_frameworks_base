@@ -172,17 +172,22 @@ import java.util.concurrent.TimeUnit;
 
     @Override
     public String toString() {
-        String out = ContextHubTransaction.typeToString(mTransactionType, true /* upperCase */)
-                + " (";
+        StringBuilder out = new StringBuilder();
+        out.append(ContextHubTransaction.typeToString(mTransactionType,
+                /* upperCase= */ true));
+        out.append(" (");
         if (mNanoAppId != null) {
-            out += "appId = 0x" + Long.toHexString(mNanoAppId) + ", ";
+            out.append("appId = 0x");
+            out.append(Long.toHexString(mNanoAppId));
+            out.append(", ");
         }
-        out += "package = " + mPackage;
+        out.append("package = ");
+        out.append(mPackage);
         if (mMessageSequenceNumber != null) {
-            out += ", messageSequenceNumber = " + mMessageSequenceNumber;
+            out.append(", messageSequenceNumber = ");
+            out.append(mMessageSequenceNumber);
         }
-        out += ")";
-
-        return out;
+        out.append(")");
+        return out.toString();
     }
 }

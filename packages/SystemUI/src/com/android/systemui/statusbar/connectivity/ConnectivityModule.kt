@@ -30,11 +30,16 @@ import com.android.systemui.qs.tiles.HotspotTile
 import com.android.systemui.qs.tiles.InternetTile
 import com.android.systemui.qs.tiles.InternetTileNewImpl
 import com.android.systemui.qs.tiles.NfcTile
+import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.airplane.domain.AirplaneModeMapper
 import com.android.systemui.qs.tiles.impl.airplane.domain.interactor.AirplaneModeTileDataInteractor
 import com.android.systemui.qs.tiles.impl.airplane.domain.interactor.AirplaneModeTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.airplane.domain.model.AirplaneModeTileModel
+import com.android.systemui.qs.tiles.impl.internet.domain.InternetTileMapper
+import com.android.systemui.qs.tiles.impl.internet.domain.interactor.InternetTileDataInteractor
+import com.android.systemui.qs.tiles.impl.internet.domain.interactor.InternetTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
 import com.android.systemui.qs.tiles.impl.saver.domain.DataSaverTileMapper
 import com.android.systemui.qs.tiles.impl.saver.domain.interactor.DataSaverTileDataInteractor
 import com.android.systemui.qs.tiles.impl.saver.domain.interactor.DataSaverTileUserActionInteractor
@@ -86,10 +91,35 @@ interface ConnectivityModule {
     /** Inject NfcTile into tileMap in QSModule */
     @Binds @IntoMap @StringKey(NfcTile.TILE_SPEC) fun bindNfcTile(nfcTile: NfcTile): QSTileImpl<*>
 
+    @Binds
+    @IntoMap
+    @StringKey(AIRPLANE_MODE_TILE_SPEC)
+    fun provideAirplaneModeAvailabilityInteractor(
+            impl: AirplaneModeTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(DATA_SAVER_TILE_SPEC)
+    fun provideDataSaverAvailabilityInteractor(
+            impl: DataSaverTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(INTERNET_TILE_SPEC)
+    fun provideInternetAvailabilityInteractor(
+            impl: InternetTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
     companion object {
 
         const val AIRPLANE_MODE_TILE_SPEC = "airplane"
         const val DATA_SAVER_TILE_SPEC = "saver"
+        const val INTERNET_TILE_SPEC = "internet"
+        const val HOTSPOT_TILE_SPEC = "hotspot"
+        const val CAST_TILE_SPEC = "cast"
+        const val BLUETOOTH_TILE_SPEC = "bt"
 
         /** Inject InternetTile or InternetTileNewImpl into tileMap in QSModule */
         @Provides
@@ -118,7 +148,7 @@ interface ConnectivityModule {
                         labelRes = R.string.airplane_mode,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
-                policy = QSTilePolicy.Restricted(UserManager.DISALLOW_AIRPLANE_MODE),
+                policy = QSTilePolicy.Restricted(listOf(UserManager.DISALLOW_AIRPLANE_MODE)),
             )
 
         /** Inject AirplaneModeTile into tileViewModelMap in QSModule */
@@ -167,6 +197,79 @@ interface ConnectivityModule {
                 userActionInteractor,
                 stateInteractor,
                 mapper,
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(INTERNET_TILE_SPEC)
+        fun provideInternetTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(INTERNET_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.ic_qs_no_internet_available,
+                        labelRes = R.string.quick_settings_internet_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        /** Inject InternetTile into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(INTERNET_TILE_SPEC)
+        fun provideInternetTileViewModel(
+            factory: QSTileViewModelFactory.Static<InternetTileModel>,
+            mapper: InternetTileMapper,
+            stateInteractor: InternetTileDataInteractor,
+            userActionInteractor: InternetTileUserActionInteractor
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(INTERNET_TILE_SPEC),
+                userActionInteractor,
+                stateInteractor,
+                mapper,
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(HOTSPOT_TILE_SPEC)
+        fun provideHotspotTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(HOTSPOT_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.ic_hotspot,
+                        labelRes = R.string.quick_settings_hotspot_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(CAST_TILE_SPEC)
+        fun provideCastTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(CAST_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.ic_cast,
+                        labelRes = R.string.quick_settings_cast_title,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(BLUETOOTH_TILE_SPEC)
+        fun provideBluetoothTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(BLUETOOTH_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_bluetooth_icon_off,
+                        labelRes = R.string.quick_settings_bluetooth_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
             )
     }
 }

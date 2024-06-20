@@ -1972,7 +1972,7 @@ public class SettingsProvider extends ContentProvider {
 
         File cacheFile = getCacheFile(name, callingUserId);
         if (cacheFile != null) {
-            if (!isValidAudioUri(name, value)) {
+            if (!isValidMediaUri(name, value)) {
                 return false;
             }
             // Invalidate any relevant cache files
@@ -2031,7 +2031,7 @@ public class SettingsProvider extends ContentProvider {
         return true;
     }
 
-    private boolean isValidAudioUri(String name, String uri) {
+    private boolean isValidMediaUri(String name, String uri) {
         if (uri != null) {
             Uri audioUri = Uri.parse(uri);
             if (Settings.AUTHORITY.equals(
@@ -2049,10 +2049,13 @@ public class SettingsProvider extends ContentProvider {
                 return false;
             }
             if (!(mimeType.startsWith("audio/") || mimeType.equals("application/ogg")
-                    || mimeType.equals("application/x-flac"))) {
+                    || mimeType.equals("application/x-flac")
+                    // also check for video ringtones
+                    || mimeType.startsWith("video/") || mimeType.equals("application/mp4"))) {
                 Slog.e(LOG_TAG,
                         "mutateSystemSetting for setting: " + name + " URI: " + audioUri
-                        + " ignored: associated mimeType: " + mimeType + " is not an audio type");
+                        + " ignored: associated MIME type:" + mimeType
+                        + " is not a recognized audio or video type");
                 return false;
             }
         }
@@ -2389,8 +2392,12 @@ public class SettingsProvider extends ContentProvider {
                 == PackageManager.PERMISSION_GRANTED;
         boolean isRoot = Binder.getCallingUid() == Process.ROOT_UID;
 
-        if (isRoot || hasWritePermission) {
+        if (isRoot) {
             return;
+        }
+
+        if (hasWritePermission) {
+            assertCallingUserDenyList(flags);
         } else if (hasAllowlistPermission) {
             for (String flag : flags) {
                 boolean namespaceAllowed = false;
@@ -2407,9 +2414,46 @@ public class SettingsProvider extends ContentProvider {
                         + "'; allowlist permission granted, but must add flag to the allowlist.");
                 }
             }
+            assertCallingUserDenyList(flags);
         } else {
             throw new SecurityException("Permission denial to mutate flag, must have root, "
                 + "WRITE_DEVICE_CONFIG, or WRITE_ALLOWLISTED_DEVICE_CONFIG");
+        }
+    }
+
+    // The check is added mainly for auto devices. On auto devices, it is possible that
+    // multiple users are visible simultaneously using visible background users.
+    // In such cases, it is desired that Non-current user (ex. visible background users) can
+    // only change settings for certain namespaces.
+    private void assertCallingUserDenyList(@NonNull Set<String> flags) {
+        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            // enforce the deny list only on devices supporting visible background user.
+            return;
+        }
+
+        int callingUser = UserHandle.getCallingUserId();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            int currentUser = ActivityManager.getCurrentUser();
+            if (callingUser == currentUser) {
+                // enforce the deny list only if the caller is not current user. Currently only auto
+                // uses background visible user, and auto doesn't support profiles so profiles of
+                // current users is not checked here.
+                return;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        for (String flag : flags) {
+            for (String denylistedPrefix :
+                    NonWritableNamespacesForBackgroundUserPrefixes.DENYLIST) {
+                if (flag.startsWith(denylistedPrefix)) {
+                    throw new SecurityException("Permission denial for flag '" + flag
+                            + "' for background user " + callingUser + ". Namespace is added to "
+                            + "denylist.");
+                }
+            }
         }
     }
 
@@ -3943,8 +3987,10 @@ public class SettingsProvider extends ContentProvider {
                         globalSettings.updateSettingLocked(Settings.Global.ZEN_MODE,
                                 Integer.toString(Settings.Global.ZEN_MODE_OFF), null,
                                 true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        final int defaultRingerMode =
+                                getContext().getResources().getInteger(R.integer.def_ringer_mode);
                         globalSettings.updateSettingLocked(Settings.Global.MODE_RINGER,
-                                Integer.toString(AudioManager.RINGER_MODE_NORMAL), null,
+                                Integer.toString(defaultRingerMode), null,
                                 true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 119;

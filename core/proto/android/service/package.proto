@@ -142,6 +142,7 @@ message PackageProto {
         // UTC timestamp of first install for the user
         optional int32 first_install_time_ms = 11;
         optional ArchiveState archive_state = 12;
+        repeated int32 suspending_user = 13;
     }
 
     message InstallSourceProto {

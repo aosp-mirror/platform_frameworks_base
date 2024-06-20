@@ -94,15 +94,28 @@ public interface WindowInsetsController {
     int APPEARANCE_LIGHT_CAPTION_BARS = 1 << 8;
 
     /**
+     * Same as {@link #APPEARANCE_LIGHT_NAVIGATION_BARS} but set by the system. The system will
+     * respect {@link #APPEARANCE_LIGHT_NAVIGATION_BARS} when this is cleared.
+     * @hide
+     */
+    int APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS = 1 << 9;
+
+    /**
      * Determines the appearance of system bars.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {APPEARANCE_OPAQUE_STATUS_BARS, APPEARANCE_OPAQUE_NAVIGATION_BARS,
-            APPEARANCE_LOW_PROFILE_BARS, APPEARANCE_LIGHT_STATUS_BARS,
-            APPEARANCE_LIGHT_NAVIGATION_BARS, APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS,
+    @IntDef(flag = true, value = {
+            APPEARANCE_OPAQUE_STATUS_BARS,
+            APPEARANCE_OPAQUE_NAVIGATION_BARS,
+            APPEARANCE_LOW_PROFILE_BARS,
+            APPEARANCE_LIGHT_STATUS_BARS,
+            APPEARANCE_LIGHT_NAVIGATION_BARS,
+            APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS,
             APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS,
-            APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND, APPEARANCE_LIGHT_CAPTION_BARS})
+            APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND,
+            APPEARANCE_LIGHT_CAPTION_BARS,
+            APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS})
     @interface Appearance {
     }
 
@@ -250,21 +263,25 @@ public interface WindowInsetsController {
     void setSystemBarsAppearance(@Appearance int appearance, @Appearance int mask);
 
     /**
+     * Similar to {@link #setSystemBarsAppearance} but the given flag will only take effect when it
+     * is not controlled by {@link #setSystemBarsAppearance}.
+     *
+     * @see WindowInsetsController#getSystemBarsAppearance()
+     * @see android.R.attr#windowLightStatusBar
+     * @see android.R.attr#windowLightNavigationBar
+     * @hide
+     */
+    void setSystemBarsAppearanceFromResource(@Appearance int appearance, @Appearance int mask);
+
+    /**
      * Retrieves the requested appearance of system bars.
      *
      * @return The requested bitmask of system bar appearance controlled by this window.
      * @see #setSystemBarsAppearance(int, int)
+     * @see android.R.attr#windowLightStatusBar
+     * @see android.R.attr#windowLightNavigationBar
      */
     @Appearance int getSystemBarsAppearance();
-
-    /**
-     * Notify the caption insets height change. The information will be used on the client side to,
-     * make sure the InsetsState has the correct caption insets.
-     *
-     * @param height the height of caption bar insets.
-     * @hide
-     */
-    void setCaptionInsetsHeight(int height);
 
     /**
      * Sets the insets height for the IME caption bar, which corresponds to the

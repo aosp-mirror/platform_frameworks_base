@@ -1,0 +1,12 @@
+package: "com.android.server.power.batterysaver"
+container: "system"
+
+flag {
+  name: "update_auto_turn_on_notification_string_and_action"
+  namespace: "backstage_power"
+  description: "Improve the string and hightligh settings item for battery saver auto-turn-on notification"
+  bug: "336960905"
+  metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

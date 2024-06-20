@@ -41,22 +41,13 @@ constructor(
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 secondaryLabel = subtitleArray[2]
-                icon = {
-                    Icon.Loaded(
-                        resources.getDrawable(R.drawable.qs_invert_colors_icon_on, theme),
-                        null
-                    )
-                }
+                iconRes = R.drawable.qs_invert_colors_icon_on
             } else {
                 activationState = QSTileState.ActivationState.INACTIVE
                 secondaryLabel = subtitleArray[1]
-                icon = {
-                    Icon.Loaded(
-                        resources.getDrawable(R.drawable.qs_invert_colors_icon_off, theme),
-                        null
-                    )
-                }
+                iconRes = R.drawable.qs_invert_colors_icon_off
             }
+            icon = { Icon.Loaded(resources.getDrawable(iconRes!!, theme), null) }
             contentDescription = label
             supportedActions =
                 setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)

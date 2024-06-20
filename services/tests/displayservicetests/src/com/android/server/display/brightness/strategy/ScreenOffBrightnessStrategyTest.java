@@ -26,6 +26,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.StrategyExecutionRequest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +57,9 @@ public final class ScreenOffBrightnessStrategyTest {
                                 .getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
-                mScreenOffBrightnessModeStrategy.updateBrightness(displayPowerRequest);
+                mScreenOffBrightnessModeStrategy.updateBrightness(
+                        new StrategyExecutionRequest(displayPowerRequest, 0.2f,
+                                /* userSetBrightnessChanged= */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 }

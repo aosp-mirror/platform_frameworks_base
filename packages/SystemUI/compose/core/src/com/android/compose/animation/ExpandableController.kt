@@ -16,6 +16,7 @@
 
 package com.android.compose.animation
 
+import android.content.ComponentName
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
@@ -134,13 +135,16 @@ internal class ExpandableControllerImpl(
     override val expandable: Expandable =
         object : Expandable {
             override fun activityTransitionController(
-                cujType: Int?,
+                launchCujType: Int?,
+                cookie: ActivityTransitionAnimator.TransitionCookie?,
+                component: ComponentName?,
+                returnCujType: Int?
             ): ActivityTransitionAnimator.Controller? {
                 if (!isComposed.value) {
                     return null
                 }
 
-                return activityController(cujType)
+                return activityController(launchCujType, cookie, component, returnCujType)
             }
 
             override fun dialogTransitionController(
@@ -167,6 +171,8 @@ internal class ExpandableControllerImpl(
             private val rootLocationOnScreen = intArrayOf(0, 0)
 
             override var transitionContainer: ViewGroup = composeViewRoot.rootView as ViewGroup
+
+            override val isLaunching: Boolean = true
 
             override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
                 animatorState.value = null
@@ -259,10 +265,29 @@ internal class ExpandableControllerImpl(
     }
 
     /** Create an [ActivityTransitionAnimator.Controller] that can be used to animate activities. */
-    private fun activityController(cujType: Int?): ActivityTransitionAnimator.Controller {
+    private fun activityController(
+        launchCujType: Int?,
+        cookie: ActivityTransitionAnimator.TransitionCookie?,
+        component: ComponentName?,
+        returnCujType: Int?
+    ): ActivityTransitionAnimator.Controller {
         val delegate = transitionController()
         return object :
             ActivityTransitionAnimator.Controller, TransitionAnimator.Controller by delegate {
+            /**
+             * CUJ identifier accounting for whether this controller is for a launch or a return.
+             */
+            private val cujType: Int?
+                get() =
+                    if (isLaunching) {
+                        launchCujType
+                    } else {
+                        returnCujType
+                    }
+
+            override val transitionCookie = cookie
+            override val component = component
+
             override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                 delegate.onTransitionAnimationStart(isExpandingFullyAbove)
                 overlay.value = composeViewRoot.rootView.overlay as ViewGroupOverlay

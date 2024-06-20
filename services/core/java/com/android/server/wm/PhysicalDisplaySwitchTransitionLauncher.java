@@ -115,8 +115,8 @@ public class PhysicalDisplaySwitchTransitionLauncher {
 
         if (mTransitionController.isCollecting()) {
             // Add display container to the currently collecting transition
-            mTransitionController.collect(mDisplayContent);
             mTransition = mTransitionController.getCollectingTransition();
+            mTransition.collect(mDisplayContent);
 
             // Make sure that transition is not ready until we finish the remote display change
             mTransition.setReady(mDisplayContent, false);
@@ -134,10 +134,9 @@ public class PhysicalDisplaySwitchTransitionLauncher {
             displayChange.setEndAbsBounds(endAbsBounds);
             displayChange.setPhysicalDisplayChanged(true);
 
-            mTransition = mTransitionController.requestTransitionIfNeeded(TRANSIT_CHANGE,
-                    0 /* flags */,
-                    mDisplayContent, mDisplayContent, null /* remoteTransition */,
-                    displayChange);
+            mTransition = mTransitionController.requestStartDisplayTransition(TRANSIT_CHANGE,
+                    0 /* flags */, mDisplayContent, null /* remoteTransition */, displayChange);
+            mTransition.collect(mDisplayContent);
         }
 
         if (mTransition != null) {

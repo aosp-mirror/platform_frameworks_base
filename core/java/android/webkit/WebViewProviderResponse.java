@@ -40,6 +40,7 @@ public final class WebViewProviderResponse implements Parcelable {
                 STATUS_SUCCESS,
                 STATUS_FAILED_WAITING_FOR_RELRO,
                 STATUS_FAILED_LISTING_WEBVIEW_PACKAGES,
+                STATUS_FAILED_OTHER,
             })
     @Retention(RetentionPolicy.SOURCE)
     private @interface WebViewProviderStatus {}
@@ -49,6 +50,7 @@ public final class WebViewProviderResponse implements Parcelable {
             WebViewFactory.LIBLOAD_FAILED_WAITING_FOR_RELRO;
     public static final int STATUS_FAILED_LISTING_WEBVIEW_PACKAGES =
             WebViewFactory.LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES;
+    public static final int STATUS_FAILED_OTHER = WebViewFactory.LIBLOAD_FAILED_OTHER;
 
     public WebViewProviderResponse(
             @Nullable PackageInfo packageInfo, @WebViewProviderStatus int status) {

@@ -27,6 +27,7 @@ import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -72,7 +73,7 @@ public class CarrierConfigTracker
 
     @Inject
     public CarrierConfigTracker(
-            CarrierConfigManager carrierConfigManager,
+            @Nullable CarrierConfigManager carrierConfigManager,
             BroadcastDispatcher broadcastDispatcher) {
         mCarrierConfigManager = carrierConfigManager;
         IntentFilter filter = new IntentFilter();
@@ -95,6 +96,9 @@ public class CarrierConfigTracker
         final int subId = intent.getIntExtra(
                 CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX,
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+        if (mCarrierConfigManager == null) {
+            return;
+        }
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             return;
         }

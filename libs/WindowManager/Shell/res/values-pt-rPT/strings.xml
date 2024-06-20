@@ -62,9 +62,9 @@
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> do <xliff:g id="APP_NAME">%2$s</xliff:g> e mais<xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>."</string>
     <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Mover p/ parte sup. esquerda"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Mover parte superior direita"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Mover p/ parte sup. direita"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Mover p/ parte infer. esquerda"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Mover parte inferior direita"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Mover p/ parte inf. direita"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"expandir <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"reduzir <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Definições de <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -117,4 +117,6 @@
     <string name="close_text" msgid="4986518933445178928">"Fechar"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Fechar menu"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Abrir menu"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maximizar ecrã"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Encaixar ecrã"</string>
 </resources>

@@ -408,6 +408,8 @@ public class LocalBluetoothProfileManager {
             boolean needDispatchProfileConnectionState = true;
             if (cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID
                     || cachedDevice.getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                mDeviceManager.syncDeviceWithinHearingAidSetIfNeeded(cachedDevice, newState,
+                        mProfile.getProfileId());
                 needDispatchProfileConnectionState = !mDeviceManager
                         .onProfileConnectionStateChangedIfProcessed(cachedDevice, newState,
                         mProfile.getProfileId());
@@ -572,8 +574,7 @@ public class LocalBluetoothProfileManager {
         return mSapProfile;
     }
 
-    @VisibleForTesting
-    HidProfile getHidProfile() {
+    public HidProfile getHidProfile() {
         return mHidProfile;
     }
 

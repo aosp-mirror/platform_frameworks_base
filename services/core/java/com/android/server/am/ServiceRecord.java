@@ -30,8 +30,10 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.Notification;
@@ -56,7 +58,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -237,8 +238,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean mFgsNotificationShown;
     // Whether FGS package has permissions to show notifications.
     boolean mFgsHasNotificationPermission;
-    // Whether the FGS contains a type that is time limited.
-    private boolean mFgsIsTimeLimited;
 
     // allow the service becomes foreground service? Service started from background may not be
     // allowed to become a foreground service.
@@ -267,9 +266,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     int mAllowStart_byBindings = REASON_DENIED;
 
     /**
-     * Whether or not we've bumped its oom adj scores during its execution.
+     * The oom adj seq number snapshot of the host process. We're taking a snapshot
+     * before executing the service. Since we may or may not bump the host process's
+     * proc state / oom adj value before that, at the end of the execution, we could
+     * compare this seq against the current seq of the host process to see if we could
+     * skip the oom adj update from there too.
      */
-    boolean mOomAdjBumpedInExec;
+    int mAdjSeq;
 
     /**
      * Whether to use the new "while-in-use permission" logic for FGS start
@@ -671,6 +674,86 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      */
     private ShortFgsInfo mShortFgsInfo;
 
+    /**
+     * Data container class to help track certain fgs info for time-restricted types.
+     */
+    static class TimeLimitedFgsInfo {
+        @UptimeMillisLong
+        private long mFirstFgsStartUptime;
+        // The first fgs start time is maintained here separately in realtime-base
+        // for the 24-hour window reset logic.
+        @ElapsedRealtimeLong
+        private long mFirstFgsStartRealtime;
+        @UptimeMillisLong
+        private long mLastFgsStartTime;
+        @UptimeMillisLong
+        private long mTimeLimitExceededAt = Long.MIN_VALUE;
+        @UptimeMillisLong
+        private long mTotalRuntime = 0;
+        private int mNumParallelServices = 0;
+
+        public void noteFgsFgsStart(@UptimeMillisLong long startTime) {
+            mNumParallelServices++;
+            if (mNumParallelServices == 1) {
+                mFirstFgsStartUptime = startTime;
+                mFirstFgsStartRealtime = SystemClock.elapsedRealtime();
+            }
+            mLastFgsStartTime = startTime;
+        }
+
+        @UptimeMillisLong
+        public long getFirstFgsStartUptime() {
+            return mFirstFgsStartUptime;
+        }
+
+        @ElapsedRealtimeLong
+        public long getFirstFgsStartRealtime() {
+            return mFirstFgsStartRealtime;
+        }
+
+        @UptimeMillisLong
+        public long getLastFgsStartTime() {
+            return mLastFgsStartTime;
+        }
+
+        public void decNumParallelServices() {
+            if (mNumParallelServices > 0) {
+                mNumParallelServices--;
+            }
+            if (mNumParallelServices == 0) {
+                mLastFgsStartTime = 0;
+            }
+        }
+
+        public void updateTotalRuntime(@UptimeMillisLong long nowUptime) {
+            mTotalRuntime += nowUptime - mLastFgsStartTime;
+            mLastFgsStartTime = nowUptime;
+        }
+
+        @UptimeMillisLong
+        public long getTotalRuntime() {
+            return mTotalRuntime;
+        }
+
+        public void setTimeLimitExceededAt(@UptimeMillisLong long timeLimitExceededAt) {
+            mTimeLimitExceededAt = timeLimitExceededAt;
+        }
+
+        @UptimeMillisLong
+        public long getTimeLimitExceededAt() {
+            return mTimeLimitExceededAt;
+        }
+
+        public void reset() {
+            mNumParallelServices = 0;
+            mFirstFgsStartUptime = 0;
+            mFirstFgsStartRealtime = 0;
+            mLastFgsStartTime = 0;
+            mTotalRuntime = 0;
+            mTimeLimitExceededAt = Long.MIN_VALUE;
+        }
+    }
+
     void dumpStartList(PrintWriter pw, String prefix, List<StartItem> list, long now) {
         final int N = list.size();
         for (int i=0; i<N; i++) {
@@ -922,8 +1005,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (isForeground || foregroundId != 0) {
             pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
             pw.print(" foregroundId="); pw.print(foregroundId);
-            pw.printf(" types=%08X", foregroundServiceType);
-            pw.print(" fgsHasTimeLimitedType="); pw.print(mFgsIsTimeLimited);
+            pw.printf(" types=0x%08X", foregroundServiceType);
             pw.print(" foregroundNoti="); pw.println(foregroundNoti);
 
             if (isShortFgs() && mShortFgsInfo != null) {
@@ -1799,80 +1881,20 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     }
 
     /**
+     * Called when a time-limited FGS starts.
+     */
+    public TimeLimitedFgsInfo createTimeLimitedFgsInfo() {
+        return new TimeLimitedFgsInfo();
+    }
+
+    /**
      * @return true if one of the types of this FGS has a time limit.
      */
     public boolean isFgsTimeLimited() {
-        return startRequested && isForeground && canFgsTypeTimeOut(foregroundServiceType);
-    }
-
-    /**
-     * Called when a FGS with a time-limited type starts ({@code true}) or stops ({@code false}).
-     */
-    public void setIsFgsTimeLimited(boolean fgsIsTimeLimited) {
-        this.mFgsIsTimeLimited = fgsIsTimeLimited;
-    }
-
-    /**
-     * @return whether {@link #mFgsIsTimeLimited} was previously set or not.
-     */
-    public boolean wasFgsPreviouslyTimeLimited() {
-        return mFgsIsTimeLimited;
-    }
-
-    /**
-     * @return the FGS type if the service has reached its time limit, otherwise -1.
-     */
-    public int getTimedOutFgsType(long nowUptime) {
-        if (!isAppAlive() || !isFgsTimeLimited()) {
-            return -1;
-        }
-
-        final Pair<Integer, Long> fgsTypeAndStopTime = getEarliestStopTypeAndTime();
-        if (fgsTypeAndStopTime.first != -1 && fgsTypeAndStopTime.second <= nowUptime) {
-            return fgsTypeAndStopTime.first;
-        }
-        return -1; // no fgs type exceeded time limit
-    }
-
-    /**
-     * @return a {@code Pair<fgs_type, stop_time>}, representing the earliest time at which the FGS
-     * should be stopped (fgs start time + time limit for most restrictive type)
-     */
-    Pair<Integer, Long> getEarliestStopTypeAndTime() {
-        int fgsType = -1;
-        long timeout = 0;
-        if ((foregroundServiceType & ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING)
-                == ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING) {
-            fgsType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING;
-            timeout = ams.mConstants.mMediaProcessingFgsTimeoutDuration;
-        }
-        if ((foregroundServiceType & ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-                == ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC) {
-            // update the timeout and type if this type has a more restrictive time limit
-            if (timeout == 0 || ams.mConstants.mDataSyncFgsTimeoutDuration < timeout) {
-                fgsType = ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC;
-                timeout = ams.mConstants.mDataSyncFgsTimeoutDuration;
-            }
-        }
-        // Add the logic for time limits introduced in the future for other fgs types here.
-        return Pair.create(fgsType, timeout == 0 ? 0 : (mFgsEnterTime + timeout));
-    }
-
-    /**
-     * Check if the given types contain a type which is time restricted.
-     */
-    boolean canFgsTypeTimeOut(int fgsType) {
-        // The below conditionals are not simplified on purpose to help with readability.
-        if ((fgsType & ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING)
-                == ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING) {
-            return true;
-        }
-        if ((fgsType & ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-                == ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC) {
-            return true;
-        }
-        // Additional types which have time limits should be added here in the future.
-        return false;
+        return startRequested
+                && isForeground
+                && ams.mServices.getTimeLimitedFgsType(foregroundServiceType)
+                        != ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
     }
 
     private boolean isAppAlive() {
@@ -1883,5 +1905,18 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             return false;
         }
         return true;
+    }
+
+    /**
+     * @return {@code true} if the host process has updated its oom adj scores.
+     */
+    boolean wasOomAdjUpdated() {
+        return app != null && app.mState.getAdjSeq() > mAdjSeq;
+    }
+
+    void updateOomAdjSeq() {
+        if (app != null) {
+            mAdjSeq = app.mState.getAdjSeq();
+        }
     }
 }

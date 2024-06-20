@@ -17,9 +17,9 @@ package com.android.systemui.battery
 
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.widget.ImageView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.flags.Flags.FLAG_NEW_STATUS_BAR_ICONS
 import com.android.systemui.res.R
@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class BatteryMeterViewTest : SysuiTestCase() {
 
@@ -190,6 +190,34 @@ class BatteryMeterViewTest : SysuiTestCase() {
             context.getString(R.string.accessibility_battery_level, 15)
         )
         assertThat(mBatteryMeterView.unifiedBatteryState.showPercent).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_NEW_STATUS_BAR_ICONS)
+    fun modeEstimate_batteryPercentView_isNotNull_flagOn() {
+        mBatteryMeterView.onBatteryLevelChanged(15, false)
+        mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
+        mBatteryMeterView.setBatteryEstimateFetcher(Fetcher())
+
+        mBatteryMeterView.updatePercentText()
+
+        // New battery icon only uses the percent view for the estimate text
+        assertThat(mBatteryMeterView.batteryPercentView).isNotNull()
+        // Make sure that it was added to the view hierarchy
+        assertThat(mBatteryMeterView.batteryPercentView.parent).isNotNull()
+    }
+
+    @Test
+    @EnableFlags(FLAG_NEW_STATUS_BAR_ICONS)
+    fun modePercent_batteryPercentView_isNull_flagOn() {
+        mBatteryMeterView.onBatteryLevelChanged(15, false)
+        mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ON)
+        mBatteryMeterView.setBatteryEstimateFetcher(Fetcher())
+
+        mBatteryMeterView.updatePercentText()
+
+        // New battery icon only uses the percent view for the estimate text
+        assertThat(mBatteryMeterView.batteryPercentView).isNull()
     }
 
     @Test

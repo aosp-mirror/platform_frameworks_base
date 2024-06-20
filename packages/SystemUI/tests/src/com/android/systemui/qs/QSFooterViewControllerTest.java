@@ -27,16 +27,16 @@ import static org.mockito.Mockito.when;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
 import com.android.systemui.retail.data.repository.FakeRetailModeRepository;
 import com.android.systemui.retail.domain.interactor.RetailModeInteractorImpl;
 import com.android.systemui.settings.UserTracker;
@@ -49,7 +49,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class QSFooterViewControllerTest extends LeakCheckedTest {

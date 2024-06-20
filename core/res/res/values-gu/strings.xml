@@ -84,7 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"મોબાઇલ નેટવર્ક સુધી પહોંચી શકાતું નથી"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"પસંદગીનું નેટવર્ક બદલવાનો પ્રયાસ કરો. બદલવા માટે ટૅપ કરો."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"કટોકટીની કૉલિંગ સેવા અનુપલબ્ધ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"વાઇ-ફાઇ પરથી કટોકટીના કૉલ કરી શકાતા નથી"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ઇમર્જન્સી કૉલ માટે મોબાઇલ નેટવર્કની આવશ્યકતા છે"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"અલર્ટ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"કૉલ ફૉર્વર્ડિંગ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"કટોકટી કૉલબૅક મોડ"</string>
@@ -153,16 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="TIME_DELAY">{2}</xliff:g> સેકન્ડ પછી <xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ફોરવર્ડ કર્યો નથી"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ફોરવર્ડ કર્યો નથી"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"સેલ્યુલર નેટવર્ક સંબંધી સુરક્ષા"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"સેટિંગ રિવ્યૂ કરો"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"ઍક્સેસ કરવામાં આવેલા ડિવાઇસના ઓળખકર્તા"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> કનેક્શન પરના નેટવર્કે <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> અને <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> વચ્ચેના સમયગાળામાં તમારા ડિવાઇસના વિશિષ્ટ રીતે ઓળખી શકાય એવા (IMSI) નંબરને <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> વખત રેકોર્ડ કર્યો છે."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> માટે એન્ક્રિપ્ટેડ કનેક્શન"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"તમે હવે વધુ સુરક્ષિત સેલ્યુલર નેટવર્કથી કનેક્ટેડ છો."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> માટે એન્ક્રિપ્ટેડ ના હોય તેવું કનેક્શન"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"તમે એન્ક્રિપ્ટેડ ના હોય તેવા સેલ્યુલર નેટવર્ક સાથે કનેક્ટેડ છો. તમારા કૉલ, મેસેજ અને ડેટા ઇન્ટરસેપ્શન માટે સંવેદનશીલ છે."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"સેલ્યુલરની સુરક્ષા સંબંધી સેટિંગ"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"મોબાઇલ નેટવર્ક સુરક્ષા"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"એન્ક્રિપ્શન, એન્ક્રિપ્ટ નહીં થયેલા નેટવર્ક માટે નોટિફિકેશન"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"ડિવાઇસ ID ઍક્સેસ કર્યાનો સમય"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> પર, તમારા <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> સિમ કાર્ડનો ઉપયોગ કરતી વખતે નજીકના કોઈ નેટવર્ક દ્વારા તમારા ડિવાઇસનું અજોડ ID (IMSI અથવા IMEI) રેકોર્ડ કરવામાં આવ્યું હતું"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> પર, તમારા <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> સિમ કાર્ડનો ઉપયોગ કરતી વખતે નજીકના કોઈ નેટવર્ક દ્વારા તમારા ડિવાઇસનું અજોડ ID (IMSI અથવા IMEI) રેકોર્ડ કરવામાં આવ્યું હતું.\n\nઆનો અર્થ એ છે કે તમારું લોકેશન, ઍક્ટિવિટી અથવા ઓળખ લૉગ કરવામાં આવી છે. આ સામાન્ય પદ્ધતિ છે પરંતુ પ્રાઇવસી વિશે ચિંતિત લોકો માટે સમસ્યા હોઈ શકે છે."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"એન્ક્રિપ્ટેડ નેટવર્ક <xliff:g id="NETWORK_NAME">%1$s</xliff:g> સાથે કનેક્ટેડ છે"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> સિમ કાર્ડ કનેક્શન હવે વધુ સુરક્ષિત છે"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"એન્ક્રિપ્ટ નહીં થયેલા નેટવર્ક સાથે કનેકટેડ છે"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"તમારા <xliff:g id="NETWORK_NAME">%1$s</xliff:g> સિમ કાર્ડનો ઉપયોગ કરતી વખતે કૉલ, મેસેજ અને ડેટા હાલમાં વધુ સંવેદનશીલ છે"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"તમારા <xliff:g id="NETWORK_NAME">%1$s</xliff:g> સિમ કાર્ડનો ઉપયોગ કરતી વખતે કૉલ, મેસેજ અને ડેટા હાલમાં વધુ સંવેદનશીલ છે.\n\nજ્યારે તમારું કનેક્શન ફરીથી એન્ક્રિપ્ટ કરવામાં આવે છે, ત્યારે તમને બીજું નોટિફિકેશન મળશે."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"મોબાઇલ નેટવર્ક સુરક્ષા સંબંધી સેટિંગ"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"વધુ જાણો"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"સમજાઈ ગયું"</string>
     <string name="fcComplete" msgid="1080909484660507044">"સુવિધા કોડ પૂર્ણ."</string>
     <string name="fcError" msgid="5325116502080221346">"કનેક્શન સમસ્યા અથવા અમાન્ય સુવિધા કોડ."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ઓકે"</string>
@@ -198,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"આ ઉપકરણ પર તમારી કાર્યાલયની પ્રોફાઇલ હવે ઉપલબ્ધ નથી"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"પાસવર્ડના ઘણા વધુ પ્રયત્નો"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"વ્યવસ્થાપકે ડિવાઇસ વ્યક્તિગત ઉપયોગ માટે આપી દીધું છે"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ખાનગી સ્પેસ કાઢી નાખી"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"મેનેજ કરેલા ડિવાઇસ પર, તમારી સંસ્થા દ્વારા ખાનગી સ્પેસને મંજૂરી આપવામાં આવતી નથી."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ડિવાઇસ મેનેજ થયેલ છે"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"તમારી સંસ્થા આ ઉપકરણનું સંચાલન કરે છે અને નેટવર્ક ટ્રાફિફનું નિયમન કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ઍપ તમારા સ્થાનને ઍક્સેસ કરી શકે છે"</string>
@@ -280,6 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"વૉઇસ સહાય"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"લૉકડાઉન"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"જવાબ આપો"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"નવું નોટિફિકેશન"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"ભૌતિક કીબોર્ડ"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"સુરક્ષા"</string>
@@ -356,6 +362,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"સ્ક્રીનશૉટ લો"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ડિસ્પ્લેનો સ્ક્રીનશૉટ લઈ શકે છે."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"પ્રીવ્યૂ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"છોડી દો"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"સ્ટેટસ બારને અક્ષમ કરો અથવા તેમાં ફેરફાર કરો"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ઍપ્લિકેશનને સ્ટેટસ બાર અક્ષમ કરવાની અથવા સિસ્ટમ આયકન્સ ઉમેરવા અને દૂર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"સ્ટેટસ બારમાં બતાવો"</string>
@@ -662,7 +669,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"ચહેરો ઓળખી શકતા નથી. તેને બદલે ફિંગરપ્રિન્ટ વાપરો."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"ચહેરો ઓળખાયો નથી. તેને બદલે ફિંગરપ્રિન્ટ વાપરો."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ફિંગરપ્રિન્ટ પ્રમાણિત કરી"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ચહેરા પ્રમાણિત"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ચહેરા પ્રમાણિત, કૃપા કરીને કન્ફર્મ કરો"</string>
@@ -828,7 +835,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"પાસવર્ડ નિયમો સેટ કરો"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"સ્ક્રીન લૉક પાસવર્ડ અને પિનમાં મંજૂર લંબાઈ અને અક્ષરોને નિયંત્રિત કરો."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"સ્ક્રીનને અનલૉક કરવાના પ્રયત્નોને મૉનિટર કરો"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડ્સની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ્સ લખ્યાં છે તો ટેબ્લેટને લૉક કરો અથવા ટેબ્લેટનો તમામ ડેટા કાઢી નાખો."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ લખ્યાં છે તો ટૅબ્લેટને લૉક કરો અથવા ટૅબ્લેટનો તમામ ડેટા કાઢી નાખો."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"સ્ક્રીનને અનલૉક કરતી વખતે ટાઇપ કરેલા ખોટા પાસવર્ડની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ ટાઇપ કર્યા હોય, તો તમારા Android TV ડિવાઇસના ડેટાને લૉક કરો અથવા આ વપરાશકર્તાનો બધો ડેટા કાઢી નાખો."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ લખ્યા હોય તો ઇન્ફોટેનમેન્ટ સિસ્ટમને લૉક કરો અથવા ઇન્ફોટેનમેન્ટ સિસ્ટમનો બધો ડેટા કાઢી નાખો."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડ્સની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ્સ લખ્યાં છે તો ફોનને લૉક કરો અથવા ફોનનો તમામ ડેટા કાઢી નાખો."</string>
@@ -1183,6 +1190,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ડિલીટ કરો"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ઇનપુટ પદ્ધતિ"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ટેક્સ્ટ ક્રિયાઓ"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"આ ફીલ્ડમાં હસ્તલેખન સપોર્ટેડ નથી"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"પાસવર્ડ ફીલ્ડમાં હસ્તલેખન સપોર્ટેડ નથી"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"પાછળ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ઇનપુટ પદ્ધતિ સ્વિચ કરો"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"સ્ટોરેજ સ્થાન સમાપ્ત થયું"</string>
@@ -1874,7 +1883,8 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"પિન ખૂબ નાનો છે. ઓછામાં ઓછો 4 અંકનો હોવો આવશ્યક છે."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"પછી ફરી પ્રયાસ કરો"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"પૂર્ણ સ્ક્રીન પર જુઓ"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"બહાર નીકળવા માટે, ટોચ પરથી નીચે સ્વાઇપ કરો."</string>
+    <!-- no translation found for immersive_cling_description (2896205051090870978) -->
+    <skip />
     <string name="immersive_cling_positive" msgid="7047498036346489883">"સમજાઈ ગયું"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"બહેતર વ્યૂ માટે ફેરવો"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"બહેતર વ્યૂ માટે, પૂર્ણ સ્ક્રીનમાં <xliff:g id="NAME">%s</xliff:g> ખોલો"</string>
@@ -1894,7 +1904,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"અનપિન કરતા પહેલાં પિન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"અનપિન કરતા પહેલાં અનલૉક પૅટર્ન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"અનપિન કરતાં પહેલાં પાસવર્ડ માટે પૂછો"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"તમારા વ્યવસ્થાપક દ્વારા ઇન્સ્ટૉલ કરવામાં આવેલ છે"</string>
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"તમારા ઍડમિન દ્વારા ઇન્સ્ટૉલ કરવામાં આવ્યું છે.\nઆપેલી પરવાનગીઓ જોવા માટે સેટિંગ પર જાઓ"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
@@ -1927,6 +1937,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> દ્વારા મેનેજ કરવામાં આવે છે"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ચાલુ છે"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"બંધ છે"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"કોઈપણ કૅલેન્ડર"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> અમુક અવાજોને મ્યૂટ કરે છે"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"તમારા ઉપકરણમાં આંતરિક સમસ્યા છે અને જ્યાં સુધી તમે ફેક્ટરી ડેટા ફરીથી સેટ કરશો નહીં ત્યાં સુધી તે અસ્થિર રહી શકે છે."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"તમારા ઉપકરણમાં આંતરિક સમસ્યા છે. વિગતો માટે તમારા નિર્માતાનો સંપર્ક કરો."</string>
@@ -2135,6 +2148,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"રૂટિન મોડની માહિતીનું નોટિફિકેશન"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"બૅટરી સેવરની સુવિધા ચાલુ કરી છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"બૅટરીની આવરદા વધારવા માટે બૅટરીનો વપરાશ ઘટાડી રહ્યાં છીએ"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"બૅટરી સેવર ચાલુ છે"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર ચાલુ કરવામાં આવ્યું છે"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"બૅટરી સેવર"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"બૅટરી સેવર બંધ કર્યું"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ફોનમાં પૂરતો ચાર્જ છે. સુવિધાઓ હવે મર્યાદિત નથી."</string>
@@ -2182,7 +2197,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"ડી-પૅડ ડાબે"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"ડી-પૅડ જમણે"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"ડી-પૅડ મધ્યમાં"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>નું કૅપ્શન બાર."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>ને પ્રતિબંધિત સમૂહમાં મૂકવામાં આવ્યું છે"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"છબી મોકલી"</string>
@@ -2209,6 +2223,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"શું ઑફિસ માટેની ઍપ પર સ્વિચ કરીએ?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"તમારી સંસ્થા તમને માત્ર ઑફિસ માટેની ઍપ પરથી કૉલ કરવાની મંજૂરી આપે છે"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"તમારી સંસ્થા તમને માત્ર ઑફિસ માટેની ઍપ પરથી મેસેજ મોકલવાની મંજૂરી આપે છે"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"ફક્ત તમે તમારી વ્યક્તિગત ફોન ઍપથી જ ફોન કૉલ કરી શકો છો. વ્યક્તિગત ફોન વડે કરેલા કૉલ તમારા વ્યક્તિગત કૉલ ઇતિહાસમાં ઉમેરવામાં આવશે."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"તમે તમારી વ્યક્તિગત Messages ઍપથી જ SMS મેસેજ મોકલી શકો છો."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"વ્યક્તિગત બ્રાઉઝરનો ઉપયોગ કરો"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ઑફિસના બ્રાઉઝરના ઉપયોગ કરો"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"કૉલ કરો"</string>
@@ -2388,9 +2404,26 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ઑફિસ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"પરીક્ષણ કરો"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"કૉમ્યુનલ"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"ઑફિસની પ્રોફાઇલ"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ખાનગી સ્પેસ"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ક્લોન"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"કૉમ્યુનલ"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"ખાનગી સ્પેસ"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"સંવેદનશીલ માહિતીવાળા નોટિફિકેશનનું કન્ટેન્ટ છુપાવ્યું"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"સુરક્ષા માટે સ્ક્રીન શેર કરતી વખતે ઍપનું કન્ટેન્ટ છુપાવેલું છે"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"સેટેલાઇટ સાથે ઑટોમૅટિક રીતે કનેક્ટેડ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"તમે મોબાઇલ અથવા વાઇ-ફાઇ નેટવર્ક વિના મેસેજ મોકલી અને પ્રાપ્ત કરી શકો છો"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ખોલો"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"તેની કામ કરવાની રીત"</string>
+    <string name="unarchival_session_app_label" msgid="6811856981546348205">"બાકી..."</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> યોગ્ય રીતે કામ કરતી ન હતી અને તેને ડિલીટ કરવામાં આવી હતી"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> અને <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> યોગ્ય રીતે કામ કરતી ન હતી અને તેને ડિલીટ કરવામાં આવી હતી"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> બરાબર કામ કરતી ન હતી અને તેને ડિલીટ કરવામાં આવી હતી. તમારા ફોનને ફિંગરપ્રિન્ટ વડે અનલૉક કરવા માટે, તેનું ફરીથી સેટઅપ કરો."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> અને <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> બરાબર કામ કરતી ન હતી અને તેને ડિલીટ કરવામાં આવી હતી. તમારા ફોનને તમારી ફિંગરપ્રિન્ટ વડે અનલૉક કરવા માટે, તેનું ફરીથી સેટઅપ કરો."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"ફેસ અનલૉક સુવિધાનું ફરી સેટઅપ કરો"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"તમારા ચહેરાનું મૉડલ બરાબર કામ કરતું ન હતું અને તેને ડિલીટ કરવામાં આવ્યું હતું. તમારા ફોનને ચહેરા વડે અનલૉક કરવા માટે, તેનું ફરીથી સેટઅપ કરો."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"સેટઅપ કરો"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"હમણાં નહીં"</string>
 </resources>

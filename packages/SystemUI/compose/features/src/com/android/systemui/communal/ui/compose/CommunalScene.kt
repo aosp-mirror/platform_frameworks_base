@@ -24,9 +24,11 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +40,8 @@ class CommunalScene
 @Inject
 constructor(
     private val viewModel: CommunalViewModel,
+    private val dialogFactory: SystemUIDialogFactory,
+    private val interactionHandler: WidgetInteractionHandler,
 ) : ComposableScene {
     override val key = Scenes.Communal
 
@@ -51,6 +55,6 @@ constructor(
 
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
-        CommunalHub(modifier, viewModel)
+        CommunalHub(modifier, viewModel, interactionHandler, dialogFactory)
     }
 }

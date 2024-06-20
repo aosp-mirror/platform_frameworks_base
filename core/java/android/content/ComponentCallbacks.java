@@ -55,15 +55,11 @@ public interface ComponentCallbacks {
      * That is, before reaching the point of killing processes hosting
      * service and foreground UI that we would like to avoid killing.
      *
-     * <p>You should implement this method to release
-     * any caches or other unnecessary resources you may be holding on to.
-     * The system will perform a garbage collection for you after returning from this method.
-     * <p>Preferably, you should implement {@link ComponentCallbacks2#onTrimMemory} from
-     * {@link ComponentCallbacks2} to incrementally unload your resources based on various
-     * levels of memory demands.  That API is available for API level 14 and higher, so you should
-     * only use this {@link #onLowMemory} method as a fallback for older versions, which can be
-     * treated the same as {@link ComponentCallbacks2#onTrimMemory} with the {@link
-     * ComponentCallbacks2#TRIM_MEMORY_COMPLETE} level.</p>
+     * @deprecated Since API level 14 this is superseded by
+     *             {@link ComponentCallbacks2#onTrimMemory}.
+     *             Since API level 34 this is never called.
+     *             Apps targeting API level 34 and above may provide an empty implementation.
      */
+    @Deprecated
     void onLowMemory();
 }

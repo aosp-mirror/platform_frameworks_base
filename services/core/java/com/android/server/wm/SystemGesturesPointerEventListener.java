@@ -107,11 +107,12 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
 
     void onConfigurationChanged() {
         final Resources r = mContext.getResources();
-        final int defaultThreshold = r.getDimensionPixelSize(
+        final int startThreshold = r.getDimensionPixelSize(
                 com.android.internal.R.dimen.system_gestures_start_threshold);
-        mSwipeStartThreshold.set(defaultThreshold, defaultThreshold, defaultThreshold,
-                defaultThreshold);
-        mSwipeDistanceThreshold = defaultThreshold;
+        mSwipeStartThreshold.set(startThreshold, startThreshold, startThreshold,
+                startThreshold);
+        mSwipeDistanceThreshold = r.getDimensionPixelSize(
+                com.android.internal.R.dimen.system_gestures_distance_threshold);
 
         final Display display = DisplayManagerGlobal.getInstance()
                 .getRealDisplay(Display.DEFAULT_DISPLAY);

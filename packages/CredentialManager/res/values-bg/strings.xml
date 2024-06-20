@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Паролите ще продължат да са налице заедно с ключовете за достъп по пътя ни към бъдеще без пароли."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Изберете къде да запазите своите <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Изберете мениджър на пароли, в който да се запазят данните ви, така че следващия път да влезете по-бързо в профила си"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Искате ли да създадете ключ за достъп, с който да влизате в(ъв) <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Искате ли да запазите паролата, за да влизате в(ъв) <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Да се запазят ли данните за вход за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Искате ли да създадете ключ за достъп, с който да влизате в(ъв) <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Искате ли да запазите паролата за влизане в(ъв) <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Искате ли да запазите данните за вход за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"код за достъп"</string>
     <string name="password" msgid="6738570945182936667">"парола"</string>
     <string name="passkeys" msgid="5733880786866559847">"ключове за достъп"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Назад към предишната страница"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Затваряне"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Отхвърляне"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Да се използва ли запазеният ви код за достъп за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Искате ли да използвате запазената си парола за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Да се използват ли вашите данни за вход за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Искате ли да отключите опциите за влизане в профила за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Използване на запазения ви ключ за достъп за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Използване на запазената ви парола за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Използване на профила ви за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Използвайте опцията си за заключване на екрана, за да влизате в(ъв) <xliff:g id="APP_NAME">%1$s</xliff:g> с профила <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Искате ли да отключите опциите за влизане в профила за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Изберете запазен ключ за достъп за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Изберете запазена парола за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Изберете запазени данни за вход за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Избиране на данни за вход за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Изберете профил за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Искате ли да изберете опция за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Да се използва ли тази информация за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Влизане в профила по друг начин"</string>

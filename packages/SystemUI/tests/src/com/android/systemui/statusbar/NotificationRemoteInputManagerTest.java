@@ -27,9 +27,9 @@ import android.app.Notification;
 import android.content.Context;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -52,7 +52,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";

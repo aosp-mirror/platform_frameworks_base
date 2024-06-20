@@ -353,6 +353,17 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testControlTargetChangedWhileProviderHasNoWindow() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final InsetsSourceProvider provider = getController().getOrCreateSourceProvider(
+                ID_STATUS_BAR, statusBars());
+        getController().onBarControlTargetChanged(app, null, null, null);
+        assertNull(getController().getControlsForDispatch(app));
+        provider.setWindowContainer(createWindow(null, TYPE_APPLICATION, "statusBar"), null, null);
+        assertNotNull(getController().getControlsForDispatch(app));
+    }
+
+    @Test
     public void testTransientVisibilityOfFixedRotationState() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
@@ -550,6 +561,24 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNotNull(control2);
         assertEquals(imeInsetsProvider.getSource().getFrame().height(),
                 control2.getInsetsHint().bottom);
+    }
+
+    @Test
+    public void testHasPendingControls() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        getController().getOrCreateSourceProvider(ID_STATUS_BAR, statusBars())
+                .setWindowContainer(statusBar, null, null);
+        // No controls dispatched yet.
+        assertFalse(getController().hasPendingControls(app));
+
+        getController().onBarControlTargetChanged(app, null, null, null);
+        // Controls pending to be dispatched.
+        assertTrue(getController().hasPendingControls(app));
+
+        performSurfacePlacementAndWaitForWindowAnimator();
+        // Pending controls were dispatched.
+        assertFalse(getController().hasPendingControls(app));
     }
 
     /** Creates a window which is associated with ActivityRecord. */

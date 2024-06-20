@@ -66,7 +66,7 @@ class LiftToRunFaceAuthBinderTest : SysuiTestCase() {
     @Captor private lateinit var triggerEventListenerCaptor: ArgumentCaptor<TriggerEventListener>
     @Mock private lateinit var mockSensor: Sensor
 
-    private val underTest = kosmos.liftToRunFaceAuthBinder
+    private val underTest by lazy { kosmos.liftToRunFaceAuthBinder }
 
     @Before
     fun setup() {

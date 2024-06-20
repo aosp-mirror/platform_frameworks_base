@@ -22,6 +22,7 @@ import android.content.Context
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.Flags
 import android.hardware.face.FaceManager
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -86,7 +87,9 @@ object BiometricViewBinder {
          *
          * TODO(b/288175072): May be able to remove this once constraint layout is implemented
          */
-        view.visibility = View.INVISIBLE
+        if (!constraintBp()) {
+            view.visibility = View.INVISIBLE
+        }
         val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
 
         val textColorError =
@@ -101,12 +104,14 @@ object BiometricViewBinder {
         val descriptionView = view.requireViewById<TextView>(R.id.description)
         val customizedViewContainer =
             view.requireViewById<LinearLayout>(R.id.customized_view_container)
+        val udfpsGuidanceView =
+            if (constraintBp()) {
+                view.requireViewById<View>(R.id.panel)
+            } else {
+                backgroundView
+            }
 
         // set selected to enable marquee unless a screen reader is enabled
-        logoView.isSelected =
-            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
-        logoDescriptionView.isSelected =
-            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         titleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         subtitleView.isSelected =
@@ -134,7 +139,7 @@ object BiometricViewBinder {
         val confirmationButton = view.requireViewById<Button>(R.id.button_confirm)
         val retryButton = view.requireViewById<Button>(R.id.button_try_again)
 
-        // TODO(b/251476085): temporary workaround for the unsafe callbacks & legacy controllers
+        // TODO(b/330788871): temporary workaround for the unsafe callbacks & legacy controllers
         val adapter =
             Spaghetti(
                 view = view,
@@ -166,11 +171,14 @@ object BiometricViewBinder {
             titleView.text = viewModel.title.first()
             subtitleView.text = viewModel.subtitle.first()
             descriptionView.text = viewModel.description.first()
-            BiometricCustomizedViewBinder.bind(
-                customizedViewContainer,
-                view.requireViewById(R.id.space_above_content),
-                viewModel
-            )
+
+            if (Flags.customBiometricPrompt() && constraintBp()) {
+                BiometricCustomizedViewBinder.bind(
+                    customizedViewContainer,
+                    viewModel.contentView.first(),
+                    legacyCallback
+                )
+            }
 
             // set button listeners
             negativeButton.setOnClickListener { legacyCallback.onButtonNegative() }
@@ -222,8 +230,8 @@ object BiometricViewBinder {
             }
 
             lifecycleScope.launch {
-                viewModel.showBpWithoutIconForCredential.collect {
-                    if (!it) {
+                viewModel.hideSensorIcon.collect { showWithoutIcon ->
+                    if (!showWithoutIcon) {
                         PromptIconViewBinder.bind(
                             iconView,
                             iconOverlayView,
@@ -284,12 +292,14 @@ object BiometricViewBinder {
                 // set padding
                 launch {
                     viewModel.promptPadding.collect { promptPadding ->
-                        view.setPadding(
-                            promptPadding.left,
-                            promptPadding.top,
-                            promptPadding.right,
-                            promptPadding.bottom
-                        )
+                        if (!constraintBp()) {
+                            view.setPadding(
+                                promptPadding.left,
+                                promptPadding.top,
+                                promptPadding.right,
+                                promptPadding.bottom
+                            )
+                        }
                     }
                 }
 
@@ -405,24 +415,11 @@ object BiometricViewBinder {
                         indicatorMessageView.isSelected =
                             !accessibilityManager.isEnabled ||
                                 !accessibilityManager.isTouchExplorationEnabled
-
-                        /**
-                         * Note: Talkback 14.0 has new rate-limitation design to reduce frequency of
-                         * TYPE_WINDOW_CONTENT_CHANGED events to once every 30 seconds. (context:
-                         * b/281765653#comment18) Using {@link View#announceForAccessibility}
-                         * instead as workaround since sending events exceeding this frequency is
-                         * required.
-                         */
-                        indicatorMessageView?.text?.let {
-                            if (it.isNotBlank()) {
-                                view.announceForAccessibility(it)
-                            }
-                        }
                     }
                 }
 
                 // Talkback directional guidance
-                backgroundView.setOnHoverListener { _, event ->
+                udfpsGuidanceView.setOnHoverListener { _, event ->
                     launch {
                         viewModel.onAnnounceAccessibilityHint(
                             event,
@@ -457,6 +454,16 @@ object BiometricViewBinder {
                         }
                     }
                 }
+
+                // Retry and confirmation when finger on sensor
+                launch {
+                    combine(viewModel.canTryAgainNow, viewModel.hasFingerOnSensor, ::Pair)
+                        .collect { (canRetry, fingerAcquired) ->
+                            if (canRetry && fingerAcquired) {
+                                legacyCallback.onButtonTryAgain()
+                            }
+                        }
+                }
             }
         }
 
@@ -472,7 +479,7 @@ object BiometricViewBinder {
  *
  * Do not reference the [view] for anything other than [asView].
  */
-@Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+@Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
 class Spaghetti(
     private val view: View,
     private val viewModel: PromptViewModel,
@@ -480,19 +487,28 @@ class Spaghetti(
     private val applicationScope: CoroutineScope,
 ) {
 
-    @Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+    @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
     interface Callback {
         fun onAuthenticated()
+
         fun onUserCanceled()
+
         fun onButtonNegative()
+
         fun onButtonTryAgain()
+
+        fun onContentViewMoreOptionsButtonPressed()
+
         fun onError()
+
         fun onUseDeviceCredential()
+
         fun onStartDelayedFingerprintSensor()
+
         fun onAuthenticatedAndConfirmed()
     }
 
-    @Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+    @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
     enum class BiometricState {
         /** Authentication hardware idle. */
         STATE_IDLE,

@@ -17,22 +17,19 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
-import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.dagger.ShadeTouchLog
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.CollapseShadeInstantly
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import dagger.Lazy
@@ -59,16 +56,14 @@ constructor(
     @Background private val scope: CoroutineScope,
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
-    private val deviceEntryInteractor: DeviceEntryInteractor,
     private val notificationStackScrollLayout: NotificationStackScrollLayout,
-    @ShadeTouchLog private val touchLog: LogBuffer,
+    private val vibratorHelper: VibratorHelper,
     commandQueue: CommandQueue,
     statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     notificationShadeWindowController: NotificationShadeWindowController,
     assistManagerLazy: Lazy<AssistManager>,
 ) :
     BaseShadeControllerImpl(
-        touchLog,
         commandQueue,
         statusBarKeyguardViewManager,
         notificationShadeWindowController,
@@ -89,19 +84,16 @@ constructor(
 
     override fun isShadeFullyOpen(): Boolean = shadeInteractor.isAnyFullyExpanded.value
 
-    override fun isExpandingOrCollapsing(): Boolean =
-        shadeInteractor.anyExpansion.value > 0f && shadeInteractor.anyExpansion.value < 1f
+    override fun isExpandingOrCollapsing(): Boolean = shadeInteractor.isUserInteracting.value
 
     override fun instantExpandShade() {
         // Do nothing
     }
 
     override fun instantCollapseShade() {
-        // TODO(b/325602936) add support for instant transition
-        sceneInteractor.changeScene(
-            getCollapseDestinationScene(),
+        sceneInteractor.snapToScene(
+            SceneFamilies.Home,
             "hide shade",
-            CollapseShadeInstantly,
         )
     }
 
@@ -122,7 +114,6 @@ constructor(
             // release focus immediately to kick off focus change transition
             notificationShadeWindowController.setNotificationShadeFocusable(false)
             notificationStackScrollLayout.cancelExpandHelper()
-            sceneInteractor.changeScene(Scenes.Shade, "ShadeController.animateExpandShade")
             if (delayed) {
                 scope.launch {
                     delay(125)
@@ -141,18 +132,10 @@ constructor(
 
     private fun animateCollapseShadeInternal() {
         sceneInteractor.changeScene(
-            getCollapseDestinationScene(),
+            SceneFamilies.Home, // TODO(b/336581871): add sceneState?
             "ShadeController.animateCollapseShade",
             SlightlyFasterShadeCollapse,
         )
-    }
-
-    private fun getCollapseDestinationScene(): SceneKey {
-        return if (deviceEntryInteractor.isDeviceEntered.value) {
-            Scenes.Gone
-        } else {
-            Scenes.Lockscreen
-        }
     }
 
     override fun cancelExpansionAndCollapseShade() {
@@ -189,11 +172,14 @@ constructor(
     }
 
     override fun expandToNotifications() {
-        sceneInteractor.changeScene(Scenes.Shade, "ShadeController.animateExpandShade")
+        sceneInteractor.changeScene(
+            SceneFamilies.NotifShade,
+            "ShadeController.animateExpandShade",
+        )
     }
 
     override fun expandToQs() {
-        sceneInteractor.changeScene(Scenes.QuickSettings, "ShadeController.animateExpandQs")
+        sceneInteractor.changeScene(SceneFamilies.QuickSettings, "ShadeController.animateExpandQs")
     }
 
     override fun setVisibilityListener(listener: ShadeVisibilityListener) {
@@ -247,7 +233,11 @@ constructor(
     }
 
     override fun onStatusBarTouch(event: MotionEvent) {
-        // The only call to this doesn't happen with migrateClocksToBlueprint() enabled
+        // The only call to this doesn't happen with MigrateClocksToBlueprint.isEnabled enabled
         throw UnsupportedOperationException()
+    }
+
+    override fun performHapticFeedback(constant: Int) {
+        vibratorHelper.performHapticFeedback(notificationStackScrollLayout, constant)
     }
 }

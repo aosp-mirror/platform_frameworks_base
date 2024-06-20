@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.UserHandle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.Flags as AConfigFlags
@@ -49,39 +50,40 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth
 import kotlin.math.min
+import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var activityStarter: ActivityStarter
@@ -134,11 +136,18 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     private lateinit var lockscreenToPrimaryBouncerTransitionViewModel:
         LockscreenToPrimaryBouncerTransitionViewModel
     @Mock
-    private lateinit var transitionInteractor: KeyguardTransitionInteractor
+    private lateinit var lockscreenToGlanceableHubTransitionViewModel:
+        LockscreenToGlanceableHubTransitionViewModel
+    @Mock
+    private lateinit var glanceableHubToLockscreenTransitionViewModel:
+        GlanceableHubToLockscreenTransitionViewModel
+    @Mock private lateinit var transitionInteractor: KeyguardTransitionInteractor
+
+    private val kosmos = testKosmos()
 
     private lateinit var underTest: KeyguardQuickAffordancesCombinedViewModel
 
-    private lateinit var testScope: TestScope
+    private val testScope = kosmos.testScope
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var homeControlsQuickAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var quickAccessWalletAffordanceConfig: FakeKeyguardQuickAffordanceConfig
@@ -196,8 +205,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         whenever(userTracker.userHandle).thenReturn(mock())
         whenever(lockPatternUtils.getStrongAuthForUser(ArgumentMatchers.anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
-        val testDispatcher = StandardTestDispatcher()
-        testScope = TestScope(testDispatcher)
 
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
@@ -214,6 +221,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
+                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -233,7 +241,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 legacySettingSyncer =
                     KeyguardQuickAffordanceLegacySettingSyncer(
                         scope = testScope.backgroundScope,
-                        backgroundDispatcher = testDispatcher,
+                        backgroundDispatcher = kosmos.testDispatcher,
                         secureSettings = FakeSettings(),
                         selectionsManager = localUserSelectionManager,
                     ),
@@ -271,6 +279,10 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         whenever(lockscreenToOccludedTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
         whenever(lockscreenToPrimaryBouncerTransitionViewModel.shortcutsAlpha)
             .thenReturn(emptyFlow())
+        whenever(lockscreenToGlanceableHubTransitionViewModel.shortcutsAlpha)
+            .thenReturn(emptyFlow())
+        whenever(glanceableHubToLockscreenTransitionViewModel.shortcutsAlpha)
+            .thenReturn(emptyFlow())
         whenever(shadeInteractor.anyExpansion).thenReturn(intendedShadeAlphaMutableStateFlow)
         whenever(transitionInteractor.finishedKeyguardState)
             .thenReturn(intendedFinishedKeyguardStateFlow)
@@ -292,8 +304,9 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                         devicePolicyManager = devicePolicyManager,
                         dockManager = dockManager,
                         biometricSettingsRepository = biometricSettingsRepository,
-                        backgroundDispatcher = testDispatcher,
+                        backgroundDispatcher = kosmos.testDispatcher,
                         appContext = mContext,
+                        sceneInteractor = { kosmos.sceneInteractor },
                     ),
                 keyguardInteractor = keyguardInteractor,
                 shadeInteractor = shadeInteractor,
@@ -307,6 +320,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 offToLockscreenTransitionViewModel = offToLockscreenTransitionViewModel,
                 primaryBouncerToLockscreenTransitionViewModel =
                     primaryBouncerToLockscreenTransitionViewModel,
+                glanceableHubToLockscreenTransitionViewModel =
+                    glanceableHubToLockscreenTransitionViewModel,
                 lockscreenToAodTransitionViewModel = lockscreenToAodTransitionViewModel,
                 lockscreenToDozingTransitionViewModel = lockscreenToDozingTransitionViewModel,
                 lockscreenToDreamingHostedTransitionViewModel =
@@ -316,6 +331,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 lockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel,
                 lockscreenToPrimaryBouncerTransitionViewModel =
                     lockscreenToPrimaryBouncerTransitionViewModel,
+                lockscreenToGlanceableHubTransitionViewModel =
+                    lockscreenToGlanceableHubTransitionViewModel,
                 transitionInteractor = transitionInteractor,
             )
     }

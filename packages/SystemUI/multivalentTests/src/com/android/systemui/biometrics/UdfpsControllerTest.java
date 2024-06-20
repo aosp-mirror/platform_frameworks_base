@@ -118,6 +118,8 @@ import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.CoroutineScope;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -131,8 +133,6 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -256,8 +256,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private ViewRootImpl mViewRootImpl;
     @Mock
-    private FpsUnlockTracker mFpsUnlockTracker;
-    @Mock
     private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock
     private Lazy<DeviceEntryUdfpsTouchOverlayViewModel> mDeviceEntryUdfpsTouchOverlayViewModel;
@@ -368,7 +366,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mock(DeviceEntryFaceAuthInteractor.class),
                 mUdfpsKeyguardAccessibilityDelegate,
                 mSelectedUserInteractor,
-                mFpsUnlockTracker,
                 mKeyguardTransitionInteractor,
                 mDeviceEntryUdfpsTouchOverlayViewModel,
                 mDefaultUdfpsTouchOverlayViewModel,

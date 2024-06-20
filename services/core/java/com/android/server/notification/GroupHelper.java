@@ -108,16 +108,25 @@ public class GroupHelper {
         return (flags & mask) != 0;
     }
 
-    public void onNotificationPosted(StatusBarNotification sbn, boolean autogroupSummaryExists) {
+    /**
+     * Called when a notification is newly posted. Checks whether that notification, and all other
+     * active notifications should be grouped or ungrouped atuomatically, and returns whether.
+     * @param sbn The posted notification.
+     * @param autogroupSummaryExists Whether a summary for this notification already exists.
+     * @return Whether the provided notification should be autogrouped synchronously.
+     */
+    public boolean onNotificationPosted(StatusBarNotification sbn, boolean autogroupSummaryExists) {
+        boolean sbnToBeAutogrouped = false;
         try {
             if (!sbn.isAppGroup()) {
-                maybeGroup(sbn, autogroupSummaryExists);
+                sbnToBeAutogrouped = maybeGroup(sbn, autogroupSummaryExists);
             } else {
                 maybeUngroup(sbn, false, sbn.getUserId());
             }
         } catch (Exception e) {
             Slog.e(TAG, "Failure processing new notification", e);
         }
+        return sbnToBeAutogrouped;
     }
 
     public void onNotificationRemoved(StatusBarNotification sbn) {
@@ -137,20 +146,22 @@ public class GroupHelper {
      *
      * And stores the list of upgrouped notifications & their flags
      */
-    private void maybeGroup(StatusBarNotification sbn, boolean autogroupSummaryExists) {
+    private boolean maybeGroup(StatusBarNotification sbn, boolean autogroupSummaryExists) {
         int flags = 0;
         List<String> notificationsToGroup = new ArrayList<>();
         List<NotificationAttributes> childrenAttr = new ArrayList<>();
+        // Indicates whether the provided sbn should be autogrouped by the caller.
+        boolean sbnToBeAutogrouped = false;
         synchronized (mUngroupedNotifications) {
-            String key = generatePackageKey(sbn.getUserId(), sbn.getPackageName());
+            String packageKey = generatePackageKey(sbn.getUserId(), sbn.getPackageName());
             final ArrayMap<String, NotificationAttributes> children =
-                    mUngroupedNotifications.getOrDefault(key, new ArrayMap<>());
+                    mUngroupedNotifications.getOrDefault(packageKey, new ArrayMap<>());
 
             NotificationAttributes attr = new NotificationAttributes(sbn.getNotification().flags,
                     sbn.getNotification().getSmallIcon(), sbn.getNotification().color,
                     sbn.getNotification().visibility);
             children.put(sbn.getKey(), attr);
-            mUngroupedNotifications.put(key, children);
+            mUngroupedNotifications.put(packageKey, children);
 
             if (children.size() >= mAutoGroupAtCount || autogroupSummaryExists) {
                 flags = getAutogroupSummaryFlags(children);
@@ -187,10 +198,20 @@ public class GroupHelper {
                 mCallback.addAutoGroupSummary(sbn.getUserId(), sbn.getPackageName(), sbn.getKey(),
                         attr);
             }
-            for (String key : notificationsToGroup) {
-                mCallback.addAutoGroup(key);
+            for (String keyToGroup : notificationsToGroup) {
+                if (android.app.Flags.checkAutogroupBeforePost()) {
+                    if (keyToGroup.equals(sbn.getKey())) {
+                        // Autogrouping for the provided notification is to be done synchronously.
+                        sbnToBeAutogrouped = true;
+                    } else {
+                        mCallback.addAutoGroup(keyToGroup, /*requestSort=*/true);
+                    }
+                } else {
+                    mCallback.addAutoGroup(keyToGroup, /*requestSort=*/true);
+                }
             }
         }
+        return sbnToBeAutogrouped;
     }
 
     /**
@@ -406,7 +427,7 @@ public class GroupHelper {
     }
 
     protected interface Callback {
-        void addAutoGroup(String key);
+        void addAutoGroup(String key, boolean requestSort);
         void removeAutoGroup(String key);
 
         void addAutoGroupSummary(int userId, String pkg, String triggeringKey,

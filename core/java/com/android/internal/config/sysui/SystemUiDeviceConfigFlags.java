@@ -560,6 +560,19 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String CURSOR_HOVER_STATES_ENABLED = "cursor_hover_states_enabled";
 
+
+    /*
+     * (long) The reset interval for generated preview API calls.
+     */
+    public static final String GENERATED_PREVIEW_API_RESET_INTERVAL_MS =
+            "generated_preview_api_reset_interval_ms";
+
+    /*
+     * (int) The max number of generated preview API calls per reset interval.
+     */
+    public static final String GENERATED_PREVIEW_API_MAX_CALLS_PER_INTERVAL =
+            "generated_preview_api_max_calls_per_interval";
+
     private SystemUiDeviceConfigFlags() {
     }
 }

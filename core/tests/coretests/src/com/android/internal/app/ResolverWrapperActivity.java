@@ -116,6 +116,10 @@ public class ResolverWrapperActivity extends ResolverActivity {
             when(sOverrides.resolverListController.getUserHandle()).thenReturn(UserHandle.SYSTEM);
             return sOverrides.resolverListController;
         }
+        if (isLaunchedInSingleUserMode()) {
+            when(sOverrides.resolverListController.getUserHandle()).thenReturn(userHandle);
+            return sOverrides.resolverListController;
+        }
         when(sOverrides.workResolverListController.getUserHandle()).thenReturn(userHandle);
         return sOverrides.workResolverListController;
     }

@@ -32,8 +32,9 @@ import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,10 +43,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * The base class for all vibrations.
  */
 abstract class Vibration {
-    private static final SimpleDateFormat DEBUG_TIME_FORMAT =
-            new SimpleDateFormat("HH:mm:ss.SSS");
-    private static final SimpleDateFormat DEBUG_DATE_TIME_FORMAT =
-            new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+    private static final DateTimeFormatter DEBUG_TIME_FORMATTER = DateTimeFormatter.ofPattern(
+            "HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
+    private static final DateTimeFormatter DEBUG_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
+            "MM-dd HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
+
     // Used to generate globally unique vibration ids.
     private static final AtomicInteger sNextVibrationId = new AtomicInteger(1); // 0 = no callback
 
@@ -73,7 +75,7 @@ abstract class Vibration {
         IGNORED_ERROR_TOKEN(VibrationProto.IGNORED_ERROR_TOKEN),
         IGNORED_APP_OPS(VibrationProto.IGNORED_APP_OPS),
         IGNORED_BACKGROUND(VibrationProto.IGNORED_BACKGROUND),
-        IGNORED_UNKNOWN_VIBRATION(VibrationProto.IGNORED_UNKNOWN_VIBRATION),
+        IGNORED_MISSING_PERMISSION(VibrationProto.IGNORED_MISSING_PERMISSION),
         IGNORED_UNSUPPORTED(VibrationProto.IGNORED_UNSUPPORTED),
         IGNORED_FOR_EXTERNAL(VibrationProto.IGNORED_FOR_EXTERNAL),
         IGNORED_FOR_HIGHER_IMPORTANCE(VibrationProto.IGNORED_FOR_HIGHER_IMPORTANCE),
@@ -208,6 +210,7 @@ abstract class Vibration {
      * potentially expensive or resource-linked objects, such as {@link IBinder}.
      */
     static final class DebugInfo {
+        final Status mStatus;
         final long mCreateTime;
         final CallerInfo mCallerInfo;
         @Nullable
@@ -220,7 +223,6 @@ abstract class Vibration {
         private final CombinedVibration mOriginalEffect;
         private final int mScaleLevel;
         private final float mAdaptiveScale;
-        private final Status mStatus;
 
         DebugInfo(Status status, VibrationStats stats, @Nullable CombinedVibration playedEffect,
                 @Nullable CombinedVibration originalEffect, int scaleLevel,
@@ -240,10 +242,12 @@ abstract class Vibration {
 
         @Override
         public String toString() {
-            return "createTime: " + DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime))
-                    + ", startTime: " + DEBUG_DATE_TIME_FORMAT.format(new Date(mStartTime))
-                    + ", endTime: "
-                    + (mEndTime == 0 ? null : DEBUG_DATE_TIME_FORMAT.format(new Date(mEndTime)))
+            return "createTime: " + DEBUG_DATE_TIME_FORMATTER.format(
+                    Instant.ofEpochMilli(mCreateTime))
+                    + ", startTime: " + DEBUG_DATE_TIME_FORMATTER.format(
+                    Instant.ofEpochMilli(mStartTime))
+                    + ", endTime: " + (mEndTime == 0 ? null : DEBUG_DATE_TIME_FORMATTER.format(
+                    Instant.ofEpochMilli(mEndTime)))
                     + ", durationMs: " + mDurationMs
                     + ", status: " + mStatus.name().toLowerCase(Locale.ROOT)
                     + ", playedEffect: " + mPlayedEffect
@@ -251,6 +255,10 @@ abstract class Vibration {
                     + ", scaleLevel: " + VibrationScaler.scaleLevelToString(mScaleLevel)
                     + ", adaptiveScale: " + String.format(Locale.ROOT, "%.2f", mAdaptiveScale)
                     + ", callerInfo: " + mCallerInfo;
+        }
+
+        void logMetrics(VibratorFrameworkStatsLogger statsLogger) {
+            statsLogger.logVibrationAdaptiveHapticScale(mCallerInfo.uid, mAdaptiveScale);
         }
 
         /**
@@ -263,12 +271,14 @@ abstract class Vibration {
             boolean isExternalVibration = mPlayedEffect == null;
             String timingsStr = String.format(Locale.ROOT,
                     "%s | %8s | %20s | duration: %5dms | start: %12s | end: %12s",
-                    DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime)),
+                    DEBUG_DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(mCreateTime)),
                     isExternalVibration ? "external" : "effect",
                     mStatus.name().toLowerCase(Locale.ROOT),
                     mDurationMs,
-                    mStartTime == 0 ? "" : DEBUG_TIME_FORMAT.format(new Date(mStartTime)),
-                    mEndTime == 0 ? "" : DEBUG_TIME_FORMAT.format(new Date(mEndTime)));
+                    mStartTime == 0 ? ""
+                            : DEBUG_TIME_FORMATTER.format(Instant.ofEpochMilli(mStartTime)),
+                    mEndTime == 0 ? ""
+                            : DEBUG_TIME_FORMATTER.format(Instant.ofEpochMilli(mEndTime)));
             String paramStr = String.format(Locale.ROOT,
                     " | scale: %8s (adaptive=%.2f) | flags: %4s | usage: %s",
                     VibrationScaler.scaleLevelToString(mScaleLevel), mAdaptiveScale,
@@ -303,10 +313,12 @@ abstract class Vibration {
             pw.increaseIndent();
             pw.println("status = " + mStatus.name().toLowerCase(Locale.ROOT));
             pw.println("durationMs = " + mDurationMs);
-            pw.println("createTime = " + DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime)));
-            pw.println("startTime = " + DEBUG_DATE_TIME_FORMAT.format(new Date(mStartTime)));
-            pw.println("endTime = "
-                    + (mEndTime == 0 ? null : DEBUG_DATE_TIME_FORMAT.format(new Date(mEndTime))));
+            pw.println("createTime = " + DEBUG_DATE_TIME_FORMATTER.format(
+                    Instant.ofEpochMilli(mCreateTime)));
+            pw.println("startTime = " + DEBUG_DATE_TIME_FORMATTER.format(
+                    Instant.ofEpochMilli(mStartTime)));
+            pw.println("endTime = " + (mEndTime == 0 ? null
+                    : DEBUG_DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(mEndTime))));
             pw.println("playedEffect = " + mPlayedEffect);
             pw.println("originalEffect = " + mOriginalEffect);
             pw.println("scale = " + VibrationScaler.scaleLevelToString(mScaleLevel));

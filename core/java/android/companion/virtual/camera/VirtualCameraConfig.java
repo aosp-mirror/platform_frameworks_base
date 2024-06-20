@@ -237,19 +237,15 @@ public final class VirtualCameraConfig implements Parcelable {
                 @IntRange(from = 1) int height,
                 @ImageFormat.Format int format,
                 @IntRange(from = 1) int maximumFramesPerSecond) {
-            // TODO(b/310857519): Check dimension upper limits based on the maximum texture size
-            // supported by the current device, instead of hardcoded limits.
-            if (width <= 0 || width > VirtualCameraStreamConfig.DIMENSION_UPPER_LIMIT) {
+            if (width <= 0) {
                 throw new IllegalArgumentException(
                         "Invalid width passed for stream config: " + width
-                                + ", must be between 1 and "
-                                + VirtualCameraStreamConfig.DIMENSION_UPPER_LIMIT);
+                                + ", must be greater than 0");
             }
-            if (height <= 0 || height > VirtualCameraStreamConfig.DIMENSION_UPPER_LIMIT) {
+            if (height <= 0) {
                 throw new IllegalArgumentException(
                         "Invalid height passed for stream config: " + height
-                                + ", must be between 1 and "
-                                + VirtualCameraStreamConfig.DIMENSION_UPPER_LIMIT);
+                                + ", must be greater than 0");
             }
             if (!isFormatSupported(format)) {
                 throw new IllegalArgumentException(

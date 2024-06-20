@@ -16,24 +16,29 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
+import android.content.res.Resources
+import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.viewinterop.AndroidView
-import com.android.compose.animation.scene.ElementKey
+import androidx.core.view.contains
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
-import com.android.keyguard.KeyguardClockSwitch
-import com.android.systemui.customization.R as customizationR
-import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.customization.R
+import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys.largeClockElementKey
+import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys.smallClockElementKey
+import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.largeClockScene
+import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.splitShadeLargeClockScene
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
 import com.android.systemui.keyguard.ui.composable.modifier.onTopPlacementChanged
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
@@ -46,114 +51,108 @@ class DefaultClockSection
 @Inject
 constructor(
     private val viewModel: KeyguardClockViewModel,
-    private val clockInteractor: KeyguardClockInteractor,
     private val aodBurnInViewModel: AodBurnInViewModel,
 ) {
-
     @Composable
     fun SceneScope.SmallClock(
         burnInParams: BurnInParameters,
         onTopChanged: (top: Float?) -> Unit,
         modifier: Modifier = Modifier,
     ) {
-        val clockSize by viewModel.clockSize.collectAsState()
-        val currentClock by viewModel.currentClock.collectAsState()
-        viewModel.clock = currentClock
-
-        if (clockSize != KeyguardClockSwitch.SMALL || currentClock?.smallClock?.view == null) {
-            onTopChanged(null)
+        val currentClock by viewModel.currentClock.collectAsStateWithLifecycle()
+        val smallTopMargin by
+            viewModel.smallClockTopMargin.collectAsStateWithLifecycle(
+                viewModel.getSmallClockTopMargin()
+            )
+        if (currentClock?.smallClock?.view == null) {
             return
         }
-
-        val view = LocalView.current
-
-        DisposableEffect(view) {
-            clockInteractor.clockEventController.registerListeners(view)
-
-            onDispose { clockInteractor.clockEventController.unregisterListeners() }
-        }
-
-        MovableElement(
-            key = ClockElementKey,
-            modifier = modifier,
-        ) {
-            content {
-                AndroidView(
-                    factory = { context ->
-                        FrameLayout(context).apply {
-                            val newClockView = checkNotNull(currentClock).smallClock.view
-                            (newClockView.parent as? ViewGroup)?.removeView(newClockView)
-                            addView(newClockView)
-                        }
-                    },
-                    modifier =
-                        Modifier.padding(
-                                horizontal =
-                                    dimensionResource(customizationR.dimen.clock_padding_start)
-                            )
-                            .padding(top = { viewModel.getSmallClockTopMargin(view.context) })
-                            .onTopPlacementChanged(onTopChanged)
-                            .burnInAware(
-                                viewModel = aodBurnInViewModel,
-                                params = burnInParams,
-                            ),
-                    update = {
-                        val newClockView = checkNotNull(currentClock).smallClock.view
-                        it.removeAllViews()
-                        (newClockView.parent as? ViewGroup)?.removeView(newClockView)
-                        it.addView(newClockView)
-                    },
-                )
-            }
-        }
+        val context = LocalContext.current
+        AndroidView(
+            factory = { context ->
+                FrameLayout(context).apply {
+                    ensureClockViewExists(checkNotNull(currentClock).smallClock.view)
+                }
+            },
+            update = { it.ensureClockViewExists(checkNotNull(currentClock).smallClock.view) },
+            modifier =
+                modifier
+                    .height(dimensionResource(R.dimen.small_clock_height))
+                    .padding(horizontal = dimensionResource(R.dimen.clock_padding_start))
+                    .padding(top = { smallTopMargin })
+                    .onTopPlacementChanged(onTopChanged)
+                    .burnInAware(
+                        viewModel = aodBurnInViewModel,
+                        params = burnInParams,
+                    )
+                    .element(smallClockElementKey),
+        )
     }
 
     @Composable
-    fun SceneScope.LargeClock(modifier: Modifier = Modifier) {
-        val clockSize by viewModel.clockSize.collectAsState()
-        val currentClock by viewModel.currentClock.collectAsState()
-        viewModel.clock = currentClock
-
-        if (clockSize != KeyguardClockSwitch.LARGE) {
-            return
-        }
-
+    fun SceneScope.LargeClock(burnInParams: BurnInParameters, modifier: Modifier = Modifier) {
+        val currentClock by viewModel.currentClock.collectAsStateWithLifecycle()
         if (currentClock?.largeClock?.view == null) {
             return
         }
 
-        val view = LocalView.current
+        // Centering animation for clocks that have custom position animations.
+        LaunchedEffect(layoutState.currentTransition?.progress) {
+            val transition = layoutState.currentTransition ?: return@LaunchedEffect
+            if (currentClock?.largeClock?.config?.hasCustomPositionUpdatedAnimation != true) {
+                return@LaunchedEffect
+            }
 
-        DisposableEffect(view) {
-            clockInteractor.clockEventController.registerListeners(view)
+            // If we are not doing the centering animation, do not animate.
+            val progress =
+                if (transition.isTransitioningBetween(largeClockScene, splitShadeLargeClockScene)) {
+                    transition.progress
+                } else {
+                    1f
+                }
 
-            onDispose { clockInteractor.clockEventController.unregisterListeners() }
+            val dir = if (transition.toScene == splitShadeLargeClockScene) -1f else 1f
+            val distance = dir * getClockCenteringDistance()
+            val largeClock = checkNotNull(currentClock).largeClock
+            largeClock.animations.onPositionUpdated(
+                distance = distance,
+                fraction = progress,
+            )
         }
 
-        MovableElement(
-            key = ClockElementKey,
-            modifier = modifier,
-        ) {
+        MovableElement(key = largeClockElementKey, modifier = modifier) {
             content {
                 AndroidView(
                     factory = { context ->
                         FrameLayout(context).apply {
-                            val newClockView = checkNotNull(currentClock).largeClock.view
-                            (newClockView.parent as? ViewGroup)?.removeView(newClockView)
-                            addView(newClockView)
+                            ensureClockViewExists(checkNotNull(currentClock).largeClock.view)
                         }
                     },
                     update = {
-                        val newClockView = checkNotNull(currentClock).largeClock.view
-                        it.removeAllViews()
-                        (newClockView.parent as? ViewGroup)?.removeView(newClockView)
-                        it.addView(newClockView)
+                        it.ensureClockViewExists(checkNotNull(currentClock).largeClock.view)
                     },
-                    modifier = Modifier.fillMaxSize()
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .burnInAware(
+                                viewModel = aodBurnInViewModel,
+                                params = burnInParams,
+                                isClock = true
+                            )
                 )
             }
         }
     }
-}
 
-private val ClockElementKey = ElementKey("Clock")
+    private fun FrameLayout.ensureClockViewExists(clockView: View) {
+        if (contains(clockView)) {
+            return
+        }
+        removeAllViews()
+        (clockView.parent as? ViewGroup)?.removeView(clockView)
+        addView(clockView)
+    }
+
+    fun getClockCenteringDistance(): Float {
+        return Resources.getSystem().displayMetrics.widthPixels / 4f
+    }
+}

@@ -838,7 +838,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         if ((params.installFlags & PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK) != 0
                 && !PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)
-                && !Build.IS_DEBUGGABLE) {
+                && !Build.IS_DEBUGGABLE
+                && !PackageManagerServiceUtils.isAdoptedShell(callingUid, mContext)) {
             // If the bypass flag is set, but not running as system root or shell then remove
             // the flag
             params.installFlags &= ~PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
@@ -1422,7 +1423,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         DevicePolicyManagerInternal dpmi =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
         final boolean canSilentlyInstallPackage =
-                dpmi != null && dpmi.canSilentlyInstallPackage(callerPackageName, callingUid);
+                (dpmi != null && dpmi.canSilentlyInstallPackage(callerPackageName, callingUid))
+                        || PackageInstallerSession.isEmergencyInstallerEnabled(
+                        versionedPackage.getPackageName(), snapshot, userId, callingUid);
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),

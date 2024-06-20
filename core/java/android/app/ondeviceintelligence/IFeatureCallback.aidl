@@ -8,7 +8,7 @@ import android.os.PersistableBundle;
   *
   * @hide
   */
-interface IFeatureCallback {
+oneway interface IFeatureCallback {
     void onSuccess(in Feature result) = 1;
     void onFailure(int errorCode, in String errorMessage, in PersistableBundle errorParams) = 2;
 }

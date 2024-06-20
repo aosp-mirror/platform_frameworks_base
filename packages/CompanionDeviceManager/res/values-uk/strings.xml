@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"пристрій"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Цей додаток матиме доступ до перелічених нижче дозволів на вашому <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Надайте додатку &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; доступ до цієї інформації з телефона"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Дозволити додатку &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; транслювати додатки телефона?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s матиме доступ до контенту, що відображається чи відтворюється на телефоні, зокрема до аудіо, фото, паролів і повідомлень.&lt;br/&gt;&lt;br/&gt;%1$s зможе транслювати додатки, поки ви не скасуєте цей дозвіл."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Сервіси для кількох пристроїв"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> від імені вашого пристрою \"<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>\" запитує дозвіл на трансляцію додатків між вашими пристроями"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> від імені вашого пристрою \"<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>\" запитує дозвіл на відображення й транслювання додатків на ваших пристроях"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Надайте пристрою &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; доступ до цієї інформації з телефона"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Сервіси Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> від імені вашого пристрою \"<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>\" запитує дозвіл на доступ до фотографій, медіафайлів і сповіщень вашого телефона"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Дозволити додатку &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; виконувати цю дію?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Дозволити пристрою &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; транслювати додатки й системні функції телефона?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s матиме доступ до контенту, що відображається чи відтворюється на телефоні, зокрема до аудіо, фото, платіжної інформації, паролів і повідомлень.&lt;br/&gt;&lt;br/&gt;%1$s зможе транслювати додатки й системні функції, поки ви не скасуєте цей дозвіл."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> від імені вашого пристрою (<xliff:g id="DEVICE_NAME">%2$s</xliff:g>) запитує дозвіл на трансляцію додатків та інших системних функцій на пристрої поблизу"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"пристрій"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Цей додаток зможе синхронізувати інформацію (наприклад, ім’я абонента, який викликає) між телефоном і вибраним пристроєм"</string>

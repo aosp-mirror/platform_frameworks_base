@@ -21,11 +21,17 @@ import static android.content.pm.PackageManager.GET_CONFIGURATIONS;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.os.Binder.getCallingUid;
 
+import static com.android.internal.R.array.config_companionDeviceCerts;
+import static com.android.internal.R.array.config_companionDevicePackages;
+import static com.android.internal.R.array.config_companionPermSyncEnabledCerts;
+import static com.android.internal.R.array.config_companionPermSyncEnabledPackages;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
+import android.app.ecm.EnhancedConfirmationManager;
 import android.companion.CompanionDeviceService;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,6 +47,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.os.Binder;
 import android.os.Process;
+import android.permission.flags.Flags;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
@@ -183,15 +190,30 @@ public final class PackageUtils {
      */
     public static boolean isPackageAllowlisted(Context context,
             PackageManagerInternal packageManagerInternal, @NonNull String packageName) {
-        final String[] allowlistedPackages = context.getResources()
-                .getStringArray(com.android.internal.R.array.config_companionDevicePackages);
+        return isPackageAllowlisted(context, packageManagerInternal, packageName,
+                config_companionDevicePackages, config_companionDeviceCerts);
+    }
+
+    /**
+     * Check if perm sync is allowlisted and auto-enabled for the package.
+     */
+    public static boolean isPermSyncAutoEnabled(Context context,
+            PackageManagerInternal packageManagerInternal, String packageName) {
+        return isPackageAllowlisted(context, packageManagerInternal, packageName,
+                config_companionPermSyncEnabledPackages, config_companionPermSyncEnabledCerts);
+    }
+
+    private static boolean isPackageAllowlisted(Context context,
+            PackageManagerInternal packageManagerInternal, String packageName,
+            int packagesConfig, int certsConfig) {
+        final String[] allowlistedPackages = context.getResources().getStringArray(packagesConfig);
         if (!ArrayUtils.contains(allowlistedPackages, packageName)) {
             Slog.d(TAG, packageName + " is not allowlisted.");
             return false;
         }
 
         final String[] allowlistedPackagesSignatureDigests = context.getResources()
-                .getStringArray(com.android.internal.R.array.config_companionDeviceCerts);
+                .getStringArray(certsConfig);
         final Set<String> allowlistedSignatureDigestsForRequestingPackage = new HashSet<>();
         for (int i = 0; i < allowlistedPackages.length; i++) {
             if (allowlistedPackages[i].equals(packageName)) {
@@ -227,9 +249,19 @@ public final class PackageUtils {
      */
     public static boolean isRestrictedSettingsAllowed(
             Context context, String packageName, int uid) {
-        final int mode = context.getSystemService(AppOpsManager.class).noteOpNoThrow(
-                AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS, uid,
-                packageName, /* attributionTag= */ null, /* message= */ null);
-        return mode == AppOpsManager.MODE_ALLOWED;
+        if (Flags.enhancedConfirmationModeApisEnabled()) {
+            EnhancedConfirmationManager ecm = context.getSystemService(
+                    EnhancedConfirmationManager.class);
+            try {
+                return !ecm.isRestricted(packageName, AppOpsManager.OPSTR_ACCESS_NOTIFICATIONS);
+            } catch (PackageManager.NameNotFoundException e) {
+                return true;
+            }
+        } else {
+            final int mode = context.getSystemService(AppOpsManager.class).noteOpNoThrow(
+                    AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS, uid,
+                    packageName, /* attributionTag= */ null, /* message= */ null);
+            return mode == AppOpsManager.MODE_ALLOWED || mode == AppOpsManager.MODE_DEFAULT;
+        }
     }
 }

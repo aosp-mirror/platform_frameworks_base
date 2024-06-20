@@ -64,10 +64,22 @@ interface PreferenceModel {
     val title: String
 
     /**
+     * The content description of [title].
+     */
+    val titleContentDescription: String?
+        get() = null
+
+    /**
      * The summary of this [Preference].
      */
     val summary: () -> String
         get() = { "" }
+
+    /**
+     * The content description of [summary].
+     */
+    val summaryContentDescription: () -> String?
+        get() = { null }
 
     /**
      * The icon of this [Preference].
@@ -112,7 +124,9 @@ fun Preference(
     EntryHighlight {
         BasePreference(
             title = model.title,
+            titleContentDescription = model.titleContentDescription,
             summary = model.summary,
+            summaryContentDescription = model.summaryContentDescription,
             singleLineSummary = singleLineSummary,
             modifier = modifier,
             icon = model.icon,

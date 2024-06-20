@@ -31,6 +31,7 @@ import com.android.systemui.testKosmos
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -194,6 +195,7 @@ class CommunalLoggerStartableTest : SysuiTestCase() {
         return ObservableTransitionState.Transition(
             fromScene = from,
             toScene = to,
+            currentScene = flowOf(to),
             progress = emptyFlow(),
             isInitiatedByUserInput = true,
             isUserInputOngoing = emptyFlow(),

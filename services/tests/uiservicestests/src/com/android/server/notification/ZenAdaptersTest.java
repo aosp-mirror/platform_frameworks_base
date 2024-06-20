@@ -16,7 +16,7 @@
 
 package com.android.server.notification;
 
-import static com.android.server.notification.ZenAdapters.notificationPolicyToZenPolicy;
+import static android.service.notification.ZenAdapters.notificationPolicyToZenPolicy;
 
 import static com.google.common.truth.Truth.assertThat;
 

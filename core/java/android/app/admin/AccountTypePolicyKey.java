@@ -19,12 +19,12 @@ package android.app.admin;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_ACCOUNT_TYPE;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_BUNDLE_KEY;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_KEY;
-import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.admin.flags.Flags;
 import android.os.Bundle;
 import android.os.Parcel;
 
@@ -54,7 +54,7 @@ public final class AccountTypePolicyKey extends PolicyKey {
     @TestApi
     public AccountTypePolicyKey(@NonNull String key, @NonNull String accountType) {
         super(key);
-        if (devicePolicySizeTrackingEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             PolicySizeVerifier.enforceMaxStringLength(accountType, "accountType");
         }
         mAccountType = Objects.requireNonNull((accountType));

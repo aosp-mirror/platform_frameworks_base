@@ -16,6 +16,7 @@
 
 package com.android.internal.protolog;
 
+import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.CACHE_UPDATER;
 import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LEGACY_OUTPUT_FILE_PATH;
 import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LEGACY_VIEWER_CONFIG_PATH;
 import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LOG_GROUPS;
@@ -48,6 +49,9 @@ public class ProtoLogImpl {
 
     @ProtoLogToolInjected(LOG_GROUPS)
     private static TreeMap<String, IProtoLogGroup> sLogGroups;
+
+    @ProtoLogToolInjected(CACHE_UPDATER)
+    private static Runnable sCacheUpdater;
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
     public static void d(IProtoLogGroup group, long messageHash, int paramsMask,
@@ -94,9 +98,12 @@ public class ProtoLogImpl {
         getSingleInstance().log(LogLevel.WTF, group, messageHash, paramsMask, messageString, args);
     }
 
-    public static boolean isEnabled(IProtoLogGroup group) {
-        // TODO: Implement for performance reasons, with optional level parameter?
-        return true;
+    /**
+     * Should return true iff we should be logging to either protolog or logcat for this group
+     * and log level.
+     */
+    public static boolean isEnabled(IProtoLogGroup group, LogLevel level) {
+        return getSingleInstance().isEnabled(group, level);
     }
 
     /**
@@ -105,11 +112,14 @@ public class ProtoLogImpl {
     public static synchronized IProtoLog getSingleInstance() {
         if (sServiceInstance == null) {
             if (android.tracing.Flags.perfettoProtologTracing()) {
-                sServiceInstance = new PerfettoProtoLogImpl(sViewerConfigPath, sLogGroups);
+                sServiceInstance = new PerfettoProtoLogImpl(
+                        sViewerConfigPath, sLogGroups, sCacheUpdater);
             } else {
                 sServiceInstance = new LegacyProtoLogImpl(
-                        sLegacyOutputFilePath, sLegacyViewerConfigPath, sLogGroups);
+                        sLegacyOutputFilePath, sLegacyViewerConfigPath, sLogGroups, sCacheUpdater);
             }
+
+            sCacheUpdater.run();
         }
         return sServiceInstance;
     }

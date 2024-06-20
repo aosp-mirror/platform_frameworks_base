@@ -48,6 +48,12 @@ class ConfigurationInteractor @Inject constructor(private val repository: Config
             }
         }
 
+    /** Returns the unadjusted screen size. */
+    val maxBounds: Flow<Rect> =
+        repository.configurationValues
+            .map { Rect(it.windowConfiguration.maxBounds) }
+            .distinctUntilChanged()
+
     /**
      * Returns screen size adjusted to rotation, so returned screen sizes are stable across all
      * rotations, could be useful if you need to react to screen resize (e.g. fold/unfold on
@@ -55,6 +61,13 @@ class ConfigurationInteractor @Inject constructor(private val repository: Config
      */
     val naturalMaxBounds: Flow<Rect> =
         repository.configurationValues.map { it.naturalScreenBounds }.distinctUntilChanged()
+
+    /**
+     * The layout direction. Will be either `View#LAYOUT_DIRECTION_LTR` or
+     * `View#LAYOUT_DIRECTION_RTL`.
+     */
+    val layoutDirection: Flow<Int> =
+        repository.configurationValues.map { it.layoutDirection }.distinctUntilChanged()
 
     /** Given [resourceId], emit the dimension pixel size on config change */
     fun dimensionPixelSize(resourceId: Int): Flow<Int> {

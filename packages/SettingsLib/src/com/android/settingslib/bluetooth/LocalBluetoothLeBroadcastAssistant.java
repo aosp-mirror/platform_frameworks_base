@@ -381,6 +381,14 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
                 });
     }
 
+    /** Gets devices with matched connection states. */
+    public List<BluetoothDevice> getDevicesMatchingConnectionStates(@NonNull int[] states) {
+        if (mService == null) {
+            return new ArrayList<BluetoothDevice>(0);
+        }
+        return mService.getDevicesMatchingConnectionStates(states);
+    }
+
     public boolean isEnabled(BluetoothDevice device) {
         if (mService == null || device == null) {
             return false;

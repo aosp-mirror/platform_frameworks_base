@@ -46,10 +46,13 @@ import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
 
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
+import static com.android.server.notification.Flags.FLAG_ALL_NOTIFS_NEED_TTL;
+import static com.android.server.notification.Flags.FLAG_PERSIST_INCOMPLETE_RESTORE_DATA;
 import static com.android.server.notification.NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_UPDATED_BY_USER;
 import static com.android.server.notification.PreferencesHelper.DEFAULT_BUBBLE_PREFERENCE;
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
@@ -110,6 +113,9 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.permission.PermissionManager;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -140,6 +146,9 @@ import com.android.os.AtomsProto.PackageNotificationPreferences;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.PermissionHelper.PackagePermission;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -148,6 +157,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -160,6 +170,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Clock;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -171,13 +183,10 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 public class PreferencesHelperTest extends UiServiceTestCase {
-    private static final int UID_N_MR1 = 0;
     private static final int UID_HEADLESS = 1000000;
     private static final UserHandle USER = UserHandle.of(0);
-    private static final int UID_O = 1111;
-    private static final int UID_P = 2222;
     private static final String SYSTEM_PKG = "android";
     private static final int SYSTEM_UID = 1000;
     private static final UserHandle USER2 = UserHandle.of(10);
@@ -214,6 +223,22 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     private PreferencesHelper mXmlHelper;
     private AudioAttributes mAudioAttributes;
     private NotificationChannelLoggerFake mLogger = new NotificationChannelLoggerFake();
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+
+    @Mock
+    Clock mClock;
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(
+                FLAG_PERSIST_INCOMPLETE_RESTORE_DATA);
+    }
+
+    public PreferencesHelperTest(FlagsParameterization flags) {
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -324,14 +349,19 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPermissionHelper.getNotificationPermissionValues(USER_SYSTEM))
                 .thenReturn(appPermissions);
 
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(IntArray.wrap(new int[] {0}));
+        IntArray currentProfileIds = IntArray.wrap(new int[]{0});
+        if (UserManager.isHeadlessSystemUserMode()) {
+            currentProfileIds.add(UserHandle.getUserId(UID_HEADLESS));
+        }
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(currentProfileIds);
+        when(mClock.millis()).thenReturn(System.currentTimeMillis());
 
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                false);
+                false, mClock);
         mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                false);
+                false, mClock);
         resetZenModeHelper();
 
         mAudioAttributes = new AudioAttributes.Builder()
@@ -679,7 +709,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testReadXml_oldXml_migrates() throws Exception {
         mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                /* showReviewPermissionsNotification= */ true);
+                /* showReviewPermissionsNotification= */ true, mClock);
 
         String xml = "<ranking version=\"2\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" uid=\"" + UID_N_MR1
@@ -815,7 +845,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testReadXml_newXml_noMigration_showPermissionNotification() throws Exception {
         mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                /* showReviewPermissionsNotification= */ true);
+                /* showReviewPermissionsNotification= */ true, mClock);
 
         String xml = "<ranking version=\"3\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
@@ -874,7 +904,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testReadXml_newXml_permissionNotificationOff() throws Exception {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                /* showReviewPermissionsNotification= */ false);
+                /* showReviewPermissionsNotification= */ false, mClock);
 
         String xml = "<ranking version=\"3\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
@@ -933,7 +963,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testReadXml_newXml_noMigration_noPermissionNotification() throws Exception {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                /* showReviewPermissionsNotification= */ true);
+                /* showReviewPermissionsNotification= */ true, mClock);
 
         String xml = "<ranking version=\"4\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
@@ -1009,7 +1039,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(1234);
         final ApplicationInfo app = new ApplicationInfo();
         app.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
-        when(mPm.getApplicationInfoAsUser(eq("something"), anyInt(), anyInt())).thenReturn(app);
+        when(mPm.getApplicationInfoAsUser(
+                eq("something"), anyInt(), eq(USER_SYSTEM))).thenReturn(app);
 
         mXmlHelper.onPackagesChanged(false, 0, new String[] {"something"}, new int[] {1234});
 
@@ -1098,18 +1129,15 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "<package name=\"com.example.o\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
-                + "=\"false\" uid=\"1111\">\n"
+                + "=\"false\" uid=\"10002\">\n"
                 + "<channel id=\"id\" name=\"name\" importance=\"2\" "
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
                 + "</package>\n"
-                + "<package name=\"com.example.p\" show_badge=\"true\" "
-                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
-                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" uid=\"2222\" />\n"
                 + "<package name=\"com.example.n_mr1\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
-                + "=\"false\" uid=\"0\">\n"
+                + "=\"false\" uid=\"10001\">\n"
                 + "<channelGroup id=\"1\" name=\"bye\" blocked=\"false\" locked=\"0\" />\n"
                 + "<channelGroup id=\"2\" name=\"hello\" blocked=\"false\" locked=\"0\" />\n"
                 + "<channel id=\"id1\" name=\"name1\" importance=\"4\" show_badge=\"true\" "
@@ -1125,6 +1153,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
+                + "<package name=\"com.example.p\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" uid=\"10003\" />\n"
                 + "</ranking>";
         assertThat(baos.toString()).contains(expected);
     }
@@ -1190,10 +1221,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
                 + "</package>\n"
                 // Importance default because on in permission helper
-                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
-                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
-                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" />\n"
-                // Importance default because on in permission helper
                 + "<package name=\"com.example.n_mr1\" importance=\"3\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
@@ -1213,6 +1240,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
+                // Importance default because on in permission helper
+                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" />\n"
                 // Packages that exist solely in permissionhelper
                 + "<package name=\"first\" importance=\"3\" />\n"
                 + "<package name=\"third\" importance=\"0\" />\n"
@@ -1276,12 +1307,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
                 + "</package>\n"
-                // Importance default because on in permission helper
-                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
-                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
-                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" />\n"
-                // Importance missing because missing from permission helper
-                + "<package name=\"com.example.n_mr1\" show_badge=\"true\" "
+                // Importance 0 because missing from permission helper
+                + "<package name=\"com.example.n_mr1\" importance=\"0\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
                 + "=\"false\">\n"
@@ -1300,6 +1327,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
+                // Importance default because on in permission helper
+                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" />\n"
                 + "</ranking>";
         assertThat(baos.toString()).contains(expected);
     }
@@ -1451,6 +1482,149 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(actualChannel.isSoundRestored());
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_PERSIST_INCOMPLETE_RESTORE_DATA)
+    public void testRestoreXml_delayedRestore() throws Exception {
+        // simulate package not installed
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        when(mPm.getApplicationInfoAsUser(eq(PKG_R), anyInt(), anyInt())).thenThrow(
+                new PackageManager.NameNotFoundException());
+        when(mClock.millis()).thenReturn(System.currentTimeMillis());
+
+        String id = "id";
+        String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_R + "\" show_badge=\"true\">\n"
+                + "<channel id=\"" + id + "\" name=\"name\" importance=\"2\" "
+                + "show_badge=\"true\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+
+        // settings are not available with real uid because pkg is not installed
+        assertThat(mXmlHelper.getNotificationChannel(PKG_R, UID_P, id, false)).isNull();
+        // but the settings are in memory with unknown_uid
+        assertThat(mXmlHelper.getNotificationChannel(PKG_R, UNKNOWN_UID, id, false)).isNotNull();
+
+        // package is "installed"
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UID_P);
+
+        // Trigger 2nd restore pass
+        mXmlHelper.onPackagesChanged(false, USER_SYSTEM, new String[]{PKG_R},
+                new int[]{UID_P});
+
+        NotificationChannel channel = mXmlHelper.getNotificationChannel(PKG_R, UID_P, id,
+                false);
+        assertThat(channel.getImportance()).isEqualTo(2);
+        assertThat(channel.canShowBadge()).isTrue();
+        assertThat(channel.canBypassDnd()).isFalse();
+
+        // removed from 'pending install' set
+        assertThat(mXmlHelper.getNotificationChannel(PKG_R, UNKNOWN_UID, id,false)).isNull();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_PERSIST_INCOMPLETE_RESTORE_DATA)
+    public void testRestoreXml_delayedRestore_afterReboot() throws Exception {
+        // load restore data
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair<>(UID_R, PKG_R), new Pair<>(true, false));
+        when(mPermissionHelper.getNotificationPermissionValues(USER_SYSTEM))
+                .thenReturn(appPermissions);
+
+        // simulate package not installed
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        when(mPm.getApplicationInfoAsUser(eq(PKG_R), anyInt(), anyInt())).thenThrow(
+                new PackageManager.NameNotFoundException());
+        when(mClock.millis()).thenReturn(System.currentTimeMillis());
+
+        String id = "id";
+        String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_R + "\" show_badge=\"true\">\n"
+                + "<channel id=\"" + id + "\" name=\"name\" importance=\"2\" "
+                + "show_badge=\"true\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+
+        // simulate write to disk
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        mXmlHelper.writeXml(serializer, false, USER_SYSTEM);
+        serializer.endDocument();
+        serializer.flush();
+
+        // simulate load after reboot
+        mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
+                false, mClock);
+        loadByteArrayXml(baos.toByteArray(), false, USER_ALL);
+
+        // Trigger 2nd restore pass
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UID_R);
+        mXmlHelper.onPackagesChanged(false, USER_SYSTEM, new String[]{PKG_R},
+                new int[]{UID_R});
+
+        NotificationChannel channel = mXmlHelper.getNotificationChannel(PKG_R, UID_R, id,
+                false);
+        assertThat(channel.getImportance()).isEqualTo(2);
+        assertThat(channel.canShowBadge()).isTrue();
+        assertThat(channel.canBypassDnd()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_PERSIST_INCOMPLETE_RESTORE_DATA)
+    public void testRestoreXml_delayedRestore_packageMissingAfterTwoDays() throws Exception {
+        // load restore data
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair<>(UID_R, PKG_R), new Pair<>(true, false));
+        when(mPermissionHelper.getNotificationPermissionValues(USER_SYSTEM))
+                .thenReturn(appPermissions);
+
+        // simulate package not installed
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        when(mPm.getApplicationInfoAsUser(eq(PKG_R), anyInt(), anyInt())).thenThrow(
+                new PackageManager.NameNotFoundException());
+
+        String id = "id";
+        String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_R + "\" show_badge=\"true\">\n"
+                + "<channel id=\"" + id + "\" name=\"name\" importance=\"2\" "
+                + "show_badge=\"true\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+
+        // simulate write to disk
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        mXmlHelper.writeXml(serializer, false, USER_SYSTEM);
+        serializer.endDocument();
+        serializer.flush();
+
+        // advance time by 2 days
+        when(mClock.millis()).thenReturn(
+                Duration.ofDays(2).toMillis() + System.currentTimeMillis());
+
+        // simulate load after reboot
+        mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
+                false, mClock);
+        loadByteArrayXml(xml.getBytes(), false, USER_ALL);
+
+        // Trigger 2nd restore pass
+        mXmlHelper.onPackagesChanged(false, USER_SYSTEM, new String[]{PKG_R},
+                new int[]{UID_P});
+
+        // verify the 2nd restore pass failed because the restore data had been removed
+        assertThat(mXmlHelper.getNotificationChannel(PKG_R, UNKNOWN_UID, id, false)).isNull();
+    }
 
     /**
      * Although we don't make backups with uncanonicalized uris anymore, we used to, so we have to
@@ -1519,10 +1693,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         mHelper = new PreferencesHelper(mContext, mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                false);
+                false, mClock);
         mXmlHelper = new PreferencesHelper(mContext, mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                false);
+                false, mClock);
 
         NotificationChannel channel =
                 new NotificationChannel("id", "name", IMPORTANCE_LOW);
@@ -3958,6 +4132,20 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadXml_existingPackage_bubblePrefsRestored() throws Exception {
+        mHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_ALL);
+        assertEquals(BUBBLE_PREFERENCE_ALL, mHelper.getBubblePreference(PKG_O, UID_O));
+
+        mXmlHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_NONE);
+        assertEquals(BUBBLE_PREFERENCE_NONE, mXmlHelper.getBubblePreference(PKG_O, UID_O));
+
+        ByteArrayOutputStream stream = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
+        loadStreamXml(stream, true, UserHandle.USER_ALL);
+
+        assertEquals(BUBBLE_PREFERENCE_ALL, mXmlHelper.getBubblePreference(PKG_O, UID_O));
+    }
+
+    @Test
     public void testUpdateNotificationChannel_fixedPermission() {
         List<UserInfo> users = ImmutableList.of(new UserInfo(UserHandle.USER_SYSTEM, "user0", 0));
         when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
@@ -3966,7 +4154,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), anyInt())).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(eq(0), anyInt())).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         assertTrue(mHelper.isImportanceLocked(PKG_O, UID_O));
@@ -4082,7 +4270,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
@@ -4105,7 +4293,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
@@ -4294,7 +4482,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         ArraySet<String> toRemove = new ArraySet<>();
@@ -4326,7 +4514,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         assertTrue(mHelper.isImportanceLocked(PKG_O, UID_O));

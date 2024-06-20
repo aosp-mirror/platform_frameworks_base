@@ -53,7 +53,7 @@ public class HidlToAidlSessionAdapter implements ISession {
 
     private static final String TAG = "HidlToAidlSessionAdapter";
 
-    private static final int CHALLENGE_TIMEOUT_SEC = 600;
+    @VisibleForTesting static final int CHALLENGE_TIMEOUT_SEC = 600;
     @DurationMillisLong
     private static final int GENERATE_CHALLENGE_REUSE_INTERVAL_MILLIS = 60 * 1000;
     @DurationMillisLong

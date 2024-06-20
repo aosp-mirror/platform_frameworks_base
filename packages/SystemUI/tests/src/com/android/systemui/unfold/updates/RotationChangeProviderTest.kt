@@ -18,8 +18,11 @@ package com.android.systemui.unfold.updates
 
 import android.content.Context
 import android.hardware.display.DisplayManager
+import android.os.HandlerThread
 import android.os.Looper
+import android.os.Process
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -40,6 +43,7 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
+@RunWithLooper
 class RotationChangeProviderTest : SysuiTestCase() {
 
     private lateinit var rotationChangeProvider: RotationChangeProvider
@@ -48,7 +52,10 @@ class RotationChangeProviderTest : SysuiTestCase() {
     @Mock lateinit var listener: RotationListener
     @Mock lateinit var display: Display
     @Captor lateinit var displayListener: ArgumentCaptor<DisplayManager.DisplayListener>
-    private val fakeHandler = FakeHandler(Looper.getMainLooper())
+    private val bgThread =
+        HandlerThread("UnfoldBgTest", Process.THREAD_PRIORITY_FOREGROUND).apply { start() }
+    private val bgHandler = FakeHandler(bgThread.looper)
+    private val callbackHandler = FakeHandler(Looper.getMainLooper())
 
     private lateinit var spyContext: Context
 
@@ -57,9 +64,10 @@ class RotationChangeProviderTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         spyContext = spy(context)
         whenever(spyContext.display).thenReturn(display)
-        rotationChangeProvider = RotationChangeProvider(displayManager, spyContext, fakeHandler)
+        rotationChangeProvider =
+            RotationChangeProvider(displayManager, spyContext, bgHandler, callbackHandler)
         rotationChangeProvider.addCallback(listener)
-        fakeHandler.dispatchQueuedMessages()
+        bgHandler.dispatchQueuedMessages()
         verify(displayManager).registerDisplayListener(displayListener.capture(), any())
     }
 
@@ -76,7 +84,7 @@ class RotationChangeProviderTest : SysuiTestCase() {
         verify(listener).onRotationChanged(42)
 
         rotationChangeProvider.removeCallback(listener)
-        fakeHandler.dispatchQueuedMessages()
+        bgHandler.dispatchQueuedMessages()
         sendRotationUpdate(43)
 
         verify(displayManager).unregisterDisplayListener(any())
@@ -86,6 +94,6 @@ class RotationChangeProviderTest : SysuiTestCase() {
     private fun sendRotationUpdate(newRotation: Int) {
         whenever(display.rotation).thenReturn(newRotation)
         displayListener.allValues.forEach { it.onDisplayChanged(display.displayId) }
-        fakeHandler.dispatchQueuedMessages()
+        callbackHandler.dispatchQueuedMessages()
     }
 }

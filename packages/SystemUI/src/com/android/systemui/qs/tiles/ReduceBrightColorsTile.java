@@ -23,14 +23,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.res.R.drawable;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -42,6 +41,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R.drawable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -97,7 +97,7 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         mReduceBrightColorsController.setReduceBrightColorsActivated(!mState.value);
     }
 

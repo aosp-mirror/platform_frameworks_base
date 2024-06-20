@@ -1,0 +1,6 @@
+<data-labels>
+    <data-shared dataType="location_data_type_approx_location"
+        purposes="analytics" />
+    <data-shared dataType="location_data_type_precise_location"
+        purposes="analytics" />
+</data-labels>

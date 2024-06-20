@@ -186,4 +186,11 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     public int getAnimationType() {
         return mControl.getAnimationType();
     }
+
+    @Override
+    public void updateLayoutInsetsDuringAnimation(
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
+        InsetsAnimationThread.getHandler().post(
+                () -> mControl.updateLayoutInsetsDuringAnimation(layoutInsetsDuringAnimation));
+    }
 }

@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,6 +41,7 @@ class LockscreenToGoneTransitionViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val repository = kosmos.fakeKeyguardTransitionRepository
+    private val sysuiStatusBarStateController = kosmos.sysuiStatusBarStateController
     private val underTest = kosmos.lockscreenToGoneTransitionViewModel
 
     @Test
@@ -68,9 +70,7 @@ class LockscreenToGoneTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(0f))
             assertThat(alpha).isEqualTo(0.5f)
 
-            repository.sendTransitionStep(step(0.25f))
-            assertThat(alpha).isEqualTo(0.25f)
-
+            // Before the halfway point, it will have reached zero
             repository.sendTransitionStep(step(.5f))
             assertThat(alpha).isEqualTo(0f)
         }
@@ -90,6 +90,20 @@ class LockscreenToGoneTransitionViewModelTest : SysuiTestCase() {
 
             repository.sendTransitionStep(step(0.5f))
             assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun notificationAlpha_leaveShadeOpen() =
+        testScope.runTest {
+            val values by collectValues(underTest.notificationAlpha(ViewStateAccessor()))
+
+            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(1f))
+
+            assertThat(values.size).isEqualTo(2)
+            values.forEach { assertThat(it).isEqualTo(1f) }
         }
 
     private fun step(

@@ -15,18 +15,26 @@
  */
 
 #include <gui/BufferQueue.h>
+#include <system/window.h>
 
 namespace android {
 
 class HostBufferQueue : public IGraphicBufferProducer, public IGraphicBufferConsumer {
 public:
-    HostBufferQueue() : mWidth(0), mHeight(0) { }
+    HostBufferQueue() : mWidth(0), mHeight(0) {}
 
-    virtual status_t setConsumerIsProtected(bool isProtected) { return OK; }
+    // Consumer
+    virtual status_t setConsumerIsProtected(bool isProtected) {
+        return OK;
+    }
 
-    virtual status_t detachBuffer(int slot) { return OK; }
+    virtual status_t detachBuffer(int slot) {
+        return OK;
+    }
 
-    virtual status_t getReleasedBuffers(uint64_t* slotMask) { return OK; }
+    virtual status_t getReleasedBuffers(uint64_t* slotMask) {
+        return OK;
+    }
 
     virtual status_t setDefaultBufferSize(uint32_t w, uint32_t h) {
         mWidth = w;
@@ -35,22 +43,54 @@ public:
         return OK;
     }
 
-    virtual status_t setDefaultBufferFormat(PixelFormat defaultFormat) { return OK; }
+    virtual status_t setDefaultBufferFormat(PixelFormat defaultFormat) {
+        return OK;
+    }
 
-    virtual status_t setDefaultBufferDataSpace(android_dataspace defaultDataSpace) { return OK; }
+    virtual status_t setDefaultBufferDataSpace(android_dataspace defaultDataSpace) {
+        return OK;
+    }
 
-    virtual status_t discardFreeBuffers() { return OK; }
+    virtual status_t discardFreeBuffers() {
+        return OK;
+    }
 
     virtual status_t acquireBuffer(BufferItem* buffer, nsecs_t presentWhen,
-                                       uint64_t maxFrameNumber = 0) {
+                                   uint64_t maxFrameNumber = 0) {
         buffer->mGraphicBuffer = mBuffer;
         buffer->mSlot = 0;
         return OK;
     }
 
-    virtual status_t setMaxAcquiredBufferCount(int maxAcquiredBuffers) { return OK; }
+    virtual status_t setMaxAcquiredBufferCount(int maxAcquiredBuffers) {
+        return OK;
+    }
 
-    virtual status_t setConsumerUsageBits(uint64_t usage) { return OK; }
+    virtual status_t setConsumerUsageBits(uint64_t usage) {
+        return OK;
+    }
+
+    // Producer
+    virtual int query(int what, int* value) {
+        switch (what) {
+            case NATIVE_WINDOW_WIDTH:
+                *value = mWidth;
+                break;
+            case NATIVE_WINDOW_HEIGHT:
+                *value = mHeight;
+                break;
+            default:
+                *value = 0;
+                break;
+        }
+        return OK;
+    }
+
+    virtual status_t requestBuffer(int slot, sp<GraphicBuffer>* buf) {
+        *buf = mBuffer;
+        return OK;
+    }
+
 private:
     sp<GraphicBuffer> mBuffer;
     uint32_t mWidth;
@@ -58,8 +98,7 @@ private:
 };
 
 void BufferQueue::createBufferQueue(sp<IGraphicBufferProducer>* outProducer,
-        sp<IGraphicBufferConsumer>* outConsumer) {
-
+                                    sp<IGraphicBufferConsumer>* outConsumer) {
     sp<HostBufferQueue> obj(new HostBufferQueue());
 
     *outProducer = obj;

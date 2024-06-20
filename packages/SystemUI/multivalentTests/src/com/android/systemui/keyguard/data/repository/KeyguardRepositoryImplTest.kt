@@ -30,6 +30,7 @@ import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.dreams.DreamOverlayCallbackController
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
@@ -332,27 +333,16 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isDreamingFromKeyguardUpdateMonitor() =
-        TestScope(mainDispatcher).runTest {
-            whenever(keyguardUpdateMonitor.isDreaming()).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isDreaming.onEach { latest = it }.launchIn(this)
+    fun isDreaming() =
+        testScope.runTest {
+            val isDreaming by collectLastValue(underTest.isDreaming)
+            assertThat(isDreaming).isFalse()
 
-            runCurrent()
-            assertThat(latest).isFalse()
+            underTest.setDreaming(true)
+            assertThat(isDreaming).isTrue()
 
-            val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
-            verify(keyguardUpdateMonitor).registerCallback(captor.capture())
-
-            captor.value.onDreamingStateChanged(true)
-            runCurrent()
-            assertThat(latest).isTrue()
-
-            captor.value.onDreamingStateChanged(false)
-            runCurrent()
-            assertThat(latest).isFalse()
-
-            job.cancel()
+            underTest.setDreaming(false)
+            assertThat(isDreaming).isFalse()
         }
 
     @Test
@@ -515,11 +505,9 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     fun biometricUnlockSource() =
         testScope.runTest {
             val values = mutableListOf<BiometricUnlockSource?>()
-            val job = underTest.biometricUnlockSource.onEach(values::add).launchIn(this)
+            val job = underTest.biometricUnlockState.onEach { values.add(it.source) }.launchIn(this)
 
             runCurrent()
-            val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
-            verify(keyguardUpdateMonitor).registerCallback(captor.capture())
 
             // An initial, null value should be initially emitted so that flows combined with this
             // one
@@ -535,7 +523,10 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                     BiometricSourceType.FINGERPRINT,
                 )
                 .onEach { biometricSourceType ->
-                    captor.value.onBiometricAuthenticated(0, biometricSourceType, false)
+                    underTest.setBiometricUnlockState(
+                        BiometricUnlockMode.NONE,
+                        BiometricUnlockSource.Companion.fromBiometricSourceType(biometricSourceType)
+                    )
                     runCurrent()
                 }
 

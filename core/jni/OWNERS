@@ -26,6 +26,7 @@ per-file android_view_VelocityTracker.* = file:/services/core/java/com/android/s
 # WindowManager
 per-file android_graphics_BLASTBufferQueue.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file android_view_Surface* = file:/services/core/java/com/android/server/wm/OWNERS
+per-file android_view_WindowManagerGlobal.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file android_window_* = file:/services/core/java/com/android/server/wm/OWNERS
 
 # Resources

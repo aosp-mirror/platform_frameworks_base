@@ -23,15 +23,16 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
-import com.android.systemui.user.data.repository.userRepository
 import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -45,19 +46,18 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
-    val kosmos = testKosmos()
-    val testComponent = kosmos.testScope
-    val configurationRepository = kosmos.fakeConfigurationRepository
-    val keyguardRepository = kosmos.fakeKeyguardRepository
-    val keyguardTransitionRepository = kosmos.keyguardTransitionRepository
-    val sceneInteractor = kosmos.sceneInteractor
-    val userRepository = kosmos.userRepository
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val configurationRepository = kosmos.fakeConfigurationRepository
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val sceneInteractor = kosmos.sceneInteractor
+    private val shadeRepository = kosmos.shadeRepository
 
-    val underTest = kosmos.shadeInteractorSceneContainerImpl
+    private val underTest = kosmos.shadeInteractorSceneContainerImpl
 
     @Test
     fun qsExpansionWhenInSplitShadeAndQsExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.qsExpansion)
 
             // WHEN split shade is enabled and QS is expanded
@@ -69,6 +69,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = MutableStateFlow(.3f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -84,7 +85,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun qsExpansionWhenNotInSplitShadeAndQsExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.qsExpansion)
 
             // WHEN split shade is not enabled and QS is expanded
@@ -98,6 +99,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -112,7 +114,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun qsFullscreen_falseWhenTransitioning() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isQsFullscreen)
 
             // WHEN scene transition active
@@ -122,6 +124,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = MutableStateFlow(.3f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -136,7 +139,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun qsFullscreen_falseWhenIdleNotQS() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isQsFullscreen)
 
             // WHEN Idle but not on QuickSettings scene
@@ -154,7 +157,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun qsFullscreen_trueWhenIdleQS() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isQsFullscreen)
 
             // WHEN Idle on QuickSettings scene
@@ -172,7 +175,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun lockscreenShadeExpansion_idle_onScene() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an expansion flow based on transitions to and from a scene
             val key = Scenes.Shade
             val expansion = underTest.sceneBasedExpansion(sceneInteractor, key)
@@ -189,7 +192,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun lockscreenShadeExpansion_idle_onDifferentScene() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an expansion flow based on transitions to and from a scene
             val expansion = underTest.sceneBasedExpansion(sceneInteractor, Scenes.Shade)
             val expansionAmount by collectLastValue(expansion)
@@ -207,7 +210,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun lockscreenShadeExpansion_transitioning_toScene() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an expansion flow based on transitions to and from a scene
             val key = Scenes.QuickSettings
             val expansion = underTest.sceneBasedExpansion(sceneInteractor, key)
@@ -220,6 +223,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Lockscreen,
                         toScene = key,
+                        currentScene = flowOf(key),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -245,7 +249,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun lockscreenShadeExpansion_transitioning_fromScene() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an expansion flow based on transitions to and from a scene
             val key = Scenes.QuickSettings
             val expansion = underTest.sceneBasedExpansion(sceneInteractor, key)
@@ -258,6 +262,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = key,
                         toScene = Scenes.Lockscreen,
+                        currentScene = flowOf(Scenes.Lockscreen),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -282,7 +287,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
         }
 
     fun isQsBypassingShade_goneToQs() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isQsBypassingShade)
 
             // WHEN transitioning from QS directly to Gone
@@ -292,6 +297,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Gone,
                         toScene = Scenes.QuickSettings,
+                        currentScene = flowOf(Scenes.QuickSettings),
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -305,7 +311,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
         }
 
     fun isQsBypassingShade_shadeToQs() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isQsBypassingShade)
 
             // WHEN transitioning from QS to Shade
@@ -315,6 +321,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Shade,
                         toScene = Scenes.QuickSettings,
+                        currentScene = flowOf(Scenes.QuickSettings),
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -329,7 +336,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun lockscreenShadeExpansion_transitioning_toAndFromDifferentScenes() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an expansion flow based on transitions to and from a scene
             val expansion = underTest.sceneBasedExpansion(sceneInteractor, Scenes.QuickSettings)
             val expansionAmount by collectLastValue(expansion)
@@ -341,6 +348,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Lockscreen,
                         toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -366,7 +374,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun userInteracting_idle() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an interacting flow based on transitions to and from a scene
             val key = Scenes.Shade
             val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, key)
@@ -383,7 +391,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun userInteracting_transitioning_toScene_programmatic() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an interacting flow based on transitions to and from a scene
             val key = Scenes.QuickSettings
             val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, key)
@@ -396,6 +404,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Lockscreen,
                         toScene = key,
+                        currentScene = flowOf(key),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -421,7 +430,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun userInteracting_transitioning_toScene_userInputDriven() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an interacting flow based on transitions to and from a scene
             val key = Scenes.QuickSettings
             val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, key)
@@ -434,6 +443,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Lockscreen,
                         toScene = key,
+                        currentScene = flowOf(key),
                         progress = progress,
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(false),
@@ -459,7 +469,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun userInteracting_transitioning_fromScene_programmatic() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an interacting flow based on transitions to and from a scene
             val key = Scenes.QuickSettings
             val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, key)
@@ -472,6 +482,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = key,
                         toScene = Scenes.Lockscreen,
+                        currentScene = flowOf(Scenes.Lockscreen),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -497,7 +508,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun userInteracting_transitioning_fromScene_userInputDriven() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an interacting flow based on transitions to and from a scene
             val key = Scenes.QuickSettings
             val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, key)
@@ -510,6 +521,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = key,
                         toScene = Scenes.Lockscreen,
+                        currentScene = flowOf(Scenes.Lockscreen),
                         progress = progress,
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(false),
@@ -535,7 +547,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun userInteracting_transitioning_toAndFromDifferentScenes() =
-        testComponent.runTest {
+        testScope.runTest {
             // GIVEN an interacting flow based on transitions to and from a scene
             val interactingFlow = underTest.sceneBasedInteracting(sceneInteractor, Scenes.Shade)
             val interacting by collectLastValue(interactingFlow)
@@ -547,6 +559,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Lockscreen,
                         toScene = Scenes.QuickSettings,
+                        currentScene = flowOf(Scenes.QuickSettings),
                         progress = MutableStateFlow(0f),
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(false),
@@ -556,5 +569,20 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
             // THEN interacting is false
             Truth.assertThat(interacting).isFalse()
+        }
+
+    @Test
+    fun shadeMode() =
+        testScope.runTest {
+            val shadeMode by collectLastValue(underTest.shadeMode)
+
+            shadeRepository.setShadeMode(ShadeMode.Split)
+            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
+
+            shadeRepository.setShadeMode(ShadeMode.Single)
+            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
+
+            shadeRepository.setShadeMode(ShadeMode.Split)
+            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
         }
 }

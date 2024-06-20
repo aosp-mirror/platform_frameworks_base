@@ -17,6 +17,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.server.inputmethod.multisessiontest">
 
+    <application>
+        <uses-library android:name="android.test.runner" />
+        <activity android:name=".MainActivity"
+                  android:theme="@android:style/Theme.Material.NoActionBar"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+    </application>
+
     <instrumentation
         android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.android.server.inputmethod.multisessiontest"></instrumentation>

@@ -20,6 +20,8 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.IInstalld.IFsveritySetupAuthToken;
@@ -99,8 +101,11 @@ public final class FileIntegrityManager {
      * @throws IOException If the operation failed.
      *
      * @see <a href="https://www.kernel.org/doc/html/next/filesystems/fsverity.html">Kernel doc</a>
+     * @hide
      */
     @FlaggedApi(Flags.FLAG_FSVERITY_API)
+    @SuppressLint("StreamFiles")
+    @SystemApi
     public void setupFsVerity(@NonNull File file) throws IOException {
         if (!file.isAbsolute()) {
             // fs-verity is to be enabled by installd, which enforces the validation to the
@@ -138,8 +143,11 @@ public final class FileIntegrityManager {
      * @param file The file to measure the fs-verity digest.
      * @return The fs-verity digest in byte[], null if none.
      * @see <a href="https://www.kernel.org/doc/html/next/filesystems/fsverity.html">Kernel doc</a>
+     * @hide
      */
     @FlaggedApi(Flags.FLAG_FSVERITY_API)
+    @SuppressLint("StreamFiles")
+    @SystemApi
     public @Nullable byte[] getFsVerityDigest(@NonNull File file) throws IOException {
         return VerityUtils.getFsverityDigest(file.getPath());
     }

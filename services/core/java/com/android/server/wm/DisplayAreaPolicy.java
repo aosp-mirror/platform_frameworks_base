@@ -40,6 +40,10 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.android.tools.r8.keepanno.annotations.KeepItemKind;
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +86,11 @@ public abstract class DisplayAreaPolicy {
      * Gets the set of {@link DisplayArea} that are created for the given feature to apply to.
      */
     public abstract List<DisplayArea<? extends WindowContainer>> getDisplayAreas(int featureId);
+
+    /**
+     * Returns the {@link DisplayArea} that is used to put all window content.
+     */
+    public abstract DisplayArea<? extends WindowContainer> getWindowingArea();
 
     /**
      * @return the default/fallback {@link TaskDisplayArea} on the display.
@@ -179,6 +188,13 @@ public abstract class DisplayAreaPolicy {
         /**
          * Instantiates the device-specific {@link Provider}.
          */
+        @UsesReflection(
+                value = {
+                        @KeepTarget(
+                                kind = KeepItemKind.CLASS_AND_MEMBERS,
+                                instanceOfClassConstantExclusive = Provider.class,
+                                methodName = "<init>")
+                })
         static Provider fromResources(Resources res) {
             String name = res.getString(
                     com.android.internal.R.string.config_deviceSpecificDisplayAreaPolicyProvider);

@@ -180,25 +180,26 @@ public final class UserManagerTest {
 
         // Test that only one clone user can be created
         final int mainUserId = mainUser.getIdentifier();
-        UserInfo userInfo = createProfileForUser("Clone user1",
+        UserInfo cloneProfileUser = createProfileForUser("Clone user1",
                 UserManager.USER_TYPE_PROFILE_CLONE,
                 mainUserId);
-        assertThat(userInfo).isNotNull();
-        UserInfo userInfo2 = createProfileForUser("Clone user2",
+        assertThat(cloneProfileUser).isNotNull();
+        UserInfo cloneProfileUser2 = createProfileForUser("Clone user2",
                 UserManager.USER_TYPE_PROFILE_CLONE,
                 mainUserId);
-        assertThat(userInfo2).isNull();
+        assertThat(cloneProfileUser2).isNull();
 
-        final Context userContext = mContext.createPackageContextAsUser("system", 0,
-                UserHandle.of(userInfo.id));
-        assertThat(userContext.getSystemService(
+        final Context profileUserContest = mContext.createPackageContextAsUser("system", 0,
+                UserHandle.of(cloneProfileUser.id));
+        final UserManager profileUM = UserManager.get(profileUserContest);
+        assertThat(profileUserContest.getSystemService(
                 UserManager.class).isMediaSharedWithParent()).isTrue();
-        assertThat(Settings.Secure.getInt(userContext.getContentResolver(),
+        assertThat(Settings.Secure.getInt(profileUserContest.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, 0)).isEqualTo(1);
 
         List<UserInfo> list = mUserManager.getUsers();
         List<UserInfo> cloneUsers = list.stream().filter(
-                user -> (user.id == userInfo.id && user.name.equals("Clone user1")
+                user -> (user.id == cloneProfileUser.id && user.name.equals("Clone user1")
                         && user.isCloneProfile()))
                 .collect(Collectors.toList());
         assertThat(cloneUsers.size()).isEqualTo(1);
@@ -206,7 +207,7 @@ public final class UserManagerTest {
         // Check that the new clone user has the expected properties (relative to the defaults)
         // provided that the test caller has the necessary permissions.
         UserProperties cloneUserProperties =
-                mUserManager.getUserProperties(UserHandle.of(userInfo.id));
+                mUserManager.getUserProperties(UserHandle.of(cloneProfileUser.id));
         assertThat(typeProps.getUseParentsContacts())
                 .isEqualTo(cloneUserProperties.getUseParentsContacts());
         assertThat(typeProps.getShowInLauncher())
@@ -226,16 +227,18 @@ public final class UserManagerTest {
         assertThrows(SecurityException.class, cloneUserProperties::getAlwaysVisible);
         assertThat(typeProps.getProfileApiVisibility()).isEqualTo(
                 cloneUserProperties.getProfileApiVisibility());
-        compareDrawables(mUserManager.getUserBadge(),
+        compareDrawables(profileUM.getUserBadge(),
                 Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
-        UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
+        UserInfo parentProfileInfo = mUserManager.getProfileParent(cloneProfileUser.id);
         assertThat(parentProfileInfo).isNotNull();
         assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
-        removeUser(userInfo.id);
+        removeUser(cloneProfileUser.id);
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+        assertThat(mUserManager.getProfileAccessibilityString(cloneProfileUser.id)).isEqualTo(
+                Resources.getSystem().getString(userTypeDetails.getAccessibilityString()));
     }
 
     @Test
@@ -275,6 +278,9 @@ public final class UserManagerTest {
         assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
         switchUser(originalCurrent);
         assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
+        assertThat(mUserManager.getProfileAccessibilityString(communal.getIdentifier()))
+                .isEqualTo(Resources.getSystem()
+                        .getString(userTypeDetails.getAccessibilityString()));
     }
 
     @Test
@@ -316,21 +322,28 @@ public final class UserManagerTest {
                 .that(userTypeDetails).isNotNull();
         final UserProperties typeProps = userTypeDetails.getDefaultUserPropertiesReference();
 
+        // Only run the test if private profile creation is enabled on the device
+        assumeTrue("Private profile not enabled on the device",
+                mUserManager.canAddPrivateProfile());
+
         // Test that only one private profile  can be created
         final int mainUserId = mainUser.getIdentifier();
-        UserInfo userInfo = createProfileForUser("Private profile1",
+        UserInfo privateProfileUser = createProfileForUser("Private profile1",
                 UserManager.USER_TYPE_PROFILE_PRIVATE,
                 mainUserId);
-        assertThat(userInfo).isNotNull();
-        UserInfo userInfo2 = createProfileForUser("Private profile2",
+        assertThat(privateProfileUser).isNotNull();
+        UserInfo privateProfileUser2 = createProfileForUser("Private profile2",
                 UserManager.USER_TYPE_PROFILE_PRIVATE,
                 mainUserId);
-        assertThat(userInfo2).isNull();
+        assertThat(privateProfileUser2).isNull();
+        final UserManager profileUM = UserManager.get(
+                mContext.createPackageContextAsUser("android", 0,
+                        UserHandle.of(privateProfileUser.id)));
 
         // Check that the new private profile has the expected properties (relative to the defaults)
         // provided that the test caller has the necessary permissions.
         UserProperties privateProfileUserProperties =
-                mUserManager.getUserProperties(UserHandle.of(userInfo.id));
+                mUserManager.getUserProperties(UserHandle.of(privateProfileUser.id));
         assertThat(typeProps.getShowInLauncher())
                 .isEqualTo(privateProfileUserProperties.getShowInLauncher());
         assertThrows(SecurityException.class, privateProfileUserProperties::getStartWithParent);
@@ -352,18 +365,30 @@ public final class UserManagerTest {
                 privateProfileUserProperties.getProfileApiVisibility());
         assertThat(typeProps.areItemsRestrictedOnHomeScreen())
                 .isEqualTo(privateProfileUserProperties.areItemsRestrictedOnHomeScreen());
-        compareDrawables(mUserManager.getUserBadge(),
+        compareDrawables(profileUM.getUserBadge(),
                 Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
         // Verify private profile parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
-        UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
+        UserInfo parentProfileInfo = mUserManager.getProfileParent(privateProfileUser.id);
         assertThat(parentProfileInfo).isNotNull();
         assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
-        removeUser(userInfo.id);
+        removeUser(privateProfileUser.id);
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
-        assertThat(mUserManager.getProfileLabel()).isEqualTo(
+        assertThat(profileUM.getProfileLabel()).isEqualTo(
                 Resources.getSystem().getString(userTypeDetails.getLabel(0)));
+        assertThat(mUserManager.getProfileAccessibilityString(privateProfileUser.id)).isEqualTo(
+                Resources.getSystem().getString(userTypeDetails.getAccessibilityString()));
+    }
+
+    @Test
+    public void testGetProfileAccessibilityString_throwsExceptionForNonProfileUser() {
+        UserInfo user1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
+        assertThat(user1).isNotNull();
+        assertThrows(Resources.NotFoundException.class,
+                () -> mUserManager.getProfileAccessibilityString(user1.id));
+        assertThrows(Resources.NotFoundException.class,
+                () -> mUserManager.getProfileAccessibilityString(UserHandle.USER_SYSTEM));
     }
 
     @MediumTest
@@ -960,10 +985,13 @@ public final class UserManagerTest {
         assertThat(userTypeDetails.getName()).isEqualTo(UserManager.USER_TYPE_PROFILE_MANAGED);
 
         int mainUserId = mUserManager.getMainUser().getIdentifier();
-        UserInfo userInfo = createProfileForUser("Managed",
+        UserInfo managedProfileUser = createProfileForUser("Managed",
                 UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
-        assertThat(userInfo).isNotNull();
-        final int userId = userInfo.id;
+        assertThat(managedProfileUser).isNotNull();
+        final int userId = managedProfileUser.id;
+        final UserManager profileUM = UserManager.get(
+                mContext.createPackageContextAsUser("android", 0,
+                        UserHandle.of(managedProfileUser.id)));
 
         assertThat(mUserManager.hasBadge(userId)).isEqualTo(userTypeDetails.hasBadge());
         assertThat(mUserManager.getUserIconBadgeResId(userId))
@@ -974,10 +1002,10 @@ public final class UserManagerTest {
                 .isEqualTo(userTypeDetails.getBadgeNoBackground());
         assertThat(mUserManager.getUserStatusBarIconResId(userId))
                 .isEqualTo(userTypeDetails.getStatusBarIcon());
-        compareDrawables(mUserManager.getUserBadge(),
+        compareDrawables(profileUM.getUserBadge(),
                 Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
-        final int badgeIndex = userInfo.profileBadge;
+        final int badgeIndex = managedProfileUser.profileBadge;
         assertThat(mUserManager.getUserBadgeColor(userId)).isEqualTo(
                 Resources.getSystem().getColor(userTypeDetails.getBadgeColor(badgeIndex), null));
         assertThat(mUserManager.getUserBadgeDarkColor(userId)).isEqualTo(
@@ -992,6 +1020,8 @@ public final class UserManagerTest {
                 "android", 0, asHandle(userId)));
         assertThat(userManagerForUser.isUserOfType(userTypeDetails.getName())).isTrue();
         assertThat(userManagerForUser.isProfile()).isEqualTo(userTypeDetails.isProfile());
+        assertThat(mUserManager.getProfileAccessibilityString(managedProfileUser.id)).isEqualTo(
+                Resources.getSystem().getString(userTypeDetails.getAccessibilityString()));
     }
 
     /** Test that UserManager returns the correct UserProperties for a new managed profile. */
@@ -1009,10 +1039,10 @@ public final class UserManagerTest {
 
         // Create an actual user (of this user type) and get its properties.
         int mainUserId = mUserManager.getMainUser().getIdentifier();
-        final UserInfo userInfo = createProfileForUser("Managed",
+        final UserInfo managedProfileUser = createProfileForUser("Managed",
                 UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
-        assertThat(userInfo).isNotNull();
-        final int userId = userInfo.id;
+        assertThat(managedProfileUser).isNotNull();
+        final int userId = managedProfileUser.id;
         final UserProperties userProps = mUserManager.getUserProperties(UserHandle.of(userId));
 
         // Check that this new user has the expected properties (relative to the defaults)
@@ -1226,6 +1256,44 @@ public final class UserManagerTest {
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, false,
                     mainUserHandle);
+        }
+    }
+
+    @MediumTest
+    @Test
+    public void testPrivateProfileCreationRestrictions() {
+        assumeTrue(mUserManager.canAddPrivateProfile());
+        final int mainUserId = ActivityManager.getCurrentUser();
+        try {
+            UserInfo privateProfileInfo = createProfileForUser("Private",
+                            UserManager.USER_TYPE_PROFILE_PRIVATE, mainUserId);
+            assertThat(privateProfileInfo).isNotNull();
+        } catch (Exception e) {
+            fail("Creation of private profile failed due to " + e.getMessage());
+        }
+    }
+
+    @MediumTest
+    @Test
+    public void testDefaultUserRestrictionsForPrivateProfile() {
+        assumeTrue(mUserManager.canAddPrivateProfile());
+        final int currentUserId = ActivityManager.getCurrentUser();
+        UserInfo privateProfileInfo = null;
+        try {
+            privateProfileInfo = createProfileForUser("Private",
+                    UserManager.USER_TYPE_PROFILE_PRIVATE, currentUserId);
+            assertThat(privateProfileInfo).isNotNull();
+        } catch (Exception e) {
+            fail("Creation of private profile failed due to " + e.getMessage());
+        }
+        assertDefaultPrivateProfileRestrictions(privateProfileInfo.getUserHandle());
+    }
+
+    private void assertDefaultPrivateProfileRestrictions(UserHandle userHandle) {
+        Bundle defaultPrivateProfileRestrictions =
+                UserTypeFactory.getDefaultPrivateProfileRestrictions();
+        for (String restriction : defaultPrivateProfileRestrictions.keySet()) {
+            assertThat(mUserManager.hasUserRestrictionForUser(restriction, userHandle)).isTrue();
         }
     }
 

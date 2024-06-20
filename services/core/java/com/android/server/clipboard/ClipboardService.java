@@ -30,7 +30,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManagerInternal;
-import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IUriGrantsManager;
 import android.app.KeyguardManager;
@@ -48,9 +47,8 @@ import android.content.IClipboard;
 import android.content.IOnPrimaryClipChangedListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
@@ -151,7 +149,7 @@ public class ClipboardService extends SystemService {
     private final ContentCaptureManagerInternal mContentCaptureInternal;
     private final AutofillManagerInternal mAutofillInternal;
     private final IBinder mPermissionOwner;
-    private final Consumer<ClipData> mEmulatorClipboardMonitor;
+    private final Consumer<ClipData> mClipboardMonitor;
     private final Handler mWorkerHandler;
 
     @GuardedBy("mLock")
@@ -192,7 +190,7 @@ public class ClipboardService extends SystemService {
         final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
         if (Build.IS_EMULATOR) {
-            mEmulatorClipboardMonitor = new EmulatorClipboardMonitor((clip) -> {
+            mClipboardMonitor = new EmulatorClipboardMonitor((clip) -> {
                 synchronized (mLock) {
                     Clipboard clipboard = getClipboardLocked(0, DEVICE_ID_DEFAULT);
                     if (clipboard != null) {
@@ -201,8 +199,12 @@ public class ClipboardService extends SystemService {
                     }
                 }
             });
+        } else if (Build.IS_ARC) {
+            mClipboardMonitor = new ArcClipboardMonitor((clip, uid) -> {
+                setPrimaryClipInternal(clip, uid);
+            });
         } else {
-            mEmulatorClipboardMonitor = (clip) -> {};
+            mClipboardMonitor = (clip) -> {};
         }
 
         updateConfig();
@@ -937,7 +939,7 @@ public class ClipboardService extends SystemService {
     private void setPrimaryClipInternalLocked(
             @Nullable ClipData clip, int uid, int deviceId, @Nullable String sourcePackage) {
         if (deviceId == DEVICE_ID_DEFAULT) {
-            mEmulatorClipboardMonitor.accept(clip);
+            mClipboardMonitor.accept(clip);
         }
 
         final int userId = UserHandle.getUserId(uid);
@@ -1243,20 +1245,13 @@ public class ClipboardService extends SystemService {
 
     @GuardedBy("mLock")
     private void addActiveOwnerLocked(int uid, int deviceId, String pkg) {
-        final IPackageManager pm = AppGlobals.getPackageManager();
+        final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
         final int targetUserHandle = UserHandle.getCallingUserId();
         final long oldIdentity = Binder.clearCallingIdentity();
         try {
-            PackageInfo pi = pm.getPackageInfo(pkg, 0, targetUserHandle);
-            if (pi == null) {
-                throw new IllegalArgumentException("Unknown package " + pkg);
+            if (!pm.isSameApp(pkg, 0, uid, targetUserHandle)) {
+                throw new SecurityException("Calling uid " + uid + " does not own package " + pkg);
             }
-            if (!UserHandle.isSameApp(pi.applicationInfo.uid, uid)) {
-                throw new SecurityException("Calling uid " + uid
-                        + " does not own package " + pkg);
-            }
-        } catch (RemoteException e) {
-            // Can't happen; the package manager is in the same process
         } finally {
             Binder.restoreCallingIdentity(oldIdentity);
         }

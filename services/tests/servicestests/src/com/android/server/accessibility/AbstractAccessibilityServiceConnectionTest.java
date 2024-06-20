@@ -89,6 +89,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.test.FakePermissionEnforcer;
 import android.util.Pair;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -181,6 +182,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Mock private FingerprintGestureDispatcher mMockFingerprintGestureDispatcher;
     @Mock private MagnificationProcessor mMockMagnificationProcessor;
     @Mock private RemoteCallback.OnResultListener mMockListener;
+    FakePermissionEnforcer mFakePermissionEnforcer = new FakePermissionEnforcer();
 
     @Before
     public void setup() {
@@ -198,6 +200,8 @@ public class AbstractAccessibilityServiceConnectionTest {
         PowerManager powerManager =
                 new PowerManager(mMockContext, mMockIPowerManager, mMockIThermalService, mHandler);
         when(mMockContext.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
+        when(mMockContext.getSystemService(Context.PERMISSION_ENFORCER_SERVICE))
+                .thenReturn(mFakePermissionEnforcer);
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.hasSystemFeature(FEATURE_FINGERPRINT)).thenReturn(true);
 
@@ -214,7 +218,7 @@ public class AbstractAccessibilityServiceConnectionTest {
                 .thenReturn(mA11yWindowInfos.get(0));
         when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(PIP_WINDOWID))
                 .thenReturn(mA11yWindowInfos.get(1));
-        when(mMockA11yWindowManager.getDisplayIdByUserIdAndWindowIdLocked(USER_ID,
+        when(mMockA11yWindowManager.getDisplayIdByUserIdAndWindowId(USER_ID,
             WINDOWID_ONSECONDDISPLAY)).thenReturn(SECONDARY_DISPLAY_ID);
         when(mMockA11yWindowManager.getWindowListLocked(SECONDARY_DISPLAY_ID))
             .thenReturn(mA11yWindowInfosOnSecondDisplay);

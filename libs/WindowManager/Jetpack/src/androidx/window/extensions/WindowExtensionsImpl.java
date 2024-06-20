@@ -16,15 +16,20 @@
 
 package androidx.window.extensions;
 
-import android.app.ActivityTaskManager;
+import static android.view.WindowManager.ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15;
+import static android.view.WindowManager.ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15;
+
 import android.app.ActivityThread;
 import android.app.Application;
+import android.app.compat.CompatChanges;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.RawFoldingFeatureProducer;
 import androidx.window.extensions.area.WindowAreaComponent;
@@ -38,25 +43,59 @@ import java.util.Objects;
 
 
 /**
- * The reference implementation of {@link WindowExtensions} that implements the initial API version.
+ * The reference implementation of {@link WindowExtensions} that implements the latest WindowManager
+ * Extensions APIs.
  */
-public class WindowExtensionsImpl implements WindowExtensions {
+class WindowExtensionsImpl implements WindowExtensions {
 
     private static final String TAG = "WindowExtensionsImpl";
+
+    /**
+     * The value of the system property that indicates no override is set.
+     */
+    private static final int NO_LEVEL_OVERRIDE = -1;
+
+    /**
+     * The min version of the WM Extensions that must be supported in the current platform version.
+     */
+    @VisibleForTesting
+    static final int EXTENSIONS_VERSION_CURRENT_PLATFORM = 6;
+
     private final Object mLock = new Object();
     private volatile DeviceStateManagerFoldingFeatureProducer mFoldingFeatureProducer;
     private volatile WindowLayoutComponentImpl mWindowLayoutComponent;
     private volatile SplitController mSplitController;
     private volatile WindowAreaComponent mWindowAreaComponent;
 
-    public WindowExtensionsImpl() {
-        Log.i(TAG, "Initializing Window Extensions.");
+    private final int mVersion = EXTENSIONS_VERSION_CURRENT_PLATFORM;
+    private final boolean mIsActivityEmbeddingEnabled;
+
+    WindowExtensionsImpl() {
+        mIsActivityEmbeddingEnabled = isActivityEmbeddingEnabled();
+
+        Log.i(TAG, generateLogMessage());
+    }
+
+    private String generateLogMessage() {
+        final StringBuilder logBuilder = new StringBuilder("Initializing Window Extensions, "
+                + "vendor API level=" + mVersion);
+        final int levelOverride = getLevelOverride();
+        if (levelOverride != NO_LEVEL_OVERRIDE) {
+            logBuilder.append(", override to ").append(levelOverride);
+        }
+        logBuilder.append(", activity embedding enabled=").append(mIsActivityEmbeddingEnabled);
+        return logBuilder.toString();
     }
 
     // TODO(b/241126279) Introduce constants to better version functionality
     @Override
     public int getVendorApiLevel() {
-        return 5;
+        final int levelOverride = getLevelOverride();
+        return (levelOverride != NO_LEVEL_OVERRIDE) ? levelOverride : mVersion;
+    }
+
+    private int getLevelOverride() {
+        return SystemProperties.getInt("persist.wm.debug.ext_version_override", NO_LEVEL_OVERRIDE);
     }
 
     @NonNull
@@ -74,8 +113,8 @@ public class WindowExtensionsImpl implements WindowExtensions {
         if (mFoldingFeatureProducer == null) {
             synchronized (mLock) {
                 if (mFoldingFeatureProducer == null) {
-                    Context context = getApplication();
-                    RawFoldingFeatureProducer foldingFeatureProducer =
+                    final Context context = getApplication();
+                    final RawFoldingFeatureProducer foldingFeatureProducer =
                             new RawFoldingFeatureProducer(context);
                     mFoldingFeatureProducer =
                             new DeviceStateManagerFoldingFeatureProducer(context,
@@ -91,8 +130,8 @@ public class WindowExtensionsImpl implements WindowExtensions {
         if (mWindowLayoutComponent == null) {
             synchronized (mLock) {
                 if (mWindowLayoutComponent == null) {
-                    Context context = getApplication();
-                    DeviceStateManagerFoldingFeatureProducer producer =
+                    final Context context = getApplication();
+                    final DeviceStateManagerFoldingFeatureProducer producer =
                             getFoldingFeatureProducer();
                     mWindowLayoutComponent = new WindowLayoutComponentImpl(context, producer);
                 }
@@ -102,29 +141,35 @@ public class WindowExtensionsImpl implements WindowExtensions {
     }
 
     /**
-     * Returns a reference implementation of {@link WindowLayoutComponent} if available,
-     * {@code null} otherwise. The implementation must match the API level reported in
-     * {@link WindowExtensions#getWindowLayoutComponent()}.
+     * Returns a reference implementation of the latest {@link WindowLayoutComponent}.
+     *
+     * The implementation must match the API level reported in
+     * {@link WindowExtensions#getVendorApiLevel()}.
+     *
      * @return {@link WindowLayoutComponent} OEM implementation
      */
+    @NonNull
     @Override
     public WindowLayoutComponent getWindowLayoutComponent() {
         return getWindowLayoutComponentImpl();
     }
 
     /**
-     * Returns a reference implementation of {@link ActivityEmbeddingComponent} if available,
-     * {@code null} otherwise. The implementation must match the API level reported in
-     * {@link WindowExtensions#getWindowLayoutComponent()}.
+     * Returns a reference implementation of the latest {@link ActivityEmbeddingComponent} if the
+     * device supports this feature, {@code null} otherwise.
+     *
+     * The implementation must match the API level reported in
+     * {@link WindowExtensions#getVendorApiLevel()}.
+     *
      * @return {@link ActivityEmbeddingComponent} OEM implementation.
      */
     @Nullable
+    @Override
     public ActivityEmbeddingComponent getActivityEmbeddingComponent() {
+        if (!mIsActivityEmbeddingEnabled) {
+            return null;
+        }
         if (mSplitController == null) {
-            if (!ActivityTaskManager.supportsMultiWindow(getApplication())) {
-                // Disable AE for device that doesn't support multi window.
-                return null;
-            }
             synchronized (mLock) {
                 if (mSplitController == null) {
                     mSplitController = new SplitController(
@@ -138,21 +183,35 @@ public class WindowExtensionsImpl implements WindowExtensions {
     }
 
     /**
-     * Returns a reference implementation of {@link WindowAreaComponent} if available,
-     * {@code null} otherwise. The implementation must match the API level reported in
-     * {@link WindowExtensions#getWindowAreaComponent()}.
+     * Returns a reference implementation of the latest {@link WindowAreaComponent}
+     *
+     * The implementation must match the API level reported in
+     * {@link WindowExtensions#getVendorApiLevel()}.
+     *
      * @return {@link WindowAreaComponent} OEM implementation.
      */
+    @Nullable
+    @Override
     public WindowAreaComponent getWindowAreaComponent() {
         if (mWindowAreaComponent == null) {
             synchronized (mLock) {
                 if (mWindowAreaComponent == null) {
-                    Context context = ActivityThread.currentApplication();
-                    mWindowAreaComponent =
-                            new WindowAreaComponentImpl(context);
+                    final Context context = getApplication();
+                    mWindowAreaComponent = new WindowAreaComponentImpl(context);
                 }
             }
         }
         return mWindowAreaComponent;
+    }
+
+    @VisibleForTesting
+    static boolean isActivityEmbeddingEnabled() {
+        if (!ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15) {
+            // Device enables it for all apps without targetSDK check.
+            // This must be true for all large screen devices.
+            return true;
+        }
+        // Use compat framework to guard the feature with targetSDK 15.
+        return CompatChanges.isChangeEnabled(ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15);
     }
 }

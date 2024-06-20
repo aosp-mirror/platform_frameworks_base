@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"အထောက်အထားမန်နေဂျာ"</string>
     <string name="string_cancel" msgid="6369133483981306063">"မလုပ်တော့"</string>
     <string name="string_continue" msgid="1346732695941131882">"ရှေ့ဆက်ရန်"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"အခြားနည်း သိမ်းရန်"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"အခြားနည်းသုံးရန်"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ပိုမိုလေ့လာရန်"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"စကားဝှက်ကို ပြရန်"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"စကားဝှက်ကို ဖျောက်ရန်"</string>
@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"စကားဝှက်မသုံးခြင်း အနာဂတ်ဆီသို့ ရှေ့ဆက်ရာတွင် လျှို့ဝှက်ကီးများနှင့်အတူ စကားဝှက်များကို ဆက်လက်အသုံးပြုနိုင်ပါမည်။"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"သင်၏ <xliff:g id="CREATETYPES">%1$s</xliff:g> သိမ်းရန်နေရာ ရွေးခြင်း"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"သင့်အချက်အလက်သိမ်းပြီး နောက်တစ်ကြိမ်၌ ပိုမိုမြန်ဆန်စွာ လက်မှတ်ထိုးဝင်ရန် စကားဝှက်မန်နေဂျာကို ရွေးပါ"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> သို့ လက်မှတ်ထိုးဝင်ရန် လျှို့ဝှက်ကီး ပြုလုပ်မလား။"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> သို့ လက်မှတ်ထိုးဝင်ရန် စကားဝှက်ကို သိမ်းမလား။"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> အတွက် လက်မှတ်ထိုးဝင်သည့်အချက်အလက်ကို သိမ်းမလား။"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> သို့ လက်မှတ်ထိုးဝင်ရန် လျှို့ဝှက်ကီး ပြုလုပ်မလား။"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> သို့ လက်မှတ်ထိုးဝင်ရန် စကားဝှက်ကို သိမ်းမလား။"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် လက်မှတ်ထိုးဝင်ရန် အချက်အလက်ကို သိမ်းမလား။"</string>
     <string name="passkey" msgid="632353688396759522">"လျှို့ဝှက်ကီး"</string>
     <string name="password" msgid="6738570945182936667">"စကားဝှက်"</string>
     <string name="passkeys" msgid="5733880786866559847">"လျှို့ဝှက်ကီးများ"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ယခင်စာမျက်နှာကို ပြန်သွားပါ"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"ပိတ်ရန်"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"ပယ်ရန်"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"သိမ်းထားသောလျှို့ဝှက်ကီးကို <xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သုံးမလား။"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သိမ်းထားသောစကားဝှက် သုံးမလား။"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သင့်လက်မှတ်ထိုးဝင်မှုကို သုံးမလား။"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် လက်မှတ်ထိုးဝင်မှု ရွေးစရာကို ဖွင့်မလား။"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သင်သိမ်းထားသော လျှို့ဝှက်ကီးကို သုံးပါ"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သင်သိမ်းထားသော စကားဝှက်ကို သုံးပါ"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သင့်အကောင့်ကို သုံးပါ"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="APP_NAME">%1$s</xliff:g> သို့ <xliff:g id="USERNAME">%2$s</xliff:g> ဖြင့် လက်မှတ်ထိုးဝင်ရန် သင့်ဖန်သားပြင်လော့ခ်ကို သုံးနိုင်သည်"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် လက်မှတ်ထိုးဝင်မှု ရွေးစရာကို ဖွင့်ပါ"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သိမ်းထားသော လျှို့ဝှက်ကီး ရွေးပါ"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သိမ်းထားသော စကားဝှက် ရွေးပါ"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သိမ်းထားသော လက်မှတ်ထိုးဝင်မှုကို ရွေးပါ"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် လက်မှတ်ထိုးဝင်မှု ရွေးခြင်း"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် အကောင့်တစ်ခု ရွေးပါ"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် တစ်ခုကိုရွေးမလား။"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> တွင် ဤအချက်အလက်ကို သုံးမလား။"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"နောက်တစ်နည်းဖြင့် လက်မှတ်ထိုးဝင်ရန်"</string>

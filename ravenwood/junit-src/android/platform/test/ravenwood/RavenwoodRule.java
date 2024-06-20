@@ -28,7 +28,8 @@ import android.platform.test.annotations.DisabledOnNonRavenwood;
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.EnabledOnRavenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
-import android.util.ArraySet;
+
+import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -55,7 +56,7 @@ import java.util.regex.Pattern;
  * before a test class is fully initialized.
  */
 public class RavenwoodRule implements TestRule {
-    static final boolean IS_ON_RAVENWOOD = RavenwoodRuleImpl.isOnRavenwood();
+    static final boolean IS_ON_RAVENWOOD = RavenwoodCommonUtils.isOnRavenwood();
 
     /**
      * When probing is enabled, all tests will be unconditionally run on Ravenwood to detect
@@ -278,6 +279,12 @@ public class RavenwoodRule implements TestRule {
                 return false;
             }
         }
+        final var clazz = description.getTestClass();
+        if (clazz != null) {
+            if (clazz.getAnnotation(DisabledOnNonRavenwood.class) != null) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -308,14 +315,17 @@ public class RavenwoodRule implements TestRule {
         }
 
         // Otherwise, consult any class-level annotations
-        if (description.getTestClass().getAnnotation(EnabledOnRavenwood.class) != null) {
-            return true;
-        }
-        if (description.getTestClass().getAnnotation(DisabledOnRavenwood.class) != null) {
-            return false;
-        }
-        if (description.getTestClass().getAnnotation(IgnoreUnderRavenwood.class) != null) {
-            return false;
+        final var clazz = description.getTestClass();
+        if (clazz != null) {
+            if (description.getTestClass().getAnnotation(EnabledOnRavenwood.class) != null) {
+                return true;
+            }
+            if (description.getTestClass().getAnnotation(DisabledOnRavenwood.class) != null) {
+                return false;
+            }
+            if (description.getTestClass().getAnnotation(IgnoreUnderRavenwood.class) != null) {
+                return false;
+            }
         }
 
         // When no annotations have been requested, assume test should be included
@@ -413,10 +423,20 @@ public class RavenwoodRule implements TestRule {
         };
     }
 
+    public static class _$RavenwoodPrivate {
+        public static boolean isOptionalValidationEnabled() {
+            return ENABLE_OPTIONAL_VALIDATION;
+        }
+    }
+
     /**
-     * Do not use it outside ravenwood core classes.
+     * Returns the "real" result from {@link System#currentTimeMillis()}.
+     *
+     * Currently, it's the same thing as calling {@link System#currentTimeMillis()},
+     * but this one is guaranteeed to return the real value, even when Ravenwood supports
+     * injecting a time to{@link System#currentTimeMillis()}.
      */
-    public boolean _ravenwood_private$isOptionalValidationEnabled() {
-        return ENABLE_OPTIONAL_VALIDATION;
+    public long realCurrentTimeMillis() {
+        return System.currentTimeMillis();
     }
 }

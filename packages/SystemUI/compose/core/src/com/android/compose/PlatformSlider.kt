@@ -18,25 +18,28 @@
 
 package com.android.compose
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,33 +47,44 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasurePolicy
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.android.compose.modifiers.padding
-import com.android.compose.theme.LocalAndroidColorScheme
+import androidx.compose.ui.util.fastFirst
+import androidx.compose.ui.util.fastFirstOrNull
 
 /**
  * Platform slider implementation that displays a slider with an [icon] and a [label] at the start.
  *
  * @param onValueChangeFinished is called when the slider settles on a [value]. This callback
  *   shouldn't be used to react to value changes. Use [onValueChange] instead
- * @param interactionSource - the [MutableInteractionSource] representing the stream of Interactions
+ * @param interactionSource the [MutableInteractionSource] representing the stream of Interactions
  *   for this slider. You can create and pass in your own remembered instance to observe
  *   Interactions and customize the appearance / behavior of this slider in different states.
- * @param colors - slider color scheme.
- * @param draggingCornersRadius - radius of the slider indicator when the user drags it
- * @param icon - icon at the start of the slider. Icon is limited to a square space at the start of
- *   the slider
- * @param label - control shown next to the icon.
+ * @param colors determine slider color scheme.
+ * @param draggingCornersRadius is the radius of the slider indicator when the user drags it
+ * @param icon at the start of the slider. Icon is limited to a square space at the start of the
+ *   slider
+ * @param label is shown next to the icon.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlatformSlider(
     value: Float,
@@ -86,7 +100,7 @@ fun PlatformSlider(
     label: (@Composable (isDragging: Boolean) -> Unit)? = null,
 ) {
     val sliderHeight: Dp = 64.dp
-    val iconWidth: Dp = sliderHeight
+    val thumbSize: Dp = sliderHeight
     var isDragging by remember { mutableStateOf(false) }
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect { interaction ->
@@ -101,16 +115,6 @@ fun PlatformSlider(
             }
         }
     }
-    val paddingStart by
-        animateDpAsState(
-            targetValue =
-                if ((!isDragging && value == valueRange.start) || icon == null) {
-                    16.dp
-                } else {
-                    0.dp
-                },
-            label = "LabelIconSpacingAnimation"
-        )
 
     Box(modifier = modifier.height(sliderHeight)) {
         Slider(
@@ -126,44 +130,33 @@ fun PlatformSlider(
                     sliderState = it,
                     enabled = enabled,
                     colors = colors,
-                    iconWidth = iconWidth,
                     draggingCornersRadius = draggingCornersRadius,
                     sliderHeight = sliderHeight,
+                    thumbSize = thumbSize,
                     isDragging = isDragging,
-                    modifier = Modifier,
+                    label = label,
+                    icon = icon,
+                    modifier = Modifier.fillMaxSize(),
                 )
             },
-            thumb = { Spacer(Modifier.width(iconWidth).height(sliderHeight)) },
+            thumb = { Spacer(Modifier.size(thumbSize)) },
         )
 
-        if (icon != null || label != null) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                icon?.let { iconComposable ->
-                    Box(
-                        modifier = Modifier.fillMaxHeight().aspectRatio(1f),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        iconComposable(isDragging)
-                    }
-                }
-
-                label?.let { labelComposable ->
-                    Box(
-                        modifier =
-                            Modifier.fillMaxHeight()
-                                .weight(1f)
-                                .padding(
-                                    start = { paddingStart.roundToPx() },
-                                    end = { sliderHeight.roundToPx() / 2 },
-                                ),
-                        contentAlignment = Alignment.CenterStart,
-                    ) {
-                        labelComposable(isDragging)
-                    }
-                }
-            }
+        if (enabled) {
+            Spacer(
+                Modifier.padding(8.dp)
+                    .size(4.dp)
+                    .align(Alignment.CenterEnd)
+                    .background(color = colors.indicatorColor, shape = CircleShape)
+            )
         }
     }
+}
+
+private enum class TrackComponent(val zIndex: Float) {
+    Background(0f),
+    Icon(1f),
+    Label(1f),
 }
 
 @Composable
@@ -171,84 +164,253 @@ private fun Track(
     sliderState: SliderState,
     enabled: Boolean,
     colors: PlatformSliderColors,
-    iconWidth: Dp,
     draggingCornersRadius: Dp,
     sliderHeight: Dp,
+    thumbSize: Dp,
     isDragging: Boolean,
+    icon: (@Composable (isDragging: Boolean) -> Unit)?,
+    label: (@Composable (isDragging: Boolean) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    val iconWidthPx: Float
-    val halfIconWidthPx: Float
-    val targetIndicatorRadiusPx: Float
-    val halfSliderHeightPx: Float
-    with(LocalDensity.current) {
-        halfSliderHeightPx = sliderHeight.toPx() / 2
-        iconWidthPx = iconWidth.toPx()
-        halfIconWidthPx = iconWidthPx / 2
-        targetIndicatorRadiusPx =
-            if (isDragging) draggingCornersRadius.toPx() else halfSliderHeightPx
-    }
+    var drawingState: DrawingState by remember { mutableStateOf(DrawingState()) }
+    Layout(
+        modifier = modifier,
+        content = {
+            TrackBackground(
+                modifier = Modifier.layoutId(TrackComponent.Background),
+                drawingState = drawingState,
+                enabled = enabled,
+                colors = colors,
+                draggingCornersRadiusActive = draggingCornersRadius,
+                draggingCornersRadiusIdle = sliderHeight / 2,
+                isDragging = isDragging,
+            )
+            if (icon != null) {
+                Box(
+                    modifier = Modifier.layoutId(TrackComponent.Icon).clip(CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CompositionLocalProvider(
+                        LocalContentColor provides
+                            if (enabled) colors.iconColor else colors.disabledIconColor
+                    ) {
+                        icon(isDragging)
+                    }
+                }
+            }
+            if (label != null) {
+                val offsetX by
+                    animateFloatAsState(
+                        targetValue =
+                            if (enabled) {
+                                if (drawingState.isLabelOnTopOfIndicator) {
+                                    drawingState.iconWidth.coerceAtLeast(
+                                        LocalDensity.current.run { 16.dp.toPx() }
+                                    )
+                                } else {
+                                    val indicatorWidth =
+                                        drawingState.indicatorRight - drawingState.indicatorLeft
+                                    indicatorWidth + LocalDensity.current.run { 16.dp.toPx() }
+                                }
+                            } else {
+                                drawingState.iconWidth
+                            },
+                        label = "LabelIconSpacingAnimation"
+                    )
+                Box(
+                    modifier =
+                        Modifier.layoutId(TrackComponent.Label)
+                            .offset { IntOffset(offsetX.toInt(), 0) }
+                            .padding(end = 16.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    CompositionLocalProvider(
+                        LocalContentColor provides
+                            colors.getLabelColor(
+                                isEnabled = enabled,
+                                isLabelOnTopOfTheIndicator = drawingState.isLabelOnTopOfIndicator,
+                            )
+                    ) {
+                        label(isDragging)
+                    }
+                }
+            }
+        },
+        measurePolicy =
+            TrackMeasurePolicy(
+                sliderState = sliderState,
+                enabled = enabled,
+                thumbSize = LocalDensity.current.run { thumbSize.roundToPx() },
+                isRtl = isRtl,
+                onDrawingStateMeasured = { drawingState = it }
+            )
+    )
+}
 
-    val indicatorRadiusPx: Float by
-        animateFloatAsState(
-            targetValue = targetIndicatorRadiusPx,
+@Composable
+private fun TrackBackground(
+    drawingState: DrawingState,
+    enabled: Boolean,
+    colors: PlatformSliderColors,
+    draggingCornersRadiusActive: Dp,
+    draggingCornersRadiusIdle: Dp,
+    isDragging: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val indicatorRadiusDp: Dp by
+        animateDpAsState(
+            targetValue =
+                if (isDragging) draggingCornersRadiusActive else draggingCornersRadiusIdle,
             label = "PlatformSliderCornersAnimation",
         )
 
-    val trackColor = colors.getTrackColor(enabled)
-    val indicatorColor = colors.getIndicatorColor(enabled)
-    val trackCornerRadius = CornerRadius(halfSliderHeightPx, halfSliderHeightPx)
-    val indicatorCornerRadius = CornerRadius(indicatorRadiusPx, indicatorRadiusPx)
+    val trackColor by
+        animateColorAsState(
+            colors.getTrackColor(enabled),
+            label = "PlatformSliderTrackColorAnimation",
+        )
+
+    val indicatorColor by
+        animateColorAsState(
+            colors.getIndicatorColor(enabled),
+            label = "PlatformSliderIndicatorColorAnimation",
+        )
     Canvas(modifier.fillMaxSize()) {
+        val trackCornerRadius = CornerRadius(size.height / 2, size.height / 2)
         val trackPath = Path()
         trackPath.addRoundRect(
             RoundRect(
-                left = -halfIconWidthPx,
+                left = 0f,
                 top = 0f,
-                right = size.width + halfIconWidthPx,
-                bottom = size.height,
+                right = drawingState.totalWidth,
+                bottom = drawingState.totalHeight,
                 cornerRadius = trackCornerRadius,
             )
         )
         drawPath(path = trackPath, color = trackColor)
 
+        val indicatorCornerRadius = CornerRadius(indicatorRadiusDp.toPx(), indicatorRadiusDp.toPx())
         clipPath(trackPath) {
             val indicatorPath = Path()
-            if (isRtl) {
-                indicatorPath.addRoundRect(
-                    RoundRect(
-                        left =
-                            size.width -
-                                size.width * sliderState.coercedNormalizedValue -
-                                halfIconWidthPx,
-                        top = 0f,
-                        right = size.width + iconWidthPx,
-                        bottom = size.height,
-                        topLeftCornerRadius = indicatorCornerRadius,
-                        topRightCornerRadius = trackCornerRadius,
-                        bottomRightCornerRadius = trackCornerRadius,
-                        bottomLeftCornerRadius = indicatorCornerRadius,
-                    )
+            indicatorPath.addRoundRect(
+                RoundRect(
+                    left = drawingState.indicatorLeft,
+                    top = drawingState.indicatorTop,
+                    right = drawingState.indicatorRight,
+                    bottom = drawingState.indicatorBottom,
+                    topLeftCornerRadius = trackCornerRadius,
+                    topRightCornerRadius = indicatorCornerRadius,
+                    bottomRightCornerRadius = indicatorCornerRadius,
+                    bottomLeftCornerRadius = trackCornerRadius,
                 )
-            } else {
-                indicatorPath.addRoundRect(
-                    RoundRect(
-                        left = -halfIconWidthPx,
-                        top = 0f,
-                        right = size.width * sliderState.coercedNormalizedValue + halfIconWidthPx,
-                        bottom = size.height,
-                        topLeftCornerRadius = trackCornerRadius,
-                        topRightCornerRadius = indicatorCornerRadius,
-                        bottomRightCornerRadius = indicatorCornerRadius,
-                        bottomLeftCornerRadius = trackCornerRadius,
-                    )
-                )
-            }
+            )
             drawPath(path = indicatorPath, color = indicatorColor)
         }
     }
 }
+
+/** Measures track components sizes and calls [onDrawingStateMeasured] when it's done. */
+private class TrackMeasurePolicy(
+    private val sliderState: SliderState,
+    private val enabled: Boolean,
+    private val thumbSize: Int,
+    private val isRtl: Boolean,
+    private val onDrawingStateMeasured: (DrawingState) -> Unit,
+) : MeasurePolicy {
+
+    override fun MeasureScope.measure(
+        measurables: List<Measurable>,
+        constraints: Constraints
+    ): MeasureResult {
+        // Slider adds a paddings to the Track to make spase for thumb
+        val desiredWidth = constraints.maxWidth + thumbSize
+        val desiredHeight = constraints.maxHeight
+        val backgroundPlaceable: Placeable =
+            measurables
+                .fastFirst { it.layoutId == TrackComponent.Background }
+                .measure(Constraints(desiredWidth, desiredWidth, desiredHeight, desiredHeight))
+
+        val iconPlaceable: Placeable? =
+            measurables
+                .fastFirstOrNull { it.layoutId == TrackComponent.Icon }
+                ?.measure(
+                    Constraints(
+                        minWidth = desiredHeight,
+                        maxWidth = desiredHeight,
+                        minHeight = desiredHeight,
+                        maxHeight = desiredHeight,
+                    )
+                )
+
+        val iconSize = iconPlaceable?.width ?: 0
+        val labelMaxWidth = if (enabled) (desiredWidth - iconSize) / 2 else desiredWidth - iconSize
+        val labelPlaceable: Placeable? =
+            measurables
+                .fastFirstOrNull { it.layoutId == TrackComponent.Label }
+                ?.measure(
+                    Constraints(
+                        minWidth = 0,
+                        maxWidth = labelMaxWidth,
+                        minHeight = desiredHeight,
+                        maxHeight = desiredHeight,
+                    )
+                )
+
+        val drawingState =
+            if (isRtl) {
+                DrawingState(
+                    isRtl = true,
+                    totalWidth = desiredWidth.toFloat(),
+                    totalHeight = desiredHeight.toFloat(),
+                    indicatorLeft =
+                        (desiredWidth - iconSize) * (1 - sliderState.coercedNormalizedValue),
+                    indicatorTop = 0f,
+                    indicatorRight = desiredWidth.toFloat(),
+                    indicatorBottom = desiredHeight.toFloat(),
+                    iconWidth = iconSize.toFloat(),
+                    labelWidth = labelPlaceable?.width?.toFloat() ?: 0f,
+                )
+            } else {
+                DrawingState(
+                    isRtl = false,
+                    totalWidth = desiredWidth.toFloat(),
+                    totalHeight = desiredHeight.toFloat(),
+                    indicatorLeft = 0f,
+                    indicatorTop = 0f,
+                    indicatorRight =
+                        iconSize + (desiredWidth - iconSize) * sliderState.coercedNormalizedValue,
+                    indicatorBottom = desiredHeight.toFloat(),
+                    iconWidth = iconSize.toFloat(),
+                    labelWidth = labelPlaceable?.width?.toFloat() ?: 0f,
+                )
+            }
+
+        onDrawingStateMeasured(drawingState)
+
+        return layout(desiredWidth, desiredHeight) {
+            backgroundPlaceable.placeRelative(0, 0, TrackComponent.Background.zIndex)
+
+            iconPlaceable?.placeRelative(0, 0, TrackComponent.Icon.zIndex)
+            labelPlaceable?.placeRelative(0, 0, TrackComponent.Label.zIndex)
+        }
+    }
+}
+
+private data class DrawingState(
+    val isRtl: Boolean = false,
+    val totalWidth: Float = 0f,
+    val totalHeight: Float = 0f,
+    val indicatorLeft: Float = 0f,
+    val indicatorTop: Float = 0f,
+    val indicatorRight: Float = 0f,
+    val indicatorBottom: Float = 0f,
+    val iconWidth: Float = 0f,
+    val labelWidth: Float = 0f,
+)
+
+private val DrawingState.isLabelOnTopOfIndicator: Boolean
+    get() = labelWidth < indicatorRight - indicatorLeft - iconWidth
 
 /** [SliderState.value] normalized using [SliderState.valueRange]. The result belongs to [0, 1] */
 private val SliderState.coercedNormalizedValue: Float
@@ -268,17 +430,19 @@ private val SliderState.coercedNormalizedValue: Float
  * @param trackColor fills the track of the slider. This is a "background" of the slider
  * @param indicatorColor fills the slider from the start to the value
  * @param iconColor is the default icon color
- * @param labelColor is the default icon color
+ * @param labelColorOnIndicator is the label color for when it's shown on top of the indicator
+ * @param labelColorOnTrack is the label color for when it's shown on top of the track
  * @param disabledTrackColor is the [trackColor] when the PlatformSlider#enabled == false
  * @param disabledIndicatorColor is the [indicatorColor] when the PlatformSlider#enabled == false
  * @param disabledIconColor is the [iconColor] when the PlatformSlider#enabled == false
- * @param disabledLabelColor is the [labelColor] when the PlatformSlider#enabled == false
+ * @param disabledLabelColor is the label color when the PlatformSlider#enabled == false
  */
 data class PlatformSliderColors(
     val trackColor: Color,
     val indicatorColor: Color,
     val iconColor: Color,
-    val labelColor: Color,
+    val labelColorOnIndicator: Color,
+    val labelColorOnTrack: Color,
     val disabledTrackColor: Color,
     val disabledIndicatorColor: Color,
     val disabledIconColor: Color,
@@ -292,40 +456,32 @@ object PlatformSliderDefaults {
 
     @Composable
     fun defaultPlatformSliderColors(): PlatformSliderColors =
-        if (isSystemInDarkTheme()) darkThemePlatformSliderColors()
-        else lightThemePlatformSliderColors()
+        PlatformSliderColors(
+            trackColor = MaterialTheme.colorScheme.secondaryContainer,
+            indicatorColor = MaterialTheme.colorScheme.primary,
+            iconColor = MaterialTheme.colorScheme.onPrimary,
+            labelColorOnIndicator = MaterialTheme.colorScheme.onPrimary,
+            labelColorOnTrack = MaterialTheme.colorScheme.onSecondaryContainer,
+            disabledTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            disabledIndicatorColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            disabledIconColor = MaterialTheme.colorScheme.outline,
+            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 }
-
-/** [PlatformSliderColors] for the light theme */
-@Composable
-private fun lightThemePlatformSliderColors() =
-    PlatformSliderColors(
-        trackColor = MaterialTheme.colorScheme.tertiaryContainer,
-        indicatorColor = LocalAndroidColorScheme.current.tertiaryFixedDim,
-        iconColor = MaterialTheme.colorScheme.onTertiaryContainer,
-        labelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-        disabledTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        disabledIndicatorColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        disabledIconColor = MaterialTheme.colorScheme.outline,
-        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-
-/** [PlatformSliderColors] for the dark theme */
-@Composable
-private fun darkThemePlatformSliderColors() =
-    PlatformSliderColors(
-        trackColor = MaterialTheme.colorScheme.onTertiary,
-        indicatorColor = LocalAndroidColorScheme.current.onTertiaryFixedVariant,
-        iconColor = MaterialTheme.colorScheme.onTertiaryContainer,
-        labelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-        disabledTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        disabledIndicatorColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        disabledIconColor = MaterialTheme.colorScheme.outline,
-        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
 
 private fun PlatformSliderColors.getTrackColor(isEnabled: Boolean): Color =
     if (isEnabled) trackColor else disabledTrackColor
 
 private fun PlatformSliderColors.getIndicatorColor(isEnabled: Boolean): Color =
     if (isEnabled) indicatorColor else disabledIndicatorColor
+
+private fun PlatformSliderColors.getLabelColor(
+    isEnabled: Boolean,
+    isLabelOnTopOfTheIndicator: Boolean
+): Color {
+    return if (isEnabled) {
+        if (isLabelOnTopOfTheIndicator) labelColorOnIndicator else labelColorOnTrack
+    } else {
+        disabledLabelColor
+    }
+}

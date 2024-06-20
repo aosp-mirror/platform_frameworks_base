@@ -52,6 +52,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -106,6 +107,7 @@ public class HdmiControlServiceTest {
     private HdmiPortInfo[] mHdmiPortInfo;
     private ArrayList<Integer> mLocalDeviceTypes = new ArrayList<>();
     private static final int PORT_ID_EARC_SUPPORTED = 3;
+    private static final int EARC_TRIGGER_START_ARC_ACTION_DELAY = 500;
 
     @Before
     public void setUp() throws Exception {
@@ -120,6 +122,8 @@ public class HdmiControlServiceTest {
                 audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
+        doNothing().when(mHdmiControlServiceSpy)
+                .sendBroadcastAsUser(any(Intent.class));
 
         mMyLooper = mTestLooper.getLooper();
 
@@ -405,6 +409,60 @@ public class HdmiControlServiceTest {
         assertThat(mHdmiControlServiceSpy.getHdmiCecConfig().getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE)).isEqualTo(
                 HdmiControlManager.VOLUME_CONTROL_ENABLED);
+    }
+
+    @Test
+    public void setRcProfileRootMenu_reportFeatureBroadcast() {
+        setRcProfileSourceDeviceTestHelper(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED);
+    }
+
+    @Test
+    public void setRcProfileSetupMenu_reportFeatureBroadcast() {
+        setRcProfileSourceDeviceTestHelper(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED);
+    }
+
+    @Test
+    public void setRcProfileContentMenu_reportFeatureBroadcast() {
+        setRcProfileSourceDeviceTestHelper(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED);
+    }
+
+    @Test
+    public void setRcProfileTopMenu_reportFeatureBroadcast() {
+        setRcProfileSourceDeviceTestHelper(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED);
+    }
+
+    @Test
+    public void setRcProfileMediaSensitiveMenu_reportFeatureBroadcast() {
+        setRcProfileSourceDeviceTestHelper(
+                HdmiControlManager
+                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED);
+    }
+
+    /** Helper method to test if feature discovery message sent given RCProfile change */
+    private void setRcProfileSourceDeviceTestHelper(final String setting, final int val) {
+        mNativeWrapper.clearResultMessages();
+
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(setting, val);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(Constants.ADDR_PLAYBACK_1,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0,
+                Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
+                mPlaybackDeviceSpy.getRcProfile(), mPlaybackDeviceSpy.getRcFeatures(),
+                mPlaybackDeviceSpy.getDeviceFeatures());
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportFeatures);
     }
 
     @Test
@@ -1320,6 +1378,11 @@ public class HdmiControlServiceTest {
                 PORT_ID_EARC_SUPPORTED);
         verify(mHdmiControlServiceSpy, times(1))
                 .notifyEarcStatusToAudioService(eq(false), eq(new ArrayList<>()));
+        // ARC should be never initiated here. It should be started after 500 ms.
+        verify(mHdmiControlServiceSpy, times(0)).startArcAction(anyBoolean(), any());
+        // We move 500 ms forward because the action is only started 500 ms later.
+        mTestLooper.moveTimeForward(EARC_TRIGGER_START_ARC_ACTION_DELAY);
+        mTestLooper.dispatchAll();
         verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(true), any());
     }
 

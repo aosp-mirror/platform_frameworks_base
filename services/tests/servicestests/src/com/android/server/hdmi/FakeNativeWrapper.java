@@ -62,6 +62,7 @@ final class FakeNativeWrapper implements NativeWrapper {
     private HdmiCecController.HdmiCecCallback mCallback = null;
     private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
     private boolean mIsCecControlEnabled = true;
+    private boolean mGetPhysicalAddressCalled = false;
 
     @Override
     public String nativeInit() {
@@ -96,6 +97,7 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     @Override
     public int nativeGetPhysicalAddress() {
+        mGetPhysicalAddressCalled = true;
         return mMyPhysicalAddress;
     }
 
@@ -161,6 +163,10 @@ final class FakeNativeWrapper implements NativeWrapper {
         return mIsCecControlEnabled;
     }
 
+    public boolean getPhysicalAddressCalled() {
+        return mGetPhysicalAddressCalled;
+    }
+
     public void setCecVersion(@HdmiControlManager.HdmiCecVersion int cecVersion) {
         mCecVersion = cecVersion;
     }
@@ -198,6 +204,10 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     public void clearResultMessages() {
         mResultMessages.clear();
+    }
+
+    public void clearGetPhysicalAddressCallHistory() {
+        mGetPhysicalAddressCalled = false;
     }
 
     public void setPollAddressResponse(int logicalAddress, int response) {

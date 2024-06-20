@@ -18,6 +18,12 @@ package com.android.systemui.model
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 
-val Kosmos.sceneContainerPlugin by Fixture { SceneContainerPlugin { sceneInteractor } }
+val Kosmos.sceneContainerPlugin by Fixture {
+    SceneContainerPlugin(
+        sceneInteractor = { sceneInteractor },
+        occlusionInteractor = { sceneContainerOcclusionInteractor },
+    )
+}

@@ -46,6 +46,7 @@ import androidx.test.core.app.ApplicationProvider;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -91,6 +92,8 @@ public class HidlToAidlSensorAdapterTest {
     private AidlResponseHandler.AidlResponseHandlerCallback mAidlResponseHandlerCallback;
     @Mock
     private BiometricUtils<Face> mBiometricUtils;
+    @Mock
+    private AuthenticationStateListeners mAuthenticationStateListeners;
 
     private final TestLooper mLooper = new TestLooper();
     private HidlToAidlSensorAdapter mHidlToAidlSensorAdapter;
@@ -202,7 +205,8 @@ public class HidlToAidlSensorAdapterTest {
                 USER_ID, HAT, TAG, 1 /* requestId */, mBiometricUtils,
                 new int[]{} /* disabledFeatures */, ENROLL_TIMEOUT_SEC, null /* previewSurface */,
                 SENSOR_ID, mLogger, mBiometricContext, 1 /* maxTemplatesPerUser */,
-                false /* debugConsent */, (new FaceEnrollOptions.Builder()).build()));
+                false /* debugConsent */, (new FaceEnrollOptions.Builder()).build(),
+                mAuthenticationStateListeners));
         mLooper.dispatchAll();
 
         verify(mAidlResponseHandlerCallback).onEnrollSuccess();

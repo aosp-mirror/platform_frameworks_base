@@ -125,7 +125,10 @@ public class PageIndicator extends ViewGroup {
 
     public void setNumPages(int numPages) {
         setVisibility(numPages > 1 ? View.VISIBLE : View.GONE);
-        if (numPages == getChildCount()) {
+        int childCount = getChildCount();
+        // We're checking if the width needs to be updated as it's possible that the number of pages
+        // was changed while the page indicator was not visible, automatically skipping onMeasure.
+        if (numPages == childCount && calculateWidth(childCount) == getMeasuredWidth()) {
             return;
         }
         if (mAnimating) {
@@ -295,6 +298,10 @@ public class PageIndicator extends ViewGroup {
         }
     }
 
+    private int calculateWidth(int numPages) {
+        return (mPageIndicatorWidth - mPageDotWidth) * (numPages - 1) + mPageDotWidth;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int N = getChildCount();
@@ -309,7 +316,7 @@ public class PageIndicator extends ViewGroup {
         for (int i = 0; i < N; i++) {
             getChildAt(i).measure(widthChildSpec, heightChildSpec);
         }
-        int width = (mPageIndicatorWidth - mPageDotWidth) * (N - 1) + mPageDotWidth;
+        int width = calculateWidth(N);
         setMeasuredDimension(width, mPageIndicatorHeight);
     }
 

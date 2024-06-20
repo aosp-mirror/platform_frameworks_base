@@ -15,13 +15,14 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE;
 import static com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK;
 import static com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -33,10 +34,10 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.InitController;
@@ -49,6 +50,7 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -83,7 +85,7 @@ import java.util.List;
 import java.util.Set;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper()
 public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private StatusBarNotificationPresenter mStatusBarNotificationPresenter;
@@ -295,6 +297,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(
                 mContext,
                 shadeViewController,
+                mock(PanelExpansionInteractor.class),
                 mock(QuickSettingsController.class),
                 mock(HeadsUpManager.class),
                 notificationShadeWindowView,

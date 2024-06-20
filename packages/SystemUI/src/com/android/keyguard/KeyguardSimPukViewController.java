@@ -115,6 +115,12 @@ public class KeyguardSimPukViewController
     }
 
     @Override
+    public void updateMessageAreaVisibility() {
+        if (mMessageAreaController == null) return;
+        mMessageAreaController.setIsVisible(true);
+    }
+
+    @Override
     public void onResume(int reason) {
         super.onResume(reason);
         if (mShowDefaultMessage) {

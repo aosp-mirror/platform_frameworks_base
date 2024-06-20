@@ -27,6 +27,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Objects;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DisplayBrightnessStateTest {
@@ -45,6 +47,7 @@ public class DisplayBrightnessStateTest {
         float sdrBrightness = 0.2f;
         boolean shouldUseAutoBrightness = true;
         boolean shouldUpdateScreenBrightnessSetting = true;
+        int brightnessAdjustmentFlag = 2;
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
         brightnessReason.setModifier(BrightnessReason.MODIFIER_DIMMED);
@@ -54,6 +57,8 @@ public class DisplayBrightnessStateTest {
                 .setBrightnessReason(brightnessReason)
                 .setShouldUseAutoBrightness(shouldUseAutoBrightness)
                 .setShouldUpdateScreenBrightnessSetting(shouldUpdateScreenBrightnessSetting)
+                .setBrightnessAdjustmentFlag(brightnessAdjustmentFlag)
+                .setIsUserInitiatedChange(true)
                 .build();
 
         assertEquals(displayBrightnessState.getBrightness(), brightness, FLOAT_DELTA);
@@ -101,7 +106,13 @@ public class DisplayBrightnessStateTest {
                 .append("\n    customAnimationRate:")
                 .append(displayBrightnessState.getCustomAnimationRate())
                 .append("\n    shouldUpdateScreenBrightnessSetting:")
-                .append(displayBrightnessState.shouldUpdateScreenBrightnessSetting());
+                .append(displayBrightnessState.shouldUpdateScreenBrightnessSetting())
+                .append("\n    mBrightnessEvent:")
+                .append(Objects.toString(displayBrightnessState.getBrightnessEvent(), "null"))
+                .append("\n    mBrightnessAdjustmentFlag:")
+                .append(displayBrightnessState.getBrightnessAdjustmentFlag())
+                .append("\n    mIsUserInitiatedChange:")
+                .append(displayBrightnessState.isUserInitiatedChange());
         return sb.toString();
     }
 }

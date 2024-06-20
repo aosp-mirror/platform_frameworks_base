@@ -304,6 +304,15 @@
     <!-- An explanation text that the password needs to be entered since the user hasn't used strong authentication since quite some time. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_timeout_password">For additional security, use password instead</string>
 
+    <!-- An explanation text that the pin needs to be provided to enter the device for security reasons. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_added_security_pin">PIN required for additional security</string>
+
+    <!-- An explanation text that the pattern needs to be provided to enter the device for security reasons. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_added_security_pattern">Pattern required for additional security</string>
+
+    <!-- An explanation text that the password needs to be provided to enter the device for security reasons. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_added_security_password">Password required for additional security</string>
+
     <!-- An explanation text that the credential needs to be entered because a device admin has
     locked the device. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_device_admin">Device locked by admin</string>

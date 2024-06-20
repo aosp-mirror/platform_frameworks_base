@@ -28,8 +28,8 @@ import com.android.internal.R;
 
 class DeprecatedAbiDialog extends AppWarnings.BaseDialog {
     DeprecatedAbiDialog(final AppWarnings manager, Context context,
-            ApplicationInfo appInfo) {
-        super(manager, appInfo.packageName);
+            ApplicationInfo appInfo, int userId) {
+        super(manager, context, appInfo.packageName, userId);
 
         final PackageManager pm = context.getPackageManager();
         final CharSequence label = appInfo.loadSafeLabel(pm,
@@ -41,7 +41,7 @@ class DeprecatedAbiDialog extends AppWarnings.BaseDialog {
         final AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setPositiveButton(R.string.ok, (dialog, which) ->
                     manager.setPackageFlag(
-                            mPackageName, AppWarnings.FLAG_HIDE_DEPRECATED_ABI, true))
+                            mUserId, mPackageName, AppWarnings.FLAG_HIDE_DEPRECATED_ABI, true))
                 .setMessage(message)
                 .setTitle(label);
 

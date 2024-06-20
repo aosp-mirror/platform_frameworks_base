@@ -37,8 +37,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window layer will be associated with the app task when going to the overview screen. To
- * run this test: `atest FlickerTests:OpenImeWindowToOverViewTest`
+ * Test IME window layer will be associated with the app task when going to the overview screen.
+ * To run this test: `atest FlickerTestsIme2:ShowImeWhileEnteringOverviewTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -191,7 +191,7 @@ class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(fl
             this.invoke("imeLayerIsVisibleAndAlignAppWidow") {
                 val imeVisibleRegion = it.visibleRegion(ComponentNameMatcher.IME)
                 val appVisibleRegion = it.visibleRegion(imeTestApp)
-                if (imeVisibleRegion.region.isNotEmpty) {
+                if (!imeVisibleRegion.region.isEmpty) {
                     it.isVisible(ComponentNameMatcher.IME)
                     imeVisibleRegion.coversAtMost(appVisibleRegion.region)
                 }

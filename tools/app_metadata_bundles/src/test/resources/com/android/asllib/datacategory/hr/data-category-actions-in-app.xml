@@ -1,0 +1,17 @@
+<holder_of_flattened_for_testing>
+    <data-shared dataCategory="actions_in_app"
+        dataType="user_interaction"
+        purposes="analytics" />
+    <data-shared dataCategory="actions_in_app"
+        dataType="in_app_search_history"
+        purposes="analytics" />
+    <data-shared dataCategory="actions_in_app"
+        dataType="installed_apps"
+        purposes="analytics" />
+    <data-shared dataCategory="actions_in_app"
+        dataType="user_generated_content"
+        purposes="analytics" />
+    <data-shared dataCategory="actions_in_app"
+        dataType="other"
+        purposes="analytics" />
+</holder_of_flattened_for_testing>

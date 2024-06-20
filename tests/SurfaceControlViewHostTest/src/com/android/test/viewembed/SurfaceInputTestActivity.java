@@ -138,7 +138,7 @@ public class SurfaceInputTestActivity extends Activity {
         c.drawText("Local SC", 0, 0, paint);
         surface.unlockCanvasAndPost(c);
         WindowManager wm = getSystemService(WindowManager.class);
-        wm.registerBatchedSurfaceControlInputReceiver(getDisplayId(),
+        wm.registerBatchedSurfaceControlInputReceiver(
                 attachedSurfaceControl.getInputTransferToken(), mLocalSurfaceControl,
                 Choreographer.getInstance(), event -> {
                     Log.d(TAG, "onInputEvent-sc " + event);
@@ -159,7 +159,7 @@ public class SurfaceInputTestActivity extends Activity {
             holder.unlockCanvasAndPost(c);
 
             WindowManager wm = getSystemService(WindowManager.class);
-            wm.registerBatchedSurfaceControlInputReceiver(getDisplayId(),
+            wm.registerBatchedSurfaceControlInputReceiver(
                     mLocalSurfaceView.getRootSurfaceControl().getInputTransferToken(),
                     mLocalSurfaceView.getSurfaceControl(),
                     Choreographer.getInstance(), event -> {

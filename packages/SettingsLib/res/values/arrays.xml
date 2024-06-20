@@ -639,15 +639,6 @@
         <item>disabled</item>
     </array>
 
-    <!-- Images offered as options in the avatar picker. If populated, the avatar_image_descriptions
-         array must also be populated with a content description for each image. -->
-    <array name="avatar_images"/>
-
-    <!-- Content descriptions for each of the images in the avatar_images array. When overlaid
-         these values should be translated, but this empty array must not be translated or it may
-         replace the real descriptions with an empty array. -->
-    <string-array name="avatar_image_descriptions" translatable="false"/>
-
     <!-- NOTE: if you change this, you must also add the corresponding scale key and lookup table to
      frameworks/base/core/java/android/content/res/FontScaleConverterFactory.java -->
     <string-array name="entryvalues_font_size" translatable="false">

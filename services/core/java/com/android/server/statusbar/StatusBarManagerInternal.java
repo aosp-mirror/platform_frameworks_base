@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -233,17 +234,25 @@ public interface StatusBarManagerInternal {
     /**
      * Enters stage split from a current running app.
      *
-     * @see com.android.internal.statusbar.IStatusBar#enterStageSplitFromRunningApp
+     * @see com.android.internal.statusbar.IStatusBar#moveFocusedTaskToStageSplit
      */
-    void enterStageSplitFromRunningApp(boolean leftOrTop);
+    void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop);
+
+    /**
+     * Change the split screen focus to the left / top app or the right / bottom app based on
+     * {@param leftOrTop}.
+     *
+     * @see com.android.internal.statusbar.IStatusBar#setSplitscreenFocus
+     */
+    void setSplitscreenFocus(boolean leftOrTop);
 
     /**
      * Shows the media output switcher dialog.
      *
-     * @param packageName of the session for which the output switcher is shown.
+     * @param targetPackageName of the session for which the output switcher is shown.
      * @see com.android.internal.statusbar.IStatusBar#showMediaOutputSwitcher
      */
-    void showMediaOutputSwitcher(String packageName);
+    void showMediaOutputSwitcher(String targetPackageName, UserHandle targetUserHandle);
 
     /**
      * Add a tile to the Quick Settings Panel
@@ -259,7 +268,7 @@ public interface StatusBarManagerInternal {
     void removeQsTile(ComponentName tile);
 
     /**
-     * Called when requested to enter desktop from an app.
+     * Called when requested to enter desktop from a focused app.
      */
-    void enterDesktop(int displayId);
+    void moveFocusedTaskToDesktop(int displayId);
 }

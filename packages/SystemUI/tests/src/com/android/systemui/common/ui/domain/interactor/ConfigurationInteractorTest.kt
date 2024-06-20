@@ -91,7 +91,7 @@ class ConfigurationInteractorTest : SysuiTestCase() {
     @Test
     fun maxBoundsChange_emitsMaxBoundsChange() =
         testScope.runTest {
-            val values by collectValues(underTest.naturalMaxBounds)
+            val values by collectValues(underTest.maxBounds)
 
             updateDisplay(width = DISPLAY_WIDTH, height = DISPLAY_HEIGHT)
             runCurrent()
@@ -109,7 +109,7 @@ class ConfigurationInteractorTest : SysuiTestCase() {
     @Test
     fun maxBoundsSameOnConfigChange_doesNotEmitMaxBoundsChange() =
         testScope.runTest {
-            val values by collectValues(underTest.naturalMaxBounds)
+            val values by collectValues(underTest.maxBounds)
 
             updateDisplay(width = DISPLAY_WIDTH, height = DISPLAY_HEIGHT)
             runCurrent()
@@ -122,6 +122,48 @@ class ConfigurationInteractorTest : SysuiTestCase() {
     @Test
     fun firstMaxBoundsChange_emitsMaxBoundsChange() =
         testScope.runTest {
+            val values by collectValues(underTest.maxBounds)
+
+            updateDisplay(width = DISPLAY_WIDTH, height = DISPLAY_HEIGHT)
+            runCurrent()
+
+            assertThat(values).containsExactly(Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT))
+        }
+
+    @Test
+    fun maxBoundsChange_emitsNaturalMaxBoundsChange() =
+        testScope.runTest {
+            val values by collectValues(underTest.naturalMaxBounds)
+
+            updateDisplay(width = DISPLAY_WIDTH, height = DISPLAY_HEIGHT)
+            runCurrent()
+            updateDisplay(width = DISPLAY_WIDTH * 2, height = DISPLAY_HEIGHT * 3)
+            runCurrent()
+
+            assertThat(values)
+                .containsExactly(
+                    Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT),
+                    Rect(0, 0, DISPLAY_WIDTH * 2, DISPLAY_HEIGHT * 3),
+                )
+                .inOrder()
+        }
+
+    @Test
+    fun maxBoundsSameOnConfigChange_doesNotEmitNaturalMaxBoundsChange() =
+        testScope.runTest {
+            val values by collectValues(underTest.naturalMaxBounds)
+
+            updateDisplay(width = DISPLAY_WIDTH, height = DISPLAY_HEIGHT)
+            runCurrent()
+            updateDisplay(width = DISPLAY_WIDTH, height = DISPLAY_HEIGHT)
+            runCurrent()
+
+            assertThat(values).containsExactly(Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT))
+        }
+
+    @Test
+    fun firstMaxBoundsChange_emitsNaturalMaxBoundsChange() =
+        testScope.runTest {
             val values by collectValues(underTest.naturalMaxBounds)
 
             updateDisplay(width = DISPLAY_WIDTH, height = DISPLAY_HEIGHT)
@@ -131,7 +173,7 @@ class ConfigurationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun displayRotatedButMaxBoundsTheSame_doesNotEmitNewMaxBoundsChange() =
+    fun displayRotatedButMaxBoundsTheSame_doesNotEmitNewNaturalMaxBoundsChange() =
         testScope.runTest {
             val values by collectValues(underTest.naturalMaxBounds)
 

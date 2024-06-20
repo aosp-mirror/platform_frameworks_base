@@ -44,7 +44,6 @@ import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.concurrent.Executor;
 
-
 /**
  * A view which can draw a scrim.  This view maybe be used in multiple windows running on different
  * threads, but is controlled by {@link com.android.systemui.statusbar.phone.ScrimController} so we
@@ -64,8 +63,6 @@ public class ScrimView extends View {
     private String mScrimName;
     private int mTintColor;
     private boolean mBlendWithMainColor = true;
-    private Runnable mChangeRunnable;
-    private Executor mChangeRunnableExecutor;
     private Executor mExecutor;
     private Looper mExecutorLooper;
     @Nullable
@@ -270,9 +267,6 @@ public class ScrimView extends View {
             mDrawable.invalidateSelf();
         }
 
-        if (mChangeRunnable != null) {
-            mChangeRunnableExecutor.execute(mChangeRunnable);
-        }
     }
 
     public int getTint() {
@@ -300,23 +294,12 @@ public class ScrimView extends View {
                 mViewAlpha = alpha;
 
                 mDrawable.setAlpha((int) (255 * alpha));
-                if (mChangeRunnable != null) {
-                    mChangeRunnableExecutor.execute(mChangeRunnable);
-                }
             }
         });
     }
 
     public float getViewAlpha() {
         return mViewAlpha;
-    }
-
-    /**
-     * Sets a callback that is invoked whenever the alpha, color, or tint change.
-     */
-    public void setChangeRunnable(Runnable changeRunnable, Executor changeRunnableExecutor) {
-        mChangeRunnable = changeRunnable;
-        mChangeRunnableExecutor = changeRunnableExecutor;
     }
 
     @Override

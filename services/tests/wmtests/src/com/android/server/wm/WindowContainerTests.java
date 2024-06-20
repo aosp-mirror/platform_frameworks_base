@@ -565,36 +565,17 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testGetOrientation_childSpecified() {
-        testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_LANDSCAPE,
-                SCREEN_ORIENTATION_LANDSCAPE);
-        testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_UNSET,
-                SCREEN_ORIENTATION_UNSPECIFIED);
-    }
-
-    private void testGetOrientation_childSpecifiedConfig(boolean childVisible, int childOrientation,
-            int expectedOrientation) {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
-        final TestWindowContainer root = builder.setLayer(0).build();
+        final TestWindowContainer root = builder.build();
         root.setFillsParent(true);
+        assertEquals(SCREEN_ORIENTATION_UNSET, root.getOrientation());
 
-        builder.setIsVisible(childVisible);
+        final TestWindowContainer child = root.addChildWindow();
+        child.setFillsParent(true);
+        assertEquals(SCREEN_ORIENTATION_UNSET, root.getOrientation());
 
-        if (childOrientation != SCREEN_ORIENTATION_UNSET) {
-            builder.setOrientation(childOrientation);
-        }
-
-        final TestWindowContainer child1 = root.addChildWindow(builder);
-        child1.setFillsParent(true);
-
-        assertEquals(expectedOrientation, root.getOrientation());
-    }
-
-    @Test
-    public void testGetOrientation_Unset() {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
-        final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
-        // Unspecified well because we didn't specify anything...
-        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, root.getOrientation());
+        child.setOverrideOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, root.getOrientation());
     }
 
     @Test
@@ -979,10 +960,20 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(child.handlesOrientationChangeFromDescendant(orientation));
     }
 
+    private static void addLocalInsets(WindowContainer wc) {
+        final Binder owner = new Binder();
+        Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
+        final InsetsFrameProvider provider1 =
+                new InsetsFrameProvider(owner, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect1);
+        wc.addLocalInsetsFrameProvider(provider1, owner);
+    }
+
     @Test
     public void testOnDisplayChanged() {
         final Task rootTask = createTask(mDisplayContent);
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        addLocalInsets(task);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
         final DisplayContent newDc = createNewDisplay();
@@ -991,6 +982,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
         verify(rootTask).onDisplayChanged(newDc);
         verify(task).onDisplayChanged(newDc);
+        assertTrue(task.mLocalInsetsSources.size() == 1);
         verify(activity).onDisplayChanged(newDc);
         assertEquals(newDc, rootTask.mDisplayContent);
         assertEquals(newDc, task.mDisplayContent);
@@ -1000,6 +992,7 @@ public class WindowContainerTests extends WindowTestsBase {
     @Test
     public void testOnDisplayChanged_cleanupChanging() {
         final Task task = createTask(mDisplayContent);
+        addLocalInsets(task);
         spyOn(task.mSurfaceFreezer);
         mDisplayContent.mChangingContainers.add(task);
 
@@ -1007,6 +1000,7 @@ public class WindowContainerTests extends WindowTestsBase {
         // This happens on display info changed.
         task.onDisplayChanged(mDisplayContent);
 
+        assertTrue(task.mLocalInsetsSources.size() == 1);
         assertTrue(mDisplayContent.mChangingContainers.contains(task));
         verify(task.mSurfaceFreezer, never()).unfreeze(any());
 

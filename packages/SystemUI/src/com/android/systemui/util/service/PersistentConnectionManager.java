@@ -48,7 +48,7 @@ public class PersistentConnectionManager<T> implements Dumpable {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final SystemClock mSystemClock;
-    private final DelayableExecutor mMainExecutor;
+    private final DelayableExecutor mBgExecutor;
     private final int mBaseReconnectDelayMs;
     private final int mMaxReconnectAttempts;
     private final int mMinConnectionDuration;
@@ -71,8 +71,8 @@ public class PersistentConnectionManager<T> implements Dumpable {
 
     private final Observer.Callback mObserverCallback = () -> initiateConnectionAttempt();
 
-    private final ObservableServiceConnection.Callback mConnectionCallback =
-            new ObservableServiceConnection.Callback() {
+    private final ObservableServiceConnection.Callback<T> mConnectionCallback =
+            new ObservableServiceConnection.Callback<>() {
         private long mStartTime;
 
         @Override
@@ -95,12 +95,10 @@ public class PersistentConnectionManager<T> implements Dumpable {
         }
     };
 
-    // TODO: b/326449074 - Ensure the DelayableExecutor is on the correct thread, and update the
-    //                     qualifier (to @Main) or name (to bgExecutor) to be consistent with that.
     @Inject
     public PersistentConnectionManager(
             SystemClock clock,
-            @Background DelayableExecutor mainExecutor,
+            @Background DelayableExecutor bgExecutor,
             DumpManager dumpManager,
             @Named(DUMPSYS_NAME) String dumpsysName,
             @Named(SERVICE_CONNECTION) ObservableServiceConnection<T> serviceConnection,
@@ -109,7 +107,7 @@ public class PersistentConnectionManager<T> implements Dumpable {
             @Named(MIN_CONNECTION_DURATION_MS) int minConnectionDurationMs,
             @Named(OBSERVER) Observer observer) {
         mSystemClock = clock;
-        mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
         mConnection = serviceConnection;
         mObserver = observer;
         mDumpManager = dumpManager;
@@ -195,7 +193,7 @@ public class PersistentConnectionManager<T> implements Dumpable {
                     "scheduling connection attempt in " + reconnectDelayMs + "milliseconds");
         }
 
-        mCurrentReconnectCancelable = mMainExecutor.executeDelayed(mConnectRunnable,
+        mCurrentReconnectCancelable = mBgExecutor.executeDelayed(mConnectRunnable,
                 reconnectDelayMs);
 
         mReconnectAttempts++;

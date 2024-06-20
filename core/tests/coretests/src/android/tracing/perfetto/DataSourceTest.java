@@ -674,8 +674,6 @@ public class DataSourceTest {
                             protoOutputStream.write(SINGLE_INT, singleIntValue);
                             protoOutputStream.end(payloadToken);
                             protoOutputStream.end(forTestingToken);
-
-                            ctx.flush();
                         }),
                         (args) -> {}
                 );

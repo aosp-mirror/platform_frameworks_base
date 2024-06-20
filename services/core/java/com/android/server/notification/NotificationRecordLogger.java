@@ -542,7 +542,7 @@ interface NotificationRecordLogger {
             this.is_locked = p.r.isLocked();
 
             this.age_in_minutes = NotificationRecordLogger.getAgeInMinutes(
-                    p.r.getSbn().getPostTime(), p.r.getSbn().getNotification().when);
+                    p.r.getSbn().getPostTime(), p.r.getSbn().getNotification().getWhen());
         }
     }
 

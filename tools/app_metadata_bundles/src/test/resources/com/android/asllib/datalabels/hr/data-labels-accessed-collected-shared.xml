@@ -1,0 +1,8 @@
+<data-labels>
+    <data-accessed dataType="location_data_type_approx_location"
+        purposes="app_functionality" />
+    <data-collected dataType="location_data_type_precise_location"
+        purposes="app_functionality" />
+    <data-shared dataType="personal_data_type_name"
+        purposes="app_functionality" />
+</data-labels>

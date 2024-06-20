@@ -184,7 +184,7 @@ public class EditUserInfoController {
         dialogHelper
                 .setTitle(R.string.user_info_settings_title)
                 .addCustomView(content)
-                .setPositiveButton(android.R.string.ok, view -> {
+                .setPositiveButton(R.string.okay, view -> {
                     Drawable newUserIcon = mEditUserPhotoController != null
                             ? mEditUserPhotoController.getNewUserPhotoDrawable()
                             : null;
@@ -201,7 +201,7 @@ public class EditUserInfoController {
                     }
                     dialogHelper.getDialog().dismiss();
                 })
-                .setBackButton(android.R.string.cancel, view -> {
+                .setBackButton(R.string.cancel, view -> {
                     clear();
                     if (cancelCallback != null) {
                         cancelCallback.run();

@@ -34,6 +34,7 @@ import java.util.Optional
 import javax.inject.Provider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -45,12 +46,33 @@ class FooterViewModel(
     seenNotificationsInteractor: SeenNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
 ) {
+    /** A message to show instead of the footer buttons. */
+    val message: FooterMessageViewModel =
+        FooterMessageViewModel(
+            messageId = R.string.unlock_to_see_notif_text,
+            iconId = R.drawable.ic_friction_lock_closed,
+            isVisible = seenNotificationsInteractor.hasFilteredOutSeenNotifications,
+        )
+
+    private val clearAllButtonVisible =
+        activeNotificationsInteractor.hasClearableNotifications
+            .combine(message.isVisible) { hasClearableNotifications, isMessageVisible ->
+                if (isMessageVisible) {
+                    // If the message is visible, the button never is
+                    false
+                } else {
+                    hasClearableNotifications
+                }
+            }
+            .distinctUntilChanged()
+
+    /** The button for clearing notifications. */
     val clearAllButton: FooterButtonViewModel =
         FooterButtonViewModel(
             labelId = flowOf(R.string.clear_all_notifications_text),
             accessibilityDescriptionId = flowOf(R.string.accessibility_clear_all),
             isVisible =
-                activeNotificationsInteractor.hasClearableNotifications
+                clearAllButtonVisible
                     .sample(
                         // TODO(b/322167853): This check is currently duplicated in
                         //  NotificationListViewModel, but instead it should be a field in
@@ -61,9 +83,9 @@ class FooterViewModel(
                                 ::Pair
                             )
                             .onStart { emit(Pair(false, false)) }
-                    ) { hasClearableNotifications, (isShadeFullyExpanded, animationsEnabled) ->
+                    ) { clearAllButtonVisible, (isShadeFullyExpanded, animationsEnabled) ->
                         val shouldAnimate = isShadeFullyExpanded && animationsEnabled
-                        AnimatableEvent(hasClearableNotifications, shouldAnimate)
+                        AnimatableEvent(clearAllButtonVisible, shouldAnimate)
                     }
                     .toAnimatedValueFlow(),
         )
@@ -77,18 +99,16 @@ class FooterViewModel(
             else R.string.manage_notifications_text
         }
 
+    /** The button for managing notification settings or opening notification history. */
     val manageOrHistoryButton: FooterButtonViewModel =
         FooterButtonViewModel(
             labelId = manageOrHistoryButtonText,
             accessibilityDescriptionId = manageOrHistoryButtonText,
-            isVisible = flowOf(AnimatedValue.NotAnimating(true)),
-        )
-
-    val message: FooterMessageViewModel =
-        FooterMessageViewModel(
-            messageId = R.string.unlock_to_see_notif_text,
-            iconId = R.drawable.ic_friction_lock_closed,
-            isVisible = seenNotificationsInteractor.hasFilteredOutSeenNotifications,
+            isVisible =
+                // Hide the manage button if the message is visible
+                message.isVisible.map { messageVisible ->
+                    AnimatedValue.NotAnimating(!messageVisible)
+                },
         )
 }
 

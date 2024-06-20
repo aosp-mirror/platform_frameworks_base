@@ -238,7 +238,7 @@ public abstract class QualifiedNetworksService extends Service {
                 @AccessNetworkConstants.RadioAccessNetworkType int qualifiedNetworkType) {
             if (mCallback != null) {
                 try {
-                    mCallback.onReconnectQualifedNetworkType(apnTypes, qualifiedNetworkType);
+                    mCallback.onReconnectQualifiedNetworkType(apnTypes, qualifiedNetworkType);
                 } catch (RemoteException e) {
                     loge("Failed to call onReconnectQualifiedNetworkType. " + e);
                 }

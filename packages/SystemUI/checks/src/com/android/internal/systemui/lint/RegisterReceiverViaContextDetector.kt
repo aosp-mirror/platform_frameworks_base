@@ -59,7 +59,7 @@ class RegisterReceiverViaContextDetector : Detector(), SourceCodeScanner {
                             `BroadcastDispatcher` instead, which registers the receiver on a \
                              background thread. `BroadcastDispatcher` also improves our visibility \
                              into ANRs.""",
-                            moreInfo = "go/identifying-broadcast-threads",
+                            moreInfo = "http://go/identifying-broadcast-threads",
                     category = Category.PERFORMANCE,
                     priority = 8,
                     severity = Severity.WARNING,

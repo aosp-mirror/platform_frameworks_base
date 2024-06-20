@@ -80,9 +80,9 @@
     <string name="kg_face_locked_out" msgid="2751559491287575">"顔認証でロックを解除できません。何度もログインに失敗したためログインできません。"</string>
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"指紋でロックを解除できません。何度もログインに失敗したためログインできません。"</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"信頼エージェントは利用できません"</string>
-    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"間違った PIN による試行回数が上限を超えました"</string>
-    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"間違ったパターンによる試行回数が上限を超えました"</string>
-    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"間違ったパスワードによる試行回数が上限を超えました"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"間違った PIN による試行回数が上限に達しました"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"間違ったパターンによる試行回数が上限に達しました"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"間違ったパスワードによる試行回数が上限に達しました"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# 秒後にもう一度お試しください。}other{# 秒後にもう一度お試しください。}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM PIN を入力してください。"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"「<xliff:g id="CARRIER">%1$s</xliff:g>」の SIM PIN を入力してください。"</string>
@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"画面ロックを解除するにはパターンを入力してください"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"画面ロックを解除するには PIN を入力してください"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"画面ロックを解除するにはパスワードを入力してください"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"追加の確認のため PIN が必要です"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"追加の確認のためパターンが必要です"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"追加の確認のためパスワードが必要です"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"デバイスは管理者によりロックされています"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"デバイスは手動でロックされました"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"認識されませんでした"</string>

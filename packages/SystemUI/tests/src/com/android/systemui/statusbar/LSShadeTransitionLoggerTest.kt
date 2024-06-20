@@ -1,7 +1,7 @@
 package com.android.systemui.statusbar
 
-import android.testing.AndroidTestingRunner
 import android.util.DisplayMetrics
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.LogBuffer
@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class LSShadeTransitionLoggerTest : SysuiTestCase() {
     lateinit var logger: LSShadeTransitionLogger

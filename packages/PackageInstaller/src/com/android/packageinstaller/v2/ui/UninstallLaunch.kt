@@ -28,6 +28,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
+import com.android.packageinstaller.v2.model.PackageUtil.localLogv
 import com.android.packageinstaller.v2.model.UninstallAborted
 import com.android.packageinstaller.v2.model.UninstallFailed
 import com.android.packageinstaller.v2.model.UninstallRepository
@@ -159,11 +160,17 @@ class UninstallLaunch : FragmentActivity(), UninstallActionListener {
     }
 
     override fun onPositiveResponse(keepData: Boolean) {
+        if (localLogv) {
+            Log.d(LOG_TAG, "Staring uninstall")
+        }
         uninstallViewModel!!.initiateUninstall(keepData)
     }
 
     override fun onNegativeResponse() {
-        uninstallViewModel!!.cancelInstall()
+        if (localLogv) {
+            Log.d(LOG_TAG, "Cancelling uninstall")
+        }
+        uninstallViewModel!!.cancelUninstall()
         setResult(Activity.RESULT_FIRST_USER, null, true)
     }
 }

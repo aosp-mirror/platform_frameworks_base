@@ -18,6 +18,7 @@
 package com.android.systemui.user.domain.interactor
 
 import android.app.admin.DevicePolicyManager
+import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
@@ -59,6 +60,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
     @Mock private lateinit var switchUser: (Int) -> Unit
     @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
+    @Mock private lateinit var otherContext: Context
 
     private lateinit var underTest: GuestUserInteractor
 
@@ -74,30 +76,42 @@ class GuestUserInteractorTest : SysuiTestCase() {
         repository = FakeUserRepository()
         repository.setUserInfos(ALL_USERS)
 
-        underTest =
-            GuestUserInteractor(
-                applicationContext = context,
-                applicationScope = scope,
-                mainDispatcher = IMMEDIATE,
-                backgroundDispatcher = IMMEDIATE,
-                manager = manager,
-                repository = repository,
-                deviceProvisionedController = deviceProvisionedController,
-                devicePolicyManager = devicePolicyManager,
-                refreshUsersScheduler =
-                    RefreshUsersScheduler(
-                        applicationScope = scope,
-                        mainDispatcher = IMMEDIATE,
-                        repository = repository,
-                    ),
-                uiEventLogger = uiEventLogger,
-                resumeSessionReceiver = resumeSessionReceiver,
-                resetOrExitSessionReceiver = resetOrExitSessionReceiver,
-            )
+        underTest = initGuestUserInteractor(context)
     }
+
+    private fun initGuestUserInteractor(context: Context) =
+        GuestUserInteractor(
+            applicationContext = context,
+            applicationScope = scope,
+            mainDispatcher = IMMEDIATE,
+            backgroundDispatcher = IMMEDIATE,
+            manager = manager,
+            repository = repository,
+            deviceProvisionedController = deviceProvisionedController,
+            devicePolicyManager = devicePolicyManager,
+            refreshUsersScheduler =
+                RefreshUsersScheduler(
+                    applicationScope = scope,
+                    mainDispatcher = IMMEDIATE,
+                    repository = repository,
+                ),
+            uiEventLogger = uiEventLogger,
+            resumeSessionReceiver = resumeSessionReceiver,
+            resetOrExitSessionReceiver = resetOrExitSessionReceiver,
+        )
 
     @Test
     fun registersBroadcastReceivers() {
+        verify(resumeSessionReceiver).register()
+        verify(resetOrExitSessionReceiver).register()
+    }
+
+    @Test
+    fun registersBroadcastReceiversOnlyForSystemUser() {
+        for (i in 1..5) {
+            whenever(otherContext.userId).thenReturn(UserHandle.MIN_SECONDARY_USER_ID + i)
+            initGuestUserInteractor(otherContext)
+        }
         verify(resumeSessionReceiver).register()
         verify(resetOrExitSessionReceiver).register()
     }

@@ -252,7 +252,8 @@ public final class BugreportManager {
                     params.getMode(),
                     params.getFlags(),
                     dsListener,
-                    isScreenshotRequested);
+                    isScreenshotRequested,
+                    /* skipUserConsent = */ false);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (FileNotFoundException e) {
@@ -313,6 +314,7 @@ public final class BugreportManager {
                     bugreportFd.getFileDescriptor(),
                     bugreportFile,
                     /* keepBugreportOnRetrieval = */ false,
+                    /* skipUserConsent = */ false,
                     dsListener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

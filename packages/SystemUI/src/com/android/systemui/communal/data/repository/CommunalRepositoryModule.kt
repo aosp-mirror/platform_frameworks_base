@@ -21,5 +21,5 @@ import dagger.Module
 
 @Module
 interface CommunalRepositoryModule {
-    @Binds fun communalRepository(impl: CommunalRepositoryImpl): CommunalRepository
+    @Binds fun communalRepository(impl: CommunalSceneRepositoryImpl): CommunalSceneRepository
 }

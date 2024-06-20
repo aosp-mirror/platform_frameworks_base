@@ -291,7 +291,7 @@ public final class RadioMetadata implements Parcelable {
     /**
      * Provides a Clock that can be used to describe time as provided by the Radio.
      *
-     * The clock is defined by the seconds since epoch at the UTC + 0 timezone
+     * <p>The clock time is defined by the seconds since epoch at the UTC + 0 timezone
      * and timezone offset from UTC + 0 represented in number of minutes.
      *
      * @hide
@@ -493,16 +493,16 @@ public final class RadioMetadata implements Parcelable {
     /**
      * Retrieves an identifier for a bitmap.
      *
-     * The format of an identifier is opaque to the application,
+     * <p>The format of an identifier is opaque to the application,
      * with a special case of value 0 being invalid.
      * An identifier for a given image-tuner pair is unique, so an application
      * may cache images and determine if there is a necessity to fetch them
      * again - if identifier changes, it means the image has changed.
      *
-     * Only bitmap keys may be used with this method:
+     * <p>Only bitmap keys may be used with this method:
      * <ul>
-     * <li>{@link #METADATA_KEY_ICON}</li>
-     * <li>{@link #METADATA_KEY_ART}</li>
+     *     <li>{@link #METADATA_KEY_ICON}</li>
+     *     <li>{@link #METADATA_KEY_ART}</li>
      * </ul>
      *
      * @param key The key the value is stored under.
@@ -537,7 +537,7 @@ public final class RadioMetadata implements Parcelable {
      *
      * <p>Only string array keys may be used with this method:
      * <ul>
-     * <li>{@link #METADATA_KEY_UFIDS}</li>
+     *     <li>{@link #METADATA_KEY_UFIDS}</li>
      * </ul>
      *
      * @param key The key the value is stored under
@@ -667,17 +667,17 @@ public final class RadioMetadata implements Parcelable {
          * the METADATA_KEYs defined in this class are used they may only be one
          * of the following:
          * <ul>
-         * <li>{@link #METADATA_KEY_RDS_PS}</li>
-         * <li>{@link #METADATA_KEY_RDS_RT}</li>
-         * <li>{@link #METADATA_KEY_TITLE}</li>
-         * <li>{@link #METADATA_KEY_ARTIST}</li>
-         * <li>{@link #METADATA_KEY_ALBUM}</li>
-         * <li>{@link #METADATA_KEY_GENRE}</li>
-         * <li>{@link #METADATA_KEY_COMMENT_SHORT_DESCRIPTION}</li>
-         * <li>{@link #METADATA_KEY_COMMENT_ACTUAL_TEXT}</li>
-         * <li>{@link #METADATA_KEY_COMMERCIAL}</li>
-         * <li>{@link #METADATA_KEY_HD_STATION_NAME_SHORT}</li>
-         * <li>{@link #METADATA_KEY_HD_STATION_NAME_LONG}</li>
+         *     <li>{@link #METADATA_KEY_RDS_PS}</li>
+         *     <li>{@link #METADATA_KEY_RDS_RT}</li>
+         *     <li>{@link #METADATA_KEY_TITLE}</li>
+         *     <li>{@link #METADATA_KEY_ARTIST}</li>
+         *     <li>{@link #METADATA_KEY_ALBUM}</li>
+         *     <li>{@link #METADATA_KEY_GENRE}</li>
+         *     <li>{@link #METADATA_KEY_COMMENT_SHORT_DESCRIPTION}</li>
+         *     <li>{@link #METADATA_KEY_COMMENT_ACTUAL_TEXT}</li>
+         *     <li>{@link #METADATA_KEY_COMMERCIAL}</li>
+         *     <li>{@link #METADATA_KEY_HD_STATION_NAME_SHORT}</li>
+         *     <li>{@link #METADATA_KEY_HD_STATION_NAME_LONG}</li>
          * </ul>
          *
          * @param key The key for referencing this value
@@ -699,10 +699,10 @@ public final class RadioMetadata implements Parcelable {
          * the METADATA_KEYs defined in this class are used they may only be one
          * of the following:
          * <ul>
-         * <li>{@link #METADATA_KEY_RDS_PI}</li>
-         * <li>{@link #METADATA_KEY_RDS_PTY}</li>
-         * <li>{@link #METADATA_KEY_RBDS_PTY}</li>
-         * <li>{@link #METADATA_KEY_HD_SUBCHANNELS_AVAILABLE}</li>
+         *     <li>{@link #METADATA_KEY_RDS_PI}</li>
+         *     <li>{@link #METADATA_KEY_RDS_PTY}</li>
+         *     <li>{@link #METADATA_KEY_RBDS_PTY}</li>
+         *     <li>{@link #METADATA_KEY_HD_SUBCHANNELS_AVAILABLE}</li>
          * </ul>
          * or any bitmap represented by its identifier.
          *
@@ -720,8 +720,8 @@ public final class RadioMetadata implements Parcelable {
          * if the METADATA_KEYs defined in this class are used they may only be
          * one of the following:
          * <ul>
-         * <li>{@link #METADATA_KEY_ICON}</li>
-         * <li>{@link #METADATA_KEY_ART}</li>
+         *     <li>{@link #METADATA_KEY_ICON}</li>
+         *     <li>{@link #METADATA_KEY_ART}</li>
          * </ul>
          * <p>
          *
@@ -765,7 +765,7 @@ public final class RadioMetadata implements Parcelable {
          * the METADATA_KEYs defined in this class are used they may only be one
          * of the following:
          * <ul>
-         * <li>{@link #METADATA_KEY_UFIDS}</li>
+         *     <li>{@link #METADATA_KEY_UFIDS}</li>
          * </ul>
          *
          * @param key The key for referencing this value

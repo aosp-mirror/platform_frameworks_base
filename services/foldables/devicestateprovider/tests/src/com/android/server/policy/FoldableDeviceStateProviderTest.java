@@ -30,7 +30,7 @@ import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVIC
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED;
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL;
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL;
-import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration.createConfig;
+import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStatePredicateWrapper.createConfig;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -59,8 +59,10 @@ import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
 
+import androidx.annotation.NonNull;
+
 import com.android.server.devicestate.DeviceStateProvider.Listener;
-import com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration;
+import com.android.server.policy.FoldableDeviceStateProvider.DeviceStatePredicateWrapper;
 import com.android.server.policy.feature.flags.FakeFeatureFlagsImpl;
 import com.android.server.policy.feature.flags.Flags;
 
@@ -73,6 +75,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.util.reflection.FieldSetter;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Unit tests for {@link FoldableDeviceStateProvider}.
  * <p/>
@@ -81,8 +88,14 @@ import org.mockito.internal.util.reflection.FieldSetter;
 @RunWith(AndroidTestingRunner.class)
 public final class FoldableDeviceStateProviderTest {
 
-    private final ArgumentCaptor<DeviceState[]> mDeviceStateArrayCaptor = ArgumentCaptor.forClass(
-            DeviceState[].class);
+    private static final Set<Integer> EMPTY_PROPERTY_SET = new HashSet<>();
+    private static final Set<Integer> THERMAL_PROPERTY_SET = new HashSet<>(
+            Arrays.asList(DeviceState.PROPERTY_EMULATED_ONLY,
+                    DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL,
+                    DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE));
+
+    private final ArgumentCaptor<DeviceState[]> mDeviceStateArrayCaptor =
+            ArgumentCaptor.forClass(DeviceState[].class);
     @Captor
     private ArgumentCaptor<Integer> mIntegerCaptor;
     @Captor
@@ -122,22 +135,17 @@ public final class FoldableDeviceStateProviderTest {
     public void create_duplicatedDeviceStateIdentifiers_throwsException() {
         assertThrows(IllegalArgumentException.class,
                 () -> createProvider(
-                        createConfig(
-                                /* identifier= */ 0, /* name= */ "ONE", (c) -> true),
-                        createConfig(
-                                /* identifier= */ 0, /* name= */ "TWO", (c) -> true)
+                        createConfig(createDeviceState(0, "ONE"), (c) -> true),
+                        createConfig(createDeviceState(0, "TWO"), (c) -> true)
                 ));
     }
 
     @Test
     public void create_allMatchingStatesDefaultsToTheFirstIdentifier() {
         createProvider(
-                createConfig(
-                        /* identifier= */ 1, /* name= */ "ONE", (c) -> true),
-                createConfig(
-                        /* identifier= */ 2, /* name= */ "TWO", (c) -> true),
-                createConfig(
-                        /* identifier= */ 3, /* name= */ "THREE", (c) -> true)
+                createConfig(createDeviceState(1, "ONE"), (c) -> true),
+                createConfig(createDeviceState(2, "TWO"), (c) -> true),
+                createConfig(createDeviceState(3, "THREE"), (c) -> true)
         );
 
         Listener listener = mock(Listener.class);
@@ -146,9 +154,9 @@ public final class FoldableDeviceStateProviderTest {
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         final DeviceState[] expectedStates = new DeviceState[]{
-                new DeviceState(1, "ONE", /* flags= */ 0),
-                new DeviceState(2, "TWO", /* flags= */ 0),
-                new DeviceState(3, "THREE", /* flags= */ 0),
+                createDeviceState(1, "ONE", EMPTY_PROPERTY_SET),
+                createDeviceState(2, "TWO", EMPTY_PROPERTY_SET),
+                createDeviceState(3, "THREE", EMPTY_PROPERTY_SET)
         };
         assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
 
@@ -159,14 +167,10 @@ public final class FoldableDeviceStateProviderTest {
     @Test
     public void create_multipleMatchingStatesDefaultsToTheLowestIdentifier() {
         createProvider(
-                createConfig(
-                        /* identifier= */ 1, /* name= */ "ONE", (c) -> false),
-                createConfig(
-                        /* identifier= */ 3, /* name= */ "THREE", (c) -> false),
-                createConfig(
-                        /* identifier= */ 4, /* name= */ "FOUR", (c) -> true),
-                createConfig(
-                        /* identifier= */ 2, /* name= */ "TWO", (c) -> true)
+                createConfig(createDeviceState(1, "ONE"), (c) -> false),
+                createConfig(createDeviceState(3, "THREE"), (c) -> false),
+                createConfig(createDeviceState(4, "FOUR"), (c) -> true),
+                createConfig(createDeviceState(2, "TWO"), (c) -> true)
         );
 
         Listener listener = mock(Listener.class);
@@ -178,9 +182,9 @@ public final class FoldableDeviceStateProviderTest {
 
     @Test
     public void test_hingeAngleUpdatedFirstTime_switchesToMatchingState() throws Exception {
-        createProvider(createConfig(/* identifier= */ 1, /* name= */ "ONE",
+        createProvider(createConfig(createDeviceState(1, "ONE"),
                         (c) -> c.getHingeAngle() < 90f),
-                createConfig(/* identifier= */ 2, /* name= */ "TWO",
+                createConfig(createDeviceState(2, "TWO"),
                         (c) -> c.getHingeAngle() >= 90f));
         Listener listener = mock(Listener.class);
         mProvider.setListener(listener);
@@ -195,9 +199,9 @@ public final class FoldableDeviceStateProviderTest {
 
     @Test
     public void test_hallSensorUpdatedFirstTime_switchesToMatchingState() throws Exception {
-        createProvider(createConfig(/* identifier= */ 1, /* name= */ "ONE",
+        createProvider(createConfig(createDeviceState(1, "ONE"),
                         (c) -> !c.isHallSensorClosed()),
-                createConfig(/* identifier= */ 2, /* name= */ "TWO",
+                createConfig(createDeviceState(2, "TWO"),
                         FoldableDeviceStateProvider::isHallSensorClosed));
         Listener listener = mock(Listener.class);
         mProvider.setListener(listener);
@@ -213,9 +217,9 @@ public final class FoldableDeviceStateProviderTest {
 
     @Test
     public void test_hingeAngleUpdatedSecondTime_switchesToMatchingState() throws Exception {
-        createProvider(createConfig(/* identifier= */ 1, /* name= */ "ONE",
+        createProvider(createConfig(createDeviceState(1, "ONE"),
                         (c) -> c.getHingeAngle() < 90f),
-                createConfig(/* identifier= */ 2, /* name= */ "TWO",
+                createConfig(createDeviceState(2, "TWO"),
                         (c) -> c.getHingeAngle() >= 90f));
         sendSensorEvent(mHingeAngleSensor, /* value= */ 30f);
         Listener listener = mock(Listener.class);
@@ -232,9 +236,9 @@ public final class FoldableDeviceStateProviderTest {
 
     @Test
     public void test_hallSensorUpdatedSecondTime_switchesToMatchingState() throws Exception {
-        createProvider(createConfig(/* identifier= */ 1, /* name= */ "ONE",
+        createProvider(createConfig(createDeviceState(1, "ONE"),
                         (c) -> !c.isHallSensorClosed()),
-                createConfig(/* identifier= */ 2, /* name= */ "TWO",
+                createConfig(createDeviceState(2, "TWO"),
                         FoldableDeviceStateProvider::isHallSensorClosed));
         sendSensorEvent(mHallSensor, /* value= */ 0f);
         Listener listener = mock(Listener.class);
@@ -252,9 +256,9 @@ public final class FoldableDeviceStateProviderTest {
 
     @Test
     public void test_invalidSensorValues_onStateChangedIsNotTriggered() throws Exception {
-        createProvider(createConfig(/* identifier= */ 1, /* name= */ "ONE",
+        createProvider(createConfig(createDeviceState(1, "ONE"),
                         (c) -> c.getHingeAngle() < 90f),
-                createConfig(/* identifier= */ 2, /* name= */ "TWO",
+                createConfig(createDeviceState(2, "TWO"),
                         (c) -> c.getHingeAngle() >= 90f));
         Listener listener = mock(Listener.class);
         mProvider.setListener(listener);
@@ -277,23 +281,21 @@ public final class FoldableDeviceStateProviderTest {
 
     @Test
     public void test_nullSensorValues_noExceptionThrown() throws Exception {
-        createProvider(createConfig( /* identifier= */ 1, /* name= */ "ONE",
-                        (c) -> c.getHingeAngle() < 90f));
+        createProvider(createConfig(createDeviceState(1, "ONE"),
+                (c) -> c.getHingeAngle() < 90f));
         sendInvalidSensorEvent(null);
     }
 
     @Test
     public void test_flagDisableWhenThermalStatusCritical() throws Exception {
-        createProvider(createConfig(/* identifier= */ 1, /* name= */ "CLOSED",
+        createProvider(createConfig(createDeviceState(1, "CLOSED"),
                         (c) -> c.getHingeAngle() < 5f),
-                createConfig(/* identifier= */ 2, /* name= */ "HALF_OPENED",
+                createConfig(createDeviceState(2, "HALF_OPENED"),
                         (c) -> c.getHingeAngle() < 90f),
-                createConfig(/* identifier= */ 3, /* name= */ "OPENED",
+                createConfig(createDeviceState(3, "OPENED"),
                         (c) -> c.getHingeAngle() < 180f),
-                createConfig(/* identifier= */ 4, /* name= */ "THERMAL_TEST",
-                        DeviceState.FLAG_EMULATED_ONLY
-                                | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE,
+                createConfig(
+                        createDeviceState(4, "THERMAL_TEST", THERMAL_PROPERTY_SET),
                         (c) -> true));
         Listener listener = mock(Listener.class);
         mProvider.setListener(listener);
@@ -301,13 +303,10 @@ public final class FoldableDeviceStateProviderTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "THERMAL_TEST",
-                                DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE)},
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "THERMAL_TEST", THERMAL_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
         clearInvocations(listener);
 
@@ -322,9 +321,9 @@ public final class FoldableDeviceStateProviderTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */)},
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
         clearInvocations(listener);
 
@@ -334,28 +333,23 @@ public final class FoldableDeviceStateProviderTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "THERMAL_TEST",
-                                DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE)},
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "THERMAL_TEST", THERMAL_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
     }
 
     @Test
     public void test_flagDisableWhenPowerSaveEnabled() throws Exception {
-        createProvider(createConfig(/* identifier= */ 1, /* name= */ "CLOSED",
+        createProvider(createConfig(createDeviceState(1, "CLOSED"),
                         (c) -> c.getHingeAngle() < 5f),
-                createConfig(/* identifier= */ 2, /* name= */ "HALF_OPENED",
+                createConfig(createDeviceState(2, "HALF_OPENED"),
                         (c) -> c.getHingeAngle() < 90f),
-                createConfig(/* identifier= */ 3, /* name= */ "OPENED",
+                createConfig(createDeviceState(3, "OPENED"),
                         (c) -> c.getHingeAngle() < 180f),
-                createConfig(/* identifier= */ 4, /* name= */ "THERMAL_TEST",
-                        DeviceState.FLAG_EMULATED_ONLY
-                                | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE,
+                createConfig(
+                        createDeviceState(4, "THERMAL_TEST", THERMAL_PROPERTY_SET),
                         (c) -> true));
         mProvider.onPowerSaveModeChanged(false /* isPowerSaveModeEnabled */);
         Listener listener = mock(Listener.class);
@@ -365,13 +359,10 @@ public final class FoldableDeviceStateProviderTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "THERMAL_TEST",
-                                DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "THERMAL_TEST", THERMAL_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
         clearInvocations(listener);
 
@@ -386,9 +377,9 @@ public final class FoldableDeviceStateProviderTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */) },
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
         clearInvocations(listener);
 
@@ -398,13 +389,10 @@ public final class FoldableDeviceStateProviderTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "THERMAL_TEST",
-                                DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "THERMAL_TEST", THERMAL_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
     }
 
@@ -413,13 +401,11 @@ public final class FoldableDeviceStateProviderTest {
         // Create a configuration where state TWO could be matched only if
         // the previous state was 'THREE'
         createProvider(
-                createConfig(
-                        /* identifier= */ 1, /* name= */ "ONE", (c) -> c.getHingeAngle() < 30f),
-                createConfig(
-                        /* identifier= */ 2, /* name= */ "TWO",
+                createConfig(createDeviceState(1, "ONE"),
+                        (c) -> c.getHingeAngle() < 30f),
+                createConfig(createDeviceState(2, "TWO"),
                         (c) -> c.getLastReportedDeviceState() == 3 && c.getHingeAngle() > 120f),
-                createConfig(
-                        /* identifier= */ 3, /* name= */ "THREE",
+                createConfig(createDeviceState(3, "THREE"),
                         (c) -> c.getHingeAngle() > 90f)
         );
         sendSensorEvent(mHingeAngleSensor, /* value= */ 0f);
@@ -448,8 +434,7 @@ public final class FoldableDeviceStateProviderTest {
     @Test
     public void isScreenOn_afterDisplayChangedToOn_returnsTrue() {
         createProvider(
-                createConfig(
-                        /* identifier= */ 1, /* name= */ "ONE", (c) -> true)
+                createConfig(createDeviceState(1, "ONE"), (c) -> true)
         );
 
         setScreenOn(true);
@@ -460,8 +445,7 @@ public final class FoldableDeviceStateProviderTest {
     @Test
     public void isScreenOn_afterDisplayChangedToOff_returnsFalse() {
         createProvider(
-                createConfig(
-                        /* identifier= */ 1, /* name= */ "ONE", (c) -> true)
+                createConfig(createDeviceState(1, "ONE"), (c) -> true)
         );
 
         setScreenOn(false);
@@ -472,8 +456,7 @@ public final class FoldableDeviceStateProviderTest {
     @Test
     public void isScreenOn_afterDisplayChangedToOnThenOff_returnsFalse() {
         createProvider(
-                createConfig(
-                        /* identifier= */ 1, /* name= */ "ONE", (c) -> true)
+                createConfig(createDeviceState(1, "ONE"), (c) -> true)
         );
 
         setScreenOn(true);
@@ -487,14 +470,14 @@ public final class FoldableDeviceStateProviderTest {
         when(mDisplayManager.getDisplays()).thenReturn(new Display[]{mDefaultDisplay});
         when(mDefaultDisplay.getType()).thenReturn(TYPE_INTERNAL);
 
-        createProvider(createConfig(/* identifier= */ 1, /* name= */ "CLOSED",
+        createProvider(createConfig(createDeviceState(1, "CLOSED"),
                         (c) -> c.getHingeAngle() < 5f),
-                createConfig(/* identifier= */ 2, /* name= */ "HALF_OPENED",
+                createConfig(createDeviceState(2, "HALF_OPENED"),
                         (c) -> c.getHingeAngle() < 90f),
-                createConfig(/* identifier= */ 3, /* name= */ "OPENED",
+                createConfig(createDeviceState(3, "OPENED"),
                         (c) -> c.getHingeAngle() < 180f),
-                createConfig(/* identifier= */ 4, /* name= */ "DUAL_DISPLAY", /* flags */ 0,
-                        (c) -> false, FoldableDeviceStateProvider::hasNoConnectedExternalDisplay));
+                createConfig(createDeviceState(4, "DUAL_DISPLAY"), (c) -> false,
+                        FoldableDeviceStateProvider::hasNoConnectedExternalDisplay));
 
         Listener listener = mock(Listener.class);
         mProvider.setListener(listener);
@@ -502,10 +485,11 @@ public final class FoldableDeviceStateProviderTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         assertThat(mDeviceStateArrayCaptor.getValue()).asList().containsExactly(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "DUAL_DISPLAY", 0 /* flags */)}).inOrder();
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "DUAL_DISPLAY",
+                                EMPTY_PROPERTY_SET)}).inOrder();
 
         clearInvocations(listener);
 
@@ -520,9 +504,9 @@ public final class FoldableDeviceStateProviderTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_ADDED));
         assertThat(mDeviceStateArrayCaptor.getValue()).asList().containsExactly(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */)}).inOrder();
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET)}).inOrder();
         clearInvocations(listener);
 
         // The DUAL_DISPLAY state should be re-enabled.
@@ -532,10 +516,11 @@ public final class FoldableDeviceStateProviderTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_REMOVED));
         assertThat(mDeviceStateArrayCaptor.getValue()).asList().containsExactly(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "DUAL_DISPLAY", 0 /* flags */)}).inOrder();
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "DUAL_DISPLAY",
+                                EMPTY_PROPERTY_SET)}).inOrder();
     }
 
     @Test
@@ -543,14 +528,14 @@ public final class FoldableDeviceStateProviderTest {
         when(mDisplayManager.getDisplays()).thenReturn(new Display[]{mDefaultDisplay});
         when(mDefaultDisplay.getType()).thenReturn(TYPE_INTERNAL);
 
-        createProvider(createConfig(/* identifier= */ 1, /* name= */ "CLOSED",
+        createProvider(createConfig(createDeviceState(1, "CLOSED"),
                         (c) -> c.getHingeAngle() < 5f),
-                createConfig(/* identifier= */ 2, /* name= */ "HALF_OPENED",
+                createConfig(createDeviceState(2, "HALF_OPENED"),
                         (c) -> c.getHingeAngle() < 90f),
-                createConfig(/* identifier= */ 3, /* name= */ "OPENED",
+                createConfig(createDeviceState(3, "OPENED"),
                         (c) -> c.getHingeAngle() < 180f),
-                createConfig(/* identifier= */ 4, /* name= */ "DUAL_DISPLAY", /* flags */ 0,
-                        (c) -> false, FoldableDeviceStateProvider::hasNoConnectedExternalDisplay));
+                createConfig(createDeviceState(4, "DUAL_DISPLAY"),
+                        FoldableDeviceStateProvider::hasNoConnectedExternalDisplay));
 
         Listener listener = mock(Listener.class);
         mProvider.setListener(listener);
@@ -558,10 +543,11 @@ public final class FoldableDeviceStateProviderTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         assertThat(mDeviceStateArrayCaptor.getValue()).asList().containsExactly(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "DUAL_DISPLAY", 0 /* flags */)}).inOrder();
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "DUAL_DISPLAY",
+                                EMPTY_PROPERTY_SET)}).inOrder();
 
         clearInvocations(listener);
 
@@ -579,10 +565,8 @@ public final class FoldableDeviceStateProviderTest {
     @Test
     public void hasNoConnectedDisplay_afterExternalDisplayAdded_returnsFalse() {
         createProvider(
-                createConfig(
-                        /* identifier= */ 1, /* name= */ "ONE",
-                        /* flags= */0, (c) -> true,
-                        FoldableDeviceStateProvider::hasNoConnectedExternalDisplay)
+                createConfig(createDeviceState(1, "ONE", Collections.emptySet()),
+                        (c) -> true, FoldableDeviceStateProvider::hasNoConnectedExternalDisplay)
         );
 
         addExternalDisplay(/* displayId */ 1);
@@ -594,9 +578,8 @@ public final class FoldableDeviceStateProviderTest {
     public void testOnDisplayAddedWithNullDisplayDoesNotThrowNPE() {
         createProvider(
                 createConfig(
-                        /* identifier= */ 1, /* name= */ "ONE",
-                        /* flags= */0, (c) -> true,
-                        FoldableDeviceStateProvider::hasNoConnectedExternalDisplay)
+                        createDeviceState(1, "ONE", Collections.emptySet()),
+                        (c) -> true, FoldableDeviceStateProvider::hasNoConnectedExternalDisplay)
         );
 
         when(mDisplayManager.getDisplay(1)).thenReturn(null);
@@ -608,9 +591,8 @@ public final class FoldableDeviceStateProviderTest {
     public void hasNoConnectedDisplay_afterExternalDisplayAddedAndRemoved_returnsTrue() {
         createProvider(
                 createConfig(
-                        /* identifier= */ 1, /* name= */ "ONE",
-                        /* flags= */0, (c) -> true,
-                        FoldableDeviceStateProvider::hasNoConnectedExternalDisplay)
+                        createDeviceState(1, "ONE", Collections.emptySet()),
+                        (c) -> true, FoldableDeviceStateProvider::hasNoConnectedExternalDisplay)
         );
 
         addExternalDisplay(/* displayId */ 1);
@@ -657,12 +639,31 @@ public final class FoldableDeviceStateProviderTest {
         mProvider.onSensorChanged(event);
     }
 
-    private void createProvider(DeviceStateConfiguration... configurations) {
+    private void createProvider(DeviceStatePredicateWrapper... configurations) {
         mProvider = new FoldableDeviceStateProvider(mFakeFeatureFlags, mContext, mSensorManager,
                 mHingeAngleSensor, mHallSensor, mDisplayManager, configurations);
         verify(mDisplayManager)
                 .registerDisplayListener(
                         mDisplayListenerCaptor.capture(),
                         nullable(Handler.class));
+    }
+
+    /**
+     * Returns a new {@link DeviceState} object
+     */
+    private DeviceState createDeviceState(int identifier,
+            @NonNull String name,
+            @NonNull Set<@DeviceState.DeviceStateProperties Integer> systemProperties) {
+        return new DeviceState(new DeviceState.Configuration.Builder(identifier, name)
+                .setSystemProperties(systemProperties)
+                .build());
+    }
+
+    /**
+     * Returns a new {@link DeviceState} object
+     */
+    private DeviceState createDeviceState(int identifier,
+            @NonNull String name) {
+        return createDeviceState(identifier, name, Collections.emptySet());
     }
 }

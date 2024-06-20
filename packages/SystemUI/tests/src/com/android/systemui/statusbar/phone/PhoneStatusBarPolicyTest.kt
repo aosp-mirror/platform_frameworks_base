@@ -22,9 +22,9 @@ import android.app.admin.DevicePolicyResourcesManager
 import android.content.SharedPreferences
 import android.os.UserManager
 import android.telecom.TelecomManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -36,6 +36,7 @@ import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.policy.BluetoothController
 import com.android.systemui.statusbar.policy.CastController
 import com.android.systemui.statusbar.policy.DataSaverController
@@ -78,7 +79,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest

@@ -351,6 +351,12 @@ public class TaskInfo {
     }
 
     /** @hide */
+    public boolean isFreeform() {
+        return configuration.windowConfiguration.getWindowingMode()
+                == WindowConfiguration.WINDOWING_MODE_FREEFORM;
+    }
+
+    /** @hide */
     @WindowConfiguration.ActivityType
     public int getActivityType() {
         return configuration.windowConfiguration.getActivityType();

@@ -30,6 +30,8 @@ import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_N
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_TIMED;
 import static android.hardware.biometrics.BiometricConstants.LockoutMode;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricSourceType.FACE;
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
@@ -42,7 +44,6 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED;
-import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
 
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
@@ -1239,9 +1240,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         boolean cameraPrivacyEnabled = mSensorPrivacyManager.isSensorPrivacyEnabled(
                 SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE, SensorPrivacyManager.Sensors.CAMERA);
 
-        final boolean isHwUnavailable = msgId == FaceManager.FACE_ERROR_HW_UNAVAILABLE;
+        final boolean isHwUnavailable = msgId == FACE_ERROR_HW_UNAVAILABLE;
 
-        if (msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
+        if (msgId == FACE_ERROR_LOCKOUT_PERMANENT) {
             if (getFaceAuthInteractor() != null && getFaceAuthInteractor().isFaceAuthStrong()) {
                 updateFingerprintListeningState(BIOMETRIC_ACTION_STOP);
             }
@@ -1383,7 +1384,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     @Deprecated
     public boolean getIsFaceAuthenticated() {
-        return getFaceAuthInteractor() != null && getFaceAuthInteractor().isAuthenticated();
+        return getFaceAuthInteractor() != null
+                && getFaceAuthInteractor().isAuthenticated().getValue();
     }
 
     public boolean getUserCanSkipBouncer(int userId) {
@@ -1425,7 +1427,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     @Deprecated
     public boolean isCurrentUserUnlockedWithFace() {
-        return getFaceAuthInteractor() != null && getFaceAuthInteractor().isAuthenticated();
+        return getFaceAuthInteractor() != null
+                && getFaceAuthInteractor().isAuthenticated().getValue();
     }
 
     /**
@@ -1515,7 +1518,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return false;
         }
         boolean isFaceLockedOut =
-                getFaceAuthInteractor() != null && getFaceAuthInteractor().isLockedOut();
+                getFaceAuthInteractor() != null && getFaceAuthInteractor().isLockedOut().getValue();
         boolean isFaceAuthStrong =
                 getFaceAuthInteractor() != null && getFaceAuthInteractor().isFaceAuthStrong();
         boolean isFingerprintLockedOut = isFingerprintLockedOut();
@@ -1868,7 +1871,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 @Override
                 public void onPostureChanged(@DevicePostureInt int posture) {
                     if (posture == DEVICE_POSTURE_OPENED) {
-                        mLogger.d("Posture changed to open - attempting to request active unlock");
+                        mLogger.d("Posture changed to open - attempting to request active"
+                                + " unlock and run face auth");
+                        getFaceAuthInteractor().onDeviceUnfolded();
                         requestActiveUnlockFromWakeReason(PowerManager.WAKE_REASON_UNFOLD_DEVICE,
                                 false);
                     }
@@ -2434,9 +2439,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 updateFingerprintListeningState(BIOMETRIC_ACTION_START);
             }
         });
-        if (mConfigFaceAuthSupportedPosture != DEVICE_POSTURE_UNKNOWN) {
-            mDevicePostureController.addCallback(mPostureCallback);
-        }
+        mDevicePostureController.addCallback(mPostureCallback);
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
 
         mTaskStackChangeListeners.registerTaskStackListener(mTaskStackListener);
@@ -2966,7 +2969,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     @Deprecated
     public boolean isFaceLockedOut() {
-        return getFaceAuthInteractor() != null && getFaceAuthInteractor().isLockedOut();
+        return getFaceAuthInteractor() != null && getFaceAuthInteractor().isLockedOut().getValue();
     }
 
     /**

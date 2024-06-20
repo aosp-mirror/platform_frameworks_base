@@ -1,7 +1,0 @@
-# Ravenwood "policy" file for services.core.
-
-# Keep all AIDL interfaces
-class :aidl stubclass
-
-# Keep all feature flag implementations
-class :feature_flags stubclass

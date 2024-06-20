@@ -101,10 +101,6 @@ class AppIdPermissionPersistence {
         val type = getAttributeIntOrThrow(ATTR_TYPE)
         when (type) {
             Permission.TYPE_MANIFEST -> {}
-            Permission.TYPE_CONFIG -> {
-                Slog.w(LOG_TAG, "Ignoring unexpected config permission $name")
-                return
-            }
             Permission.TYPE_DYNAMIC -> {
                 permissionInfo.apply {
                     icon = getAttributeIntHexOrDefault(ATTR_ICON, 0)
@@ -134,20 +130,11 @@ class AppIdPermissionPersistence {
     }
 
     private fun BinaryXmlSerializer.serializePermission(permission: Permission) {
-        val type = permission.type
-        when (type) {
-            Permission.TYPE_MANIFEST,
-            Permission.TYPE_DYNAMIC -> {}
-            Permission.TYPE_CONFIG -> return
-            else -> {
-                Slog.w(LOG_TAG, "Skipping serializing permission $name with unknown type $type")
-                return
-            }
-        }
         tag(TAG_PERMISSION) {
             attributeInterned(ATTR_NAME, permission.name)
             attributeInterned(ATTR_PACKAGE_NAME, permission.packageName)
             attributeIntHex(ATTR_PROTECTION_LEVEL, permission.protectionLevel)
+            val type = permission.type
             attributeInt(ATTR_TYPE, type)
             if (type == Permission.TYPE_DYNAMIC) {
                 val permissionInfo = permission.permissionInfo

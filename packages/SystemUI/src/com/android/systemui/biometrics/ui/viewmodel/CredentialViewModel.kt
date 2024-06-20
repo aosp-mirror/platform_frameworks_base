@@ -2,8 +2,11 @@ package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.hardware.biometrics.Flags.customBiometricPrompt
+import android.hardware.biometrics.PromptContentView
 import android.text.InputType
 import com.android.internal.widget.LockPatternView
+import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.interactor.CredentialStatus
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
@@ -34,14 +37,19 @@ constructor(
     val header: Flow<CredentialHeaderViewModel> =
         combine(
             credentialInteractor.prompt.filterIsInstance<BiometricPromptRequest.Credential>(),
-            credentialInteractor.showBpWithoutIconForCredential
-        ) { request, showBpWithoutIconForCredential ->
+            credentialInteractor.showTitleOnly
+        ) { request, showTitleOnly ->
+            val flagEnabled = customBiometricPrompt() && constraintBp()
+            val showTitleOnlyForCredential = showTitleOnly && flagEnabled
             BiometricPromptHeaderViewModelImpl(
                 request,
                 user = request.userInfo,
                 title = request.title,
-                subtitle = if (showBpWithoutIconForCredential) "" else request.subtitle,
-                description = if (showBpWithoutIconForCredential) "" else request.description,
+                subtitle = if (showTitleOnlyForCredential) "" else request.subtitle,
+                contentView =
+                    if (flagEnabled && !showTitleOnlyForCredential) request.contentView else null,
+                description =
+                    if (flagEnabled && request.contentView != null) "" else request.description,
                 icon = applicationContext.asLockIcon(request.userInfo.deviceCredentialOwnerId),
                 showEmergencyCallButton = request.showEmergencyCallButton
             )
@@ -188,6 +196,7 @@ private class BiometricPromptHeaderViewModelImpl(
     override val title: String,
     override val subtitle: String,
     override val description: String,
+    override val contentView: PromptContentView?,
     override val icon: Drawable,
     override val showEmergencyCallButton: Boolean,
 ) : CredentialHeaderViewModel

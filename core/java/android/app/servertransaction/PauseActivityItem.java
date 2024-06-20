@@ -37,7 +37,6 @@ public class PauseActivityItem extends ActivityLifecycleItem {
 
     private boolean mFinished;
     private boolean mUserLeaving;
-    private int mConfigChanges;
     private boolean mDontReport;
     private boolean mAutoEnteringPip;
 
@@ -45,7 +44,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
             @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityPause");
-        client.handlePauseActivity(r, mFinished, mUserLeaving, mConfigChanges, mAutoEnteringPip,
+        client.handlePauseActivity(r, mFinished, mUserLeaving, mAutoEnteringPip,
                 pendingActions, "PAUSE_ACTIVITY_ITEM");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -72,7 +71,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
     /** Obtain an instance initialized with provided params. */
     @NonNull
     public static PauseActivityItem obtain(@NonNull IBinder activityToken, boolean finished,
-            boolean userLeaving, int configChanges, boolean dontReport, boolean autoEnteringPip) {
+            boolean userLeaving, boolean dontReport, boolean autoEnteringPip) {
         PauseActivityItem instance = ObjectPool.obtain(PauseActivityItem.class);
         if (instance == null) {
             instance = new PauseActivityItem();
@@ -80,7 +79,6 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         instance.setActivityToken(activityToken);
         instance.mFinished = finished;
         instance.mUserLeaving = userLeaving;
-        instance.mConfigChanges = configChanges;
         instance.mDontReport = dontReport;
         instance.mAutoEnteringPip = autoEnteringPip;
 
@@ -91,7 +89,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
     @NonNull
     public static PauseActivityItem obtain(@NonNull IBinder activityToken) {
         return obtain(activityToken, false /* finished */, false /* userLeaving */,
-                0 /* configChanges */, true /* dontReport */, false /* autoEnteringPip*/);
+                true /* dontReport */, false /* autoEnteringPip*/);
     }
 
     @Override
@@ -99,7 +97,6 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         super.recycle();
         mFinished = false;
         mUserLeaving = false;
-        mConfigChanges = 0;
         mDontReport = false;
         mAutoEnteringPip = false;
         ObjectPool.recycle(this);
@@ -113,7 +110,6 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mFinished);
         dest.writeBoolean(mUserLeaving);
-        dest.writeInt(mConfigChanges);
         dest.writeBoolean(mDontReport);
         dest.writeBoolean(mAutoEnteringPip);
     }
@@ -123,7 +119,6 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         super(in);
         mFinished = in.readBoolean();
         mUserLeaving = in.readBoolean();
-        mConfigChanges = in.readInt();
         mDontReport = in.readBoolean();
         mAutoEnteringPip = in.readBoolean();
     }
@@ -148,7 +143,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         }
         final PauseActivityItem other = (PauseActivityItem) o;
         return mFinished == other.mFinished && mUserLeaving == other.mUserLeaving
-                && mConfigChanges == other.mConfigChanges && mDontReport == other.mDontReport
+                && mDontReport == other.mDontReport
                 && mAutoEnteringPip == other.mAutoEnteringPip;
     }
 
@@ -158,7 +153,6 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         result = 31 * result + super.hashCode();
         result = 31 * result + (mFinished ? 1 : 0);
         result = 31 * result + (mUserLeaving ? 1 : 0);
-        result = 31 * result + mConfigChanges;
         result = 31 * result + (mDontReport ? 1 : 0);
         result = 31 * result + (mAutoEnteringPip ? 1 : 0);
         return result;
@@ -169,7 +163,6 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         return "PauseActivityItem{" + super.toString()
                 + ",finished=" + mFinished
                 + ",userLeaving=" + mUserLeaving
-                + ",configChanges=" + mConfigChanges
                 + ",dontReport=" + mDontReport
                 + ",autoEnteringPip=" + mAutoEnteringPip + "}";
     }

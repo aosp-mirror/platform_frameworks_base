@@ -106,6 +106,11 @@ ANDROID_API int WebViewFunctor_create(void* data, const WebViewFunctorCallbacks&
 // and it should be considered alive & active until that point.
 ANDROID_API void WebViewFunctor_release(int functor);
 
+// Reports the list of threads critical for frame production for the given
+// functor. Must be called on render thread.
+ANDROID_API void WebViewFunctor_reportRenderingThreads(int functor, const int32_t* thread_ids,
+                                                       size_t size);
+
 }  // namespace android::uirenderer
 
 #endif  // FRAMEWORKS_BASE_WEBVIEWFUNCTOR_H

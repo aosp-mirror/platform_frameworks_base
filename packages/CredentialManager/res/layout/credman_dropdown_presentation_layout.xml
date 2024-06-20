@@ -14,37 +14,59 @@
   ~ limitations under the License.
   -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@android:id/content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minHeight="@dimen/dropdown_touch_target_min_height"
-                android:layout_marginEnd="@dimen/dropdown_layout_horizontal_margin"
                 android:elevation="3dp">
 
-        <ImageView
-            android:id="@android:id/icon1"
+        <LinearLayout
+            android:id="@+id/credential_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_alignParentStart="true"
-            android:background="@null"/>
-        <TextView
-            android:id="@android:id/text1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@android:id/icon1"
-            android:minWidth="@dimen/autofill_dropdown_textview_min_width"
-            android:maxWidth="@dimen/autofill_dropdown_textview_max_width"
-            style="@style/autofill.TextTitle"/>
-        <TextView
-            android:id="@android:id/text2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@android:id/text1"
-            android:layout_toEndOf="@android:id/icon1"
-            android:minWidth="@dimen/autofill_dropdown_textview_min_width"
-            android:maxWidth="@dimen/autofill_dropdown_textview_max_width"
-            style="@style/autofill.TextSubtitle"/>
+            android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@android:id/icon1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_alignParentStart="true"
+                    android:paddingStart="@dimen/autofill_view_left_padding"
+                    app:tint="?androidprv:attr/materialColorOnSurface"
+                    android:background="@null"/>
+
+                <LinearLayout
+                    android:id="@+id/text_container"
+                    android:layout_width="@dimen/autofill_dropdown_textview_max_width"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="@dimen/autofill_view_left_padding"
+                    android:paddingEnd="@dimen/autofill_view_right_padding"
+                    android:paddingTop="@dimen/autofill_view_top_padding"
+                    android:paddingBottom="@dimen/autofill_view_bottom_padding"
+                    android:textDirection="locale"
+                    android:orientation="vertical">
+
+                        <TextView
+                            android:id="@android:id/text1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="?androidprv:attr/materialColorOnSurface"
+                            android:textDirection="locale"
+                            style="@style/autofill.TextTitle"/>
+
+                        <TextView
+                            android:id="@android:id/text2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"
+                            android:textDirection="locale"
+                            style="@style/autofill.TextSubtitle"/>
+
+                </LinearLayout>
+
+        </LinearLayout>
 
 </RelativeLayout>

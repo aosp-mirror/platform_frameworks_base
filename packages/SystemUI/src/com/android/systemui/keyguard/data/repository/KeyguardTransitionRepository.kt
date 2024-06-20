@@ -20,9 +20,12 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.annotation.FloatRange
+import android.annotation.SuppressLint
 import android.os.Trace
 import android.util.Log
+import com.android.app.tracing.coroutines.withContext
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
@@ -30,12 +33,18 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.sync.Mutex
 
 /**
  * The source of truth for all keyguard transitions.
@@ -65,6 +74,9 @@ interface KeyguardTransitionRepository {
      */
     val transitions: Flow<TransitionStep>
 
+    /** The [TransitionInfo] of the most recent call to [startTransition]. */
+    val currentTransitionInfoInternal: StateFlow<TransitionInfo>
+
     /**
      * Interactors that require information about changes between [KeyguardState]s will call this to
      * register themselves for flowable [TransitionStep]s when that transition occurs.
@@ -77,7 +89,13 @@ interface KeyguardTransitionRepository {
      * Begin a transition from one state to another. Transitions are interruptible, and will issue a
      * [TransitionStep] with state = [TransitionState.CANCELED] before beginning the next one.
      */
-    fun startTransition(info: TransitionInfo): UUID?
+    suspend fun startTransition(info: TransitionInfo): UUID?
+
+    /**
+     * Emits STARTED and FINISHED transition steps to the given state. This is used during boot to
+     * seed the repository with the appropriate initial state.
+     */
+    suspend fun emitInitialStepsFromOff(to: KeyguardState)
 
     /**
      * Allows manual control of a transition. When calling [startTransition], the consumer must pass
@@ -95,11 +113,16 @@ interface KeyguardTransitionRepository {
 }
 
 @SysUISingleton
-class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitionRepository {
-    /*
-     * Each transition between [KeyguardState]s will have an associated Flow.
-     * In order to collect these events, clients should call [transition].
+class KeyguardTransitionRepositoryImpl
+@Inject
+constructor(
+    @Main val mainDispatcher: CoroutineDispatcher,
+) : KeyguardTransitionRepository {
+    /**
+     * Each transition between [KeyguardState]s will have an associated Flow. In order to collect
+     * these events, clients should call [transition].
      */
+    @SuppressLint("SharedFlowCreation")
     private val _transitions =
         MutableSharedFlow<TransitionStep>(
             replay = 2,
@@ -110,101 +133,132 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
     private var lastStep: TransitionStep = TransitionStep()
     private var lastAnimator: ValueAnimator? = null
 
+    private val _currentTransitionMutex = Mutex()
+    private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
+        MutableStateFlow(
+            TransitionInfo(
+                ownerName = "",
+                from = KeyguardState.OFF,
+                to = KeyguardState.OFF,
+                animator = null
+            )
+        )
+    override var currentTransitionInfoInternal = _currentTransitionInfo.asStateFlow()
+
     /*
      * When manual control of the transition is requested, a unique [UUID] is used as the handle
      * to permit calls to [updateTransition]
      */
     private var updateTransitionId: UUID? = null
 
+    // Only used in a test environment
+    var forceDelayForRaceConditionTest = false
+
     init {
-        // Seed with transitions signaling a boot into lockscreen state. If updating this, please
-        // also update FakeKeyguardTransitionRepository.
+        // Start with a FINISHED transition in OFF. KeyguardBootInteractor will transition from OFF
+        // to either GONE or LOCKSCREEN once we're booted up and can determine which state we should
+        // start in.
         emitTransition(
             TransitionStep(
                 KeyguardState.OFF,
-                KeyguardState.LOCKSCREEN,
-                0f,
-                TransitionState.STARTED,
-                KeyguardTransitionRepositoryImpl::class.simpleName!!,
-            )
-        )
-        emitTransition(
-            TransitionStep(
                 KeyguardState.OFF,
-                KeyguardState.LOCKSCREEN,
                 1f,
                 TransitionState.FINISHED,
-                KeyguardTransitionRepositoryImpl::class.simpleName!!,
             )
         )
     }
 
-    override fun startTransition(info: TransitionInfo): UUID? {
-        if (lastStep.from == info.from && lastStep.to == info.to) {
-            Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
-            return null
+    override suspend fun startTransition(info: TransitionInfo): UUID? {
+        _currentTransitionInfo.value = info
+        Log.d(TAG, "(Internal) Setting current transition info: $info")
+
+        // There is no fairness guarantee with 'withContext', which means that transitions could
+        // be processed out of order. Use a Mutex to guarantee ordering.
+        _currentTransitionMutex.lock()
+
+        // Only used in a test environment
+        if (forceDelayForRaceConditionTest) {
+            delay(50L)
         }
-        val startingValue =
-            if (lastStep.transitionState != TransitionState.FINISHED) {
-                Log.i(TAG, "Transition still active: $lastStep, canceling")
-                when (info.modeOnCanceled) {
-                    TransitionModeOnCanceled.LAST_VALUE -> lastStep.value
-                    TransitionModeOnCanceled.RESET -> 0f
-                    TransitionModeOnCanceled.REVERSE -> 1f - lastStep.value
+
+        // Animators must be started on the main thread.
+        return withContext("$TAG#startTransition", mainDispatcher) {
+            _currentTransitionMutex.unlock()
+
+            if (lastStep.from == info.from && lastStep.to == info.to) {
+                Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
+                return@withContext null
+            }
+            val startingValue =
+                if (lastStep.transitionState != TransitionState.FINISHED) {
+                    Log.i(TAG, "Transition still active: $lastStep, canceling")
+                    when (info.modeOnCanceled) {
+                        TransitionModeOnCanceled.LAST_VALUE -> lastStep.value
+                        TransitionModeOnCanceled.RESET -> 0f
+                        TransitionModeOnCanceled.REVERSE -> 1f - lastStep.value
+                    }
+                } else {
+                    0f
                 }
-            } else {
-                0f
+
+            lastAnimator?.cancel()
+            lastAnimator = info.animator
+
+            // Cancel any existing manual transitions
+            updateTransitionId?.let { uuid ->
+                updateTransition(uuid, lastStep.value, TransitionState.CANCELED)
             }
 
-        lastAnimator?.cancel()
-        lastAnimator = info.animator
-
-        info.animator?.let { animator ->
-            // An animator was provided, so use it to run the transition
-            animator.setFloatValues(startingValue, 1f)
-            animator.duration = ((1f - startingValue) * animator.duration).toLong()
-            val updateListener = AnimatorUpdateListener { animation ->
-                emitTransition(
-                    TransitionStep(
-                        info,
-                        (animation.animatedValue as Float),
-                        TransitionState.RUNNING
+            info.animator?.let { animator ->
+                // An animator was provided, so use it to run the transition
+                animator.setFloatValues(startingValue, 1f)
+                animator.duration = ((1f - startingValue) * animator.duration).toLong()
+                val updateListener = AnimatorUpdateListener { animation ->
+                    emitTransition(
+                        TransitionStep(
+                            info,
+                            (animation.animatedValue as Float),
+                            TransitionState.RUNNING
+                        )
                     )
-                )
-            }
-            val adapter =
-                object : AnimatorListenerAdapter() {
-                    override fun onAnimationStart(animation: Animator) {
-                        emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
-                    }
-
-                    override fun onAnimationCancel(animation: Animator) {
-                        endAnimation(lastStep.value, TransitionState.CANCELED)
-                    }
-
-                    override fun onAnimationEnd(animation: Animator) {
-                        endAnimation(1f, TransitionState.FINISHED)
-                    }
-
-                    private fun endAnimation(value: Float, state: TransitionState) {
-                        emitTransition(TransitionStep(info, value, state))
-                        animator.removeListener(this)
-                        animator.removeUpdateListener(updateListener)
-                        lastAnimator = null
-                    }
                 }
-            animator.addListener(adapter)
-            animator.addUpdateListener(updateListener)
-            animator.start()
-            return@startTransition null
-        }
-            ?: run {
-                emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
 
-                // No animator, so it's manual. Provide a mechanism to callback
-                updateTransitionId = UUID.randomUUID()
-                return@startTransition updateTransitionId
+                val adapter =
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationStart(animation: Animator) {
+                            emitTransition(
+                                TransitionStep(info, startingValue, TransitionState.STARTED)
+                            )
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {
+                            endAnimation(lastStep.value, TransitionState.CANCELED)
+                        }
+
+                        override fun onAnimationEnd(animation: Animator) {
+                            endAnimation(1f, TransitionState.FINISHED)
+                        }
+
+                        private fun endAnimation(value: Float, state: TransitionState) {
+                            emitTransition(TransitionStep(info, value, state))
+                            animator.removeListener(this)
+                            animator.removeUpdateListener(updateListener)
+                            lastAnimator = null
+                        }
+                    }
+                animator.addListener(adapter)
+                animator.addUpdateListener(updateListener)
+                animator.start()
+                return@withContext null
             }
+                ?: run {
+                    emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
+
+                    // No animator, so it's manual. Provide a mechanism to callback
+                    updateTransitionId = UUID.randomUUID()
+                    return@withContext updateTransitionId
+                }
+        }
     }
 
     override fun updateTransition(
@@ -229,6 +283,36 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         logAndTrace(nextStep, isManual)
         _transitions.tryEmit(nextStep)
         lastStep = nextStep
+    }
+
+    override suspend fun emitInitialStepsFromOff(to: KeyguardState) {
+        _currentTransitionInfo.value =
+            TransitionInfo(
+                ownerName = "KeyguardTransitionRepository(boot)",
+                from = KeyguardState.OFF,
+                to = to,
+                animator = null
+            )
+
+        emitTransition(
+            TransitionStep(
+                KeyguardState.OFF,
+                to,
+                0f,
+                TransitionState.STARTED,
+                ownerName = "KeyguardTransitionRepository(boot)",
+            )
+        )
+
+        emitTransition(
+            TransitionStep(
+                KeyguardState.OFF,
+                to,
+                1f,
+                TransitionState.FINISHED,
+                ownerName = "KeyguardTransitionRepository(boot)",
+            ),
+        )
     }
 
     private fun logAndTrace(step: TransitionStep, isManual: Boolean) {

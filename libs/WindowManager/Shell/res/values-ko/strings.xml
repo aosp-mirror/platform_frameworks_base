@@ -95,7 +95,7 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"앱 위치를 조정하려면 앱 외부를 두 번 탭합니다."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"확인"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"추가 정보는 펼쳐서 확인하세요."</string>
-    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"화면에 맞게 보도록 다시 시작할까요?"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"화면에 맞게 보이도록 다시 시작할까요?"</string>
     <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"앱을 다시 시작하면 화면에 더 잘 맞게 볼 수는 있지만 진행 상황 또는 저장되지 않은 변경사항을 잃을 수도 있습니다."</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"취소"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"다시 시작"</string>
@@ -117,4 +117,6 @@
     <string name="close_text" msgid="4986518933445178928">"닫기"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"메뉴 닫기"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"메뉴 열기"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"화면 최대화"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"화면 분할"</string>
 </resources>

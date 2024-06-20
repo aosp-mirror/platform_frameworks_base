@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "default_locale"
+    is_exported: true
     namespace: "resource_manager"
     description: "Feature flag for default locale in LocaleConfig"
     bug: "117306409"
@@ -12,6 +13,7 @@ flag {
 
 flag {
     name: "font_scale_converter_public"
+    is_exported: true
     namespace: "accessibility"
     description: "Enables the public API for FontScaleConverter, including enabling thread-safe caching."
     bug: "239736383"
@@ -21,6 +23,7 @@ flag {
 
 flag {
     name: "asset_file_descriptor_frro"
+    is_exported: true
     namespace: "resource_manager"
     description: "Feature flag for passing in an AssetFileDescriptor to create an frro"
     bug: "304478666"
@@ -28,6 +31,7 @@ flag {
 
 flag {
     name: "manifest_flagging"
+    is_exported: true
     namespace: "resource_manager"
     description: "Feature flag for flagging manifest entries"
     bug: "297373084"
@@ -37,13 +41,15 @@ flag {
 
 flag {
     name: "nine_patch_frro"
+    is_exported: true
     namespace: "resource_manager"
     description: "Feature flag for creating an frro from a 9-patch"
-    bug: "309232726"
+    bug: "296324826"
 }
 
 flag {
     name: "register_resource_paths"
+    is_exported: true
     namespace: "resource_manager"
     description: "Feature flag for register resource paths for shared library"
     bug: "306202569"

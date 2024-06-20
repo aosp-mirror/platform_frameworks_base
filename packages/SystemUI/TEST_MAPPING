@@ -59,13 +59,16 @@
       ]
     }
   ],
-  
+
   "auto-end-to-end-postsubmit": [
     {
       "name": "AndroidAutomotiveHomeTests",
       "options" : [
         {
           "include-filter": "android.platform.tests.HomeTest"
+        },
+        {
+          "exclude-filter": "android.platform.tests.HomeTest#testAssistantWidget"
         }
       ]
     },

@@ -120,9 +120,46 @@ public class ResourcesManager {
     private final ReferenceQueue<Resources> mResourcesReferencesQueue = new ReferenceQueue<>();
 
     /**
+     * A list of Resources references for all Resources instances created through Resources public
+     * constructor, only system Resources created by the private constructor are excluded.
+     * This addition is necessary due to certain Application Resources created by constructor
+     * directly which are not managed by ResourcesManager, hence we require a comprehensive
+     * collection of all Resources references to help with asset paths appending tasks when shared
+     * libraries are registered.
+     */
+    private final ArrayList<WeakReference<Resources>> mAllResourceReferences = new ArrayList<>();
+    private final ReferenceQueue<Resources> mAllResourceReferencesQueue = new ReferenceQueue<>();
+
+    /**
      * The localeConfig of the app.
      */
     private LocaleConfig mLocaleConfig = new LocaleConfig(LocaleList.getEmptyLocaleList());
+
+    private final ArrayMap<String, SharedLibraryAssets> mSharedLibAssetsMap =
+            new ArrayMap<>();
+
+    /**
+     * The internal function to register the resources paths of a package (e.g. a shared library).
+     * This will collect the package resources' paths from its ApplicationInfo and add them to all
+     * existing and future contexts while the application is running.
+     */
+    public void registerResourcePaths(@NonNull String uniqueId, @NonNull ApplicationInfo appInfo) {
+        SharedLibraryAssets sharedLibAssets = new SharedLibraryAssets(appInfo.sourceDir,
+                appInfo.splitSourceDirs, appInfo.sharedLibraryFiles,
+                appInfo.resourceDirs, appInfo.overlayPaths);
+
+        synchronized (mLock) {
+            if (mSharedLibAssetsMap.containsKey(uniqueId)) {
+                Slog.v(TAG, "Package resources' paths for uniqueId: " + uniqueId
+                        + " has already been registered, this is a no-op.");
+                return;
+            }
+            mSharedLibAssetsMap.put(uniqueId, sharedLibAssets);
+            appendLibAssetsLocked(sharedLibAssets.getAllAssetPaths());
+            Slog.v(TAG, "The following resources' paths have been added: "
+                    + Arrays.toString(sharedLibAssets.getAllAssetPaths()));
+        }
+    }
 
     private static class ApkKey {
         public final String path;
@@ -276,6 +313,21 @@ public class ResourcesManager {
 
     @UnsupportedAppUsage
     public ResourcesManager() {
+    }
+
+    /**
+     * Inject a customized ResourcesManager instance for testing, return the old ResourcesManager
+     * instance.
+     */
+    @UnsupportedAppUsage
+    @VisibleForTesting
+    public static ResourcesManager setInstance(ResourcesManager resourcesManager) {
+        synchronized (ResourcesManager.class) {
+            ResourcesManager oldResourceManager = sResourcesManager;
+            sResourcesManager = resourcesManager;
+            return oldResourceManager;
+        }
+
     }
 
     @UnsupportedAppUsage
@@ -695,7 +747,8 @@ public class ResourcesManager {
     private @Nullable ResourcesImpl findOrCreateResourcesImplForKeyLocked(
             @NonNull ResourcesKey key, @Nullable ApkAssetsSupplier apkSupplier) {
         ResourcesImpl impl = findResourcesImplForKeyLocked(key);
-        if (impl == null) {
+        // ResourcesImpl also need to be recreated if its shared library count is not up-to-date.
+        if (impl == null || impl.getSharedLibCount() != mSharedLibAssetsMap.size()) {
             impl = createResourcesImpl(key, apkSupplier);
             if (impl != null) {
                 mResourceImpls.put(key, new WeakReference<>(impl));
@@ -1480,6 +1533,56 @@ public class ResourcesManager {
         }
     }
 
+    private void appendLibAssetsLocked(String[] libAssets) {
+        synchronized (mLock) {
+            // Record which ResourcesImpl need updating
+            // (and what ResourcesKey they should update to).
+            final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
+
+            final int implCount = mResourceImpls.size();
+            for (int i = 0; i < implCount; i++) {
+                final ResourcesKey key = mResourceImpls.keyAt(i);
+                final WeakReference<ResourcesImpl> weakImplRef = mResourceImpls.valueAt(i);
+                final ResourcesImpl impl = weakImplRef != null ? weakImplRef.get() : null;
+                if (impl == null) {
+                    Slog.w(TAG, "Found a ResourcesImpl which is null, skip it and continue to "
+                            + "append shared library assets for next ResourcesImpl.");
+                    continue;
+                }
+
+                var newDirs = new ArrayList<String>();
+                var dirsSet = new ArraySet<String>();
+                if (key.mLibDirs != null) {
+                    final int dirsLength = key.mLibDirs.length;
+                    for (int k = 0; k < dirsLength; k++) {
+                        newDirs.add(key.mLibDirs[k]);
+                        dirsSet.add(key.mLibDirs[k]);
+                    }
+                }
+                final int assetsLength = libAssets.length;
+                for (int j = 0; j < assetsLength; j++) {
+                    if (dirsSet.add(libAssets[j])) {
+                        newDirs.add(libAssets[j]);
+                    }
+                }
+                String[] newLibAssets = newDirs.toArray(new String[0]);
+                if (!Arrays.equals(newLibAssets, key.mLibDirs)) {
+                    updatedResourceKeys.put(impl, new ResourcesKey(
+                            key.mResDir,
+                            key.mSplitResDirs,
+                            key.mOverlayPaths,
+                            newLibAssets,
+                            key.mDisplayId,
+                            key.mOverrideConfiguration,
+                            key.mCompatInfo,
+                            key.mLoaders));
+                }
+            }
+
+            redirectAllResourcesToNewImplLocked(updatedResourceKeys);
+        }
+    }
+
     private void applyNewResourceDirsLocked(@Nullable final String[] oldSourceDirs,
             @NonNull final ApplicationInfo appInfo) {
         try {
@@ -1615,6 +1718,43 @@ public class ResourcesManager {
         }
     }
 
+    // Another redirect function which will loop through all Resources and reload ResourcesImpl
+    // if it needs a shared library asset paths update.
+    private void redirectAllResourcesToNewImplLocked(
+            @NonNull final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys) {
+        cleanupReferences(mAllResourceReferences, mAllResourceReferencesQueue);
+
+        // Update any references to ResourcesImpl that require reloading.
+        final int resourcesCount = mAllResourceReferences.size();
+        for (int i = 0; i < resourcesCount; i++) {
+            final WeakReference<Resources> ref = mAllResourceReferences.get(i);
+            final Resources r = ref != null ? ref.get() : null;
+            if (r != null) {
+                final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
+                if (key != null) {
+                    final ResourcesImpl impl = findOrCreateResourcesImplForKeyLocked(key);
+                    if (impl == null) {
+                        throw new Resources.NotFoundException("failed to redirect ResourcesImpl");
+                    }
+                    r.setImpl(impl);
+                } else {
+                    // ResourcesKey is null which means the ResourcesImpl could belong to a
+                    // Resources created by application through Resources constructor and was not
+                    // managed by ResourcesManager, so the ResourcesImpl needs to be recreated to
+                    // have shared library asset paths appended if there are any.
+                    if (r.getImpl() != null) {
+                        final ResourcesImpl oldImpl = r.getImpl();
+                        // ResourcesImpl constructor will help to append shared library asset paths.
+                        final ResourcesImpl newImpl = new ResourcesImpl(oldImpl.getAssets(),
+                                oldImpl.getMetrics(), oldImpl.getConfiguration(),
+                                oldImpl.getDisplayAdjustments());
+                        r.setImpl(newImpl);
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Returns the LocaleConfig current set
      */
@@ -1686,6 +1826,65 @@ public class ResourcesManager {
                 }
 
                 redirectResourcesToNewImplLocked(updatedResourceImplKeys);
+            }
+        }
+    }
+
+    public static class SharedLibraryAssets{
+        private final String[] mAssetPaths;
+
+        SharedLibraryAssets(String sourceDir, String[] splitSourceDirs, String[] sharedLibraryFiles,
+                String[] resourceDirs, String[] overlayPaths) {
+            mAssetPaths = collectAssetPaths(sourceDir, splitSourceDirs, sharedLibraryFiles,
+                    resourceDirs, overlayPaths);
+        }
+
+        private @NonNull String[] collectAssetPaths(String sourceDir, String[] splitSourceDirs,
+                String[] sharedLibraryFiles, String[] resourceDirs, String[] overlayPaths) {
+            final String[][] inputLists = {
+                    splitSourceDirs, sharedLibraryFiles, resourceDirs, overlayPaths
+            };
+
+            final ArraySet<String> assetPathSet = new ArraySet<>();
+            final List<String> assetPathList = new ArrayList<>();
+            if (sourceDir != null) {
+                assetPathSet.add(sourceDir);
+                assetPathList.add(sourceDir);
+            }
+
+            for (int i = 0; i < inputLists.length; i++) {
+                if (inputLists[i] != null) {
+                    for (int j = 0; j < inputLists[i].length; j++) {
+                        if (assetPathSet.add(inputLists[i][j])) {
+                            assetPathList.add(inputLists[i][j]);
+                        }
+                    }
+                }
+            }
+            return assetPathList.toArray(new String[0]);
+        }
+
+        /**
+         * @return all the asset paths of this collected in this class.
+         */
+        public @NonNull String[] getAllAssetPaths() {
+            return mAssetPaths;
+        }
+    }
+
+    public @NonNull ArrayMap<String, SharedLibraryAssets> getSharedLibAssetsMap() {
+        return new ArrayMap<>(mSharedLibAssetsMap);
+    }
+
+    /**
+     * Add all resources references to the list which is designed to help to append shared library
+     * asset paths. This is invoked in Resources constructor to include all Resources instances.
+     */
+    public void registerAllResourcesReference(@NonNull Resources resources) {
+        if (android.content.res.Flags.registerResourcePaths()) {
+            synchronized (mLock) {
+                mAllResourceReferences.add(
+                        new WeakReference<>(resources, mAllResourceReferencesQueue));
             }
         }
     }

@@ -42,6 +42,7 @@ import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenPolicy;
 import android.app.AutomaticZenRule;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenDeviceEffects;
 
 /** {@hide} */
 interface INotificationManager
@@ -50,8 +51,8 @@ interface INotificationManager
     void cancelAllNotifications(String pkg, int userId);
 
     void clearData(String pkg, int uid, boolean fromApp);
-    void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration, boolean isUiContext, int displayId, @nullable ITransientNotificationCallback callback);
-    void enqueueToast(String pkg, IBinder token, ITransientNotification callback, int duration, boolean isUiContext, int displayId);
+    boolean enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration, boolean isUiContext, int displayId, @nullable ITransientNotificationCallback callback);
+    boolean enqueueToast(String pkg, IBinder token, ITransientNotification callback, int duration, boolean isUiContext, int displayId);
     void cancelToast(String pkg, IBinder token);
     void finishToken(String pkg, IBinder token);
 
@@ -121,6 +122,7 @@ interface INotificationManager
     boolean onlyHasDefaultChannel(String pkg, int uid);
     boolean areChannelsBypassingDnd();
     ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int uid);
+    List<String> getPackagesBypassingDnd(int userId, boolean includeConversationChannels);
     boolean isPackagePaused(String pkg);
     void deleteNotificationHistoryItem(String pkg, int uid, long postedTime);
     boolean isPermissionFixed(String pkg, int userId);
@@ -227,6 +229,7 @@ interface INotificationManager
     int getRuleInstanceCount(in ComponentName owner);
     int getAutomaticZenRuleState(String id);
     void setAutomaticZenRuleState(String id, in Condition condition);
+    void setManualZenRuleDeviceEffects(in ZenDeviceEffects effects);
 
     byte[] getBackupPayload(int user);
     void applyRestore(in byte[] payload, int user);

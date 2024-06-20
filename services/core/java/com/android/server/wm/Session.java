@@ -41,6 +41,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -79,6 +80,7 @@ import android.view.View.FocusDirection;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
+import android.view.WindowRelayoutResult;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
@@ -280,20 +282,29 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public int relayout(IWindow window, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
+            int lastSyncSeqId, WindowRelayoutResult outRelayoutResult) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
+        int res = mService.relayoutWindow(this, window, attrs, requestedWidth,
+                requestedHeight, viewFlags, flags, seq, lastSyncSeqId, outRelayoutResult);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        return res;
+    }
+
+    /** @deprecated */
+    @Deprecated
+    @Override
+    public int relayoutLegacy(IWindow window, WindowManager.LayoutParams attrs,
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId, ClientWindowFrames outFrames,
             MergedConfiguration mergedConfiguration, SurfaceControl outSurfaceControl,
             InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
-            Bundle outSyncSeqIdBundle) {
-        if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
-                + Binder.getCallingPid());
+            Bundle outBundle) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, attrs,
                 requestedWidth, requestedHeight, viewFlags, flags, seq,
                 lastSyncSeqId, outFrames, mergedConfiguration, outSurfaceControl, outInsetsState,
-                outActiveControls, outSyncSeqIdBundle);
+                outActiveControls, outBundle);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
-                + Binder.getCallingPid());
         return res;
     }
 
@@ -301,10 +312,15 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public void relayoutAsync(IWindow window, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId) {
-        relayout(window, attrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
-                lastSyncSeqId, null /* outFrames */, null /* mergedConfiguration */,
-                null /* outSurfaceControl */, null /* outInsetsState */,
-                null /* outActiveControls */, null /* outSyncIdBundle */);
+        if (windowSessionRelayoutInfo()) {
+            relayout(window, attrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
+                    lastSyncSeqId, null /* outRelayoutResult */);
+        } else {
+            relayoutLegacy(window, attrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
+                    lastSyncSeqId, null /* outFrames */, null /* mergedConfiguration */,
+                    null /* outSurfaceControl */, null /* outInsetsState */,
+                    null /* outActiveControls */, null /* outSyncIdBundle */);
+        }
     }
 
     @Override
@@ -724,16 +740,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void updatePointerIcon(IWindow window) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            mService.updatePointerIcon(window);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    @Override
     public void updateTapExcludeRegion(IWindow window, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -912,7 +918,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface,
             IBinder clientToken, @Nullable InputTransferToken hostInputTransferToken, int flags,
-            int privateFlags, int type, int inputFeatures, IBinder windowToken,
+            int privateFlags, int inputFeatures, int type, IBinder windowToken,
             InputTransferToken inputTransferToken, String inputHandleName,
             InputChannel outInputChannel) {
         if (hostInputTransferToken == null && !mCanAddInternalSystemWindow) {
@@ -925,7 +931,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         try {
             mService.grantInputChannel(this, mUid, mPid, displayId, surface, clientToken,
                     hostInputTransferToken, flags, mCanAddInternalSystemWindow ? privateFlags : 0,
-                    type, inputFeatures, windowToken, inputTransferToken, inputHandleName,
+                    inputFeatures, type, windowToken, inputTransferToken, inputHandleName,
                     outInputChannel);
         } finally {
             Binder.restoreCallingIdentity(identity);

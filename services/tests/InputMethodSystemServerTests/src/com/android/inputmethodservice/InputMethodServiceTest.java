@@ -38,7 +38,6 @@ import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.WindowManagerGlobal;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -49,6 +48,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.apps.inputmethod.simpleime.ims.InputMethodServiceWrapper;
 import com.android.apps.inputmethod.simpleime.testing.TestActivity;
+import com.android.compatibility.common.util.SystemUtil;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 
 import org.junit.After;
@@ -601,28 +601,6 @@ public class InputMethodServiceTest {
                 false /* orientationPortrait */);
     }
 
-    @Test
-    public void switchesKeyboardLayout_withShortcut_onlyIfImeVisible() throws Exception {
-        setShowImeWithHardKeyboard(true /* enabled */);
-
-        assertThat(mInputMethodService.isInputViewShown()).isFalse();
-        assertThat(mInputMethodService.onKeyDown(KeyEvent.KEYCODE_SPACE,
-                new KeyEvent(0 /* downTime */, 0 /* eventTime */, KeyEvent.ACTION_DOWN,
-                        KeyEvent.KEYCODE_SPACE, 0 /* repeat */,
-                        KeyEvent.META_CTRL_LEFT_ON | KeyEvent.META_CTRL_ON))).isFalse();
-
-        verifyInputViewStatusOnMainSync(
-                () -> assertThat(mActivity.showImeWithInputMethodManager(0 /* flags */)).isTrue(),
-                true /* expected */,
-                true /* inputViewStarted */);
-
-        assertThat(mInputMethodService.isInputViewShown()).isTrue();
-        assertThat(mInputMethodService.onKeyDown(KeyEvent.KEYCODE_SPACE,
-                new KeyEvent(0 /* downTime */, 0 /* eventTime */, KeyEvent.ACTION_DOWN,
-                        KeyEvent.KEYCODE_SPACE, 0 /* repeat */,
-                        KeyEvent.META_CTRL_LEFT_ON | KeyEvent.META_CTRL_ON))).isTrue();
-    }
-
     /**
      * This checks that when the system navigation bar is not created (e.g. emulator),
      * then the IME caption bar is also not created.
@@ -857,8 +835,7 @@ public class InputMethodServiceTest {
 
     private String executeShellCommand(String cmd) throws IOException {
         Log.i(TAG, "Run command: " + cmd);
-        return UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-                .executeShellCommand(cmd);
+        return SystemUtil.runShellCommandOrThrow(cmd);
     }
 
     private void clickOnEditorText() {

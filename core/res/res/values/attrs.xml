@@ -606,11 +606,9 @@
         <!-- ============ -->
        <eat-comment />
        <attr name="floatingToolbarCloseDrawable" format="reference" />
-       <attr name="floatingToolbarForegroundColor" format="reference|color" />
        <attr name="floatingToolbarItemBackgroundBorderlessDrawable" format="reference" />
        <attr name="floatingToolbarItemBackgroundDrawable" format="reference" />
        <attr name="floatingToolbarOpenDrawable" format="reference" />
-       <attr name="floatingToolbarPopupBackgroundDrawable" format="reference" />
        <attr name="floatingToolbarDividerColor" format="reference" />
 
         <!-- ============ -->
@@ -1346,6 +1344,51 @@
         <attr name="materialColorTertiary" format="color"/>
         <!-- The error color for the app, intended to draw attention to error conditions. @hide -->
         <attr name="materialColorError" format="color"/>
+
+        <!-- System Custom Tokens-->
+        <!-- @hide -->
+        <attr name="customColorWidgetBackground" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorClockHour" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorClockMinute" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorClockSecond" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorThemeApp" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnThemeApp" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorThemeAppRing" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnThemeAppRing" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorBrandA" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorBrandB" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorBrandC" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorBrandD" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorUnderSurface" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorShadeActive" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnShadeActive" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnShadeActiveVariant" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorShadeInactive" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnShadeInactive" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnShadeInactiveVariant" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorShadeDisabled" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOverviewBackground" format="color"/>
+
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -2300,7 +2343,7 @@
              ensure that the status bar has enough contrast with the contents of this app, and set
              an appropriate effective bar background accordingly.
              See: {@link android.R.attr#enforceStatusBarContrast}
-             <p>If the app targets
+             <p>If the window belongs to an app targeting
              {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
              this attribute is ignored.
              @deprecated Draw proper background behind
@@ -2320,7 +2363,7 @@
              ensure that the navigation bar has enough contrast with the contents of this app, and
              set an appropriate effective bar background accordingly.
              See: {@link android.R.attr#enforceNavigationBarContrast}
-             <p>If the app targets
+             <p>If the window belongs to an app targeting
              {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
              this attribute is ignored.
              @deprecated Draw proper background behind
@@ -2335,7 +2378,7 @@
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}.
              Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}.
-             <p>If the app targets
+             <p>If the window belongs to an app targeting
              {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
              this attribute is ignored.
              @deprecated Draw proper background behind
@@ -2400,7 +2443,9 @@
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentStatus}.
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_STATUS_BAR} on
-             the decor view. -->
+             the decor view and
+             {@link android.view.WindowInsetsController#APPEARANCE_LIGHT_STATUS_BARS} on the
+             {@link android.view.WindowInsetsController}. -->
         <attr name="windowLightStatusBar" format="boolean" />
 
         <!-- Reference to a drawable to be used as the splash screen content of the window. This
@@ -2422,12 +2467,16 @@
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}.
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR} on
-             the decor view. -->
+             the decor view and
+             {@link android.view.WindowInsetsController#APPEARANCE_LIGHT_NAVIGATION_BARS} on the
+             {@link android.view.WindowInsetsController}. -->
         <attr name="windowLightNavigationBar" format="boolean" />
 
         <!-- Controls how the window is laid out if there is a {@code DisplayCutout}.
         <p>
-        Defaults to {@code default}.
+        Defaults to {@code default}. But if the window fills the screen, and it belongs to an app
+        targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or
+        above, the behavior will be the same as specifying {@code always} regardless.
         <p>
         See also
         {@link android.view.WindowManager.LayoutParams#layoutInDisplayCutoutMode
@@ -2524,8 +2573,8 @@
 
         <!-- Flag indicating whether this window would opt-out the edge-to-edge enforcement.
 
-             <p>If this is false, the edge-to-edge enforcement will be applied to the window if its
-             app targets
+             <p>If this is false, the edge-to-edge enforcement will be applied to the window if it
+             belongs to an app targeting
              {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above.
              The affected behaviors are:
              <ul>
@@ -2533,12 +2582,13 @@
                  through the {@link android.view.WindowInsets} to the content view, as if calling
                  {@link android.view.Window#setDecorFitsSystemWindows(boolean)} with false.
                  <li>{@link android.view.WindowManager.LayoutParams#layoutInDisplayCutoutMode} of
-                 the non-floating windows will be set to {@link
+                 the fill-screen windows will behave as specifying {@link
                  android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS}.
-                 Changing it to other values will cause {@link lang.IllegalArgumentException}.
                  <li>The framework will set {@link android.R.attr#statusBarColor},
                  {@link android.R.attr#navigationBarColor}, and
                  {@link android.R.attr#navigationBarDividerColor} to transparent.
+                 <li>The frameworks will send Configuration no longer considering system insets.
+                 The Configuration will be stable regardless of the system insets change.
              </ul>
 
              <p>If this is true, the edge-to-edge enforcement won't be applied. However, this
@@ -4472,15 +4522,30 @@
     </declare-styleable>
 
     <!-- Specify one or more <code>polling-loop-filter</code> elements inside a
-         <code>host-apdu-service</code> to indicate polling loop frames that
-         your service can handle. -->
-    <!-- @FlaggedApi("android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP") -->
+         <code>host-apdu-service</code> or <code>offhost-apdu-service</code> to indicate polling
+         loop frames that your service can handle. -->
+    <!-- @FlaggedApi("android.nfc.nfc_read_polling_loop") -->
     <declare-styleable name="PollingLoopFilter">
         <!-- The polling loop frame. This attribute is mandatory. -->
         <attr name="name" />
         <!-- Whether or not the system should automatically start a transaction when this polling
          loop filter matches. If not set, default value is false. -->
-        <!-- @FlaggedApi("android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP") -->
+        <!-- @FlaggedApi("android.nfc.nfc_read_polling_loop") -->
+        <attr name="autoTransact" format="boolean"/>
+    </declare-styleable>
+
+    <!-- Specify one or more <code>polling-loop-pattern-filter</code> elements inside a
+         <code>host-apdu-service</code> or <code>offhost-apdu-service</code>  to indicate polling
+         loop frames that your service can handle. -->
+    <!-- @FlaggedApi("android.nfc.nfc_read_polling_loop") -->
+    <declare-styleable name="PollingLoopPatternFilter">
+        <!-- The patter to match polling loop frames to, must to be compatible with
+         {@link java.util.regex.Pattern#compile(String)} and only contain hexadecimal numbers and
+         `.`, `?` and `*` operators. This attribute is mandatory. -->
+        <attr name="name" />
+        <!-- Whether or not the system should automatically start a transaction when this polling
+         loop filter matches. If not set, default value is false. -->
+        <!-- @FlaggedApi("android.nfc.nfc_read_polling_loop") -->
         <attr name="autoTransact" format="boolean"/>
     </declare-styleable>
 
@@ -8988,6 +9053,14 @@
         <!-- Whether to show clock and other complications such as weather in the overlay. Default
              to true. Note that the overlay on dreams is currently only supported on tablets. -->
         <attr name="showClockAndComplications" format="boolean" />
+
+        <!-- Dream Category to determine the type of dream. Default to default.
+        @hide -->
+        <attr name="dreamCategory" format="integer">
+            <flag name="none" value="0x0" />
+            <flag name="low_light" value="0x1" />
+            <flag name="home_panel" value="0x2" />
+        </attr>
     </declare-styleable>
 
     <!--  Use <code>trust-agent</code> as the root tag of the XML resource that
@@ -9625,6 +9698,12 @@
         <attr name="hotSpotX" format="dimension" />
         <!-- Y coordinate of the icon hot spot. -->
         <attr name="hotSpotY" format="dimension" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="PointerIconVectorTheme">
+        <attr name="pointerIconVectorFill" format="color" />
+        <attr name="pointerIconVectorFillInverse" format="color" />
     </declare-styleable>
 
     <declare-styleable name="Storage">

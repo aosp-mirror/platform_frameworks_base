@@ -27,9 +27,9 @@ import android.app.RemoteInputHistoryItem;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -44,7 +44,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class RemoteInputNotificationRebuilderTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";

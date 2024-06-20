@@ -17,36 +17,29 @@
 package com.android.systemui.mediaprojection.taskswitcher.data.repository
 
 import android.os.Binder
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createToken
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createToken
+import com.android.systemui.mediaprojection.taskswitcher.activityTaskManagerTasksRepository
+import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
+import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ActivityTaskManagerTasksRepositoryTest : SysuiTestCase() {
 
-    private val fakeActivityTaskManager = FakeActivityTaskManager()
-
-    private val dispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(dispatcher)
-
-    private val repo =
-        ActivityTaskManagerTasksRepository(
-            activityTaskManager = fakeActivityTaskManager.activityTaskManager,
-            applicationScope = testScope.backgroundScope,
-            backgroundDispatcher = dispatcher
-        )
+    private val kosmos = taskSwitcherKosmos()
+    private val fakeActivityTaskManager = kosmos.fakeActivityTaskManager
+    private val testScope = kosmos.testScope
+    private val repo = kosmos.activityTaskManagerTasksRepository
 
     @Test
     fun launchRecentTask_taskIsMovedToForeground() =

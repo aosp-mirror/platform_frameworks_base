@@ -118,6 +118,7 @@ object KeyguardQuickAffordanceViewBinder {
             }
 
             override fun destroy() {
+                view.setOnApplyWindowInsetsListener(null)
                 disposableHandle.dispose()
             }
         }

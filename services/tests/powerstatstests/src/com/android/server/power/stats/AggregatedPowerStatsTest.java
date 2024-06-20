@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.BatteryConsumer;
 import android.os.PersistableBundle;
+import android.util.SparseArray;
 import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
@@ -43,6 +44,9 @@ public class AggregatedPowerStatsTest {
     private static final int TEST_POWER_COMPONENT = 1077;
     private static final int APP_1 = 27;
     private static final int APP_2 = 42;
+    private static final int COMPONENT_STATE_0 = 0;
+    private static final int COMPONENT_STATE_1 = 1;
+    private static final int COMPONENT_STATE_2 = 2;
 
     private AggregatedPowerStatsConfig mAggregatedPowerStatsConfig;
     private PowerStats.Descriptor mPowerComponentDescriptor;
@@ -59,8 +63,10 @@ public class AggregatedPowerStatsTest {
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
 
-        mPowerComponentDescriptor = new PowerStats.Descriptor(TEST_POWER_COMPONENT, "fan", 2, 3,
-                PersistableBundle.forPair("speed", "fast"));
+        SparseArray<String> stateLabels = new SparseArray<>();
+        stateLabels.put(COMPONENT_STATE_1, "one");
+        mPowerComponentDescriptor = new PowerStats.Descriptor(TEST_POWER_COMPONENT, "fan", 2,
+                stateLabels, 1, 3, PersistableBundle.forPair("speed", "fast"));
     }
 
     @Test
@@ -107,6 +113,9 @@ public class AggregatedPowerStatsTest {
         ps.stats[0] = 100;
         ps.stats[1] = 987;
 
+        ps.stateStats.put(COMPONENT_STATE_0, new long[]{1111});
+        ps.stateStats.put(COMPONENT_STATE_1, new long[]{5000});
+
         ps.uidStats.put(APP_1, new long[]{389, 0, 739});
         ps.uidStats.put(APP_2, new long[]{278, 314, 628});
 
@@ -120,11 +129,14 @@ public class AggregatedPowerStatsTest {
         ps.stats[0] = 444;
         ps.stats[1] = 0;
 
+        ps.stateStats.clear();
+        ps.stateStats.put(COMPONENT_STATE_1, new long[]{1000});
+        ps.stateStats.put(COMPONENT_STATE_2, new long[]{9000});
+
         ps.uidStats.put(APP_1, new long[]{0, 0, 400});
         ps.uidStats.put(APP_2, new long[]{100, 200, 300});
 
         stats.addPowerStats(ps, 5000);
-
         return stats;
     }
 
@@ -146,6 +158,31 @@ public class AggregatedPowerStatsTest {
                 AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
                 AggregatedPowerStatsConfig.SCREEN_STATE_OTHER))
                 .isEqualTo(new long[]{222, 0});
+
+        assertThat(getStateStats(stats, COMPONENT_STATE_0,
+                AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
+                AggregatedPowerStatsConfig.SCREEN_STATE_ON))
+                .isEqualTo(new long[]{1111});
+
+        assertThat(getStateStats(stats, COMPONENT_STATE_1,
+                AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
+                AggregatedPowerStatsConfig.SCREEN_STATE_ON))
+                .isEqualTo(new long[]{5500});
+
+        assertThat(getStateStats(stats, COMPONENT_STATE_1,
+                AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
+                AggregatedPowerStatsConfig.SCREEN_STATE_OTHER))
+                .isEqualTo(new long[]{500});
+
+        assertThat(getStateStats(stats, COMPONENT_STATE_2,
+                AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
+                AggregatedPowerStatsConfig.SCREEN_STATE_ON))
+                .isEqualTo(new long[]{4500});
+
+        assertThat(getStateStats(stats, COMPONENT_STATE_2,
+                AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
+                AggregatedPowerStatsConfig.SCREEN_STATE_OTHER))
+                .isEqualTo(new long[]{4500});
 
         assertThat(getUidDeviceStats(stats,
                 APP_1,
@@ -191,14 +228,26 @@ public class AggregatedPowerStatsTest {
     }
 
     private static long[] getDeviceStats(AggregatedPowerStats stats, int... states) {
-        long[] out = new long[states.length];
-        stats.getPowerComponentStats(TEST_POWER_COMPONENT).getDeviceStats(out, states);
+        PowerComponentAggregatedPowerStats powerComponentStats =
+                stats.getPowerComponentStats(TEST_POWER_COMPONENT);
+        long[] out = new long[powerComponentStats.getPowerStatsDescriptor().statsArrayLength];
+        powerComponentStats.getDeviceStats(out, states);
+        return out;
+    }
+
+    private static long[] getStateStats(AggregatedPowerStats stats, int key, int... states) {
+        PowerComponentAggregatedPowerStats powerComponentStats =
+                stats.getPowerComponentStats(TEST_POWER_COMPONENT);
+        long[] out = new long[powerComponentStats.getPowerStatsDescriptor().stateStatsArrayLength];
+        powerComponentStats.getStateStats(out, key, states);
         return out;
     }
 
     private static long[] getUidDeviceStats(AggregatedPowerStats stats, int uid, int... states) {
-        long[] out = new long[states.length];
-        stats.getPowerComponentStats(TEST_POWER_COMPONENT).getUidStats(out, uid, states);
+        PowerComponentAggregatedPowerStats powerComponentStats =
+                stats.getPowerComponentStats(TEST_POWER_COMPONENT);
+        long[] out = new long[powerComponentStats.getPowerStatsDescriptor().uidStatsArrayLength];
+        powerComponentStats.getUidStats(out, uid, states);
         return out;
     }
 }

@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
-import static android.media.audio.Flags.FLAG_FOREGROUND_AUDIO_CONTROL;
 
 import android.Manifest;
 import android.annotation.ColorInt;
@@ -948,8 +947,6 @@ public class ActivityManager {
      * @hide
      * Process can access volume APIs and can request audio focus with GAIN.
      */
-    @FlaggedApi(FLAG_FOREGROUND_AUDIO_CONTROL)
-    @SystemApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL = 1 << 6;
 
     /**
@@ -1352,12 +1349,26 @@ public class ActivityManager {
     public static final int RESTRICTION_LEVEL_BACKGROUND_RESTRICTED = 50;
 
     /**
-     * The most restricted level where the apps are considered "in-hibernation",
-     * its package visibility to the rest of the system is limited.
+     * The restricted level where the apps are in a force-stopped state.
      *
      * @hide
      */
-    public static final int RESTRICTION_LEVEL_HIBERNATION = 60;
+    public static final int RESTRICTION_LEVEL_FORCE_STOPPED = 60;
+
+    /**
+     * The heavily background restricted level, where apps cannot start without an explicit
+     * launch by the user.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_USER_LAUNCH_ONLY = 70;
+
+    /**
+     * A reserved restriction level that is not well-defined.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_CUSTOM = 90;
 
     /**
      * Not a valid restriction level, it defines the maximum numerical value of restriction level.
@@ -1374,11 +1385,146 @@ public class ActivityManager {
             RESTRICTION_LEVEL_ADAPTIVE_BUCKET,
             RESTRICTION_LEVEL_RESTRICTED_BUCKET,
             RESTRICTION_LEVEL_BACKGROUND_RESTRICTED,
-            RESTRICTION_LEVEL_HIBERNATION,
+            RESTRICTION_LEVEL_FORCE_STOPPED,
+            RESTRICTION_LEVEL_USER_LAUNCH_ONLY,
+            RESTRICTION_LEVEL_CUSTOM,
             RESTRICTION_LEVEL_MAX,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RestrictionLevel{}
+
+    /**
+     * Maximum string length for sub reason for restriction.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_SUBREASON_MAX_LENGTH = 16;
+
+    /**
+     * Restriction reason to be used when this is normal behavior for the state.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_DEFAULT = 1;
+
+    /**
+     * Restriction reason is some kind of timeout that moves the app to a more restricted state.
+     * The threshold should specify how long the app was dormant, in milliseconds.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_DORMANT = 2;
+
+    /**
+     * Restriction reason to be used when removing a restriction due to direct or indirect usage
+     * of the app, especially to undo any automatic restrictions.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_USAGE = 3;
+
+    /**
+     * Restriction reason to be used when the user chooses to manually restrict the app, through
+     * UI or command line interface.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_USER = 4;
+
+    /**
+     * Restriction reason to be used when the OS automatically detects that the app is causing
+     * system health issues such as performance degradation, battery drain, high memory usage, etc.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_SYSTEM_HEALTH = 5;
+
+    /**
+     * Restriction reason to be used when app is doing something that is against policy, such as
+     * spamming the user or being deceptive about its intentions.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_POLICY = 6;
+
+    /**
+     * Restriction reason to be used when some other problem requires restricting the app.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_REASON_OTHER = 7;
+
+    /** @hide */
+    @IntDef(prefix = { "RESTRICTION_REASON_" }, value = {
+            RESTRICTION_REASON_DEFAULT,
+            RESTRICTION_REASON_DORMANT,
+            RESTRICTION_REASON_USAGE,
+            RESTRICTION_REASON_USER,
+            RESTRICTION_REASON_SYSTEM_HEALTH,
+            RESTRICTION_REASON_POLICY,
+            RESTRICTION_REASON_OTHER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RestrictionReason{}
+
+    /**
+     * The source of restriction is the user manually choosing to do so.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_SOURCE_USER = 1;
+
+    /**
+     * The source of restriction is the user, on being prompted by the system for the specified
+     * reason.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_SOURCE_USER_NUDGED = 2;
+
+    /**
+     * The source of restriction is the system.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_SOURCE_SYSTEM = 3;
+
+    /**
+     * The source of restriction is the command line interface through the shell or a test.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_SOURCE_COMMAND_LINE = 4;
+
+    /**
+     * The source of restriction is a configuration pushed from a server.
+     *
+     * @see #noteAppRestrictionEnabled(String, int, int, boolean, int, String, int, long)
+     * @hide
+     */
+    public static final int RESTRICTION_SOURCE_REMOTE_TRIGGER = 5;
+
+    /** @hide */
+    @IntDef(prefix = { "RESTRICTION_SOURCE_" }, value = {
+            RESTRICTION_SOURCE_USER,
+            RESTRICTION_SOURCE_USER_NUDGED,
+            RESTRICTION_SOURCE_SYSTEM,
+            RESTRICTION_SOURCE_COMMAND_LINE,
+            RESTRICTION_SOURCE_REMOTE_TRIGGER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RestrictionSource{}
 
     /** @hide */
     @android.ravenwood.annotation.RavenwoodKeep
@@ -1396,12 +1542,16 @@ public class ActivityManager {
                 return "restricted_bucket";
             case RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
                 return "background_restricted";
-            case RESTRICTION_LEVEL_HIBERNATION:
-                return "hibernation";
+            case RESTRICTION_LEVEL_FORCE_STOPPED:
+                return "stopped";
+            case RESTRICTION_LEVEL_USER_LAUNCH_ONLY:
+                return "user_only";
+            case RESTRICTION_LEVEL_CUSTOM:
+                return "custom";
             case RESTRICTION_LEVEL_MAX:
                 return "max";
             default:
-                return "";
+                return String.valueOf(level);
         }
     }
 
@@ -1604,7 +1754,13 @@ public class ActivityManager {
         private int mStatusBarColor;
         private int mNavigationBarColor;
         @Appearance
-        private int mStatusBarAppearance;
+        private int mSystemBarsAppearance;
+        /**
+         * Similar to {@link TaskDescription#mSystemBarsAppearance}, but is taken from the topmost
+         * fully opaque (i.e. non transparent) activity in the task.
+         */
+        @Appearance
+        private int mTopOpaqueSystemBarsAppearance;
         private boolean mEnsureStatusBarContrastWhenTransparent;
         private boolean mEnsureNavigationBarContrastWhenTransparent;
         private int mResizeMode;
@@ -1705,7 +1861,7 @@ public class ActivityManager {
                 final Icon icon = mIconRes == Resources.ID_NULL ? null :
                         Icon.createWithResource(ActivityThread.currentPackageName(), mIconRes);
                 return new TaskDescription(mLabel, icon, mPrimaryColor, mBackgroundColor,
-                        mStatusBarColor, mNavigationBarColor, 0, false, false,
+                        mStatusBarColor, mNavigationBarColor, 0, 0, false, false,
                         RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             }
         }
@@ -1724,7 +1880,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, @DrawableRes int iconRes, int colorPrimary) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
-                    colorPrimary, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+                    colorPrimary, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1742,7 +1898,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, @DrawableRes int iconRes) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
-                    0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+                    0, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1754,7 +1910,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label) {
-            this(label, null, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+            this(label, null, 0, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1764,7 +1920,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription() {
-            this(null, null, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+            this(null, null, 0, 0, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1780,7 +1936,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
             this(label, icon != null ? Icon.createWithBitmap(icon) : null, colorPrimary, 0, 0, 0,
-                    0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
+                    0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1796,7 +1952,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon) {
-            this(label, icon != null ? Icon.createWithBitmap(icon) : null, 0, 0, 0, 0, 0, false,
+            this(label, icon != null ? Icon.createWithBitmap(icon) : null, 0, 0, 0, 0, 0, 0, false,
                     false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
@@ -1804,7 +1960,8 @@ public class ActivityManager {
         public TaskDescription(@Nullable String label, @Nullable Icon icon,
                 int colorPrimary, int colorBackground,
                 int statusBarColor, int navigationBarColor,
-                @Appearance int statusBarAppearance,
+                @Appearance int systemBarsAppearance,
+                @Appearance int topOpaqueSystemBarsAppearance,
                 boolean ensureStatusBarContrastWhenTransparent,
                 boolean ensureNavigationBarContrastWhenTransparent, int resizeMode, int minWidth,
                 int minHeight, int colorBackgroundFloating) {
@@ -1814,7 +1971,8 @@ public class ActivityManager {
             mColorBackground = colorBackground;
             mStatusBarColor = statusBarColor;
             mNavigationBarColor = navigationBarColor;
-            mStatusBarAppearance = statusBarAppearance;
+            mSystemBarsAppearance = systemBarsAppearance;
+            mTopOpaqueSystemBarsAppearance = topOpaqueSystemBarsAppearance;
             mEnsureStatusBarContrastWhenTransparent = ensureStatusBarContrastWhenTransparent;
             mEnsureNavigationBarContrastWhenTransparent =
                     ensureNavigationBarContrastWhenTransparent;
@@ -1843,7 +2001,8 @@ public class ActivityManager {
             mColorBackground = other.mColorBackground;
             mStatusBarColor = other.mStatusBarColor;
             mNavigationBarColor = other.mNavigationBarColor;
-            mStatusBarAppearance = other.mStatusBarAppearance;
+            mSystemBarsAppearance = other.mSystemBarsAppearance;
+            mTopOpaqueSystemBarsAppearance = other.mTopOpaqueSystemBarsAppearance;
             mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
             mEnsureNavigationBarContrastWhenTransparent =
                     other.mEnsureNavigationBarContrastWhenTransparent;
@@ -1873,8 +2032,11 @@ public class ActivityManager {
             if (other.mNavigationBarColor != 0) {
                 mNavigationBarColor = other.mNavigationBarColor;
             }
-            if (other.mStatusBarAppearance != 0) {
-                mStatusBarAppearance = other.mStatusBarAppearance;
+            if (other.mSystemBarsAppearance != 0) {
+                mSystemBarsAppearance = other.mSystemBarsAppearance;
+            }
+            if (other.mTopOpaqueSystemBarsAppearance != 0) {
+                mTopOpaqueSystemBarsAppearance = other.mTopOpaqueSystemBarsAppearance;
             }
 
             mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
@@ -2148,8 +2310,16 @@ public class ActivityManager {
          * @hide
          */
         @Appearance
-        public int getStatusBarAppearance() {
-            return mStatusBarAppearance;
+        public int getSystemBarsAppearance() {
+            return mSystemBarsAppearance;
+        }
+
+        /**
+         * @hide
+         */
+        @Appearance
+        public int getTopOpaqueSystemBarsAppearance() {
+            return mTopOpaqueSystemBarsAppearance;
         }
 
         /**
@@ -2163,8 +2333,15 @@ public class ActivityManager {
         /**
          * @hide
          */
-        public void setStatusBarAppearance(@Appearance int statusBarAppearance) {
-            mStatusBarAppearance = statusBarAppearance;
+        public void setSystemBarsAppearance(@Appearance int systemBarsAppearance) {
+            mSystemBarsAppearance = systemBarsAppearance;
+        }
+
+        /**
+         * @hide
+         */
+        public void setTopOpaqueSystemBarsAppearance(int topOpaqueSystemBarsAppearance) {
+            mTopOpaqueSystemBarsAppearance = topOpaqueSystemBarsAppearance;
         }
 
         /**
@@ -2291,7 +2468,8 @@ public class ActivityManager {
             dest.writeInt(mColorBackground);
             dest.writeInt(mStatusBarColor);
             dest.writeInt(mNavigationBarColor);
-            dest.writeInt(mStatusBarAppearance);
+            dest.writeInt(mSystemBarsAppearance);
+            dest.writeInt(mTopOpaqueSystemBarsAppearance);
             dest.writeBoolean(mEnsureStatusBarContrastWhenTransparent);
             dest.writeBoolean(mEnsureNavigationBarContrastWhenTransparent);
             dest.writeInt(mResizeMode);
@@ -2315,7 +2493,8 @@ public class ActivityManager {
             mColorBackground = source.readInt();
             mStatusBarColor = source.readInt();
             mNavigationBarColor = source.readInt();
-            mStatusBarAppearance = source.readInt();
+            mSystemBarsAppearance = source.readInt();
+            mTopOpaqueSystemBarsAppearance = source.readInt();
             mEnsureStatusBarContrastWhenTransparent = source.readBoolean();
             mEnsureNavigationBarContrastWhenTransparent = source.readBoolean();
             mResizeMode = source.readInt();
@@ -2347,7 +2526,9 @@ public class ActivityManager {
                             ? " (contrast when transparent)" : "")
                     + " resizeMode: " + ActivityInfo.resizeModeToString(mResizeMode)
                     + " minWidth: " + mMinWidth + " minHeight: " + mMinHeight
-                    + " colorBackgrounFloating: " + mColorBackgroundFloating;
+                    + " colorBackgrounFloating: " + mColorBackgroundFloating
+                    + " systemBarsAppearance: " + mSystemBarsAppearance
+                    + " topOpaqueSystemBarsAppearance: " + mTopOpaqueSystemBarsAppearance;
         }
 
         @Override
@@ -2367,7 +2548,8 @@ public class ActivityManager {
             result = result * 31 + mColorBackgroundFloating;
             result = result * 31 + mStatusBarColor;
             result = result * 31 + mNavigationBarColor;
-            result = result * 31 + mStatusBarAppearance;
+            result = result * 31 + mSystemBarsAppearance;
+            result = result * 31 + mTopOpaqueSystemBarsAppearance;
             result = result * 31 + (mEnsureStatusBarContrastWhenTransparent ? 1 : 0);
             result = result * 31 + (mEnsureNavigationBarContrastWhenTransparent ? 1 : 0);
             result = result * 31 + mResizeMode;
@@ -2390,7 +2572,8 @@ public class ActivityManager {
                     && mColorBackground == other.mColorBackground
                     && mStatusBarColor == other.mStatusBarColor
                     && mNavigationBarColor == other.mNavigationBarColor
-                    && mStatusBarAppearance == other.mStatusBarAppearance
+                    && mSystemBarsAppearance == other.mSystemBarsAppearance
+                    && mTopOpaqueSystemBarsAppearance == other.mTopOpaqueSystemBarsAppearance
                     && mEnsureStatusBarContrastWhenTransparent
                             == other.mEnsureStatusBarContrastWhenTransparent
                     && mEnsureNavigationBarContrastWhenTransparent
@@ -4039,6 +4222,10 @@ public class ActivityManager {
      * Return a list of {@link ApplicationStartInfo} records containing the information about the
      * most recent app startups.
      *
+     * Records accessed using this path might include "incomplete" records such as in-progress app
+     * starts. Accessing in-progress starts using this method lets you access start information
+     * early to better optimize your startup path.
+     *
      * <p class="note"> Note: System stores this historical information in a ring buffer and only
      * the most recent records will be returned. </p>
      *
@@ -4065,6 +4252,9 @@ public class ActivityManager {
     /**
      * Return a list of {@link ApplicationStartInfo} records containing the information about the
      * most recent app startups.
+     *
+     * Records accessed using this path might include "incomplete" records such as in-progress app
+     * starts.
      *
      * <p class="note"> Note: System stores this historical information in a ring buffer and only
      * the most recent records will be returned. </p>
@@ -4111,17 +4301,19 @@ public class ActivityManager {
     }
 
     /**
-     * Adds a callback to be notified when the {@link ApplicationStartInfo} records of this startup
-     * are complete.
+     * Adds a callback that is notified when the {@link ApplicationStartInfo} record of this startup
+     * is complete. The startup is considered complete when the first frame is drawn.
      *
-     * <p class="note"> Note: callback will be removed automatically after being triggered.</p>
+     * The callback doesn't wait for {@link Activity#reportFullyDrawn} to occur. Retrieve a copy
+     * of {@link ApplicationStartInfo} after {@link Activity#reportFullyDrawn} is called (using this
+     * callback or {@link getHistoricalProcessStartReasons}) if you need the
+     * {@link ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN} timestamp.
      *
-     * <p class="note"> Note: callback will not wait for {@link Activity#reportFullyDrawn} to occur.
-     * Timestamp for fully drawn may be added after callback occurs. Set callback after invoking
-     * {@link Activity#reportFullyDrawn} if timestamp for fully drawn is required.</p>
+     * If the current start record has already been completed (that is, the process is not currently
+     * starting), the callback will be invoked immediately on the specified executor with the
+     * previously completed {@link ApplicationStartInfo} record.
      *
-     * <p class="note"> Note: if start records have already been retrieved, the callback will be
-     * invoked immediately on the specified executor with the previously resolved AppStartInfo.</p>
+     * Callback will be called at most once and removed automatically after being triggered.
      *
      * <p class="note"> Note: callback is asynchronous and should be made from a background thread.
      * </p>
@@ -4211,8 +4403,8 @@ public class ActivityManager {
      * Adds an optional developer supplied timestamp to the calling apps most recent
      * {@link ApplicationStartInfo}. This is in addition to system recorded timestamps.
      *
-     * <p class="note"> Note: timestamps added after {@link Activity#reportFullyDrawn} is called
-     * will be discarded.</p>
+     * <p class="note"> Note: any timestamps added after {@link Activity#reportFullyDrawn} is called
+     * are discarded.</p>
      *
      * <p class="note"> Note: will overwrite existing timestamp if called with same key.</p>
      *
@@ -5073,7 +5265,7 @@ public class ActivityManager {
      * <p><b>NOTE:</b> differently from {@link #switchUser(int)}, which stops the current foreground
      * user before starting a new one, this method does not stop the previous user running in
      * background in the display, and it will return {@code false} in this case. It's up to the
-     * caller to call {@link #stopUser(int, boolean)} before starting a new user.
+     * caller to call {@link #stopUser(int)} before starting a new user.
      *
      * @param userId user to be started in the display. It will return {@code false} if the user is
      * a profile, the {@link #getCurrentUser()}, the {@link UserHandle#SYSTEM system user}, or
@@ -5283,15 +5475,16 @@ public class ActivityManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     @TestApi
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-    public boolean stopUser(@UserIdInt int userId, boolean force) {
+    public boolean stopUser(@UserIdInt int userId) {
         if (userId == UserHandle.USER_SYSTEM) {
             return false;
         }
         try {
-            return USER_OP_SUCCESS == getService().stopUser(
-                    userId, force, /* callback= */ null);
+            return USER_OP_SUCCESS == getService().stopUserWithCallback(
+                    userId, /* callback= */ null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -5674,9 +5867,11 @@ public class ActivityManager {
     }
 
     /**
-     * Return if a given profile is in the foreground.
+     * Returns whether the given user, or its parent (if the user is a profile), is in the
+     * foreground.
      * @param userHandle UserHandle to check
-     * @return Returns the boolean result.
+     * @return whether the user is the foreground user or, if it is a profile, whether its parent
+     *         is the foreground user
      * @hide
      */
     @RequiresPermission(anyOf = {
@@ -6053,20 +6248,6 @@ public class ActivityManager {
     }
 
     /**
-     * Checks if the "modern" broadcast queue is enabled.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.DUMP)
-    public boolean isModernBroadcastQueueEnabled() {
-        try {
-            return getService().isModernBroadcastQueueEnabled();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Checks if the process represented by the given {@code pid} is frozen.
      *
      * @hide
@@ -6137,6 +6318,77 @@ public class ActivityManager {
             e.rethrowFromSystemServer();
         }
         return PowerExemptionManager.REASON_DENIED;
+    }
+
+    /**
+     * Requests the system to log the reason for restricting/unrestricting an app. This API
+     * should be called before applying any change to the restriction level.
+     * <p>
+     * The {@code enabled} value determines whether the state is being applied or removed.
+     * Not all restrictions are actual restrictions. For example,
+     * {@link #RESTRICTION_LEVEL_ADAPTIVE_BUCKET} is a normal state, where there is default lifecycle
+     * management applied to the app. Also, {@link #RESTRICTION_LEVEL_EXEMPTED} is used when the
+     * app is being put in a power-save allowlist.
+     * <p>
+     * Example arguments when user force-stops an app from Settings:
+     * <pre>
+     * noteAppRestrictionEnabled(
+     *     "com.example.app",
+     *     appUid,
+     *     RESTRICTION_LEVEL_FORCE_STOPPED,
+     *     true,
+     *     RESTRICTION_REASON_USER,
+     *     "settings",
+     *     RESTRICTION_SOURCE_USER,
+     *     0);
+     * </pre>
+     * Example arguments when app is put in restricted standby bucket for exceeding X hours of jobs:
+     * <pre>
+     * noteAppRestrictionEnabled(
+     *     "com.example.app",
+     *     appUid,
+     *     RESTRICTION_LEVEL_RESTRICTED_BUCKET,
+     *     true,
+     *     RESTRICTION_REASON_SYSTEM_HEALTH,
+     *     "job_duration",
+     *     RESTRICTION_SOURCE_SYSTEM,
+     *     X * 3600 * 1000L);
+     * </pre>
+     *
+     * @param packageName the package name of the app
+     * @param uid the uid of the app
+     * @param restrictionLevel the restriction level specified in {@code RestrictionLevel}
+     * @param enabled whether the state is being applied or removed
+     * @param reason the reason for the restriction state change, from {@code RestrictionReason}
+     * @param subReason a string sub reason limited to 16 characters that specifies additional
+     *                  information about the reason for restriction. This string must only contain
+     *                  reasons related to excessive system resource usage or in some cases,
+     *                  source of the restriction. This string must not contain any details that
+     *                  identify user behavior beyond their actions to restrict/unrestrict/launch
+     *                  apps in some way.
+     *                  Examples of system resource usage: wakelock, wakeups, mobile_data,
+     *                  binder_calls, memory, excessive_threads, excessive_cpu, gps_scans, etc.
+     *                  Examples of user actions: settings, notification, command_line, launch, etc.
+     * @param source the source of the action, from {@code RestrictionSource}
+     * @param threshold for reasons that are due to exceeding some threshold, the threshold value
+     *                  must be specified. The unit of the threshold depends on the reason and/or
+     *                  subReason. For time, use milliseconds. For memory, use KB. For count, use
+     *                  the actual count or if rate limited, normalized per-hour. For power,
+     *                  use milliwatts. For CPU, use mcycles.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.DEVICE_POWER)
+    public void noteAppRestrictionEnabled(@NonNull String packageName, int uid,
+            @RestrictionLevel int restrictionLevel, boolean enabled,
+            @RestrictionReason int reason,
+            @Nullable String subReason, @RestrictionSource int source, long threshold) {
+        try {
+            getService().noteAppRestrictionEnabled(packageName, uid, restrictionLevel, enabled,
+                    reason, subReason, source, threshold);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

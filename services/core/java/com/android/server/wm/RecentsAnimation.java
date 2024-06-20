@@ -112,11 +112,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 mTargetActivityType);
         ActivityRecord targetActivity = getTargetActivity(targetRootTask);
         if (targetActivity != null) {
-            if (targetActivity.isVisibleRequested() || targetActivity.isTopRunningActivity()) {
-                // The activity is ready.
-                return;
-            }
             if (targetActivity.attachedToProcess()) {
+                if (targetActivity.isVisibleRequested() || targetActivity.isTopRunningActivity()) {
+                    // The activity is ready.
+                    return;
+                }
                 if (targetActivity.app.getCurrentProcState() >= PROCESS_STATE_CACHED_ACTIVITY) {
                     Slog.v(TAG, "Skip preload recents for cached proc " + targetActivity.app);
                     // The process may be frozen that cannot receive binder call.

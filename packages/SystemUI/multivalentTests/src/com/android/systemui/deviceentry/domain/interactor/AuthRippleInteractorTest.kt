@@ -22,7 +22,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
@@ -70,8 +70,10 @@ class AuthRippleInteractorTest : SysuiTestCase() {
     fun faceUnlocked_showsAuthRipple() =
         testScope.runTest {
             val showUnlockRipple by collectLastValue(underTest.showUnlockRipple)
-            keyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FACE_SENSOR)
-            keyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+            keyguardRepository.setBiometricUnlockState(
+                BiometricUnlockMode.WAKE_AND_UNLOCK,
+                BiometricUnlockSource.FACE_SENSOR
+            )
             assertThat(showUnlockRipple).isEqualTo(BiometricUnlockSource.FACE_SENSOR)
         }
 
@@ -79,8 +81,10 @@ class AuthRippleInteractorTest : SysuiTestCase() {
     fun fingerprintUnlocked_showsAuthRipple() =
         testScope.runTest {
             val showUnlockRippleFromBiometricUnlock by collectLastValue(underTest.showUnlockRipple)
-            keyguardRepository.setBiometricUnlockSource(BiometricUnlockSource.FINGERPRINT_SENSOR)
-            keyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+            keyguardRepository.setBiometricUnlockState(
+                BiometricUnlockMode.WAKE_AND_UNLOCK,
+                BiometricUnlockSource.FINGERPRINT_SENSOR
+            )
             assertThat(showUnlockRippleFromBiometricUnlock)
                 .isEqualTo(BiometricUnlockSource.FINGERPRINT_SENSOR)
         }

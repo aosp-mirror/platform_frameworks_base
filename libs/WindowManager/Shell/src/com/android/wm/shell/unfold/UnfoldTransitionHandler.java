@@ -293,7 +293,13 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     @Override
     public void onFoldStateChanged(boolean isFolded) {
         if (isFolded) {
+            // Reset unfold animation finished flag on folding, so it could be used next time
+            // when we unfold the device as an indication that animation hasn't finished yet
             mAnimationFinished = false;
+
+            // If we are currently animating unfold animation we should finish it because
+            // the animation might not start and finish as the device was folded
+            finishTransitionIfNeeded();
         }
     }
 

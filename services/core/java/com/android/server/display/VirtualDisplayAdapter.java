@@ -92,13 +92,15 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             Context context, Handler handler, Listener listener, DisplayManagerFlags featureFlags) {
         this(syncRoot, context, handler, listener, new SurfaceControlDisplayFactory() {
             @Override
-            public IBinder createDisplay(String name, boolean secure, float requestedRefreshRate) {
-                return DisplayControl.createDisplay(name, secure, requestedRefreshRate);
+            public IBinder createDisplay(String name, boolean secure, String uniqueId,
+                                         float requestedRefreshRate) {
+                return DisplayControl.createVirtualDisplay(name, secure, uniqueId,
+                                                           requestedRefreshRate);
             }
 
             @Override
             public void destroyDisplay(IBinder displayToken) {
-                DisplayControl.destroyDisplay(displayToken);
+                DisplayControl.destroyVirtualDisplay(displayToken);
             }
         }, featureFlags);
     }
@@ -126,7 +128,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         String name = virtualDisplayConfig.getName();
         boolean secure = (flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
 
-        IBinder displayToken = mSurfaceControlDisplayFactory.createDisplay(name, secure,
+        IBinder displayToken = mSurfaceControlDisplayFactory.createDisplay(name, secure, uniqueId,
                 virtualDisplayConfig.getRequestedRefreshRate());
         MediaProjectionCallback mediaProjectionCallback =  null;
         if (projection != null) {
@@ -366,7 +368,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             if (mSurface == null) {
                 return null;
             }
-            return mSurface.getDefaultSize();
+            final Point surfaceSize = mSurface.getDefaultSize();
+            return isRotatedLocked() ? new Point(surfaceSize.y, surfaceSize.x) : surfaceSize;
         }
 
         @VisibleForTesting
@@ -652,8 +655,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         /**
          * Create a virtual display in SurfaceFlinger.
          *
-         * @param name The name of the display
+         * @param name The name of the display.
          * @param secure Whether this display is secure.
+         * @param uniqueId The unique ID for the display.
          * @param requestedRefreshRate
          *     The refresh rate, frames per second, to request on the virtual display.
          *     It should be a divisor of refresh rate of the leader physical display
@@ -662,8 +666,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
          *     the refresh rate of the leader physical display.
          * @return The token reference for the display in SurfaceFlinger.
          */
-        IBinder createDisplay(String name, boolean secure, float requestedRefreshRate);
-        
+        IBinder createDisplay(String name, boolean secure, String uniqueId,
+                              float requestedRefreshRate);
+
         /**
          * Destroy a display in SurfaceFlinger.
          *

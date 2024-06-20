@@ -1126,8 +1126,8 @@ public class Activity extends ContextThemeWrapper
          * @hide
          */
         @Override
-        public void updateStatusBarAppearance(int appearance) {
-            mTaskDescription.setStatusBarAppearance(appearance);
+        public void updateSystemBarsAppearance(int appearance) {
+            mTaskDescription.setSystemBarsAppearance(appearance);
             setTaskDescription(mTaskDescription);
         }
 
@@ -1150,6 +1150,11 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>To keep the Intent instance for future use, call {@link #setIntent(Intent)}, and use
      * this method to retrieve it.
+     *
+     * <p>Note that in {@link #onNewIntent}, this method will return the original Intent. You can
+     * use {@link #setIntent(Intent)} to update it to the new Intent.
+     *
+     * @return {@link Intent} instance that started this activity, or that was kept for future use
      */
     public Intent getIntent() {
         return mIntent;
@@ -1170,9 +1175,14 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Returns the ComponentCaller instance of the app that launched this activity with the intent
-     * from {@link #getIntent()}. To keep the value of the ComponentCaller instance for new intents,
-     * call {@link #setIntent(Intent, ComponentCaller)} instead of {@link #setIntent(Intent)}.
+     * Returns the ComponentCaller instance of the app that started this activity.
+     *
+     * <p>To keep the ComponentCaller instance for future use, call
+     * {@link #setIntent(Intent, ComponentCaller)}, and use this method to retrieve it.
+     *
+     * <p>Note that in {@link #onNewIntent}, this method will return the original ComponentCaller.
+     * You can use {@link #setIntent(Intent, ComponentCaller)} to update it to the new
+     * ComponentCaller.
      *
      * @return {@link ComponentCaller} instance corresponding to the intent from
      *         {@link #getIntent()}, or {@code null} if the activity was not launched with that
@@ -1183,6 +1193,7 @@ public class Activity extends ContextThemeWrapper
      * @see #setIntent(Intent, ComponentCaller)
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public @Nullable ComponentCaller getCaller() {
         return mCaller;
     }
@@ -1203,6 +1214,7 @@ public class Activity extends ContextThemeWrapper
      * @see #getCaller
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public void setIntent(@Nullable Intent newIntent, @Nullable ComponentCaller newCaller) {
         internalSetIntent(newIntent, newCaller);
     }
@@ -1254,12 +1266,23 @@ public class Activity extends ContextThemeWrapper
         return mApplication;
     }
 
-    /** Is this activity embedded inside of another activity? */
+    /**
+     * Whether this is a child {@link Activity} of an {@link ActivityGroup}.
+     *
+     * @deprecated {@link ActivityGroup} is deprecated.
+     */
+    @Deprecated
     public final boolean isChild() {
         return mParent != null;
     }
 
-    /** Return the parent activity if this view is an embedded child. */
+    /**
+     * Returns the parent {@link Activity} if this is a child {@link Activity} of an
+     * {@link ActivityGroup}.
+     *
+     * @deprecated {@link ActivityGroup} is deprecated.
+     */
+    @Deprecated
     public final Activity getParent() {
         return mParent;
     }
@@ -5535,6 +5558,15 @@ public class Activity extends ContextThemeWrapper
         }
 
         a.recycle();
+        if (first && mTaskDescription.getSystemBarsAppearance() == 0
+                && mWindow != null && mWindow.getSystemBarAppearance() != 0) {
+            // When the theme is applied for the first time during the activity re-creation process,
+            // the attached window restores the system bars appearance from the old window/activity.
+            // Make sure to restore this appearance in TaskDescription too, to prevent the
+            // #setTaskDescription() call below from incorrectly sending an empty value to the
+            // server.
+            mTaskDescription.setSystemBarsAppearance(mWindow.getSystemBarAppearance());
+        }
         setTaskDescription(mTaskDescription);
     }
 
@@ -5776,6 +5808,8 @@ public class Activity extends ContextThemeWrapper
      * @see #onRequestPermissionsResult
      */
     @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    @SuppressLint("OnNameExpected")
+    // Suppress lint as this is an overload of the original API.
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission, int deviceId) {
         final PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
                 : createDeviceContext(deviceId).getPackageManager();
@@ -7132,13 +7166,14 @@ public class Activity extends ContextThemeWrapper
     /**
      * Returns the ComponentCaller instance of the app that initially launched this activity.
      *
-     * <p>Note that calls to {@link #onNewIntent} have no effect on the returned value of this
-     * method.
+     * <p>Note that calls to {@link #onNewIntent} and {@link #setIntent} have no effect on the
+     * returned value of this method.
      *
      * @return {@link ComponentCaller} instance
      * @see ComponentCaller
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public @NonNull ComponentCaller getInitialCaller() {
         return mInitialCaller;
     }
@@ -7166,10 +7201,11 @@ public class Activity extends ContextThemeWrapper
      * @see #getCaller
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @SuppressLint("OnNameExpected")
     public @NonNull ComponentCaller getCurrentCaller() {
         if (mCurrentCaller == null) {
             throw new IllegalStateException("The caller is null because #getCurrentCaller should be"
-                    + " called within #onNewIntent method");
+                    + " called within #onNewIntent or #onActivityResult methods");
         }
         return mCurrentCaller;
     }
@@ -7453,7 +7489,7 @@ public class Activity extends ContextThemeWrapper
      *               intent.
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
-    public void onActivityResult(int requestCode, int resultCode, @NonNull Intent data,
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data,
             @NonNull ComponentCaller caller) {
         onActivityResult(requestCode, resultCode, data);
     }
@@ -7528,6 +7564,12 @@ public class Activity extends ContextThemeWrapper
      * orientation, the screen will immediately be changed (possibly causing
      * the activity to be restarted). Otherwise, this will be used the next
      * time the activity is visible.
+     *
+     * <aside class="note"><b>Note:</b> Device manufacturers can configure devices to override
+     *    (ignore) calls to this method to improve the layout of orientation-restricted apps. See
+     *    <a href="{@docRoot}guide/practices/device-compatibility-mode">
+     *      Device compatibility mode</a>.
+     * </aside>
      *
      * @param requestedOrientation An orientation constant as used in
      * {@link ActivityInfo#screenOrientation ActivityInfo.screenOrientation}.
@@ -9265,11 +9307,11 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "dispatchMultiWindowModeChanged " + this + ": " + isInMultiWindowMode
                         + " " + newConfig);
+        mIsInMultiWindowMode = isInMultiWindowMode;
         mFragments.dispatchMultiWindowModeChanged(isInMultiWindowMode, newConfig);
         if (mWindow != null) {
             mWindow.onMultiWindowModeChanged();
         }
-        mIsInMultiWindowMode = isInMultiWindowMode;
         onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
@@ -9278,11 +9320,11 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "dispatchPictureInPictureModeChanged " + this + ": " + isInPictureInPictureMode
                         + " " + newConfig);
+        mIsInPictureInPictureMode = isInPictureInPictureMode;
         mFragments.dispatchPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
         if (mWindow != null) {
             mWindow.onPictureInPictureModeChanged(isInPictureInPictureMode);
         }
-        mIsInPictureInPictureMode = isInPictureInPictureMode;
         onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
 
@@ -9612,6 +9654,7 @@ public class Activity extends ContextThemeWrapper
      *                            the default behaviour
      */
     @FlaggedApi(android.security.Flags.FLAG_ASM_RESTRICTIONS_ENABLED)
+    @SuppressLint("OnNameExpected")
     public void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
         ActivityClient.getInstance().setAllowCrossUidActivitySwitchFromBelow(mToken, allowed);
     }

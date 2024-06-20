@@ -242,6 +242,16 @@ public final class EuiccRulesAuthTable implements Parcelable {
                 && Arrays.equals(mPolicyRuleFlags, that.mPolicyRuleFlags);
     }
 
+    @Override
+    public int hashCode() {
+        int result = Arrays.hashCode(mPolicyRules);
+        result = 31 * result + Arrays.hashCode(mPolicyRuleFlags);
+        for (int i = 0; i < mCarrierIds.length; i++) {
+            result = 31 * result + Arrays.hashCode(mCarrierIds[i]);
+        }
+        return result;
+    }
+
     private EuiccRulesAuthTable(Parcel source) {
         mPolicyRules = source.createIntArray();
         int len = mPolicyRules.length;

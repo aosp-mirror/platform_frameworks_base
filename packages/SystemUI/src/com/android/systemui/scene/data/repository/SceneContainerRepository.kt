@@ -21,6 +21,7 @@ package com.android.systemui.scene.data.repository
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSource
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
+@SysUISingleton
 /** Source of truth for scene framework application state. */
 class SceneContainerRepository
 @Inject
@@ -81,17 +83,17 @@ constructor(
         toScene: SceneKey,
         transitionKey: TransitionKey? = null,
     ) {
-        check(allSceneKeys().contains(toScene)) {
-            """
-                Cannot set the desired scene key to "$toScene". The configuration does not
-                contain a scene with that key.
-            """
-                .trimIndent()
-        }
-
         dataSource.changeScene(
             toScene = toScene,
             transitionKey = transitionKey,
+        )
+    }
+
+    fun snapToScene(
+        toScene: SceneKey,
+    ) {
+        dataSource.snapToScene(
+            toScene = toScene,
         )
     }
 

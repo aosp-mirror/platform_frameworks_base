@@ -16,22 +16,14 @@
 
 package com.android.internal.accessibility.dialog;
 
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
-import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
-import static com.android.internal.accessibility.util.ShortcutUtils.optOutValueFromSettings;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
-import android.content.ComponentName;
 import android.content.Context;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
-import android.widget.Toast;
 
-import com.android.internal.R;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 /**
  * Extension for {@link AccessibilityServiceTarget} with
@@ -39,8 +31,8 @@ import com.android.internal.accessibility.common.ShortcutConstants.Accessibility
  */
 class VolumeShortcutToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
 
-    VolumeShortcutToggleAccessibilityServiceTarget(Context context, @ShortcutType int shortcutType,
-            @NonNull AccessibilityServiceInfo serviceInfo) {
+    VolumeShortcutToggleAccessibilityServiceTarget(Context context,
+            @UserShortcutType int shortcutType, @NonNull AccessibilityServiceInfo serviceInfo) {
         super(context,
                 shortcutType,
                 AccessibilityFragmentType.VOLUME_SHORTCUT_TOGGLE,
@@ -49,30 +41,10 @@ class VolumeShortcutToggleAccessibilityServiceTarget extends AccessibilityServic
 
     @Override
     public void onCheckedChanged(boolean isChecked) {
-        switch (getShortcutType()) {
-            case ACCESSIBILITY_BUTTON:
-                onCheckedFromAccessibilityButton(isChecked);
-                return;
-            case ACCESSIBILITY_SHORTCUT_KEY:
-                super.onCheckedChanged(isChecked);
-                return;
-            default:
-                throw new IllegalStateException("Unexpected shortcut type");
-        }
-    }
-
-    private void onCheckedFromAccessibilityButton(boolean isChecked) {
-        setShortcutEnabled(isChecked);
-        final ComponentName componentName = ComponentName.unflattenFromString(getId());
-        setAccessibilityServiceState(getContext(), componentName, isChecked);
-
-        if (!isChecked) {
-            optOutValueFromSettings(getContext(), UserShortcutType.HARDWARE, getId());
-
-            final String warningText =
-                    getContext().getString(R.string.accessibility_uncheck_legacy_item_warning,
-                            getLabel());
-            Toast.makeText(getContext(), warningText, Toast.LENGTH_SHORT).show();
+        if (getShortcutType() == HARDWARE) {
+            super.onCheckedChanged(isChecked);
+        } else {
+            throw new IllegalStateException("Unexpected shortcut type");
         }
     }
 }

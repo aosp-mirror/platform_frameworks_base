@@ -229,6 +229,11 @@ enum DebugLevel {
 
 #define PROPERTY_8BIT_HDR_HEADROOM "debug.hwui.8bit_hdr_headroom"
 
+/**
+ * Whether to initialize GL even when HWUI is running Vulkan.
+ */
+#define PROPERTY_INITIALIZE_GL_ALWAYS "debug.hwui.initialize_gl_always"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -242,7 +247,7 @@ enum class ProfileType { None, Console, Bars };
 
 enum class OverdrawColorSet { Default = 0, Deuteranomaly };
 
-enum class RenderPipelineType { SkiaGL, SkiaVulkan, NotInitialized = 128 };
+enum class RenderPipelineType { SkiaGL, SkiaVulkan, SkiaCpu, NotInitialized = 128 };
 
 enum class StretchEffectBehavior {
     ShaderHWUI,   // Stretch shader in HWUI only, matrix scale in SF
@@ -367,6 +372,8 @@ public:
     static DrawingEnabled drawingEnabled;
     static bool isDrawingEnabled();
     static void setDrawingEnabled(bool enable);
+
+    static bool initializeGlAlways();
 
 private:
     static StretchEffectBehavior stretchEffectBehavior;

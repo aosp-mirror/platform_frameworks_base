@@ -16,9 +16,10 @@
 
 package com.android.systemui.animation
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.core.animation.doOnEnd
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.doOnEnd
@@ -27,9 +28,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @RunWithLooper
+@FlakyTest(bugId = 302149604)
 class AnimatorTestRuleOrderTest : SysuiTestCase() {
 
     @get:Rule val animatorTestRule = AnimatorTestRule(this)

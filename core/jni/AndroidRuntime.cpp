@@ -221,6 +221,8 @@ extern int register_jni_common(JNIEnv* env);
 extern int register_android_tracing_PerfettoDataSource(JNIEnv* env);
 extern int register_android_tracing_PerfettoDataSourceInstance(JNIEnv* env);
 extern int register_android_tracing_PerfettoProducer(JNIEnv* env);
+extern int register_android_window_InputTransferToken(JNIEnv* env);
+extern int register_android_view_WindowManagerGlobal(JNIEnv* env);
 
 // Namespace for Android Runtime flags applied during boot time.
 static const char* RUNTIME_NATIVE_BOOT_NAMESPACE = "runtime_native_boot";
@@ -1678,6 +1680,8 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_tracing_PerfettoDataSource),
         REG_JNI(register_android_tracing_PerfettoDataSourceInstance),
         REG_JNI(register_android_tracing_PerfettoProducer),
+        REG_JNI(register_android_window_InputTransferToken),
+        REG_JNI(register_android_view_WindowManagerGlobal),
 };
 
 /*

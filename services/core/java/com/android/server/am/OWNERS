@@ -17,6 +17,7 @@ ogunwale@google.com
 
 # Permissions & Packages
 patb@google.com
+per-file AccessCheckDelegateHelper.java = file:/core/java/android/permission/OWNERS
 
 # Battery Stats
 joeo@google.com

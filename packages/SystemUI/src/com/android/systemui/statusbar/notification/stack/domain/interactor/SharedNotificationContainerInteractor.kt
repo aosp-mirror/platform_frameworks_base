@@ -29,11 +29,10 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -54,9 +53,9 @@ constructor(
     private val _topPosition = MutableStateFlow(0f)
     val topPosition = _topPosition.asStateFlow()
 
-    private val _notificationStackChanged = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val _notificationStackChanged = MutableStateFlow(0L)
     /** An internal modification was made to notifications */
-    val notificationStackChanged = _notificationStackChanged.asSharedFlow()
+    val notificationStackChanged = _notificationStackChanged.debounce(20L)
 
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
         configurationRepository.onAnyConfigurationChange
@@ -113,7 +112,7 @@ constructor(
 
     /** An internal modification was made to notifications */
     fun notificationStackChanged() {
-        _notificationStackChanged.tryEmit(Unit)
+        _notificationStackChanged.value = _notificationStackChanged.value + 1
     }
 
     data class ConfigurationBasedDimensions(

@@ -16,6 +16,8 @@
 
 package com.android.systemui.shade
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -27,6 +29,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX
+import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.fragments.FragmentService
@@ -67,6 +70,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
+@EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
     private val view = mock<NotificationsQuickSettingsContainer>()
@@ -99,7 +103,6 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeSystemClock = FakeSystemClock()
         delayableExecutor = FakeExecutor(fakeSystemClock)
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         mContext.ensureTestableResources()
         whenever(view.context).thenReturn(mContext)
         whenever(view.resources).thenReturn(mContext.resources)
@@ -161,8 +164,8 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun testLargeScreen_updateResources_refactorFlagOff_splitShadeHeightIsSet_basedOnResource() {
-        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         val helperHeight = 30
         val resourceHeight = 20
         whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(helperHeight)
@@ -182,8 +185,8 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun testLargeScreen_updateResources_refactorFlagOn_splitShadeHeightIsSet_basedOnHelper() {
-        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         val helperHeight = 30
         val resourceHeight = 20
         whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(helperHeight)
@@ -424,8 +427,8 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun testLargeScreenLayout_refactorFlagOff_qsAndNotifsTopMarginIsOfHeaderResourceHeight() {
-        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         setLargeScreen()
         val largeScreenHeaderHelperHeight = 200
         val largeScreenHeaderResourceHeight = 100
@@ -444,8 +447,8 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun testLargeScreenLayout_refactorFlagOn_qsAndNotifsTopMarginIsOfHeaderHelperHeight() {
-        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         setLargeScreen()
         val largeScreenHeaderHelperHeight = 200
         val largeScreenHeaderResourceHeight = 100

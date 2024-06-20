@@ -52,11 +52,20 @@
     <!-- Confirmation for associating an application with a companion device of APP_STREAMING profile (type) [CHAR LIMIT=NONE] -->
     <string name="title_app_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to access this information from your phone</string>
 
+    <!-- Confirmation for associating an application with a companion device of APP_STREAMING profile (type) with mirroring enabled [CHAR LIMIT=NONE] -->
+    <string name="title_app_streaming_with_mirroring">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to stream your phone\u2019s apps?</string>
+
+    <!-- Summary for associating an application with a companion device of APP_STREAMING profile [CHAR LIMIT=NONE] -->
+    <string name="summary_app_streaming">%1$s will have access to anything that’s visible or played on the phone, including audio, photos, passwords, and messages.&lt;br/>&lt;br/>%1$s will be able to stream apps until you remove access to this permission.</string>
+
     <!-- Title of the helper dialog for APP_STREAMING profile [CHAR LIMIT=30]. -->
     <string name="helper_title_app_streaming">Cross-device services</string>
 
     <!-- Description of the helper dialog for APP_STREAMING profile. [CHAR LIMIT=NONE] -->
     <string name="helper_summary_app_streaming"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="display_name" example="Chromebook">%2$s</xliff:g> to stream apps between your devices</string>
+
+    <!-- Description of the helper dialog for APP_STREAMING profile with mirroring enabled. [CHAR LIMIT=NONE] -->
+    <string name="helper_summary_app_streaming_with_mirroring"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="display_name" example="Chromebook">%2$s</xliff:g> to display and stream apps between your devices</string>
 
     <!-- ================= DEVICE_PROFILE_AUTOMOTIVE_PROJECTION ================= -->
 
@@ -84,6 +93,12 @@
 
     <!-- Confirmation for associating an application with a companion device of NEARBY_DEVICE_STREAMING profile (type) [CHAR LIMIT=NONE] -->
     <string name="title_nearby_device_streaming">Allow &lt;strong&gt;<xliff:g id="device_name" example="NearbyStreamer">%1$s</xliff:g>&lt;/strong&gt; to take this action?</string>
+
+    <!-- Confirmation for associating an application with a companion device of NEARBY_DEVICE_STREAMING profile (type) with mirroring enabled [CHAR LIMIT=NONE] -->
+    <string name="title_nearby_device_streaming_with_mirroring">Allow &lt;strong&gt;<xliff:g id="device_name" example="NearbyStreamer">%1$s</xliff:g>&lt;/strong&gt; to stream your phone\u2019s apps and system features?</string>
+
+    <!-- Summary for associating an application with a companion device of NEARBY_DEVICE_STREAMING profile [CHAR LIMIT=NONE] -->
+    <string name="summary_nearby_device_streaming">%1$s will have access to anything that’s visible or played on your phone, including audio, photos, payment info, passwords, and messages.&lt;br/>&lt;br/>%1$s will be able to stream apps and system features until you remove access to this permission.</string>
 
     <!-- Description of the helper dialog for NEARBY_DEVICE_STREAMING profile. [CHAR LIMIT=NONE] -->
     <string name="helper_summary_nearby_device_streaming"><xliff:g id="app_name" example="NearbyStreamerApp">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_name" example="NearbyDevice">%2$s</xliff:g> to stream apps and other system features to nearby devices</string>

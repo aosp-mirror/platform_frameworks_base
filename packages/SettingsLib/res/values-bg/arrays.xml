@@ -186,11 +186,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="409235464399258501">"Изключено"</item>
-    <item msgid="4195153527464162486">"Рег. буфер – 64 КБ"</item>
-    <item msgid="7464037639415220106">"Рег. буфер – 256 КБ"</item>
-    <item msgid="8539423820514360724">"Рег. буфер – 1 МБ"</item>
-    <item msgid="1984761927103140651">"Рег. буфер – 4 МБ"</item>
-    <item msgid="2983219471251787208">"Регистрационен буфер – 8 МБ"</item>
+    <item msgid="4195153527464162486">"Рег. буфер – 64 хил."</item>
+    <item msgid="7464037639415220106">"Рег. буфер – 256 хил."</item>
+    <item msgid="8539423820514360724">"Рег. буфер – 1 млн."</item>
+    <item msgid="1984761927103140651">"Рег. буфер – 4 млн."</item>
+    <item msgid="2983219471251787208">"Регистрационен буфер – 8 млн."</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Изкл."</item>

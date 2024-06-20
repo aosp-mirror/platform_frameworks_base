@@ -30,21 +30,28 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.ArrayMap;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.SurfaceControlRegistry;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 /**
@@ -57,6 +64,7 @@ public class ShellController {
     private final ShellInit mShellInit;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mMainExecutor;
+    private final DisplayInsetsController mDisplayInsetsController;
     private final ShellInterfaceImpl mImpl = new ShellInterfaceImpl();
 
     private final CopyOnWriteArrayList<ConfigurationChangeListener> mConfigChangeListeners =
@@ -65,6 +73,8 @@ public class ShellController {
             new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<UserChangeListener> mUserChangeListeners =
             new CopyOnWriteArrayList<>();
+    private final ConcurrentHashMap<DisplayImeChangeListener, Executor> mDisplayImeChangeListeners =
+            new ConcurrentHashMap<>();
 
     private ArrayMap<String, Supplier<ExternalInterfaceBinder>> mExternalInterfaceSuppliers =
             new ArrayMap<>();
@@ -73,20 +83,53 @@ public class ShellController {
 
     private Configuration mLastConfiguration;
 
+    private OnInsetsChangedListener mInsetsChangeListener = new OnInsetsChangedListener() {
+        private InsetsState mInsetsState = new InsetsState();
+
+        @Override
+        public void insetsChanged(InsetsState insetsState) {
+            if (mInsetsState == insetsState) {
+                return;
+            }
+
+            InsetsSource oldSource = mInsetsState.peekSource(InsetsSource.ID_IME);
+            boolean wasVisible = (oldSource != null && oldSource.isVisible());
+            Rect oldFrame = wasVisible ? oldSource.getFrame() : null;
+
+            InsetsSource newSource = insetsState.peekSource(InsetsSource.ID_IME);
+            boolean isVisible = (newSource != null && newSource.isVisible());
+            Rect newFrame = isVisible ? newSource.getFrame() : null;
+
+            if (wasVisible != isVisible) {
+                onImeVisibilityChanged(isVisible);
+            }
+
+            if (newFrame != null && !newFrame.equals(oldFrame)) {
+                onImeBoundsChanged(newFrame);
+            }
+
+            mInsetsState = insetsState;
+        }
+    };
+
 
     public ShellController(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
+            DisplayInsetsController displayInsetsController,
             ShellExecutor mainExecutor) {
         mContext = context;
         mShellInit = shellInit;
         mShellCommandHandler = shellCommandHandler;
+        mDisplayInsetsController = displayInsetsController;
         mMainExecutor = mainExecutor;
         shellInit.addInitCallback(this::onInit, this);
     }
 
     private void onInit() {
         mShellCommandHandler.addDumpCallback(this::dump, this);
+        mDisplayInsetsController.addInsetsChangedListener(
+                mContext.getDisplayId(), mInsetsChangeListener);
     }
 
     /**
@@ -259,6 +302,25 @@ public class ShellController {
         }
     }
 
+    @VisibleForTesting
+    void onImeBoundsChanged(Rect bounds) {
+        ProtoLog.v(WM_SHELL_SYSUI_EVENTS, "Display Ime bounds changed");
+        mDisplayImeChangeListeners.forEach(
+                (DisplayImeChangeListener listener, Executor executor) ->
+                executor.execute(() -> listener.onImeBoundsChanged(
+                    mContext.getDisplayId(), bounds)));
+    }
+
+    @VisibleForTesting
+    void onImeVisibilityChanged(boolean isShowing) {
+        ProtoLog.v(WM_SHELL_SYSUI_EVENTS, "Display Ime visibility changed: isShowing=%b",
+                isShowing);
+        mDisplayImeChangeListeners.forEach(
+                (DisplayImeChangeListener listener, Executor executor) ->
+                executor.execute(() -> listener.onImeVisibilityChanged(
+                    mContext.getDisplayId(), isShowing)));
+    }
+
     private void handleInit() {
         SurfaceControlRegistry.createProcessInstance(mContext);
         mShellInit.init();
@@ -326,6 +388,19 @@ public class ShellController {
         public void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {
             mMainExecutor.execute(() ->
                     ShellController.this.onUserProfilesChanged(profiles));
+        }
+
+        @Override
+        public void addDisplayImeChangeListener(DisplayImeChangeListener listener,
+                Executor executor) {
+            ProtoLog.v(WM_SHELL_SYSUI_EVENTS, "Adding new DisplayImeChangeListener");
+            mDisplayImeChangeListeners.put(listener, executor);
+        }
+
+        @Override
+        public void removeDisplayImeChangeListener(DisplayImeChangeListener listener) {
+            ProtoLog.v(WM_SHELL_SYSUI_EVENTS, "Removing DisplayImeChangeListener");
+            mDisplayImeChangeListeners.remove(listener);
         }
 
         @Override

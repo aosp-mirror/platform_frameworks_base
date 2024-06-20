@@ -16,12 +16,10 @@
 
 package com.android.systemui.statusbar.notification.row.wrapper;
 
-import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -35,19 +33,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
-@RunWithLooper
+@RunWith(AndroidJUnit4.class)
 public class NotificationCustomViewWrapperTest extends SysuiTestCase {
 
     private ExpandableNotificationRow mRow;
 
     @Before
     public void setUp() throws Exception {
-        allowTestableLooperAsMainThread();
-        NotificationTestHelper helper = new NotificationTestHelper(
-                mContext,
-                mDependency,
-                TestableLooper.get(this));
+        NotificationTestHelper helper = new NotificationTestHelper(mContext, mDependency);
         mRow = helper.createRow();
     }
 

@@ -19,6 +19,7 @@ package com.android.systemui.communal.domain.model
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.pm.ApplicationInfo
+import android.graphics.Bitmap
 import android.widget.RemoteViews
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
@@ -45,12 +46,12 @@ sealed interface CommunalContentModel {
 
     sealed interface WidgetContent : CommunalContentModel {
         val appWidgetId: Int
-        val providerInfo: AppWidgetProviderInfo
 
         data class Widget(
             override val appWidgetId: Int,
-            override val providerInfo: AppWidgetProviderInfo,
+            val providerInfo: AppWidgetProviderInfo,
             val appWidgetHost: CommunalAppWidgetHost,
+            val inQuietMode: Boolean,
         ) : WidgetContent {
             override val key = KEY.widget(appWidgetId)
             // Widget size is always half.
@@ -65,7 +66,7 @@ sealed interface CommunalContentModel {
 
         data class DisabledWidget(
             override val appWidgetId: Int,
-            override val providerInfo: AppWidgetProviderInfo
+            val providerInfo: AppWidgetProviderInfo
         ) : WidgetContent {
             override val key = KEY.disabledWidget(appWidgetId)
             // Widget size is always half.
@@ -73,6 +74,16 @@ sealed interface CommunalContentModel {
 
             val appInfo: ApplicationInfo?
                 get() = providerInfo.providerInfo?.applicationInfo
+        }
+
+        data class PendingWidget(
+            override val appWidgetId: Int,
+            val packageName: String,
+            val icon: Bitmap? = null,
+        ) : WidgetContent {
+            override val key = KEY.pendingWidget(appWidgetId)
+            // Widget size is always half.
+            override val size = CommunalContentSize.HALF
         }
     }
 
@@ -86,13 +97,6 @@ sealed interface CommunalContentModel {
     /** A CTA tile in the glanceable hub view mode which can be dismissed. */
     class CtaTileInViewMode : CommunalContentModel {
         override val key: String = KEY.CTA_TILE_IN_VIEW_MODE_KEY
-        // Same as widget size.
-        override val size = CommunalContentSize.HALF
-    }
-
-    /** A CTA tile in the glanceable hub edit model which remains visible in the grid. */
-    class CtaTileInEditMode : CommunalContentModel {
-        override val key: String = KEY.CTA_TILE_IN_EDIT_MODE_KEY
         // Same as widget size.
         override val size = CommunalContentSize.HALF
     }
@@ -133,6 +137,10 @@ sealed interface CommunalContentModel {
                 return "disabled_widget_$id"
             }
 
+            fun pendingWidget(id: Int): String {
+                return "pending_widget_$id"
+            }
+
             fun widgetPlaceholder(): String {
                 return "widget_placeholder_${UUID.randomUUID()}"
             }
@@ -152,4 +160,6 @@ sealed interface CommunalContentModel {
     }
 
     fun isWidgetContent() = this is WidgetContent
+
+    fun isLiveContent() = this is Smartspace || this is Umo
 }

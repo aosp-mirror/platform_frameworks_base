@@ -16,10 +16,6 @@
 
 #include "Properties.h"
 
-#include "Debug.h"
-#ifdef __ANDROID__
-#include "HWUIProperties.sysprop.h"
-#endif
 #include <android-base/properties.h>
 #include <cutils/compiler.h>
 #include <log/log.h>
@@ -28,6 +24,8 @@
 #include <cstdlib>
 #include <optional>
 
+#include "Debug.h"
+#include "HWUIProperties.sysprop.h"
 #include "src/core/SkTraceEventCommon.h"
 
 #ifdef __ANDROID__
@@ -41,21 +39,14 @@ constexpr bool clip_surfaceviews() {
 constexpr bool hdr_10bit_plus() {
     return false;
 }
+constexpr bool initialize_gl_always() {
+    return false;
+}
 }  // namespace hwui_flags
 #endif
 
 namespace android {
 namespace uirenderer {
-
-#ifndef __ANDROID__ // Layoutlib does not compile HWUIProperties.sysprop as it depends on cutils properties
-std::optional<bool> use_vulkan() {
-    return base::GetBoolProperty("ro.hwui.use_vulkan", true);
-}
-
-std::optional<std::int32_t> render_ahead() {
-    return base::GetIntProperty("ro.hwui.render_ahead", 0);
-}
-#endif
 
 bool Properties::debugLayersUpdates = false;
 bool Properties::debugOverdraw = false;
@@ -267,6 +258,10 @@ bool Properties::isDrawingEnabled() {
         enableRTAnimations = drawingEnabledProp;
     }
     return drawingEnabled == DrawingEnabled::On;
+}
+
+bool Properties::initializeGlAlways() {
+    return base::GetBoolProperty(PROPERTY_INITIALIZE_GL_ALWAYS, hwui_flags::initialize_gl_always());
 }
 
 }  // namespace uirenderer

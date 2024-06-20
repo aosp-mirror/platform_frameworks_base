@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.AppCompatTaskInfo.cameraCompatControlStateToString;
+import static android.app.CameraCompatTaskInfo.cameraCompatControlStateToString;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NONE;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NORMAL;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_ROTATION;
@@ -573,7 +573,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     // Capture the animation surface control for activity's main window
     static class StartingWindowAnimationAdaptor implements AnimationAdapter {
-        SurfaceControl mAnimationLeash;
+
         @Override
         public boolean getShowWallpaper() {
             return false;
@@ -582,14 +582,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         @Override
         public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
                 int type, @NonNull SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
-            mAnimationLeash = animationLeash;
         }
 
         @Override
         public void onAnimationCancelled(SurfaceControl animationLeash) {
-            if (mAnimationLeash == animationLeash) {
-                mAnimationLeash = null;
-            }
         }
 
         @Override
@@ -604,9 +600,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         @Override
         public void dump(PrintWriter pw, String prefix) {
-            pw.print(prefix + "StartingWindowAnimationAdaptor mCapturedLeash=");
-            pw.print(mAnimationLeash);
-            pw.println();
         }
 
         @Override
@@ -616,16 +609,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     static SurfaceControl applyStartingWindowAnimation(WindowState window) {
         final SurfaceControl.Transaction t = window.getPendingTransaction();
-        final Rect mainFrame = window.getRelativeFrame();
         final StartingWindowAnimationAdaptor adaptor = new StartingWindowAnimationAdaptor();
         window.startAnimation(t, adaptor, false, ANIMATION_TYPE_STARTING_REVEAL);
-        if (adaptor.mAnimationLeash == null) {
+        final SurfaceControl leash = window.getAnimationLeash();
+        if (leash == null) {
             Slog.e(TAG, "Cannot start starting window animation, the window " + window
                     + " was removed");
             return null;
         }
-        t.setPosition(adaptor.mAnimationLeash, mainFrame.left, mainFrame.top);
-        return adaptor.mAnimationLeash;
+        t.setPosition(leash, window.mSurfacePosition.x, window.mSurfacePosition.y);
+        return leash;
     }
 
     boolean addStartingWindow(Task task, ActivityRecord activity, int launchTheme,
@@ -678,12 +671,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             if (hasImeSurface) {
                 if (topActivity.isVisibleRequested() && dc.mInputMethodWindow != null
                         && dc.isFixedRotationLaunchingApp(topActivity)) {
-                    removalInfo.deferRemoveForImeMode = DEFER_MODE_ROTATION;
+                    removalInfo.deferRemoveMode = DEFER_MODE_ROTATION;
                 } else {
-                    removalInfo.deferRemoveForImeMode = DEFER_MODE_NORMAL;
+                    removalInfo.deferRemoveMode = DEFER_MODE_NORMAL;
                 }
-            } else {
-                removalInfo.deferRemoveForImeMode = DEFER_MODE_NONE;
             }
 
             final WindowState mainWindow =
@@ -696,7 +687,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 removalInfo.roundedCornerRadius =
                         topActivity.mLetterboxUiController.getRoundedCornersRadius(mainWindow);
                 removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
-                removalInfo.mainFrame = mainWindow.getRelativeFrame();
+                removalInfo.mainFrame = new Rect(mainWindow.getFrame());
+                removalInfo.mainFrame.offsetTo(mainWindow.mSurfacePosition.x,
+                        mainWindow.mSurfacePosition.y);
             }
         }
         try {
@@ -750,6 +743,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         removalInfo.taskId = taskId;
         removalInfo.windowlessSurface = true;
         removalInfo.removeImmediately = immediately;
+        removalInfo.deferRemoveMode = DEFER_MODE_NONE;
         try {
             lastOrganizer.removeStartingWindow(removalInfo);
         } catch (RemoteException e) {

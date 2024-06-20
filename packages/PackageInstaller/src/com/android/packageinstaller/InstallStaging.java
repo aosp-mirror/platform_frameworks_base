@@ -165,7 +165,9 @@ public class InstallStaging extends Activity {
         if (mStagingTask != null) {
             mStagingTask.cancel(true);
         }
-
+        if (mDialog != null) {
+            mDialog.dismiss();
+        }
         super.onDestroy();
     }
 

@@ -339,8 +339,6 @@ public class VirtualDeviceManagerServiceTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
-        mSetFlagsRule.enableFlags(com.android.input.flags.Flags.FLAG_ENABLE_POINTER_CHOREOGRAPHER);
-
         doNothing().when(mInputManagerInternalMock)
                 .setMousePointerAccelerationEnabled(anyBoolean(), anyInt());
         doNothing().when(mInputManagerInternalMock).setPointerIconVisible(anyBoolean(), anyInt());
@@ -2003,7 +2001,7 @@ public class VirtualDeviceManagerServiceTest {
                         mRunningAppsChangedCallback,
                         params,
                         new DisplayManagerGlobal(mIDisplayManager),
-                        new VirtualCameraController(DEVICE_POLICY_DEFAULT));
+                        new VirtualCameraController(DEVICE_POLICY_DEFAULT, virtualDeviceId));
         mVdms.addVirtualDevice(virtualDeviceImpl);
         assertThat(virtualDeviceImpl.getAssociationId()).isEqualTo(mAssociationInfo.getId());
         assertThat(virtualDeviceImpl.getPersistentDeviceId())

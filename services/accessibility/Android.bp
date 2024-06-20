@@ -34,6 +34,8 @@ java_library_static {
     ],
     static_libs: [
         "com_android_server_accessibility_flags_lib",
+        "//frameworks/base/packages/SystemUI/aconfig:com_android_systemui_flags_lib",
+
     ],
 }
 

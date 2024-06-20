@@ -39,16 +39,16 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Kako se krećemo prema budućnosti bez lozinki, lozinke će i dalje biti dostupne uz pristupne ključeve."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite gdje će se pohranjivati <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Odaberite upravitelja lozinki da sačuvate svoje informacije i brže se prijavite sljedeći put"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Kreirati pristupni ključ da se prijavite u aplikaciju <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Sačuvati lozinku da se prijavite u aplikaciju <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Sačuvati informacije o prijavi za aplikaciju <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Kreirati pristupni ključ da se prijavite u aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Sačuvati lozinku da se prijavite u aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Sačuvati podatke za prijavu u aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"pristupni ključ"</string>
     <string name="password" msgid="6738570945182936667">"lozinka"</string>
     <string name="passkeys" msgid="5733880786866559847">"pristupni ključevi"</string>
     <string name="passwords" msgid="5419394230391253816">"lozinke"</string>
     <string name="sign_ins" msgid="4710739369149469208">"prijave"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"informacije o prijavi"</string>
-    <string name="save_credential_to_title" msgid="3172811692275634301">"Sačuvaj <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> na"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Sačuvaj vrstu akreditiva \"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>\" na"</string>
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Kreirati pristupni ključ na drugom uređaju?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Sačuvati lozinku na drugom uređaju?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Sačuvati akreditive za prijavu na drugom uređaju?"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Povratak na prethodnu stranicu"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Zatvaranje"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Odbacivanje"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Koristiti sačuvani pristupni ključ za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Koristiti sačuvanu lozinku za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Koristiti prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Otključati opcije prijave za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Koristite sačuvani pristupni ključ za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Koristite sačuvanu lozinku za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Koristite račun za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Koristite zaključavanje ekrana da se prijavite u aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g> pomoću korisničkog imena <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Otključajte načine prijave za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Odaberite sačuvani pristupni ključ za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Odaberite sačuvanu lozinku za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Odaberite sačuvanu prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Odaberite prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Odaberite račun za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Odabrati opciju za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Koristiti ove informacije u aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prijavite se na drugi način"</string>

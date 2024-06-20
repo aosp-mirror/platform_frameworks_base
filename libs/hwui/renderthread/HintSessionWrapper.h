@@ -17,9 +17,11 @@
 #pragma once
 
 #include <android/performance_hint.h>
+#include <private/performance_hint_private.h>
 
 #include <future>
 #include <optional>
+#include <vector>
 
 #include "utils/TimeUtils.h"
 
@@ -47,11 +49,15 @@ public:
     nsecs_t getLastUpdate();
     void delayedDestroy(renderthread::RenderThread& rt, nsecs_t delay,
                         std::shared_ptr<HintSessionWrapper> wrapperPtr);
+    // Must be called on Render thread. Otherwise can cause a race condition.
+    void setActiveFunctorThreads(std::vector<pid_t> threadIds);
 
 private:
     APerformanceHintSession* mHintSession = nullptr;
     // This needs to work concurrently for testing
     std::optional<std::shared_future<APerformanceHintSession*>> mHintSessionFuture;
+    // This needs to work concurrently for testing
+    std::optional<std::shared_future<int>> mSetThreadsFuture;
 
     int mResetsSinceLastReport = 0;
     nsecs_t mLastFrameNotification = 0;
@@ -59,6 +65,8 @@ private:
 
     pid_t mUiThreadId;
     pid_t mRenderThreadId;
+    std::vector<pid_t> mPermanentSessionTids;
+    std::vector<pid_t> mActiveFunctorTids;
 
     bool mSessionValid = true;
 
@@ -73,15 +81,18 @@ private:
         virtual ~HintSessionBinding() = default;
         virtual void init();
         APerformanceHintManager* (*getManager)();
-        APerformanceHintSession* (*createSession)(APerformanceHintManager* manager,
-                                                  const int32_t* tids, size_t tidCount,
-                                                  int64_t defaultTarget) = nullptr;
+        APerformanceHintSession* (*createSessionInternal)(APerformanceHintManager* manager,
+                                                          const int32_t* tids, size_t tidCount,
+                                                          int64_t defaultTarget,
+                                                          SessionTag tag) = nullptr;
         void (*closeSession)(APerformanceHintSession* session) = nullptr;
         void (*updateTargetWorkDuration)(APerformanceHintSession* session,
                                          int64_t targetDuration) = nullptr;
         void (*reportActualWorkDuration)(APerformanceHintSession* session,
                                          int64_t actualDuration) = nullptr;
         void (*sendHint)(APerformanceHintSession* session, int32_t hintId) = nullptr;
+        int (*setThreads)(APerformanceHintSession* session, const pid_t* tids,
+                          size_t size) = nullptr;
 
     private:
         bool mInitialized = false;

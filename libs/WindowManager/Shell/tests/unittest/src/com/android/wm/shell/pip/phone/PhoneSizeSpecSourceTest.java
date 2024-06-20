@@ -16,33 +16,26 @@
 
 package com.android.wm.shell.pip.phone;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.SystemProperties;
 import android.testing.AndroidTestingRunner;
 import android.util.Size;
 import android.view.DisplayInfo;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.SizeSpecSource;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.exceptions.misusing.InvalidUseOfMatchersException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,15 +56,24 @@ public class PhoneSizeSpecSourceTest extends ShellTestCase {
     private static final float DEFAULT_PERCENT = 0.6f;
     /** Minimum sizing percentage */
     private static final float MIN_PERCENT = 0.5f;
+    /** Threshold to determine if a Display is square-ish. */
+    private static final float SQUARE_DISPLAY_THRESHOLD = 0.95f;
+    /** Default sizing percentage for square-ish Display. */
+    private static final float SQUARE_DISPLAY_DEFAULT_PERCENT = 0.5f;
+    /** Minimum sizing percentage for square-ish Display. */
+    private static final float SQUARE_DISPLAY_MIN_PERCENT = 0.4f;
     /** Aspect ratio that the new PIP size spec logic optimizes for. */
     private static final float OPTIMIZED_ASPECT_RATIO = 9f / 16;
 
-    /** A map of aspect ratios to be tested to expected sizes */
-    private static Map<Float, Size> sExpectedMaxSizes;
-    private static Map<Float, Size> sExpectedDefaultSizes;
-    private static Map<Float, Size> sExpectedMinSizes;
-    /** A static mockito session object to mock {@link SystemProperties} */
-    private static StaticMockitoSession sStaticMockitoSession;
+    /** Maps of aspect ratios to be tested to expected sizes on non-square Display. */
+    private static Map<Float, Size> sNonSquareDisplayExpectedMaxSizes;
+    private static Map<Float, Size> sNonSquareDisplayExpectedDefaultSizes;
+    private static Map<Float, Size> sNonSquareDisplayExpectedMinSizes;
+
+    /** Maps of aspect ratios to be tested to expected sizes on square Display. */
+    private static Map<Float, Size> sSquareDisplayExpectedMaxSizes;
+    private static Map<Float, Size> sSquareDisplayExpectedDefaultSizes;
+    private static Map<Float, Size> sSquareDisplayExpectedMinSizes;
 
     @Mock private Context mContext;
     @Mock private Resources mResources;
@@ -80,49 +82,55 @@ public class PhoneSizeSpecSourceTest extends ShellTestCase {
     private SizeSpecSource mSizeSpecSource;
 
     /**
-     * Sets up static Mockito session for SystemProperties and mocks necessary static methods.
+     * Initializes the map with the aspect ratios to be tested and corresponding expected max sizes.
+     * This is to initialize the expectations on non-square Display only.
      */
-    private static void setUpStaticSystemPropertiesSession() {
-        sStaticMockitoSession = mockitoSession()
-                .mockStatic(SystemProperties.class).startMocking();
-        when(SystemProperties.get(anyString(), anyString())).thenAnswer(invocation -> {
-            String property = invocation.getArgument(0);
-            if (property.equals("com.android.wm.shell.pip.phone.def_percentage")) {
-                return Float.toString(DEFAULT_PERCENT);
-            } else if (property.equals("com.android.wm.shell.pip.phone.min_percentage")) {
-                return Float.toString(MIN_PERCENT);
-            }
+    private static void initNonSquareDisplayExpectedSizes() {
+        sNonSquareDisplayExpectedMaxSizes = new HashMap<>();
+        sNonSquareDisplayExpectedDefaultSizes = new HashMap<>();
+        sNonSquareDisplayExpectedMinSizes = new HashMap<>();
 
-            // throw an exception if illegal arguments are used for these tests
-            throw new InvalidUseOfMatchersException(
-                String.format("Argument %s does not match", property)
-            );
-        });
+        sNonSquareDisplayExpectedMaxSizes.put(16f / 9, new Size(1000, 563));
+        sNonSquareDisplayExpectedDefaultSizes.put(16f / 9, new Size(600, 338));
+        sNonSquareDisplayExpectedMinSizes.put(16f / 9, new Size(501, 282));
+
+        sNonSquareDisplayExpectedMaxSizes.put(4f / 3, new Size(893, 670));
+        sNonSquareDisplayExpectedDefaultSizes.put(4f / 3, new Size(536, 402));
+        sNonSquareDisplayExpectedMinSizes.put(4f / 3, new Size(447, 335));
+
+        sNonSquareDisplayExpectedMaxSizes.put(3f / 4, new Size(670, 893));
+        sNonSquareDisplayExpectedDefaultSizes.put(3f / 4, new Size(402, 536));
+        sNonSquareDisplayExpectedMinSizes.put(3f / 4, new Size(335, 447));
+
+        sNonSquareDisplayExpectedMaxSizes.put(9f / 16, new Size(563, 1001));
+        sNonSquareDisplayExpectedDefaultSizes.put(9f / 16, new Size(338, 601));
+        sNonSquareDisplayExpectedMinSizes.put(9f / 16, new Size(282, 501));
     }
 
     /**
      * Initializes the map with the aspect ratios to be tested and corresponding expected max sizes.
+     * This is to initialize the expectations on square Display only.
      */
-    private static void initExpectedSizes() {
-        sExpectedMaxSizes = new HashMap<>();
-        sExpectedDefaultSizes = new HashMap<>();
-        sExpectedMinSizes = new HashMap<>();
+    private static void initSquareDisplayExpectedSizes() {
+        sSquareDisplayExpectedMaxSizes = new HashMap<>();
+        sSquareDisplayExpectedDefaultSizes = new HashMap<>();
+        sSquareDisplayExpectedMinSizes = new HashMap<>();
 
-        sExpectedMaxSizes.put(16f / 9, new Size(1000, 563));
-        sExpectedDefaultSizes.put(16f / 9, new Size(600, 338));
-        sExpectedMinSizes.put(16f / 9, new Size(501, 282));
+        sSquareDisplayExpectedMaxSizes.put(16f / 9, new Size(1000, 563));
+        sSquareDisplayExpectedDefaultSizes.put(16f / 9, new Size(500, 281));
+        sSquareDisplayExpectedMinSizes.put(16f / 9, new Size(400, 225));
 
-        sExpectedMaxSizes.put(4f / 3, new Size(893, 670));
-        sExpectedDefaultSizes.put(4f / 3, new Size(536, 402));
-        sExpectedMinSizes.put(4f / 3, new Size(447, 335));
+        sSquareDisplayExpectedMaxSizes.put(4f / 3, new Size(893, 670));
+        sSquareDisplayExpectedDefaultSizes.put(4f / 3, new Size(447, 335));
+        sSquareDisplayExpectedMinSizes.put(4f / 3, new Size(357, 268));
 
-        sExpectedMaxSizes.put(3f / 4, new Size(670, 893));
-        sExpectedDefaultSizes.put(3f / 4, new Size(402, 536));
-        sExpectedMinSizes.put(3f / 4, new Size(335, 447));
+        sSquareDisplayExpectedMaxSizes.put(3f / 4, new Size(670, 893));
+        sSquareDisplayExpectedDefaultSizes.put(3f / 4, new Size(335, 447));
+        sSquareDisplayExpectedMinSizes.put(3f / 4, new Size(268, 357));
 
-        sExpectedMaxSizes.put(9f / 16, new Size(563, 1001));
-        sExpectedDefaultSizes.put(9f / 16, new Size(338, 601));
-        sExpectedMinSizes.put(9f / 16, new Size(282, 501));
+        sSquareDisplayExpectedMaxSizes.put(9f / 16, new Size(563, 1001));
+        sSquareDisplayExpectedDefaultSizes.put(9f / 16, new Size(282, 501));
+        sSquareDisplayExpectedMinSizes.put(9f / 16, new Size(225, 400));
     }
 
     private void forEveryTestCaseCheck(Map<Float, Size> expectedSizes,
@@ -137,20 +145,38 @@ public class PhoneSizeSpecSourceTest extends ShellTestCase {
 
     @Before
     public void setUp() {
-        initExpectedSizes();
+        initNonSquareDisplayExpectedSizes();
+        initSquareDisplayExpectedSizes();
 
-        when(mResources.getDimensionPixelSize(anyInt())).thenReturn(DEFAULT_MIN_EDGE_SIZE);
-        when(mResources.getFloat(anyInt())).thenReturn(OPTIMIZED_ASPECT_RATIO);
-        when(mResources.getString(anyInt())).thenReturn("0x0");
+        when(mResources.getFloat(R.dimen.config_pipSystemPreferredDefaultSizePercent))
+                .thenReturn(DEFAULT_PERCENT);
+        when(mResources.getFloat(R.dimen.config_pipSystemPreferredMinimumSizePercent))
+                .thenReturn(MIN_PERCENT);
+        when(mResources.getDimensionPixelSize(R.dimen.default_minimal_size_pip_resizable_task))
+                .thenReturn(DEFAULT_MIN_EDGE_SIZE);
+        when(mResources.getFloat(R.dimen.config_pipLargeScreenOptimizedAspectRatio))
+                .thenReturn(OPTIMIZED_ASPECT_RATIO);
+        when(mResources.getString(R.string.config_defaultPictureInPictureScreenEdgeInsets))
+                .thenReturn("0x0");
         when(mResources.getDisplayMetrics())
                 .thenReturn(getContext().getResources().getDisplayMetrics());
+        when(mResources.getFloat(R.dimen.config_pipSquareDisplayThresholdForSystemPreferredSize))
+                .thenReturn(SQUARE_DISPLAY_THRESHOLD);
+        when(mResources.getFloat(
+                R.dimen.config_pipSystemPreferredDefaultSizePercentForSquareDisplay))
+                .thenReturn(SQUARE_DISPLAY_DEFAULT_PERCENT);
+        when(mResources.getFloat(
+                R.dimen.config_pipSystemPreferredMinimumSizePercentForSquareDisplay))
+                .thenReturn(SQUARE_DISPLAY_MIN_PERCENT);
 
         // set up the mock context for spec handler specifically
         when(mContext.getResources()).thenReturn(mResources);
+    }
 
+    private void setupSizeSpecWithDisplayDimension(int width, int height) {
         DisplayInfo displayInfo = new DisplayInfo();
-        displayInfo.logicalWidth = DISPLAY_EDGE_SIZE;
-        displayInfo.logicalHeight = DISPLAY_EDGE_SIZE;
+        displayInfo.logicalWidth = width;
+        displayInfo.logicalHeight = height;
 
         // use the parent context (not the mocked one) to obtain the display layout
         // this is done to avoid unnecessary mocking while allowing for custom display dimensions
@@ -159,38 +185,57 @@ public class PhoneSizeSpecSourceTest extends ShellTestCase {
         mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
         mPipDisplayLayoutState.setDisplayLayout(displayLayout);
 
-        setUpStaticSystemPropertiesSession();
         mSizeSpecSource = new PhoneSizeSpecSource(mContext, mPipDisplayLayoutState);
 
         // no overridden min edge size by default
         mSizeSpecSource.setOverrideMinSize(null);
     }
 
-    @After
-    public void cleanUp() {
-        sStaticMockitoSession.finishMocking();
-    }
-
     @Test
-    public void testGetMaxSize() {
-        forEveryTestCaseCheck(sExpectedMaxSizes,
+    public void testGetMaxSize_nonSquareDisplay() {
+        setupSizeSpecWithDisplayDimension(DISPLAY_EDGE_SIZE * 2, DISPLAY_EDGE_SIZE);
+        forEveryTestCaseCheck(sNonSquareDisplayExpectedMaxSizes,
                 (aspectRatio) -> mSizeSpecSource.getMaxSize(aspectRatio));
     }
 
     @Test
-    public void testGetDefaultSize() {
-        forEveryTestCaseCheck(sExpectedDefaultSizes,
+    public void testGetDefaultSize_nonSquareDisplay() {
+        setupSizeSpecWithDisplayDimension(DISPLAY_EDGE_SIZE * 2, DISPLAY_EDGE_SIZE);
+        forEveryTestCaseCheck(sNonSquareDisplayExpectedDefaultSizes,
                 (aspectRatio) -> mSizeSpecSource.getDefaultSize(aspectRatio));
     }
 
     @Test
-    public void testGetMinSize() {
-        forEveryTestCaseCheck(sExpectedMinSizes,
+    public void testGetMinSize_nonSquareDisplay() {
+        setupSizeSpecWithDisplayDimension(DISPLAY_EDGE_SIZE * 2, DISPLAY_EDGE_SIZE);
+        forEveryTestCaseCheck(sNonSquareDisplayExpectedMinSizes,
+                (aspectRatio) -> mSizeSpecSource.getMinSize(aspectRatio));
+    }
+
+    @Test
+    public void testGetMaxSize_squareDisplay() {
+        setupSizeSpecWithDisplayDimension(DISPLAY_EDGE_SIZE, DISPLAY_EDGE_SIZE);
+        forEveryTestCaseCheck(sSquareDisplayExpectedMaxSizes,
+                (aspectRatio) -> mSizeSpecSource.getMaxSize(aspectRatio));
+    }
+
+    @Test
+    public void testGetDefaultSize_squareDisplay() {
+        setupSizeSpecWithDisplayDimension(DISPLAY_EDGE_SIZE, DISPLAY_EDGE_SIZE);
+        forEveryTestCaseCheck(sSquareDisplayExpectedDefaultSizes,
+                (aspectRatio) -> mSizeSpecSource.getDefaultSize(aspectRatio));
+    }
+
+    @Test
+    public void testGetMinSize_squareDisplay() {
+        setupSizeSpecWithDisplayDimension(DISPLAY_EDGE_SIZE, DISPLAY_EDGE_SIZE);
+        forEveryTestCaseCheck(sSquareDisplayExpectedMinSizes,
                 (aspectRatio) -> mSizeSpecSource.getMinSize(aspectRatio));
     }
 
     @Test
     public void testGetSizeForAspectRatio_noOverrideMinSize() {
+        setupSizeSpecWithDisplayDimension(DISPLAY_EDGE_SIZE * 2, DISPLAY_EDGE_SIZE);
         // an initial size with 16:9 aspect ratio
         Size initSize = new Size(600, 337);
 
@@ -202,6 +247,7 @@ public class PhoneSizeSpecSourceTest extends ShellTestCase {
 
     @Test
     public void testGetSizeForAspectRatio_withOverrideMinSize() {
+        setupSizeSpecWithDisplayDimension(DISPLAY_EDGE_SIZE * 2, DISPLAY_EDGE_SIZE);
         // an initial size with a 1:1 aspect ratio
         Size initSize = new Size(OVERRIDE_MIN_EDGE_SIZE, OVERRIDE_MIN_EDGE_SIZE);
         mSizeSpecSource.setOverrideMinSize(initSize);

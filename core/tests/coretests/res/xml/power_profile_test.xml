@@ -98,4 +98,16 @@
         <value>40</value>
         <value>50</value>
     </array>
+
+    <!-- Idle current for bluetooth in mA.-->
+    <item name="bluetooth.controller.idle">0.02</item>
+
+    <!-- Rx current for bluetooth in mA.-->
+    <item name="bluetooth.controller.rx">3</item>
+
+    <!-- Tx current for bluetooth in mA-->
+    <item name="bluetooth.controller.tx">5</item>
+
+    <!-- Operating voltage for bluetooth in mV.-->
+    <item name="bluetooth.controller.voltage">3300</item>
 </device>

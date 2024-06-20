@@ -817,10 +817,11 @@ final class OverlayManagerServiceImpl {
                     overlayPackage.getSplits().get(0).getPath());
         }
 
-        // Immutable RROs targeting to "android", ie framework-res.apk, are handled by native
-        // layers.
         final OverlayInfo updatedOverlayInfo = mSettings.getOverlayInfo(overlay, userId);
         @IdmapManager.IdmapStatus int idmapStatus = IDMAP_NOT_EXIST;
+
+        // Idmaps for immutable RROs targeting "android", i.e. framework-res.apk, are created at
+        // boot time in OverlayConfig.createImmutableFrameworkIdmapsInZygote().
         if (targetPackage != null && !("android".equals(info.getTargetPackageName())
                 && !isPackageConfiguredMutable(overlayPackage))) {
             idmapStatus = mIdmapManager.createIdmap(targetPackage, overlayPackageState,

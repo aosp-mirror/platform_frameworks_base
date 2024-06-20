@@ -20,9 +20,11 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -38,6 +40,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarWindowController mStatusBarWindowController;
     private final ShadeViewController mShadeViewController;
+    private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final NotificationStackScrollLayoutController mNsslController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final HeadsUpManager mHeadsUpManager;
@@ -49,6 +52,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarWindowController statusBarWindowController,
             ShadeViewController shadeViewController,
+            PanelExpansionInteractor panelExpansionInteractor,
             NotificationStackScrollLayoutController nsslController,
             KeyguardBypassController keyguardBypassController,
             HeadsUpManager headsUpManager,
@@ -57,6 +61,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
         mNotificationShadeWindowController = notificationShadeWindowController;
         mStatusBarWindowController = statusBarWindowController;
         mShadeViewController = shadeViewController;
+        mPanelExpansionInteractor = panelExpansionInteractor;
         mNsslController = nsslController;
         mKeyguardBypassController = keyguardBypassController;
         mHeadsUpManager = headsUpManager;
@@ -74,14 +79,14 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
         if (inPinnedMode) {
             mNotificationShadeWindowController.setHeadsUpShowing(true);
             mStatusBarWindowController.setForceStatusBarVisible(true);
-            if (mShadeViewController.isFullyCollapsed()) {
+            if (mPanelExpansionInteractor.isFullyCollapsed()) {
                 mShadeViewController.updateTouchableRegion();
             }
         } else {
             boolean bypassKeyguard = mKeyguardBypassController.getBypassEnabled()
                     && mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
-            if (!mShadeViewController.isFullyCollapsed()
-                    || mShadeViewController.isTracking()
+            if (!mPanelExpansionInteractor.isFullyCollapsed()
+                    || mPanelExpansionInteractor.isTracking()
                     || bypassKeyguard) {
                 // We are currently tracking or is open and the shade doesn't need to
                 //be kept
@@ -94,15 +99,21 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
                 // we need to keep the panel open artificially, let's wait until the
                 //animation
                 // is finished.
-                mHeadsUpManager.setHeadsUpGoingAway(true);
+                setHeadsAnimatingAway(true);
                 mNsslController.runAfterAnimationFinished(() -> {
                     if (!mHeadsUpManager.hasPinnedHeadsUp()) {
                         mNotificationShadeWindowController.setHeadsUpShowing(false);
-                        mHeadsUpManager.setHeadsUpGoingAway(false);
+                        setHeadsAnimatingAway(false);
                     }
                     mNotificationRemoteInputManager.onPanelCollapsed();
                 });
             }
+        }
+    }
+
+    private void setHeadsAnimatingAway(boolean headsUpAnimatingAway) {
+        if (!NotificationsHeadsUpRefactor.isEnabled()) {
+            mHeadsUpManager.setHeadsUpAnimatingAway(headsUpAnimatingAway);
         }
     }
 }

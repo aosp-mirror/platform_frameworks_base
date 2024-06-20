@@ -932,7 +932,10 @@ public class VoiceInteractionService extends Service {
      * @param sharedMemory The unrestricted data blob to be provided to the
      * {@link VisualQueryDetectionService}. Use this to provide models or other such data to the
      * sandboxed process.
-     * @param callback The callback to notify of detection events.
+     * @param callback The callback to notify of detection events. Single threaded or sequential
+     *                 executors are recommended for the callback are not guaranteed to be executed
+     *                 in the order of how they were called from the
+     *                 {@link VisualQueryDetectionService}.
      * @return An instanece of {@link VisualQueryDetector}.
      * @throws IllegalStateException when there is an existing {@link VisualQueryDetector}, or when
      * there is a non-trusted hotword detector running.

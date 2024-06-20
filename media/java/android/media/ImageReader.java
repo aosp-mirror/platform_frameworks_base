@@ -37,6 +37,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.Trace;
 import android.view.Surface;
 
 import dalvik.system.VMRuntime;
@@ -925,6 +926,7 @@ public class ImageReader implements AutoCloseable {
         if (ir == null) {
             return;
         }
+        Trace.beginSection("android.media.ImageReader#postEventFromNative");
 
         final Executor executor;
         final OnImageAvailableListener listener;
@@ -948,6 +950,7 @@ public class ImageReader implements AutoCloseable {
                 }
             });
         }
+        Trace.endSection();
     }
 
     /**

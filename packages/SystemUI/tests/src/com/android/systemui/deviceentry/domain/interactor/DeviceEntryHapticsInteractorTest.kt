@@ -29,7 +29,7 @@ import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
@@ -162,7 +162,7 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
         kosmos.fakeKeyguardRepository.setBiometricUnlockSource(
             BiometricUnlockSource.FINGERPRINT_SENSOR
         )
-        kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+        kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.WAKE_AND_UNLOCK)
     }
 
     private fun fingerprintFailure() {

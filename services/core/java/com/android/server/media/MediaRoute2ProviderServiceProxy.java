@@ -21,6 +21,7 @@ import static android.media.MediaRoute2ProviderService.REQUEST_ID_NONE;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +42,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -49,15 +51,14 @@ import com.android.media.flags.Flags;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * Maintains a connection to a particular {@link MediaRoute2ProviderService}.
- */
-final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
-        implements ServiceConnection {
+/** Maintains a connection to a particular {@link MediaRoute2ProviderService}. */
+final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
     private static final String TAG = "MR2ProviderSvcProxy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -65,6 +66,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     private final int mUserId;
     private final Handler mHandler;
     private final boolean mIsSelfScanOnlyProvider;
+    private final ServiceConnection mServiceConnection = new ServiceConnectionImpl();
 
     // Connection state
     private boolean mRunning;
@@ -77,18 +79,30 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     private boolean mLastDiscoveryPreferenceIncludesThisPackage = false;
 
     @GuardedBy("mLock")
-    final List<RoutingSessionInfo> mReleasingSessions = new ArrayList<>();
+    private final List<RoutingSessionInfo> mReleasingSessions = new ArrayList<>();
+
+    // We keep pending requests for transfers and sessions creation separately because transfers
+    // don't have an associated request id and session creations don't have a session id.
+    @GuardedBy("mLock")
+    private final LongSparseArray<SessionCreationOrTransferRequest>
+            mRequestIdToSessionCreationRequest;
+
+    @GuardedBy("mLock")
+    private final Map<String, SessionCreationOrTransferRequest> mSessionOriginalIdToTransferRequest;
 
     MediaRoute2ProviderServiceProxy(
             @NonNull Context context,
+            @NonNull Looper looper,
             @NonNull ComponentName componentName,
             boolean isSelfScanOnlyProvider,
             int userId) {
         super(componentName);
         mContext = Objects.requireNonNull(context, "Context must not be null.");
+        mRequestIdToSessionCreationRequest = new LongSparseArray<>();
+        mSessionOriginalIdToTransferRequest = new HashMap<>();
         mIsSelfScanOnlyProvider = isSelfScanOnlyProvider;
         mUserId = userId;
-        mHandler = new Handler(Looper.myLooper());
+        mHandler = new Handler(looper);
     }
 
     public void setManagerScanning(boolean managerScanning) {
@@ -102,13 +116,26 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     public void requestCreateSession(
             long requestId,
             String packageName,
-            String routeId,
+            String routeOriginalId,
             Bundle sessionHints,
             @RoutingSessionInfo.TransferReason int transferReason,
             @NonNull UserHandle transferInitiatorUserHandle,
             @NonNull String transferInitiatorPackageName) {
         if (mConnectionReady) {
-            mActiveConnection.requestCreateSession(requestId, packageName, routeId, sessionHints);
+            if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+                synchronized (mLock) {
+                    mRequestIdToSessionCreationRequest.put(
+                            requestId,
+                            new SessionCreationOrTransferRequest(
+                                    requestId,
+                                    routeOriginalId,
+                                    transferReason,
+                                    transferInitiatorUserHandle,
+                                    transferInitiatorPackageName));
+                }
+            }
+            mActiveConnection.requestCreateSession(
+                    requestId, packageName, routeOriginalId, sessionHints);
             updateBinding();
         }
     }
@@ -116,6 +143,11 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     @Override
     public void releaseSession(long requestId, String sessionId) {
         if (mConnectionReady) {
+            if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+                synchronized (mLock) {
+                    mSessionOriginalIdToTransferRequest.remove(sessionId);
+                }
+            }
             mActiveConnection.releaseSession(requestId, sessionId);
             updateBinding();
         }
@@ -152,35 +184,47 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             long requestId,
             @NonNull UserHandle transferInitiatorUserHandle,
             @NonNull String transferInitiatorPackageName,
-            String sessionId,
-            String routeId,
+            String sessionOriginalId,
+            String routeOriginalId,
             @RoutingSessionInfo.TransferReason int transferReason) {
         if (mConnectionReady) {
-            mActiveConnection.transferToRoute(requestId, sessionId, routeId);
+            if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+                synchronized (mLock) {
+                    mSessionOriginalIdToTransferRequest.put(
+                            sessionOriginalId,
+                            new SessionCreationOrTransferRequest(
+                                    requestId,
+                                    routeOriginalId,
+                                    transferReason,
+                                    transferInitiatorUserHandle,
+                                    transferInitiatorPackageName));
+                }
+            }
+            mActiveConnection.transferToRoute(requestId, sessionOriginalId, routeOriginalId);
         }
     }
 
     @Override
-    public void setRouteVolume(long requestId, String routeId, int volume) {
+    public void setRouteVolume(long requestId, String routeOriginalId, int volume) {
         if (mConnectionReady) {
-            mActiveConnection.setRouteVolume(requestId, routeId, volume);
+            mActiveConnection.setRouteVolume(requestId, routeOriginalId, volume);
             updateBinding();
         }
     }
 
     @Override
-    public void setSessionVolume(long requestId, String sessionId, int volume) {
+    public void setSessionVolume(long requestId, String sessionOriginalId, int volume) {
         if (mConnectionReady) {
-            mActiveConnection.setSessionVolume(requestId, sessionId, volume);
+            mActiveConnection.setSessionVolume(requestId, sessionOriginalId, volume);
             updateBinding();
         }
     }
 
     @Override
-    public void prepareReleaseSession(@NonNull String sessionId) {
+    public void prepareReleaseSession(@NonNull String sessionUniqueId) {
         synchronized (mLock) {
             for (RoutingSessionInfo session : mSessionInfos) {
-                if (TextUtils.equals(session.getId(), sessionId)) {
+                if (TextUtils.equals(session.getId(), sessionUniqueId)) {
                     mSessionInfos.remove(session);
                     mReleasingSessions.add(session);
                     break;
@@ -232,7 +276,9 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         if (!mRunning) {
             return false;
         }
-        if (!getSessionInfos().isEmpty() || mIsManagerScanning) {
+        boolean bindDueToManagerScan =
+                mIsManagerScanning && !Flags.enablePreventionOfManagerScansWhenNoAppsScan();
+        if (!getSessionInfos().isEmpty() || bindDueToManagerScan) {
             // We bind if any manager is scanning (regardless of whether an app is scanning) to give
             // the opportunity for providers to publish routing sessions that were established
             // directly between the app and the provider (typically via AndroidX MediaRouter). See
@@ -255,9 +301,12 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             Intent service = new Intent(MediaRoute2ProviderService.SERVICE_INTERFACE);
             service.setComponent(mComponentName);
             try {
-                mBound = mContext.bindServiceAsUser(service, this,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
-                        new UserHandle(mUserId));
+                mBound =
+                        mContext.bindServiceAsUser(
+                                service,
+                                mServiceConnection,
+                                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                                new UserHandle(mUserId));
                 if (!mBound && DEBUG) {
                     Slog.d(TAG, this + ": Bind failed");
                 }
@@ -277,12 +326,11 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
             mBound = false;
             disconnect();
-            mContext.unbindService(this);
+            mContext.unbindService(mServiceConnection);
         }
     }
 
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
+    private void onServiceConnectedInternal(IBinder service) {
         if (DEBUG) {
             Slog.d(TAG, this + ": Connected");
         }
@@ -306,16 +354,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         }
     }
 
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
+    private void onServiceDisconnectedInternal() {
         if (DEBUG) {
             Slog.d(TAG, this + ": Service disconnected");
         }
         disconnect();
     }
 
-    @Override
-    public void onBindingDied(ComponentName name) {
+    private void onBindingDiedInternal(ComponentName name) {
         unbind();
         if (Flags.enablePreventionOfKeepAliveRouteProviders()) {
             Slog.w(
@@ -380,6 +426,11 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         String newSessionId = newSession.getId();
 
         synchronized (mLock) {
+            if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+                newSession =
+                        createSessionWithPopulatedTransferInitiationDataLocked(
+                                requestId, /* oldSessionInfo= */ null, newSession);
+            }
             if (mSessionInfos.stream()
                     .anyMatch(session -> TextUtils.equals(session.getId(), newSessionId))
                     || mReleasingSessions.stream()
@@ -393,6 +444,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         mCallback.onSessionCreated(this, requestId, newSession);
     }
 
+    @GuardedBy("mLock")
     private int findSessionByIdLocked(RoutingSessionInfo session) {
         for (int i = 0; i < mSessionInfos.size(); i++) {
             if (TextUtils.equals(mSessionInfos.get(i).getId(), session.getId())) {
@@ -413,7 +465,6 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             for (RoutingSessionInfo session : sessions) {
                 if (session == null) continue;
                 session = assignProviderIdForSession(session);
-
                 int sourceIndex = findSessionByIdLocked(session);
                 if (sourceIndex < 0) {
                     mSessionInfos.add(targetIndex++, session);
@@ -421,6 +472,12 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
                 } else if (sourceIndex < targetIndex) {
                     Slog.w(TAG, "Ignoring duplicate session ID: " + session.getId());
                 } else {
+                    if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+                        RoutingSessionInfo oldSessionInfo = mSessionInfos.get(sourceIndex);
+                        session =
+                                createSessionWithPopulatedTransferInitiationDataLocked(
+                                        REQUEST_ID_NONE, oldSessionInfo, session);
+                    }
                     mSessionInfos.set(sourceIndex, session);
                     Collections.swap(mSessionInfos, sourceIndex, targetIndex++);
                     dispatchSessionUpdated(session);
@@ -428,9 +485,63 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             }
             for (int i = mSessionInfos.size() - 1; i >= targetIndex; i--) {
                 RoutingSessionInfo releasedSession = mSessionInfos.remove(i);
+                mSessionOriginalIdToTransferRequest.remove(releasedSession.getId());
                 dispatchSessionReleased(releasedSession);
             }
         }
+    }
+
+    /**
+     * Returns a {@link RoutingSessionInfo} with transfer initiation data from the given {@code
+     * oldSessionInfo}, and any pending transfer or session creation requests.
+     */
+    @GuardedBy("mLock")
+    private RoutingSessionInfo createSessionWithPopulatedTransferInitiationDataLocked(
+            long requestId,
+            @Nullable RoutingSessionInfo oldSessionInfo,
+            @NonNull RoutingSessionInfo newSessionInfo) {
+        SessionCreationOrTransferRequest pendingRequest =
+                oldSessionInfo != null
+                        ? mSessionOriginalIdToTransferRequest.get(newSessionInfo.getOriginalId())
+                        : mRequestIdToSessionCreationRequest.get(requestId);
+        boolean pendingTargetRouteInSelectedRoutes =
+                pendingRequest != null
+                        && pendingRequest.isTargetRouteIdInRouteUniqueIdList(
+                                newSessionInfo.getSelectedRoutes());
+        boolean pendingTargetRouteInTransferableRoutes =
+                pendingRequest != null
+                        && pendingRequest.isTargetRouteIdInRouteUniqueIdList(
+                                newSessionInfo.getTransferableRoutes());
+
+        int transferReason;
+        UserHandle transferInitiatorUserHandle;
+        String transferInitiatorPackageName;
+        if (pendingTargetRouteInSelectedRoutes) { // The pending request has been satisfied.
+            transferReason = pendingRequest.mTransferReason;
+            transferInitiatorUserHandle = pendingRequest.mTransferInitiatorUserHandle;
+            transferInitiatorPackageName = pendingRequest.mTransferInitiatorPackageName;
+        } else if (oldSessionInfo != null) {
+            // No pending request, we copy the values from the old session object.
+            transferReason = oldSessionInfo.getTransferReason();
+            transferInitiatorUserHandle = oldSessionInfo.getTransferInitiatorUserHandle();
+            transferInitiatorPackageName = oldSessionInfo.getTransferInitiatorPackageName();
+        } else { // There's a new session with no associated creation request, we use defaults.
+            transferReason = RoutingSessionInfo.TRANSFER_REASON_FALLBACK;
+            transferInitiatorUserHandle = UserHandle.of(mUserId);
+            transferInitiatorPackageName = newSessionInfo.getClientPackageName();
+        }
+        if (pendingTargetRouteInSelectedRoutes || !pendingTargetRouteInTransferableRoutes) {
+            // The pending request has been satisfied, or the target route is no longer available.
+            if (oldSessionInfo != null) {
+                mSessionOriginalIdToTransferRequest.remove(newSessionInfo.getId());
+            } else if (pendingRequest != null) {
+                mRequestIdToSessionCreationRequest.remove(pendingRequest.mRequestId);
+            }
+        }
+        return new RoutingSessionInfo.Builder(newSessionInfo)
+                .setTransferInitiator(transferInitiatorUserHandle, transferInitiatorPackageName)
+                .setTransferReason(transferReason)
+                .build();
     }
 
     private void onSessionReleased(Connection connection, RoutingSessionInfo releasedSession) {
@@ -446,6 +557,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
         boolean found = false;
         synchronized (mLock) {
+            mSessionOriginalIdToTransferRequest.remove(releasedSession.getId());
             for (RoutingSessionInfo session : mSessionInfos) {
                 if (TextUtils.equals(session.getId(), releasedSession.getId())) {
                     mSessionInfos.remove(session);
@@ -494,6 +606,11 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     private void onRequestFailed(Connection connection, long requestId, int reason) {
+        if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+            synchronized (mLock) {
+                mRequestIdToSessionCreationRequest.remove(requestId);
+            }
+        }
         if (mActiveConnection != connection) {
             return;
         }
@@ -518,18 +635,60 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
                 }
                 mSessionInfos.clear();
                 mReleasingSessions.clear();
+                mRequestIdToSessionCreationRequest.clear();
+                mSessionOriginalIdToTransferRequest.clear();
             }
         }
     }
 
     @Override
     protected String getDebugString() {
+        int pendingSessionCreationCount;
+        int pendingTransferCount;
+        synchronized (mLock) {
+            pendingSessionCreationCount = mRequestIdToSessionCreationRequest.size();
+            pendingTransferCount = mSessionOriginalIdToTransferRequest.size();
+        }
         return TextUtils.formatSimple(
-                "ProviderServiceProxy - package: %s, bound: %b, connection (active:%b, ready:%b)",
+                "ProviderServiceProxy - package: %s, bound: %b, connection (active:%b, ready:%b), "
+                        + "pending (session creations: %d, transfers: %d)",
                 mComponentName.getPackageName(),
                 mBound,
                 mActiveConnection != null,
-                mConnectionReady);
+                mConnectionReady,
+                pendingSessionCreationCount,
+                pendingTransferCount);
+    }
+
+    // All methods in this class are called on the main thread.
+    private final class ServiceConnectionImpl implements ServiceConnection {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(() -> onServiceConnectedInternal(service));
+            } else {
+                onServiceConnectedInternal(service);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(() -> onServiceDisconnectedInternal());
+            } else {
+                onServiceDisconnectedInternal();
+            }
+        }
+
+        @Override
+        public void onBindingDied(ComponentName name) {
+            if (Flags.enableMr2ServiceNonMainBgThread()) {
+                mHandler.post(() -> onBindingDiedInternal(name));
+            } else {
+                onBindingDiedInternal(name);
+            }
+        }
     }
 
     private final class Connection implements DeathRecipient {
@@ -662,7 +821,9 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         }
 
         @Override
-        public void notifyProviderUpdated(MediaRoute2ProviderInfo providerInfo) {
+        public void notifyProviderUpdated(@NonNull MediaRoute2ProviderInfo providerInfo) {
+            Objects.requireNonNull(providerInfo, "providerInfo must not be null");
+
             for (MediaRoute2Info route : providerInfo.getRoutes()) {
                 if (route.isSystemRoute()) {
                     throw new SecurityException(

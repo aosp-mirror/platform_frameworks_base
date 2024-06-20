@@ -53,8 +53,8 @@ class UnfoldRemoteModule {
     @UnfoldMain
     fun provideMainRotationChangeProvider(
         rotationChangeProviderFactory: RotationChangeProvider.Factory,
-        @UnfoldMain mainHandler: Handler,
+        @UnfoldMain callbackHandler: Handler,
     ): RotationChangeProvider {
-        return rotationChangeProviderFactory.create(mainHandler)
+        return rotationChangeProviderFactory.create(callbackHandler)
     }
 }

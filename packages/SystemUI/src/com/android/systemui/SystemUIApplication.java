@@ -44,16 +44,15 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.res.R;
-import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 
@@ -82,6 +81,7 @@ public class SystemUIApplication extends Application implements
 
     public SystemUIApplication() {
         super();
+        Trace.registerWithPerfetto();
         Log.v(TAG, "SystemUIApplication constructed.");
         // SysUI may be building without protolog preprocessing in some cases
         ProtoLog.REQUIRE_PROTOLOGTOOL = false;
@@ -203,7 +203,7 @@ public class SystemUIApplication extends Application implements
      */
 
     public void startSystemUserServicesIfNeeded() {
-        if (!mProcessWrapper.isSystemUser()) {
+        if (!shouldStartSystemUserServices()) {
             Log.wtf(TAG, "Tried starting SystemUser services on non-SystemUser");
             return;  // Per-user startables are handled in #startSystemUserServicesIfNeeded.
         }
@@ -226,7 +226,7 @@ public class SystemUIApplication extends Application implements
      * <p>This method must only be called from the main thread.</p>
      */
     void startSecondaryUserServicesIfNeeded() {
-        if (mProcessWrapper.isSystemUser()) {
+        if (!shouldStartSecondaryUserServices()) {
             return;  // Per-user startables are handled in #startSystemUserServicesIfNeeded.
         }
         // Sort the startables so that we get a deterministic ordering.
@@ -235,6 +235,14 @@ public class SystemUIApplication extends Application implements
         sortedStartables.putAll(mSysUIComponent.getPerUserStartables());
         startServicesIfNeeded(
                 sortedStartables, "StartSecondaryServices", null);
+    }
+
+    protected boolean shouldStartSystemUserServices() {
+        return mProcessWrapper.isSystemUser();
+    }
+
+    protected boolean shouldStartSecondaryUserServices() {
+        return !mProcessWrapper.isSystemUser();
     }
 
     private void startServicesIfNeeded(
@@ -291,6 +299,7 @@ public class SystemUIApplication extends Application implements
         int serviceIndex = 0;
 
         do {
+            startedAny = false;
             queue = nextQueue;
             nextQueue = new ArrayDeque<>(startables.size());
 
@@ -298,9 +307,9 @@ public class SystemUIApplication extends Application implements
                 Map.Entry<Class<?>, Provider<CoreStartable>> entry = queue.removeFirst();
 
                 Class<?> cls = entry.getKey();
-                Dependencies dep = cls.getAnnotation(Dependencies.class);
-                Class<? extends CoreStartable>[] deps = (dep == null ? null : dep.value());
-                if (deps == null || startedStartables.containsAll(Arrays.asList(deps))) {
+                Set<Class<? extends CoreStartable>> deps =
+                        mSysUIComponent.getStartableDependencies().get(cls);
+                if (deps == null || startedStartables.containsAll(deps)) {
                     String clsName = cls.getName();
                     int i = serviceIndex;  // Copied to make lambda happy.
                     timeInitialization(
@@ -322,12 +331,12 @@ public class SystemUIApplication extends Application implements
             while (!nextQueue.isEmpty()) {
                 Map.Entry<Class<?>, Provider<CoreStartable>> entry = nextQueue.removeFirst();
                 Class<?> cls = entry.getKey();
-                Dependencies dep = cls.getAnnotation(Dependencies.class);
-                Class<? extends CoreStartable>[] deps = (dep == null ? null : dep.value());
+                Set<Class<? extends CoreStartable>> deps =
+                        mSysUIComponent.getStartableDependencies().get(cls);
                 StringJoiner stringJoiner = new StringJoiner(", ");
-                for (int i = 0; deps != null && i < deps.length; i++) {
-                    if (!startedStartables.contains(deps[i])) {
-                        stringJoiner.add(deps[i].getName());
+                for (Class<? extends CoreStartable> c : deps) {
+                    if (!startedStartables.contains(c)) {
+                        stringJoiner.add(c.getName());
                     }
                 }
                 Log.e(TAG, "Failed to start " + cls.getName()

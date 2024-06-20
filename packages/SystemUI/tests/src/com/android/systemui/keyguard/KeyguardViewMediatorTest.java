@@ -25,8 +25,8 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
-import static com.android.systemui.Flags.FLAG_REFACTOR_GET_CURRENT_USER;
 import static com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR;
+import static com.android.systemui.Flags.FLAG_REFACTOR_GET_CURRENT_USER;
 import static com.android.systemui.keyguard.KeyguardViewMediator.DELAYED_KEYGUARD_ACTION;
 import static com.android.systemui.keyguard.KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT;
 import static com.android.systemui.keyguard.KeyguardViewMediator.REBOOT_MAINLINE_UPDATE;
@@ -75,7 +75,6 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.foldables.FoldGracePeriodProvider;
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
@@ -92,17 +91,17 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.dreams.ui.viewmodel.DreamViewModel;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
-import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
@@ -134,6 +133,10 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.flow.Flow;
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -143,10 +146,6 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.flow.Flow;
-import kotlinx.coroutines.test.TestScope;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -181,7 +180,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock NotificationShadeDepthController mNotificationShadeDepthController;
     private @Mock KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private @Mock ScreenOffAnimationController mScreenOffAnimationController;
-    private @Mock InteractionJankMonitor mInteractionJankMonitor;
     private @Mock ScreenOnCoordinator mScreenOnCoordinator;
     private @Mock KeyguardTransitions mKeyguardTransitions;
     private @Mock ShadeController mShadeController;
@@ -220,9 +218,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private boolean mKeyguardGoingAway = false;
 
     private @Mock CoroutineDispatcher mDispatcher;
-    private @Mock DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
+    private @Mock DreamViewModel mDreamViewModel;
+    private @Mock CommunalTransitionViewModel mCommunalTransitionViewModel;
     private @Mock SystemPropertiesHelper mSystemPropertiesHelper;
-    private @Mock SceneContainerFlags mSceneContainerFlags;
 
     private FakeFeatureFlags mFeatureFlags;
     private final int mDefaultUserId = 100;
@@ -235,15 +233,17 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
         when(mPowerManager.isInteractive()).thenReturn(true);
-        when(mInteractionJankMonitor.begin(any(), anyInt())).thenReturn(true);
-        when(mInteractionJankMonitor.end(anyInt())).thenReturn(true);
         mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
         final ViewRootImpl testViewRoot = mock(ViewRootImpl.class);
         when(testViewRoot.getView()).thenReturn(mock(View.class));
         when(mStatusBarKeyguardViewManager.getViewRootImpl()).thenReturn(testViewRoot);
-        when(mDreamingToLockscreenTransitionViewModel.getDreamOverlayAlpha())
+        when(mDreamViewModel.getDreamAlpha())
                 .thenReturn(mock(Flow.class));
-        when(mDreamingToLockscreenTransitionViewModel.getTransitionEnded())
+        when(mDreamViewModel.getTransitionEnded())
+                .thenReturn(mock(Flow.class));
+        when(mCommunalTransitionViewModel.getShowCommunalFromOccluded())
+                .thenReturn(mock(Flow.class));
+        when(mCommunalTransitionViewModel.getTransitionFromOccludedEnded())
                 .thenReturn(mock(Flow.class));
         when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(mDefaultUserId);
         when(mSelectedUserInteractor.getSelectedUserId(anyBoolean())).thenReturn(mDefaultUserId);
@@ -262,13 +262,11 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mColorExtractor,
                 mDumpManager,
                 mKeyguardStateController,
-                mScreenOffAnimationController,
                 mAuthController,
                 () -> mShadeInteractor,
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mSceneContainerFlags,
                 mKosmos::getCommunalInteractor);
         mFeatureFlags = new FakeFeatureFlags();
         mSetFlagsRule.enableFlags(FLAG_REFACTOR_GET_CURRENT_USER);
@@ -306,28 +304,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
             // Just so we don't have to add the exception signature to every test.
             fail();
         }
-    }
-
-    @Test
-    @TestableLooper.RunWithLooper(setAsMainLooper = true)
-    public void testRaceCondition_doNotRegisterCentralSurfacesImmediately() {
-        create(false);
-
-        // GIVEN central surfaces is not registered with KeyguardViewMediator, but a call to enable
-        // keyguard comes in
-        mViewMediator.onSystemReady();
-        mViewMediator.setKeyguardEnabled(true);
-        TestableLooper.get(this).processAllMessages();
-
-        // If this step has been reached, then system ui has not crashed. Now register
-        // CentralSurfaces
-        assertFalse(mViewMediator.isShowingAndNotOccluded());
-        register();
-        TestableLooper.get(this).moveTimeForward(100);
-        TestableLooper.get(this).processAllMessages();
-
-        // THEN keyguard is shown
-        assertTrue(mViewMediator.isShowingAndNotOccluded());
     }
 
     @Test
@@ -1210,11 +1186,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     private void createAndStartViewMediator(boolean orderUnlockAndWake) {
-        create(orderUnlockAndWake);
-        register();
-    }
-
-    private void create(boolean orderUnlockAndWake) {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_orderUnlockAndWake, orderUnlockAndWake);
 
@@ -1245,7 +1216,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mNotificationShadeDepthController,
                 mScreenOnCoordinator,
                 mKeyguardTransitions,
-                mInteractionJankMonitor,
+                mKosmos.getInteractionJankMonitor(),
                 mDreamOverlayStateController,
                 mJavaAdapter,
                 mWallpaperRepository,
@@ -1259,16 +1230,17 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mSystemSettings,
                 mSystemClock,
                 mDispatcher,
-                () -> mDreamingToLockscreenTransitionViewModel,
+                () -> mDreamViewModel,
+                () -> mCommunalTransitionViewModel,
                 mSystemPropertiesHelper,
                 () -> mock(WindowManagerLockscreenVisibilityManager.class),
                 mSelectedUserInteractor,
-                mKeyguardInteractor);
+                mKeyguardInteractor,
+                mock(WindowManagerOcclusionManager.class));
         mViewMediator.start();
-    }
 
-    private void register() {
-        mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);
+        mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null);
+        mViewMediator.onBootCompleted();
     }
 
     private void captureKeyguardStateControllerCallback() {

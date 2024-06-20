@@ -54,6 +54,8 @@ import android.content.res.Resources;
 import android.os.PowerManager;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
+import android.view.Display;
+import android.view.WindowManager;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -82,6 +84,8 @@ public final class WindowWakeUpPolicyTests {
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock PowerManager mPowerManager;
+    @Mock WindowManager mWindowManager;
+    @Mock Display mDefaultDisplay;
     @Mock Clock mClock;
     @Mock WindowWakeUpPolicyInternal.InputWakeUpDelegate mInputWakeUpDelegate;
 
@@ -96,7 +100,10 @@ public final class WindowWakeUpPolicyTests {
         mResourcesSpy = spy(mContextSpy.getResources());
         when(mContextSpy.getResources()).thenReturn(mResourcesSpy);
         when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
+        when(mContextSpy.getSystemService(WindowManager.class)).thenReturn(mWindowManager);
+        when(mWindowManager.getDefaultDisplay()).thenReturn(mDefaultDisplay);
         LocalServices.removeServiceForTest(WindowWakeUpPolicyInternal.class);
+        setDefaultDisplayState(Display.STATE_OFF);
     }
 
     @Test
@@ -199,6 +206,19 @@ public final class WindowWakeUpPolicyTests {
     }
 
     @Test
+    public void testTheaterModeChecksNotAppliedWhenScreenIsOn() {
+        mSetFlagsRule.enableFlags(FLAG_SUPPORT_INPUT_WAKEUP_DELEGATE);
+        setDefaultDisplayState(Display.STATE_ON);
+        setTheaterModeEnabled(true);
+        setBooleanRes(config_allowTheaterModeWakeFromMotion, false);
+        mPolicy = new WindowWakeUpPolicy(mContextSpy, mClock);
+
+        mPolicy.wakeUpFromMotion(200L, SOURCE_TOUCHSCREEN, true);
+
+        verify(mPowerManager).wakeUp(200L, WAKE_REASON_WAKE_MOTION, "android.policy:MOTION");
+    }
+
+    @Test
     public void testWakeUpFromMotion() {
         runPowerManagerUpChecks(
                 () -> mPolicy.wakeUpFromMotion(mClock.uptimeMillis(), SOURCE_TOUCHSCREEN, true),
@@ -291,6 +311,7 @@ public final class WindowWakeUpPolicyTests {
 
         Mockito.reset(mPowerManager);
         setBooleanRes(theatherModeWakeResId, true);
+        LocalServices.removeServiceForTest(WindowWakeUpPolicyInternal.class);
         mPolicy = new WindowWakeUpPolicy(mContextSpy, mClock);
         setUptimeMillis(200);
         assertWithMessage("Wake should happen in theater mode when config allows it.")
@@ -299,6 +320,7 @@ public final class WindowWakeUpPolicyTests {
 
         Mockito.reset(mPowerManager);
         setBooleanRes(theatherModeWakeResId, false);
+        LocalServices.removeServiceForTest(WindowWakeUpPolicyInternal.class);
         mPolicy = new WindowWakeUpPolicy(mContextSpy, mClock);
         setUptimeMillis(250);
         assertWithMessage("Wake should not happen in theater mode when config disallows it.")
@@ -310,6 +332,7 @@ public final class WindowWakeUpPolicyTests {
 
         Mockito.reset(mPowerManager);
         setBooleanRes(theatherModeWakeResId, true);
+        LocalServices.removeServiceForTest(WindowWakeUpPolicyInternal.class);
         mPolicy = new WindowWakeUpPolicy(mContextSpy, mClock);
         setUptimeMillis(300);
         assertWithMessage("Wake should happen when not in theater mode.")
@@ -318,6 +341,7 @@ public final class WindowWakeUpPolicyTests {
 
         Mockito.reset(mPowerManager);
         setBooleanRes(theatherModeWakeResId, false);
+        LocalServices.removeServiceForTest(WindowWakeUpPolicyInternal.class);
         mPolicy = new WindowWakeUpPolicy(mContextSpy, mClock);
         setUptimeMillis(350);
         assertWithMessage("Wake should happen when not in theater mode.")
@@ -350,5 +374,9 @@ public final class WindowWakeUpPolicyTests {
     private void setDelegatedKeyWakeUpResult(boolean result) {
         when(mInputWakeUpDelegate.wakeUpFromKey(anyLong(), anyInt(), anyBoolean()))
                 .thenReturn(result);
+    }
+
+    private void setDefaultDisplayState(int displayState) {
+        when(mDefaultDisplay.getState()).thenReturn(displayState);
     }
 }

@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"ወደ የይለፍ ቃል የሌለው ወደፊት ስንሄድ የይለፍ ቃላት ከይለፍ ቁልፎች ጎን ለጎን ይገኛሉ።"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"የእርስዎን <xliff:g id="CREATETYPES">%1$s</xliff:g> የት እንደሚያስቀምጡ ይምረጡ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"መረጃዎን ለማስቀመጥ እና በቀጣይ ጊዜ በፍጥነት በመለያ ለመግባት የሚስጥር ቁልፍ አስተዳዳሪን ይምረጡ"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"ወደ <xliff:g id="APPNAME">%1$s</xliff:g> ለመግባት የይለፍ ቁልፍ ይፈጠር?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"ወደ <xliff:g id="APPNAME">%1$s</xliff:g> ለመግባት የይለፍ ቃል ይቀመጥ?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የመግቢያ መረጃ ይቀመጥ?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"ወደ <xliff:g id="APP_NAME">%1$s</xliff:g> ለመግባት የይለፍ ቁልፍ ይፈጠር?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"ወደ <xliff:g id="APP_NAME">%1$s</xliff:g> ለመግባት የይለፍ ቃል ይቀመጥ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> የመግቢያ መረጃ ይቀመጥ?"</string>
     <string name="passkey" msgid="632353688396759522">"የይለፍ ቁልፍ"</string>
     <string name="password" msgid="6738570945182936667">"የይለፍ ቃል"</string>
     <string name="passkeys" msgid="5733880786866559847">"የይለፍ ቁልፎች"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ወደ ቀዳሚው ገፅ ይመለሱ"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"ዝጋ"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"አሰናብት"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"የተቀመጠ የይለፍ ቁልፍዎን ለ<xliff:g id="APP_NAME">%1$s</xliff:g> ይጠቀሙ?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የተቀመጠውን የይለፍ ቃልዎን ይጠቀሙ?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> መግቢያዎ ጥቅም ላይ ይዋል?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የመግቢያ አማራጮች ይከፈቱ?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"የተቀመጠ የይለፍ ቁልፍዎን ለ<xliff:g id="APP_NAME">%1$s</xliff:g> ይጠቀሙ"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የተቀመጠውን የይለፍ ቃልዎ ይጠቀሙ"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"መለያዎን ለ<xliff:g id="APP_NAME">%1$s</xliff:g> ይጠቀሙ"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"በ<xliff:g id="USERNAME">%2$s</xliff:g> ወደ <xliff:g id="APP_NAME">%1$s</xliff:g> ለመግባት የማያ ገጽ መቆለፊያዎን ይጠቀሙ"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የመግቢያ አማራጮችን ይከፈቱ"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የተቀመጠ የይለፍ ቁልፍ ይምረጡ"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የተቀመጠ የይለፍ ቃል ይምረጡ"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የተቀመጠ መግቢያ ይጠቀሙ"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> መግቢያ ይምረጡ"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> መለያን ይምረጡ"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> አማራጭ ይመረጥ?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"ይህን መረጃ በ<xliff:g id="APP_NAME">%1$s</xliff:g> ላይ ይጠቀማሉ?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"በሌላ መንገድ ይግቡ"</string>

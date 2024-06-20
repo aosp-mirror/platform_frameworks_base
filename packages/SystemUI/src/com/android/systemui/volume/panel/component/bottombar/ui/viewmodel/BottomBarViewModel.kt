@@ -18,8 +18,10 @@ package com.android.systemui.volume.panel.component.bottombar.ui.viewmodel
 
 import android.content.Intent
 import android.provider.Settings
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import javax.inject.Inject
 
@@ -29,6 +31,7 @@ class BottomBarViewModel
 constructor(
     private val activityStarter: ActivityStarter,
     private val volumePanelViewModel: VolumePanelViewModel,
+    private val uiEventLogger: UiEventLogger,
 ) {
 
     fun onDoneClicked() {
@@ -36,10 +39,16 @@ constructor(
     }
 
     fun onSettingsClicked() {
-        volumePanelViewModel.dismissPanel()
-        activityStarter.startActivity(
-            Intent(Settings.ACTION_SOUND_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-            true,
+        uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_SOUND_SETTINGS_CLICKED)
+        activityStarter.startActivityDismissingKeyguard(
+            /* intent = */ Intent(Settings.ACTION_SOUND_SETTINGS),
+            /* onlyProvisioned = */ false,
+            /* dismissShade = */ true,
+            /* disallowEnterPictureInPictureWhileLaunching = */ false,
+            /* callback = */ { volumePanelViewModel.dismissPanel() },
+            /* flags = */ Intent.FLAG_ACTIVITY_REORDER_TO_FRONT,
+            /* animationController = */ null,
+            /* userHandle = */ null,
         )
     }
 }

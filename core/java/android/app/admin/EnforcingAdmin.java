@@ -16,9 +16,13 @@
 
 package android.app.admin;
 
+import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -60,6 +64,8 @@ public final class EnforcingAdmin implements Parcelable {
      *
      * @hide
      */
+    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
+    @TestApi
     public EnforcingAdmin(
             @NonNull String packageName, @NonNull Authority authority,
             @NonNull UserHandle userHandle, @Nullable ComponentName componentName) {
@@ -99,6 +105,16 @@ public final class EnforcingAdmin implements Parcelable {
     @NonNull
     public UserHandle getUserHandle() {
         return mUserHandle;
+    }
+
+    /**
+     * Returns the {@link ComponentName} of the admin if applicable.
+     *
+     * @hide
+     */
+    @Nullable
+    public ComponentName getComponentName() {
+        return mComponentName;
     }
 
     @Override

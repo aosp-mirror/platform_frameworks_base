@@ -17,6 +17,7 @@
 <resources>
     <style name="PreferenceTheme.SettingsLib" parent="@style/PreferenceThemeOverlay">
         <item name="preferenceCategoryTitleTextAppearance">@style/TextAppearance.CategoryTitle.SettingsLib</item>
+        <item name="preferenceCategoryTitleTextColor">@color/settingslib_text_color_preference_category_title</item>
         <item name="preferenceScreenStyle">@style/SettingsPreferenceScreen.SettingsLib</item>
         <item name="preferenceCategoryStyle">@style/SettingsCategoryPreference.SettingsLib</item>
         <item name="preferenceStyle">@style/SettingsPreference.SettingsLib</item>

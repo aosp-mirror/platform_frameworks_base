@@ -18,14 +18,14 @@ package com.android.wm.shell.flicker.pip.apps
 
 import android.Manifest
 import android.platform.test.annotations.Postsubmit
-import android.tools.NavBar
 import android.tools.Rotation
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.NetflixAppHelper
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.helpers.WindowUtils
+import android.tools.traces.component.ComponentNameMatcher
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import org.junit.Assume
@@ -62,6 +62,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition(flicker) {
     override val standardAppHelper: NetflixAppHelper = NetflixAppHelper(instrumentation)
+    private val startingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
+    private val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
 
     override val permissions: Array<String> = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
 
@@ -134,6 +136,31 @@ open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
         // Netflix plays in immersive fullscreen mode, so taskbar will be gone at some point
     }
 
+    @Postsubmit
+    @Test
+    override fun pipWindowRemainInsideVisibleBounds() {
+        // during the transition we assert the center point is within the display bounds, since it
+        // might go outside of bounds as we resize from landscape fullscreen to destination bounds,
+        // and once the animation is over we assert that it's fully within the display bounds, at
+        // which point the device also performs orientation change from landscape to portrait
+        flicker.assertWmVisibleRegion(standardAppHelper.packageNameMatcher) {
+            regionsCenterPointInside(startingBounds).then().coversAtMost(endingBounds)
+        }
+    }
+
+    @Postsubmit
+    @Test
+    override fun pipLayerOrOverlayRemainInsideVisibleBounds() {
+        // during the transition we assert the center point is within the display bounds, since it
+        // might go outside of bounds as we resize from landscape fullscreen to destination bounds,
+        // and once the animation is over we assert that it's fully within the display bounds, at
+        // which point the device also performs orientation change from landscape to portrait
+        // since Netflix uses source rect hint, there is no PiP overlay present
+        flicker.assertLayersVisibleRegion(standardAppHelper.packageNameMatcher) {
+            regionsCenterPointInside(startingBounds).then().coversAtMost(endingBounds)
+        }
+    }
+
     companion object {
         /**
          * Creates the test configurations.
@@ -145,8 +172,7 @@ open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
         @JvmStatic
         fun getParams() =
             LegacyFlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(Rotation.ROTATION_0),
-                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
     }
 }

@@ -61,10 +61,10 @@
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Добавить обратно в стек"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> из приложения \"<xliff:g id="APP_NAME">%2$s</xliff:g>\""</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> от приложения \"<xliff:g id="APP_NAME">%2$s</xliff:g>\" и ещё <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Перенести в левый верхний угол"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Перенести в правый верхний угол"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Перенести в левый нижний угол"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Перенести в правый нижний угол"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Переместить в левый верхний угол"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Переместить в правый верхний угол"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Переместить в левый нижний угол"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Переместить в правый нижний угол"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"Развернуть <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"Свернуть <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>: настройки"</string>
@@ -117,4 +117,6 @@
     <string name="close_text" msgid="4986518933445178928">"Закрыть"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Закрыть меню"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Открыть меню"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Развернуть на весь экран"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Свернуть"</string>
 </resources>

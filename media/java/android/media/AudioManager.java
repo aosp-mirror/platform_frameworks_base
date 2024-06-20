@@ -5453,7 +5453,8 @@ public class AudioManager {
             String regId = service.registerAudioPolicy(policy.getConfig(), policy.cb(),
                     policy.hasFocusListener(), policy.isFocusPolicy(), policy.isTestFocusPolicy(),
                     policy.isVolumeController(),
-                    projection == null ? null : projection.getProjection());
+                    projection == null ? null : projection.getProjection(),
+                    policy.getAttributionSource());
             if (regId == null) {
                 return ERROR;
             } else {
@@ -8616,6 +8617,7 @@ public class AudioManager {
     @SystemApi
     @NonNull
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+    // TODO also open to MODIFY_AUDIO_SETTINGS_PRIVILEGED b/341780042
     public static List<AudioVolumeGroup> getAudioVolumeGroups() {
         final IAudioService service = getService();
         try {

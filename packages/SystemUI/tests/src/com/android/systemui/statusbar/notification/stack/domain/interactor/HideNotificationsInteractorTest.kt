@@ -17,10 +17,10 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import android.content.res.Configuration
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.view.Surface
 import android.view.Surface.ROTATION_0
 import android.view.Surface.ROTATION_90
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
@@ -31,9 +31,9 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.ScreenPowerState.SCREEN_ON
 import com.android.systemui.power.shared.model.WakefulnessState.STARTING_TO_SLEEP
 import com.android.systemui.statusbar.policy.FakeConfigurationController
-import com.android.systemui.unfold.TestUnfoldTransitionProvider
+import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
-import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractorImpl
+import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import com.android.systemui.util.animation.data.repository.FakeAnimationStatusRepository
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -52,14 +52,14 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 open class HideNotificationsInteractorTest : SysuiTestCase() {
 
     private val testScope = TestScope()
 
     private val animationStatus = FakeAnimationStatusRepository()
     private val configurationController = FakeConfigurationController()
-    private val unfoldTransitionProgressProvider = TestUnfoldTransitionProvider()
+    private val unfoldTransitionProgressProvider = FakeUnfoldTransitionProvider()
     private val powerRepository = FakePowerRepository()
     private val powerInteractor =
         PowerInteractor(
@@ -69,11 +69,6 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
             statusBarStateController = mock()
         )
 
-    private val unfoldTransitionRepository =
-        UnfoldTransitionRepositoryImpl(Optional.of(unfoldTransitionProgressProvider))
-    private val unfoldTransitionInteractor =
-        UnfoldTransitionInteractorImpl(unfoldTransitionRepository)
-
     private val configurationRepository =
         ConfigurationRepositoryImpl(
             configurationController,
@@ -82,6 +77,11 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
             mock()
         )
     private val configurationInteractor = ConfigurationInteractor(configurationRepository)
+
+    private val unfoldTransitionRepository =
+        UnfoldTransitionRepositoryImpl(Optional.of(unfoldTransitionProgressProvider))
+    private val unfoldTransitionInteractor =
+        UnfoldTransitionInteractor(unfoldTransitionRepository, configurationInteractor)
 
     private lateinit var configuration: Configuration
     private lateinit var underTest: HideNotificationsInteractor

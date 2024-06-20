@@ -98,6 +98,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 public final class CachedAppOptimizer {
 
     // Flags stored in the DeviceConfig API.
@@ -582,6 +584,7 @@ public final class CachedAppOptimizer {
             mTotalCpuTimeMillis += totalCpuTimeMillis;
         }
 
+        @NeverCompile
         public void dump(PrintWriter pw) {
             long totalCompactRequested = mSomeCompactRequested + mFullCompactRequested;
             long totalCompactPerformed = mSomeCompactPerformed + mFullCompactPerformed;
@@ -735,6 +738,7 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy("mProcLock")
+    @NeverCompile
     void dump(PrintWriter pw) {
         pw.println("CachedAppOptimizer settings");
         synchronized (mPhenotypeFlagLock) {
@@ -1414,8 +1418,13 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy({"mAm", "mProcLock"})
+    void forceFreezeAppAsyncLSP(ProcessRecord app) {
+        freezeAppAsyncInternalLSP(app, 0 /* delayMillis */, true /* force */);
+    }
+
+    @GuardedBy({"mAm", "mProcLock"})
     private void freezeAppAsyncLSP(ProcessRecord app, @UptimeMillisLong long delayMillis) {
-        freezeAppAsyncInternalLSP(app, delayMillis, false);
+        freezeAppAsyncInternalLSP(app, delayMillis, false /* force */);
     }
 
     @GuardedBy({"mAm", "mProcLock"})
@@ -1423,11 +1432,26 @@ public final class CachedAppOptimizer {
         freezeAppAsyncLSP(app, updateEarliestFreezableTime(app, 0));
     }
 
+    // TODO: Update freezeAppAsyncAtEarliestLSP to actually freeze the app at the earliest
+    // and remove this method.
     @GuardedBy({"mAm", "mProcLock"})
-    void freezeAppAsyncInternalLSP(ProcessRecord app, @UptimeMillisLong long delayMillis,
+    void freezeAppAsyncImmediateLSP(ProcessRecord app) {
+        freezeAppAsyncInternalLSP(app, 0 /* delayMillis */, false /* force */);
+    }
+
+    @GuardedBy({"mAm", "mProcLock"})
+    private void freezeAppAsyncInternalLSP(ProcessRecord app, @UptimeMillisLong long delayMillis,
             boolean force) {
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         if (opt.isPendingFreeze()) {
+            if (delayMillis == 0) {
+                // Caller is requesting to freeze the process without delay, so remove
+                // any already posted messages which would have been handled with a delay and
+                // post a new message without a delay.
+                mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
+                mFreezeHandler.sendMessage(mFreezeHandler.obtainMessage(
+                        SET_FROZEN_PROCESS_MSG, DO_FREEZE, 0, app));
+            }
             // Skip redundant DO_FREEZE message
             return;
         }
@@ -1441,8 +1465,7 @@ public final class CachedAppOptimizer {
             return;
         }
 
-        if (mAm.mConstants.USE_MODERN_TRIM
-                && app.mState.getSetAdj() >= ProcessList.CACHED_APP_MIN_ADJ) {
+        if (app.mState.getSetAdj() >= ProcessList.CACHED_APP_MIN_ADJ) {
             final IApplicationThread thread = app.getThread();
             if (thread != null) {
                 try {
@@ -1816,6 +1839,7 @@ public final class CachedAppOptimizer {
             return mRssAfterCompaction;
         }
 
+        @NeverCompile
         void dump(PrintWriter pw) {
             pw.println("    (" + mProcessName + "," + mSourceType.name() + "," + mDeltaAnonRssKBs
                     + "," + mZramConsumedKBs + "," + mAnonMemFreedKBs + "," + getCompactEfficiency()
@@ -2210,6 +2234,9 @@ public final class CachedAppOptimizer {
                 case SET_FROZEN_PROCESS_MSG: {
                     ProcessRecord proc = (ProcessRecord) msg.obj;
                     synchronized (mAm) {
+                        if (!proc.mOptRecord.isPendingFreeze()) {
+                            return;
+                        }
                         freezeProcess(proc);
                     }
                     if (proc.mOptRecord.isFrozen()) {
@@ -2341,6 +2368,14 @@ public final class CachedAppOptimizer {
                     Slog.d(TAG_AM, "Skipping freeze for process " + pid
                             + " " + name + " curAdj = " + proc.mState.getCurAdj()
                             + "(override)");
+                    return;
+                }
+
+                if (opt.shouldNotFreeze()) {
+                    if (DEBUG_FREEZER) {
+                        Slog.d(TAG_AM, "Skipping freeze because process is marked "
+                                + "should not be frozen");
+                    }
                     return;
                 }
 

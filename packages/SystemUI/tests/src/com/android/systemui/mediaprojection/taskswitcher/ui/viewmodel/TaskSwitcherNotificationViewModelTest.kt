@@ -17,60 +17,35 @@
 package com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel
 
 import android.content.Intent
-import android.os.Handler
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager.Companion.createDisplaySession
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager.Companion.createSingleTaskSession
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionManagerRepository
-import com.android.systemui.mediaprojection.taskswitcher.domain.interactor.TaskSwitchInteractor
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
+import com.android.systemui.mediaprojection.taskswitcher.FakeMediaProjectionManager.Companion.createDisplaySession
+import com.android.systemui.mediaprojection.taskswitcher.FakeMediaProjectionManager.Companion.createSingleTaskSession
+import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
+import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
+import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
+import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherViewModel
 import com.android.systemui.mediaprojection.taskswitcher.ui.model.TaskSwitcherNotificationUiState
+import com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel.TaskSwitcherNotificationViewModel.Companion.NOTIFICATION_MAX_SHOW_DURATION
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
 
-    private val dispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(dispatcher)
-
-    private val fakeActivityTaskManager = FakeActivityTaskManager()
-    private val fakeMediaProjectionManager = FakeMediaProjectionManager()
-
-    private val tasksRepo =
-        ActivityTaskManagerTasksRepository(
-            activityTaskManager = fakeActivityTaskManager.activityTaskManager,
-            applicationScope = testScope.backgroundScope,
-            backgroundDispatcher = dispatcher
-        )
-
-    private val mediaRepo =
-        MediaProjectionManagerRepository(
-            mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
-            handler = Handler.getMain(),
-            applicationScope = testScope.backgroundScope,
-            tasksRepository = tasksRepo,
-            backgroundDispatcher = dispatcher,
-            mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
-        )
-
-    private val interactor = TaskSwitchInteractor(mediaRepo, tasksRepo)
-
-    private val viewModel =
-        TaskSwitcherNotificationViewModel(interactor, backgroundDispatcher = dispatcher)
+    private val kosmos = taskSwitcherKosmos()
+    private val testScope = kosmos.testScope
+    private val fakeActivityTaskManager = kosmos.fakeActivityTaskManager
+    private val fakeMediaProjectionManager = kosmos.fakeMediaProjectionManager
+    private val viewModel = kosmos.taskSwitcherViewModel
 
     @Test
     fun uiState_notProjecting_emitsNotShowing() =
@@ -135,6 +110,41 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
 
             assertThat(uiState)
                 .isEqualTo(TaskSwitcherNotificationUiState.Showing(projectedTask, foregroundTask))
+        }
+
+    @Test
+    fun uiState_taskChanged_beforeDelayLimit_stillEmitsShowing() =
+        testScope.runTest {
+            val projectedTask = createTask(taskId = 1)
+            val foregroundTask = createTask(taskId = 2)
+            val uiState by collectLastValue(viewModel.uiState)
+
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
+
+            testScheduler.advanceTimeBy(NOTIFICATION_MAX_SHOW_DURATION - 1.milliseconds)
+            assertThat(uiState)
+                .isEqualTo(TaskSwitcherNotificationUiState.Showing(projectedTask, foregroundTask))
+        }
+
+    @Test
+    fun uiState_taskChanged_afterDelayLimit_emitsNotShowing() =
+        testScope.runTest {
+            val projectedTask = createTask(taskId = 1)
+            val foregroundTask = createTask(taskId = 2)
+            val uiState by collectLastValue(viewModel.uiState)
+
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
+
+            testScheduler.advanceTimeBy(NOTIFICATION_MAX_SHOW_DURATION)
+            assertThat(uiState).isEqualTo(TaskSwitcherNotificationUiState.NotShowing)
         }
 
     @Test

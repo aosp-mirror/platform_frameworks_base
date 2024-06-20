@@ -1375,8 +1375,10 @@ class JobConcurrencyManager {
             final JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus jobStatus = jsc.getRunningJobLocked();
 
-            if (jobStatus != null && !jsc.isWithinExecutionGuaranteeTime()
-                    && restriction.isJobRestricted(jobStatus)) {
+            if (jobStatus != null
+                    && !jsc.isWithinExecutionGuaranteeTime()
+                    && restriction.isJobRestricted(
+                            jobStatus, mService.evaluateJobBiasLocked(jobStatus))) {
                 jsc.cancelExecutingJobLocked(restriction.getStopReason(),
                         restriction.getInternalReason(),
                         JobParameters.getInternalReasonCodeDescription(
@@ -1650,6 +1652,16 @@ class JobConcurrencyManager {
                     continue;
                 }
 
+                if (Flags.countQuotaFix() && !nextPending.isReady()) {
+                    // This could happen when the constraints for the job have been marked
+                    // as unsatisfiled but hasn't been removed from the pending queue yet.
+                    if (DEBUG) {
+                        Slog.w(TAG, "Pending+not ready job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
+                    continue;
+                }
+
                 if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
                     Slog.w(TAG, "Already running similar job to: " + nextPending);
                 }
@@ -1732,6 +1744,16 @@ class JobConcurrencyManager {
                     Slog.wtf(TAG, "Pending queue contained a running job");
                     if (DEBUG) {
                         Slog.e(TAG, "Pending+running job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
+                    continue;
+                }
+
+                if (Flags.countQuotaFix() && !nextPending.isReady()) {
+                    // This could happen when the constraints for the job have been marked
+                    // as unsatisfiled but hasn't been removed from the pending queue yet.
+                    if (DEBUG) {
+                        Slog.w(TAG, "Pending+not ready job: " + nextPending);
                     }
                     pendingJobQueue.remove(nextPending);
                     continue;

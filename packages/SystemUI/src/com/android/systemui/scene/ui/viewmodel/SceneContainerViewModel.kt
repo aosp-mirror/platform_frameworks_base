@@ -19,15 +19,24 @@ package com.android.systemui.scene.ui.viewmodel
 import android.view.MotionEvent
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state for the scene container. */
 @SysUISingleton
@@ -37,6 +46,7 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
+    scenes: Set<@JvmSuppressWildcards Scene>,
 ) {
     /**
      * Keys of all scenes in the container.
@@ -51,6 +61,25 @@ constructor(
 
     /** Whether the container is visible. */
     val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
+
+    private val destinationScenesBySceneKey =
+        scenes.associate { scene ->
+            scene.key to scene.destinationScenes.flatMapLatestConflated { replaceSceneFamilies(it) }
+        }
+
+    fun currentDestinationScenes(
+        scope: CoroutineScope,
+    ): StateFlow<Map<UserAction, UserActionResult>> {
+        return currentScene
+            .flatMapLatestConflated { currentSceneKey ->
+                checkNotNull(destinationScenesBySceneKey[currentSceneKey])
+            }
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = emptyMap(),
+            )
+    }
 
     /**
      * Binds the given flow so the system remembers it.
@@ -99,8 +128,10 @@ constructor(
             when (toScene) {
                 Scenes.Bouncer -> Classifier.BOUNCER_UNLOCK
                 Scenes.Gone -> Classifier.UNLOCK
+                Scenes.NotificationsShade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.QuickSettings -> Classifier.QUICK_SETTINGS
+                Scenes.QuickSettingsShade -> Classifier.QUICK_SETTINGS
                 else -> null
             }
 
@@ -113,7 +144,38 @@ constructor(
             val fromLockscreenScene = currentScene.value == Scenes.Lockscreen
 
             !fromLockscreenScene || !isFalseTouch
+        } ?: true
+    }
+
+    /**
+     * Immediately resolves any scene families present in [actionResultMap] to their current
+     * resolution target.
+     */
+    fun resolveSceneFamilies(
+        actionResultMap: Map<UserAction, UserActionResult>,
+    ): Map<UserAction, UserActionResult> {
+        return actionResultMap.mapValues { (_, actionResult) ->
+            sceneInteractor.resolveSceneFamilyOrNull(actionResult.toScene)?.value?.let {
+                actionResult.copy(toScene = it)
+            } ?: actionResult
         }
-            ?: true
+    }
+
+    private fun replaceSceneFamilies(
+        destinationScenes: Map<UserAction, UserActionResult>,
+    ): Flow<Map<UserAction, UserActionResult>> {
+        return destinationScenes
+            .mapValues { (_, actionResult) ->
+                sceneInteractor.resolveSceneFamily(actionResult.toScene).map { scene ->
+                    actionResult.copy(toScene = scene)
+                }
+            }
+            .combineValueFlows()
     }
 }
+
+private fun <K, V> Map<K, Flow<V>>.combineValueFlows(): Flow<Map<K, V>> =
+    combine(
+        asIterable().map { (k, fv) -> fv.map { k to it } },
+        transform = Array<Pair<K, V>>::toMap,
+    )

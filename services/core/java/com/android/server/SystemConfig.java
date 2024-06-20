@@ -267,8 +267,8 @@ public class SystemConfig {
     final ArrayMap<String, ArraySet<String>> mAllowIgnoreLocationSettings = new ArrayMap<>();
 
     // These are the packages that are allow-listed to be able to access camera when
-    // the camera privacy state is for driver assistance apps only.
-    final ArrayMap<String, Boolean> mAllowlistCameraPrivacy = new ArrayMap<>();
+    // the camera privacy state is enabled.
+    final ArraySet<String> mAllowlistCameraPrivacy = new ArraySet<>();
 
     // These are the action strings of broadcasts which are whitelisted to
     // be delivered anonymously even to apps which target O+.
@@ -352,7 +352,7 @@ public class SystemConfig {
     @NonNull private final Set<String> mInitialNonStoppedSystemPackages = new ArraySet<>();
 
     // Which packages (key) are allowed to join particular SharedUid (value).
-    @NonNull private final Map<String, String> mPackageToSharedUidAllowList = new ArrayMap<>();
+    @NonNull private final ArrayMap<String, String> mPackageToSharedUidAllowList = new ArrayMap<>();
 
     // A map of preloaded package names and the path to its app metadata file path.
     private final ArrayMap<String, String> mAppMetadataFilePaths = new ArrayMap<>();
@@ -492,7 +492,7 @@ public class SystemConfig {
         return mAllowedAssociations;
     }
 
-    public ArrayMap<String, Boolean> getCameraPrivacyAllowlist() {
+    public ArraySet<String> getCameraPrivacyAllowlist() {
         return mAllowlistCameraPrivacy;
     }
 
@@ -574,7 +574,7 @@ public class SystemConfig {
     }
 
     @NonNull
-    public Map<String, String> getPackageToSharedUidAllowList() {
+    public ArrayMap<String, String> getPackageToSharedUidAllowList() {
         return mPackageToSharedUidAllowList;
     }
 
@@ -720,6 +720,9 @@ public class SystemConfig {
         }
         // Read configuration of features, libs and priv-app permissions from apex module.
         int apexPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS;
+        if (android.permission.flags.Flags.apexSignaturePermissionAllowlistEnabled()) {
+            apexPermissionFlag |= ALLOW_SIGNATURE_PERMISSIONS;
+        }
         // TODO: Use a solid way to filter apex module folders?
         for (File f: FileUtils.listFilesOrEmpty(Environment.getApexDirectory())) {
             if (f.isFile() || f.getPath().contains("@")) {
@@ -1090,13 +1093,11 @@ public class SystemConfig {
                     case "camera-privacy-allowlisted-app" : {
                         if (allowOverrideAppRestrictions) {
                             String pkgname = parser.getAttributeValue(null, "package");
-                            boolean isMandatory = XmlUtils.readBooleanAttribute(
-                                    parser, "mandatory", false);
                             if (pkgname == null) {
                                 Slog.w(TAG, "<" + name + "> without package in "
                                         + permFile + " at " + parser.getPositionDescription());
                             } else {
-                                mAllowlistCameraPrivacy.put(pkgname, isMandatory);
+                                mAllowlistCameraPrivacy.add(pkgname);
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
@@ -1324,6 +1325,8 @@ public class SystemConfig {
                                     Environment.getProductDirectory().toPath() + "/");
                             boolean systemExt = permFile.toPath().startsWith(
                                     Environment.getSystemExtDirectory().toPath() + "/");
+                            boolean apex = permFile.toPath().startsWith(
+                                    Environment.getApexDirectory().toPath() + "/");
                             if (vendor) {
                                 readSignatureAppPermissions(parser,
                                         mPermissionAllowlist.getVendorSignatureAppAllowlist());
@@ -1333,6 +1336,9 @@ public class SystemConfig {
                             } else if (systemExt) {
                                 readSignatureAppPermissions(parser,
                                         mPermissionAllowlist.getSystemExtSignatureAppAllowlist());
+                            } else if (apex) {
+                                readSignatureAppPermissions(parser,
+                                        mPermissionAllowlist.getApexSignatureAppAllowlist());
                             } else {
                                 readSignatureAppPermissions(parser,
                                         mPermissionAllowlist.getSignatureAppAllowlist());

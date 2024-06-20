@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.PolicyValue;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -193,6 +194,33 @@ final class PolicyState<V> {
                 + "\nmPolicyDefinition= \n\t" + mPolicyDefinition
                 + "\nmPoliciesSetByAdmins= \n\t" + mPoliciesSetByAdmins
                 + ",\nmCurrentResolvedPolicy= \n\t" + mCurrentResolvedPolicy + " }";
+    }
+
+    public void dump(IndentingPrintWriter pw) {
+        pw.println(mPolicyDefinition.getPolicyKey());
+        pw.increaseIndent();
+
+        pw.println("Per-admin Policy:");
+        pw.increaseIndent();
+        if (mPoliciesSetByAdmins.size() == 0) {
+            pw.println("null");
+        } else {
+            for (EnforcingAdmin admin : mPoliciesSetByAdmins.keySet()) {
+                pw.println(admin);
+                pw.increaseIndent();
+                pw.println(mPoliciesSetByAdmins.get(admin));
+                pw.decreaseIndent();
+            }
+        }
+        pw.decreaseIndent();
+
+        pw.printf("Resolved Policy (%s):\n",
+                mPolicyDefinition.getResolutionMechanism().getClass().getSimpleName());
+        pw.increaseIndent();
+        pw.println(mCurrentResolvedPolicy);
+        pw.decreaseIndent();
+
+        pw.decreaseIndent();
     }
 
     void saveToXml(TypedXmlSerializer serializer) throws IOException {

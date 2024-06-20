@@ -11,7 +11,6 @@ per-file StagingManager.java = dariofreni@google.com, ioffe@google.com, olilan@g
 
 # dex
 per-file AbstractStatsBase.java = file:dex/OWNERS
-per-file BackgroundDexOptService.java = file:dex/OWNERS
 per-file CompilerStats.java = file:dex/OWNERS
 per-file DexOptHelper.java = file:dex/OWNERS
 per-file DynamicCodeLoggingService.java = file:dex/OWNERS
@@ -35,6 +34,7 @@ per-file KeySetManagerService.java = cbrubaker@google.com, nnk@google.com
 per-file PackageKeySetData.java = cbrubaker@google.com, nnk@google.com
 per-file PackageSignatures.java = cbrubaker@google.com, nnk@google.com
 per-file SELinuxMMAC* = alanstokes@google.com, cbrubaker@google.com, jeffv@google.com
+per-file SaferIntentUtils.java = topjohnwu@google.com
 
 # shortcuts
 per-file LauncherAppsService.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com

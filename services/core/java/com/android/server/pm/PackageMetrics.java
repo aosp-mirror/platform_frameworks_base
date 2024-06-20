@@ -16,19 +16,35 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.GET_RESOLVED_FILTER;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.os.Process.INVALID_UID;
+import static android.os.Process.SYSTEM_UID;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.admin.SecurityLog;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,12 +56,14 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Metrics class for reporting stats to logging infrastructures like statsd
  */
 final class PackageMetrics {
+    private static final String TAG = "PackageMetrics";
     public static final int STEP_PREPARE = 1;
     public static final int STEP_SCAN = 2;
     public static final int STEP_RECONCILE = 3;
@@ -111,17 +129,20 @@ final class PackageMetrics {
 
         long versionCode = 0, apksSize = 0;
         if (success) {
-            // TODO: Remove temp try-catch to avoid IllegalStateException. The reason is because
-            //  the scan result is null for installExistingPackageAsUser(). Because it's installing
-            //  a package that's already existing, there's no scanning or parsing involved
-            try {
+            if (mInstallRequest.isInstallForUsers()) {
+                // In case of installExistingPackageAsUser, there's no scanned PackageSetting
+                // in the request but the pkg object should be readily available
+                AndroidPackage pkg = mInstallRequest.getPkg();
+                if (pkg != null) {
+                    versionCode = pkg.getLongVersionCode();
+                    apksSize = getApksSize(new File(pkg.getPath()));
+                }
+            } else {
                 final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
                 if (ps != null) {
                     versionCode = ps.getVersionCode();
                     apksSize = getApksSize(ps.getPath());
                 }
-            } catch (IllegalStateException | NullPointerException e) {
-                // no-op
             }
         }
 
@@ -339,5 +360,85 @@ final class PackageMetrics {
         }
         SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_UNINSTALLED, packageName, versionCode,
                 userId);
+    }
+
+    public static class ComponentStateMetrics {
+        public int mUid;
+        public int mCallingUid;
+        public int mComponentOldState;
+        public int mComponentNewState;
+        public boolean mIsForWholeApp;
+        @NonNull private String mPackageName;
+        @Nullable private String mClassName;
+
+        ComponentStateMetrics(@NonNull PackageManager.ComponentEnabledSetting setting, int uid,
+                int componentOldState, int callingUid) {
+            mUid = uid;
+            mComponentOldState = componentOldState;
+            mComponentNewState = setting.getEnabledState();
+            mIsForWholeApp = !setting.isComponent();
+            mPackageName = setting.getPackageName();
+            mClassName = setting.getClassName();
+            mCallingUid = callingUid;
+        }
+
+        public boolean isLauncherActivity(@NonNull Computer computer, @UserIdInt int userId) {
+            if (mIsForWholeApp) {
+                return false;
+            }
+            // Query the launcher activities with the package name.
+            final Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            intent.setPackage(mPackageName);
+            List<ResolveInfo> launcherActivities = computer.queryIntentActivitiesInternal(
+                    intent, null,
+                    MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE | GET_RESOLVED_FILTER
+                            | MATCH_DISABLED_COMPONENTS, SYSTEM_UID, userId);
+            final int launcherActivitiesSize =
+                    launcherActivities != null ? launcherActivities.size() : 0;
+            for (int i = 0; i < launcherActivitiesSize; i++) {
+                ResolveInfo resolveInfo = launcherActivities.get(i);
+                if (isSameComponent(resolveInfo.activityInfo)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean isSameComponent(ActivityInfo activityInfo) {
+            if (activityInfo == null) {
+                return false;
+            }
+            return mIsForWholeApp ? TextUtils.equals(activityInfo.packageName, mPackageName)
+                    : activityInfo.getComponentName().equals(
+                            new ComponentName(mPackageName, mClassName));
+        }
+    }
+
+    public static void reportComponentStateChanged(@NonNull Computer computer,
+            List<ComponentStateMetrics> componentStateMetricsList, @UserIdInt int userId) {
+        if (!Flags.componentStateChangedMetrics()) {
+            return;
+        }
+        if (componentStateMetricsList == null || componentStateMetricsList.isEmpty()) {
+            Slog.d(TAG, "Fail to report component state due to metrics is empty");
+            return;
+        }
+        final int metricsSize = componentStateMetricsList.size();
+        for (int i = 0; i < metricsSize; i++) {
+            final ComponentStateMetrics componentStateMetrics = componentStateMetricsList.get(i);
+            reportComponentStateChanged(componentStateMetrics.mUid,
+                    componentStateMetrics.mComponentOldState,
+                    componentStateMetrics.mComponentNewState,
+                    componentStateMetrics.isLauncherActivity(computer, userId),
+                    componentStateMetrics.mIsForWholeApp,
+                    componentStateMetrics.mCallingUid);
+        }
+    }
+
+    private static void reportComponentStateChanged(int uid, int componentOldState,
+            int componentNewState, boolean isLauncher, boolean isForWholeApp, int callingUid) {
+        FrameworkStatsLog.write(FrameworkStatsLog.COMPONENT_STATE_CHANGED_REPORTED,
+                uid, componentOldState, componentNewState, isLauncher, isForWholeApp, callingUid);
     }
 }

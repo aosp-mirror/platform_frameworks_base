@@ -202,6 +202,14 @@ public class TextureView extends View {
     // Set by native code, do not write!
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mNativeWindow;
+    // Used for VRR detecting "normal" frame rate rather than "high". This is the previous
+    // interval for drawing. This can be removed when NORMAL is the default rate for Views.
+    // (b/329156944)
+    private long mMinusTwoFrameIntervalMillis = 0;
+    // Used for VRR detecting "normal" frame rate rather than "high". This is the last
+    // frame time for drawing. This can be removed when NORMAL is the default rate for Views.
+    // (b/329156944)
+    private long mLastFrameTimeMillis = 0;
 
     /**
      * Creates a new TextureView.
@@ -889,11 +897,25 @@ public class TextureView extends View {
      * @hide
      */
     @Override
-    protected int calculateFrameRateCategory(float sizePercentage) {
-        if (mMinusTwoFrameIntervalMillis > 15 && mMinusOneFrameIntervalMillis > 15) {
+    protected int calculateFrameRateCategory() {
+        long now = getDrawingTime();
+        // This isn't necessary when the default frame rate is NORMAL (b/329156944)
+        if (mMinusTwoFrameIntervalMillis > 15 && (now - mLastFrameTimeMillis) > 15) {
             return FRAME_RATE_CATEGORY_NORMAL;
         }
-        return super.calculateFrameRateCategory(sizePercentage);
+        return super.calculateFrameRateCategory();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected void votePreferredFrameRate() {
+        super.votePreferredFrameRate();
+        // This isn't necessary when the default frame rate is NORMAL (b/329156944)
+        long now = getDrawingTime();
+        mMinusTwoFrameIntervalMillis = now - mLastFrameTimeMillis;
+        mLastFrameTimeMillis = now;
     }
 
     @UnsupportedAppUsage

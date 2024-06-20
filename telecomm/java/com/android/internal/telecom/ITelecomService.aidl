@@ -401,7 +401,7 @@ interface ITelecomService {
      * @see TelecomServiceImpl#isInSelfManagedCall
      */
     boolean isInSelfManagedCall(String packageName, in UserHandle userHandle,
-        String callingPackage, boolean detectForAllUsers);
+        String callingPackage);
 
     /**
      * @see TelecomServiceImpl#addCall

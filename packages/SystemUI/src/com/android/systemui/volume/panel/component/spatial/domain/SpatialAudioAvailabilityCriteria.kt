@@ -18,11 +18,12 @@ package com.android.systemui.volume.panel.component.spatial.domain
 
 import com.android.systemui.volume.panel.component.spatial.domain.interactor.SpatialAudioComponentInteractor
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioAvailabilityModel
+import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioEnabledModel
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 
 @VolumePanelScope
 class SpatialAudioAvailabilityCriteria
@@ -31,5 +32,11 @@ constructor(private val interactor: SpatialAudioComponentInteractor) :
     ComponentAvailabilityCriteria {
 
     override fun isAvailable(): Flow<Boolean> =
-        interactor.isAvailable.map { it is SpatialAudioAvailabilityModel.SpatialAudio }
+        combine(interactor.isAvailable, interactor.isEnabled) { isAvailable, isEnabled ->
+            if (isAvailable is SpatialAudioAvailabilityModel.SpatialAudio) {
+                isEnabled !is SpatialAudioEnabledModel.Unknown
+            } else {
+                false
+            }
+        }
 }

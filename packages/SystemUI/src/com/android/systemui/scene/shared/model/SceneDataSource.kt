@@ -40,4 +40,11 @@ interface SceneDataSource {
         toScene: SceneKey,
         transitionKey: TransitionKey? = null,
     )
+
+    /**
+     * Asks for an instant scene switch to [toScene], without an animated transition of any kind.
+     */
+    fun snapToScene(
+        toScene: SceneKey,
+    )
 }

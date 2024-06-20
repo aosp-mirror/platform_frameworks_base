@@ -19,6 +19,7 @@ package com.android.systemui.biometrics.data.repository
 import android.database.ContentObserver
 import android.os.Handler
 import android.provider.Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -35,19 +36,18 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
 
 private const val USER_ID = 8
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class FaceSettingsRepositoryImplTest : SysuiTestCase() {
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
@@ -82,7 +82,12 @@ class FaceSettingsRepositoryImplTest : SysuiTestCase() {
             val keys =
                 captureMany<String> {
                     verify(secureSettings)
-                        .registerContentObserverForUser(capture(), anyBoolean(), any(), eq(USER_ID))
+                        .registerContentObserverForUserSync(
+                            capture(),
+                            anyBoolean(),
+                            any(),
+                            eq(USER_ID)
+                        )
                 }
 
             assertThat(keys).containsExactly(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION)
@@ -102,7 +107,7 @@ class FaceSettingsRepositoryImplTest : SysuiTestCase() {
             val observer =
                 withArgCaptor<ContentObserver> {
                     verify(secureSettings)
-                        .registerContentObserverForUser(
+                        .registerContentObserverForUserSync(
                             eq(setting),
                             anyBoolean(),
                             capture(),

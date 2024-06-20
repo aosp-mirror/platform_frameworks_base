@@ -17,15 +17,23 @@
 package com.android.systemui.communal.data.model
 
 import android.appwidget.AppWidgetProviderInfo
+import com.android.settingslib.flags.Flags.allowAllWidgetsOnLockscreenByDefault
 
 /**
  * The widget categories to display on communal hub (where categories is a bitfield with values that
  * match those in {@link AppWidgetProviderInfo}).
  */
 @JvmInline
-value class CommunalWidgetCategories(
-    // The default is keyguard widgets.
-    val categories: Int = AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
-) {
+value class CommunalWidgetCategories(val categories: Int = defaultCategories) {
     fun contains(category: Int) = (categories and category) == category
+
+    companion object {
+        val defaultCategories: Int
+            get() {
+                return AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD or
+                    if (allowAllWidgetsOnLockscreenByDefault())
+                        AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
+                    else 0
+            }
+    }
 }

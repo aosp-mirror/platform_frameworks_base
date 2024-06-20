@@ -15,10 +15,13 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.os.PowerExemptionManager.REASON_TILE_ONCLICK;
+import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
 import static android.service.quicksettings.TileService.START_ACTIVITY_NEEDS_PENDING_INTENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -52,14 +55,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IDeviceIdleController;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.TileService;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.annotation.Nullable;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -71,11 +77,23 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 
+import java.util.List;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 public class TileLifecycleManagerTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
+    }
 
     private final PackageManagerAdapter mMockPackageManagerAdapter =
             mock(PackageManagerAdapter.class);
@@ -83,6 +101,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
             mock(BroadcastDispatcher.class);
     private final IQSTileService.Stub mMockTileService = mock(IQSTileService.Stub.class);
     private final ActivityManager mActivityManager = mock(ActivityManager.class);
+    private final IDeviceIdleController mDeviceIdleController = mock(IDeviceIdleController.class);
 
     private ComponentName mTileServiceComponentName;
     private Intent mTileServiceIntent;
@@ -94,6 +113,11 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     private TileLifecycleManager mStateManager;
     private TestContextWrapper mWrappedContext;
     private MockitoSession mMockitoSession;
+
+    public TileLifecycleManagerTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -126,6 +150,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mTileServiceIntent,
                 mUser,
                 mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
     }
 
@@ -259,7 +284,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNoClickOfNotListeningAnymore() throws Exception {
+    @DisableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void testNoClickIfNotListeningAnymore() throws Exception {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
         mStateManager.onClick(null);
@@ -272,6 +298,42 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         mExecutor.runAllReady();
         assertFalse(mContext.isBound(mTileServiceComponentName));
         verify(mMockTileService, never()).onClick(null);
+    }
+
+    @Test
+    @EnableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void testNoClickIfNotListeningBeforeClick() throws Exception {
+        mStateManager.onTileAdded();
+        mStateManager.onStartListening();
+        mStateManager.onStopListening();
+        mStateManager.onClick(null);
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+
+        verifyBind(1);
+        mStateManager.executeSetBindService(false);
+        mExecutor.runAllReady();
+        assertFalse(mContext.isBound(mTileServiceComponentName));
+        verify(mMockTileService, never()).onClick(null);
+    }
+
+    @Test
+    @EnableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void testClickIfStopListeningBeforeProcessedClick() throws Exception {
+        mStateManager.onTileAdded();
+        mStateManager.onStartListening();
+        mStateManager.onClick(null);
+        mStateManager.onStopListening();
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+
+        verifyBind(1);
+        mStateManager.executeSetBindService(false);
+        mExecutor.runAllReady();
+        assertFalse(mContext.isBound(mTileServiceComponentName));
+        InOrder inOrder = Mockito.inOrder(mMockTileService);
+        inOrder.verify(mMockTileService).onClick(null);
+        inOrder.verify(mMockTileService).onStopListening();
     }
 
     @Test
@@ -386,6 +448,20 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testClickCallsDeviceIdleManager() throws Exception {
+        mStateManager.onTileAdded();
+        mStateManager.onStartListening();
+        mStateManager.onClick(null);
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+
+        verify(mMockTileService).onClick(null);
+        verify(mDeviceIdleController).addPowerSaveTempWhitelistApp(
+                mTileServiceComponentName.getPackageName(), 15000,
+                mUser.getIdentifier(), REASON_TILE_ONCLICK, "tile onclick");
+    }
+
+    @Test
     public void testFalseBindCallsUnbind() {
         Context falseContext = mock(Context.class);
         when(falseContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(false);
@@ -396,6 +472,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mTileServiceIntent,
                 mUser,
                 mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -418,6 +495,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mTileServiceIntent,
                 mUser,
                 mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -440,6 +518,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mTileServiceIntent,
                 mUser,
                 mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -464,6 +543,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mTileServiceIntent,
                 mUser,
                 mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);

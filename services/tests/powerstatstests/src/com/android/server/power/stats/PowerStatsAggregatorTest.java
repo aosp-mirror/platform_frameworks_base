@@ -58,7 +58,7 @@ public class PowerStatsAggregatorTest {
 
     @Before
     public void setup() throws ParseException {
-        mHistory = new BatteryStatsHistory(1024,
+        mHistory = new BatteryStatsHistory(null, null, 0, 1024,
                 mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock,
                 mMonotonicClock, mock(BatteryStatsHistory.TraceDelegate.class), null);
 
@@ -76,9 +76,8 @@ public class PowerStatsAggregatorTest {
 
     @Test
     public void stateUpdates() {
-        PowerStats.Descriptor descriptor =
-                new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
-                        new PersistableBundle());
+        PowerStats.Descriptor descriptor = new PowerStats.Descriptor(TEST_POWER_COMPONENT,
+                "majorDrain", 1, null, 0, 1, new PersistableBundle());
         PowerStats powerStats = new PowerStats(descriptor);
 
         mClock.currentTime = 1222156800000L;    // An important date in world history
@@ -186,9 +185,8 @@ public class PowerStatsAggregatorTest {
 
     @Test
     public void incompatiblePowerStats() {
-        PowerStats.Descriptor descriptor =
-                new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
-                        new PersistableBundle());
+        PowerStats.Descriptor descriptor = new PowerStats.Descriptor(TEST_POWER_COMPONENT,
+                "majorDrain", 1, null, 0, 1, new PersistableBundle());
         PowerStats powerStats = new PowerStats(descriptor);
 
         mHistory.forceRecordAllHistory();
@@ -209,7 +207,7 @@ public class PowerStatsAggregatorTest {
 
         advance(1000);
 
-        descriptor = new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
+        descriptor = new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, null, 0, 1,
                 PersistableBundle.forPair("something", "changed"));
         powerStats = new PowerStats(descriptor);
         powerStats.stats = new long[]{20000};

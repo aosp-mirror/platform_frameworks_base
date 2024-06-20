@@ -19,27 +19,30 @@ package com.android.systemui.keyguard.ui.binder
 import android.transition.TransitionManager
 import android.transition.TransitionSet
 import android.view.View.INVISIBLE
+import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.helper.widget.Layer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.keyguard.KeyguardClockSwitch.LARGE
-import com.android.keyguard.KeyguardClockSwitch.SMALL
-import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.clocks.AodClockBurnInModel
 import com.android.systemui.plugins.clocks.ClockController
-import com.android.systemui.shared.clocks.DEFAULT_CLOCK_ID
 import kotlinx.coroutines.launch
 
 object KeyguardClockViewBinder {
     private val TAG = KeyguardClockViewBinder::class.simpleName!!
+    // When changing to new clock, we need to remove old clock views from burnInLayer
+    private var lastClock: ClockController? = null
 
     @JvmStatic
     fun bind(
@@ -48,40 +51,43 @@ object KeyguardClockViewBinder {
         viewModel: KeyguardClockViewModel,
         keyguardClockInteractor: KeyguardClockInteractor,
         blueprintInteractor: KeyguardBlueprintInteractor,
+        rootViewModel: KeyguardRootViewModel,
     ) {
         keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 keyguardClockInteractor.clockEventController.registerListeners(keyguardRootView)
             }
         }
+
         keyguardRootView.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
-                    if (!migrateClocksToBlueprint()) return@launch
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     viewModel.currentClock.collect { currentClock ->
-                        cleanupClockViews(viewModel.clock, keyguardRootView, viewModel.burnInLayer)
-                        viewModel.clock = currentClock
+                        cleanupClockViews(currentClock, keyguardRootView, viewModel.burnInLayer)
                         addClockViews(currentClock, keyguardRootView)
-                        updateBurnInLayer(keyguardRootView, viewModel)
+                        updateBurnInLayer(keyguardRootView, viewModel, viewModel.clockSize.value)
                         applyConstraints(clockSection, keyguardRootView, true)
                     }
                 }
+
                 launch {
-                    if (!migrateClocksToBlueprint()) return@launch
-                    viewModel.clockSize.collect {
-                        updateBurnInLayer(keyguardRootView, viewModel)
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                    viewModel.clockSize.collect { clockSize ->
+                        updateBurnInLayer(keyguardRootView, viewModel, clockSize)
                         blueprintInteractor.refreshBlueprint(Type.ClockSize)
                     }
                 }
+
                 launch {
-                    if (!migrateClocksToBlueprint()) return@launch
-                    viewModel.clockShouldBeCentered.collect { clockShouldBeCentered ->
-                        viewModel.clock?.let {
-                            // Weather clock also has hasCustomPositionUpdatedAnimation as true
-                            // TODO(b/323020908): remove ID check
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                    viewModel.clockShouldBeCentered.collect {
+                        viewModel.currentClock.value?.let {
+                            // TODO(b/301502635): remove "!it.config.useCustomClockScene" when
+                            // migrate clocks to blueprint is fully rolled out
                             if (
                                 it.largeClock.config.hasCustomPositionUpdatedAnimation &&
-                                    it.config.id == DEFAULT_CLOCK_ID
+                                    !it.config.useCustomClockScene
                             ) {
                                 blueprintInteractor.refreshBlueprint(Type.DefaultClockStepping)
                             } else {
@@ -90,16 +96,31 @@ object KeyguardClockViewBinder {
                         }
                     }
                 }
+
                 launch {
-                    if (!migrateClocksToBlueprint()) return@launch
-                    viewModel.isAodIconsVisible.collect { isAodIconsVisible ->
-                        viewModel.clock?.let {
-                            // Weather clock also has hasCustomPositionUpdatedAnimation as true
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                    viewModel.isAodIconsVisible.collect {
+                        viewModel.currentClock.value?.let {
                             if (
-                                viewModel.useLargeClock && it.config.id == "DIGITAL_CLOCK_WEATHER"
+                                viewModel.isLargeClockVisible.value && it.config.useCustomClockScene
                             ) {
                                 blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
                             }
+                        }
+                    }
+                }
+
+                launch {
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                    rootViewModel.burnInModel.collect { burnInModel ->
+                        viewModel.currentClock.value?.let {
+                            it.largeClock.layout.applyAodBurnIn(
+                                AodClockBurnInModel(
+                                    translationX = burnInModel.translationX.toFloat(),
+                                    translationY = burnInModel.translationY.toFloat(),
+                                    scale = burnInModel.scale
+                                )
+                            )
                         }
                     }
                 }
@@ -111,20 +132,20 @@ object KeyguardClockViewBinder {
     fun updateBurnInLayer(
         keyguardRootView: ConstraintLayout,
         viewModel: KeyguardClockViewModel,
+        clockSize: ClockSize,
     ) {
         val burnInLayer = viewModel.burnInLayer
         val clockController = viewModel.currentClock.value
+        // Large clocks won't be added to or removed from burn in layer
+        // Weather large clock has customized burn in preventing mechanism
+        // Non-weather large clock will only scale and translate vertically
         clockController?.let { clock ->
-            when (viewModel.clockSize.value) {
-                LARGE -> {
+            when (clockSize) {
+                ClockSize.LARGE -> {
                     clock.smallClock.layout.views.forEach { burnInLayer?.removeView(it) }
-                    if (clock.config.useAlternateSmartspaceAODTransition) {
-                        clock.largeClock.layout.views.forEach { burnInLayer?.addView(it) }
-                    }
                 }
-                SMALL -> {
+                ClockSize.SMALL -> {
                     clock.smallClock.layout.views.forEach { burnInLayer?.addView(it) }
-                    clock.largeClock.layout.views.forEach { burnInLayer?.removeView(it) }
                 }
             }
         }
@@ -132,24 +153,22 @@ object KeyguardClockViewBinder {
     }
 
     private fun cleanupClockViews(
-        clockController: ClockController?,
+        currentClock: ClockController?,
         rootView: ConstraintLayout,
         burnInLayer: Layer?
     ) {
-        clockController?.let { clock ->
+        if (lastClock == currentClock) {
+            return
+        }
+
+        lastClock?.let { clock ->
             clock.smallClock.layout.views.forEach {
                 burnInLayer?.removeView(it)
                 rootView.removeView(it)
             }
-            // add large clock to burn in layer only when it will have same transition with other
-            // components in AOD
-            // otherwise, it will have a separate scale transition while other components only have
-            // translate transition
-            if (clock.config.useAlternateSmartspaceAODTransition) {
-                clock.largeClock.layout.views.forEach { burnInLayer?.removeView(it) }
-            }
             clock.largeClock.layout.views.forEach { rootView.removeView(it) }
         }
+        lastClock = currentClock
     }
 
     @VisibleForTesting
@@ -157,11 +176,19 @@ object KeyguardClockViewBinder {
         clockController: ClockController?,
         rootView: ConstraintLayout,
     ) {
+        // We'll collect the same clock when exiting wallpaper picker without changing clock
+        // so we need to remove clock views from parent before addView again
         clockController?.let { clock ->
             clock.smallClock.layout.views.forEach {
+                if (it.parent != null) {
+                    (it.parent as ViewGroup).removeView(it)
+                }
                 rootView.addView(it).apply { it.visibility = INVISIBLE }
             }
             clock.largeClock.layout.views.forEach {
+                if (it.parent != null) {
+                    (it.parent as ViewGroup).removeView(it)
+                }
                 rootView.addView(it).apply { it.visibility = INVISIBLE }
             }
         }

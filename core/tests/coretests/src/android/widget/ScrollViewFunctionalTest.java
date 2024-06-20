@@ -16,11 +16,18 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.util.AttributeSet;
 import android.util.PollingCheck;
 
 import androidx.test.filters.MediumTest;
@@ -43,14 +50,20 @@ import java.util.concurrent.TimeUnit;
 public class ScrollViewFunctionalTest {
     private ScrollViewActivity mActivity;
     private ScrollView mScrollView;
+    private MyScrollView mMyScrollView;
     @Rule
     public ActivityTestRule<ScrollViewActivity> mActivityRule = new ActivityTestRule<>(
             ScrollViewActivity.class);
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() throws Exception {
         mActivity = mActivityRule.getActivity();
         mScrollView = mActivity.findViewById(R.id.scroll_view);
+        mMyScrollView = (MyScrollView) mActivity.findViewById(R.id.my_scroll_view);
     }
 
     @Test
@@ -79,6 +92,37 @@ public class ScrollViewFunctionalTest {
         assertEquals(maxScroll, mScrollView.getScrollY());
     }
 
+    @Test
+    @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
+    public void testSetVelocity() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            mMyScrollView.setFrameContentVelocity(0);
+        });
+        // set setFrameContentVelocity shouldn't do anything.
+        assertTrue(mMyScrollView.isSetVelocityCalled);
+        assertEquals(0f, mMyScrollView.velocity, 0f);
+        mMyScrollView.isSetVelocityCalled = false;
+
+        mActivityRule.runOnUiThread(() -> {
+            mMyScrollView.fling(100);
+        });
+        // set setFrameContentVelocity should be called when fling.
+        assertTrue(mMyScrollView.isSetVelocityCalled);
+        assertNotEquals(0f, mMyScrollView.velocity, 0.01f);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
+    public void hasVelocityInSmoothScrollBy() throws Throwable {
+        int maxScroll = mMyScrollView.getChildAt(0).getHeight() - mMyScrollView.getHeight();
+        mActivityRule.runOnUiThread(() -> {
+            mMyScrollView.smoothScrollTo(0, maxScroll);
+        });
+        PollingCheck.waitFor(() -> mMyScrollView.getScrollY() != 0);
+        assertTrue(mMyScrollView.isSetVelocityCalled);
+        assertTrue(mMyScrollView.velocity > 0f);
+    }
+
     static class WatchedEdgeEffect extends EdgeEffect {
         public CountDownLatch onAbsorbLatch = new CountDownLatch(1);
 
@@ -90,6 +134,31 @@ public class ScrollViewFunctionalTest {
         public void onAbsorb(int velocity) {
             super.onAbsorb(velocity);
             onAbsorbLatch.countDown();
+        }
+    }
+
+    public static class MyScrollView extends ScrollView {
+
+        public boolean isSetVelocityCalled;
+
+        public float velocity;
+
+        public MyScrollView(Context context) {
+            super(context);
+        }
+
+        public MyScrollView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public MyScrollView(Context context, AttributeSet attrs, int defStyle) {
+            super(context, attrs, defStyle);
+        }
+
+        @Override
+        public void setFrameContentVelocity(float pixelsPerSecond) {
+            isSetVelocityCalled = true;
+            velocity = pixelsPerSecond;
         }
     }
 }

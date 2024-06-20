@@ -33,10 +33,10 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DOZING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DREAMING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TRACING_ENABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULNESS_TRANSITION;
 
@@ -85,7 +85,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -98,19 +97,22 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.SceneFamilies;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 import com.android.systemui.shared.system.smartspace.ISysuiUnlockAnimationController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
+import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import dagger.Lazy;
@@ -144,8 +146,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
-    private final FeatureFlags mFeatureFlags;
-    private final SceneContainerFlags mSceneContainerFlags;
     private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
     private final Lazy<ShadeViewController> mShadeViewControllerLazy;
@@ -207,8 +207,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void onStatusBarTouchEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentity("onStatusBarTouchEvent", () -> {
-                // TODO move this logic to message queue
-                if (event.getActionMasked() == ACTION_DOWN) {
+                if (SceneContainerFlag.isEnabled()) {
+                    //TODO(b/329863123) implement latency tracking for shade scene
+                    Log.i(TAG_OPS, "Scene container enabled. Latency tracking not started.");
+                } else if (event.getActionMasked() == ACTION_DOWN) {
                     mShadeViewControllerLazy.get().startExpandLatencyTracking();
                 }
                 mHandler.post(() -> {
@@ -220,7 +222,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
                         // If scene framework is enabled, set the scene container window to
                         // visible and let the touch "slip" into that window.
-                        if (mSceneContainerFlags.isEnabled()) {
+                        if (SceneContainerFlag.isEnabled()) {
                             mSceneInteractor.get().onRemoteUserInteractionStarted("launcher swipe");
                         } else {
                             mShadeViewControllerLazy.get().startInputFocusTransfer();
@@ -229,7 +231,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     if (action == ACTION_UP || action == ACTION_CANCEL) {
                         mInputFocusTransferStarted = false;
 
-                        if (!mSceneContainerFlags.isEnabled()) {
+                        if (!SceneContainerFlag.isEnabled()) {
                             float velocity = (event.getY() - mInputFocusTransferStartY)
                                     / (event.getEventTime() - mInputFocusTransferStartMillis);
                             if (action == ACTION_CANCEL) {
@@ -237,6 +239,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             } else {
                                 mShadeViewControllerLazy.get().finishInputFocusTransfer(velocity);
                             }
+                        } else if (action == ACTION_UP) {
+                            // Gesture was too short to be picked up by scene container touch
+                            // handling; programmatically start the transition to shade scene.
+                            mSceneInteractor.get().changeScene(
+                                    SceneFamilies.NotifShade,
+                                    "short launcher swipe"
+                            );
                         }
                     }
                     event.recycle();
@@ -246,14 +255,36 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         @Override
         public void onStatusBarTrackpadEvent(MotionEvent event) {
-            verifyCallerAndClearCallingIdentityPostMain("onStatusBarTrackpadEvent", () ->
-                    mShadeViewControllerLazy.get().handleExternalTouch(event));
+            verifyCallerAndClearCallingIdentityPostMain("onStatusBarTrackpadEvent", () -> {
+                if (SceneContainerFlag.isEnabled()) {
+                    int action = event.getActionMasked();
+                    if (action == ACTION_DOWN) {
+                        mSceneInteractor.get().onRemoteUserInteractionStarted(
+                                "trackpad swipe");
+                    } else if (action == ACTION_UP) {
+                        mSceneInteractor.get().changeScene(
+                                SceneFamilies.NotifShade,
+                                "short trackpad swipe"
+                        );
+                    }
+                    mStatusBarWinController.getWindowRootView().dispatchTouchEvent(event);
+                } else {
+                    mShadeViewControllerLazy.get().handleExternalTouch(event);
+                }
+            });
         }
 
         @Override
         public void animateNavBarLongPress(boolean isTouchDown, boolean shrink, long durationMs) {
             verifyCallerAndClearCallingIdentityPostMain("animateNavBarLongPress", () ->
                     notifyAnimateNavBarLongPress(isTouchDown, shrink, durationMs));
+        }
+
+        @Override
+        public void setOverrideHomeButtonLongPress(long duration, float slopMultiplier,
+                boolean haptic) {
+            verifyCallerAndClearCallingIdentityPostMain("setOverrideHomeButtonLongPress",
+                    () -> notifySetOverrideHomeButtonLongPress(duration, slopMultiplier, haptic));
         }
 
         @Override
@@ -380,7 +411,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void toggleNotificationPanel() {
             verifyCallerAndClearCallingIdentityPostMain("toggleNotificationPanel", () ->
-                    mCommandQueue.togglePanel());
+                    mCommandQueue.toggleNotificationsPanel());
+        }
+
+        @Override
+        public void toggleQuickSettingsPanel() {
+            verifyCallerAndClearCallingIdentityPostMain("toggleQuickSettingsPanel", () ->
+                    mCommandQueue.toggleQuickSettingsPanel());
         }
 
         private boolean verifyCaller(String reason) {
@@ -598,8 +635,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             InWindowLauncherUnlockAnimationManager inWindowLauncherUnlockAnimationManager,
             AssistUtils assistUtils,
-            FeatureFlags featureFlags,
-            SceneContainerFlags sceneContainerFlags,
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
             BroadcastDispatcher broadcastDispatcher
@@ -611,8 +646,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         mContext = context;
-        mFeatureFlags = featureFlags;
-        mSceneContainerFlags = sceneContainerFlags;
         mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;
         mShadeViewControllerLazy = shadeViewControllerLazy;
@@ -668,14 +701,18 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             // Listen for tracing state changes
             @Override
             public void onTracingStateChanged(boolean enabled) {
-                mSysUiState.setFlag(SYSUI_STATE_TRACING_ENABLED, enabled)
-                        .commitUpdate(mContext.getDisplayId());
+                // TODO(b/286509643) Cleanup callers of this; Unused downstream
             }
 
             @Override
-            public void enterStageSplitFromRunningApp(boolean leftOrTop) {
+            public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
                 if (mOverviewProxy != null) {
                     try {
+                        if (DesktopModeStatus.canEnterDesktopMode(mContext)
+                                && (sysUiState.getFlags()
+                                & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0) {
+                            return;
+                        }
                         mOverviewProxy.enterStageSplitFromRunningApp(leftOrTop);
                     } catch (RemoteException e) {
                         Log.w(TAG_OPS, "Unable to enter stage split from the current running app");
@@ -729,7 +766,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
-    private void notifySystemUiStateFlags(int flags) {
+    private void notifySystemUiStateFlags(@SystemUiStateFlags long flags) {
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Notifying sysui state change to overview service: proxy="
                     + mOverviewProxy + " flags=" + flags);
@@ -943,6 +980,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void notifySetOverrideHomeButtonLongPress(long duration, float slopMultiplier,
+            boolean haptic) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i)
+                    .setOverrideHomeButtonLongPress(duration, slopMultiplier, haptic);
+        }
+    }
+
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
             if (mOverviewProxy != null) {
@@ -1100,6 +1145,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void startAssistant(Bundle bundle) {}
         default void setAssistantOverridesRequested(int[] invocationTypes) {}
         default void animateNavBarLongPress(boolean isTouchDown, boolean shrink, long durationMs) {}
+        /** Set override of home button long press duration, touch slop multiplier, and haptic. */
+        default void setOverrideHomeButtonLongPress(
+                long override, float slopMultiplier, boolean haptic) {}
     }
 
     /**

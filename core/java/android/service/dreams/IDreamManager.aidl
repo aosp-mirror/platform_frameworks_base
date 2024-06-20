@@ -38,8 +38,9 @@ interface IDreamManager {
     boolean isDreaming();
     @UnsupportedAppUsage
     boolean isDreamingOrInPreview();
+    boolean canStartDreaming(boolean isScreenOn);
     void finishSelf(in IBinder token, boolean immediate);
-    void startDozing(in IBinder token, int screenState, int screenBrightness);
+    void startDozing(in IBinder token, int screenState, int reason, int screenBrightness);
     void stopDozing(in IBinder token);
     void forceAmbientDisplayEnabled(boolean enabled);
     ComponentName[] getDreamComponentsForUser(int userId);
@@ -47,4 +48,6 @@ interface IDreamManager {
     void setSystemDreamComponent(in ComponentName componentName);
     void registerDreamOverlayService(in ComponentName componentName);
     void startDreamActivity(in Intent intent);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)")
+    oneway void setDreamIsObscured(in boolean isObscured);
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 import static com.android.systemui.biometrics.BiometricNotificationBroadcastReceiver.ACTION_SHOW_FACE_REENROLL_DIALOG;
 import static com.android.systemui.biometrics.BiometricNotificationBroadcastReceiver.ACTION_SHOW_FINGERPRINT_REENROLL_DIALOG;
@@ -43,8 +44,8 @@ import android.util.Log;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.Optional;
@@ -79,6 +80,8 @@ public class BiometricNotificationService implements CoreStartable {
     private boolean mFaceNotificationQueued;
     private boolean mFingerprintNotificationQueued;
     private boolean mFingerprintReenrollRequired;
+
+    private boolean mIsFingerprintReenrollForced;
 
     private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
             new KeyguardStateController.Callback() {
@@ -118,9 +121,11 @@ public class BiometricNotificationService implements CoreStartable {
                 public void onBiometricHelp(int msgId, String helpString,
                         BiometricSourceType biometricSourceType) {
                     if (biometricSourceType == BiometricSourceType.FINGERPRINT
-                            && mFingerprintReEnrollNotification.isFingerprintReEnrollRequired(
+                            && mFingerprintReEnrollNotification.isFingerprintReEnrollRequested(
                                     msgId)) {
                         mFingerprintReenrollRequired = true;
+                        mIsFingerprintReenrollForced =
+                                mFingerprintReEnrollNotification.isFingerprintReEnrollForced(msgId);
                     }
                 }
             };
@@ -191,7 +196,7 @@ public class BiometricNotificationService implements CoreStartable {
         final String name = mContext.getString(R.string.face_re_enroll_notification_name);
         mHandler.postDelayed(
                 () -> showNotification(ACTION_SHOW_FACE_REENROLL_DIALOG, title, content, name,
-                        FACE_NOTIFICATION_ID),
+                        FACE_NOTIFICATION_ID, false),
                 SHOW_NOTIFICATION_DELAY_MS);
     }
 
@@ -204,12 +209,12 @@ public class BiometricNotificationService implements CoreStartable {
         final String name = mContext.getString(R.string.fingerprint_re_enroll_notification_name);
         mHandler.postDelayed(
                 () -> showNotification(ACTION_SHOW_FINGERPRINT_REENROLL_DIALOG, title, content,
-                        name, FINGERPRINT_NOTIFICATION_ID),
+                        name, FINGERPRINT_NOTIFICATION_ID, mIsFingerprintReenrollForced),
                 SHOW_NOTIFICATION_DELAY_MS);
     }
 
     private void showNotification(String action, CharSequence title, CharSequence content,
-            CharSequence name, int notificationId) {
+            CharSequence name, int notificationId, boolean isReenrollForced) {
         if (notificationId == FACE_NOTIFICATION_ID) {
             mFaceNotificationQueued = false;
         } else if (notificationId == FINGERPRINT_NOTIFICATION_ID) {
@@ -223,8 +228,12 @@ public class BiometricNotificationService implements CoreStartable {
         }
 
         final Intent onClickIntent = new Intent(action);
+        onClickIntent.putExtra(BiometricNotificationBroadcastReceiver.EXTRA_IS_REENROLL_FORCED,
+                isReenrollForced);
+
         final PendingIntent onClickPendingIntent = PendingIntent.getBroadcastAsUser(mContext,
-                0 /* requestCode */, onClickIntent, FLAG_IMMUTABLE, UserHandle.CURRENT);
+                0 /* requestCode */, onClickIntent, FLAG_IMMUTABLE | FLAG_UPDATE_CURRENT,
+                UserHandle.CURRENT);
 
         final Notification notification = new Notification.Builder(mContext, CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_SYSTEM)

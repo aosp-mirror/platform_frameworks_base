@@ -75,7 +75,8 @@ public class SetScreenLockDialogActivity extends AlertActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (!(android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.showSetScreenLockDialog())) {
+                && android.multiuser.Flags.showSetScreenLockDialog()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures())) {
             finish();
             return;
         }

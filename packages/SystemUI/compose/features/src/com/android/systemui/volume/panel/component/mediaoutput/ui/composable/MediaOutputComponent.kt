@@ -27,12 +27,14 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,14 +45,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.toColor
+import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel.ConnectedDeviceViewModel
 import com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel.DeviceIconViewModel
 import com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel.MediaOutputViewModel
@@ -69,17 +77,31 @@ constructor(
     @Composable
     override fun VolumePanelComposeScope.Content(modifier: Modifier) {
         val connectedDeviceViewModel: ConnectedDeviceViewModel? by
-            viewModel.connectedDeviceViewModel.collectAsState()
+            viewModel.connectedDeviceViewModel.collectAsStateWithLifecycle()
         val deviceIconViewModel: DeviceIconViewModel? by
-            viewModel.deviceIconViewModel.collectAsState()
+            viewModel.deviceIconViewModel.collectAsStateWithLifecycle()
+        val clickLabel = stringResource(R.string.volume_panel_enter_media_output_settings)
+        val enabled: Boolean by viewModel.enabled.collectAsStateWithLifecycle()
 
         Expandable(
-            modifier = Modifier.fillMaxWidth().height(80.dp),
+            modifier =
+                Modifier.fillMaxWidth().height(80.dp).semantics {
+                    liveRegion = LiveRegionMode.Polite
+                    this.onClick(label = clickLabel) {
+                        viewModel.onBarClick(null)
+                        true
+                    }
+                },
             color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(28.dp),
-            onClick = { viewModel.onBarClick(it) },
+            onClick =
+                if (enabled) {
+                    { viewModel.onBarClick(it) }
+                } else {
+                    null
+                },
         ) { _ ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                 connectedDeviceViewModel?.let { ConnectedDeviceText(it) }
 
                 deviceIconViewModel?.let { ConnectedDeviceIcon(it) }
@@ -137,12 +159,14 @@ constructor(
                     }
                 }
             ) { targetViewModel ->
-                Expandable(
-                    modifier = Modifier.fillMaxSize(),
-                    color = targetViewModel.backgroundColor.toColor(),
-                    shape = RoundedCornerShape(12.dp),
-                    onClick = { viewModel.onDeviceClick(it) },
-                ) {}
+                Spacer(
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .background(
+                                color = targetViewModel.backgroundColor.toColor(),
+                                shape = RoundedCornerShape(12.dp),
+                            ),
+                )
             }
             transition.AnimatedContent(
                 contentKey = { it.icon },

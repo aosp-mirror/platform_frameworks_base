@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"ଡିଭାଇସ"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"ଆପଣଙ୍କ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>ରେ ଏହି ଅନୁମତିଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଆଯିବ"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"ଆପଣଙ୍କ ଫୋନରୁ ଏହି ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"ଆପଣଙ୍କ ଫୋନର ଆପ୍ସକୁ ଷ୍ଟ୍ରିମ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦେବେ?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"ଅଡିଓ, ଫଟୋ, ପାସୱାର୍ଡ ଏବଂ ମେସେଜ ସମେତ ଫୋନରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ %1$sର ଆକ୍ସେସ ରହିବ।&lt;br/&gt;&lt;br/&gt;ଆପଣ ଏହି ଅନୁମତିକୁ ଆକ୍ସେସ କାଢ଼ି ନଦେବା ପର୍ଯ୍ୟନ୍ତ %1$s ଆପ୍ସକୁ ଷ୍ଟ୍ରିମ କରିବା ପାଇଁ ସକ୍ଷମ ହେବ।"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"କ୍ରସ-ଡିଭାଇସ ସେବାଗୁଡ଼ିକ"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"ଆପଣଙ୍କ ଡିଭାଇସଗୁଡ଼ିକ ମଧ୍ୟରେ ଆପ୍ସକୁ ଷ୍ଟ୍ରିମ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପଣଙ୍କର <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ତରଫରୁ ଅନୁମତି ପାଇଁ ଅନୁରୋଧ କରୁଛି"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"ଆପଣଙ୍କ ଡିଭାଇସଗୁଡ଼ିକ ମଧ୍ୟରେ ଆପ୍ସକୁ ଡିସପ୍ଲେ ଏବଂ ଷ୍ଟ୍ରିମ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପଣଙ୍କର <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ତରଫରୁ ଅନୁମତି ପାଇଁ ଅନୁରୋଧ କରୁଛି"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"ଆପଣଙ୍କ ଫୋନରୁ ଏହି ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play ସେବାଗୁଡ଼ିକ"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"ଆପଣଙ୍କ ଫୋନର ଫଟୋ, ମିଡିଆ ଏବଂ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପଣଙ୍କର <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ତରଫରୁ ଅନୁମତି ପାଇଁ ଅନୁରୋଧ କରୁଛି"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"ଏହି ପଦକ୍ଷେପ ନେବା ପାଇଁ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦେବେ?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"ଆପଣଙ୍କ ଫୋନର ଆପ୍ସ ଏବଂ ସିଷ୍ଟମ ଫିଚରଗୁଡ଼ିକୁ ଷ୍ଟ୍ରିମ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦେବେ?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"ଅଡିଓ, ଫଟୋ, ପେମେଣ୍ଟ ସୂଚନା, ପାସୱାର୍ଡ ଏବଂ ମେସେଜ ସମେତ ଆପଣଙ୍କ ଫୋନରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ %1$sର ଆକ୍ସେସ ରହିବ।&lt;br/&gt;&lt;br/&gt;ଆପଣ ଏହି ଅନୁମତିକୁ ଆକ୍ସେସ କାଢ଼ି ନଦେବା ପର୍ଯ୍ୟନ୍ତ %1$s ଆପ୍ସ ଏବଂ ସିଷ୍ଟମ ଫିଚରଗୁଡ଼ିକୁ ଷ୍ଟ୍ରିମ କରିବା ପାଇଁ ସକ୍ଷମ ହେବ।"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକରେ ଆପ୍ସ ଏବଂ ଅନ୍ୟ ସିଷ୍ଟମ ଫିଚରଗୁଡ଼ିକୁ ଷ୍ଟ୍ରିମ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପଣଙ୍କ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> ତରଫରୁ ଅନୁମତି ପାଇଁ ଅନୁରୋଧ କରୁଛି"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ଡିଭାଇସ୍"</string>
     <string name="summary_generic" msgid="1761976003668044801">"ଆପଣଙ୍କ ଫୋନ ଏବଂ ବଛାଯାଇଥିବା ଡିଭାଇସ ମଧ୍ୟରେ, କଲ କରୁଥିବା ଯେ କୌଣସି ବ୍ୟକ୍ତିଙ୍କ ନାମ ପରି ସୂଚନା ସିଙ୍କ କରିବାକୁ ଏହି ଆପ ସକ୍ଷମ ହେବ"</string>

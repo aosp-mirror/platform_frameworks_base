@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.notification
 
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.platform.test.rule.DisableNotificationCooldownSettingRule
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.FlickerTestData
@@ -37,6 +38,7 @@ import com.android.server.wm.flicker.navBarWindowIsVisibleAtEnd
 import com.android.server.wm.flicker.taskBarLayerIsVisibleAtEnd
 import com.android.server.wm.flicker.taskBarWindowIsVisibleAtEnd
 import org.junit.Assume
+import org.junit.ClassRule
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test
@@ -47,7 +49,7 @@ import org.junit.runners.Parameterized
 /**
  * Test cold launching an app from a notification.
  *
- * To run this test: `atest FlickerTests:OpenAppFromNotificationWarm`
+ * To run this test: `atest FlickerTestsNotification:OpenAppFromNotificationWarmTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -208,5 +210,10 @@ open class OpenAppFromNotificationWarmTest(flicker: LegacyFlickerTest) :
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams() = LegacyFlickerTestFactory.nonRotationTests()
+
+        /** Ensures that posted notifications will alert and HUN even just after boot. */
+        @ClassRule
+        @JvmField
+        val disablenotificationCooldown = DisableNotificationCooldownSettingRule()
     }
 }

@@ -18,6 +18,10 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.Back
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -30,14 +34,17 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Sim
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.domain.interactor.sceneContainerStartable
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
+import com.android.systemui.truth.containsEntriesExactly
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -54,17 +61,17 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class BouncerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
-    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
+
     private lateinit var underTest: BouncerViewModel
 
     @Before
     fun setUp() {
-        kosmos.fakeSceneContainerFlags.enabled = true
+        kosmos.sceneContainerStartable.start()
         underTest = kosmos.bouncerViewModel
     }
 
@@ -142,54 +149,6 @@ class BouncerViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun message() =
-        testScope.runTest {
-            val message by collectLastValue(underTest.message)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
-            assertThat(message?.isUpdateAnimated).isTrue()
-
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                bouncerInteractor.authenticate(WRONG_PIN)
-            }
-            assertThat(message?.isUpdateAnimated).isFalse()
-
-            val lockoutEndMs = authenticationInteractor.lockoutEndTimestamp ?: 0
-            advanceTimeBy(lockoutEndMs - testScope.currentTime)
-            assertThat(message?.isUpdateAnimated).isTrue()
-        }
-
-    @Test
-    fun lockoutMessage() =
-        testScope.runTest {
-            val authMethodViewModel by collectLastValue(underTest.authMethodViewModel)
-            val message by collectLastValue(underTest.message)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
-            assertThat(kosmos.fakeAuthenticationRepository.lockoutEndTimestamp).isNull()
-            assertThat(authMethodViewModel?.lockoutMessageId).isNotNull()
-
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) { times ->
-                bouncerInteractor.authenticate(WRONG_PIN)
-                if (times < FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
-                    assertThat(message?.text).isEqualTo(bouncerInteractor.message.value)
-                    assertThat(message?.isUpdateAnimated).isTrue()
-                }
-            }
-            val lockoutSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS
-            assertTryAgainMessage(message?.text, lockoutSeconds)
-            assertThat(message?.isUpdateAnimated).isFalse()
-
-            repeat(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS) { time ->
-                advanceTimeBy(1.seconds)
-                val remainingSeconds = lockoutSeconds - time - 1
-                if (remainingSeconds > 0) {
-                    assertTryAgainMessage(message?.text, remainingSeconds)
-                }
-            }
-            assertThat(message?.text).isEmpty()
-            assertThat(message?.isUpdateAnimated).isTrue()
-        }
-
-    @Test
     fun isInputEnabled() =
         testScope.runTest {
             val isInputEnabled by
@@ -202,32 +161,13 @@ class BouncerViewModelTest : SysuiTestCase() {
             assertThat(isInputEnabled).isTrue()
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                bouncerInteractor.authenticate(WRONG_PIN)
+                kosmos.bouncerInteractor.authenticate(WRONG_PIN)
             }
             assertThat(isInputEnabled).isFalse()
 
-            val lockoutEndMs = authenticationInteractor.lockoutEndTimestamp ?: 0
+            val lockoutEndMs = kosmos.authenticationInteractor.lockoutEndTimestamp ?: 0
             advanceTimeBy(lockoutEndMs - testScope.currentTime)
             assertThat(isInputEnabled).isTrue()
-        }
-
-    @Test
-    fun dialogViewModel() =
-        testScope.runTest {
-            val authMethodViewModel by collectLastValue(underTest.authMethodViewModel)
-            val dialogViewModel by collectLastValue(underTest.dialogViewModel)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
-            assertThat(authMethodViewModel?.lockoutMessageId).isNotNull()
-
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                assertThat(dialogViewModel).isNull()
-                bouncerInteractor.authenticate(WRONG_PIN)
-            }
-            assertThat(dialogViewModel).isNotNull()
-            assertThat(dialogViewModel?.text).isNotEmpty()
-
-            dialogViewModel?.onDismiss?.invoke()
-            assertThat(dialogViewModel).isNull()
         }
 
     @Test
@@ -261,15 +201,25 @@ class BouncerViewModelTest : SysuiTestCase() {
             assertThat(isFoldSplitRequired).isTrue()
         }
 
+    @Test
+    fun destinationScenes() =
+        testScope.runTest {
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            kosmos.fakeSceneDataSource.changeScene(Scenes.QuickSettings)
+            runCurrent()
+
+            kosmos.fakeSceneDataSource.changeScene(Scenes.Bouncer)
+            runCurrent()
+
+            assertThat(destinationScenes)
+                .containsEntriesExactly(
+                    Back to UserActionResult(Scenes.QuickSettings),
+                    Swipe(SwipeDirection.Down) to UserActionResult(Scenes.QuickSettings),
+                )
+        }
+
     private fun authMethodsToTest(): List<AuthenticationMethodModel> {
         return listOf(None, Pin, Password, Pattern, Sim)
-    }
-
-    private fun assertTryAgainMessage(
-        message: String?,
-        time: Int,
-    ) {
-        assertThat(message).isEqualTo("Try again in $time seconds.")
     }
 
     companion object {

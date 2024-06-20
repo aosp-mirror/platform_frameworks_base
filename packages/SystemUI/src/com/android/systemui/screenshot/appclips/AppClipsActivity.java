@@ -52,7 +52,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLogger.UiEventEnum;
 import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
-import com.android.systemui.screenshot.CropView;
+import com.android.systemui.screenshot.scroll.CropView;
 import com.android.systemui.settings.UserTracker;
 
 import javax.inject.Inject;

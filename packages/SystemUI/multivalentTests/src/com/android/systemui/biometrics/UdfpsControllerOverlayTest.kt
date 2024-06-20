@@ -45,32 +45,32 @@ import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayView
 import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -102,6 +102,7 @@ private const val SENSOR_HEIGHT = 60
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class UdfpsControllerOverlayTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     @JvmField @Rule var rule = MockitoJUnit.rule()
 
@@ -148,28 +149,11 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        testScope = TestScope(StandardTestDispatcher())
-        powerRepository = FakePowerRepository()
-        powerInteractor =
-            PowerInteractor(
-                powerRepository,
-                mock(FalsingCollector::class.java),
-                mock(ScreenOffAnimationController::class.java),
-                statusBarStateController,
-            )
-        keyguardTransitionRepository = FakeKeyguardTransitionRepository()
-        keyguardTransitionInteractor =
-            KeyguardTransitionInteractor(
-                scope = testScope.backgroundScope,
-                repository = keyguardTransitionRepository,
-                fromLockscreenTransitionInteractor = {
-                    mock(FromLockscreenTransitionInteractor::class.java)
-                },
-                fromPrimaryBouncerTransitionInteractor = {
-                    mock(FromPrimaryBouncerTransitionInteractor::class.java)
-                },
-                fromAodTransitionInteractor = { mock(FromAodTransitionInteractor::class.java) },
-            )
+        testScope = kosmos.testScope
+        powerRepository = kosmos.fakePowerRepository
+        powerInteractor = kosmos.powerInteractor
+        keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+        keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
         whenever(inflater.inflate(R.layout.udfps_view, null, false)).thenReturn(udfpsView)
         whenever(inflater.inflate(R.layout.udfps_bp_view, null))
             .thenReturn(mock(UdfpsBpView::class.java))
@@ -551,6 +535,67 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
                 val lp = layoutParamsCaptor.value
                 assertThat(lp.width).isEqualTo(overlayParams.sensorBounds.width())
                 assertThat(lp.height).isEqualTo(overlayParams.sensorBounds.height())
+            }
+        }
+
+    @Test
+    fun addViewPending_layoutIsNotUpdated() =
+        testScope.runTest {
+            withReasonSuspend(REASON_AUTH_KEYGUARD) {
+                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
+                mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+
+                // GIVEN going to sleep
+                keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.OFF,
+                    to = KeyguardState.GONE,
+                    testScope = this,
+                )
+                powerRepository.updateWakefulness(
+                    rawState = WakefulnessState.STARTING_TO_SLEEP,
+                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                    lastSleepReason = WakeSleepReason.OTHER,
+                )
+                runCurrent()
+
+                // WHEN a request comes to show the view
+                controllerOverlay.show(udfpsController, overlayParams)
+                runCurrent()
+
+                // THEN the view does not get added immediately
+                verify(windowManager, never()).addView(any(), any())
+
+                // WHEN updateOverlayParams gets called when the view is pending to be added
+                controllerOverlay.updateOverlayParams(overlayParams)
+
+                // THEN the view layout is never updated
+                verify(windowManager, never()).updateViewLayout(any(), any())
+
+                // CLEANUP we hide to end the job that listens for the finishedGoingToSleep signal
+                controllerOverlay.hide()
+            }
+        }
+
+    @Test
+    fun updateOverlayParams_viewLayoutUpdated() =
+        testScope.runTest {
+            withReasonSuspend(REASON_AUTH_KEYGUARD) {
+                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
+                powerRepository.updateWakefulness(
+                    rawState = WakefulnessState.AWAKE,
+                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                    lastSleepReason = WakeSleepReason.OTHER,
+                )
+                runCurrent()
+                controllerOverlay.show(udfpsController, overlayParams)
+                runCurrent()
+                verify(windowManager).addView(any(), any())
+
+                // WHEN updateOverlayParams gets called
+                controllerOverlay.updateOverlayParams(overlayParams)
+
+                // THEN the view layout is updated
+                verify(windowManager).updateViewLayout(any(), any())
             }
         }
 }

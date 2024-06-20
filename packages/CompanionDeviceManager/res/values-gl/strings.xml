@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"dispositivo"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Esta aplicación poderá acceder a estes permisos do dispositivo (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>)"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Permitir que a aplicación &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; acceda a esta información desde o teu teléfono"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Queres permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; emita as aplicacións do teu teléfono?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s terá acceso a todo o que sexa visible ou se reproduza no teléfono, como audio, fotos, contrasinais e mensaxes.&lt;br/&gt;&lt;br/&gt;%1$s poderá emitir aplicacións ata que quites o acceso a este permiso."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Servizos multidispositivo"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> está solicitando permiso en nome do teu dispositivo (<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>) para emitir contido de aplicacións entre os teus aparellos"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> está solicitando permiso en nome do teu dispositivo (<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>) para mostrar e emitir aplicacións noutros dispositivos teus"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; acceda a esta información do teu teléfono"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Servizos de Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> está solicitando permiso en nome do teu dispositivo (<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>) para acceder ás fotos, ao contido multimedia e ás notificacións do teléfono"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Queres permitir que &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; leve a cabo esta acción?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Queres permitir que &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; emita as aplicacións e as funcións do sistema do teu teléfono?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s terá acceso a todo o que sexa visible ou se reproduza no teléfono, como audio, fotos, información de pago, contrasinais e mensaxes.&lt;br/&gt;&lt;br/&gt;%1$s poderá emitir aplicacións e funcións do sistema ata que quites o acceso a este permiso."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> está solicitando permiso en nome do teu dispositivo (<xliff:g id="DEVICE_NAME">%2$s</xliff:g>) para emitir o contido das aplicacións e doutras funcións do sistema en dispositivos próximos"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"dispositivo"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Esta aplicación poderá sincronizar información (por exemplo, o nome de quen chama) entre o teléfono e o dispositivo escollido"</string>

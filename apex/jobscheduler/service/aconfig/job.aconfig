@@ -28,3 +28,23 @@ flag {
     description: "Only relax a prefetch job's connectivity constraint when the device is charging and battery is not low"
     bug: "299329948"
 }
+
+flag {
+    name: "count_quota_fix"
+    namespace: "backstage_power"
+    description: "Fix job count quota check"
+    bug: "300862949"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+   name: "thermal_restrictions_to_fgs_jobs"
+   namespace: "backstage_power"
+   description: "Apply thermal restrictions to FGS jobs."
+   bug: "315157163"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}

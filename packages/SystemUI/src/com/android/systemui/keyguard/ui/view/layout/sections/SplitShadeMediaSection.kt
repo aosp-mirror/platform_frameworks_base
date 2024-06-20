@@ -28,7 +28,7 @@ import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.res.R
@@ -46,7 +46,7 @@ constructor(
     private val mediaContainerId = R.id.status_view_media_container
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
 
@@ -73,7 +73,7 @@ constructor(
     override fun bindData(constraintLayout: ConstraintLayout) {}
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
 
@@ -87,7 +87,7 @@ constructor(
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
 

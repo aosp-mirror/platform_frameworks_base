@@ -48,7 +48,8 @@ public class RegisterStatusBarResultTest {
         final String dumyIconKey = "dummyIcon1";
         final ArrayMap<String, StatusBarIcon> iconMap = new ArrayMap<>();
         iconMap.put(dumyIconKey, new StatusBarIcon("com.android.internal.statusbar.test",
-                UserHandle.of(100), 123, 1, 2, "dummyIconDescription"));
+                UserHandle.of(100), 123, 1, 2, "dummyIconDescription",
+                StatusBarIcon.Type.SystemIcon));
         final LetterboxDetails letterboxDetails = new LetterboxDetails(
                 /* letterboxInnerBounds= */ new Rect(1, 2, 3, 4),
                 /* letterboxFullBounds= */ new Rect(5, 6, 7, 8),

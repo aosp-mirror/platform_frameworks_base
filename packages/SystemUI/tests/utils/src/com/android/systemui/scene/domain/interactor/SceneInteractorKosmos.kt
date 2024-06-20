@@ -20,6 +20,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteract
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.domain.resolver.sceneFamilyResolvers
 import com.android.systemui.scene.shared.logger.sceneLogger
 
 val Kosmos.sceneInteractor by
@@ -28,6 +29,7 @@ val Kosmos.sceneInteractor by
             applicationScope = applicationCoroutineScope,
             repository = sceneContainerRepository,
             logger = sceneLogger,
+            sceneFamilyResolvers = { sceneFamilyResolvers },
             deviceUnlockedInteractor = deviceUnlockedInteractor,
         )
     }

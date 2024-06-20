@@ -26,8 +26,13 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"idivayisi"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Le-app izovunyelwa ukufinyelela lezi zimvume ku-<xliff:g id="DEVICE_NAME">%1$s</xliff:g> yakho"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Vumela i-&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ifinyelele lolu lwazi kusukela efonini yakho"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Vumela i-<xliff:g id="APP_NAME">%1$s</xliff:g> ukusakaza ama-app efoni yakho?"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for summary_app_streaming (295548145144086753) -->
+    <skip />
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Amasevisi amadivayisi amaningi"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> icela imvume esikhundleni se-<xliff:g id="DISPLAY_NAME">%2$s</xliff:g> yakho ukuze isakaze-bukhoma ama-app phakathi kwamadivayisi akho"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> icela imvume esikhundleni se-<xliff:g id="DISPLAY_NAME">%2$s</xliff:g> yakho yokubonisa nokusakaza ama-app phakathi kwamadivayisi wakho"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Vumela &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ukufinyelela lolu lwazi kusuka efonini yakho"</string>
@@ -35,6 +40,10 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Amasevisi we-Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> icela imvume esikhundleni se-<xliff:g id="DISPLAY_NAME">%2$s</xliff:g> yakho ukuze ifinyelele izithombe zefoni yakho, imidiya nezaziso"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Vumela i-<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ukwenza lesi senzo?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Vumela i-<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ukuze usakaze ama-app wefoni yakho nezakhi zesistimu?"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for summary_nearby_device_streaming (4039565463149145573) -->
+    <skip />
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> icela imvume esikhundleni se-<xliff:g id="DEVICE_NAME">%2$s</xliff:g> ukusakaza ama-app nezinye izakhi zesistimu kumadivayisi aseduze"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"idivayisi"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Le app izokwazi ukuvumelanisa ulwazi, njengegama lomuntu othile ofonayo, phakathi kwefoni yakho nedivayisi ekhethiwe"</string>

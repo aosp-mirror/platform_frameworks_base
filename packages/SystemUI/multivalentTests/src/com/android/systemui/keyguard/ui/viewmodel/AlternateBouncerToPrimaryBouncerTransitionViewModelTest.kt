@@ -41,10 +41,7 @@ import org.junit.runner.RunWith
 class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            fakeFeatureFlagsClassic.apply {
-                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-            }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }

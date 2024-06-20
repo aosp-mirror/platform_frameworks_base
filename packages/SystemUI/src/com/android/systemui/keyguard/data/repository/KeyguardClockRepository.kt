@@ -16,18 +16,21 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.content.Context
 import android.os.UserHandle
 import android.provider.Settings
-import androidx.annotation.VisibleForTesting
 import com.android.keyguard.ClockEventController
-import com.android.keyguard.KeyguardClockSwitch.ClockSize
-import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.keyguard.shared.model.SettingsClockSize
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
+import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
@@ -48,21 +51,28 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 interface KeyguardClockRepository {
-    /** clock size determined by notificationPanelViewController, LARGE or SMALL */
-    val clockSize: StateFlow<Int>
+    /**
+     * clock size determined by notificationPanelViewController, LARGE or SMALL
+     *
+     * @deprecated When scene container flag is on use clockSize from domain level.
+     */
+    val clockSize: StateFlow<ClockSize>
 
     /** clock size selected in picker, DYNAMIC or SMALL */
-    val selectedClockSize: Flow<SettingsClockSize>
+    val selectedClockSize: StateFlow<ClockSizeSetting>
 
     /** clock id, selected from clock carousel in wallpaper picker */
     val currentClockId: Flow<ClockId>
 
     val currentClock: StateFlow<ClockController?>
 
-    val previewClockPair: StateFlow<Pair<ClockController, ClockController>>
+    val previewClock: Flow<ClockController>
 
     val clockEventController: ClockEventController
-    fun setClockSize(@ClockSize size: Int)
+
+    val shouldForceSmallClock: Boolean
+
+    fun setClockSize(size: ClockSize)
 }
 
 @SysUISingleton
@@ -74,24 +84,32 @@ constructor(
     override val clockEventController: ClockEventController,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Application private val applicationScope: CoroutineScope,
+    @Application private val applicationContext: Context,
+    private val featureFlags: FeatureFlagsClassic,
 ) : KeyguardClockRepository {
 
     /** Receive SMALL or LARGE clock should be displayed on keyguard. */
-    private val _clockSize: MutableStateFlow<Int> = MutableStateFlow(LARGE)
-    override val clockSize: StateFlow<Int> = _clockSize.asStateFlow()
+    private val _clockSize: MutableStateFlow<ClockSize> = MutableStateFlow(ClockSize.LARGE)
+    override val clockSize: StateFlow<ClockSize> = _clockSize.asStateFlow()
 
-    override fun setClockSize(size: Int) {
+    override fun setClockSize(size: ClockSize) {
+        SceneContainerFlag.assertInLegacyMode()
         _clockSize.value = size
     }
 
-    override val selectedClockSize: Flow<SettingsClockSize> =
+    override val selectedClockSize: StateFlow<ClockSizeSetting> =
         secureSettings
             .observerFlow(
                 names = arrayOf(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK),
                 userId = UserHandle.USER_SYSTEM,
             )
             .onStart { emit(Unit) } // Forces an initial update.
-            .map { getClockSize() }
+            .map { withContext(backgroundDispatcher) { getClockSize() } }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = getClockSize()
+            )
 
     override val currentClockId: Flow<ClockId> =
         callbackFlow {
@@ -113,37 +131,37 @@ constructor(
 
     override val currentClock: StateFlow<ClockController?> =
         currentClockId
-            .map { clockRegistry.createCurrentClock() }
+            .map {
+                clockEventController.clock = clockRegistry.createCurrentClock()
+                clockEventController.clock
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = clockRegistry.createCurrentClock()
             )
 
-    override val previewClockPair: StateFlow<Pair<ClockController, ClockController>> =
-        currentClockId
-            .map { Pair(clockRegistry.createCurrentClock(), clockRegistry.createCurrentClock()) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue =
-                    Pair(clockRegistry.createCurrentClock(), clockRegistry.createCurrentClock())
-            )
-
-    @VisibleForTesting
-    suspend fun getClockSize(): SettingsClockSize {
-        return withContext(backgroundDispatcher) {
-            if (
-                secureSettings.getIntForUser(
-                    Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
-                    1,
-                    UserHandle.USER_CURRENT
-                ) == 1
-            ) {
-                SettingsClockSize.DYNAMIC
-            } else {
-                SettingsClockSize.SMALL
-            }
+    override val previewClock: Flow<ClockController> =
+        currentClockId.map {
+            // We should create a new instance for each collect call
+            // cause in preview, the same clock will be attached to different view
+            // at the same time
+            clockRegistry.createCurrentClock()
         }
+
+    override val shouldForceSmallClock: Boolean
+        get() =
+            featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE) &&
+                // True on small landscape screens
+                applicationContext.resources.getBoolean(R.bool.force_small_clock_on_lockscreen)
+
+    private fun getClockSize(): ClockSizeSetting {
+        return ClockSizeSetting.fromSettingValue(
+            secureSettings.getIntForUser(
+                Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
+                /* defaultValue= */ 1,
+                UserHandle.USER_CURRENT
+            )
+        )
     }
 }

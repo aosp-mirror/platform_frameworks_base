@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 class HomeControlsDreamStartable
 @Inject
 constructor(
-    private val context: Context,
+    context: Context,
     private val packageManager: PackageManager,
     private val homeControlsComponentInteractor: HomeControlsComponentInteractor,
     @Background private val bgScope: CoroutineScope,
@@ -39,10 +39,13 @@ constructor(
     private val componentName = ComponentName(context, HomeControlsDreamService::class.java)
 
     override fun start() {
-        if (!homePanelDream()) return
         bgScope.launch {
-            homeControlsComponentInteractor.panelComponent.collect { selectedPanelComponent ->
-                setEnableHomeControlPanel(selectedPanelComponent != null)
+            if (homePanelDream()) {
+                homeControlsComponentInteractor.panelComponent.collect { selectedPanelComponent ->
+                    setEnableHomeControlPanel(selectedPanelComponent != null)
+                }
+            } else {
+                setEnableHomeControlPanel(false)
             }
         }
     }

@@ -126,6 +126,7 @@ import android.os.BatteryManagerInternal;
 import android.os.BatteryStatsInternal;
 import android.os.BatteryUsageStats;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.Process;
 import android.os.RemoteException;
@@ -321,6 +322,7 @@ public final class BackgroundRestrictionTest {
     private BindServiceEventListener mBindServiceEventListener;
 
     private Context mContext = getInstrumentation().getTargetContext();
+    private Handler mDefaultHandler = new Handler(Looper.getMainLooper());
     private TestBgRestrictionInjector mInjector;
     private AppRestrictionController mBgRestrictionController;
     private AppBatteryTracker mAppBatteryTracker;
@@ -346,10 +348,6 @@ public final class BackgroundRestrictionTest {
         mActivityManagerService.mConstants = mActivityManagerConstants;
         mPhoneCarrierPrivileges = new PhoneCarrierPrivileges(
                 mInjector.getTelephonyManager(), MOCK_PRIVILEGED_PACKAGES.length);
-        for (int i = 0; i < MOCK_PRIVILEGED_PACKAGES.length; i++) {
-            mPhoneCarrierPrivileges.addNewPrivilegePackages(i,
-                    MOCK_PRIVILEGED_PACKAGES[i], MOCK_PRIVILEGED_UIDS[i]);
-        }
 
         doReturn(PROCESS_STATE_FOREGROUND_SERVICE).when(mActivityManagerInternal)
                 .getUidProcessState(anyInt());
@@ -3048,6 +3046,11 @@ public final class BackgroundRestrictionTest {
 
     @Test
     public void testCarrierPrivilegedAppListener() throws Exception {
+        for (int i = 0; i < MOCK_PRIVILEGED_PACKAGES.length; i++) {
+            mPhoneCarrierPrivileges.addNewPrivilegePackages(i,
+                    MOCK_PRIVILEGED_PACKAGES[i], MOCK_PRIVILEGED_UIDS[i]);
+        }
+
         final long shortMs = 1_000L;
         for (int i = 0; i < MOCK_PRIVILEGED_PACKAGES.length; i++) {
             verifyPotentialSystemExemptionReason(REASON_CARRIER_PRIVILEGED_APP,
@@ -3356,6 +3359,11 @@ public final class BackgroundRestrictionTest {
         }
 
         @Override
+        Handler getDefaultHandler() {
+            return mDefaultHandler;
+        }
+
+        @Override
         boolean isTest() {
             return true;
         }
@@ -3444,6 +3452,16 @@ public final class BackgroundRestrictionTest {
         @Override
         IAppOpsService getIAppOpsService() {
             return BackgroundRestrictionTest.this.mIAppOpsService;
+        }
+
+        @Override
+        int checkPermission(String perm, int pid, int uid) {
+            try {
+                return BackgroundRestrictionTest.this.mIActivityManager.checkPermission(
+                        perm, pid, uid);
+            } catch (RemoteException e) {
+                return PERMISSION_DENIED;
+            }
         }
     }
 

@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.AvalancheController;
 
 import java.io.PrintWriter;
 
@@ -56,12 +57,13 @@ public class AmbientState implements Dumpable {
     private final SectionProvider mSectionProvider;
     private final BypassController mBypassController;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    private final AvalancheController mAvalancheController;
+
     /**
      *  Used to read bouncer states.
      */
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mScrollY;
-    private boolean mDimmed;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private boolean mDozing;
@@ -263,9 +265,6 @@ public class AmbientState implements Dumpable {
         return mStackHeight;
     }
 
-    /** Tracks the state from HeadsUpManager#hasNotifications() */
-    private boolean mHasHeadsUpEntries;
-
     @Inject
     public AmbientState(
             @NonNull Context context,
@@ -273,12 +272,14 @@ public class AmbientState implements Dumpable {
             @NonNull SectionProvider sectionProvider,
             @NonNull BypassController bypassController,
             @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            @NonNull LargeScreenShadeInterpolator largeScreenShadeInterpolator
+            @NonNull LargeScreenShadeInterpolator largeScreenShadeInterpolator,
+            AvalancheController avalancheController
     ) {
         mSectionProvider = sectionProvider;
         mBypassController = bypassController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
+        mAvalancheController = avalancheController;
         reload(context);
         dumpManager.registerDumpable(this);
     }
@@ -291,11 +292,26 @@ public class AmbientState implements Dumpable {
         mBaseZHeight = getBaseHeight(mZDistanceBetweenElements);
     }
 
+    String getAvalancheShowingHunKey() {
+        // If we don't have a previous showing hun, we don't consider the showing hun as avalanche
+        if (isNullAvalancheKey(getAvalanchePreviousHunKey())) return "";
+        return mAvalancheController.getShowingHunKey();
+    }
+
+    String getAvalanchePreviousHunKey() {
+        return mAvalancheController.getPreviousHunKey();
+    }
+
+    boolean isNullAvalancheKey(String key) {
+        if (key == null || key.isEmpty()) return true;
+        return key.equals("HeadsUpEntry null") || key.equals("HeadsUpEntry.mEntry null");
+    }
+
     void setOverExpansion(float overExpansion) {
         mOverExpansion = overExpansion;
     }
 
-    float getOverExpansion() {
+    public float getOverExpansion() {
         return mOverExpansion;
     }
 
@@ -344,14 +360,6 @@ public class AmbientState implements Dumpable {
         this.mScrollY = Math.max(scrollY, 0);
     }
 
-    /**
-     * @param dimmed Whether we are in a dimmed state (on the lockscreen), where the backgrounds are
-     *               translucent and everything is scaled back a bit.
-     */
-    public void setDimmed(boolean dimmed) {
-        mDimmed = dimmed;
-    }
-
     /** While dozing, we draw as little as possible, assuming a black background */
     public void setDozing(boolean dozing) {
         mDozing = dozing;
@@ -373,12 +381,6 @@ public class AmbientState implements Dumpable {
 
     public void setHideSensitive(boolean hideSensitive) {
         mHideSensitive = hideSensitive;
-    }
-
-    public boolean isDimmed() {
-        // While we are expanding from pulse, we want the notifications not to be dimmed, otherwise
-        // you'd see the difference to the pulsing notification
-        return mDimmed && !(isPulseExpanding() && mDozeAmount == 1.0f);
     }
 
     public boolean isDozing() {
@@ -432,7 +434,7 @@ public class AmbientState implements Dumpable {
         return mLayoutMaxHeight;
     }
 
-    public float getTopPadding() {
+    public int getTopPadding() {
         return mTopPadding;
     }
 
@@ -560,10 +562,6 @@ public class AmbientState implements Dumpable {
 
     public void setPanelTracking(boolean panelTracking) {
         mPanelTracking = panelTracking;
-    }
-
-    public boolean hasPulsingNotifications() {
-        return mPulsing && mHasHeadsUpEntries;
     }
 
     public void setPulsing(boolean hasPulsing) {
@@ -716,10 +714,6 @@ public class AmbientState implements Dumpable {
         return mAppearFraction;
     }
 
-    public void setHasHeadsUpEntries(boolean hasHeadsUpEntries) {
-        mHasHeadsUpEntries = hasHeadsUpEntries;
-    }
-
     public void setStackTopMargin(int stackTopMargin) {
         mStackTopMargin = stackTopMargin;
     }
@@ -768,8 +762,7 @@ public class AmbientState implements Dumpable {
         pw.println("mHideSensitive=" + mHideSensitive);
         pw.println("mShadeExpanded=" + mShadeExpanded);
         pw.println("mClearAllInProgress=" + mClearAllInProgress);
-        pw.println("mDimmed=" + mDimmed);
-        pw.println("mStatusBarState=" + mStatusBarState);
+        pw.println("mStatusBarState=" + StatusBarState.toString(mStatusBarState));
         pw.println("mExpansionChanging=" + mExpansionChanging);
         pw.println("mPanelFullWidth=" + mIsSmallScreen);
         pw.println("mPulsing=" + mPulsing);

@@ -16,7 +16,7 @@
 
 package com.android.systemui.util.kotlin
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -28,7 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class RaceSuspendTest : SysuiTestCase() {
     @Test
     fun raceSimple() = runBlocking {
@@ -46,10 +46,11 @@ class RaceSuspendTest : SysuiTestCase() {
     @Test
     fun raceImmediate() = runBlocking {
         assertThat(
-            race<Int>(
-                { 1 },
-                { 2 },
+                race<Int>(
+                    { 1 },
+                    { 2 },
+                )
             )
-        ).isEqualTo(1)
+            .isEqualTo(1)
     }
 }

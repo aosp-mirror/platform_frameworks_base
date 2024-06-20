@@ -893,7 +893,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}.</p>
      * <p>Note that the actual achievable max framerate also depends on the minimum frame
      * duration of the output streams. The max frame rate will be
-     * <code>min(aeTargetFpsRange.maxFps, 1 / max(individual stream min durations)</code>. For example,
+     * <code>min(aeTargetFpsRange.maxFps, 1 / max(individual stream min durations))</code>. For example,
      * if the application sets this key to <code>{60, 60}</code>, but the maximum minFrameDuration among
      * all configured streams is 33ms, the maximum framerate won't be 60fps, but will be
      * 30fps.</p>
@@ -2823,6 +2823,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * indicate when it is not being applied by returning 'INACTIVE'.</p>
      * <p>This key will be absent from the CaptureResult if AE mode is not set to
      * 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY.</p>
+     * <p>The default value will always be 'INACTIVE'.</p>
      * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #CONTROL_LOW_LIGHT_BOOST_STATE_INACTIVE INACTIVE}</li>
@@ -2974,36 +2975,40 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>Flash strength level to be used when manual flash control is active.</p>
      * <p>Flash strength level to use in capture mode i.e. when the applications control
-     * flash with either SINGLE or TORCH mode.</p>
-     * <p>Use android.flash.info.singleStrengthMaxLevel and
-     * android.flash.info.torchStrengthMaxLevel to check whether the device supports
+     * flash with either <code>SINGLE</code> or <code>TORCH</code> mode.</p>
+     * <p>Use {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} and
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} to check whether the device supports
      * flash strength control or not.
-     * If the values of android.flash.info.singleStrengthMaxLevel and
-     * android.flash.info.torchStrengthMaxLevel are greater than 1,
+     * If the values of {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} and
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} are greater than 1,
      * then the device supports manual flash strength control.</p>
-     * <p>If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> TORCH the value must be &gt;= 1
-     * and &lt;= android.flash.info.torchStrengthMaxLevel.
+     * <p>If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> <code>TORCH</code> the value must be &gt;= 1
+     * and &lt;= {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel}.
      * If the application doesn't set the key and
-     * android.flash.info.torchStrengthMaxLevel &gt; 1,
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} &gt; 1,
      * then the flash will be fired at the default level set by HAL in
-     * android.flash.info.torchStrengthDefaultLevel.
-     * If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> SINGLE, then the value must be &gt;= 1
-     * and &lt;= android.flash.info.singleStrengthMaxLevel.
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_DEFAULT_LEVEL android.flash.torchStrengthDefaultLevel}.
+     * If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> <code>SINGLE</code>, then the value must be &gt;= 1
+     * and &lt;= {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel}.
      * If the application does not set this key and
-     * android.flash.info.singleStrengthMaxLevel &gt; 1,
+     * {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} &gt; 1,
      * then the flash will be fired at the default level set by HAL
-     * in android.flash.info.singleStrengthDefaultLevel.
-     * If {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to any of ON_AUTO_FLASH, ON_ALWAYS_FLASH,
-     * ON_AUTO_FLASH_REDEYE, ON_EXTERNAL_FLASH values, then the strengthLevel will be ignored.</p>
+     * in {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_DEFAULT_LEVEL android.flash.singleStrengthDefaultLevel}.
+     * If {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to any of <code>ON_AUTO_FLASH</code>, <code>ON_ALWAYS_FLASH</code>,
+     * <code>ON_AUTO_FLASH_REDEYE</code>, <code>ON_EXTERNAL_FLASH</code> values, then the strengthLevel will be ignored.</p>
      * <p><b>Range of valid values:</b><br>
-     * <code>[1-android.flash.info.torchStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
+     * <code>[1-{@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel}]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
      * set to TORCH;
-     * <code>[1-android.flash.info.singleStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
+     * <code>[1-{@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel}]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
      * set to SINGLE</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#FLASH_MODE
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_DEFAULT_LEVEL
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_DEFAULT_LEVEL
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL
      */
     @PublicKey
     @NonNull
@@ -3091,7 +3096,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * upright.</p>
      * <p>Camera devices may either encode this value into the JPEG EXIF header, or
      * rotate the image data to match this orientation. When the image data is rotated,
-     * the thumbnail data will also be rotated.</p>
+     * the thumbnail data will also be rotated. Additionally, in the case where the image data
+     * is rotated, {@link android.media.Image#getWidth } and {@link android.media.Image#getHeight }
+     * will not be updated to reflect the height and width of the rotated image.</p>
      * <p>Note that this orientation is relative to the orientation of the camera sensor, given
      * by {@link CameraCharacteristics#SENSOR_ORIENTATION android.sensor.orientation}.</p>
      * <p>To translate from the device orientation given by the Android sensor APIs for camera
@@ -4838,6 +4845,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * correction map that needs to be applied to get shading
      * corrected images that match the camera device's output for
      * non-RAW formats.</p>
+     * <p>Therefore, whatever the value of lensShadingApplied is, the lens
+     * shading map should always be applied to RAW images if the goal is to
+     * match the shading appearance of processed (non-RAW) images.</p>
      * <p>For a complete shading correction map, the least shaded
      * section of the image will have a gain factor of 1; all
      * other sections will have gains above 1.</p>
@@ -5940,7 +5950,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<int[]> EFV_PADDING_REGION =
             new Key<int[]>("android.efv.paddingRegion", int[].class);
 
@@ -5961,7 +5971,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<int[]> EFV_AUTO_ZOOM_PADDING_REGION =
             new Key<int[]>("android.efv.autoZoomPaddingRegion", int[].class);
 
@@ -5984,7 +5994,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<android.graphics.PointF[]> EFV_TARGET_COORDINATES =
             new Key<android.graphics.PointF[]>("android.efv.targetCoordinates", android.graphics.PointF[].class);
 
@@ -6014,7 +6024,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_PADDING_ZOOM_FACTOR =
             new Key<Float>("android.efv.paddingZoomFactor", float.class);
 
@@ -6041,7 +6051,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Integer> EFV_STABILIZATION_MODE =
             new Key<Integer>("android.efv.stabilizationMode", int.class);
 
@@ -6064,7 +6074,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Boolean> EFV_AUTO_ZOOM =
             new Key<Boolean>("android.efv.autoZoom", boolean.class);
 
@@ -6081,7 +6091,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_ROTATE_VIEWPORT =
             new Key<Float>("android.efv.rotateViewport", float.class);
 
@@ -6103,7 +6113,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<android.util.Pair<Integer,Integer>> EFV_TRANSLATE_VIEWPORT =
             new Key<android.util.Pair<Integer,Integer>>("android.efv.translateViewport", new TypeReference<android.util.Pair<Integer,Integer>>() {{ }});
 
@@ -6124,21 +6134,11 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_MAX_PADDING_ZOOM_FACTOR =
             new Key<Float>("android.efv.maxPaddingZoomFactor", float.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
-
-
-
-
-
-
-
-
-
-
 }

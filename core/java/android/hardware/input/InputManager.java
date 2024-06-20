@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
+import static com.android.input.flags.Flags.FLAG_DEVICE_ASSOCIATIONS;
 import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
 
 import android.Manifest;
@@ -332,19 +333,6 @@ public final class InputManager {
     }
 
     /**
-     * Returns true if an input device is enabled. Should return true for most
-     * situations. Some system apps may disable an input device, for
-     * example to prevent unwanted touch events.
-     *
-     * @param id The input device Id.
-     *
-     * @hide
-     */
-    public boolean isInputDeviceEnabled(int id) {
-        return mGlobal.isInputDeviceEnabled(id);
-    }
-
-    /**
      * Enables an InputDevice.
      * <p>
      * Requires {@link android.Manifest.permission#DISABLE_INPUT_DEVICE}.
@@ -473,22 +461,21 @@ public final class InputManager {
     }
 
     /**
-     * Returns the descriptors of all supported keyboard layouts appropriate for the specified
-     * input device.
+     * Returns the descriptors of all supported keyboard layouts.
      * <p>
      * The input manager consults the built-in keyboard layouts as well as all keyboard layouts
      * advertised by applications using a {@link #ACTION_QUERY_KEYBOARD_LAYOUTS} broadcast receiver.
      * </p>
      *
-     * @param device The input device to query.
      * @return The ids of all keyboard layouts which are supported by the specified input device.
      *
      * @hide
      */
     @TestApi
     @NonNull
-    public List<String> getKeyboardLayoutDescriptorsForInputDevice(@NonNull InputDevice device) {
-        KeyboardLayout[] layouts = getKeyboardLayoutsForInputDevice(device.getIdentifier());
+    @SuppressLint("UnflaggedApi")
+    public List<String> getKeyboardLayoutDescriptors() {
+        KeyboardLayout[] layouts = getKeyboardLayouts();
         List<String> res = new ArrayList<>();
         for (KeyboardLayout kl : layouts) {
             res.add(kl.getDescriptor());
@@ -511,33 +498,18 @@ public final class InputManager {
     @TestApi
     @NonNull
     public String getKeyboardLayoutTypeForLayoutDescriptor(@NonNull String layoutDescriptor) {
-        KeyboardLayout[] layouts = getKeyboardLayouts();
-        for (KeyboardLayout kl : layouts) {
-            if (layoutDescriptor.equals(kl.getDescriptor())) {
-                return kl.getLayoutType();
-            }
-        }
-        return "";
+        KeyboardLayout layout = getKeyboardLayout(layoutDescriptor);
+        return layout == null ? "" : layout.getLayoutType();
     }
 
     /**
-     * Gets information about all supported keyboard layouts appropriate
-     * for a specific input device.
-     * <p>
-     * The input manager consults the built-in keyboard layouts as well
-     * as all keyboard layouts advertised by applications using a
-     * {@link #ACTION_QUERY_KEYBOARD_LAYOUTS} broadcast receiver.
-     * </p>
-     *
-     * @return A list of all supported keyboard layouts for a specific
-     * input device.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
     @NonNull
     public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
             @NonNull InputDeviceIdentifier identifier) {
-        return mGlobal.getKeyboardLayoutsForInputDevice(identifier);
+        return new KeyboardLayout[0];
     }
 
     /**
@@ -549,6 +521,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @Nullable
     public KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor) {
         if (keyboardLayoutDescriptor == null) {
             throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
@@ -562,121 +535,45 @@ public final class InputManager {
     }
 
     /**
-     * Gets the current keyboard layout descriptor for the specified input device.
-     *
-     * @param identifier Identifier for the input device
-     * @return The keyboard layout descriptor, or null if no keyboard layout has been set.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
-    @TestApi
     @Nullable
     public String getCurrentKeyboardLayoutForInputDevice(
             @NonNull InputDeviceIdentifier identifier) {
-        try {
-            return mIm.getCurrentKeyboardLayoutForInputDevice(identifier);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return null;
     }
 
     /**
-     * Sets the current keyboard layout descriptor for the specified input device.
-     * <p>
-     * This method may have the side-effect of causing the input device in question to be
-     * reconfigured.
-     * </p>
-     *
-     * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use, must not be null.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
-    @TestApi
-    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void setCurrentKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
-            @NonNull String keyboardLayoutDescriptor) {
-        mGlobal.setCurrentKeyboardLayoutForInputDevice(identifier,
-                keyboardLayoutDescriptor);
-    }
+            @NonNull String keyboardLayoutDescriptor) {}
 
     /**
-     * Gets all keyboard layout descriptors that are enabled for the specified input device.
-     *
-     * @param identifier The identifier for the input device.
-     * @return The keyboard layout descriptors.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
     public String[] getEnabledKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
-        if (identifier == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
-
-        try {
-            return mIm.getEnabledKeyboardLayoutsForInputDevice(identifier);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return new String[0];
     }
 
     /**
-     * Adds the keyboard layout descriptor for the specified input device.
-     * <p>
-     * This method may have the side-effect of causing the input device in question to be
-     * reconfigured.
-     * </p>
-     *
-     * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to add.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
-    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void addKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
-        if (identifier == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
-
-        try {
-            mIm.addKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
     }
 
     /**
-     * Removes the keyboard layout descriptor for the specified input device.
-     * <p>
-     * This method may have the side-effect of causing the input device in question to be
-     * reconfigured.
-     * </p>
-     *
-     * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to remove.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
-    @TestApi
     @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void removeKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
             @NonNull String keyboardLayoutDescriptor) {
-        if (identifier == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
-
-        try {
-            mIm.removeKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
     }
 
     /**
@@ -1066,11 +963,10 @@ public final class InputManager {
      * originate from the system, just that we were unable to verify it. This can
      * happen for a number of reasons during normal operation.
      *
-     * @param event The {@link android.view.InputEvent} to check
+     * @param event The {@link android.view.InputEvent} to check.
      *
      * @return {@link android.view.VerifiedInputEvent}, which is a subset of the provided
-     * {@link android.view.InputEvent}
-     *         {@code null} if the event could not be verified.
+     *     {@link android.view.InputEvent}, or {@code null} if the event could not be verified.
      */
     @Nullable
     public VerifiedInputEvent verifyInputEvent(@NonNull InputEvent event) {
@@ -1082,21 +978,14 @@ public final class InputManager {
     }
 
     /**
-     * Changes the mouse pointer's icon shape into the specified id.
+     * This method exists for backwards-compatibility, and is a no-op.
      *
-     * @param iconId The id of the pointer graphic, as a value between
-     * {@link PointerIcon#TYPE_ARROW} and {@link PointerIcon#TYPE_HANDWRITING}.
-     *
+     * @deprecated
      * @hide
      */
     @UnsupportedAppUsage
     public void setPointerIconType(int iconId) {
-        mGlobal.setPointerIconType(iconId);
-    }
-
-    /** @hide */
-    public void setCustomPointerIcon(PointerIcon icon) {
-        mGlobal.setCustomPointerIcon(icon);
+        Log.e(TAG, "setPointerIcon: Unsupported app usage!");
     }
 
     /** @hide */
@@ -1145,13 +1034,14 @@ public final class InputManager {
     /**
      * Add a runtime association between the input port and the display port. This overrides any
      * static associations.
-     * @param inputPort The port of the input device.
-     * @param displayPort The physical port of the associated display.
+     * @param inputPort the port of the input device
+     * @param displayPort the physical port of the associated display
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     public void addPortAssociation(@NonNull String inputPort, int displayPort) {
         try {
             mIm.addPortAssociation(inputPort, displayPort);
@@ -1163,12 +1053,13 @@ public final class InputManager {
     /**
      * Remove the runtime association between the input port and the display port. Any existing
      * static association for the cleared input port will be restored.
-     * @param inputPort The port of the input device to be cleared.
+     * @param inputPort the port of the input device to be cleared
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     public void removePortAssociation(@NonNull String inputPort) {
         try {
             mIm.removePortAssociation(inputPort);
@@ -1180,30 +1071,72 @@ public final class InputManager {
     /**
      * Add a runtime association between the input port and display, by unique id. Input ports are
      * expected to be unique.
-     * @param inputPort The port of the input device.
-     * @param displayUniqueId The unique id of the associated display.
+     * @param inputPort the port of the input device
+     * @param displayUniqueId the unique id of the associated display
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     @TestApi
-    public void addUniqueIdAssociation(@NonNull String inputPort,
+    public void addUniqueIdAssociationByPort(@NonNull String inputPort,
             @NonNull String displayUniqueId) {
-        mGlobal.addUniqueIdAssociation(inputPort, displayUniqueId);
+        mGlobal.addUniqueIdAssociationByPort(inputPort, displayUniqueId);
     }
 
     /**
      * Removes a runtime association between the input device and display.
-     * @param inputPort The port of the input device.
+     * @param inputPort the port of the input device
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     @TestApi
-    public void removeUniqueIdAssociation(@NonNull String inputPort) {
-        mGlobal.removeUniqueIdAssociation(inputPort);
+    public void removeUniqueIdAssociationByPort(@NonNull String inputPort) {
+        mGlobal.removeUniqueIdAssociationByPort(inputPort);
+    }
+
+    /**
+     * Add a runtime association between the input device name and display, by descriptor. Input
+     * device descriptors are expected to be unique per physical device, though one physical
+     * device can have multiple virtual input devices that possess the same descriptor.
+     * E.g. a keyboard with built in trackpad will be 2 different input devices with the same
+     * descriptor.
+     * @param inputDeviceDescriptor the descriptor of the input device
+     * @param displayUniqueId the unique id of the associated display
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * </p>
+     * @hide
+     */
+    @FlaggedApi(FLAG_DEVICE_ASSOCIATIONS)
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
+    @TestApi
+    public void addUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor,
+                                                   @NonNull String displayUniqueId) {
+        mGlobal.addUniqueIdAssociationByDescriptor(inputDeviceDescriptor, displayUniqueId);
+    }
+
+    /**
+     * Removes a runtime association between the input device and display.
+    }
+
+    /**
+     * Removes a runtime association between the input device and display.
+     * @param inputDeviceDescriptor the descriptor of the input device
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * </p>
+     * @hide
+     */
+    @FlaggedApi(FLAG_DEVICE_ASSOCIATIONS)
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
+    @TestApi
+    public void removeUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor) {
+        mGlobal.removeUniqueIdAssociationByDescriptor(inputDeviceDescriptor);
     }
 
     /**

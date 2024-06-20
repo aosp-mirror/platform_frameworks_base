@@ -1,14 +1,7 @@
 {
-  "presubmit": [
-    // TODO(b/326897452): Reenable after JDK 21 switch.
-    // { "name": "tiny-framework-dump-test" },
-    { "name": "hoststubgentest" },
-    { "name": "hoststubgen-invoke-test" }
-  ],
-  "ravenwood-presubmit": [
+  "imports": [
     {
-      "name": "CtsUtilTestCasesRavenwood",
-      "host": true
+      "path": "frameworks/base/ravenwood"
     }
   ]
 }

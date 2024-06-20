@@ -16,10 +16,7 @@
 
 package com.android.wm.shell.splitscreen;
 
-import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED;
-import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -31,8 +28,9 @@ import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -40,10 +38,13 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
+import android.app.PendingIntent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -51,7 +52,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.window.WindowContainerToken;
+import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.annotation.UiThreadTest;
@@ -74,6 +75,7 @@ import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
@@ -111,6 +113,8 @@ public class StageCoordinatorTests extends ShellTestCase {
     private TransactionPool mTransactionPool;
     @Mock
     private LaunchAdjacentController mLaunchAdjacentController;
+    @Mock
+    private DefaultMixedHandler mDefaultMixedHandler;
 
     private final Rect mBounds1 = new Rect(10, 20, 30, 40);
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
@@ -337,14 +341,14 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     @Test
     public void testAddActivityOptions_addsBackgroundActivitiesFlags() {
-        Bundle options = mStageCoordinator.resolveStartStage(STAGE_TYPE_MAIN,
+        Bundle bundle = mStageCoordinator.resolveStartStage(STAGE_TYPE_MAIN,
                 SPLIT_POSITION_UNDEFINED, null /* options */, null /* wct */);
+        ActivityOptions options = ActivityOptions.fromBundle(bundle);
 
-        assertEquals(options.getParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, WindowContainerToken.class),
-                mMainStage.mRootTaskInfo.token);
-        assertTrue(options.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED));
-        assertTrue(options.getBoolean(
-                KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION));
+        assertThat(options.getLaunchRootTask()).isEqualTo(mMainStage.mRootTaskInfo.token);
+        assertThat(options.getPendingIntentBackgroundActivityStartMode())
+                .isEqualTo(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+        assertThat(options.isPendingIntentBackgroundActivityLaunchAllowedByPermission()).isTrue();
     }
 
     @Test
@@ -368,6 +372,96 @@ public class StageCoordinatorTests extends ShellTestCase {
             verify(mStageCoordinator).onSplitScreenExit();
             verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
         }
+    }
+
+    @Test
+    public void testSplitIntentAndTaskWithPippedApp_launchFullscreen() {
+        int taskId = 9;
+        SplitScreenTransitions splitScreenTransitions =
+                spy(mStageCoordinator.getSplitTransitions());
+        mStageCoordinator.setSplitTransitions(splitScreenTransitions);
+        mStageCoordinator.setMixedHandler(mDefaultMixedHandler);
+        PendingIntent pendingIntent = mock(PendingIntent.class);
+        RemoteTransition remoteTransition = mock(RemoteTransition.class);
+        when(remoteTransition.getDebugName()).thenReturn("");
+        // Test launching second task full screen
+        when(mDefaultMixedHandler.isIntentInPip(pendingIntent)).thenReturn(true);
+        mStageCoordinator.startIntentAndTask(
+                pendingIntent,
+                null /*fillInIntent*/,
+                null /*option1*/,
+                taskId,
+                null /*option2*/,
+                0 /*splitPosition*/,
+                1 /*snapPosition*/,
+                remoteTransition /*remoteTransition*/,
+                null /*instanceId*/);
+        verify(splitScreenTransitions, times(1))
+                .startFullscreenTransition(any(), any());
+
+        // Test launching first intent fullscreen
+        when(mDefaultMixedHandler.isIntentInPip(pendingIntent)).thenReturn(false);
+        when(mDefaultMixedHandler.isTaskInPip(taskId, mTaskOrganizer)).thenReturn(true);
+        mStageCoordinator.startIntentAndTask(
+                pendingIntent,
+                null /*fillInIntent*/,
+                null /*option1*/,
+                taskId,
+                null /*option2*/,
+                0 /*splitPosition*/,
+                1 /*snapPosition*/,
+                remoteTransition /*remoteTransition*/,
+                null /*instanceId*/);
+        verify(splitScreenTransitions, times(2))
+                .startFullscreenTransition(any(), any());
+    }
+
+    @Test
+    public void testSplitIntentsWithPippedApp_launchFullscreen() {
+        SplitScreenTransitions splitScreenTransitions =
+                spy(mStageCoordinator.getSplitTransitions());
+        mStageCoordinator.setSplitTransitions(splitScreenTransitions);
+        mStageCoordinator.setMixedHandler(mDefaultMixedHandler);
+        PendingIntent pendingIntent = mock(PendingIntent.class);
+        PendingIntent pendingIntent2 = mock(PendingIntent.class);
+        RemoteTransition remoteTransition = mock(RemoteTransition.class);
+        when(remoteTransition.getDebugName()).thenReturn("");
+        // Test launching second task full screen
+        when(mDefaultMixedHandler.isIntentInPip(pendingIntent)).thenReturn(true);
+        mStageCoordinator.startIntents(
+                pendingIntent,
+                null /*fillInIntent*/,
+                null /*shortcutInfo1*/,
+                new Bundle(),
+                pendingIntent2,
+                null /*fillInIntent2*/,
+                null /*shortcutInfo1*/,
+                new Bundle(),
+                0 /*splitPosition*/,
+                1 /*snapPosition*/,
+                remoteTransition /*remoteTransition*/,
+                null /*instanceId*/);
+        verify(splitScreenTransitions, times(1))
+                .startFullscreenTransition(any(), any());
+
+        // Test launching first intent fullscreen
+        when(mDefaultMixedHandler.isIntentInPip(pendingIntent)).thenReturn(false);
+        when(mDefaultMixedHandler.isIntentInPip(pendingIntent2)).thenReturn(true);
+        mStageCoordinator.startIntents(
+                pendingIntent,
+                null /*fillInIntent*/,
+                null /*shortcutInfo1*/,
+                new Bundle(),
+                pendingIntent2,
+                null /*fillInIntent2*/,
+                null /*shortcutInfo1*/,
+                new Bundle(),
+                0 /*splitPosition*/,
+                1 /*snapPosition*/,
+                remoteTransition /*remoteTransition*/,
+                null /*instanceId*/);
+        verify(splitScreenTransitions, times(2))
+                .startFullscreenTransition(any(), any());
     }
 
     private Transitions createTestTransitions() {

@@ -135,7 +135,7 @@ public class EmbeddedWindowService extends Service {
                 c.drawText("Remote", 250, 250, paint);
                 surface.unlockCanvasAndPost(c);
                 WindowManager wm = getSystemService(WindowManager.class);
-                wm.registerBatchedSurfaceControlInputReceiver(displayId, inputTransferToken,
+                wm.registerBatchedSurfaceControlInputReceiver(inputTransferToken,
                         mSurfaceControl,
                         Choreographer.getInstance(), event -> {
                             Log.d(TAG, "onInputEvent-remote " + event);

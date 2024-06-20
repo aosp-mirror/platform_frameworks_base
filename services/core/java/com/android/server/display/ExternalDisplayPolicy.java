@@ -136,6 +136,9 @@ class ExternalDisplayPolicy {
                     handleExternalDisplayConnectedLocked(logicalDisplay);
                 }
             }
+            if (!mDisplayIdsWaitingForBootCompletion.isEmpty()) {
+                mLogicalDisplayMapper.updateLogicalDisplaysLocked();
+            }
             mDisplayIdsWaitingForBootCompletion.clear();
         }
 
@@ -222,7 +225,7 @@ class ExternalDisplayPolicy {
         } else {
             // As external display is enabled by default, need to disable it now.
             // TODO(b/292196201) Remove when the display can be disabled before DPC is created.
-            logicalDisplay.setEnabledLocked(false);
+            mLogicalDisplayMapper.setEnabledLocked(logicalDisplay, false);
         }
 
         if (!isExternalDisplayAllowed()) {

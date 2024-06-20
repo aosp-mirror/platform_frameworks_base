@@ -21,11 +21,8 @@ import com.android.tools.lint.checks.infrastructure.TestFiles
 import com.android.tools.lint.checks.infrastructure.TestMode
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
-import org.junit.Ignore
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
-@Ignore("b/254533331")
 class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTest() {
     override fun getDetector(): Detector {
         return CleanArchitectureDependencyViolationDetector()

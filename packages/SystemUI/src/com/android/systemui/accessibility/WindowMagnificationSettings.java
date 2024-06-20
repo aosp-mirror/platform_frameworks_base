@@ -98,6 +98,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private ImageButton mMediumButton;
     private ImageButton mLargeButton;
     private Button mDoneButton;
+    private TextView mSizeTitle;
     private Button mEditButton;
     private ImageButton mFullScreenButton;
     private int mLastSelectedButtonIndex = MagnificationSize.NONE;
@@ -318,7 +319,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         }
 
         // Unregister observer before removing view
-        mSecureSettings.unregisterContentObserver(mMagnificationCapabilityObserver);
+        mSecureSettings.unregisterContentObserverSync(mMagnificationCapabilityObserver);
         mWindowManager.removeView(mSettingView);
         mIsVisible = false;
         if (resetPosition) {
@@ -379,7 +380,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
             mWindowManager.addView(mSettingView, mParams);
 
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
                     mMagnificationCapabilityObserver,
                     UserHandle.USER_CURRENT);
@@ -521,6 +522,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mMediumButton = mSettingView.findViewById(R.id.magnifier_medium_button);
         mLargeButton = mSettingView.findViewById(R.id.magnifier_large_button);
         mDoneButton = mSettingView.findViewById(R.id.magnifier_done_button);
+        mSizeTitle = mSettingView.findViewById(R.id.magnifier_size_title);
         mEditButton = mSettingView.findViewById(R.id.magnifier_edit_button);
         mFullScreenButton = mSettingView.findViewById(R.id.magnifier_full_button);
         mAllowDiagonalScrollingTitle =
@@ -548,6 +550,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mDoneButton.setOnClickListener(mButtonClickListener);
         mFullScreenButton.setOnClickListener(mButtonClickListener);
         mEditButton.setOnClickListener(mButtonClickListener);
+        mSizeTitle.setSelected(true);
         mAllowDiagonalScrollingTitle.setSelected(true);
 
         mSettingView.setOnApplyWindowInsetsListener((v, insets) -> {

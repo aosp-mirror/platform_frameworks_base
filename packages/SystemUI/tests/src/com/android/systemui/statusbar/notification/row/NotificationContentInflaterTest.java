@@ -27,6 +27,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -40,7 +41,7 @@ import android.os.AsyncTask;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
-import android.testing.AndroidTestingRunner;
+import android.platform.test.annotations.DisableFlags;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.TypedValue;
@@ -49,8 +50,8 @@ import android.view.ViewGroup;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.filters.Suppress;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
@@ -60,6 +61,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
@@ -79,9 +81,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
-@Suppress
+@DisableFlags(NotificationRowContentBinderRefactor.FLAG_NAME)
 public class NotificationContentInflaterTest extends SysuiTestCase {
 
     private NotificationContentInflater mNotificationInflater;
@@ -95,6 +97,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     @Mock private InflatedSmartReplyState mInflatedSmartReplyState;
     @Mock private InflatedSmartReplyViewHolder mInflatedSmartReplies;
     @Mock private NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
+    @Mock private HeadsUpStyleProvider mHeadsUpStyleProvider;
     @Mock private NotifLayoutInflaterFactory mNotifLayoutInflaterFactory;
 
     private final SmartReplyStateInflater mSmartReplyStateInflater =
@@ -127,7 +130,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 TestableLooper.get(this));
         ExpandableNotificationRow row = mHelper.createRow(mBuilder.build());
         mRow = spy(row);
-        when(mNotifLayoutInflaterFactoryProvider.provide(any(), any()))
+        when(mNotifLayoutInflaterFactoryProvider.provide(any(), anyInt()))
                 .thenReturn(mNotifLayoutInflaterFactory);
 
         mNotificationInflater = new NotificationContentInflater(
@@ -138,7 +141,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mock(Executor.class),
                 mSmartReplyStateInflater,
                 mNotifLayoutInflaterFactoryProvider,
-                mock(NotificationContentInflaterLogger.class));
+                mHeadsUpStyleProvider,
+                mock(NotificationRowContentBinderLogger.class));
     }
 
     @Test
@@ -231,6 +235,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         NotificationContentInflater.applyRemoteView(
                 AsyncTask.SERIAL_EXECUTOR,
                 false /* inflateSynchronously */,
+                /* isMinimized= */ false,
                 result,
                 FLAG_CONTENT_VIEW_EXPANDED,
                 0,
@@ -262,7 +267,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                                 R.layout.custom_view_dark);
                     }
                 },
-                mock(NotificationContentInflaterLogger.class));
+                mock(NotificationRowContentBinderLogger.class));
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 
@@ -279,6 +284,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore
     public void testUsesSameViewWhenCachedPossibleToReuse() throws Exception {
         // GIVEN a cached view.
         RemoteViews contractedRemoteView = mBuilder.createContentView();
@@ -344,6 +350,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore
     public void testNotificationViewHeightTooSmallFailsValidation() {
         View view = mock(View.class);
         when(view.getHeight())

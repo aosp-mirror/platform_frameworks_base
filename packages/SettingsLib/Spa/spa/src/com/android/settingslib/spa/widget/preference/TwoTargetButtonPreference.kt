@@ -36,7 +36,7 @@ fun TwoTargetButtonPreference(
         TwoTargetPreference(
             title = title,
             summary = summary,
-            onClick = onClick,
+            primaryOnClick = onClick,
             icon = icon,
         ) {
             IconButton(onClick = onButtonClick) {

@@ -30,15 +30,13 @@ import android.util.ArraySet
 import android.util.Log
 import android.view.View
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.NOTIFICATION_INLINE_REPLY_ANIMATION
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.RemoteInputController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo
 import com.android.systemui.statusbar.policy.RemoteInputView.NotificationRemoteInputEvent
-import com.android.systemui.statusbar.policy.RemoteInputView.RevealParams
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewScope
 import javax.inject.Inject
 
@@ -61,10 +59,6 @@ interface RemoteInputViewController {
     var remoteInput: RemoteInput?
     /** Other [RemoteInput]s from the notification associated with this Controller. */
     var remoteInputs: Array<RemoteInput>?
-
-    var revealParams: RevealParams?
-
-    val isFocusAnimationFlagActive: Boolean
 
     /**
      * Sets the smart reply that should be inserted in the remote input, or `null` if the user is
@@ -94,7 +88,6 @@ interface RemoteInputViewController {
         other.close()
         remoteInput = other.remoteInput
         remoteInputs = other.remoteInputs
-        revealParams = other.revealParams
         pendingIntent = other.pendingIntent
         focus()
     }
@@ -145,18 +138,7 @@ class RemoteInputViewControllerImpl @Inject constructor(
     override var pendingIntent: PendingIntent? = null
     override var remoteInputs: Array<RemoteInput>? = null
 
-    override var revealParams: RevealParams? = null
-        set(value) {
-            field = value
-            if (isBound) {
-                view.setRevealParameters(value)
-            }
-        }
-
     override val isActive: Boolean get() = view.isActive
-
-    override val isFocusAnimationFlagActive: Boolean
-        get() = mFlags.isEnabled(NOTIFICATION_INLINE_REPLY_ANIMATION)
 
     override fun bind() {
         if (isBound) return
@@ -167,8 +149,6 @@ class RemoteInputViewControllerImpl @Inject constructor(
             view.setHintText(it.label)
             view.setSupportedMimeTypes(it.allowedDataTypes)
         }
-        view.setRevealParameters(revealParams)
-        view.setIsFocusAnimationFlagActive(isFocusAnimationFlagActive)
 
         view.addOnEditTextFocusChangedListener(onFocusChangeListener)
         view.addOnSendRemoteInputListener(onSendRemoteInputListener)

@@ -21,13 +21,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.credentials.ClearCredentialStateException;
 import android.credentials.ClearCredentialStateRequest;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.selection.ProviderData;
 import android.credentials.selection.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.service.credentials.CallingAppInfo;
 import android.util.Slog;
 
@@ -41,7 +41,7 @@ import java.util.Set;
 public final class ClearRequestSession extends RequestSession<ClearCredentialStateRequest,
         IClearCredentialStateCallback, Void>
         implements ProviderSession.ProviderInternalCallback<Void> {
-    private static final String TAG = "GetRequestSession";
+    private static final String TAG = CredentialManager.TAG;
 
     public ClearRequestSession(Context context, RequestSession.SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,
@@ -150,7 +150,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     }
 
     @Override
-    public void onUiCancellation(boolean isUserCancellation, ResultReceiver resultReceiver) {
+    public void onUiCancellation(boolean isUserCancellation) {
         // Not needed since UI is not involved
     }
 

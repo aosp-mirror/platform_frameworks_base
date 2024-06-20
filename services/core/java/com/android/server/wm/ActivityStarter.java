@@ -139,6 +139,7 @@ import com.android.server.wm.BackgroundActivityStartController.BalCode;
 import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 import com.android.server.wm.TaskFragment.EmbeddingCheckResult;
+import com.android.wm.shell.Flags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -936,13 +937,8 @@ class ActivityStarter {
         }
         mLastStartReason = request.reason;
         mLastStartActivityTimeMs = System.currentTimeMillis();
-        // Reset the ActivityRecord#mCurrentLaunchCanTurnScreenOn state of last start activity in
-        // case the state is not yet consumed during rapid activity launch.
-        if (mLastStartActivityRecord != null) {
-            mLastStartActivityRecord.setCurrentLaunchCanTurnScreenOn(false);
-        }
-        mLastStartActivityRecord = null;
 
+        final ActivityRecord previousStart = mLastStartActivityRecord;
         final IApplicationThread caller = request.caller;
         Intent intent = request.intent;
         NeededUriGrants intentGrants = request.intentGrants;
@@ -1625,7 +1621,7 @@ class ActivityStarter {
         final ActivityRecord currentTop = startedActivityRootTask.topRunningActivity();
         if (currentTop != null && currentTop.shouldUpdateConfigForDisplayChanged()) {
             mRootWindowContainer.ensureVisibilityAndConfig(
-                    currentTop, currentTop.getDisplayId(), false /* deferResume */);
+                    currentTop, currentTop.mDisplayContent, false /* deferResume */);
         }
 
         if (!avoidMoveToFront() && mDoResume && mRootWindowContainer
@@ -1728,7 +1724,14 @@ class ActivityStarter {
         // Get top task at beginning because the order may be changed when reusing existing task.
         final Task prevTopRootTask = mPreferredTaskDisplayArea.getFocusedRootTask();
         final Task prevTopTask = prevTopRootTask != null ? prevTopRootTask.getTopLeafTask() : null;
-        final Task reusedTask = getReusableTask();
+        final boolean sourceActivityLaunchedFromBubble =
+                sourceRecord != null && sourceRecord.getLaunchedFromBubble();
+        // if the flag is enabled, allow reusing bubbled tasks only if the source activity is
+        // bubbled.
+        final boolean includeLaunchedFromBubble =
+                Flags.onlyReuseBubbledTaskWhenLaunchedFromBubble()
+                        ? sourceActivityLaunchedFromBubble : true;
+        final Task reusedTask = resolveReusableTask(includeLaunchedFromBubble);
 
         // If requested, freeze the task list
         if (mOptions != null && mOptions.freezeRecentTasksReordering()
@@ -2113,7 +2116,6 @@ class ActivityStarter {
         if (hostTask == null || targetTask != hostTask) {
             return EMBEDDING_DISALLOWED_NEW_TASK;
         }
-
         return taskFragment.isAllowedToEmbedActivity(starting);
     }
 
@@ -2524,7 +2526,9 @@ class ActivityStarter {
         // If the caller has asked not to resume at this point, we make note
         // of this in the record so that we can skip it when trying to find
         // the top running activity.
-        if (!r.showToCurrentUser() || mLaunchTaskBehind) {
+        final boolean canShowActivity = r.showToCurrentUser();
+        if (!canShowActivity) Slog.w(TAG, "Can't resume non-current user r=" + r);
+        if (!canShowActivity || mLaunchTaskBehind) {
             r.delayedResume = true;
             mDoResume = false;
         } else {
@@ -2726,8 +2730,11 @@ class ActivityStarter {
     /**
      * Decide whether the new activity should be inserted into an existing task. Returns null
      * if not or an ActivityRecord with the task into which the new activity should be added.
+     *
+     * @param includeLaunchedFromBubble whether a task whose top activity was launched from a bubble
+     *                                  should be allowed to be reused for the new activity.
      */
-    private Task getReusableTask() {
+    private Task resolveReusableTask(boolean includeLaunchedFromBubble) {
         // If a target task is specified, try to reuse that one
         if (mOptions != null && mOptions.getLaunchTaskId() != INVALID_TASK_ID) {
             Task launchTask = mRootWindowContainer.anyTaskForId(mOptions.getLaunchTaskId());
@@ -2755,7 +2762,14 @@ class ActivityStarter {
                 // There can be one and only one instance of single instance activity in the
                 // history, and it is always in its own unique task, so we do a special search.
                 intentActivity = mRootWindowContainer.findActivity(mIntent, mStartActivity.info,
-                       mStartActivity.isActivityTypeHome());
+                       false /* compareIntentFilters */);
+                // Removes the existing singleInstance Activity if we're starting it as home
+                // activity, while the existing one is not.
+                if (intentActivity != null && mStartActivity.isActivityTypeHome()
+                        && !intentActivity.isActivityTypeHome()) {
+                    intentActivity.destroyIfPossible("Removes redundant singleInstance");
+                    intentActivity = null;
+                }
             } else if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
                 // For the launch adjacent case we only want to put the activity in an existing
                 // task if the activity already exists in the history.
@@ -2764,7 +2778,8 @@ class ActivityStarter {
             } else {
                 // Otherwise find the best task to put the activity in.
                 intentActivity =
-                        mRootWindowContainer.findTask(mStartActivity, mPreferredTaskDisplayArea);
+                        mRootWindowContainer.findTask(mStartActivity, mPreferredTaskDisplayArea,
+                                includeLaunchedFromBubble);
             }
         }
 
@@ -2952,23 +2967,9 @@ class ActivityStarter {
                 sendCanNotEmbedActivityError(mInTaskFragment, embeddingCheckResult);
             }
         } else {
-            TaskFragment candidateTf = mAddingToTaskFragment != null ? mAddingToTaskFragment : null;
+            TaskFragment candidateTf = mAddingToTaskFragment;
             if (candidateTf == null) {
-                // Puts the activity on the top-most non-isolated navigation TF, unless the
-                // activity is launched from the same TF.
-                final TaskFragment sourceTaskFragment =
-                        mSourceRecord != null ? mSourceRecord.getTaskFragment() : null;
-                final ActivityRecord top = task.getActivity(r -> {
-                    if (!r.canBeTopRunning()) {
-                        return false;
-                    }
-                    final TaskFragment taskFragment = r.getTaskFragment();
-                    return !taskFragment.isIsolatedNav() || (sourceTaskFragment != null
-                            && sourceTaskFragment == taskFragment);
-                });
-                if (top != null) {
-                    candidateTf = top.getTaskFragment();
-                }
+                candidateTf = findCandidateTaskFragment(task);
             }
             if (candidateTf != null && candidateTf.isEmbedded()
                     && canEmbedActivity(candidateTf, mStartActivity, task) == EMBEDDING_ALLOWED) {
@@ -2983,6 +2984,50 @@ class ActivityStarter {
         } else {
             mStartActivity.reparent(newParent, newParent.getChildCount() /* top */, reason);
         }
+    }
+
+    /**
+     * Finds a candidate TaskFragment in {@code task} to launch activity, or returns {@code null}
+     * if there's no such a TaskFragment.
+     */
+    @Nullable
+    private TaskFragment findCandidateTaskFragment(@NonNull Task task) {
+        final TaskFragment sourceTaskFragment =
+                mSourceRecord != null ? mSourceRecord.getTaskFragment() : null;
+        for (int i = task.getChildCount() - 1; i >= 0; --i) {
+            final WindowContainer<?> wc = task.getChildAt(i);
+            final ActivityRecord activity = wc.asActivityRecord();
+            if (activity != null) {
+                if (activity.finishing) {
+                    continue;
+                }
+                // Early return if the top child is an Activity.
+                return null;
+            }
+            final TaskFragment taskFragment = wc.asTaskFragment();
+            if (taskFragment == null || taskFragment.isRemovalRequested()) {
+                // Skip if the TaskFragment is going to be finished.
+                continue;
+            }
+            if (taskFragment.getActivity(ActivityRecord::canBeTopRunning) == null) {
+                // Skip if there's no activity in this TF can be top running.
+                continue;
+            }
+            if (taskFragment.isIsolatedNav()) {
+                // Stop here if we reach an isolated navigated TF.
+                return null;
+            }
+            if (sourceTaskFragment != null && sourceTaskFragment == taskFragment) {
+                // Choose the taskFragment launched from even if it's pinned.
+                return taskFragment;
+            }
+            if (taskFragment.isPinned()) {
+                // Skip the pinned TaskFragment.
+                continue;
+            }
+            return taskFragment;
+        }
+        return null;
     }
 
     /**

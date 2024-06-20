@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.notification.notificationActivityStarter
 import com.android.systemui.statusbar.notification.stack.displaySwitchNotificationsHiderTracker
 import com.android.systemui.statusbar.notification.stack.ui.view.notificationStatsLogger
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationListViewModel
+import com.android.systemui.statusbar.notification.ui.viewbinder.headsUpNotificationViewBinder
 import com.android.systemui.statusbar.phone.notificationIconAreaController
 import java.util.Optional
 
@@ -37,6 +38,7 @@ val Kosmos.notificationListViewBinder by Fixture {
         backgroundDispatcher = testDispatcher,
         configuration = configurationState,
         falsingManager = falsingManager,
+        hunBinder = headsUpNotificationViewBinder,
         iconAreaController = notificationIconAreaController,
         loggerOptional = Optional.of(notificationStatsLogger),
         metricsLogger = metricsLogger,

@@ -78,7 +78,8 @@ public class DatabaseUtilsTest {
         final int sel = STATEMENT_SELECT;
         assertEquals(sel, getSqlStatementType("SELECT"));
         assertEquals(sel, getSqlStatementType("  SELECT"));
-        assertEquals(sel, getSqlStatementType(" \n SELECT"));
+        assertEquals(sel, getSqlStatementType(" \n\r\f\t SELECT"));
+        assertEquals(sel, getSqlStatementType(" \n\r\f\t SEL"));
 
         final int upd = STATEMENT_UPDATE;
         assertEquals(upd, getSqlStatementType("UPDATE"));
@@ -89,12 +90,21 @@ public class DatabaseUtilsTest {
         assertEquals(ddl, getSqlStatementType("ALTER TABLE t1 ADD COLUMN j int"));
         assertEquals(ddl, getSqlStatementType("CREATE TABLE t1 (i int)"));
 
+        // Verify that the answers are case-insensitive
+        assertEquals(sel, getSqlStatementType("select"));
+        assertEquals(sel, getSqlStatementType("sElect"));
+        assertEquals(sel, getSqlStatementType("sELECT"));
+        assertEquals(sel, getSqlStatementType("seLECT"));
+
         // Short statements, leading comments, and WITH are decoded to "other" in the public API.
         final int othr = STATEMENT_OTHER;
         assertEquals(othr, getSqlStatementType("SE"));
         assertEquals(othr, getSqlStatementType("SE LECT"));
         assertEquals(othr, getSqlStatementType("-- cmt\n SE"));
         assertEquals(othr, getSqlStatementType("WITH"));
+        assertEquals(othr, getSqlStatementType("-"));
+        assertEquals(othr, getSqlStatementType("--"));
+        assertEquals(othr, getSqlStatementType("*/* foo */ SEL"));
 
         // Verify that leading line-comments are skipped.
         assertEquals(sel, getSqlStatementType("-- cmt\n SELECT"));

@@ -58,7 +58,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"Deïnstalleer program"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Deïnstalleer opdatering"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> is deel van die volgende program:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"Wil jy hierdie program deïnstalleer?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Wil jy hierdie app deïnstalleer?"</string>
     <string name="archive_application_text" msgid="8482325710714386348">"Jou persoonlike data sal gestoor word"</string>
     <string name="archive_application_text_all_users" msgid="3151229641681672580">"Argiveer hierdie app vir alle gebruikers? Jou persoonlike data sal gestoor word"</string>
     <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Argiveer hierdie app op jou werkprofiel? Jou persoonlike data sal gestoor word"</string>

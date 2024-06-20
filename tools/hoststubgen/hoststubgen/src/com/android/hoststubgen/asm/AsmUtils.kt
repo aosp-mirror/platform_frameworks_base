@@ -34,6 +34,9 @@ val CLASS_INITIALIZER_NAME = "<clinit>"
 /** Descriptor of the class initializer method. */
 val CLASS_INITIALIZER_DESC = "()V"
 
+/** Name of constructors. */
+val CTOR_NAME = "<init>"
+
 /**
  * Find any of [anyAnnotations] from the list of visible / invisible annotations.
  */
@@ -73,17 +76,45 @@ fun findAnnotationValueAsString(an: AnnotationNode, propertyName: String): Strin
     return null
 }
 
-private val removeLastElement = """[./][^./]*$""".toRegex()
+val periodOrSlash = charArrayOf('.', '/')
 
-fun getPackageNameFromClassName(className: String): String {
-    return className.replace(removeLastElement, "")
+fun getPackageNameFromFullClassName(fullClassName: String): String {
+    val pos = fullClassName.lastIndexOfAny(periodOrSlash)
+    if (pos == -1) {
+        return ""
+    } else {
+        return fullClassName.substring(0, pos)
+    }
 }
 
-fun resolveClassName(className: String, packageName: String): String {
+fun getClassNameFromFullClassName(fullClassName: String): String {
+    val pos = fullClassName.lastIndexOfAny(periodOrSlash)
+    if (pos == -1) {
+        return fullClassName
+    } else {
+        return fullClassName.substring(pos + 1)
+    }
+}
+
+fun getOuterClassNameFromFullClassName(fullClassName: String): String {
+    val start = fullClassName.lastIndexOfAny(periodOrSlash)
+    val end = fullClassName.indexOf('$')
+    if (end == -1) {
+        return fullClassName.substring(start + 1)
+    } else {
+        return fullClassName.substring(start + 1, end)
+    }
+}
+
+/**
+ * If [className] is a fully qualified name, just return it.
+ * Otherwise, prepend [defaultPackageName].
+ */
+fun resolveClassNameWithDefaultPackage(className: String, defaultPackageName: String): String {
     if (className.contains('.') || className.contains('/')) {
         return className
     }
-    return "$packageName.$className"
+    return "$defaultPackageName.$className"
 }
 
 fun String.toJvmClassName(): String {
@@ -135,10 +166,10 @@ fun writeByteCodeToPushArguments(
         // Note, long and double will consume two local variable spaces, so the extra `i++`.
         when (type) {
             Type.VOID_TYPE -> throw HostStubGenInternalException("VOID_TYPE not expected")
-            Type.BOOLEAN_TYPE, Type.INT_TYPE, Type.SHORT_TYPE, Type.CHAR_TYPE
+            Type.BOOLEAN_TYPE, Type.CHAR_TYPE, Type.BYTE_TYPE, Type.SHORT_TYPE, Type.INT_TYPE
                 -> writer.visitVarInsn(Opcodes.ILOAD, i)
-            Type.LONG_TYPE -> writer.visitVarInsn(Opcodes.LLOAD, i++)
             Type.FLOAT_TYPE -> writer.visitVarInsn(Opcodes.FLOAD, i)
+            Type.LONG_TYPE -> writer.visitVarInsn(Opcodes.LLOAD, i++)
             Type.DOUBLE_TYPE -> writer.visitVarInsn(Opcodes.DLOAD, i++)
             else -> writer.visitVarInsn(Opcodes.ALOAD, i)
         }
@@ -154,10 +185,10 @@ fun writeByteCodeToReturn(methodDescriptor: String, writer: MethodVisitor) {
         // See https://en.wikipedia.org/wiki/List_of_Java_bytecode_instructions
         when (type) {
             Type.VOID_TYPE -> writer.visitInsn(Opcodes.RETURN)
-            Type.BOOLEAN_TYPE, Type.INT_TYPE, Type.SHORT_TYPE, Type.CHAR_TYPE
+            Type.BOOLEAN_TYPE, Type.CHAR_TYPE, Type.BYTE_TYPE, Type.SHORT_TYPE, Type.INT_TYPE
                 -> writer.visitInsn(Opcodes.IRETURN)
-            Type.LONG_TYPE -> writer.visitInsn(Opcodes.LRETURN)
             Type.FLOAT_TYPE -> writer.visitInsn(Opcodes.FRETURN)
+            Type.LONG_TYPE -> writer.visitInsn(Opcodes.LRETURN)
             Type.DOUBLE_TYPE -> writer.visitInsn(Opcodes.DRETURN)
             else -> writer.visitInsn(Opcodes.ARETURN)
         }
@@ -257,6 +288,16 @@ fun MethodNode.getVisibility(): Visibility {
 
 fun FieldNode.getVisibility(): Visibility {
     return Visibility.fromAccess(this.access)
+}
+
+/** Return the [access] flags without the visibility */
+fun clearVisibility(access: Int): Int {
+    return access and (Opcodes.ACC_PUBLIC or Opcodes.ACC_PROTECTED or Opcodes.ACC_PRIVATE).inv()
+}
+
+/** Return the visibility part of the [access] flags */
+fun getVisibility(access: Int): Int {
+    return access and (Opcodes.ACC_PUBLIC or Opcodes.ACC_PROTECTED or Opcodes.ACC_PRIVATE)
 }
 
 

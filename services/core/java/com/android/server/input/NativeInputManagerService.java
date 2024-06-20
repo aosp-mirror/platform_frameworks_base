@@ -183,17 +183,11 @@ interface NativeInputManagerService {
 
     void monitor();
 
-    boolean isInputDeviceEnabled(int deviceId);
-
     void enableInputDevice(int deviceId);
 
     void disableInputDevice(int deviceId);
 
-    void setPointerIconType(int iconId);
-
     void reloadPointerIcons();
-
-    void setCustomPointerIcon(@NonNull PointerIcon icon);
 
     boolean setPointerIcon(@NonNull PointerIcon icon, int displayId, int deviceId, int pointerId,
             @NonNull IBinder inputToken);
@@ -272,6 +266,17 @@ interface NativeInputManagerService {
      * Notify if Accessibility sticky keys is enabled/disabled from InputSettings.
      */
     void setAccessibilityStickyKeysEnabled(boolean enabled);
+
+    void setInputMethodConnectionIsActive(boolean isActive);
+
+    /**
+     * Get the device ID of the InputDevice that used most recently.
+     *
+     * @return the last used input device ID, or
+     *     {@link android.os.IInputConstants#INVALID_INPUT_DEVICE_ID} if no device has been used
+     *     since boot.
+     */
+    int getLastUsedInputDeviceId();
 
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
@@ -456,22 +461,13 @@ interface NativeInputManagerService {
         public native void monitor();
 
         @Override
-        public native boolean isInputDeviceEnabled(int deviceId);
-
-        @Override
         public native void enableInputDevice(int deviceId);
 
         @Override
         public native void disableInputDevice(int deviceId);
 
         @Override
-        public native void setPointerIconType(int iconId);
-
-        @Override
         public native void reloadPointerIcons();
-
-        @Override
-        public native void setCustomPointerIcon(PointerIcon icon);
 
         @Override
         public native boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId,
@@ -549,5 +545,11 @@ interface NativeInputManagerService {
 
         @Override
         public native void setAccessibilityStickyKeysEnabled(boolean enabled);
+
+        @Override
+        public native void setInputMethodConnectionIsActive(boolean isActive);
+
+        @Override
+        public native int getLastUsedInputDeviceId();
     }
 }

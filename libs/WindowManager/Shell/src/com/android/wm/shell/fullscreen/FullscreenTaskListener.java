@@ -161,7 +161,7 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
                 taskInfo.taskId);
         mTasks.remove(taskInfo.taskId);
-
+        mWindowDecorViewModelOptional.ifPresent(v -> v.onTaskVanished(taskInfo));
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         if (mWindowDecorViewModelOptional.isPresent()) {
             mWindowDecorViewModelOptional.get().destroyWindowDecoration(taskInfo);

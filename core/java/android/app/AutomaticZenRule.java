@@ -119,6 +119,7 @@ public final class AutomaticZenRule implements Parcelable {
     @IntDef(flag = true, prefix = { "FIELD_" }, value = {
             FIELD_NAME,
             FIELD_INTERRUPTION_FILTER,
+            FIELD_ICON
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ModifiableField {}
@@ -133,6 +134,11 @@ public final class AutomaticZenRule implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_INTERRUPTION_FILTER = 1 << 1;
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int FIELD_ICON = 1 << 2;
 
     private boolean enabled;
     private String name;
@@ -173,8 +179,8 @@ public final class AutomaticZenRule implements Parcelable {
      *                           interrupt the user (e.g. via sound &amp; vibration) while this rule
      *                           is active.
      * @param enabled Whether the rule is enabled.
-     * @deprecated use {@link #AutomaticZenRule(String, ComponentName, ComponentName, Uri,
-     * ZenPolicy, int, boolean)}.
+     *
+     * @deprecated Use {@link AutomaticZenRule.Builder} to construct an {@link AutomaticZenRule}.
      */
     @Deprecated
     public AutomaticZenRule(String name, ComponentName owner, Uri conditionId,
@@ -184,6 +190,8 @@ public final class AutomaticZenRule implements Parcelable {
 
     /**
      * Creates an automatic zen rule.
+     *
+     * <p>Note: Prefer {@link AutomaticZenRule.Builder} to construct an {@link AutomaticZenRule}.
      *
      * @param name The name of the rule.
      * @param owner The Condition Provider service that owns this rule. This can be null if you're
@@ -207,7 +215,6 @@ public final class AutomaticZenRule implements Parcelable {
      *               action ({@link Condition#STATE_TRUE}).
      * @param enabled Whether the rule is enabled.
      */
-    // TODO (b/309088420): deprecate this constructor in favor of the builder
     public AutomaticZenRule(@NonNull String name, @Nullable ComponentName owner,
             @Nullable ComponentName configurationActivity, @NonNull Uri conditionId,
             @Nullable ZenPolicy policy, int interruptionFilter, boolean enabled) {
@@ -368,6 +375,9 @@ public final class AutomaticZenRule implements Parcelable {
 
     /**
      * Sets the zen policy.
+     *
+     * <p>When updating an existing rule via {@link NotificationManager#updateAutomaticZenRule},
+     * a {@code null} value here means the previous policy is retained.
      */
     public void setZenPolicy(@Nullable ZenPolicy zenPolicy) {
         this.mZenPolicy = (zenPolicy == null ? null : zenPolicy.copy());
@@ -390,7 +400,12 @@ public final class AutomaticZenRule implements Parcelable {
      * Sets the configuration activity - an activity that handles
      * {@link NotificationManager#ACTION_AUTOMATIC_ZEN_RULE} that shows the user more information
      * about this rule and/or allows them to configure it. This is required to be non-null for rules
-     * that are not backed by {@link android.service.notification.ConditionProviderService}.
+     * that are not backed by a {@link android.service.notification.ConditionProviderService}.
+     *
+     * <p>This is exclusive with the {@code owner} supplied in the constructor; rules where a
+     * configuration activity is set will not use the
+     * {@link android.service.notification.ConditionProviderService} supplied there to determine
+     * whether the rule should be active.
      */
     public void setConfigurationActivity(@Nullable ComponentName componentName) {
         this.configurationActivity = getTrimmedComponentName(componentName);
@@ -570,6 +585,9 @@ public final class AutomaticZenRule implements Parcelable {
         if ((bitmask & FIELD_INTERRUPTION_FILTER) != 0) {
             modified.add("FIELD_INTERRUPTION_FILTER");
         }
+        if ((bitmask & FIELD_ICON) != 0) {
+            modified.add("FIELD_ICON");
+        }
         return "{" + String.join(",", modified) + "}";
     }
 
@@ -662,12 +680,12 @@ public final class AutomaticZenRule implements Parcelable {
         private String mName;
         private ComponentName mOwner;
         private Uri mConditionId;
-        private int mInterruptionFilter;
+        private int mInterruptionFilter = NotificationManager.INTERRUPTION_FILTER_PRIORITY;
         private boolean mEnabled = true;
         private ComponentName mConfigurationActivity = null;
         private ZenPolicy mPolicy = null;
         private ZenDeviceEffects mDeviceEffects = null;
-        private int mType;
+        private int mType = TYPE_UNKNOWN;
         private String mDescription;
         private int mIconResId;
         private boolean mAllowManualInvocation;
@@ -831,6 +849,15 @@ public final class AutomaticZenRule implements Parcelable {
          */
         public @NonNull Builder setCreationTime(long creationTime) {
             mCreationTime = creationTime;
+            return this;
+        }
+
+        /**
+         * Sets the package that owns this rule
+         * @hide
+         */
+        public @NonNull Builder setPackage(@NonNull String pkg) {
+            mPkg = pkg;
             return this;
         }
 

@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabledRo;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.SuspendDialogInfo.BUTTON_ACTION_MORE_DETAILS;
@@ -59,6 +60,7 @@ public class SuspendedAppActivity extends AlertActivity
     public static final String EXTRA_SUSPENDED_PACKAGE = PACKAGE_NAME + ".extra.SUSPENDED_PACKAGE";
     public static final String EXTRA_SUSPENDING_PACKAGE =
             PACKAGE_NAME + ".extra.SUSPENDING_PACKAGE";
+    public static final String EXTRA_SUSPENDING_USER = PACKAGE_NAME + ".extra.SUSPENDING_USER";
     public static final String EXTRA_DIALOG_INFO = PACKAGE_NAME + ".extra.DIALOG_INFO";
     public static final String EXTRA_ACTIVITY_OPTIONS = PACKAGE_NAME + ".extra.ACTIVITY_OPTIONS";
     public static final String EXTRA_UNSUSPEND_INTENT = PACKAGE_NAME + ".extra.UNSUSPEND_INTENT";
@@ -67,6 +69,7 @@ public class SuspendedAppActivity extends AlertActivity
     private IntentSender mOnUnsuspend;
     private String mSuspendedPackage;
     private String mSuspendingPackage;
+    private int mSuspendingUserId;
     private int mNeutralButtonAction;
     private int mUserId;
     private PackageManager mPm;
@@ -117,7 +120,7 @@ public class SuspendedAppActivity extends AlertActivity
                 .setPackage(mSuspendingPackage);
         final String requiredPermission = Manifest.permission.SEND_SHOW_SUSPENDED_APP_DETAILS;
         final ResolveInfo resolvedInfo = mPm.resolveActivityAsUser(moreDetailsIntent,
-                MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE, mUserId);
+                MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE, mSuspendingUserId);
         if (resolvedInfo != null && resolvedInfo.activityInfo != null
                 && requiredPermission.equals(resolvedInfo.activityInfo.permission)) {
             moreDetailsIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, mSuspendedPackage)
@@ -231,12 +234,17 @@ public class SuspendedAppActivity extends AlertActivity
         }
         mSuspendedPackage = intent.getStringExtra(EXTRA_SUSPENDED_PACKAGE);
         mSuspendingPackage = intent.getStringExtra(EXTRA_SUSPENDING_PACKAGE);
+        if (crossUserSuspensionEnabledRo()) {
+            mSuspendingUserId = intent.getIntExtra(EXTRA_SUSPENDING_USER, mUserId);
+        } else {
+            mSuspendingUserId = mUserId;
+        }
         mSuppliedDialogInfo = intent.getParcelableExtra(EXTRA_DIALOG_INFO, android.content.pm.SuspendDialogInfo.class);
         mOnUnsuspend = intent.getParcelableExtra(EXTRA_UNSUSPEND_INTENT, android.content.IntentSender.class);
         if (mSuppliedDialogInfo != null) {
             try {
                 mSuspendingAppResources = createContextAsUser(
-                        UserHandle.of(mUserId), /* flags */ 0).getPackageManager()
+                        UserHandle.of(mSuspendingUserId), /* flags */ 0).getPackageManager()
                         .getResourcesForApplication(mSuspendingPackage);
             } catch (PackageManager.NameNotFoundException ne) {
                 Slog.e(TAG, "Could not find resources for " + mSuspendingPackage, ne);
@@ -299,7 +307,7 @@ public class SuspendedAppActivity extends AlertActivity
                     case BUTTON_ACTION_MORE_DETAILS:
                         if (mMoreDetailsIntent != null) {
                             startActivityAsUser(mMoreDetailsIntent, mOptions,
-                                    UserHandle.of(mUserId));
+                                    UserHandle.of(mSuspendingUserId));
                         } else {
                             Slog.wtf(TAG, "Neutral button should not have existed!");
                         }
@@ -324,7 +332,7 @@ public class SuspendedAppActivity extends AlertActivity
                                 .putExtra(Intent.EXTRA_PACKAGE_NAME, mSuspendedPackage)
                                 .setPackage(mSuspendingPackage)
                                 .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                        sendBroadcastAsUser(reportUnsuspend, UserHandle.of(mUserId));
+                        sendBroadcastAsUser(reportUnsuspend, UserHandle.of(mSuspendingUserId));
 
                         if (mOnUnsuspend != null) {
                             Bundle activityOptions =
@@ -365,6 +373,9 @@ public class SuspendedAppActivity extends AlertActivity
                 .putExtra(Intent.EXTRA_USER_ID, userId)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        if (crossUserSuspensionEnabledRo() && suspendingPackage != null) {
+            intent.putExtra(EXTRA_SUSPENDING_USER, suspendingPackage.userId);
+        }
         return intent;
     }
 }

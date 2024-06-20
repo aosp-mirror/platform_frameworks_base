@@ -18,11 +18,10 @@ package com.android.server.companion;
 
 import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_SYNC;
 
-import static com.android.server.companion.utils.PermissionsUtils.sanitizeWithCallerChecks;
-
 import android.companion.AssociationInfo;
 import android.companion.ContextSyncMessage;
 import android.companion.Flags;
+import android.companion.ObservingDevicePresenceRequest;
 import android.companion.Telecom;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.net.MacAddress;
@@ -32,11 +31,14 @@ import android.os.ShellCommand;
 import android.util.Base64;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.companion.association.AssociationRequestsProcessor;
+import com.android.server.companion.association.AssociationStore;
+import com.android.server.companion.association.DisassociationProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
-import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
-import com.android.server.companion.presence.ObservableUuid;
+import com.android.server.companion.devicepresence.DevicePresenceProcessor;
+import com.android.server.companion.devicepresence.ObservableUuid;
 import com.android.server.companion.transport.CompanionTransportManager;
 
 import java.io.PrintWriter;
@@ -46,9 +48,9 @@ class CompanionDeviceShellCommand extends ShellCommand {
     private static final String TAG = "CDM_CompanionDeviceShellCommand";
 
     private final CompanionDeviceManagerService mService;
-    private final AssociationRevokeProcessor mRevokeProcessor;
-    private final AssociationStoreImpl mAssociationStore;
-    private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
+    private final DisassociationProcessor mDisassociationProcessor;
+    private final AssociationStore mAssociationStore;
+    private final DevicePresenceProcessor mDevicePresenceProcessor;
     private final CompanionTransportManager mTransportManager;
 
     private final SystemDataTransferProcessor mSystemDataTransferProcessor;
@@ -56,21 +58,21 @@ class CompanionDeviceShellCommand extends ShellCommand {
     private final BackupRestoreProcessor mBackupRestoreProcessor;
 
     CompanionDeviceShellCommand(CompanionDeviceManagerService service,
-            AssociationStoreImpl associationStore,
-            CompanionDevicePresenceMonitor devicePresenceMonitor,
+            AssociationStore associationStore,
+            DevicePresenceProcessor devicePresenceProcessor,
             CompanionTransportManager transportManager,
             SystemDataTransferProcessor systemDataTransferProcessor,
             AssociationRequestsProcessor associationRequestsProcessor,
             BackupRestoreProcessor backupRestoreProcessor,
-            AssociationRevokeProcessor revokeProcessor) {
+            DisassociationProcessor disassociationProcessor) {
         mService = service;
         mAssociationStore = associationStore;
-        mDevicePresenceMonitor = devicePresenceMonitor;
+        mDevicePresenceProcessor = devicePresenceProcessor;
         mTransportManager = transportManager;
         mSystemDataTransferProcessor = systemDataTransferProcessor;
         mAssociationRequestsProcessor = associationRequestsProcessor;
         mBackupRestoreProcessor = backupRestoreProcessor;
-        mRevokeProcessor = revokeProcessor;
+        mDisassociationProcessor = disassociationProcessor;
     }
 
     @Override
@@ -79,35 +81,19 @@ class CompanionDeviceShellCommand extends ShellCommand {
         final int associationId;
 
         try {
-            if ("simulate-device-event".equals(cmd) && Flags.devicePresence()) {
-                associationId = getNextIntArgRequired();
-                int event = getNextIntArgRequired();
-                mDevicePresenceMonitor.simulateDeviceEvent(associationId, event);
-                return 0;
-            }
-
-            if ("simulate-device-uuid-event".equals(cmd) && Flags.devicePresence()) {
-                String uuid = getNextArgRequired();
-                String packageName = getNextArgRequired();
-                int userId = getNextIntArgRequired();
-                int event = getNextIntArgRequired();
-                ObservableUuid observableUuid = new ObservableUuid(
-                        userId, ParcelUuid.fromString(uuid), packageName,
-                        System.currentTimeMillis());
-                mDevicePresenceMonitor.simulateDeviceEventByUuid(observableUuid, event);
-                return 0;
-            }
-
             switch (cmd) {
                 case "list": {
                     final int userId = getNextIntArgRequired();
                     final List<AssociationInfo> associationsForUser =
-                            mAssociationStore.getAssociationsForUser(userId);
+                            mAssociationStore.getActiveAssociationsByUser(userId);
+                    final int maxId = mAssociationStore.getMaxId();
+                    out.println("Max ID: " + maxId);
+                    out.println("Association ID | Package Name | Mac Address");
                     for (AssociationInfo association : associationsForUser) {
                         // TODO(b/212535524): use AssociationInfo.toShortString(), once it's not
                         //  longer referenced in tests.
-                        out.println(association.getPackageName() + " "
-                                + association.getDeviceMacAddress() + " " + association.getId());
+                        out.println(association.getId() + " | " + association.getPackageName()
+                                + " | " + association.getDeviceMacAddress());
                     }
                 }
                 break;
@@ -118,8 +104,9 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     String address = getNextArgRequired();
                     String deviceProfile = getNextArg();
                     final MacAddress macAddress = MacAddress.fromString(address);
-                    mService.createNewAssociation(userId, packageName, macAddress,
-                            /* displayName= */ deviceProfile, deviceProfile, false);
+                    mAssociationRequestsProcessor.createAssociation(userId, packageName, macAddress,
+                            deviceProfile, deviceProfile, /* associatedDevice */ null, false,
+                            /* callback */ null, /* resultReceiver */ null);
                 }
                 break;
 
@@ -128,40 +115,121 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     final String packageName = getNextArgRequired();
                     final String address = getNextArgRequired();
                     final AssociationInfo association =
-                            mService.getAssociationWithCallerChecks(userId, packageName, address);
-                    if (association != null) {
-                        mRevokeProcessor.disassociateInternal(association.getId());
+                            mAssociationStore.getFirstAssociationByAddress(userId, packageName,
+                                    address);
+                    if (association == null) {
+                        out.println("Association doesn't exist.");
+                    } else {
+                        mDisassociationProcessor.disassociate(association.getId());
                     }
                 }
                 break;
 
                 case "disassociate-all": {
                     final int userId = getNextIntArgRequired();
-                    final String packageName = getNextArgRequired();
                     final List<AssociationInfo> userAssociations =
-                            mAssociationStore.getAssociationsForPackage(userId, packageName);
+                            mAssociationStore.getAssociationsByUser(userId);
                     for (AssociationInfo association : userAssociations) {
-                        if (sanitizeWithCallerChecks(mService.getContext(), association) != null) {
-                            mRevokeProcessor.disassociateInternal(association.getId());
-                        }
+                        mDisassociationProcessor.disassociate(association.getId());
                     }
                 }
                 break;
 
-                case "clear-association-memory-cache":
-                    mService.persistState();
-                    mService.loadAssociationsFromDisk();
+                case "refresh-cache":
+                    mAssociationStore.refreshCache();
                     break;
 
                 case "simulate-device-appeared":
                     associationId = getNextIntArgRequired();
-                    mDevicePresenceMonitor.simulateDeviceEvent(associationId, /* event */ 0);
+                    mDevicePresenceProcessor.simulateDeviceEvent(associationId, /* event */ 0);
                     break;
 
                 case "simulate-device-disappeared":
                     associationId = getNextIntArgRequired();
-                    mDevicePresenceMonitor.simulateDeviceEvent(associationId, /* event */ 1);
+                    mDevicePresenceProcessor.simulateDeviceEvent(associationId, /* event */ 1);
                     break;
+
+                case "simulate-device-event": {
+                    if (Flags.devicePresence()) {
+                        associationId = getNextIntArgRequired();
+                        int event = getNextIntArgRequired();
+                        mDevicePresenceProcessor.simulateDeviceEvent(associationId, event);
+                    }
+                    break;
+                }
+
+                case "simulate-device-uuid-event": {
+                    if (Flags.devicePresence()) {
+                        String uuid = getNextArgRequired();
+                        String packageName = getNextArgRequired();
+                        int userId = getNextIntArgRequired();
+                        int event = getNextIntArgRequired();
+                        ObservableUuid observableUuid = new ObservableUuid(
+                                userId, ParcelUuid.fromString(uuid), packageName,
+                                System.currentTimeMillis());
+                        mDevicePresenceProcessor.simulateDeviceEventByUuid(observableUuid, event);
+                    }
+                    break;
+                }
+
+                case "simulate-device-event-device-locked": {
+                    if (Flags.devicePresence()) {
+                        associationId = getNextIntArgRequired();
+                        int userId = getNextIntArgRequired();
+                        int event = getNextIntArgRequired();
+                        String uuid = getNextArgRequired();
+                        ParcelUuid parcelUuid =
+                                uuid.equals("null") ? null : ParcelUuid.fromString(uuid);
+                        mDevicePresenceProcessor.simulateDeviceEventOnDeviceLocked(
+                                associationId, userId, event, parcelUuid);
+                    }
+                    break;
+                }
+
+                case "simulate-device-event-device-unlocked": {
+                    if (Flags.devicePresence()) {
+                        int userId = getNextIntArgRequired();
+                        mDevicePresenceProcessor.simulateDeviceEventOnUserUnlocked(userId);
+                    }
+                    break;
+                }
+
+                case "start-observing-device-presence-uuid": {
+                    if (Flags.devicePresence()) {
+                        int userId = getNextIntArgRequired();
+                        String packageName = getNextArgRequired();
+                        String uuid = getNextArgRequired();
+                        if ("null".equals(uuid)) {
+                            out.println("UUID can not be null.");
+                            break;
+                        }
+                        ParcelUuid parcelUuid = ParcelUuid.fromString(uuid);
+                        ObservingDevicePresenceRequest request = new ObservingDevicePresenceRequest
+                                .Builder().setUuid(parcelUuid).build();
+                        mDevicePresenceProcessor.startObservingDevicePresence(
+                                request, packageName, userId, /* enforcePermissions */ false);
+
+                    }
+                    break;
+                }
+
+                case "stop-observing-device-presence-uuid": {
+                    if (Flags.devicePresence()) {
+                        int userId = getNextIntArgRequired();
+                        String packageName = getNextArgRequired();
+                        String uuid = getNextArgRequired();
+                        if ("null".equals(uuid)) {
+                            out.println("UUID can not be null.");
+                            break;
+                        }
+                        ParcelUuid parcelUuid = ParcelUuid.fromString(uuid);
+                        ObservingDevicePresenceRequest request = new ObservingDevicePresenceRequest
+                                .Builder().setUuid(parcelUuid).build();
+                        mDevicePresenceProcessor.stopObservingDevicePresence(
+                                request, packageName, userId, /* enforcePermissions */ false);
+                    }
+                    break;
+                }
 
                 case "get-backup-payload": {
                     final int userId = getNextIntArgRequired();
@@ -408,10 +476,9 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      Remove an existing Association.");
         pw.println("  disassociate-all USER_ID");
         pw.println("      Remove all Associations for a user.");
-        pw.println("  clear-association-memory-cache");
+        pw.println("  refresh-cache");
         pw.println("      Clear the in-memory association cache and reload all association ");
-        pw.println("      information from persistent storage. USE FOR DEBUGGING PURPOSES ONLY.");
-        pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+        pw.println("      information from disk. USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
 
         pw.println("  simulate-device-appeared ASSOCIATION_ID");
         pw.println("      Make CDM act as if the given companion device has appeared.");
@@ -475,6 +542,25 @@ class CompanionDeviceShellCommand extends ShellCommand {
             pw.println("      Make CDM act as if the given DEVICE is BT disconnected base"
                     + "on the UUID");
             pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  simulate-device-event-device-locked"
+                    + " ASSOCIATION_ID USER_ID DEVICE_EVENT PARCEL_UUID");
+            pw.println("  Simulate device event when the device is locked");
+            pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  simulate-device-event-device-unlocked USER_ID");
+            pw.println("  Simulate device unlocked for given user. This will send corresponding");
+            pw.println("  callback after simulate-device-event-device-locked");
+            pw.println("  command has been called.");
+            pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  start-observing-device-presence-uuid USER_ID PACKAGE_NAME UUID");
+            pw.println("  Start observing device presence base on the UUID.");
+            pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  stop-observing-device-presence-uuid USER_ID PACKAGE_NAME UUID");
+            pw.println("  Stop observing device presence base on the UUID.");
+            pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
         }
 
         pw.println("  remove-inactive-associations");

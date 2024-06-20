@@ -38,6 +38,9 @@ import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.Time;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.System;
@@ -51,6 +54,7 @@ import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.LocalServiceKeeperRule;
 import com.android.server.SystemService;
+import com.android.server.display.feature.flags.Flags;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
@@ -93,6 +97,9 @@ public class ColorDisplayServiceTest {
 
     @Rule
     public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() {
@@ -1000,6 +1007,20 @@ public class ColorDisplayServiceTest {
         startService();
         assertUserColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         assertActiveColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_EVEN_DIMMER)
+    public void ensureRbcDisabledWhenEvenDimmerEnabled() {
+        // If rbc & even dimmer are enabled
+        doReturn(true).when(mResourcesSpy).getBoolean(
+                R.bool.config_reduceBrightColorsAvailable);
+        doReturn(true).when(mResourcesSpy).getBoolean(
+                com.android.internal.R.bool.config_evenDimmerEnabled);
+        startService();
+
+        // ensure rbc isn't enabled, since even dimmer is the successor.
+        assertThat(ColorDisplayManager.isReduceBrightColorsAvailable(mContext)).isFalse();
     }
 
     @Test

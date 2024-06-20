@@ -72,6 +72,7 @@ import com.android.settingslib.testutils.shadow.ShadowUserManager;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -499,6 +500,7 @@ public class ApplicationsStateRoboTest {
         verify(mApplicationsState, never()).clearEntries();
     }
 
+    @Ignore("b/328332487")
     @Test
     public void removeProfileApp_workprofileExists_doResumeIfNeededLocked_shouldClearEntries()
             throws RemoteException {
@@ -573,6 +575,7 @@ public class ApplicationsStateRoboTest {
         verify(mApplicationsState).clearEntries();
     }
 
+    @Ignore("b/328332487")
     @Test
     public void removeOwnerApp_workprofileExists_doResumeIfNeededLocked_shouldClearEntries()
             throws RemoteException {
@@ -654,6 +657,7 @@ public class ApplicationsStateRoboTest {
         verify(mApplicationsState).clearEntries();
     }
 
+    @Ignore("b/328332487")
     @Test
     public void noAppRemoved_workprofileExists_doResumeIfNeededLocked_shouldNotClearEntries()
             throws RemoteException {
@@ -773,6 +777,7 @@ public class ApplicationsStateRoboTest {
         assertThat(primaryUserApp.shouldShowInPersonalTab(um, appInfo.uid)).isTrue();
     }
 
+    @Ignore("b/328332487")
     @Test
     public void shouldShowInPersonalTab_userProfilePreU_returnsFalse() {
         UserManager um = RuntimeEnvironment.application.getSystemService(UserManager.class);

@@ -18,6 +18,7 @@ package com.android.systemui.common.data.repository
 
 import android.os.UserHandle
 import com.android.systemui.common.shared.model.PackageChangeModel
+import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.filter
 class PackageChangeRepositoryImpl
 @Inject
 constructor(
+    packageInstallerMonitor: PackageInstallerMonitor,
     private val monitorFactory: PackageUpdateMonitor.Factory,
 ) : PackageChangeRepository {
     /**
@@ -37,4 +39,7 @@ constructor(
 
     override fun packageChanged(user: UserHandle): Flow<PackageChangeModel> =
         monitor.packageChanged.filter { user == UserHandle.ALL || user == it.user }
+
+    override val packageInstallSessionsForPrimaryUser: Flow<List<PackageInstallSession>> =
+        packageInstallerMonitor.installSessionsForPrimaryUser
 }

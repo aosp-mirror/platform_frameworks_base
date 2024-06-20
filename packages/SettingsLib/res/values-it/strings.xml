@@ -94,18 +94,34 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connesso (telefono escluso), batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connesso (contenuti multimediali esclusi), batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connesso (telefono o contenuti multimediali esclusi), batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Attivo - Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Attivo, S: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Attivo. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> di batteria."</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Attivo. S: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> di batteria. D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> di batteria."</string>
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Attivo. S: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> di batteria."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Attivo. D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> di batteria."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"S: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Sinistra: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Destra: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"S: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> di batteria. D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> di batteria."</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Sinistro: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> di batteria"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Destro: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> di batteria"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Sinistra: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Destra: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Attivo"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Dispositivo salvato"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Attiva, solo sinistra"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Attiva, solo destra"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Attivo, destra e sinistra"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Attivo (solo sinistro)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Attivo (solo destro)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Attivi (destro e sinistro)"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Attivo (solo contenuti multimediali). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> di batteria."</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Attivo (solo contenuti multimediali). S: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> di batteria. D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> di batteria."</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Connesso (supporta la condivisione audio). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> di batteria."</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Connesso (supporta la condivisione audio). S: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> di batteria. D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> di batteria."</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Connesso (supporta la condivisione audio). Sinistro: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> di batteria."</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Connesso (supporta la condivisione audio). Destro: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> di batteria."</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Connesso (supporta la condivisione audio)"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Attivo (solo contenuti multimediali)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Supporta la condivisione audio"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Attivo (solo contenuti multimediali), solo sinistro"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Attivo (solo contenuti multimediali), solo destro"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Attivo (solo contenuti multimediali), sinistro e destro"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimediale"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonate"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Trasferimento file"</string>
@@ -437,9 +453,6 @@
     <string name="transcode_default" msgid="3784803084573509491">"Presupponi che le app supportino i formati moderni"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostra notifiche relative alla transcodifica"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Disattiva memorizzazione nella cache per la transcodifica"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Impostazioni Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forza riserva L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Seleziona per forzare riserva L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Servizi in esecuzione"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualizza e controlla i servizi attualmente in esecuzione"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementazione di WebView"</string>
@@ -479,6 +492,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> alla ricarica completa"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ricarica ottimizzata"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ In carica"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Ricarica completa entro <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Batteria completamente carica entro <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Batteria completamente carica entro <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Ricarica completa entro le ore <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Sconosciuta"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"In carica"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ricarica veloce"</string>
@@ -490,6 +507,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Carica"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Batteria completamente carica"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Ricarica in sospeso"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"In carica"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Ricarica rapida"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Gestita dall\'amministratore"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Gestita tramite impostazioni con restrizioni"</string>
     <string name="disabled" msgid="8017887509554714950">"Disattivato"</string>
@@ -619,7 +638,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Creazione nuovo utente non riuscita"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Impossibile creare un nuovo ospite"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nickname"</string>
-    <string name="edit_user_info_message" msgid="5199468585059260053">"Il tuo nome e la tua foto saranno visibili a chiunque usi questo dispositivo."</string>
+    <string name="edit_user_info_message" msgid="6677556031419002895">"Il nome e l\'immagine che scegli saranno visibili a chiunque utilizzi questo dispositivo."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Aggiungi utente"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Aggiungi ospite"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Rimuovi ospite"</string>
@@ -646,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Quando esci verrà eliminata tutta l\'attività"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Quando esci puoi salvare o eliminare la tua attività"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reimposta la sessione per eliminare subito l\'attività, oppure salvala o eliminala quando esci"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Scatta una foto"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Scegli un\'immagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleziona la foto"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Troppi tentativi sbagliati. I dati del dispositivo verranno eliminati."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Troppi tentativi sbagliati. Questo utente verrà eliminato."</string>
@@ -678,6 +695,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Telefono: una barra."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Telefono: due barre."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Telefono: tre barre."</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"Telefono con quattro barre."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Massimo segnale telefonico."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Nessun dato."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Dati: una barra."</string>
@@ -687,12 +705,10 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Connessione Ethernet annullata."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Chiamate non disponibili."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Scegli un\'immagine del profilo"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Icona dell\'utente predefinito"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Tastiera fisica"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Scegli layout tastiera"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predefinito"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Attiva lo schermo"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Controllo di attivazione dello schermo"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Consenti l\'attivazione dello schermo"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Consenti a un\'app di attivare lo schermo. Se la autorizzi, l\'app può attivare lo schermo in qualsiasi momento senza la tua autorizzazione esplicita."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vuoi interrompere la trasmissione dell\'app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
@@ -707,4 +723,5 @@
     <string name="neuter" msgid="2075249330106127310">"Neutro"</string>
     <string name="feminine" msgid="1529155595310784757">"Femminile"</string>
     <string name="masculine" msgid="4653978041013996303">"Maschile"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Aggiornamenti di sistema"</string>
 </resources>

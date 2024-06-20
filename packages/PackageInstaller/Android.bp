@@ -54,6 +54,7 @@ android_app {
         "androidx.lifecycle_lifecycle-extensions",
         "android.content.pm.flags-aconfig-java",
         "android.os.flags-aconfig-java",
+        "android.multiuser.flags-aconfig-java",
     ],
 
     lint: {
@@ -85,6 +86,7 @@ android_app {
         "androidx.lifecycle_lifecycle-extensions",
         "android.content.pm.flags-aconfig-java",
         "android.os.flags-aconfig-java",
+        "android.multiuser.flags-aconfig-java",
     ],
     aaptflags: ["--product tablet"],
 
@@ -118,6 +120,7 @@ android_app {
         "androidx.lifecycle_lifecycle-extensions",
         "android.content.pm.flags-aconfig-java",
         "android.os.flags-aconfig-java",
+        "android.multiuser.flags-aconfig-java",
     ],
     aaptflags: ["--product tv"],
 

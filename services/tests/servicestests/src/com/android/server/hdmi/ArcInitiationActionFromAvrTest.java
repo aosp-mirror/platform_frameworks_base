@@ -22,8 +22,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
 import android.os.test.TestLooper;
@@ -83,6 +85,11 @@ public class ArcInitiationActionFromAvrTest {
                     @Override
                     protected Looper getServiceLooper() {
                         return mTestLooper.getLooper();
+                    }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
                     }
                 };
 

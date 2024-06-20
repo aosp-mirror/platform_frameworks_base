@@ -21,9 +21,6 @@
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
 
     <application>
-        <activity
-            android:name="com.android.settingslib.users.AvatarPickerActivity"
-            android:theme="@style/SudThemeGlifV2.DayNight"/>
     </application>
 
 </manifest>

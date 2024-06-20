@@ -7,9 +7,9 @@ import android.graphics.ColorSpace
 import android.graphics.Point
 import android.graphics.Rect
 import android.hardware.HardwareBuffer
-import android.testing.AndroidTestingRunner
 import android.view.Surface
 import android.window.TaskSnapshot
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.recents.model.ThumbnailData
@@ -24,7 +24,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 class ActivityTaskManagerThumbnailLoaderTest : SysuiTestCase() {
@@ -52,7 +52,7 @@ class ActivityTaskManagerThumbnailLoaderTest : SysuiTestCase() {
             val taskId = 123
             val isLowResolution = false
             val snapshot = createTaskSnapshot()
-            val thumbnailData = ThumbnailData(snapshot)
+            val thumbnailData = ThumbnailData.fromSnapshot(snapshot)
             whenever(activityManager.getTaskThumbnail(taskId, isLowResolution))
                 .thenReturn(thumbnailData)
 
@@ -74,7 +74,7 @@ class ActivityTaskManagerThumbnailLoaderTest : SysuiTestCase() {
     fun captureThumbnail_thumbnailAvailable_returnsThumbnailData() =
         testScope.runTest {
             val taskId = 321
-            val thumbnailData = ThumbnailData(createTaskSnapshot())
+            val thumbnailData = ThumbnailData.fromSnapshot(createTaskSnapshot())
 
             whenever(activityManager.takeTaskThumbnail(taskId)).thenReturn(thumbnailData)
 

@@ -16,7 +16,7 @@
 
 package com.android.systemui.deviceentry.domain.ui.viewmodel
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.accessibility.data.repository.fakeAccessibilityRepository
@@ -24,7 +24,9 @@ import com.android.systemui.biometrics.data.repository.fingerprintPropertyReposi
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.data.ui.viewmodel.deviceEntryUdfpsAccessibilityOverlayViewModel
+import com.android.systemui.deviceentry.ui.viewmodel.DeviceEntryUdfpsAccessibilityOverlayViewModel
 import com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
@@ -34,19 +36,22 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.fakeDeviceEntryIconViewModelTransition
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @ExperimentalCoroutinesApi
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class UdfpsAccessibilityOverlayViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             fakeFeatureFlagsClassic.apply { set(FULL_SCREEN_USER_SWITCHER, false) }
@@ -59,8 +64,27 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
     private val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
     private val deviceEntryFingerprintAuthRepository = kosmos.deviceEntryFingerprintAuthRepository
     private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
-    private val shadeRepository = kosmos.fakeShadeRepository
-    private val underTest = kosmos.deviceEntryUdfpsAccessibilityOverlayViewModel
+
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
+
+    private lateinit var underTest: DeviceEntryUdfpsAccessibilityOverlayViewModel
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    @Before
+    fun setup() {
+        underTest = kosmos.deviceEntryUdfpsAccessibilityOverlayViewModel
+    }
 
     @Test
     fun visible() =
@@ -122,7 +146,6 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
         fingerprintPropertyRepository.supportsUdfps()
         biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
         deviceEntryFingerprintAuthRepository.setIsRunning(true)
-        deviceEntryRepository.setUnlocked(false)
 
         // Lockscreen
         keyguardTransitionRepository.sendTransitionStep(
@@ -143,7 +166,7 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
         )
 
         // Shade not expanded
-        shadeRepository.qsExpansion.value = 0f
-        shadeRepository.lockscreenShadeExpansion.value = 0f
+        shadeTestUtil.setQsExpansion(0f)
+        shadeTestUtil.setLockscreenShadeExpansion(0f)
     }
 }

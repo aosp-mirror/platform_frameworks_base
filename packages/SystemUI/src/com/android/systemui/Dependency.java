@@ -22,17 +22,13 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Preconditions;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
-import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentService;
@@ -47,7 +43,6 @@ import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
@@ -58,7 +53,6 @@ import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
@@ -96,10 +90,6 @@ public class Dependency {
      * Key for getting a Handler for receiving time tick broadcasts on.
      */
     public static final String TIME_TICK_HANDLER_NAME = "time_tick_handler";
-    /**
-     * Generic handler on the main thread.
-     */
-    private static final String MAIN_HANDLER_NAME = "main_handler";
 
     /**
      * An email address to send memory leak reports to by default.
@@ -121,11 +111,6 @@ public class Dependency {
      */
     public static final DependencyKey<Handler> TIME_TICK_HANDLER =
             new DependencyKey<>(TIME_TICK_HANDLER_NAME);
-    /**
-     * Generic handler on the main thread.
-     */
-    public static final DependencyKey<Handler> MAIN_HANDLER =
-            new DependencyKey<>(MAIN_HANDLER_NAME);
 
     private final ArrayMap<Object, Object> mDependencies = new ArrayMap<>();
     private final ArrayMap<Object, LazyDependencyCreator> mProviders = new ArrayMap<>();
@@ -134,7 +119,6 @@ public class Dependency {
 
     @Inject Lazy<BroadcastDispatcher> mBroadcastDispatcher;
     @Inject Lazy<BluetoothController> mBluetoothController;
-    @Inject Lazy<FlashlightController> mFlashlightController;
     @Inject Lazy<KeyguardUpdateMonitor> mKeyguardUpdateMonitor;
     @Inject Lazy<DeviceProvisionedController> mDeviceProvisionedController;
     @Inject Lazy<PluginManager> mPluginManager;
@@ -150,15 +134,10 @@ public class Dependency {
     @Inject Lazy<LightBarController> mLightBarController;
     @Inject Lazy<OverviewProxyService> mOverviewProxyService;
     @Inject Lazy<NavigationModeController> mNavBarModeController;
-    @Inject Lazy<AccessibilityButtonModeObserver> mAccessibilityButtonModeObserver;
-    @Inject Lazy<AccessibilityButtonTargetsObserver> mAccessibilityButtonListController;
-    @Inject Lazy<IStatusBarService> mIStatusBarService;
-    @Inject Lazy<NotificationRemoteInputManager.Callback> mNotificationRemoteInputManagerCallback;
     @Inject Lazy<NavigationBarController> mNavigationBarController;
     @Inject Lazy<StatusBarStateController> mStatusBarStateController;
     @Inject Lazy<NotificationMediaManager> mNotificationMediaManager;
     @Inject @Background Lazy<Looper> mBgLooper;
-    @Inject @Main Lazy<Handler> mMainHandler;
     @Inject @Named(TIME_TICK_HANDLER_NAME) Lazy<Handler> mTimeTickHandler;
     @Inject Lazy<SysUiState> mSysUiStateFlagsContainer;
     @Inject Lazy<CommandQueue> mCommandQueue;
@@ -187,10 +166,8 @@ public class Dependency {
         // on imports.
         mProviders.put(TIME_TICK_HANDLER, mTimeTickHandler::get);
         mProviders.put(BG_LOOPER, mBgLooper::get);
-        mProviders.put(MAIN_HANDLER, mMainHandler::get);
         mProviders.put(BroadcastDispatcher.class, mBroadcastDispatcher::get);
         mProviders.put(BluetoothController.class, mBluetoothController::get);
-        mProviders.put(FlashlightController.class, mFlashlightController::get);
         mProviders.put(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor::get);
         mProviders.put(DeviceProvisionedController.class, mDeviceProvisionedController::get);
         mProviders.put(PluginManager.class, mPluginManager::get);
@@ -205,13 +182,6 @@ public class Dependency {
         mProviders.put(LightBarController.class, mLightBarController::get);
         mProviders.put(OverviewProxyService.class, mOverviewProxyService::get);
         mProviders.put(NavigationModeController.class, mNavBarModeController::get);
-        mProviders.put(AccessibilityButtonModeObserver.class,
-                mAccessibilityButtonModeObserver::get);
-        mProviders.put(AccessibilityButtonTargetsObserver.class,
-                mAccessibilityButtonListController::get);
-        mProviders.put(IStatusBarService.class, mIStatusBarService::get);
-        mProviders.put(NotificationRemoteInputManager.Callback.class,
-                mNotificationRemoteInputManagerCallback::get);
         mProviders.put(NavigationBarController.class, mNavigationBarController::get);
         mProviders.put(StatusBarStateController.class, mStatusBarStateController::get);
         mProviders.put(NotificationMediaManager.class, mNotificationMediaManager::get);

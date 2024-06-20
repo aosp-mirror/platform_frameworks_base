@@ -55,13 +55,15 @@ fun SceneTransitionLayout(
     state: SceneTransitionLayoutState,
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
-    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
+    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0.05f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     SceneTransitionLayoutForTesting(
         state,
         modifier,
         swipeSourceDetector,
+        swipeDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
         scenes,
@@ -95,14 +97,24 @@ fun SceneTransitionLayout(
     transitions: SceneTransitions,
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
+    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
-    val state = updateSceneTransitionLayoutState(currentScene, onChangeScene, transitions)
+    val state =
+        updateSceneTransitionLayoutState(
+            currentScene,
+            onChangeScene,
+            transitions,
+            enableInterruptions = enableInterruptions,
+        )
+
     SceneTransitionLayout(
         state,
         modifier,
         swipeSourceDetector,
+        swipeDetector,
         transitionInterceptionThreshold,
         scenes,
     )
@@ -131,9 +143,33 @@ interface SceneTransitionLayoutScope {
  */
 @DslMarker annotation class ElementDsl
 
+/** A scope that can be used to query the target state of an element or scene. */
+interface ElementStateScope {
+    /**
+     * Return the *target* size of [this] element in the given [scene], i.e. the size of the element
+     * when idle, or `null` if the element is not composed and measured in that scene (yet).
+     */
+    fun ElementKey.targetSize(scene: SceneKey): IntSize?
+
+    /**
+     * Return the *target* offset of [this] element in the given [scene], i.e. the size of the
+     * element when idle, or `null` if the element is not composed and placed in that scene (yet).
+     */
+    fun ElementKey.targetOffset(scene: SceneKey): Offset?
+
+    /**
+     * Return the *target* size of [this] scene, i.e. the size of the scene when idle, or `null` if
+     * the scene was never composed.
+     */
+    fun SceneKey.targetSize(): IntSize?
+}
+
 @Stable
 @ElementDsl
-interface BaseSceneScope {
+interface BaseSceneScope : ElementStateScope {
+    /** The key of this scene. */
+    val sceneKey: SceneKey
+
     /** The state of the [SceneTransitionLayout] in which this scene is contained. */
     val layoutState: SceneTransitionLayoutState
 
@@ -221,6 +257,7 @@ interface BaseSceneScope {
     fun Modifier.horizontalNestedScrollToScene(
         leftBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
         rightBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        isExternalOverscrollGesture: () -> Boolean = { false },
     ): Modifier
 
     /**
@@ -233,6 +270,7 @@ interface BaseSceneScope {
     fun Modifier.verticalNestedScrollToScene(
         topBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
         bottomBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        isExternalOverscrollGesture: () -> Boolean = { false },
     ): Modifier
 
     /**
@@ -250,9 +288,7 @@ interface SceneScope : BaseSceneScope {
      *
      * @param value the value of this shared value in the current scene.
      * @param key the key of this shared value.
-     * @param lerp the *linear* interpolation function that should be used to interpolate between
-     *   two different values. Note that it has to be linear because the [fraction] passed to this
-     *   interpolator is already interpolated.
+     * @param type the [SharedValueType] of this animated value.
      * @param canOverflow whether this value can overflow past the values it is interpolated
      *   between, for instance because the transition is animated using a bouncy spring.
      * @see animateSceneIntAsState
@@ -264,9 +300,37 @@ interface SceneScope : BaseSceneScope {
     fun <T> animateSceneValueAsState(
         value: T,
         key: ValueKey,
-        lerp: (start: T, stop: T, fraction: Float) -> T,
+        type: SharedValueType<T, *>,
         canOverflow: Boolean,
     ): AnimatedState<T>
+}
+
+/**
+ * The type of a shared value animated using [ElementScope.animateElementValueAsState] or
+ * [SceneScope.animateSceneValueAsState].
+ */
+@Stable
+interface SharedValueType<T, Delta> {
+    /** The unspecified value for this type. */
+    val unspecifiedValue: T
+
+    /**
+     * The zero value of this type. It should be equal to what [diff(x, x)] returns for any value of
+     * x.
+     */
+    val zeroDeltaValue: Delta
+
+    /**
+     * Return the linear interpolation of [a] and [b] at the given [progress], i.e. `a + (b - a) *
+     * progress`.
+     */
+    fun lerp(a: T, b: T, progress: Float): T
+
+    /** Return `a - b`. */
+    fun diff(a: T, b: T): Delta
+
+    /** Return `a + b * bWeight`. */
+    fun addWeighted(a: T, b: Delta, bWeight: Float): T
 }
 
 @Stable
@@ -277,9 +341,7 @@ interface ElementScope<ContentScope> {
      *
      * @param value the value of this shared value in the current scene.
      * @param key the key of this shared value.
-     * @param lerp the *linear* interpolation function that should be used to interpolate between
-     *   two different values. Note that it has to be linear because the [fraction] passed to this
-     *   interpolator is already interpolated.
+     * @param type the [SharedValueType] of this animated value.
      * @param canOverflow whether this value can overflow past the values it is interpolated
      *   between, for instance because the transition is animated using a bouncy spring.
      * @see animateElementIntAsState
@@ -291,7 +353,7 @@ interface ElementScope<ContentScope> {
     fun <T> animateElementValueAsState(
         value: T,
         key: ValueKey,
-        lerp: (start: T, stop: T, fraction: Float) -> T,
+        type: SharedValueType<T, *>,
         canOverflow: Boolean,
     ): AnimatedState<T>
 
@@ -415,25 +477,7 @@ interface UserActionDistance {
     ): Float
 }
 
-interface UserActionDistanceScope : Density {
-    /**
-     * Return the *target* size of [this] element in the given [scene], i.e. the size of the element
-     * when idle, or `null` if the element is not composed and measured in that scene (yet).
-     */
-    fun ElementKey.targetSize(scene: SceneKey): IntSize?
-
-    /**
-     * Return the *target* offset of [this] element in the given [scene], i.e. the size of the
-     * element when idle, or `null` if the element is not composed and placed in that scene (yet).
-     */
-    fun ElementKey.targetOffset(scene: SceneKey): Offset?
-
-    /**
-     * Return the *target* size of [this] scene, i.e. the size of the scene when idle, or `null` if
-     * the scene was never composed.
-     */
-    fun SceneKey.targetSize(): IntSize?
-}
+interface UserActionDistanceScope : Density, ElementStateScope
 
 /** The user action has a fixed [absoluteDistance]. */
 class FixedDistance(private val distance: Dp) : UserActionDistance {
@@ -454,6 +498,7 @@ internal fun SceneTransitionLayoutForTesting(
     state: SceneTransitionLayoutState,
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
+    swipeDetector: SwipeDetector = DefaultSwipeDetector,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
     scenes: SceneTransitionLayoutScope.() -> Unit,
@@ -489,5 +534,5 @@ internal fun SceneTransitionLayoutForTesting(
         layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
     }
 
-    layoutImpl.Content(modifier)
+    layoutImpl.Content(modifier, swipeDetector)
 }

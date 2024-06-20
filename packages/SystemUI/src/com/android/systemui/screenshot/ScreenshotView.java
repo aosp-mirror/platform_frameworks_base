@@ -26,6 +26,7 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_SCROLL;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_UI;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW;
 import static com.android.systemui.screenshot.LogConfig.logTag;
+import static com.android.systemui.screenshot.ScreenshotController.SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS;
 
 import static java.util.Objects.requireNonNull;
 
@@ -33,6 +34,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.BroadcastOptions;
 import android.app.Notification;
@@ -88,8 +90,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
+import com.android.systemui.screenshot.scroll.ScrollCaptureController;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -102,7 +104,7 @@ import java.util.ArrayList;
 public class ScreenshotView extends FrameLayout implements
         ViewTreeObserver.OnComputeInternalInsetsListener {
 
-    interface ScreenshotViewCallback {
+    public interface ScreenshotViewCallback {
         void onUserInteraction();
 
         void onAction(Intent intent, UserHandle owner, boolean overrideTransition);
@@ -168,7 +170,6 @@ public class ScreenshotView extends FrameLayout implements
     private ScreenshotData mScreenshotData;
 
     private final InteractionJankMonitor mInteractionJankMonitor;
-    private long mDefaultTimeoutOfTimeoutHandler;
     private FeatureFlags mFlags;
     private final Bundle mInteractiveBroadcastOption;
 
@@ -244,10 +245,6 @@ public class ScreenshotView extends FrameLayout implements
         return InteractionJankMonitor.getInstance();
     }
 
-    void setDefaultTimeoutMillis(long timeout) {
-        mDefaultTimeoutOfTimeoutHandler = timeout;
-    }
-
     public void hideScrollChip() {
         mScrollChip.setVisibility(View.GONE);
     }
@@ -262,16 +259,8 @@ public class ScreenshotView extends FrameLayout implements
         if (DEBUG_SCROLL) {
             Log.d(TAG, "Showing Scroll option");
         }
-        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION, 0, packageName);
         mScrollChip.setVisibility(VISIBLE);
-        mScrollChip.setOnClickListener((v) -> {
-            if (DEBUG_INPUT) {
-                Log.d(TAG, "scroll chip tapped");
-            }
-            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_REQUESTED, 0,
-                    packageName);
-            onClick.run();
-        });
+        mScrollChip.setOnClickListener((v) -> onClick.run());
     }
 
     @Override // ViewTreeObserver.OnComputeInternalInsetsListener
@@ -426,15 +415,15 @@ public class ScreenshotView extends FrameLayout implements
         return mScreenshotPreview;
     }
 
-    /**
-     * Set up the logger and callback on dismissal.
-     *
-     * Note: must be called before any other (non-constructor) method or null pointer exceptions
-     * may occur.
-     */
-    void init(UiEventLogger uiEventLogger, ScreenshotViewCallback callbacks, FeatureFlags flags) {
+    void setUiEventLogger(UiEventLogger uiEventLogger) {
         mUiEventLogger = uiEventLogger;
+    }
+
+    void setCallbacks(ScreenshotViewCallback callbacks) {
         mCallbacks = callbacks;
+    }
+
+    void setFlags(FeatureFlags flags) {
         mFlags = flags;
     }
 
@@ -755,7 +744,7 @@ public class ScreenshotView extends FrameLayout implements
                         InteractionJankMonitor.Configuration.Builder.withView(
                                         CUJ_TAKE_SCREENSHOT, mScreenshotStatic)
                                 .setTag("Actions")
-                                .setTimeout(mDefaultTimeoutOfTimeoutHandler);
+                                .setTimeout(SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS);
                 mInteractionJankMonitor.begin(builder);
             }
         });
@@ -781,7 +770,7 @@ public class ScreenshotView extends FrameLayout implements
         return animator;
     }
 
-    void badgeScreenshot(Drawable badge) {
+    void badgeScreenshot(@Nullable Drawable badge) {
         mScreenshotBadge.setImageDrawable(badge);
         mScreenshotBadge.setVisibility(badge != null ? View.VISIBLE : View.GONE);
     }
@@ -791,15 +780,8 @@ public class ScreenshotView extends FrameLayout implements
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED, 0, mPackageName);
             prepareSharedTransition();
 
-            Intent shareIntent;
-            if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && mScreenshotData != null
-                    && mScreenshotData.getContextUrl() != null) {
-                shareIntent = ActionIntentCreator.INSTANCE.createShareWithText(
-                        imageData.uri, mScreenshotData.getContextUrl().toString());
-            } else {
-                shareIntent = ActionIntentCreator.INSTANCE.createShareWithSubject(
-                        imageData.uri, imageData.subject);
-            }
+            Intent shareIntent = ActionIntentCreator.INSTANCE.createShareWithSubject(
+                    imageData.uri, imageData.subject);
             mCallbacks.onAction(shareIntent, imageData.owner, false);
 
         });

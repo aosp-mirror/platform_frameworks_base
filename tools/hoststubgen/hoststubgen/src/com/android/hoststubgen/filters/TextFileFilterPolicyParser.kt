@@ -17,6 +17,7 @@ package com.android.hoststubgen.filters
 
 import com.android.hoststubgen.ParseException
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.asm.toHumanReadableClassName
 import com.android.hoststubgen.log
 import com.android.hoststubgen.normalizeTextLine
 import com.android.hoststubgen.whitespaceRegex
@@ -31,13 +32,17 @@ import java.util.Objects
  * Print a class node as a "keep" policy.
  */
 fun printAsTextPolicy(pw: PrintWriter, cn: ClassNode) {
-    pw.printf("class %s\t%s\n", cn.name, "keep")
+    pw.printf("class %s %s\n", cn.name.toHumanReadableClassName(), "keep")
 
-    for (f in cn.fields ?: emptyList()) {
-        pw.printf("  field %s\t%s\n", f.name, "keep")
+    cn.fields?.let {
+        for (f in it.sortedWith(compareBy({ it.name }))) {
+            pw.printf("    field %s %s\n", f.name, "keep")
+        }
     }
-    for (m in cn.methods ?: emptyList()) {
-        pw.printf("  method %s\t%s\t%s\n", m.name, m.desc, "keep")
+    cn.methods?.let {
+        for (m in it.sortedWith(compareBy({ it.name }, { it.desc }))) {
+            pw.printf("    method %s %s %s\n", m.name, m.desc, "keep")
+        }
     }
 }
 
@@ -66,6 +71,7 @@ fun createFilterFromTextPolicyFile(
         var aidlPolicy: FilterPolicyWithReason? = null
         var featureFlagsPolicy: FilterPolicyWithReason? = null
         var syspropsPolicy: FilterPolicyWithReason? = null
+        var rFilePolicy: FilterPolicyWithReason? = null
 
         try {
             BufferedReader(FileReader(filename)).use { reader ->
@@ -162,6 +168,14 @@ fun createFilterFromTextPolicyFile(
                                         syspropsPolicy = policy.withReason(
                                                 "$FILTER_REASON (special-class sysprops)")
                                     }
+                                    SpecialClass.RFile -> {
+                                        if (rFilePolicy != null) {
+                                            throw ParseException(
+                                                "Policy for R file already defined")
+                                        }
+                                        rFilePolicy = policy.withReason(
+                                            "$FILTER_REASON (special-class R file)")
+                                    }
                                 }
                             }
                         }
@@ -225,13 +239,9 @@ fun createFilterFromTextPolicyFile(
             throw e.withSourceInfo(filename, lineNo)
         }
 
-        var ret: OutputFilter = imf
-        if (aidlPolicy != null || featureFlagsPolicy != null || syspropsPolicy != null) {
-            log.d("AndroidHeuristicsFilter enabled")
-            ret = AndroidHeuristicsFilter(
-                    classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, imf)
-        }
-        return ret
+        // Wrap the in-memory-filter with AHF.
+        return AndroidHeuristicsFilter(
+                classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, rFilePolicy, imf)
     }
 }
 
@@ -240,6 +250,7 @@ private enum class SpecialClass {
     Aidl,
     FeatureFlags,
     Sysprops,
+    RFile,
 }
 
 private fun resolveSpecialClass(className: String): SpecialClass {
@@ -250,6 +261,7 @@ private fun resolveSpecialClass(className: String): SpecialClass {
         ":aidl" -> return SpecialClass.Aidl
         ":feature_flags" -> return SpecialClass.FeatureFlags
         ":sysprops" -> return SpecialClass.Sysprops
+        ":r" -> return SpecialClass.RFile
     }
     throw ParseException("Invalid special class name \"$className\"")
 }

@@ -16,16 +16,15 @@
 
 package com.android.systemui.shade;
 
-import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
-import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.StatusBarManager;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,6 +32,7 @@ import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
+import com.android.keyguard.KeyguardUnfoldTransition;
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
@@ -48,12 +48,14 @@ import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
-import com.android.systemui.keyguard.ui.binder.AlternateBouncerViewBinder;
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -71,19 +73,17 @@ import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
-import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.SystemClock;
 
-import dagger.Lazy;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Controller for {@link NotificationShadeWindowView}.
@@ -106,7 +106,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PulsingGestureListener mPulsingGestureListener;
     private final LockscreenHostedDreamGestureListener mLockscreenHostedDreamGestureListener;
     private final NotificationInsetsController mNotificationInsetsController;
-    private final boolean mIsTrackpadCommonEnabled;
     private final FeatureFlagsClassic mFeatureFlagsClassic;
     private final SysUIKeyEventHandler mSysUIKeyEventHandler;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
@@ -137,9 +136,15 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private DragDownHelper mDragDownHelper;
     private boolean mExpandingBelowNotch;
     private final DockManager mDockManager;
-    private final NotificationPanelViewController mNotificationPanelViewController;
+    private final ShadeViewController mShadeViewController;
+    private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
 
+    /**
+     * If {@code true}, an external touch sent in {@link #handleExternalTouch(MotionEvent)} has been
+     * intercepted and all future touch events for the gesture should be processed by this view.
+     */
+    private boolean mExternalTouchIntercepted = false;
     private boolean mIsTrackingBarGesture = false;
     private boolean mIsOcclusionTransitionRunning = false;
     private DisableSubpixelTextTransitionListener mDisableSubpixelTextTransitionListener;
@@ -159,7 +164,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
             DockManager dockManager,
             NotificationShadeDepthController depthController,
             NotificationShadeWindowView notificationShadeWindowView,
-            NotificationPanelViewController notificationPanelViewController,
+            ShadeViewController shadeViewController,
+            PanelExpansionInteractor panelExpansionInteractor,
             ShadeExpansionStateManager shadeExpansionStateManager,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -170,6 +176,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             DozeScrimController dozeScrimController,
             NotificationShadeWindowController controller,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider,
+            Optional<SysUIUnfoldComponent> unfoldComponent,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             NotificationInsetsController notificationInsetsController,
             AmbientState ambientState,
@@ -186,15 +193,14 @@ public class NotificationShadeWindowViewController implements Dumpable {
             QuickSettingsController quickSettingsController,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor,
-            Lazy<JavaAdapter> javaAdapter,
-            Lazy<AlternateBouncerDependencies> alternateBouncerDependencies,
             BouncerViewBinder bouncerViewBinder) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
         mView = notificationShadeWindowView;
         mDockManager = dockManager;
-        mNotificationPanelViewController = notificationPanelViewController;
+        mShadeViewController = shadeViewController;
+        mPanelExpansionInteractor = panelExpansionInteractor;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mDepthController = depthController;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
@@ -212,7 +218,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mLockscreenHostedDreamGestureListener = lockscreenHostedDreamGestureListener;
         mNotificationInsetsController = notificationInsetsController;
         mGlanceableHubContainerController = glanceableHubContainerController;
-        mIsTrackpadCommonEnabled = featureFlagsClassic.isEnabled(TRACKPAD_GESTURE_COMMON);
         mFeatureFlagsClassic = featureFlagsClassic;
         mSysUIKeyEventHandler = sysUIKeyEventHandler;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
@@ -224,29 +229,21 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mDisableSubpixelTextTransitionListener = new DisableSubpixelTextTransitionListener(mView);
         bouncerViewBinder.bind(mView.findViewById(R.id.keyguard_bouncer_container));
 
-        if (DeviceEntryUdfpsRefactor.isEnabled()) {
-            AlternateBouncerViewBinder.bind(
-                    mView.findViewById(R.id.alternate_bouncer),
-                    alternateBouncerDependencies.get()
-            );
-            javaAdapter.get().alwaysCollectFlow(
-                    alternateBouncerDependencies.get().getViewModel()
-                            .getForcePluginOpen(),
-                        forcePluginOpen ->
-                            mNotificationShadeWindowController.setForcePluginOpen(
-                                    forcePluginOpen,
-                                    alternateBouncerDependencies.get()
-                                            .getViewModel()
-                            )
-            );
-        }
-
-        collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
+        collectFlow(mView, keyguardTransitionInteractor.transition(
+                Edge.create(LOCKSCREEN, DREAMING)),
                 mLockscreenToDreamingTransition);
         collectFlow(
                 mView,
                 notificationLaunchAnimationInteractor.isLaunchAnimationRunning(),
                 this::setExpandAnimationRunning);
+
+        var keyguardUnfoldTransition = unfoldComponent.map(
+                SysUIUnfoldComponent::getKeyguardUnfoldTransition);
+        var notificationPanelUnfoldAnimationController = unfoldComponent.map(
+                SysUIUnfoldComponent::getNotificationPanelUnfoldAnimationController);
+
+        keyguardUnfoldTransition.ifPresent(KeyguardUnfoldTransition::setup);
+        notificationPanelUnfoldAnimationController.ifPresent(u -> u.setup(mView));
 
         mClock = clock;
         if (featureFlagsClassic.isEnabled(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION)) {
@@ -274,11 +271,28 @@ public class NotificationShadeWindowViewController implements Dumpable {
     }
 
     /**
-     * Handle a touch event while dreaming by forwarding the event to the content view.
+     * Handle a touch event while dreaming or on the hub by forwarding the event to the content
+     * view.
+     * <p>
+     * Since important logic for handling touches lives in the dispatch/intercept phases, we
+     * simulate going through all of these stages before sending onTouchEvent if intercepted.
+     *
      * @param event The event to forward.
      */
-    public void handleDreamTouch(MotionEvent event) {
-        mView.dispatchTouchEvent(event);
+    public void handleExternalTouch(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mExternalTouchIntercepted = false;
+        }
+
+        if (!mView.dispatchTouchEvent(event)) {
+            return;
+        }
+        if (!mExternalTouchIntercepted) {
+            mExternalTouchIntercepted = mView.onInterceptTouchEvent(event);
+        }
+        if (mExternalTouchIntercepted) {
+            mView.onTouchEvent(event);
+        }
     }
 
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
@@ -320,7 +334,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
                     mTouchActive = true;
                     mTouchCancelled = false;
                     mDownEvent = ev;
-                    if (migrateClocksToBlueprint()) {
+                    if (MigrateClocksToBlueprint.isEnabled()) {
                         mService.userActivity();
                     }
                 } else if (ev.getActionMasked() == MotionEvent.ACTION_UP
@@ -357,7 +371,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 mFalsingCollector.onTouchEvent(ev);
                 mPulsingWakeupGestureHandler.onTouchEvent(ev);
 
-                if (mGlanceableHubContainerController.onTouchEvent(ev)) {
+                if (!SceneContainerFlag.isEnabled()
+                        && mGlanceableHubContainerController.onTouchEvent(ev)) {
+                    // GlanceableHubContainerController is only used pre-flexiglass.
                     return logDownDispatch(ev, "dispatched to glanceable hub container", true);
                 }
                 if (mDreamingWakeupGestureHandler != null
@@ -398,16 +414,19 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 }
 
                 if (!mIsTrackingBarGesture && isDown
-                        && mNotificationPanelViewController.isFullyCollapsed()) {
+                        && mPanelExpansionInteractor.isFullyCollapsed()) {
                     float x = ev.getRawX();
                     float y = ev.getRawY();
                     if (mStatusBarViewController.touchIsWithinView(x, y)) {
-                        if (mStatusBarWindowStateController.windowIsShowing()) {
-                            mIsTrackingBarGesture = true;
-                            return logDownDispatch(ev, "sending touch to status bar",
-                                    mStatusBarViewController.sendTouchToView(ev));
-                        } else {
-                            return logDownDispatch(ev, "hidden or hiding", true);
+                        if (!(MigrateClocksToBlueprint.isEnabled()
+                                && mPrimaryBouncerInteractor.isBouncerShowing())) {
+                            if (mStatusBarWindowStateController.windowIsShowing()) {
+                                mIsTrackingBarGesture = true;
+                                return logDownDispatch(ev, "sending touch to status bar",
+                                        mStatusBarViewController.sendTouchToView(ev));
+                            } else {
+                                return logDownDispatch(ev, "hidden or hiding", true);
+                            }
                         }
                     }
                 } else if (mIsTrackingBarGesture) {
@@ -471,11 +490,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 } else {
                     bouncerShowing = mService.isBouncerShowing();
                 }
-                if (mNotificationPanelViewController.isFullyExpanded()
+                if (mPanelExpansionInteractor.isFullyExpanded()
                         && !bouncerShowing
                         && !mStatusBarStateController.isDozing()) {
                     if (mDragDownHelper.isDragDownEnabled()) {
-                        if (migrateClocksToBlueprint()) {
+                        if (MigrateClocksToBlueprint.isEnabled()) {
                             // When on lockscreen, if the touch originates at the top of the screen
                             // go directly to QS and not the shade
                             if (mStatusBarStateController.getState() == KEYGUARD
@@ -488,7 +507,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
 
                         // This handles drag down over lockscreen
                         boolean result = mDragDownHelper.onInterceptTouchEvent(ev);
-                        if (migrateClocksToBlueprint()) {
+                        if (MigrateClocksToBlueprint.isEnabled()) {
                             if (result) {
                                 mLastInterceptWasDragDownHelper = true;
                                 if (ev.getAction() == MotionEvent.ACTION_DOWN) {
@@ -511,7 +530,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
                             return true;
                         }
                     }
-                } else if (migrateClocksToBlueprint()) {
+                } else if (MigrateClocksToBlueprint.isEnabled()) {
                     // This final check handles swipes on HUNs and when Pulsing
                     if (!bouncerShowing && didNotificationPanelInterceptEvent(ev)) {
                         mShadeLogger.d("NSWVC: intercepted for HUN/PULSING");
@@ -526,8 +545,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 MotionEvent cancellation = MotionEvent.obtain(ev);
                 cancellation.setAction(MotionEvent.ACTION_CANCEL);
                 mStackScrollLayout.onInterceptTouchEvent(cancellation);
-                if (!migrateClocksToBlueprint()) {
-                    mNotificationPanelViewController.handleExternalInterceptTouch(cancellation);
+                if (!MigrateClocksToBlueprint.isEnabled()) {
+                    mShadeViewController.handleExternalInterceptTouch(cancellation);
                 }
                 cancellation.recycle();
             }
@@ -541,12 +560,12 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 if (mStatusBarKeyguardViewManager.onTouch(ev)) {
                     return true;
                 }
-                if (migrateClocksToBlueprint()) {
+                if (MigrateClocksToBlueprint.isEnabled()) {
                     if (mLastInterceptWasDragDownHelper && (mDragDownHelper.isDraggingDown())) {
                         // we still want to finish our drag down gesture when locking the screen
                         handled |= mDragDownHelper.onTouchEvent(ev) || handled;
                     }
-                    if (!handled && mNotificationPanelViewController.handleExternalTouch(ev)) {
+                    if (!handled && mShadeViewController.handleExternalTouch(ev)) {
                         return true;
                     }
                 } else {
@@ -583,6 +602,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
             public boolean dispatchKeyEvent(KeyEvent event) {
                 return mSysUIKeyEventHandler.dispatchKeyEvent(event);
             }
+
+            @Override
+            public void collectKeyEvent(KeyEvent event) {
+                mFalsingCollector.onKeyEvent(event);
+            }
         });
 
         mView.setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
@@ -613,6 +637,10 @@ public class NotificationShadeWindowViewController implements Dumpable {
      * The layout lives in {@link R.id.communal_ui_stub}.
      */
     public void setupCommunalHubLayout() {
+        if (SceneContainerFlag.isEnabled()) {
+            // GlanceableHubContainerController is only used pre-flexiglass.
+            return;
+        }
         collectFlow(
                 mView,
                 mGlanceableHubContainerController.communalAvailable(),
@@ -631,11 +659,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
     }
 
     private boolean didNotificationPanelInterceptEvent(MotionEvent ev) {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             // Since NotificationStackScrollLayout is now a sibling of notification_panel, we need
             // to also ask NotificationPanelViewController directly, in order to process swipe up
             // events originating from notifications
-            if (mNotificationPanelViewController.handleExternalInterceptTouch(ev)) {
+            if (mShadeViewController.handleExternalInterceptTouch(ev)) {
                 mShadeLogger.d("NSWVC: NPVC intercepted");
                 return true;
             }
@@ -653,22 +681,19 @@ public class NotificationShadeWindowViewController implements Dumpable {
         if (mTouchActive) {
             final long now = mClock.uptimeMillis();
             final MotionEvent event;
-            if (mIsTrackpadCommonEnabled) {
-                event = MotionEvent.obtain(mDownEvent);
-                event.setDownTime(now);
-                event.setAction(MotionEvent.ACTION_CANCEL);
-                event.setLocation(0.0f, 0.0f);
-            } else {
-                event = MotionEvent.obtain(now, now,
-                        MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
-                event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-            }
+            event = MotionEvent.obtain(mDownEvent);
+            event.setDownTime(now);
+            event.setAction(MotionEvent.ACTION_CANCEL);
+            event.setLocation(0.0f, 0.0f);
             Log.w(TAG, "Canceling current touch event (should be very rare)");
             mView.dispatchTouchEvent(event);
             event.recycle();
             mTouchCancelled = true;
         }
         mAmbientState.setSwipingUp(false);
+        if (MigrateClocksToBlueprint.isEnabled()) {
+            mDragDownHelper.stopDragging();
+        }
     }
 
     @Override

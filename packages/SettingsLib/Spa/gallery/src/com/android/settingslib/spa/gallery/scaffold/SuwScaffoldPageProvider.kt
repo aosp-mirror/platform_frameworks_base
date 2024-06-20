@@ -22,6 +22,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SignalCellularAlt
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -37,6 +41,8 @@ import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.BottomAppBarButton
 import com.android.settingslib.spa.widget.scaffold.SuwScaffold
 import com.android.settingslib.spa.widget.ui.SettingsBody
+import com.android.settingslib.spa.widget.ui.Spinner
+import com.android.settingslib.spa.widget.ui.SpinnerOption
 
 private const val TITLE = "Sample SuwScaffold"
 
@@ -67,13 +73,12 @@ private fun Page() {
         actionButton = BottomAppBarButton("Next") {},
         dismissButton = BottomAppBarButton("Cancel") {},
     ) {
-        Column(Modifier.padding(SettingsDimension.itemPadding)) {
-            SettingsBody("To add another SIM, download a new eSIM.")
-        }
-        Illustration(object : IllustrationModel {
-            override val resId = R.drawable.accessibility_captioning_banner
-            override val resourceType = ResourceType.IMAGE
-        })
+        var selectedId by rememberSaveable { mutableIntStateOf(1) }
+        Spinner(
+            options = (1..3).map { SpinnerOption(id = it, text = "Option $it") },
+            selectedId = selectedId,
+            setId = { selectedId = it },
+        )
         Column(Modifier.padding(SettingsDimension.itemPadding)) {
             SettingsBody("To add another SIM, download a new eSIM.")
         }

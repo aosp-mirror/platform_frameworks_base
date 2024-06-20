@@ -19,6 +19,7 @@ package android.widget;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Parcel;
 
 import com.android.internal.widget.IRemoteViewsFactory;
 
@@ -41,13 +42,6 @@ public abstract class RemoteViewsService extends Service {
     private static final HashMap<Intent.FilterComparison, RemoteViewsFactory> sRemoteViewFactories =
             new HashMap<Intent.FilterComparison, RemoteViewsFactory>();
     private static final Object sLock = new Object();
-
-    /**
-     * Used for determining the maximum number of entries to retrieve from RemoteViewsFactory
-     *
-     * @hide
-     */
-    private static final int MAX_NUM_ENTRY = 10;
 
     /**
      * An interface for an adapter between a remote collection view (ListView, GridView, etc) and
@@ -130,6 +124,43 @@ public abstract class RemoteViewsService extends Service {
          * @return True if the same id always refers to the same object.
          */
         public boolean hasStableIds();
+
+        /**
+         * @hide
+         */
+        default RemoteViews.RemoteCollectionItems getRemoteCollectionItems(int capSize) {
+            RemoteViews.RemoteCollectionItems items = new RemoteViews.RemoteCollectionItems
+                    .Builder().build();
+            Parcel capSizeTestParcel = Parcel.obtain();
+            // restore allowSquashing to reduce the noise in error messages
+            boolean prevAllowSquashing = capSizeTestParcel.allowSquashing();
+
+            try {
+                RemoteViews.RemoteCollectionItems.Builder itemsBuilder =
+                        new RemoteViews.RemoteCollectionItems.Builder();
+                onDataSetChanged();
+
+                itemsBuilder.setHasStableIds(hasStableIds());
+                final int numOfEntries = getCount();
+
+                for (int i = 0; i < numOfEntries; i++) {
+                    final long currentItemId = getItemId(i);
+                    final RemoteViews currentView = getViewAt(i);
+                    currentView.writeToParcel(capSizeTestParcel, 0);
+                    if (capSizeTestParcel.dataSize() > capSize) {
+                        break;
+                    }
+                    itemsBuilder.addItem(currentItemId, currentView);
+                }
+
+                items = itemsBuilder.build();
+            } finally {
+                capSizeTestParcel.restoreAllowSquashing(prevAllowSquashing);
+                // Recycle the parcel
+                capSizeTestParcel.recycle();
+            }
+            return items;
+        }
     }
 
     /**
@@ -235,22 +266,11 @@ public abstract class RemoteViewsService extends Service {
         }
 
         @Override
-        public RemoteViews.RemoteCollectionItems getRemoteCollectionItems() {
+        public RemoteViews.RemoteCollectionItems getRemoteCollectionItems(int capSize) {
             RemoteViews.RemoteCollectionItems items = new RemoteViews.RemoteCollectionItems
                     .Builder().build();
-
             try {
-                RemoteViews.RemoteCollectionItems.Builder itemsBuilder =
-                        new RemoteViews.RemoteCollectionItems.Builder();
-                mFactory.onDataSetChanged();
-
-                itemsBuilder.setHasStableIds(mFactory.hasStableIds());
-                final int numOfEntries = Math.min(mFactory.getCount(), MAX_NUM_ENTRY);
-                for (int i = 0; i < numOfEntries; i++) {
-                    itemsBuilder.addItem(mFactory.getItemId(i), mFactory.getViewAt(i));
-                }
-
-                items = itemsBuilder.build();
+                items = mFactory.getRemoteCollectionItems(capSize);
             } catch (Exception ex) {
                 Thread t = Thread.currentThread();
                 Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);

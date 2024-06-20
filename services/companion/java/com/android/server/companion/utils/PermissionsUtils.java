@@ -16,6 +16,8 @@
 
 package com.android.server.companion.utils;
 
+import static android.Manifest.permission.BLUETOOTH_CONNECT;
+import static android.Manifest.permission.BLUETOOTH_SCAN;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED;
@@ -33,16 +35,18 @@ import static android.os.Binder.getCallingUid;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.getCallingUserId;
 
+import static com.android.server.companion.utils.RolesUtils.isRoleHolder;
+
 import static java.util.Collections.unmodifiableMap;
 
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
@@ -148,21 +152,6 @@ public final class PermissionsUtils {
     }
 
     /**
-     * Check if the caller is system UID or the provided user.
-     */
-    public static boolean checkCallerIsSystemOr(@UserIdInt int userId,
-            @NonNull String packageName) {
-        final int callingUid = getCallingUid();
-        if (callingUid == SYSTEM_UID) return true;
-
-        if (getCallingUserId() != userId) return false;
-
-        if (!checkPackage(callingUid, packageName)) return false;
-
-        return true;
-    }
-
-    /**
      * Check if the calling user id matches the userId, and if the package belongs to
      * the calling uid.
      */
@@ -183,21 +172,30 @@ public final class PermissionsUtils {
     }
 
     /**
-     * Check if the caller holds the necessary permission to manage companion devices.
-     */
-    public static boolean checkCallerCanManageCompanionDevice(@NonNull Context context) {
-        if (getCallingUid() == SYSTEM_UID) return true;
-
-        return context.checkCallingPermission(MANAGE_COMPANION_DEVICES) == PERMISSION_GRANTED;
-    }
-
-    /**
      * Require the caller to be able to manage the associations for the package.
      */
     public static void enforceCallerCanManageAssociationsForPackage(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName,
             @Nullable String actionDescription) {
-        if (checkCallerCanManageAssociationsForPackage(context, userId, packageName)) return;
+        final int callingUid = getCallingUid();
+
+        // If the caller is the system
+        if (callingUid == SYSTEM_UID) {
+            return;
+        }
+
+        // If caller can manage the package or has the permissions to manage companion devices
+        boolean canInteractAcrossUsers = context.checkCallingPermission(INTERACT_ACROSS_USERS)
+                == PERMISSION_GRANTED;
+        boolean canManageCompanionDevices = context.checkCallingPermission(MANAGE_COMPANION_DEVICES)
+                == PERMISSION_GRANTED;
+        if (getCallingUserId() == userId) {
+            if (checkPackage(callingUid, packageName) || canManageCompanionDevices) {
+                return;
+            }
+        } else if (canInteractAcrossUsers && canManageCompanionDevices) {
+            return;
+        }
 
         throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
                 + "permissions to "
@@ -208,48 +206,12 @@ public final class PermissionsUtils {
     /**
      * Require the caller to hold necessary permission to observe device presence by UUID.
      */
-    public static void enforceCallerCanObservingDevicePresenceByUuid(@NonNull Context context) {
-        if (context.checkCallingPermission(REQUEST_OBSERVE_DEVICE_UUID_PRESENCE)
-                != PERMISSION_GRANTED) {
+    public static void enforceCallerCanObserveDevicePresenceByUuid(@NonNull Context context,
+            String packageName, int userId) {
+        if (!hasRequirePermissions(context, packageName, userId)) {
             throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
                     + "permissions to request observing device presence base on the UUID");
         }
-    }
-
-    /**
-     * Check if the caller is either:
-     * <ul>
-     * <li> the package itself
-     * <li> the System ({@link android.os.Process#SYSTEM_UID})
-     * <li> holds {@link Manifest.permission#MANAGE_COMPANION_DEVICES} and, if belongs to a
-     * different user, also holds {@link Manifest.permission#INTERACT_ACROSS_USERS}.
-     * </ul>
-     * @return whether the caller is one of the above.
-     */
-    public static boolean checkCallerCanManageAssociationsForPackage(@NonNull Context context,
-            @UserIdInt int userId, @NonNull String packageName) {
-        if (checkCallerIsSystemOr(userId, packageName)) return true;
-
-        if (!checkCallerCanInteractWithUserId(context, userId)) return false;
-
-        return checkCallerCanManageCompanionDevice(context);
-    }
-
-    /**
-     * Check if CDM can trust the context to process the association.
-     */
-    @Nullable
-    public static AssociationInfo sanitizeWithCallerChecks(@NonNull Context context,
-            @Nullable AssociationInfo association) {
-        if (association == null) return null;
-
-        final int userId = association.getUserId();
-        final String packageName = association.getPackageName();
-        if (!checkCallerCanManageAssociationsForPackage(context, userId, packageName)) {
-            return null;
-        }
-
-        return association;
     }
 
     private static boolean checkPackage(@UserIdInt int uid, @NonNull String packageName) {
@@ -271,6 +233,17 @@ public final class PermissionsUtils {
             }
         }
         return sAppOpsService;
+    }
+
+    private static boolean hasRequirePermissions(
+            @NonNull Context context, String packageName, int userId) {
+        return context.checkCallingPermission(
+                REQUEST_OBSERVE_DEVICE_UUID_PRESENCE) == PERMISSION_GRANTED
+                && context.checkCallingPermission(BLUETOOTH_SCAN) == PERMISSION_GRANTED
+                && context.checkCallingPermission(BLUETOOTH_CONNECT) == PERMISSION_GRANTED
+                && Boolean.TRUE.equals(Binder.withCleanCallingIdentity(
+                        () -> isRoleHolder(context, userId, packageName,
+                                DEVICE_PROFILE_AUTOMOTIVE_PROJECTION)));
     }
 
     // DO NOT USE DIRECTLY! Access via getAppOpsService().

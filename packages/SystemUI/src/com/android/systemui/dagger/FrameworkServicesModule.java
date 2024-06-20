@@ -49,6 +49,7 @@ import android.content.SharedPreferences;
 import android.content.om.OverlayManager;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.res.AssetManager;
@@ -65,16 +66,19 @@ import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.input.InputManager;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.MediaRouter2Manager;
 import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
+import android.nearby.NearbyManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
+import android.os.IDeviceIdleController;
 import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.ServiceManager;
@@ -118,6 +122,8 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.shared.system.PackageManagerWrapper;
+import com.android.systemui.user.utils.UserScopedService;
+import com.android.systemui.user.utils.UserScopedServiceImpl;
 
 import dagger.Module;
 import dagger.Provides;
@@ -216,6 +222,13 @@ public class FrameworkServicesModule {
     @Singleton
     static DevicePolicyManager provideDevicePolicyManager(Context context) {
         return context.getSystemService(DevicePolicyManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static UserScopedService<ColorDisplayManager> provideScopedColorDisplayManager(
+            Context context) {
+        return new UserScopedServiceImpl<>(context, ColorDisplayManager.class);
     }
 
     @Provides
@@ -441,6 +454,12 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static NearbyManager provideNearbyManager(Context context) {
+        return context.getSystemService(NearbyManager.class);
+    }
+
+    @Provides
+    @Singleton
     static NetworkScoreManager provideNetworkScoreManager(Context context) {
         return context.getSystemService(NetworkScoreManager.class);
     }
@@ -469,6 +488,12 @@ public class FrameworkServicesModule {
     @Singleton
     static PackageManager providePackageManager(Context context) {
         return context.getPackageManager();
+    }
+
+    @Provides
+    @Singleton
+    static PackageInstaller providePackageInstaller(PackageManager packageManager) {
+        return packageManager.getPackageInstaller();
     }
 
     @Provides
@@ -617,6 +642,12 @@ public class FrameworkServicesModule {
     }
 
     @Provides
+    @Singleton
+    static UserScopedService<UserManager> provideScopedUserManager(@Application Context context) {
+        return new UserScopedServiceImpl<>(context, UserManager.class);
+    }
+
+    @Provides
     static WallpaperManager provideWallpaperManager(Context context) {
         return context.getSystemService(WallpaperManager.class);
     }
@@ -636,6 +667,7 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    @Nullable
     static CarrierConfigManager provideCarrierConfigManager(Context context) {
         return context.getSystemService(CarrierConfigManager.class);
     }
@@ -654,6 +686,12 @@ public class FrameworkServicesModule {
             pm.initializeUsageHelper();
         }
         return pm;
+    }
+
+    @Provides
+    @Singleton
+    static LocationManager provideLocationManager(Context context) {
+        return context.getSystemService(LocationManager.class);
     }
 
     @Provides
@@ -718,5 +756,12 @@ public class FrameworkServicesModule {
     @Singleton
     static Optional<SatelliteManager> provideSatelliteManager(Context context) {
         return Optional.ofNullable(context.getSystemService(SatelliteManager.class));
+    }
+
+    @Provides
+    @Singleton
+    static IDeviceIdleController provideDeviceIdleController() {
+        return IDeviceIdleController.Stub.asInterface(
+                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
     }
 }

@@ -16,6 +16,8 @@
 
 package com.android.systemui.screenshot;
 
+import static com.android.systemui.screenshot.ImageExporter.createSystemFileDisplayName;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -179,6 +181,30 @@ public class ImageExporterTest extends SysuiTestCase {
             }
             contentResolver.delete(result.uri, null);
         }
+    }
+
+    @Test
+    public void testImageExport_customizedFileName()
+            throws ExecutionException, InterruptedException {
+        // This test only asserts the file name for the case when user specifies a file name,
+        // instead of using the auto-generated name by ImageExporter::createFileName. Other
+        // metadata are not affected by the specified file name.
+        final String customizedFileName = "customized_file_name";
+        ContentResolver contentResolver = mContext.getContentResolver();
+        ImageExporter exporter = new ImageExporter(contentResolver, mFeatureFlags);
+
+        UUID requestId = UUID.fromString("3c11da99-9284-4863-b1d5-6f3684976814");
+        Bitmap original = createCheckerBitmap(10, 10, 10);
+
+        ListenableFuture<ImageExporter.Result> direct =
+                exporter.export(DIRECT_EXECUTOR, requestId, original, CAPTURE_TIME,
+                        Process.myUserHandle(), customizedFileName);
+        assertTrue("future should be done", direct.isDone());
+        assertFalse("future should not be canceled", direct.isCancelled());
+        ImageExporter.Result result = direct.get();
+        assertEquals("Filename should contain the correct filename",
+                createSystemFileDisplayName(customizedFileName, CompressFormat.PNG),
+                result.fileName);
     }
 
     @Test

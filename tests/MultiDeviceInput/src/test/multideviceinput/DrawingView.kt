@@ -21,8 +21,13 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.view.InputDevice
+import android.view.InputDevice.SOURCE_MOUSE
 import android.view.InputDevice.SOURCE_STYLUS
+import android.view.InputDevice.SOURCE_TOUCHSCREEN
+import android.view.InputDevice.SOURCE_TOUCHPAD
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_CANCEL
 import android.view.MotionEvent.ACTION_DOWN
 import android.view.MotionEvent.ACTION_HOVER_EXIT
 import android.view.MotionEvent.ACTION_UP
@@ -56,8 +61,8 @@ private fun drawLine(canvas: Canvas, from: MotionEvent, to: MotionEvent, paint: 
 }
 
 private fun drawCircle(canvas: Canvas, event: MotionEvent, paint: Paint, radius: Float) {
-    val x = event.getX()
-    val y = event.getY()
+    val x = event.x
+    val y = event.y
     canvas.drawCircle(x, y, radius, paint)
 }
 
@@ -110,15 +115,48 @@ class DrawingView : View {
     private val scaleGestureDetector = ScaleGestureDetector(context, scaleGestureListener, null)
 
     private var touchPaint = Paint()
+    private var touchpadPaint = Paint()
     private var stylusPaint = Paint()
+    private var mousePaint = Paint()
+    private var drawingTabletPaint = Paint()
 
     private fun init() {
         touchPaint.color = Color.RED
-        touchPaint.setStrokeWidth(5f)
+        touchPaint.strokeWidth = 5f
+        touchpadPaint.color = Color.BLACK
+        touchpadPaint.strokeWidth = 5f
         stylusPaint.color = Color.YELLOW
-        stylusPaint.setStrokeWidth(5f)
-
+        stylusPaint.strokeWidth = 5f
+        mousePaint.color = Color.BLUE
+        mousePaint.strokeWidth = 5f
+        drawingTabletPaint.color = Color.GREEN
+        drawingTabletPaint.strokeWidth = 5f
         setOnHoverListener { _, event -> processHoverEvent(event); true }
+    }
+
+    private fun resolvePaint(event: MotionEvent): Paint? {
+        val inputDevice = InputDevice.getDevice(event.deviceId)
+        val isTouchpadDevice = inputDevice != null && inputDevice.supportsSource(SOURCE_TOUCHPAD)
+        return if (event.isFromSource(SOURCE_STYLUS or SOURCE_MOUSE)) {
+            // External stylus / drawing tablet
+            drawingTabletPaint
+        } else if (event.isFromSource(SOURCE_TOUCHSCREEN) && !event.isFromSource(SOURCE_STYLUS)) {
+            // Touchscreen event
+            touchPaint
+        } else if (event.isFromSource(SOURCE_MOUSE) &&
+            (event.isFromSource(SOURCE_TOUCHPAD) || isTouchpadDevice)) {
+            // Touchpad event
+            touchpadPaint
+        } else if (event.isFromSource(SOURCE_MOUSE)) {
+            // Mouse event
+            mousePaint
+        } else if (event.isFromSource(SOURCE_STYLUS)) {
+            // Stylus event
+            stylusPaint
+        } else {
+            // Drop the event
+            null
+        }
     }
 
     private fun processTouchEvent(event: MotionEvent) {
@@ -126,28 +164,23 @@ class DrawingView : View {
         if (event.actionMasked == ACTION_DOWN) {
             touchEvents.remove(event.deviceId)
             myState?.state = PointerState.DOWN
-        } else if (event.actionMasked == ACTION_UP) {
+        } else if (event.actionMasked == ACTION_UP || event.actionMasked == ACTION_CANCEL) {
             myState?.state = PointerState.NONE
         }
-        var vec = touchEvents.getOrPut(event.deviceId) { Vector<Pair<MotionEvent, Paint>>() }
-
-        val paint = if (event.isFromSource(SOURCE_STYLUS)) {
+        val paint = resolvePaint(event)
+        if (paint != null) {
+            val vec = touchEvents.getOrPut(event.deviceId) { Vector<Pair<MotionEvent, Paint>>() }
             val size = myState?.lineSize ?: 5f
-            stylusPaint.setStrokeWidth(size)
-            Paint(stylusPaint)
-        } else {
-            val size = myState?.lineSize ?: 5f
-            touchPaint.setStrokeWidth(size)
-            Paint(touchPaint)
+            paint.strokeWidth = size
+            vec.add(Pair(MotionEvent.obtain(event), Paint(paint)))
+            invalidate()
         }
-        vec.add(Pair(MotionEvent.obtain(event), paint))
-        invalidate()
     }
 
     private fun processHoverEvent(event: MotionEvent) {
         hoverEvents.remove(event.deviceId)
-        if (event.getActionMasked() != ACTION_HOVER_EXIT) {
-            hoverEvents.put(event.deviceId, MotionEvent.obtain(event))
+        if (event.actionMasked != ACTION_HOVER_EXIT) {
+            hoverEvents[event.deviceId] = MotionEvent.obtain(event)
             myState?.state = PointerState.HOVER
         } else {
             myState?.state = PointerState.NONE
@@ -155,7 +188,7 @@ class DrawingView : View {
         invalidate()
     }
 
-    public override fun onTouchEvent(event: MotionEvent): Boolean {
+    override fun onTouchEvent(event: MotionEvent): Boolean {
         processTouchEvent(event)
         return true
     }
@@ -171,12 +204,10 @@ class DrawingView : View {
         }
         // Draw hovers
         for ((_, event) in hoverEvents ) {
-            if (event.isFromSource(SOURCE_STYLUS)) {
+            val paint = resolvePaint(event)
+            if (paint != null) {
                 val size = myState?.circleSize ?: 20f
-                drawCircle(canvas, event, stylusPaint, size)
-            } else {
-                val size = myState?.circleSize ?: 20f
-                drawCircle(canvas, event, touchPaint, size)
+                drawCircle(canvas, event, paint, size)
             }
         }
     }

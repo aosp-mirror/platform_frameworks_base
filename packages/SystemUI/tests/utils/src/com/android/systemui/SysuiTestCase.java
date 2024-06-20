@@ -15,8 +15,6 @@
  */
 package com.android.systemui;
 
-import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
-
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -99,8 +97,22 @@ public abstract class SysuiTestCase {
             .setProvideMainThread(true)
             .build();
 
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+    @ClassRule
+    public static final SetFlagsRule.ClassRule mSetFlagsClassRule =
+            new SetFlagsRule.ClassRule(
+                    android.app.Flags.class,
+                    android.hardware.biometrics.Flags.class,
+                    android.multiuser.Flags.class,
+                    android.net.platform.flags.Flags.class,
+                    android.os.Flags.class,
+                    android.service.controls.flags.Flags.class,
+                    com.android.internal.telephony.flags.Flags.class,
+                    com.android.server.notification.Flags.class,
+                    com.android.systemui.Flags.class);
+
+    // TODO(b/339471826): Fix Robolectric to execute the @ClassRule correctly
+    @Rule public final SetFlagsRule mSetFlagsRule =
+            isRobolectricTest() ? new SetFlagsRule() : mSetFlagsClassRule.createSetFlagsRule();
 
     @Rule(order = 10)
     public final SceneContainerRule mSceneContainerRule = new SceneContainerRule();
@@ -177,7 +189,7 @@ public abstract class SysuiTestCase {
         // TODO(b/292141694): build out Ravenwood support for Instrumentation
         // Ravenwood doesn't yet provide Instrumentation, so we sidestep this global configuration
         // step; any tests that rely on it are already being excluded on Ravenwood
-        if (!isRavenwoodTest()) {
+        if (!isRavenwoodTest() && !isScreenshotTest()) {
             mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
             Instrumentation inst = spy(mRealInstrumentation);
             when(inst.getContext()).thenAnswer(invocation -> {
@@ -286,6 +298,10 @@ public abstract class SysuiTestCase {
 
     public static boolean isRobolectricTest() {
         return !isRavenwoodTest() && Build.FINGERPRINT.contains("robolectric");
+    }
+
+    protected boolean isScreenshotTest() {
+        return false;
     }
 
     public static boolean isRavenwoodTest() {

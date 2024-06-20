@@ -90,8 +90,6 @@ public class UserRestrictionsUtilsTest {
     public void testCanDeviceOwnerChange() {
         assertFalse(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_RECORD_AUDIO));
         assertFalse(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_WALLPAPER));
-        assertFalse(UserRestrictionsUtils.canDeviceOwnerChange(
-                UserManager.DISALLOW_ADD_PRIVATE_PROFILE));
         assertTrue(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_ADD_USER));
         assertTrue(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_USER_SWITCH));
     }
@@ -108,10 +106,6 @@ public class UserRestrictionsUtilsTest {
                 false));
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_USER_SWITCH,
-                true,
-                false));
-        assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
                 true,
                 false));
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(

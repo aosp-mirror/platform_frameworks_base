@@ -35,7 +35,6 @@ import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
@@ -117,24 +116,20 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
 
     @LockoutTracker.LockoutMode
     public int handleFailedAttempt(int userId) {
-        if (Flags.deHidl()) {
-            if (mLockoutTracker != null) {
-                mLockoutTracker.addFailedAttemptForUser(getTargetUserId());
-            }
-            @LockoutTracker.LockoutMode final int lockoutMode =
-                    getLockoutTracker().getLockoutModeForUser(userId);
-            final PerformanceTracker performanceTracker =
-                    PerformanceTracker.getInstanceForSensorId(getSensorId());
-            if (lockoutMode == LockoutTracker.LOCKOUT_PERMANENT) {
-                performanceTracker.incrementPermanentLockoutForUser(userId);
-            } else if (lockoutMode == LockoutTracker.LOCKOUT_TIMED) {
-                performanceTracker.incrementTimedLockoutForUser(userId);
-            }
-
-            return lockoutMode;
-        } else {
-            return LockoutTracker.LOCKOUT_NONE;
+        if (mLockoutTracker != null) {
+            mLockoutTracker.addFailedAttemptForUser(getTargetUserId());
         }
+        @LockoutTracker.LockoutMode final int lockoutMode =
+                getLockoutTracker().getLockoutModeForUser(userId);
+        final PerformanceTracker performanceTracker =
+                PerformanceTracker.getInstanceForSensorId(getSensorId());
+        if (lockoutMode == LockoutTracker.LOCKOUT_PERMANENT) {
+            performanceTracker.incrementPermanentLockoutForUser(userId);
+        } else if (lockoutMode == LockoutTracker.LOCKOUT_TIMED) {
+            performanceTracker.incrementTimedLockoutForUser(userId);
+        }
+
+        return lockoutMode;
     }
 
     protected long getStartTimeMs() {
@@ -247,14 +242,14 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
                 byteToken[i] = hardwareAuthToken.get(i);
             }
 
-            if (mIsStrongBiometric) {
-                mBiometricManager.resetLockoutTimeBound(getToken(),
-                        getContext().getOpPackageName(),
-                        getSensorId(), getTargetUserId(), byteToken);
-            }
-
             // For BP, BiometricService will add the authToken to Keystore.
-            if (!isBiometricPrompt() && mIsStrongBiometric) {
+            if (!isBiometricPrompt()) {
+                if (mIsStrongBiometric) {
+                    mBiometricManager.resetLockoutTimeBound(getToken(),
+                            getContext().getOpPackageName(),
+                            getSensorId(), getTargetUserId(), byteToken);
+                }
+
                 final int result = KeyStoreAuthorization.getInstance().addAuthToken(byteToken);
                 if (result != 0) {
                     Slog.d(TAG, "Error adding auth token : " + result);

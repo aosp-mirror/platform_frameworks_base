@@ -31,8 +31,8 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
  * BroadcastReceiver for handling media output intent
  */
 class MediaOutputDialogReceiver @Inject constructor(
-    private val mediaOutputDialogFactory: MediaOutputDialogFactory,
-    private val mediaOutputBroadcastDialogFactory: MediaOutputBroadcastDialogFactory
+        private val mediaOutputDialogManager: MediaOutputDialogManager,
+        private val mediaOutputBroadcastDialogManager: MediaOutputBroadcastDialogManager
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
@@ -42,7 +42,7 @@ class MediaOutputDialogReceiver @Inject constructor(
                 launchMediaOutputDialogIfPossible(packageName)
             }
             MediaOutputConstants.ACTION_LAUNCH_SYSTEM_MEDIA_OUTPUT_DIALOG -> {
-                mediaOutputDialogFactory.createDialogForSystemRouting()
+                mediaOutputDialogManager.createAndShowForSystemRouting()
             }
             MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG -> {
                 if (!legacyLeAudioSharing()) return
@@ -55,7 +55,7 @@ class MediaOutputDialogReceiver @Inject constructor(
 
     private fun launchMediaOutputDialogIfPossible(packageName: String?) {
         if (!packageName.isNullOrEmpty()) {
-            mediaOutputDialogFactory.create(packageName, false)
+            mediaOutputDialogManager.createAndShow(packageName, false)
         } else if (DEBUG) {
             Log.e(TAG, "Unable to launch media output dialog. Package name is empty.")
         }
@@ -63,7 +63,7 @@ class MediaOutputDialogReceiver @Inject constructor(
 
     private fun launchMediaOutputBroadcastDialogIfPossible(packageName: String?) {
         if (!packageName.isNullOrEmpty()) {
-            mediaOutputBroadcastDialogFactory.create(
+            mediaOutputBroadcastDialogManager.createAndShow(
                     packageName, aboveStatusBar = true, view = null)
         } else if (DEBUG) {
             Log.e(TAG, "Unable to launch media output broadcast dialog. Package name is empty.")

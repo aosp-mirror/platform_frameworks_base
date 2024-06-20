@@ -113,7 +113,7 @@
             android:excludeFromRecents="true"
             />
 
-        <activity android:name="com.android.systemui.screenshot.ScrollViewActivity"
+        <activity android:name="com.android.systemui.screenshot.scroll.ScrollViewActivity"
                   android:exported="false" />
 
         <activity android:name="com.android.systemui.screenshot.RecyclerViewActivity"
@@ -224,6 +224,5 @@
 
     <instrumentation android:name="android.testing.TestableInstrumentation"
         android:targetPackage="com.android.systemui.tests"
-        android:label="Tests for SystemUI">
-    </instrumentation>
+        android:label="Tests for SystemUI" />
 </manifest>

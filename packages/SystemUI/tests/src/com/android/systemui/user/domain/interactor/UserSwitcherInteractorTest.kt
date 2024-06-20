@@ -887,6 +887,46 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun removeGuestUser_shouldNotShowExitGuestDialog() {
+        createUserInteractor()
+        testScope.runTest {
+            val (userInfo, guestUserInfo) = createUserInfos(count = 2, includeGuest = true)
+            userRepository.setUserInfos(listOf(userInfo, guestUserInfo))
+            userRepository.setSelectedUserInfo(guestUserInfo)
+
+            whenever(manager.markGuestForDeletion(guestUserInfo.id)).thenReturn(true)
+            underTest.removeGuestUser(guestUserInfo.id, userInfo.id)
+            runCurrent()
+
+            verify(manager).markGuestForDeletion(guestUserInfo.id)
+            verify(activityManager).switchUser(userInfo.id)
+            assertThat(collectLastValue(underTest.dialogShowRequests)()).isNull()
+        }
+    }
+
+    @Test
+    fun resetGuestUser_shouldNotShowExitGuestDialog() {
+        createUserInteractor()
+        testScope.runTest {
+            val (userInfo, guestUserInfo) = createUserInfos(count = 2, includeGuest = true)
+            val otherGuestUserInfo = createUserInfos(count = 1, includeGuest = true)[0]
+            userRepository.setUserInfos(listOf(userInfo, guestUserInfo))
+            userRepository.setSelectedUserInfo(guestUserInfo)
+
+            whenever(manager.markGuestForDeletion(guestUserInfo.id)).thenReturn(true)
+            whenever(manager.createGuest(any())).thenReturn(otherGuestUserInfo)
+            underTest.removeGuestUser(guestUserInfo.id, UserHandle.USER_NULL)
+            runCurrent()
+
+            verify(manager).markGuestForDeletion(guestUserInfo.id)
+            verify(manager).createGuest(any())
+            verify(activityManager).switchUser(otherGuestUserInfo.id)
+            assertThat(collectLastValue(underTest.dialogShowRequests)())
+                .isEqualTo(ShowDialogRequestModel.ShowUserCreationDialog(isGuest = true))
+        }
+    }
+
+    @Test
     fun showUserSwitcher_fullScreenDisabled_showsDialogSwitcher() {
         createUserInteractor()
         testScope.runTest {
@@ -1012,6 +1052,136 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
         whenever(manager.aliveUsers).thenReturn(listOf())
         createUserInteractor()
         verify(spyContext, never()).startServiceAsUser(any(), any())
+    }
+
+    @Test
+    fun userIsAdminAndRestricted_addUserActionsNotAdded() {
+        createUserInteractor()
+        testScope.runTest {
+            val id = 0
+            val userInfo =
+                UserInfo(
+                    id,
+                    "child",
+                    /* iconPath= */ "",
+                    /* flags= */ UserInfo.FLAG_ADMIN,
+                    UserManager.USER_TYPE_FULL_RESTRICTED,
+                )
+            whenever(
+                    manager.hasUserRestrictionForUser(
+                        UserManager.DISALLOW_ADD_USER,
+                        UserHandle.of(id)
+                    )
+                )
+                .thenReturn(true)
+
+            userRepository.setUserInfos(listOf(userInfo))
+            userRepository.setSelectedUserInfo(userInfo)
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            val value = collectLastValue(underTest.actions)
+            runCurrent()
+
+            assertThat(value()).isEqualTo(listOf(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT))
+        }
+    }
+
+    @Test
+    fun userIsNotRestrictedAndCannotAddGuests_actionsDoesNotIncludeAddGuest() {
+        createUserInteractor()
+        testScope.runTest {
+            val userInfos = createUserInfos(count = 2, includeGuest = false)
+
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+            keyguardRepository.setKeyguardShowing(false)
+
+            whenever(manager.canAddMoreUsers(UserManager.USER_TYPE_FULL_GUEST)).thenReturn(false)
+
+            val value = collectLastValue(underTest.actions)
+            runCurrent()
+
+            assertThat(value())
+                .isEqualTo(
+                    listOf(
+                        UserActionModel.ADD_USER,
+                        UserActionModel.ADD_SUPERVISED_USER,
+                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun userIsNotRestrictedAndCannotAddUsers_actionsDoesNotIncludeAddUsers() {
+        createUserInteractor()
+        testScope.runTest {
+            val userInfos = createUserInfos(count = 2, includeGuest = false)
+
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+            keyguardRepository.setKeyguardShowing(false)
+
+            whenever(manager.canAddMoreUsers(UserManager.USER_TYPE_FULL_SECONDARY))
+                .thenReturn(false)
+
+            val value = collectLastValue(underTest.actions)
+            runCurrent()
+
+            assertThat(value())
+                .isEqualTo(
+                    listOf(
+                        UserActionModel.ENTER_GUEST_MODE,
+                        UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun systemUserHasRestrictions_addUserActionsNotAdded() {
+        createUserInteractor()
+        testScope.runTest {
+            val systemId = 0
+            val systemUser =
+                UserInfo(
+                    systemId,
+                    "system",
+                    /* iconPath= */ "",
+                    /* flags= */ UserInfo.FLAG_SYSTEM,
+                    UserManager.USER_TYPE_SYSTEM_HEADLESS,
+                )
+            val adminId = 10
+            val adminUser =
+                UserInfo(
+                    adminId,
+                    "admin",
+                    /* iconPath= */ "",
+                    /* flags= */ UserInfo.FLAG_ADMIN,
+                    UserManager.USER_TYPE_FULL_SYSTEM,
+                )
+
+            userRepository.setUserInfos(listOf(systemUser, adminUser))
+            userRepository.setSelectedUserInfo(adminUser)
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+            keyguardRepository.setKeyguardShowing(false)
+
+            whenever(headlessSystemUserMode.isHeadlessSystemUserMode()).thenReturn(true)
+            whenever(
+                    manager.hasUserRestrictionForUser(
+                        UserManager.DISALLOW_ADD_USER,
+                        UserHandle.of(0)
+                    )
+                )
+                .thenReturn(true)
+
+            val value = collectLastValue(underTest.actions)
+            runCurrent()
+
+            assertThat(value()).isEqualTo(listOf(UserActionModel.NAVIGATE_TO_USER_MANAGEMENT))
+        }
     }
 
     private fun assertUsers(

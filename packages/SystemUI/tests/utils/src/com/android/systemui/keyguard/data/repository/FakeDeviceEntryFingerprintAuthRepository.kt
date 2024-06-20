@@ -40,6 +40,9 @@ class FakeDeviceEntryFingerprintAuthRepository @Inject constructor() :
     private val _isRunning = MutableStateFlow(false)
     override val isRunning: Flow<Boolean>
         get() = _isRunning
+
+    override val isEngaged: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     fun setIsRunning(value: Boolean) {
         _isRunning.value = value
     }

@@ -37,7 +37,6 @@ import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
-import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -642,7 +641,7 @@ public abstract class AutofillService extends Service {
 
         @Override
         public void onFillCredentialRequest(FillRequest request, IFillCallback callback,
-                IAutoFillManagerClient autofillClientCallback) {
+                IBinder autofillClientCallback) {
             ICancellationSignal transport = CancellationSignal.createTransport();
             try {
                 callback.onCancellable(transport);
@@ -724,7 +723,7 @@ public abstract class AutofillService extends Service {
      */
     public void onFillCredentialRequest(@NonNull FillRequest request,
             @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback,
-            @NonNull IAutoFillManagerClient autofillClientCallback) {}
+            @NonNull IBinder autofillClientCallback) {}
 
     /**
      * Called by the Android system to convert a credential manager response to a dataset

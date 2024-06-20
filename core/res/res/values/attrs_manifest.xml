@@ -301,7 +301,9 @@
             granted to the system companion device manager service -->
         <flag name="companion" value="0x800000" />
         <!-- Additional flag from base permission type: this permission will be granted to the
-             retail demo app, as defined by the OEM. -->
+             retail demo app, as defined by the OEM.
+             This flag has been replaced by the retail demo role and is a no-op since Android V.
+          -->
         <flag name="retailDemo" value="0x1000000" />
         <!-- Additional flag from base permission type: this permission will be granted to the
              recents app. -->
@@ -840,7 +842,8 @@
             that created the task, and therefore there will only be one instance of this activity
             in a task. In contrast to the {@code singleTask} launch mode, this activity can be
             started in multiple instances in different tasks if the
-            {@code FLAG_ACTIVITY_MULTIPLE_TASK} or {@code FLAG_ACTIVITY_NEW_DOCUMENT} is set.-->
+            {@code FLAG_ACTIVITY_MULTIPLE_TASK} or {@code FLAG_ACTIVITY_NEW_DOCUMENT} is set.
+            This enum value is introduced in API level 31. -->
         <enum name="singleInstancePerTask" value="4" />
     </attr>
     <!-- Specify the orientation an activity should be run in.  If not
@@ -848,7 +851,12 @@
          of the screen.
          <p>This attribute is supported by the <a
             href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
-            element. -->
+            element.
+         <aside class="note"><b>Note:</b> Device manufacturers can configure devices to override
+            (ignore) this attribute to improve the layout of apps. See
+            <a href="{@docRoot}guide/practices/device-compatibility-mode">
+            Device compatibility mode</a>.
+         </aside> -->
     <attr name="screenOrientation">
         <!-- No preference specified: let the system decide the best
              orientation.  This will either be the orientation selected
@@ -1444,13 +1452,23 @@
          no other apps in multi-window visible on screen (e.g. picture-in-picture) or on other
          displays. Therefore, this flag cannot be used to assure an exclusive resource access.
 
-         <p>NOTE: A task's root activity value is applied to all additional activities launched in
+         <p>A task's root activity value is applied to all additional activities launched in
          the task. That is if the root activity of a task is resizeable then the system will treat
          all other activities in the task as resizeable and will not if the root activity isn't
          resizeable.
 
-         <p>NOTE: The value of {@link android.R.attr#screenOrientation} is ignored for
-         resizeable activities when in multi-window mode before Android 12. -->
+         <aside class="note"><b>Note:</b>
+            <ul>
+                <li>On Android 11 (API level 30) and lower, the value of
+                    {@link android.R.attr#screenOrientation} is ignored for resizeable activities
+                    in multi-window mode.
+                <li>Device manufacturers can configure devices to override (ignore) this attribute
+                    to force apps to resize. The override does not affect the app's support for
+                    multi-window mode. See
+                    <a href="{@docRoot}guide/practices/device-compatibility-mode">
+                    Device compatibility mode</a>.
+            </ul>
+         </aside> -->
     <attr name="resizeableActivity" format="boolean" />
 
     <!-- Indicates that the activity specifically supports the picture-in-picture form of
@@ -1467,27 +1485,37 @@
     <!-- This value indicates the maximum aspect ratio the activity supports. If the app runs on a
          device with a wider aspect ratio, the system automatically letterboxes the app, leaving
          portions of the screen unused so the app can run at its specified maximum aspect ratio.
-         <p>
-         Maximum aspect ratio, expressed as (longer dimension / shorter dimension) in decimal
+         <p>Maximum aspect ratio, expressed as (longer dimension / shorter dimension) in decimal
          form. For example, if the maximum aspect ratio is 7:3, set value to 2.33.
-         <p>
-         Value needs to be greater or equal to 1.0, otherwise it is ignored.
-         <p>
-         NOTE: This attribute is ignored if the activity has
-         {@link android.R.attr#resizeableActivity} set to true. -->
+         <p>Value needs to be greater or equal to 1.0, otherwise it is ignored.
+         <aside class="note"><b>Note:</b>
+            <ul>
+                <li>This attribute is ignored if the activity has
+                    {@link android.R.attr#resizeableActivity} set to {@code true}.
+                <li>Device manufacturers can configure devices to override (ignore) this attribute
+                    to improve the layout of apps. See
+                    <a href="{@docRoot}guide/practices/device-compatibility-mode">
+                    Device compatibility mode</a>.
+            </ul>
+         </aside> -->
     <attr name="maxAspectRatio" format="float" />
 
     <!-- This value indicates the minimum aspect ratio the activity supports. If the app runs on a
          device with a narrower aspect ratio, the system automatically letterboxes the app, leaving
          portions of the screen unused so the app can run at its specified minimum aspect ratio.
-         <p>
-         Minimum aspect ratio, expressed as (longer dimension / shorter dimension) in decimal
-         form. For example, if the minimum aspect ratio is 4:3, set value to 1.33.
-         <p>
-         Value needs to be greater or equal to 1.0, otherwise it is ignored.
-         <p>
-         NOTE: This attribute is ignored if the activity has
-         {@link android.R.attr#resizeableActivity} set to true. -->
+         <p>Minimum aspect ratio, expressed as (longer dimension / shorter dimension) in decimal
+            form. For example, if the minimum aspect ratio is 4:3, set value to 1.33.
+         <p>Value needs to be greater or equal to 1.0, otherwise it is ignored.
+         <aside class="note"><b>Note:</b>
+            <ul>
+                <li>This attribute is ignored if the activity has
+                    {@link android.R.attr#resizeableActivity} set to {@code true}.
+                <li>Device manufacturers can configure devices to override (ignore) this attribute
+                    to improve the layout of apps. See
+                    <a href="{@docRoot}guide/practices/device-compatibility-mode">
+                    Device compatibility mode</a>.
+            </ul>
+         </aside> -->
     <attr name="minAspectRatio" format="float" />
 
     <!-- This value indicates how tasks rooted at this activity will behave in lockTask mode.
@@ -3285,10 +3313,9 @@
         -->
         <attr name="enableOnBackInvokedCallback" format="boolean"/>
 
-        <!-- Specifies permissions necessary to launch this activity via
-             {@link android.content.Context#startActivity} when passing content URIs. The default
-             value is {@code none}, meaning no specific permissions are required. Setting this
-             attribute restricts activity invocation based on the invoker's permissions. If the
+        <!-- Specifies permissions necessary to launch this activity when passing content URIs. The
+             default value is {@code none}, meaning no specific permissions are required. Setting
+             this attribute restricts activity invocation based on the invoker's permissions. If the
              invoker doesn't have the required permissions, the activity start will be denied via a
              {@link java.lang.SecurityException}.
 

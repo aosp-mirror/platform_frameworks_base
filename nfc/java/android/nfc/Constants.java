@@ -16,6 +16,8 @@
 
 package android.nfc;
 
+import android.provider.Settings;
+
 /**
  * @hide
  * TODO(b/303286040): Holds @hide API constants. Formalize these APIs.
@@ -26,4 +28,15 @@ public final class Constants {
     public static final String SETTINGS_SECURE_NFC_PAYMENT_FOREGROUND = "nfc_payment_foreground";
     public static final String SETTINGS_SECURE_NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
     public static final String FEATURE_NFC_ANY = "android.hardware.nfc.any";
+
+    /**
+     * @hide constant copied from {@link Settings.Global}
+     * TODO(b/274636414): Migrate to official API in Android V.
+     */
+    public static final String SETTINGS_SATELLITE_MODE_RADIOS = "satellite_mode_radios";
+    /**
+     * @hide constant copied from {@link Settings.Global}
+     * TODO(b/274636414): Migrate to official API in Android V.
+     */
+    public static final String SETTINGS_SATELLITE_MODE_ENABLED = "satellite_mode_enabled";
 }

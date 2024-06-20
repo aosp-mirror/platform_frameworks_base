@@ -80,10 +80,6 @@ final class InputMethodMenuController {
 
         final int userId = mService.getCurrentImeUserIdLocked();
 
-        if (imList.isEmpty()) {
-            return;
-        }
-
         hideInputMethodMenuLocked();
 
         if (preferredInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
@@ -102,7 +98,10 @@ final class InputMethodMenuController {
         final int size = imList.size();
         mIms = new InputMethodInfo[size];
         mSubtypeIds = new int[size];
-        int checkedItem = 0;
+        // No items are checked by default. When we have a list of explicitly enabled subtypes,
+        // the implicit subtype is no longer listed, but if it is still the selected one,
+        // no items will be shown as checked.
+        int checkedItem = -1;
         for (int i = 0; i < size; ++i) {
             final ImeSubtypeListItem item = imList.get(i);
             mIms[i] = item.mImi;
@@ -115,6 +114,12 @@ final class InputMethodMenuController {
                     checkedItem = i;
                 }
             }
+        }
+
+        if (checkedItem == -1) {
+            Slog.w(TAG, "Switching menu shown with no item selected"
+                    + ", IME id: " + preferredInputMethodId
+                    + ", subtype index: " + preferredInputMethodSubtypeId);
         }
 
         if (mDialogWindowContext == null) {

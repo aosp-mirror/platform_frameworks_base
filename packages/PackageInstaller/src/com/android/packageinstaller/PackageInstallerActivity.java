@@ -84,8 +84,7 @@ public class PackageInstallerActivity extends Activity {
     static final String EXTRA_ORIGINAL_SOURCE_INFO = "EXTRA_ORIGINAL_SOURCE_INFO";
     static final String EXTRA_STAGED_SESSION_ID = "EXTRA_STAGED_SESSION_ID";
     static final String EXTRA_APP_SNIPPET = "EXTRA_APP_SNIPPET";
-    static final String EXTRA_ORIGINATING_UID_FROM_SESSION_INFO =
-        "EXTRA_ORIGINATING_UID_FROM_SESSION_INFO";
+    static final String EXTRA_IS_TRUSTED_SOURCE = "EXTRA_IS_TRUSTED_SOURCE";
     private static final String ALLOW_UNKNOWN_SOURCES_KEY =
             PackageInstallerActivity.class.getName() + "ALLOW_UNKNOWN_SOURCES_KEY";
 
@@ -98,10 +97,6 @@ public class PackageInstallerActivity extends Activity {
      * The package name corresponding to #mOriginatingUid
      */
     private String mOriginatingPackage;
-    /**
-     * The package name corresponding to the app updater in the update-ownership confirmation dialog
-     */
-    private String mOriginatingPackageFromSessionInfo;
     private int mActivityResultCode = Activity.RESULT_CANCELED;
     private int mPendingUserActionReason = -1;
 
@@ -154,8 +149,7 @@ public class PackageInstallerActivity extends Activity {
             viewToEnable = mDialog.requireViewById(R.id.install_confirm_question_update);
 
             final CharSequence existingUpdateOwnerLabel = getExistingUpdateOwnerLabel();
-            final CharSequence requestedUpdateOwnerLabel =
-                getApplicationLabel(mOriginatingPackageFromSessionInfo);
+            final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mOriginatingPackage);
             if (!TextUtils.isEmpty(existingUpdateOwnerLabel)
                     && mPendingUserActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP) {
                 String updateOwnerString =
@@ -182,11 +176,14 @@ public class PackageInstallerActivity extends Activity {
     }
 
     private CharSequence getExistingUpdateOwnerLabel() {
+        return getApplicationLabel(getExistingUpdateOwner());
+    }
+
+    private String getExistingUpdateOwner() {
         try {
             final String packageName = mPkgInfo.packageName;
             final InstallSourceInfo sourceInfo = mPm.getInstallSourceInfo(packageName);
-            final String existingUpdateOwner = sourceInfo.getUpdateOwnerPackageName();
-            return getApplicationLabel(existingUpdateOwner);
+            return sourceInfo.getUpdateOwnerPackageName();
         } catch (NameNotFoundException e) {
             return null;
         }
@@ -304,22 +301,19 @@ public class PackageInstallerActivity extends Activity {
         return packagesForUid[0];
     }
 
-    private boolean isInstallRequestFromUnknownSource(Intent intent) {
-        if (mCallingPackage != null && intent.getBooleanExtra(
-                Intent.EXTRA_NOT_UNKNOWN_SOURCE, false)) {
-            if (mSourceInfo != null && mSourceInfo.isPrivilegedApp()) {
-                // Privileged apps can bypass unknown sources check if they want.
-                return false;
-            }
-        }
-        if (mSourceInfo != null && checkPermission(Manifest.permission.INSTALL_PACKAGES,
-                -1 /* pid */, mSourceInfo.uid) == PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-        return true;
-    }
-
     private void initiateInstall() {
+        final String existingUpdateOwner = getExistingUpdateOwner();
+        if (mSessionId == SessionInfo.INVALID_ID &&
+            !TextUtils.isEmpty(existingUpdateOwner) &&
+            !TextUtils.equals(existingUpdateOwner, mOriginatingPackage)) {
+            // Since update ownership is being changed, the system will request another
+            // user confirmation shortly. Thus, we don't need to ask the user to confirm
+            // installation here.
+            startInstall();
+            return;
+        }
+
+        // Proceed with user confirmation as we are not changing the update-owner in this install.
         String pkgName = mPkgInfo.packageName;
         // Check if there is already a package on the device with this name
         // but it has been renamed to something else.
@@ -384,15 +378,9 @@ public class PackageInstallerActivity extends Activity {
         mCallingPackage = intent.getStringExtra(EXTRA_CALLING_PACKAGE);
         mCallingAttributionTag = intent.getStringExtra(EXTRA_CALLING_ATTRIBUTION_TAG);
         mSourceInfo = intent.getParcelableExtra(EXTRA_ORIGINAL_SOURCE_INFO);
-        mOriginatingUid = intent.getIntExtra(Intent.EXTRA_ORIGINATING_UID,
-                Process.INVALID_UID);
+        mOriginatingUid = intent.getIntExtra(Intent.EXTRA_ORIGINATING_UID, Process.INVALID_UID);
         mOriginatingPackage = (mOriginatingUid != Process.INVALID_UID)
                 ? getPackageNameForUid(mOriginatingUid) : null;
-        int originatingUidFromSessionInfo =
-            intent.getIntExtra(EXTRA_ORIGINATING_UID_FROM_SESSION_INFO, Process.INVALID_UID);
-        mOriginatingPackageFromSessionInfo = (originatingUidFromSessionInfo != Process.INVALID_UID)
-            ? getPackageNameForUid(originatingUidFromSessionInfo) : mCallingPackage;
-
 
         final Object packageSource;
         if (PackageInstaller.ACTION_CONFIRM_INSTALL.equals(action)) {
@@ -492,10 +480,13 @@ public class PackageInstallerActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         while (!mActiveUnknownSourcesListeners.isEmpty()) {
             unregister(mActiveUnknownSourcesListeners.get(0));
         }
+        if (mDialog != null) {
+            mDialog.dismiss();
+        }
+        super.onDestroy();
     }
 
     private void bindUi() {
@@ -557,7 +548,7 @@ public class PackageInstallerActivity extends Activity {
      * Check if it is allowed to install the package and initiate install if allowed.
      */
     private void checkIfAllowedAndInitiateInstall() {
-        if (mAllowUnknownSources || !isInstallRequestFromUnknownSource(getIntent())) {
+        if (mAllowUnknownSources || getIntent().getBooleanExtra(EXTRA_IS_TRUSTED_SOURCE, false)) {
             if (mLocalLOGV) Log.i(TAG, "install allowed");
             initiateInstall();
         } else {

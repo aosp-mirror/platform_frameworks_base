@@ -2,16 +2,19 @@ package com.android.systemui.animation.back
 
 import android.util.DisplayMetrics
 import android.window.BackEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mockito.verify
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class OnBackAnimationCallbackExtensionTest : SysuiTestCase() {
     private val onBackProgress: (BackTransformation) -> Unit = mock()
     private val onBackStart: (BackEvent) -> Unit = mock()
@@ -27,7 +30,7 @@ class OnBackAnimationCallbackExtensionTest : SysuiTestCase() {
 
     private val onBackAnimationCallback =
         onBackAnimationCallbackFrom(
-            backAnimationSpec = BackAnimationSpec.floatingSystemSurfacesForSysUi(displayMetrics),
+            backAnimationSpec = BackAnimationSpec.floatingSystemSurfacesForSysUi { displayMetrics },
             displayMetrics = displayMetrics,
             onBackProgressed = onBackProgress,
             onBackStarted = onBackStart,
@@ -48,7 +51,14 @@ class OnBackAnimationCallbackExtensionTest : SysuiTestCase() {
 
         onBackAnimationCallback.onBackProgressed(backEvent)
 
-        verify(onBackProgress).invoke(BackTransformation(0f, 0f, 1f))
+        val argumentCaptor = argumentCaptor<BackTransformation>()
+        verify(onBackProgress).invoke(capture(argumentCaptor))
+
+        val actual = argumentCaptor.value
+        val tolerance = 0.0001f
+        assertThat(actual.translateX).isWithin(tolerance).of(0f)
+        assertThat(actual.translateY).isWithin(tolerance).of(0f)
+        assertThat(actual.scale).isWithin(tolerance).of(1f)
     }
 
     @Test
