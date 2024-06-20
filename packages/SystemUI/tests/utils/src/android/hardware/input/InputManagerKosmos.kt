@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyboard.shortcut.shared.model
+package android.hardware.input
 
-sealed interface ShortcutHelperState {
-    data object Inactive : ShortcutHelperState
+import com.android.systemui.kosmos.Kosmos
 
-    data class Active(val deviceId: Int) : ShortcutHelperState
-}
+val Kosmos.fakeInputManager by Kosmos.Fixture { FakeInputManager() }
