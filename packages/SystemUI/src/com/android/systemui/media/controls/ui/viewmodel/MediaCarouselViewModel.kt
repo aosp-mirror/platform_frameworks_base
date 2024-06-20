@@ -108,12 +108,24 @@ constructor(
         interactor.reorderMedia()
     }
 
+    fun onCardVisibleToUser(
+        qsExpanded: Boolean,
+        visibleIndex: Int,
+        location: Int,
+        isUpdate: Boolean = false
+    ) {
+        // Skip logging if on LS or QQS, and there is no active media card
+        if (!qsExpanded && !interactor.hasActiveMediaOrRecommendation()) return
+        interactor.logSmartspaceSeenCard(visibleIndex, location, isUpdate)
+    }
+
     private fun toViewModel(
         commonModel: MediaCommonModel.MediaControl
     ): MediaCommonViewModel.MediaControl {
         val instanceId = commonModel.mediaLoadedModel.instanceId
         return mediaControlByInstanceId[instanceId]?.copy(
-            immediatelyUpdateUi = commonModel.mediaLoadedModel.immediatelyUpdateUi
+            immediatelyUpdateUi = commonModel.mediaLoadedModel.immediatelyUpdateUi,
+            updateTime = commonModel.updateTime
         )
             ?: MediaCommonViewModel.MediaControl(
                     instanceId = instanceId,
@@ -125,7 +137,8 @@ constructor(
                         mediaControlByInstanceId.remove(instanceId)
                     },
                     onUpdated = { onMediaControlAddedOrUpdated(it, commonModel) },
-                    isMediaFromRec = commonModel.isMediaFromRec
+                    isMediaFromRec = commonModel.isMediaFromRec,
+                    updateTime = commonModel.updateTime
                 )
                 .also { mediaControlByInstanceId[instanceId] = it }
     }

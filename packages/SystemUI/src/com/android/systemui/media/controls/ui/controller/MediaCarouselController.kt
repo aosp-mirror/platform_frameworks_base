@@ -764,6 +764,7 @@ constructor(
                 mediaContent.addView(viewHolder.recommendations, position)
             }
         }
+        onAddOrUpdateVisibleToUserCard(position, isMediaCardUpdate = false)
         viewController.setListening(mediaCarouselScrollHandler.visibleToUser && currentlyExpanded)
         controllerByViewModel[commonViewModel] = viewController
         updateViewControllerToState(viewController, noAnimation = true)
@@ -781,10 +782,14 @@ constructor(
         commonViewModel.onAdded(commonViewModel)
     }
 
-    private fun onUpdated(commonViewModel: MediaCommonViewModel) {
+    private fun onUpdated(commonViewModel: MediaCommonViewModel, position: Int) {
         commonViewModel.onUpdated(commonViewModel)
         updatePageIndicator()
         mediaCarouselScrollHandler.onPlayersChanged()
+        onAddOrUpdateVisibleToUserCard(
+            position,
+            commonViewModel is MediaCommonViewModel.MediaControl
+        )
     }
 
     private fun onRemoved(commonViewModel: MediaCommonViewModel) {
@@ -819,6 +824,20 @@ constructor(
         }
         updatePageIndicator()
         mediaCarouselScrollHandler.onPlayersChanged()
+    }
+
+    private fun onAddOrUpdateVisibleToUserCard(position: Int, isMediaCardUpdate: Boolean) {
+        if (
+            mediaCarouselScrollHandler.visibleToUser &&
+                mediaCarouselScrollHandler.visibleMediaIndex == position
+        ) {
+            mediaCarouselViewModel.onCardVisibleToUser(
+                mediaCarouselScrollHandler.qsExpanded,
+                mediaCarouselScrollHandler.visibleMediaIndex,
+                currentEndLocation,
+                isMediaCardUpdate
+            )
+        }
     }
 
     private fun setNewViewModelsList(viewModels: List<MediaCommonViewModel>) {
@@ -1434,6 +1453,14 @@ constructor(
 
     /** Log the user impression for media card at visibleMediaIndex. */
     fun logSmartspaceImpression(qsExpanded: Boolean) {
+        if (SceneContainerFlag.isEnabled) {
+            mediaCarouselViewModel.onCardVisibleToUser(
+                qsExpanded,
+                mediaCarouselScrollHandler.visibleMediaIndex,
+                currentEndLocation
+            )
+            return
+        }
         val visibleMediaIndex = mediaCarouselScrollHandler.visibleMediaIndex
         if (MediaPlayerData.players().size > visibleMediaIndex) {
             val mediaControlPanel = MediaPlayerData.getMediaControlPanel(visibleMediaIndex)

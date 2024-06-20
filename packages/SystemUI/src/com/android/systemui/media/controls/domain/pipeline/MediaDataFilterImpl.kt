@@ -116,11 +116,12 @@ constructor(
             return
         }
 
-        mediaFilterRepository.addSelectedUserMediaEntry(data)
+        val isUpdate = mediaFilterRepository.addSelectedUserMediaEntry(data)
 
         mediaLoadingLogger.logMediaLoaded(data.instanceId, data.active, "loading media")
         mediaFilterRepository.addMediaDataLoadingState(
-            MediaDataLoadingModel.Loaded(data.instanceId)
+            MediaDataLoadingModel.Loaded(data.instanceId),
+            isUpdate
         )
 
         // Notify listeners
@@ -323,9 +324,10 @@ constructor(
 
         mediaFilterRepository.allUserEntries.value.forEach { (key, data) ->
             if (lockscreenUserManager.isCurrentProfile(data.userId)) {
-                mediaFilterRepository.addSelectedUserMediaEntry(data)
+                val isUpdate = mediaFilterRepository.addSelectedUserMediaEntry(data)
                 mediaFilterRepository.addMediaDataLoadingState(
-                    MediaDataLoadingModel.Loaded(data.instanceId)
+                    MediaDataLoadingModel.Loaded(data.instanceId),
+                    isUpdate
                 )
                 mediaLoadingLogger.logMediaLoaded(
                     data.instanceId,

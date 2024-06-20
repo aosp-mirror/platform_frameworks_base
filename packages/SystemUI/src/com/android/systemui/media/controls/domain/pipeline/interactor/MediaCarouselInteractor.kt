@@ -211,7 +211,8 @@ constructor(
         mediaDataFilter.onSwipeToDismiss(MediaSmartspaceLogger.getSurface(location))
     }
 
-    override fun hasActiveMediaOrRecommendation() = hasActiveMediaOrRecommendation.value
+    override fun hasActiveMediaOrRecommendation() =
+        mediaFilterRepository.hasActiveMediaOrRecommendation()
 
     override fun hasAnyMediaOrRecommendation() = hasAnyMediaOrRecommendation.value
 
@@ -223,6 +224,14 @@ constructor(
 
     fun reorderMedia() {
         mediaFilterRepository.setOrderedMedia()
+    }
+
+    fun logSmartspaceSeenCard(visibleIndex: Int, location: Int, isMediaCardUpdate: Boolean) {
+        mediaFilterRepository.logSmartspaceCardSeen(
+            MediaSmartspaceLogger.getSurface(location),
+            visibleIndex,
+            isMediaCardUpdate
+        )
     }
 
     /** Add a listener for internal events. */
