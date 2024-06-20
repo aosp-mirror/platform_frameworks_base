@@ -493,6 +493,13 @@ public class MockingOomAdjusterTests {
         assertFalse(app.mState.isCached());
         assertFalse(app.mState.isEmpty());
         assertEquals("vis-activity", app.mState.getAdjType());
+
+        doReturn(WindowProcessController.ACTIVITY_STATE_FLAG_IS_VISIBLE
+                | WindowProcessController.ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN)
+                .when(wpc).getActivityStateFlags();
+        updateOomAdj(app);
+        assertProcStates(app, PROCESS_STATE_TOP, VISIBLE_APP_ADJ, SCHED_GROUP_TOP_APP);
+        assertEquals("resumed-split-screen-activity", app.mState.getAdjType());
     }
 
     @SuppressWarnings("GuardedBy")

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.res.Configuration.ASSETS_SEQ_UNDEFINED;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
@@ -316,6 +317,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public static final int ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE = 1 << 20;
     public static final int ACTIVITY_STATE_FLAG_HAS_RESUMED = 1 << 21;
     public static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
+    public static final int ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN = 1 << 23;
     public static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
 
     /**
@@ -1238,14 +1240,25 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 stateFlags |= ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE;
             }
             final Task task = r.getTask();
-            if (task != null && task.mLayerRank != Task.LAYER_RANK_INVISIBLE) {
+            if (task == null) {
+                Slog.e(TAG, "Unexpected detached " + r + " in " + this);
+                continue;
+            }
+            if (task.mLayerRank != Task.LAYER_RANK_INVISIBLE) {
                 stateFlags |= ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK;
             }
             if (r.isVisibleRequested()) {
                 if (r.isState(RESUMED)) {
                     stateFlags |= ACTIVITY_STATE_FLAG_HAS_RESUMED;
+                    final int windowingMode = r.getWindowingMode();
+                    if (windowingMode == WINDOWING_MODE_MULTI_WINDOW
+                            && com.android.window.flags.Flags
+                                    .processPriorityPolicyForMultiWindowMode()
+                            && task.getAdjacentTask() != null) {
+                        stateFlags |= ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN;
+                    }
                 }
-                if (task != null && minTaskLayer > 0) {
+                if (minTaskLayer > 0) {
                     final int layer = task.mLayerRank;
                     if (layer >= 0 && minTaskLayer > layer) {
                         minTaskLayer = layer;
@@ -2089,6 +2102,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 pw.print("V|");
                 if ((stateFlags & ACTIVITY_STATE_FLAG_HAS_RESUMED) != 0) {
                     pw.print("R|");
+                    if ((stateFlags & ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN) != 0) {
+                        pw.print("RS|");
+                    }
                 }
             } else if ((stateFlags & ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED) != 0) {
                 pw.print("P|");

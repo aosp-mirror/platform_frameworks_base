@@ -1683,7 +1683,7 @@ public class OomAdjuster {
             this.mState = app.mState;
         }
 
-        void onVisibleActivity() {
+        void onVisibleActivity(int flags) {
             // App has a visible activity; only upgrade adjustment.
             if (adj > VISIBLE_APP_ADJ) {
                 adj = VISIBLE_APP_ADJ;
@@ -1702,6 +1702,12 @@ public class OomAdjuster {
             }
             if (schedGroup < SCHED_GROUP_DEFAULT) {
                 schedGroup = SCHED_GROUP_DEFAULT;
+            }
+            if ((flags & WindowProcessController.ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN) != 0) {
+                // Another side of split should be the current global top. Use the same top
+                // priority for this non-top split.
+                schedGroup = SCHED_GROUP_TOP_APP;
+                mAdjType = "resumed-split-screen-activity";
             }
             foregroundActivities = true;
             mHasVisibleActivities = true;

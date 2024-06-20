@@ -1113,6 +1113,7 @@ final class ProcessStateRecord {
         return mCachedCompatChanges[cachedCompatChangeId] == VALUE_TRUE;
     }
 
+    /** This is only called if the process contains activities and is not the global top. */
     @GuardedBy("mService")
     void computeOomAdjFromActivitiesIfNecessary(OomAdjuster.ComputeOomAdjWindowCallback callback,
             int adj, boolean foregroundActivities, boolean hasVisibleActivities, int procState,
@@ -1125,7 +1126,7 @@ final class ProcessStateRecord {
         final int flags = mApp.getWindowProcessController().getActivityStateFlags();
 
         if ((flags & ACTIVITY_STATE_FLAG_IS_VISIBLE) != 0) {
-            callback.onVisibleActivity();
+            callback.onVisibleActivity(flags);
         } else if ((flags & ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED) != 0) {
             callback.onPausedActivity();
         } else if ((flags & ACTIVITY_STATE_FLAG_IS_STOPPING) != 0) {

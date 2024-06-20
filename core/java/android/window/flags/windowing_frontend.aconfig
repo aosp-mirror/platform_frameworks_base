@@ -146,6 +146,13 @@ flag {
 }
 
 flag {
+  name: "process_priority_policy_for_multi_window_mode"
+  namespace: "windowing_frontend"
+  description: "Use higher priority for top-like processes"
+  bug: "200769420"
+}
+
+flag {
   name: "insets_decoupled_configuration"
   namespace: "windowing_frontend"
   description: "Configuration decoupled from insets"
