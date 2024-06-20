@@ -2012,38 +2012,94 @@ public class HdmiCecLocalDeviceTvTest {
     }
 
     @Test
-    public void handleStandby_fromActiveSource_standby() {
-        mPowerManager.setInteractive(true);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+    public void handleStandby_fromActiveSource_previousActiveSourceSet_standby() {
+        mHdmiCecLocalDeviceTv = new MockTvDevice(mHdmiControlService);
+        HdmiCecMessage activeSourceFromPlayback =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1, 0x1000);
+        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(ADDR_PLAYBACK_1,
+                ADDR_TV);
         mTestLooper.dispatchAll();
 
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+                .isFalse();
+        mPowerManager.setInteractive(true);
+        mTestLooper.dispatchAll();
+
+        mHdmiCecLocalDeviceTv.dispatchMessage(activeSourceFromPlayback);
         mHdmiControlService.setActiveSource(ADDR_PLAYBACK_1, 0x1000,
                 "HdmiCecLocalDeviceTvTest");
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(ADDR_PLAYBACK_1,
-                ADDR_TV);
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+                .isTrue();
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
                 .isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
 
         assertThat(mPowerManager.isInteractive()).isFalse();
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+                .isFalse();
     }
 
     @Test
-    public void handleStandby_fromNonActiveSource_noStandby() {
+    public void handleStandby_fromNonActiveSource_previousActiveSourceSet_noStandby() {
+        HdmiCecMessage activeSourceFromPlayback =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_2, 0x2000);
+        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(ADDR_PLAYBACK_1,
+                ADDR_TV);
+        mHdmiCecLocalDeviceTv = new MockTvDevice(mHdmiControlService);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+                .isFalse();
         mPowerManager.setInteractive(true);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+
+        mHdmiCecLocalDeviceTv.dispatchMessage(activeSourceFromPlayback);
         mHdmiControlService.setActiveSource(ADDR_PLAYBACK_2, 0x2000,
                 "HdmiCecLocalDeviceTvTest");
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(ADDR_PLAYBACK_1,
-                ADDR_TV);
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+                .isTrue();
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
                 .isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
 
         assertThat(mPowerManager.isInteractive()).isTrue();
+    }
+
+
+    @Test
+    public void handleStandby_fromNonActiveSource_previousActiveSourceNotSet_Standby() {
+        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(ADDR_PLAYBACK_1,
+                ADDR_TV);
+        mHdmiCecLocalDeviceTv = new MockTvDevice(mHdmiControlService);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+                .isFalse();
+        mPowerManager.setInteractive(true);
+
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+                .isFalse();
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
+                .isEqualTo(Constants.HANDLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isFalse();
+        assertThat(mHdmiCecLocalDeviceTv.getWasActiveSourceSetToConnectedDevice())
+                .isFalse();
+    }
+
+    protected static class MockTvDevice extends HdmiCecLocalDeviceTv {
+        MockTvDevice(HdmiControlService service) {
+            super(service);
+        }
+
+        @Override
+        protected int handleActiveSource(HdmiCecMessage message) {
+            setWasActiveSourceSetToConnectedDevice(true);
+            return super.handleActiveSource(message);
+        }
     }
 }
