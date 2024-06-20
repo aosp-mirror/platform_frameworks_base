@@ -128,6 +128,87 @@ public class ViewFrameRateTest {
         assertEquals(0f, mViewRoot.getLastPreferredFrameRate(), 0f);
     }
 
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
+    public void highHintWhenActionMove() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_LOW);
+            ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            mMovingView.setLayoutParams(layoutParams);
+            mMovingView.setOnClickListener((v) -> {});
+        });
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> assertEquals(FRAME_RATE_CATEGORY_LOW,
+                mViewRoot.getLastPreferredFrameRateCategory()));
+
+        int[] position = new int[2];
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.getLocationOnScreen(position);
+            position[0] += mMovingView.getWidth() / 2;
+            position[1] += mMovingView.getHeight() / 2;
+        });
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        long now = SystemClock.uptimeMillis();
+        MotionEvent down = MotionEvent.obtain(
+                now, // downTime
+                now, // eventTime
+                MotionEvent.ACTION_DOWN, // action
+                position[0], // x
+                position[1], // y
+                0 // metaState
+        );
+        down.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        instrumentation.sendPointerSync(down);
+
+        now = SystemClock.uptimeMillis();
+        MotionEvent move = MotionEvent.obtain(
+                now, // downTime
+                now, // eventTime
+                MotionEvent.ACTION_MOVE, // action
+                position[0], // x
+                position[1], // y
+                0 // metaState
+        );
+        move.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        instrumentation.sendPointerSync(move);
+
+        // We should continue to enable touch boost even when GTE compatibility is present.
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.offsetLeftAndRight(10);
+            assertTrue(mViewRoot.getIsTouchBoosting());
+        });
+
+        now = SystemClock.uptimeMillis();
+        MotionEvent up = MotionEvent.obtain(
+                now, // downTime
+                now, // eventTime
+                MotionEvent.ACTION_UP, // action
+                position[0], // x
+                position[1], // y
+                0 // metaState
+        );
+        up.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        instrumentation.sendPointerSync(up);
+
+        // No touch boost when there is no ongoing pressed gesture.
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.offsetLeftAndRight(10);
+            assertFalse(mViewRoot.getIsTouchBoosting());
+        });
+
+        down.recycle();
+        move.recycle();
+        up.recycle();
+    }
+
     @Test
     @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
     public void frameBoostDisable() throws Throwable {
