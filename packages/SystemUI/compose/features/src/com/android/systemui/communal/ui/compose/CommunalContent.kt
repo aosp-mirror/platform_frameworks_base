@@ -29,6 +29,7 @@ import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
+import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import javax.inject.Inject
@@ -41,8 +42,10 @@ constructor(
     private val interactionHandler: SmartspaceInteractionHandler,
     private val dialogFactory: SystemUIDialogFactory,
     private val lockSection: LockSection,
+    private val bottomAreaSection: BottomAreaSection,
     private val ambientStatusBarSection: AmbientStatusBarSection,
 ) {
+
     @Composable
     fun SceneScope.Content(modifier: Modifier = Modifier) {
         Layout(
@@ -65,10 +68,16 @@ constructor(
                         modifier = Modifier.element(Communal.Elements.LockIcon)
                     )
                 }
+                with(bottomAreaSection) {
+                    IndicationArea(
+                        Modifier.element(Communal.Elements.IndicationArea).fillMaxWidth()
+                    )
+                }
             }
         ) { measurables, constraints ->
             val communalGridMeasurable = measurables[0]
             val lockIconMeasurable = measurables[1]
+            val bottomAreaMeasurable = measurables[2]
 
             val noMinConstraints =
                 constraints.copy(
@@ -85,6 +94,13 @@ constructor(
                     bottom = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Bottom],
                 )
 
+            val bottomAreaPlaceable =
+                bottomAreaMeasurable.measure(
+                    noMinConstraints.copy(
+                        maxHeight = (constraints.maxHeight - lockIconBounds.bottom).coerceAtLeast(0)
+                    )
+                )
+
             val communalGridPlaceable =
                 communalGridMeasurable.measure(
                     noMinConstraints.copy(maxHeight = lockIconBounds.top)
@@ -98,6 +114,10 @@ constructor(
                 lockIconPlaceable.place(
                     x = lockIconBounds.left,
                     y = lockIconBounds.top,
+                )
+                bottomAreaPlaceable.place(
+                    x = 0,
+                    y = constraints.maxHeight - bottomAreaPlaceable.height,
                 )
             }
         }
