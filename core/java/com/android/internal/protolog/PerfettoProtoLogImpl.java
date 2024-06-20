@@ -106,6 +106,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
     private final int[] mDefaultLogLevelCounts = new int[LogLevel.values().length];
     private final Map<IProtoLogGroup, int[]> mLogLevelCounts = new ArrayMap<>();
+    private final Map<IProtoLogGroup, Integer> mCollectStackTraceGroupCounts = new ArrayMap<>();
 
     private final Lock mBackgroundServiceLock = new ReentrantLock();
     private ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
@@ -162,8 +163,15 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             @Nullable Object[] args) {
         if (isProtoEnabled()) {
             long tsNanos = SystemClock.elapsedRealtimeNanos();
+            final String stacktrace;
+            if (mCollectStackTraceGroupCounts.getOrDefault(group, 0) > 0) {
+                stacktrace = collectStackTrace();
+            } else {
+                stacktrace = null;
+            }
             mBackgroundLoggingService.execute(() ->
-                    logToProto(level, group, messageHash, paramsMask, args, tsNanos));
+                        logToProto(level, group, messageHash, paramsMask, args, tsNanos,
+                                stacktrace));
         }
         if (group.isLogToLogcat()) {
             logToLogcat(group.getTag(), level, messageHash, args);
@@ -174,9 +182,15 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     public void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object... args) {
         if (isProtoEnabled()) {
             long tsNanos = SystemClock.elapsedRealtimeNanos();
+            final String stacktrace;
+            if (mCollectStackTraceGroupCounts.getOrDefault(group, 0) > 0) {
+                stacktrace = collectStackTrace();
+            } else {
+                stacktrace = null;
+            }
             mBackgroundLoggingService.execute(
                     () -> logStringMessageToProto(logLevel, group, messageString, args,
-                            tsNanos));
+                            tsNanos, stacktrace));
         }
         if (group.isLogToLogcat()) {
             logToLogcat(group.getTag(), logLevel, messageString, args);
@@ -372,30 +386,32 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private void logToProto(LogLevel level, IProtoLogGroup logGroup, long messageHash,
-            int paramsMask, Object[] args, long tsNanos) {
+            int paramsMask, Object[] args, long tsNanos, @Nullable String stacktrace) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logToProto");
         try {
-            doLogToProto(level, logGroup, new Message(messageHash), paramsMask, args, tsNanos);
+            doLogToProto(level, logGroup, new Message(messageHash), paramsMask, args, tsNanos,
+                    stacktrace);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
     private void logStringMessageToProto(LogLevel logLevel, IProtoLogGroup group,
-            String messageString, Object[] args, long tsNanos) {
+            String messageString, Object[] args, long tsNanos, @Nullable String stacktrace) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logStringMessageToProto");
         try {
-            doLogToProto(logLevel, group, messageString, args, tsNanos);
+            doLogToProto(logLevel, group, messageString, args, tsNanos, stacktrace);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
     private void doLogToProto(LogLevel level, IProtoLogGroup logGroup, String messageString,
-            Object[] args, long tsNanos) {
+            Object[] args, long tsNanos, @Nullable String stacktrace) {
         final List<Integer> argTypes = LogDataType.parseFormatString(messageString);
         final int typeMask = LogDataType.logDataTypesToBitMask(argTypes);
-        doLogToProto(level, logGroup, new Message(messageString), typeMask, args, tsNanos);
+        doLogToProto(level, logGroup, new Message(messageString), typeMask, args, tsNanos,
+                stacktrace);
     }
 
     private static class Message {
@@ -414,7 +430,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private void doLogToProto(LogLevel level, IProtoLogGroup logGroup, Message message,
-            int paramsMask, Object[] args, long tsNanos) {
+            int paramsMask, Object[] args, long tsNanos, @Nullable String stacktrace) {
         mDataSource.trace(ctx -> {
             final ProtoLogDataSource.TlsState tlsState = ctx.getCustomTlsState();
             final LogLevel logFrom = tlsState.getLogFromLevel(logGroup.name());
@@ -442,7 +458,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 // Intern stackstraces before creating the trace packet for the proto message so
                 // that the interned stacktrace strings appear before in the trace to make the
                 // trace processing easier.
-                String stacktrace = collectStackTrace();
                 internedStacktrace = internStacktraceString(ctx, stacktrace);
             }
 
@@ -778,6 +793,11 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             for (int i = defaultLogFrom.ordinal(); i < LogLevel.values().length; i++) {
                 logLevelsCountsForGroup[logFromLevel.ordinal()]++;
             }
+
+            if (config.getConfigFor(overriddenGroupTag).collectStackTrace) {
+                mCollectStackTraceGroupCounts.put(group,
+                        mCollectStackTraceGroupCounts.getOrDefault(group, 0) + 1);
+            }
         }
 
         mCacheUpdater.run();
@@ -804,6 +824,15 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             }
             if (Arrays.stream(logLevelsCountsForGroup).allMatch(it -> it == 0)) {
                 mLogLevelCounts.remove(group);
+            }
+
+            if (config.getConfigFor(overriddenGroupTag).collectStackTrace) {
+                mCollectStackTraceGroupCounts.put(group,
+                        mCollectStackTraceGroupCounts.get(group) - 1);
+
+                if (mCollectStackTraceGroupCounts.get(group) == 0) {
+                    mCollectStackTraceGroupCounts.remove(group);
+                }
             }
         }
 
