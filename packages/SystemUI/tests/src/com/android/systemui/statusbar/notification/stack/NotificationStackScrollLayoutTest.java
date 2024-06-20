@@ -262,15 +262,62 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateStackEndHeightAndStackHeight_normallyUpdatesBoth() {
-        final float expansionFraction = 0.5f;
+    @EnableSceneContainer
+    public void updateStackEndHeightAndStackHeight_shadeFullyExpanded_withSceneContainer() {
+        final float stackTop = 200f;
+        final float stackCutoff = 1000f;
+        final float stackEndHeight = stackCutoff - stackTop;
+        mAmbientState.setStackTop(stackTop);
+        mAmbientState.setStackCutoff(stackCutoff);
         mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
-
-        // Validate that by default we update everything
         clearInvocations(mAmbientState);
+
+        // WHEN shade is fully expanded
+        mStackScroller.updateStackEndHeightAndStackHeight(/* fraction = */ 1.0f);
+
+        // THEN stackHeight and stackEndHeight are the same
+        verify(mAmbientState).setStackEndHeight(stackEndHeight);
+        verify(mAmbientState).setStackHeight(stackEndHeight);
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void updateStackEndHeightAndStackHeight_shadeExpanding_withSceneContainer() {
+        final float stackTop = 200f;
+        final float stackCutoff = 1000f;
+        final float stackEndHeight = stackCutoff - stackTop;
+        mAmbientState.setStackTop(stackTop);
+        mAmbientState.setStackCutoff(stackCutoff);
+        mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
+        clearInvocations(mAmbientState);
+
+        // WHEN shade is expanding
+        final float expansionFraction = 0.5f;
         mStackScroller.updateStackEndHeightAndStackHeight(expansionFraction);
-        verify(mAmbientState).setStackEndHeight(anyFloat());
-        verify(mAmbientState).setStackHeight(anyFloat());
+
+        // THEN stackHeight is changed by the expansion frac
+        verify(mAmbientState).setStackEndHeight(stackEndHeight);
+        verify(mAmbientState).setStackHeight(stackEndHeight * 0.75f);
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void updateStackEndHeightAndStackHeight_shadeOverscrolledToTop_withSceneContainer() {
+        // GIVEN stack scrolled over the top, stack top is negative
+        final float stackTop = -2000f;
+        final float stackCutoff = 1000f;
+        final float stackEndHeight = stackCutoff - stackTop;
+        mAmbientState.setStackTop(stackTop);
+        mAmbientState.setStackCutoff(stackCutoff);
+        mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
+        clearInvocations(mAmbientState);
+
+        // WHEN stack is updated
+        mStackScroller.updateStackEndHeightAndStackHeight(/* fraction = */ 1.0f);
+
+        // THEN stackHeight is measured from the stack top
+        verify(mAmbientState).setStackEndHeight(stackEndHeight);
+        verify(mAmbientState).setStackHeight(stackEndHeight);
     }
 
     @Test

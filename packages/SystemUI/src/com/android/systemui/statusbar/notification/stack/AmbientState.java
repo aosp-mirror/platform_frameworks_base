@@ -131,13 +131,13 @@ public class AmbientState implements Dumpable {
     /** Distance of top of notifications panel from top of screen. */
     private float mStackY = 0;
 
-    /** Height of notifications panel. */
+    /** Height of notifications panel interpolated by the expansion fraction. */
     private float mStackHeight = 0;
 
     /** Fraction of shade expansion. */
     private float mExpansionFraction;
 
-    /** Height of the notifications panel without top padding when expansion completes. */
+    /** Height of the notifications panel when expansion completes. */
     private float mStackEndHeight;
 
     /** Whether we are swiping up. */
@@ -176,8 +176,7 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @param stackEndHeight Height of the notifications panel without top padding
-     *                       when expansion completes.
+     * @see #getStackEndHeight()
      */
     public void setStackEndHeight(float stackEndHeight) {
         mStackEndHeight = stackEndHeight;
@@ -257,14 +256,14 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @param stackHeight Height of notifications panel.
+     * @see #getStackHeight()
      */
     public void setStackHeight(float stackHeight) {
         mStackHeight = stackHeight;
     }
 
     /**
-     * @return Height of notifications panel.
+     * @return Height of notifications panel interpolated by the expansion fraction.
      */
     public float getStackHeight() {
         return mStackHeight;
