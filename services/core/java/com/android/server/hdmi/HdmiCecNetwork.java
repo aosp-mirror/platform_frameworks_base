@@ -655,7 +655,11 @@ public class HdmiCecNetwork {
                     .setPortId(physicalAddressToPortId(physicalAddress))
                     .setDeviceType(type)
                     .build();
-            updateCecDevice(updatedDeviceInfo);
+            if (deviceInfo.getPhysicalAddress() != physicalAddress) {
+                addCecDevice(updatedDeviceInfo);
+            } else {
+                updateCecDevice(updatedDeviceInfo);
+            }
         }
     }
 
