@@ -95,9 +95,22 @@ class InstallRepository(private val context: Context) {
      */
     var stagedSessionId = SessionInfo.INVALID_ID
         private set
+
+    /**
+     * UID of the last caller of Pia. This can point to a 3P installer if it uses intents to install
+     * an APK, or receives a
+     * [STATUS_PENDING_USER_ACTION][PackageInstaller.STATUS_PENDING_USER_ACTION] status code.
+     * It may point to Pia, when it receives the STATUS_PENDING_USER_ACTION status code in case of
+     * an update-ownership change.
+     */
     private var callingUid = Process.INVALID_UID
+
+    /**
+     * UID of the origin of the installation. This UID is used to fetch the app-label of the
+     * source of the install, and also check whether the source app has the AppOp to install other
+     * apps.
+     */
     private var originatingUid = Process.INVALID_UID
-    private var originatingUidFromSessionInfo = Process.INVALID_UID
     private var callingPackage: String? = null
     private var sessionStager: SessionStager? = null
     private lateinit var intent: Intent
@@ -143,22 +156,19 @@ class InstallRepository(private val context: Context) {
             Log.e(LOG_TAG, "Could not determine the launching uid.")
         }
 
-        originatingUidFromSessionInfo = callingUid
+        originatingUid = callingUid
         val sessionInfo: SessionInfo? =
             if (sessionId != SessionInfo.INVALID_ID)
                 packageInstaller.getSessionInfo(sessionId)
             else null
         if (sessionInfo != null) {
-            callingPackage = sessionInfo.installerPackageName
             callingAttributionTag = sessionInfo.installerAttributionTag
             if (sessionInfo.originatingUid != Process.INVALID_UID) {
-                originatingUidFromSessionInfo = sessionInfo.originatingUid
+                originatingUid = sessionInfo.originatingUid
             }
         }
 
         val sourceInfo: ApplicationInfo? = getSourceInfo(callingPackage)
-        // Uid of the source package, with a preference to uid from ApplicationInfo
-        originatingUid = sourceInfo?.uid ?: callingUid
         appOpRequestInfo = AppOpRequestInfo(
             getPackageNameForUid(context, originatingUid, callingPackage),
             originatingUid, callingAttributionTag
@@ -180,24 +190,18 @@ class InstallRepository(private val context: Context) {
         }
 
         if ((sessionId != SessionInfo.INVALID_ID
-                && !isCallerSessionOwner(packageInstaller, originatingUid, sessionId))
+                && !isCallerSessionOwner(packageInstaller, callingUid, sessionId))
             || (stagedSessionId != SessionInfo.INVALID_ID
                 && !isCallerSessionOwner(packageInstaller, Process.myUid(), stagedSessionId))
         ) {
             Log.e(LOG_TAG, "UID is not the owner of the session:\n" +
-                "CallingUid: $originatingUid | SessionId: $sessionId\n" +
+                "CallingUid: $callingUid | SessionId: $sessionId\n" +
                 "My UID: ${Process.myUid()} | StagedSessionId: $stagedSessionId")
             return InstallAborted(ABORT_REASON_INTERNAL_ERROR)
         }
 
-        isTrustedSource = isInstallRequestFromTrustedSource(sourceInfo, this.intent, originatingUid)
-        if (!isInstallPermissionGrantedOrRequested(
-                context, callingUid, originatingUid, isTrustedSource
-            )
-        ) {
-            Log.e(LOG_TAG, "UID $originatingUid needs to declare " +
-                Manifest.permission.REQUEST_INSTALL_PACKAGES
-            )
+        isTrustedSource = isInstallRequestFromTrustedSource(sourceInfo, this.intent, callingUid)
+        if (!isInstallPermissionGrantedOrRequested(context, callingUid, isTrustedSource)) {
             return InstallAborted(ABORT_REASON_INTERNAL_ERROR)
         }
 
@@ -230,12 +234,12 @@ class InstallRepository(private val context: Context) {
     private fun isInstallRequestFromTrustedSource(
         sourceInfo: ApplicationInfo?,
         intent: Intent,
-        originatingUid: Int,
+        callingUid: Int,
     ): Boolean {
         val isNotUnknownSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false)
         return (sourceInfo != null && sourceInfo.isPrivilegedApp
             && (isNotUnknownSource
-            || isPermissionGranted(context, Manifest.permission.INSTALL_PACKAGES, originatingUid)))
+            || isPermissionGranted(context, Manifest.permission.INSTALL_PACKAGES, callingUid)))
     }
 
     private fun getDevicePolicyRestrictions(): String? {
@@ -661,10 +665,9 @@ class InstallRepository(private val context: Context) {
         if (isAppUpdating(pkgInfo)) {
             val existingUpdateOwnerLabel = getExistingUpdateOwnerLabel(pkgInfo)
 
-            val originatingPackageNameFromSessionInfo =
-                getPackageNameForUid(context, originatingUidFromSessionInfo, callingPackage)
-            val requestedUpdateOwnerLabel =
-                getApplicationLabel(originatingPackageNameFromSessionInfo)
+            val originatingPackageName =
+                getPackageNameForUid(context, originatingUid, callingPackage)
+            val requestedUpdateOwnerLabel = getApplicationLabel(originatingPackageName)
 
             if (!TextUtils.isEmpty(existingUpdateOwnerLabel)
                 && userActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP
