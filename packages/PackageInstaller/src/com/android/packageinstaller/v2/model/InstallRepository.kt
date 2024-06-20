@@ -149,11 +149,13 @@ class InstallRepository(private val context: Context) {
         stagedSessionId = intent.getIntExtra(EXTRA_STAGED_SESSION_ID, SessionInfo.INVALID_ID)
 
         callingPackage = callerInfo.packageName
-
-        // Uid of the source package, coming from ActivityManager
         callingUid = callerInfo.uid
-        if (callingUid == Process.INVALID_UID) {
-            Log.e(LOG_TAG, "Could not determine the launching uid.")
+
+        val sourceInfo: ApplicationInfo? = getSourceInfo(callingPackage)
+        if (callingUid == Process.INVALID_UID && sourceInfo == null) {
+            // Caller's identity could not be determined. Abort the install
+            Log.e(LOG_TAG, "Cannot determine caller since UID is invalid and sourceInfo is null")
+            return InstallAborted(ABORT_REASON_INTERNAL_ERROR)
         }
 
         originatingUid = callingUid
@@ -168,25 +170,22 @@ class InstallRepository(private val context: Context) {
             }
         }
 
-        val sourceInfo: ApplicationInfo? = getSourceInfo(callingPackage)
         appOpRequestInfo = AppOpRequestInfo(
             getPackageNameForUid(context, originatingUid, callingPackage),
-            originatingUid, callingAttributionTag
+            originatingUid,
+            callingAttributionTag
         )
 
-        if(localLogv) {
-            Log.i(LOG_TAG, "Intent: $intent\n" +
-                "sessionId: $sessionId\n" +
-                "staged sessionId: $stagedSessionId\n" +
-                "calling package: $callingPackage\n" +
-                "callingUid: $callingUid\n" +
-                "originatingUid: $originatingUid")
-        }
-
-        if (callingUid == Process.INVALID_UID && sourceInfo == null) {
-            // Caller's identity could not be determined. Abort the install
-            Log.e(LOG_TAG, "Cannot determine caller since UID is invalid and sourceInfo is null")
-            return InstallAborted(ABORT_REASON_INTERNAL_ERROR)
+        if (localLogv) {
+            Log.i(
+                LOG_TAG, "Intent: $intent\n" +
+                    "sessionId: $sessionId\n" +
+                    "staged sessionId: $stagedSessionId\n" +
+                    "calling package: $callingPackage\n" +
+                    "callingUid: $callingUid\n" +
+                    "originatingUid: $originatingUid\n" +
+                    "sourceInfo: $sourceInfo"
+            )
         }
 
         if ((sessionId != SessionInfo.INVALID_ID
@@ -194,9 +193,11 @@ class InstallRepository(private val context: Context) {
             || (stagedSessionId != SessionInfo.INVALID_ID
                 && !isCallerSessionOwner(packageInstaller, Process.myUid(), stagedSessionId))
         ) {
-            Log.e(LOG_TAG, "UID is not the owner of the session:\n" +
-                "CallingUid: $callingUid | SessionId: $sessionId\n" +
-                "My UID: ${Process.myUid()} | StagedSessionId: $stagedSessionId")
+            Log.e(
+                LOG_TAG, "UID is not the owner of the session:\n" +
+                    "CallingUid: $callingUid | SessionId: $sessionId\n" +
+                    "My UID: ${Process.myUid()} | StagedSessionId: $stagedSessionId"
+            )
             return InstallAborted(ABORT_REASON_INTERNAL_ERROR)
         }
 
@@ -209,7 +210,7 @@ class InstallRepository(private val context: Context) {
         if (restriction != null) {
             val adminSupportDetailsIntent =
                 devicePolicyManager!!.createAdminSupportIntent(restriction)
-            Log.e(LOG_TAG, "$restriction set in place. Cannot install." )
+            Log.e(LOG_TAG, "$restriction set in place. Cannot install.")
             return InstallAborted(
                 ABORT_REASON_POLICY, message = restriction, resultIntent = adminSupportDetailsIntent
             )
@@ -324,7 +325,7 @@ class InstallRepository(private val context: Context) {
                             Intent.EXTRA_INSTALL_RESULT, PackageManager.INSTALL_FAILED_INVALID_APK
                         ),
                         activityResultCode = Activity.RESULT_FIRST_USER,
-                        errorDialogType =  if (e is IOException) DLG_PACKAGE_ERROR else DLG_NONE
+                        errorDialogType = if (e is IOException) DLG_PACKAGE_ERROR else DLG_NONE
                     )
                     return
                 }
@@ -405,8 +406,9 @@ class InstallRepository(private val context: Context) {
                 Log.e(LOG_TAG, "Cannot parse package $debugPathName. Assuming defaults.", e)
                 params.setSize(pfd.statSize)
             } catch (e: IOException) {
-                Log.e(LOG_TAG, "Cannot calculate installed size $debugPathName. " +
-                    "Try only apk size.", e
+                Log.e(
+                    LOG_TAG, "Cannot calculate installed size $debugPathName. " +
+                        "Try only apk size.", e
                 )
             }
         } else {
@@ -771,14 +773,14 @@ class InstallRepository(private val context: Context) {
     }
 
     private fun handleUnknownSources(requestInfo: AppOpRequestInfo): InstallStage {
-        if (requestInfo.callingPackage == null) {
+        if (requestInfo.originatingPackage == null) {
             Log.i(LOG_TAG, "No source found for package " + newPackageInfo?.packageName)
             return InstallUserActionRequired(USER_ACTION_REASON_ANONYMOUS_SOURCE)
         }
         // Shouldn't use static constant directly, see b/65534401.
         val appOpStr = AppOpsManager.permissionToOp(Manifest.permission.REQUEST_INSTALL_PACKAGES)
         val appOpMode = appOpsManager!!.noteOpNoThrow(
-            appOpStr!!, requestInfo.originatingUid, requestInfo.callingPackage,
+            appOpStr!!, requestInfo.originatingUid, requestInfo.originatingPackage,
             requestInfo.attributionTag, "Started package installation activity"
         )
         if (localLogv) {
@@ -789,20 +791,20 @@ class InstallRepository(private val context: Context) {
             AppOpsManager.MODE_DEFAULT, AppOpsManager.MODE_ERRORED -> {
                 if (appOpMode == AppOpsManager.MODE_DEFAULT) {
                     appOpsManager.setMode(
-                        appOpStr, requestInfo.originatingUid, requestInfo.callingPackage,
+                        appOpStr, requestInfo.originatingUid, requestInfo.originatingPackage,
                         AppOpsManager.MODE_ERRORED
                     )
                 }
                 try {
                     val sourceInfo =
-                        packageManager.getApplicationInfo(requestInfo.callingPackage, 0)
+                        packageManager.getApplicationInfo(requestInfo.originatingPackage, 0)
                     val sourceAppSnippet = getAppSnippet(context, sourceInfo)
                     InstallUserActionRequired(
                         USER_ACTION_REASON_UNKNOWN_SOURCE, appSnippet = sourceAppSnippet,
-                        dialogMessage = requestInfo.callingPackage
+                        sourceApp = requestInfo.originatingPackage
                     )
                 } catch (e: PackageManager.NameNotFoundException) {
-                    Log.e(LOG_TAG, "Did not find appInfo for " + requestInfo.callingPackage)
+                    Log.e(LOG_TAG, "Did not find appInfo for " + requestInfo.originatingPackage)
                     InstallAborted(ABORT_REASON_INTERNAL_ERROR)
                 }
             }
@@ -844,8 +846,10 @@ class InstallRepository(private val context: Context) {
                 setStageBasedOnResult(PackageInstaller.STATUS_SUCCESS, -1, null)
             } catch (e: PackageManager.NameNotFoundException) {
                 setStageBasedOnResult(
-                    PackageInstaller.STATUS_FAILURE, PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
-                    null)
+                    PackageInstaller.STATUS_FAILURE,
+                    PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
+                    null
+                )
             }
             return
         }
@@ -865,7 +869,8 @@ class InstallRepository(private val context: Context) {
             }
         } catch (e: OutOfIdsException) {
             setStageBasedOnResult(
-                PackageInstaller.STATUS_FAILURE, PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null)
+                PackageInstaller.STATUS_FAILURE, PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null
+            )
             return
         }
         val broadcastIntent = Intent(BROADCAST_ACTION)
@@ -883,7 +888,8 @@ class InstallRepository(private val context: Context) {
             Log.e(LOG_TAG, "Session $stagedSessionId could not be opened.", e)
             packageInstaller.abandonSession(stagedSessionId)
             setStageBasedOnResult(
-                PackageInstaller.STATUS_FAILURE, PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null)
+                PackageInstaller.STATUS_FAILURE, PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null
+            )
         }
     }
 
@@ -893,9 +899,11 @@ class InstallRepository(private val context: Context) {
         message: String?,
     ) {
         if (localLogv) {
-            Log.i(LOG_TAG, "Status code: $statusCode\n" +
-                "legacy status: $legacyStatus\n" +
-                "message: $message")
+            Log.i(
+                LOG_TAG, "Status code: $statusCode\n" +
+                    "legacy status: $legacyStatus\n" +
+                    "message: $message"
+            )
         }
         if (statusCode == PackageInstaller.STATUS_SUCCESS) {
             val shouldReturnResult = intent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)
@@ -908,11 +916,12 @@ class InstallRepository(private val context: Context) {
             _installResult.setValue(InstallSuccess(appSnippet, shouldReturnResult, resultIntent))
         } else {
             if (statusCode != PackageInstaller.STATUS_FAILURE_ABORTED) {
-                _installResult.setValue(InstallFailed(appSnippet, statusCode, legacyStatus, message))
+                _installResult.setValue(
+                    InstallFailed(appSnippet, statusCode, legacyStatus, message)
+                )
             } else {
                 _installResult.setValue(InstallAborted(ABORT_REASON_INTERNAL_ERROR))
             }
-
         }
     }
 
@@ -956,7 +965,7 @@ class InstallRepository(private val context: Context) {
 
     data class CallerInfo(val packageName: String?, val uid: Int)
     data class AppOpRequestInfo(
-        val callingPackage: String?,
+        val originatingPackage: String?,
         val originatingUid: Int,
         val attributionTag: String?,
     )

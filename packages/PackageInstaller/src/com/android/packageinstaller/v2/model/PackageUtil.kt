@@ -362,8 +362,8 @@ object PackageUtil {
      * @return the packageName corresponding to a UID.
      */
     @JvmStatic
-    fun getPackageNameForUid(context: Context, sourceUid: Int, callingPackage: String?): String? {
-        if (sourceUid == Process.INVALID_UID) {
+    fun getPackageNameForUid(context: Context, uid: Int, preferredPkgName: String?): String? {
+        if (uid == Process.INVALID_UID) {
             return null
         }
         // If the sourceUid belongs to the system downloads provider, we explicitly return the
@@ -371,20 +371,21 @@ object PackageUtil {
         // packages, resulting in uncertainty about which package will end up first in the list
         // of packages associated with this UID
         val pm = context.packageManager
-        val systemDownloadProviderInfo = getSystemDownloadsProviderInfo(pm, sourceUid)
+        val systemDownloadProviderInfo = getSystemDownloadsProviderInfo(pm, uid)
         if (systemDownloadProviderInfo != null) {
             return systemDownloadProviderInfo.packageName
         }
-        val packagesForUid = pm.getPackagesForUid(sourceUid) ?: return null
+
+        val packagesForUid = pm.getPackagesForUid(uid) ?: return null
         if (packagesForUid.size > 1) {
-            if (callingPackage != null) {
+            Log.i(LOG_TAG, "Multiple packages found for source uid $uid")
+            if (preferredPkgName != null) {
                 for (packageName in packagesForUid) {
-                    if (packageName == callingPackage) {
+                    if (packageName == preferredPkgName) {
                         return packageName
                     }
                 }
             }
-            Log.i(LOG_TAG, "Multiple packages found for source uid $sourceUid")
         }
         return packagesForUid[0]
     }
@@ -439,7 +440,7 @@ object PackageUtil {
      */
     data class AppSnippet(var label: CharSequence?, var icon: Drawable?) {
         override fun toString(): String {
-            return "AppSnippet[label = ${label}, hasIcon = ${icon != null}]"
+            return "AppSnippet[label = $label, hasIcon = ${icon != null}]"
         }
     }
 }
