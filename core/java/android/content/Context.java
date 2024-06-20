@@ -4419,7 +4419,8 @@ public abstract class Context {
      * @see #DISPLAY_HASH_SERVICE
      * @see android.view.displayhash.DisplayHashManager
      */
-    public abstract @Nullable Object getSystemService(@ServiceName @NonNull String name);
+    // TODO(b/347269120): Re-add @Nullable
+    public abstract Object getSystemService(@ServiceName @NonNull String name);
 
     /**
      * Return the handle to a system-level service by class.
@@ -4463,7 +4464,8 @@ public abstract class Context {
      * <b>never</b> throw a {@link RuntimeException} if the name is not supported.
      */
     @SuppressWarnings("unchecked")
-    public final @Nullable <T> T getSystemService(@NonNull Class<T> serviceClass) {
+    // TODO(b/347269120): Re-add @Nullable
+    public final <T> T getSystemService(@NonNull Class<T> serviceClass) {
         // Because subclasses may override getSystemService(String) we cannot
         // perform a lookup by class alone.  We must first map the class to its
         // service name then invoke the string-based method.
