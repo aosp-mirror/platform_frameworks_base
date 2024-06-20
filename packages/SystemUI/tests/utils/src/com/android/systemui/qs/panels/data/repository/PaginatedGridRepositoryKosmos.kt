@@ -16,6 +16,12 @@
 
 package com.android.systemui.qs.panels.data.repository
 
+import com.android.systemui.common.ui.data.repository.configurationRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testCase
 
-val Kosmos.infiniteGridSizeRepository by Kosmos.Fixture { InfiniteGridSizeRepository() }
+val Kosmos.paginatedGridRepository by
+    Kosmos.Fixture {
+        testCase.context.orCreateTestableResources
+        PaginatedGridRepository(testCase.context.resources, configurationRepository)
+    }

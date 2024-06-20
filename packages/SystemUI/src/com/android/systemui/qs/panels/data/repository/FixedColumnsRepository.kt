@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @SysUISingleton
-class NoopConsistencyInteractor @Inject constructor() : GridTypeConsistencyInteractor {
-    override fun reconcileTiles(tiles: List<TileSpec>): List<TileSpec> = tiles
+class FixedColumnsRepository @Inject constructor() {
+    // Number of columns in the narrowest state for consistency
+    private val _columns = MutableStateFlow(4)
+    val columns: StateFlow<Int> = _columns.asStateFlow()
 }

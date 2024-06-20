@@ -16,15 +16,28 @@
 
 package com.android.systemui.qs.panels.data.repository
 
+import android.content.res.Resources
+import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
+import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 
+/**
+ * Provides the number of [rows] to use with a paginated grid, by tracking the resource
+ * [R.integer.quick_settings_max_rows].
+ */
 @SysUISingleton
-class InfiniteGridSizeRepository @Inject constructor() {
-    // Number of columns in the narrowest state for consistency
-    private val _columns = MutableStateFlow(4)
-    val columns: StateFlow<Int> = _columns.asStateFlow()
+class PaginatedGridRepository
+@Inject
+constructor(
+    @Main private val resources: Resources,
+    configurationRepository: ConfigurationRepository,
+) {
+    val rows =
+        configurationRepository.onConfigurationChange.emitOnStart().map {
+            resources.getInteger(R.integer.quick_settings_max_rows)
+        }
 }

@@ -17,7 +17,16 @@
 package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.infiniteGridSizeInteractor
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.qs.panels.domain.interactor.paginatedGridInteractor
 
-val Kosmos.infiniteGridSizeViewModel by
-    Kosmos.Fixture { InfiniteGridSizeViewModelImpl(infiniteGridSizeInteractor) }
+val Kosmos.paginatedGridViewModel by
+    Kosmos.Fixture {
+        PaginatedGridViewModel(
+            iconTilesViewModel,
+            fixedColumnsSizeViewModel,
+            iconLabelVisibilityViewModel,
+            paginatedGridInteractor,
+            applicationCoroutineScope,
+        )
+    }

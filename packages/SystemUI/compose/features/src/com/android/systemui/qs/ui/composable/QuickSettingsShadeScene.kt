@@ -155,6 +155,7 @@ private fun QuickSettingsLayout(
             viewModel = viewModel.tileGridViewModel,
             modifier =
                 Modifier.fillMaxWidth().heightIn(max = QuickSettingsShade.Dimensions.GridMaxHeight),
+            viewModel.editModeViewModel::startEditing,
         )
         Button(
             onClick = { viewModel.editModeViewModel.startEditing() },
@@ -169,7 +170,7 @@ object QuickSettingsShade {
     object Dimensions {
         val Padding = 16.dp
         val BrightnessSliderHeight = 64.dp
-        val GridMaxHeight = 400.dp
+        val GridMaxHeight = 800.dp
     }
 
     object Transitions {

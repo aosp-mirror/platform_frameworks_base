@@ -17,16 +17,30 @@
 package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.qs.panels.domain.interactor.PaginatedGridInteractor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 @SysUISingleton
-class PartitionedGridViewModel
+class PaginatedGridViewModel
 @Inject
 constructor(
     iconTilesViewModel: IconTilesViewModel,
     gridSizeViewModel: FixedColumnsSizeViewModel,
     iconLabelVisibilityViewModel: IconLabelVisibilityViewModel,
+    paginatedGridInteractor: PaginatedGridInteractor,
+    @Application applicationScope: CoroutineScope,
 ) :
     IconTilesViewModel by iconTilesViewModel,
     FixedColumnsSizeViewModel by gridSizeViewModel,
-    IconLabelVisibilityViewModel by iconLabelVisibilityViewModel
+    IconLabelVisibilityViewModel by iconLabelVisibilityViewModel {
+    val rows =
+        paginatedGridInteractor.rows.stateIn(
+            applicationScope,
+            SharingStarted.WhileSubscribed(),
+            paginatedGridInteractor.defaultRows,
+        )
+}

@@ -17,16 +17,16 @@
 package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.domain.interactor.FixedColumnsSizeInteractor
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
+
+interface FixedColumnsSizeViewModel {
+    val columns: StateFlow<Int>
+}
 
 @SysUISingleton
-class PartitionedGridViewModel
-@Inject
-constructor(
-    iconTilesViewModel: IconTilesViewModel,
-    gridSizeViewModel: FixedColumnsSizeViewModel,
-    iconLabelVisibilityViewModel: IconLabelVisibilityViewModel,
-) :
-    IconTilesViewModel by iconTilesViewModel,
-    FixedColumnsSizeViewModel by gridSizeViewModel,
-    IconLabelVisibilityViewModel by iconLabelVisibilityViewModel
+class FixedColumnsSizeViewModelImpl @Inject constructor(interactor: FixedColumnsSizeInteractor) :
+    FixedColumnsSizeViewModel {
+    override val columns: StateFlow<Int> = interactor.columns
+}

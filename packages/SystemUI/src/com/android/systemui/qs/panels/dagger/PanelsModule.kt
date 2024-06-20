@@ -30,18 +30,21 @@ import com.android.systemui.qs.panels.shared.model.GridConsistencyLog
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.IconLabelVisibilityLog
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
+import com.android.systemui.qs.panels.shared.model.PaginatedGridLayoutType
 import com.android.systemui.qs.panels.shared.model.PartitionedGridLayoutType
 import com.android.systemui.qs.panels.shared.model.StretchedGridLayoutType
 import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
+import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
+import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout
 import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
 import com.android.systemui.qs.panels.ui.compose.StretchedGridLayout
+import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModelImpl
 import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModelImpl
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModelImpl
-import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridSizeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridSizeViewModelImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -62,14 +65,24 @@ interface PanelsModule {
 
     @Binds fun bindIconTilesViewModel(impl: IconTilesViewModelImpl): IconTilesViewModel
 
-    @Binds fun bindGridSizeViewModel(impl: InfiniteGridSizeViewModelImpl): InfiniteGridSizeViewModel
+    @Binds fun bindGridSizeViewModel(impl: FixedColumnsSizeViewModelImpl): FixedColumnsSizeViewModel
 
     @Binds
     fun bindIconLabelVisibilityViewModel(
         impl: IconLabelVisibilityViewModelImpl
     ): IconLabelVisibilityViewModel
 
-    @Binds @Named("Default") fun bindDefaultGridLayout(impl: PartitionedGridLayout): GridLayout
+    @Binds
+    @PaginatedBaseLayoutType
+    fun bindPaginatedBaseGridLayout(impl: PartitionedGridLayout): PaginatableGridLayout
+
+    @Binds
+    @PaginatedBaseLayoutType
+    fun bindPaginatedBaseConsistencyInteractor(
+        impl: NoopGridConsistencyInteractor
+    ): GridTypeConsistencyInteractor
+
+    @Binds @Named("Default") fun bindDefaultGridLayout(impl: PaginatedGridLayout): GridLayout
 
     companion object {
         @Provides
@@ -109,6 +122,14 @@ interface PanelsModule {
         }
 
         @Provides
+        @IntoSet
+        fun providePaginatedGridLayout(
+            gridLayout: PaginatedGridLayout
+        ): Pair<GridLayoutType, GridLayout> {
+            return Pair(PaginatedGridLayoutType, gridLayout)
+        }
+
+        @Provides
         fun provideGridLayoutMap(
             entries: Set<@JvmSuppressWildcards Pair<GridLayoutType, GridLayout>>
         ): Map<GridLayoutType, GridLayout> {
@@ -144,6 +165,14 @@ interface PanelsModule {
             consistencyInteractor: NoopGridConsistencyInteractor
         ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
             return Pair(PartitionedGridLayoutType, consistencyInteractor)
+        }
+
+        @Provides
+        @IntoSet
+        fun providePaginatedGridConsistencyInteractor(
+            @PaginatedBaseLayoutType consistencyInteractor: GridTypeConsistencyInteractor,
+        ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
+            return Pair(PaginatedGridLayoutType, consistencyInteractor)
         }
 
         @Provides

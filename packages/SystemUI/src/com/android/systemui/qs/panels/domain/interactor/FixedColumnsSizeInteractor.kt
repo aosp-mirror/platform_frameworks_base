@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.data.repository.FixedColumnsRepository
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
 @SysUISingleton
-class PartitionedGridViewModel
-@Inject
-constructor(
-    iconTilesViewModel: IconTilesViewModel,
-    gridSizeViewModel: FixedColumnsSizeViewModel,
-    iconLabelVisibilityViewModel: IconLabelVisibilityViewModel,
-) :
-    IconTilesViewModel by iconTilesViewModel,
-    FixedColumnsSizeViewModel by gridSizeViewModel,
-    IconLabelVisibilityViewModel by iconLabelVisibilityViewModel
+class FixedColumnsSizeInteractor @Inject constructor(repo: FixedColumnsRepository) {
+    val columns: StateFlow<Int> = repo.columns
+}
