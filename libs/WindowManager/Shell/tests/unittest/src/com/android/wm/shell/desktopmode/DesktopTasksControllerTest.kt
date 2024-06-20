@@ -191,7 +191,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             .strictness(Strictness.LENIENT)
             .spyStatic(DesktopModeStatus::class.java)
             .startMocking()
-    whenever(DesktopModeStatus.isEnabled()).thenReturn(true)
+    whenever(DesktopModeStatus.isDesktopModeFlagEnabled()).thenReturn(true)
     doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
 
     shellInit = spy(ShellInit(testExecutor))
@@ -261,7 +261,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   fun instantiate_flagOff_doNotAddInitCallback() {
-    whenever(DesktopModeStatus.isEnabled()).thenReturn(false)
+    whenever(DesktopModeStatus.isDesktopModeFlagEnabled()).thenReturn(false)
     clearInvocations(shellInit)
 
     createController()
