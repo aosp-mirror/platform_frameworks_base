@@ -63,7 +63,7 @@ import java.nio.charset.StandardCharsets;
  */
 @SmallTest
 @Presubmit
-public class WindowTracingTest {
+public class WindowTracingLegacyTest {
 
     private static final byte[] MAGIC_HEADER = new byte[]{
             0x9, 0x57, 0x49, 0x4e, 0x54, 0x52, 0x41, 0x43, 0x45,
@@ -88,7 +88,7 @@ public class WindowTracingTest {
         mFile = testContext.getFileStreamPath("tracing_test.dat");
         mFile.delete();
 
-        mWindowTracing = new WindowTracing(mFile, mWmMock, mChoreographer,
+        mWindowTracing = new WindowTracingLegacy(mFile, mWmMock, mChoreographer,
                 new WindowManagerGlobalLock(), 1024);
     }
 
