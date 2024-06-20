@@ -28,8 +28,8 @@
 #include <include/gpu/ganesh/vk/GrVkBackendSemaphore.h>
 #include <include/gpu/ganesh/vk/GrVkBackendSurface.h>
 #include <include/gpu/ganesh/vk/GrVkDirectContext.h>
+#include <include/gpu/vk/VulkanBackendContext.h>
 #include <ui/FatVector.h>
-#include <vk/GrVkExtensions.h>
 #include <vk/GrVkTypes.h>
 
 #include <sstream>
@@ -141,7 +141,8 @@ VulkanManager::~VulkanManager() {
     mPhysicalDeviceFeatures2 = {};
 }
 
-void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFeatures2& features) {
+void VulkanManager::setupDevice(skgpu::VulkanExtensions& grExtensions,
+                                VkPhysicalDeviceFeatures2& features) {
     VkResult err;
 
     constexpr VkApplicationInfo app_info = {
@@ -506,7 +507,7 @@ sk_sp<GrDirectContext> VulkanManager::createContext(GrContextOptions& options,
         return vkGetInstanceProcAddr(instance, proc_name);
     };
 
-    GrVkBackendContext backendContext;
+    skgpu::VulkanBackendContext backendContext;
     backendContext.fInstance = mInstance;
     backendContext.fPhysicalDevice = mPhysicalDevice;
     backendContext.fDevice = mDevice;
