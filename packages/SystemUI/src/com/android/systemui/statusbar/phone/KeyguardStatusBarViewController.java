@@ -378,6 +378,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mAnimationScheduler.addCallback(mAnimationCallback);
         mUserInfoController.addCallback(mOnUserInfoChangedListener);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mStatusBarState = mStatusBarStateController.getState();
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mDisableStateTracker.startTracking(mCommandQueue, mView.getDisplay().getDisplayId());
         if (mTintedIconManager == null) {
