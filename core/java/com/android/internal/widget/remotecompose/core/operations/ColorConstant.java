@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,32 +24,27 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 import java.util.List;
 
 /**
- * Operation to deal with Text data
+ * Operation that defines a simple Color based on ID
+ * Mainly for colors in theming.
  */
-public class NamedVariable implements Operation {
-    public int mVarId;
-    public String mVarName;
-    public int mVarType;
+public class ColorConstant implements Operation {
+    public int mColorId;
+    public int mColor;
     public static final Companion COMPANION = new Companion();
-    public static final int MAX_STRING_SIZE = 4000;
-    public static final int COLOR_TYPE = 2;
-    public static final int FLOAT_TYPE = 1;
-    public static final int STRING_TYPE = 0;
-    public NamedVariable(int varId, int varType, String name) {
-        this.mVarId = varId;
-        this.mVarType = varType;
-        this.mVarName = name;
+
+    public ColorConstant(int colorId, int color) {
+        this.mColorId = colorId;
+        this.mColor = color;
     }
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mVarId, mVarType, mVarName);
+        COMPANION.apply(buffer, mColorId, mColor);
     }
 
     @Override
     public String toString() {
-        return "VariableName[" + mVarId + "] = \""
-                + Utils.trimString(mVarName, 10) + "\" type=" + mVarType;
+        return "ColorConstant[" + mColorId + "] = " + Utils.colorInt(mColor) + "";
     }
 
     public static class Companion implements CompanionOperation {
@@ -58,40 +53,38 @@ public class NamedVariable implements Operation {
 
         @Override
         public String name() {
-            return "TextData";
+            return "ColorConstant";
         }
 
         @Override
         public int id() {
-            return Operations.DATA_TEXT;
+            return Operations.COLOR_CONSTANT;
         }
 
         /**
          * Writes out the operation to the buffer
+         *
          * @param buffer
-         * @param varId
-         * @param varType
-         * @param text
+         * @param colorId
+         * @param color
          */
-        public void apply(WireBuffer buffer, int varId, int varType, String text) {
-            buffer.start(Operations.NAMED_VARIABLE);
-            buffer.writeInt(varId);
-            buffer.writeInt(varType);
-            buffer.writeUTF8(text);
+        public void apply(WireBuffer buffer, int colorId, int color) {
+            buffer.start(Operations.COLOR_CONSTANT);
+            buffer.writeInt(colorId);
+            buffer.writeInt(color);
         }
 
         @Override
         public void read(WireBuffer buffer, List<Operation> operations) {
-            int varId = buffer.readInt();
-            int varType = buffer.readInt();
-            String text = buffer.readUTF8(MAX_STRING_SIZE);
-            operations.add(new NamedVariable(varId, varType, text));
+            int colorId = buffer.readInt();
+            int color = buffer.readInt();
+            operations.add(new ColorConstant(colorId, color));
         }
     }
 
     @Override
     public void apply(RemoteContext context) {
-        context.loadVariableName(mVarName, mVarId, mVarType);
+        context.loadColor(mColorId, mColor);
     }
 
     @Override
