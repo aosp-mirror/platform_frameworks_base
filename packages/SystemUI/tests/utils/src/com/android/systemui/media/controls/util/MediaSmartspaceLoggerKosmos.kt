@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.controls.data.repository
+package com.android.systemui.media.controls.util
 
-import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.media.controls.util.mediaSmartspaceLogger
-import com.android.systemui.statusbar.policy.configurationController
-import com.android.systemui.util.time.systemClock
+import org.mockito.Mockito.mock
 
-val Kosmos.mediaFilterRepository by
-    Kosmos.Fixture {
-        MediaFilterRepository(
-            applicationContext = applicationContext,
-            systemClock = systemClock,
-            configurationController = configurationController,
-            smartspaceLogger = mediaSmartspaceLogger,
-        )
-    }
+var Kosmos.mediaSmartspaceLogger by Kosmos.Fixture { MediaSmartspaceLogger() }
+val Kosmos.mockMediaSmartspaceLogger by Kosmos.Fixture { mock(MediaSmartspaceLogger::class.java) }
