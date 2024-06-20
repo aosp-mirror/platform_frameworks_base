@@ -94,6 +94,7 @@ object Notifications {
         val HeadsUpNotificationPlaceholder =
             ElementKey("HeadsUpNotificationPlaceholder", scenePicker = LowestZIndexScenePicker)
         val ShelfSpace = ElementKey("ShelfSpace")
+        val NotificationStackCutoffGuideline = ElementKey("NotificationStackCutoffGuideline")
     }
 
     // Expansion fraction thresholds (between 0-1f) at which the corresponding value should be
@@ -410,18 +411,22 @@ fun SceneScope.NotificationShelfSpace(
  * the notification contents (stack, footer, shelf) should be drawn.
  */
 @Composable
-fun NotificationStackCutoffGuideline(
+fun SceneScope.NotificationStackCutoffGuideline(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
 ) {
     Spacer(
         modifier =
-            modifier.fillMaxWidth().height(0.dp).onGloballyPositioned { coordinates ->
-                val positionY = coordinates.positionInWindow().y
-                debugLog(viewModel) { "STACK cutoff onGloballyPositioned: y=$positionY" }
-                stackScrollView.setStackCutoff(positionY)
-            }
+            modifier
+                .element(key = Notifications.Elements.NotificationStackCutoffGuideline)
+                .fillMaxWidth()
+                .height(0.dp)
+                .onGloballyPositioned { coordinates ->
+                    val positionY = coordinates.positionInWindow().y
+                    debugLog(viewModel) { "STACK cutoff onGloballyPositioned: y=$positionY" }
+                    stackScrollView.setStackCutoff(positionY)
+                }
     )
 }
 

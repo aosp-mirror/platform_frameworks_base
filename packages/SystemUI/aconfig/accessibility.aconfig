@@ -73,6 +73,16 @@ flag {
 }
 
 flag {
+    name: "redesign_magnifier_window_size"
+    namespace: "accessibility"
+    description: "Redesigns the window magnification magnifier sizes provided in the settings panel."
+    bug: "288056772"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "save_and_restore_magnification_settings_buttons"
     namespace: "accessibility"
     description: "Saves the selected button status in magnification settings and restore the status when revisiting the same smallest screen DP."

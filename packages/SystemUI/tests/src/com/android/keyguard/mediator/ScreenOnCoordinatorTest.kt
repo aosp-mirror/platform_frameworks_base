@@ -19,7 +19,7 @@ package com.android.keyguard.mediator
 import android.os.Looper
 import android.platform.test.flag.junit.SetFlagsRule
 import android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
@@ -43,7 +43,7 @@ import org.mockito.MockitoAnnotations
 import java.util.Optional
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ScreenOnCoordinatorTest : SysuiTestCase() {
 
     @Mock

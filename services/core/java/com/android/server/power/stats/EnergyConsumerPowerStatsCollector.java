@@ -128,6 +128,16 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        int voltageMv = mVoltageSupplier.getAsInt();
+        int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
+        if (averageVoltage <= 0) {
+            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMv
+                    + " mV) when querying energy consumers");
+            return null;
+        }
+
+        mLastVoltageMv = voltageMv;
+
         EnergyConsumerResult[] energy =
                     mConsumedEnergyRetriever.getConsumedEnergy(mEnergyConsumerIds);
         long consumedEnergy = 0;
@@ -151,15 +161,6 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
-        int voltageMv = mVoltageSupplier.getAsInt();
-        if (voltageMv <= 0) {
-            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMv
-                    + " mV) when querying energy consumers");
-            voltageMv = 0;
-        }
-
-        int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
-        mLastVoltageMv = voltageMv;
         mLayout.setConsumedEnergy(mPowerStats.stats, 0, uJtoUc(energyDelta, averageVoltage));
 
         for (int i = mPowerStats.uidStats.size() - 1; i >= 0; i--) {

@@ -4444,6 +4444,7 @@
   <java-symbol type="bool" name="config_profcollectReportUploaderEnabled" />
   <java-symbol type="string" name="config_defaultProfcollectReportUploaderApp" />
   <java-symbol type="string" name="config_defaultProfcollectReportUploaderAction" />
+  <java-symbol type="array" name="config_profcollectOnCameraOpenedSkipPackages" />
 
   <java-symbol type="string" name="usb_device_resolve_prompt_warn" />
 
@@ -5424,6 +5425,7 @@
   <java-symbol type="drawable" name="focus_event_pressed_key_background" />
   <java-symbol type="drawable" name="focus_event_rotary_input_background" />
   <java-symbol type="string" name="config_defaultShutdownVibrationFile" />
+  <java-symbol type="bool" name="config_disableShutdownVibrationInZen" />
   <java-symbol type="string" name="lockscreen_too_many_failed_attempts_countdown" />
 
   <java-symbol type="bool" name="config_enable_a11y_magnification_single_panning" />
@@ -5515,6 +5517,12 @@
   <java-symbol type="string" name="biometric_dangling_notification_action_set_up" />
   <java-symbol type="string" name="biometric_dangling_notification_action_not_now" />
 
+  <!-- Notification bundles -->
+  <java-symbol type="string"  name="promotional_notification_channel_label"/>
+  <java-symbol type="string"  name="social_notification_channel_label"/>
+  <java-symbol type="string"  name="news_notification_channel_label"/>
+  <java-symbol type="string"  name="recs_notification_channel_label"/>
+
   <!-- Priority Modes icons -->
   <java-symbol type="drawable" name="ic_zen_mode_type_bedtime" />
   <java-symbol type="drawable" name="ic_zen_mode_type_driving" />
@@ -5525,5 +5533,4 @@
   <java-symbol type="drawable" name="ic_zen_mode_type_schedule_time" />
   <java-symbol type="drawable" name="ic_zen_mode_type_theater" />
   <java-symbol type="drawable" name="ic_zen_mode_type_unknown" />
-
 </resources>

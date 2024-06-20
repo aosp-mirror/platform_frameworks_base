@@ -2373,7 +2373,7 @@ public class ZenModeConfig implements Parcelable {
 
         public int userId = UserHandle.USER_NULL;  // USER_NULL = unspecified - use current user
         public String calName;  // CalendarContract.Calendars.DISPLAY_NAME, or null for any
-        public Long calendarId; // Calendars._ID, or null if restored from < Q calendar
+        @Nullable public Long calendarId; // Calendars._ID, or null if restored from < Q calendar
         public int reply;
 
         @Override
@@ -2403,6 +2403,33 @@ public class ZenModeConfig implements Parcelable {
         public static int resolveUserId(int userId) {
             return userId == UserHandle.USER_NULL ? ActivityManager.getCurrentUser() : userId;
         }
+    }
+
+    // ==== Built-in system condition: custom manual ====
+
+    public static final String CUSTOM_MANUAL_PATH = "custom_manual";
+    private static final Uri CUSTOM_MANUAL_CONDITION_ID =
+            new Uri.Builder().scheme(Condition.SCHEME)
+                    .authority(SYSTEM_AUTHORITY)
+                    .appendPath(CUSTOM_MANUAL_PATH)
+                    .build();
+
+    /** Returns the condition id used for manual (not automatically triggered) custom rules. */
+    public static Uri toCustomManualConditionId() {
+        return CUSTOM_MANUAL_CONDITION_ID;
+    }
+
+    /**
+     * Returns whether the supplied {@link Uri} corresponds to the condition id used for manual (not
+     * automatically triggered) custom rules.
+     */
+    public static boolean isValidCustomManualConditionId(Uri conditionId) {
+        return CUSTOM_MANUAL_CONDITION_ID.equals(conditionId);
+    }
+
+    /** Returns the {@link ComponentName} of the custom manual condition provider. */
+    public static ComponentName getCustomManualConditionProvider() {
+        return new ComponentName(SYSTEM_AUTHORITY, "CustomManualConditionProvider");
     }
 
     // ==== End built-in system conditions ====

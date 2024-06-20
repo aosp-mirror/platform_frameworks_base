@@ -269,6 +269,8 @@
     <string name="screenshot_detected_multiple_template"><xliff:g id="appName" example="Google Chrome">%1$s</xliff:g> and other open apps detected this screenshot.</string>
     <!-- Add to note button used in App Clips flow to return the saved screenshot image to notes app. [CHAR LIMIT=NONE] -->
     <string name="app_clips_save_add_to_note">Add to note</string>
+    <!-- TODO(b/300307759): Temporary string for text view that displays backlinks data. [CHAR LIMIT=NONE] -->
+    <string name="backlinks_string" translatable="false">Open <xliff:g id="appName" example="Google Chrome">%1$s</xliff:g></string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_title">Screen Recorder</string>
@@ -1379,6 +1381,15 @@
 
     <!-- Text which is shown in the expanded notification shade when there are currently no notifications visible that the user hasn't already seen. [CHAR LIMIT=30] -->
     <string name="no_unseen_notif_text">No new notifications</string>
+
+    <!-- Title of heads up notification for adaptive notifications user education. [CHAR LIMIT=30] -->
+    <string name="adaptive_notification_edu_hun_title">Adaptive notifications is on</string>
+
+    <!-- Text of heads up notification for adaptive notifications user education. [CHAR LIMIT=100] -->
+    <string name="adaptive_notification_edu_hun_text">Your device now lowers the volume and reduces pop-ups on the screen for up to two minutes when you receive many notifications in a short time span.</string>
+
+    <!-- Action label for going to adaptive notification settings [CHAR LIMIT=20] -->
+    <string name="go_to_adaptive_notification_settings">Turn off</string>
 
     <!-- Text which is shown in the locked notification shade when there are currently no notifications, but if the user were to unlock, notifications would appear. [CHAR LIMIT=40] -->
     <string name="unlock_to_see_notif_text">Unlock to see older notifications</string>
@@ -3577,6 +3588,12 @@
     <string name="touchpad_tutorial_action_key_button">Action key</string>
     <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_done_button">Done</string>
+    <!-- Touchpad back gesture action name in tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_back_gesture_action_title">Go back</string>
+    <!-- Touchpad back gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_back_gesture_guidance">To go back, swipe left or right using three fingers anywhere on the touchpad.</string>
+    <string name="touchpad_back_gesture_animation_content_description">Touchpad showing three fingers moving right and left</string>
+    <string name="touchpad_back_gesture_screen_animation_content_description">Device screen showing animation for back gesture</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>

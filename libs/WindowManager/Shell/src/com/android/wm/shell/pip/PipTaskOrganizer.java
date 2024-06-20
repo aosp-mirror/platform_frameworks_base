@@ -608,6 +608,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void exitPip(int animationDurationMs, boolean requestEnterSplit) {
         if (!mPipTransitionState.isInPip()
                 || mPipTransitionState.getTransitionState() == PipTransitionState.EXITING_PIP
+                || mPipTransitionState.getInSwipePipToHomeTransition()
                 || mToken == null) {
             ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Not allowed to exitPip in current state"

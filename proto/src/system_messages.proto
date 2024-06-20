@@ -310,6 +310,10 @@ message SystemMessage {
     // Package: android
     NOTE_USB_UVC = 75;
 
+    // Inform the user about adaptive notifications
+    // Package: com.android.systemui
+    NOTE_ADAPTIVE_NOTIFICATIONS = 76;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

@@ -16,16 +16,20 @@
 
 package com.android.systemui.screenshot.appclips;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_ACCEPTED;
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_CANCELLED;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.ACTION_FINISH_FROM_TRAMPOLINE;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_NAME;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_TASK_ID;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_RESULT_RECEIVER;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.PERMISSION_SELF;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -43,6 +47,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
@@ -51,9 +56,12 @@ import androidx.lifecycle.ViewModelProvider;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLogger.UiEventEnum;
 import com.android.settingslib.Utils;
+import com.android.systemui.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.screenshot.scroll.CropView;
 import com.android.systemui.settings.UserTracker;
+
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -73,8 +81,6 @@ import javax.inject.Inject;
  *
  * <p>This {@link Activity} runs in its own separate process to isolate memory intensive image
  * editing from SysUI process.
- *
- * TODO(b/267309532): Polish UI and animations.
  */
 public class AppClipsActivity extends ComponentActivity {
 
@@ -94,6 +100,7 @@ public class AppClipsActivity extends ComponentActivity {
     private CropView mCropView;
     private Button mSave;
     private Button mCancel;
+    private TextView mBacklinksData;
     private AppClipsViewModel mViewModel;
 
     private ResultReceiver mResultReceiver;
@@ -153,11 +160,10 @@ public class AppClipsActivity extends ComponentActivity {
         mCancel = mLayout.findViewById(R.id.cancel);
         mSave.setOnClickListener(this::onClick);
         mCancel.setOnClickListener(this::onClick);
-
-
         mCropView = mLayout.findViewById(R.id.crop_view);
-
+        mBacklinksData = mLayout.findViewById(R.id.backlinks_data);
         mPreview = mLayout.findViewById(R.id.preview);
+
         mPreview.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
                         updateImageDimensions());
@@ -166,9 +172,19 @@ public class AppClipsActivity extends ComponentActivity {
         mViewModel.getScreenshot().observe(this, this::setScreenshot);
         mViewModel.getResultLiveData().observe(this, this::setResultThenFinish);
         mViewModel.getErrorLiveData().observe(this, this::setErrorThenFinish);
+        mViewModel.getBacklinksLiveData().observe(this, this::setBacklinksData);
 
         if (savedInstanceState == null) {
-            mViewModel.performScreenshot();
+            int displayId = getDisplayId();
+            mViewModel.performScreenshot(displayId);
+
+            if (Flags.appClipsBacklinks()) {
+                int appClipsTaskId = getTaskId();
+                int callingPackageTaskId = intent.getIntExtra(EXTRA_CALLING_PACKAGE_TASK_ID,
+                        INVALID_TASK_ID);
+                Set<Integer> taskIdsToIgnore = Set.of(appClipsTaskId, callingPackageTaskId);
+                mViewModel.triggerBacklinks(taskIdsToIgnore, displayId);
+            }
         }
     }
 
@@ -279,6 +295,15 @@ public class AppClipsActivity extends ComponentActivity {
     private void setErrorThenFinish(int errorCode) {
         setError(errorCode);
         finish();
+    }
+
+    private void setBacklinksData(ClipData clipData) {
+        if (mBacklinksData.getVisibility() == View.GONE) {
+            mBacklinksData.setVisibility(View.VISIBLE);
+        }
+
+        mBacklinksData.setText(String.format(getString(R.string.backlinks_string),
+                clipData.getDescription().getLabel()));
     }
 
     private void setError(int errorCode) {

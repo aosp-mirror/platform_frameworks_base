@@ -4069,8 +4069,10 @@ public class AudioManager {
     private boolean delegateSoundEffectToVdm(@SystemSoundEffect int effectType) {
         if (hasCustomPolicyVirtualDeviceContext()) {
             VirtualDeviceManager vdm = getVirtualDeviceManager();
-            vdm.playSoundEffect(mOriginalContextDeviceId, effectType);
-            return true;
+            if (vdm != null) {
+                vdm.playSoundEffect(mOriginalContextDeviceId, effectType);
+                return true;
+            }
         }
         return false;
     }

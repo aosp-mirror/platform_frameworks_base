@@ -42,6 +42,7 @@ public class XmlUtils {
     public static final String HR_TAG_DATA_COLLECTED = "data-collected";
     public static final String HR_TAG_DATA_COLLECTED_EPHEMERAL = "data-collected-ephemeral";
     public static final String HR_TAG_DATA_SHARED = "data-shared";
+    public static final String HR_TAG_ITEM = "item";
     public static final String HR_ATTR_NAME = "name";
     public static final String HR_ATTR_EMAIL = "email";
     public static final String HR_ATTR_ADDRESS = "address";
@@ -64,12 +65,13 @@ public class XmlUtils {
     public static final String HR_ATTR_DESCRIPTION = "description";
     public static final String HR_ATTR_CONTAINS_ADS = "containsAds";
     public static final String HR_ATTR_OBEY_APS = "obeyAps";
+    public static final String HR_ATTR_APS_COMPLIANT = "apsCompliant";
     public static final String HR_ATTR_ADS_FINGERPRINTING = "adsFingerprinting";
     public static final String HR_ATTR_SECURITY_FINGERPRINTING = "securityFingerprinting";
     public static final String HR_ATTR_PRIVACY_POLICY = "privacyPolicy";
     public static final String HR_ATTR_SECURITY_ENDPOINTS = "securityEndpoints";
-    public static final String HR_ATTR_FIRST_PARTY_ENDPOINTS = "firstPartyEndpoints";
-    public static final String HR_ATTR_SERVICE_PROVIDER_ENDPOINTS = "serviceProviderEndpoints";
+    public static final String HR_TAG_FIRST_PARTY_ENDPOINTS = "first-party-endpoints";
+    public static final String HR_TAG_SERVICE_PROVIDER_ENDPOINTS = "service-provider-endpoints";
     public static final String HR_ATTR_CATEGORY = "category";
 
     public static final String OD_TAG_BUNDLE = "bundle";
@@ -98,12 +100,13 @@ public class XmlUtils {
     public static final String OD_NAME_DESCRIPTION = "description";
     public static final String OD_NAME_CONTAINS_ADS = "contains_ads";
     public static final String OD_NAME_OBEY_APS = "obey_aps";
+    public static final String OD_NAME_APS_COMPLIANT = "aps_compliant";
     public static final String OD_NAME_ADS_FINGERPRINTING = "ads_fingerprinting";
     public static final String OD_NAME_SECURITY_FINGERPRINTING = "security_fingerprinting";
     public static final String OD_NAME_PRIVACY_POLICY = "privacy_policy";
-    public static final String OD_NAME_SECURITY_ENDPOINT = "security_endpoint";
-    public static final String OD_NAME_FIRST_PARTY_ENDPOINT = "first_party_endpoint";
-    public static final String OD_NAME_SERVICE_PROVIDER_ENDPOINT = "service_provider_endpoint";
+    public static final String OD_NAME_SECURITY_ENDPOINT = "security_endpoints";
+    public static final String OD_NAME_FIRST_PARTY_ENDPOINTS = "first_party_endpoints";
+    public static final String OD_NAME_SERVICE_PROVIDER_ENDPOINTS = "service_provider_endpoints";
     public static final String OD_NAME_CATEGORY = "category";
     public static final String OD_NAME_VERSION = "version";
     public static final String OD_NAME_URL = "url";
@@ -237,7 +240,18 @@ public class XmlUtils {
         return ele;
     }
 
-    /** Create OD style array DOM Element, which can represent any time but is stored as Strings. */
+    /** Create HR style array DOM Element. */
+    public static Element createHrArray(Document doc, String arrayTagName, List<String> arrayVals) {
+        Element arrEle = doc.createElement(arrayTagName);
+        for (String s : arrayVals) {
+            Element itemEle = doc.createElement(XmlUtils.HR_TAG_ITEM);
+            itemEle.setTextContent(s);
+            arrEle.appendChild(itemEle);
+        }
+        return arrEle;
+    }
+
+    /** Create OD style array DOM Element, which can represent any type but is stored as Strings. */
     public static Element createOdArray(
             Document doc, String arrayTag, String arrayName, List<String> arrayVals) {
         Element arrEle = doc.createElement(arrayTag);
@@ -454,6 +468,32 @@ public class XmlUtils {
             ints.add(Integer.parseInt(XmlUtils.getStringAttr(itemEle, XmlUtils.OD_ATTR_VALUE)));
         }
         return ints;
+    }
+
+    /** Gets human-readable style String array. */
+    public static List<String> getHrItemsAsStrings(
+            Element parent, String elementName, boolean required) throws MalformedXmlException {
+
+        List<Element> arrayEles = XmlUtils.getChildrenByTagName(parent, elementName);
+        if (arrayEles.size() > 1) {
+            throw new MalformedXmlException(
+                    String.format(
+                            "Found more than one %s in %s.", elementName, parent.getTagName()));
+        }
+        if (arrayEles.isEmpty()) {
+            if (required) {
+                throw new MalformedXmlException(
+                        String.format("Found no %s in %s.", elementName, parent.getTagName()));
+            }
+            return null;
+        }
+        Element arrayEle = arrayEles.get(0);
+        List<Element> itemEles = XmlUtils.getChildrenByTagName(arrayEle, XmlUtils.HR_TAG_ITEM);
+        List<String> strs = new ArrayList<String>();
+        for (Element itemEle : itemEles) {
+            strs.add(itemEle.getTextContent());
+        }
+        return strs;
     }
 
     /** Gets on-device style String array. */

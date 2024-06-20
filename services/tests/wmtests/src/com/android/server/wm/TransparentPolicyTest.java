@@ -332,7 +332,7 @@ public class TransparentPolicyTest extends WindowTestsBase {
             mTask = task;
             mActivityStack = new ActivityStackTest();
             mActivityStack.pushActivity(opaqueActivity);
-            spyOn(opaqueActivity.mTransparentPolicy);
+            spyOn(opaqueActivity.mAppCompatController.getTransparentPolicy());
         }
 
         void configureTopActivityAsEmbedded() {
@@ -360,7 +360,7 @@ public class TransparentPolicyTest extends WindowTestsBase {
             if (addToTask) {
                 mTask.addChild(newActivity);
             }
-            spyOn(newActivity.mTransparentPolicy);
+            spyOn(newActivity.mAppCompatController.getTransparentPolicy());
             mActivityStack.pushActivity(newActivity);
         }
 
@@ -406,31 +406,34 @@ public class TransparentPolicyTest extends WindowTestsBase {
         }
 
         void checkTopActivityPolicyStateIsRunning() {
-            assertTrue(mActivityStack.top().mTransparentPolicy.isRunning());
+            assertTrue(mActivityStack.top().mAppCompatController
+                    .getTransparentPolicy().isRunning());
         }
 
         void checkTopActivityPolicyStateIsNotRunning() {
-            assertFalse(mActivityStack.top().mTransparentPolicy.isRunning());
+            assertFalse(mActivityStack.top().mAppCompatController
+                    .getTransparentPolicy().isRunning());
         }
 
         void checkTopActivityPolicyStopInvoked() {
-            verify(mActivityStack.top().mTransparentPolicy).stop();
+            verify(mActivityStack.top().mAppCompatController.getTransparentPolicy()).stop();
         }
 
         void checkTopActivityPolicyStopNotInvoked() {
             mActivityStack.applyToTop((activity) -> {
-                verify(activity.mTransparentPolicy, never()).stop();
+                verify(activity.mAppCompatController.getTransparentPolicy(), never()).stop();
             });
         }
 
         void checkTopActivityPolicyStartInvoked() {
             mActivityStack.applyToTop((activity) -> {
-                verify(activity.mTransparentPolicy).start();
+                verify(activity.mAppCompatController.getTransparentPolicy()).start();
             });
         }
 
         void checkTopActivityPolicyStartNotInvoked() {
-            verify(mActivityStack.top().mTransparentPolicy, never()).start();
+            verify(mActivityStack.top().mAppCompatController.getTransparentPolicy(),
+                    never()).start();
         }
 
         void assertTrueOnActivity(int fromTop, Predicate<ActivityRecord> predicate) {
@@ -505,7 +508,7 @@ public class TransparentPolicyTest extends WindowTestsBase {
         void clearInteractions() {
             mActivityStack.applyToAll((activity) -> {
                 clearInvocations(activity);
-                clearInvocations(activity.mTransparentPolicy);
+                clearInvocations(activity.mAppCompatController.getTransparentPolicy());
             });
         }
 

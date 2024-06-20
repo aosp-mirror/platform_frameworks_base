@@ -354,10 +354,21 @@ constructor(
 
                     activeDevice =
                         routingSession?.let {
+                            val icon = if (it.selectedRoutes.size > 1) {
+                                context.getDrawable(
+                                        com.android.settingslib.R.drawable.ic_media_group_device)
+                            } else {
+                                connectedDevice?.icon // Single route. We don't change the icon.
+                            }
                             // For a remote session, always use the current device from
-                            // LocalMediaManager. Override with routing session name if available to
-                            // show dynamic group name.
-                            connectedDevice?.copy(name = it.name ?: connectedDevice.name)
+                            // LocalMediaManager. Override with routing session information if
+                            // available:
+                            //   - Name: To show the dynamic group name.
+                            //   - Icon: To show the group icon if there's more than one selected
+                            //           route.
+                            connectedDevice?.copy(
+                                    name = it.name ?: connectedDevice.name,
+                                    icon = icon)
                         } ?: MediaDeviceData(
                             enabled = false,
                             icon = context.getDrawable(R.drawable.ic_media_home_devices),

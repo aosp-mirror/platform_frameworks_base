@@ -10,6 +10,7 @@ import android.service.controls.templates.TemperatureControlTemplate
 import android.service.controls.templates.ThumbnailTemplate
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -20,10 +21,12 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class TemperatureControlBehaviorTest : SysuiTestCase() {
 
     @Mock lateinit var controlsMetricsLogger: ControlsMetricsLogger

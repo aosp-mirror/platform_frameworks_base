@@ -421,10 +421,13 @@ flag {
 }
 
 flag {
-   name: "fast_unlock_transition"
+   name: "faster_unlock_transition"
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"
    bug: "298186160"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -861,6 +864,13 @@ flag {
     namespace: "systemui"
     description: "A new implementation of the keyboards shortcuts helper sheet."
     bug: "327364197"
+}
+
+flag {
+    name: "keyboard_touchpad_contextual_education"
+    namespace: "systemui"
+    description: "Allow showing education for physical keyboard and touchpad"
+    bug: "317496783"
 }
 
 flag {

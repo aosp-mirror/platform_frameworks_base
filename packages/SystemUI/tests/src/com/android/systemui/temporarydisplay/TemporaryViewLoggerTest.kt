@@ -16,6 +16,7 @@
 
 package com.android.systemui.temporarydisplay
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
@@ -28,9 +29,11 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class TemporaryViewLoggerTest : SysuiTestCase() {
     private lateinit var buffer: LogBuffer
     private lateinit var logger: TemporaryViewLogger<TemporaryViewInfo>

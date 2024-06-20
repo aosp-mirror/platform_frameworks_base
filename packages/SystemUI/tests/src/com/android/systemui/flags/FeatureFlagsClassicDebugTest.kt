@@ -23,6 +23,7 @@ import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_SYSUI_TEAMFOOD
 import com.android.systemui.SysuiTestCase
@@ -39,6 +40,7 @@ import java.util.function.Consumer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyString
@@ -55,6 +57,7 @@ import org.mockito.MockitoAnnotations
  * the default.
  */
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     private lateinit var mFeatureFlagsClassicDebug: FeatureFlagsClassicDebug
 

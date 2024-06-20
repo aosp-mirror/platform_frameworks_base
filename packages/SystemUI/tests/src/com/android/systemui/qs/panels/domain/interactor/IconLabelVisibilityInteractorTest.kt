@@ -17,7 +17,7 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import android.content.pm.UserInfo
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -34,7 +34,7 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class IconLabelVisibilityInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val underTest = with(kosmos) { iconLabelVisibilityInteractor }

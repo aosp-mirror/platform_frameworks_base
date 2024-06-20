@@ -82,6 +82,7 @@ import java.util.concurrent.Executor;
  */
 @Presubmit
 @SmallTest
+@SuppressWarnings("GuardedBy")
 @RunWith(AndroidJUnit4.class)
 public class DividerPresenterTest {
     @Rule
@@ -186,7 +187,8 @@ public class DividerPresenterTest {
         mDividerPresenter.updateDivider(
                 mTransaction,
                 mParentInfo,
-                mSplitContainer);
+                mSplitContainer,
+                false /* isTaskFragmentVanished */);
 
         assertNotEquals(mProperties, mDividerPresenter.mProperties);
         verify(mRenderer).update();
@@ -206,7 +208,8 @@ public class DividerPresenterTest {
         mDividerPresenter.updateDivider(
                 mTransaction,
                 mParentInfo,
-                mSplitContainer);
+                mSplitContainer,
+                false /* isTaskFragmentVanished */);
 
         assertNotEquals(mProperties, mDividerPresenter.mProperties);
         verify(mRenderer).update();
@@ -222,7 +225,8 @@ public class DividerPresenterTest {
         mDividerPresenter.updateDivider(
                 mTransaction,
                 mParentInfo,
-                mSplitContainer);
+                mSplitContainer,
+                false /* isTaskFragmentVanished */);
 
         assertEquals(mProperties, mDividerPresenter.mProperties);
         verify(mRenderer, never()).update();
@@ -234,7 +238,42 @@ public class DividerPresenterTest {
         mDividerPresenter.updateDivider(
                 mTransaction,
                 mParentInfo,
-                null /* splitContainer */);
+                null /* splitContainer */,
+                false /* isTaskFragmentVanished */);
+        final TaskFragmentOperation taskFragmentOperation = new TaskFragmentOperation.Builder(
+                OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE)
+                .build();
+
+        verify(mTransaction).addTaskFragmentOperation(
+                mPrimaryContainerToken, taskFragmentOperation);
+        verify(mRenderer).release();
+        assertNull(mDividerPresenter.mRenderer);
+        assertNull(mDividerPresenter.mProperties);
+        assertNull(mDividerPresenter.mDecorSurfaceOwner);
+    }
+
+    @Test
+    public void testUpdateDivider_noChangeWhenHasContainersToFinishButTaskFragmentNotVanished() {
+        mDividerPresenter.setHasContainersToFinish(true);
+        mDividerPresenter.updateDivider(
+                mTransaction,
+                mParentInfo,
+                null /* splitContainer */,
+                false /* isTaskFragmentVanished */);
+
+        assertEquals(mProperties, mDividerPresenter.mProperties);
+        verify(mRenderer, never()).update();
+        verify(mTransaction, never()).addTaskFragmentOperation(any(), any());
+    }
+
+    @Test
+    public void testUpdateDivider_dividerRemovedWhenHasContainersToFinishAndTaskFragmentVanished() {
+        mDividerPresenter.setHasContainersToFinish(true);
+        mDividerPresenter.updateDivider(
+                mTransaction,
+                mParentInfo,
+                null /* splitContainer */,
+                true /* isTaskFragmentVanished */);
         final TaskFragmentOperation taskFragmentOperation = new TaskFragmentOperation.Builder(
                 OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE)
                 .build();
@@ -254,7 +293,8 @@ public class DividerPresenterTest {
         mDividerPresenter.updateDivider(
                 mTransaction,
                 mParentInfo,
-                mSplitContainer);
+                mSplitContainer,
+                false /* isTaskFragmentVanished */);
         final TaskFragmentOperation taskFragmentOperation = new TaskFragmentOperation.Builder(
                 OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE)
                 .build();
