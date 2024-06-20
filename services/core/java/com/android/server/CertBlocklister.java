@@ -16,37 +16,39 @@
 
 package com.android.server;
 
-import android.content.Context;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.provider.Settings;
 import android.util.Slog;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import libcore.io.IoUtils;
-
 /**
- * <p>CertBlacklister provides a simple mechanism for updating the platform denylists for SSL
+ * <p>CertBlocklister provides a simple mechanism for updating the platform denylists for SSL
  * certificate public keys and serial numbers.
  */
-public class CertBlacklister extends Binder {
+public class CertBlocklister extends Binder {
 
-    private static final String TAG = "CertBlacklister";
+    private static final String TAG = "CertBlocklister";
 
     private static final String DENYLIST_ROOT = System.getenv("ANDROID_DATA") + "/misc/keychain/";
 
+    /* For compatibility reasons, the name of these paths cannot be changed */
     public static final String PUBKEY_PATH = DENYLIST_ROOT + "pubkey_blacklist.txt";
     public static final String SERIAL_PATH = DENYLIST_ROOT + "serial_blacklist.txt";
 
-    public static final String PUBKEY_BLACKLIST_KEY = "pubkey_blacklist";
-    public static final String SERIAL_BLACKLIST_KEY = "serial_blacklist";
+    /* For compatibility reasons, the name of these keys cannot be changed */
+    public static final String PUBKEY_BLOCKLIST_KEY = "pubkey_blacklist";
+    public static final String SERIAL_BLOCKLIST_KEY = "serial_blacklist";
 
-    private static class BlacklistObserver extends ContentObserver {
+    private static class BlocklistObserver extends ContentObserver {
 
         private final String mKey;
         private final String mName;
@@ -54,7 +56,7 @@ public class CertBlacklister extends Binder {
         private final File mTmpDir;
         private final ContentResolver mContentResolver;
 
-        public BlacklistObserver(String key, String name, String path, ContentResolver cr) {
+        BlocklistObserver(String key, String name, String path, ContentResolver cr) {
             super(null);
             mKey = key;
             mName = name;
@@ -70,16 +72,17 @@ public class CertBlacklister extends Binder {
         }
 
         public String getValue() {
-            return Settings.Secure.getString(mContentResolver, mKey);
+            return Settings.Secure.getStringForUser(
+                mContentResolver, mKey, mContentResolver.getUserId());
         }
 
         private void writeDenylist() {
-            new Thread("BlacklistUpdater") {
+            new Thread("BlocklistUpdater") {
                 public void run() {
-                    synchronized(mTmpDir) {
-                        String blacklist = getValue();
-                        if (blacklist != null) {
-                            Slog.i(TAG, "Certificate blacklist changed, updating...");
+                    synchronized (mTmpDir) {
+                        String blocklist = getValue();
+                        if (blocklist != null) {
+                            Slog.i(TAG, "Certificate blocklist changed, updating...");
                             FileOutputStream out = null;
                             try {
                                 // create a temporary file
@@ -88,14 +91,14 @@ public class CertBlacklister extends Binder {
                                 tmp.setReadable(true, false);
                                 // write to it
                                 out = new FileOutputStream(tmp);
-                                out.write(blacklist.getBytes());
+                                out.write(blocklist.getBytes());
                                 // sync to disk
                                 FileUtils.sync(out);
                                 // atomic rename
                                 tmp.renameTo(new File(mPath));
-                                Slog.i(TAG, "Certificate blacklist updated");
+                                Slog.i(TAG, "Certificate blocklist updated");
                             } catch (IOException e) {
-                                Slog.e(TAG, "Failed to write blacklist", e);
+                                Slog.e(TAG, "Failed to write blocklist", e);
                             } finally {
                                 IoUtils.closeQuietly(out);
                             }
@@ -106,19 +109,19 @@ public class CertBlacklister extends Binder {
         }
     }
 
-    public CertBlacklister(Context context) {
+    public CertBlocklister(Context context) {
         registerObservers(context.getContentResolver());
     }
 
-    private BlacklistObserver buildPubkeyObserver(ContentResolver cr) {
-        return new BlacklistObserver(PUBKEY_BLACKLIST_KEY,
+    private BlocklistObserver buildPubkeyObserver(ContentResolver cr) {
+        return new BlocklistObserver(PUBKEY_BLOCKLIST_KEY,
                     "pubkey",
                     PUBKEY_PATH,
                     cr);
     }
 
-    private BlacklistObserver buildSerialObserver(ContentResolver cr) {
-        return new BlacklistObserver(SERIAL_BLACKLIST_KEY,
+    private BlocklistObserver buildSerialObserver(ContentResolver cr) {
+        return new BlocklistObserver(SERIAL_BLOCKLIST_KEY,
                     "serial",
                     SERIAL_PATH,
                     cr);
@@ -127,16 +130,16 @@ public class CertBlacklister extends Binder {
     private void registerObservers(ContentResolver cr) {
         // set up the public key denylist observer
         cr.registerContentObserver(
-            Settings.Secure.getUriFor(PUBKEY_BLACKLIST_KEY),
-            true,
-            buildPubkeyObserver(cr)
+                Settings.Secure.getUriFor(PUBKEY_BLOCKLIST_KEY),
+                true,
+                buildPubkeyObserver(cr)
         );
 
         // set up the serial number denylist observer
         cr.registerContentObserver(
-            Settings.Secure.getUriFor(SERIAL_BLACKLIST_KEY),
-            true,
-            buildSerialObserver(cr)
+                Settings.Secure.getUriFor(SERIAL_BLOCKLIST_KEY),
+                true,
+                buildSerialObserver(cr)
         );
     }
 }
