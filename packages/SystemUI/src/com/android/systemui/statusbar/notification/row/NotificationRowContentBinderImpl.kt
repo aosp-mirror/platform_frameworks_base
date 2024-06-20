@@ -1359,79 +1359,17 @@ constructor(
             if (runningInflations.isNotEmpty()) {
                 return false
             }
-            val privateLayout = row.privateLayout
-            val publicLayout = row.publicLayout
             logger.logAsyncTaskProgress(entry, "finishing")
-            if (reInflateFlags and FLAG_CONTENT_VIEW_CONTRACTED != 0) {
-                if (result.inflatedContentView != null) {
-                    // New view case
-                    privateLayout.setContractedChild(result.inflatedContentView)
-                    remoteViewCache.putCachedView(
-                        entry,
-                        FLAG_CONTENT_VIEW_CONTRACTED,
-                        result.remoteViews.contracted
-                    )
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED)) {
-                    // Reinflation case. Only update if it's still cached (i.e. view has not been
-                    // freed while inflating).
-                    remoteViewCache.putCachedView(
-                        entry,
-                        FLAG_CONTENT_VIEW_CONTRACTED,
-                        result.remoteViews.contracted
-                    )
-                }
-            }
-            if (reInflateFlags and FLAG_CONTENT_VIEW_EXPANDED != 0) {
-                if (result.inflatedExpandedView != null) {
-                    privateLayout.setExpandedChild(result.inflatedExpandedView)
-                    remoteViewCache.putCachedView(
-                        entry,
-                        FLAG_CONTENT_VIEW_EXPANDED,
-                        result.remoteViews.expanded
-                    )
-                } else if (result.remoteViews.expanded == null) {
-                    privateLayout.setExpandedChild(null)
-                    remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)) {
-                    remoteViewCache.putCachedView(
-                        entry,
-                        FLAG_CONTENT_VIEW_EXPANDED,
-                        result.remoteViews.expanded
-                    )
-                }
-                if (result.remoteViews.expanded != null) {
-                    privateLayout.setExpandedInflatedSmartReplies(
-                        result.expandedInflatedSmartReplies
-                    )
-                } else {
-                    privateLayout.setExpandedInflatedSmartReplies(null)
-                }
-                row.setExpandable(result.remoteViews.expanded != null)
-            }
-            if (reInflateFlags and FLAG_CONTENT_VIEW_HEADS_UP != 0) {
-                if (result.inflatedHeadsUpView != null) {
-                    privateLayout.setHeadsUpChild(result.inflatedHeadsUpView)
-                    remoteViewCache.putCachedView(
-                        entry,
-                        FLAG_CONTENT_VIEW_HEADS_UP,
-                        result.remoteViews.headsUp
-                    )
-                } else if (result.remoteViews.headsUp == null) {
-                    privateLayout.setHeadsUpChild(null)
-                    remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)) {
-                    remoteViewCache.putCachedView(
-                        entry,
-                        FLAG_CONTENT_VIEW_HEADS_UP,
-                        result.remoteViews.headsUp
-                    )
-                }
-                if (result.remoteViews.headsUp != null) {
-                    privateLayout.setHeadsUpInflatedSmartReplies(result.headsUpInflatedSmartReplies)
-                } else {
-                    privateLayout.setHeadsUpInflatedSmartReplies(null)
-                }
-            }
+            setViewsFromRemoteViews(
+                reInflateFlags,
+                entry,
+                remoteViewCache,
+                result,
+                row,
+                isMinimized,
+            )
+            result.inflatedSmartReplyState?.let { row.privateLayout.setInflatedSmartReplyState(it) }
+
             if (
                 AsyncHybridViewInflation.isEnabled &&
                     reInflateFlags and FLAG_CONTENT_VIEW_SINGLE_LINE != 0
@@ -1444,78 +1382,127 @@ constructor(
                     } else {
                         SingleLineViewBinder.bind(viewModel, singleLineView)
                     }
-                    privateLayout.setSingleLineView(result.inflatedSingleLineView)
-                }
-            }
-            result.inflatedSmartReplyState?.let { privateLayout.setInflatedSmartReplyState(it) }
-            if (reInflateFlags and FLAG_CONTENT_VIEW_PUBLIC != 0) {
-                if (result.inflatedPublicView != null) {
-                    publicLayout.setContractedChild(result.inflatedPublicView)
-                    remoteViewCache.putCachedView(
-                        entry,
-                        FLAG_CONTENT_VIEW_PUBLIC,
-                        result.remoteViews.public
-                    )
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC)) {
-                    remoteViewCache.putCachedView(
-                        entry,
-                        FLAG_CONTENT_VIEW_PUBLIC,
-                        result.remoteViews.public
-                    )
-                }
-            }
-            if (AsyncGroupHeaderViewInflation.isEnabled) {
-                if (reInflateFlags and FLAG_GROUP_SUMMARY_HEADER != 0) {
-                    if (result.inflatedGroupHeaderView != null) {
-                        // We need to set if the row is minimized before setting the group header to
-                        // make sure the setting of header view works correctly
-                        row.setIsMinimized(isMinimized)
-                        row.setGroupHeader(/* headerView= */ result.inflatedGroupHeaderView)
-                        remoteViewCache.putCachedView(
-                            entry,
-                            FLAG_GROUP_SUMMARY_HEADER,
-                            result.remoteViews.normalGroupHeader
-                        )
-                    } else if (remoteViewCache.hasCachedView(entry, FLAG_GROUP_SUMMARY_HEADER)) {
-                        // Re-inflation case. Only update if it's still cached (i.e. view has not
-                        // been freed while inflating).
-                        remoteViewCache.putCachedView(
-                            entry,
-                            FLAG_GROUP_SUMMARY_HEADER,
-                            result.remoteViews.normalGroupHeader
-                        )
-                    }
-                }
-                if (reInflateFlags and FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER != 0) {
-                    if (result.inflatedMinimizedGroupHeaderView != null) {
-                        // We need to set if the row is minimized before setting the group header to
-                        // make sure the setting of header view works correctly
-                        row.setIsMinimized(isMinimized)
-                        row.setMinimizedGroupHeader(
-                            /* headerView= */ result.inflatedMinimizedGroupHeaderView
-                        )
-                        remoteViewCache.putCachedView(
-                            entry,
-                            FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
-                            result.remoteViews.minimizedGroupHeader
-                        )
-                    } else if (
-                        remoteViewCache.hasCachedView(entry, FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER)
-                    ) {
-                        // Re-inflation case. Only update if it's still cached (i.e. view has not
-                        // been freed while inflating).
-                        remoteViewCache.putCachedView(
-                            entry,
-                            FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
-                            result.remoteViews.normalGroupHeader
-                        )
-                    }
+                    row.privateLayout.setSingleLineView(result.inflatedSingleLineView)
                 }
             }
             entry.setContentModel(result.contentModel)
             Trace.endAsyncSection(APPLY_TRACE_METHOD, System.identityHashCode(row))
             endListener?.onAsyncInflationFinished(entry)
             return true
+        }
+
+        private fun setViewsFromRemoteViews(
+            reInflateFlags: Int,
+            entry: NotificationEntry,
+            remoteViewCache: NotifRemoteViewCache,
+            result: InflationProgress,
+            row: ExpandableNotificationRow,
+            isMinimized: Boolean,
+        ) {
+            val privateLayout = row.privateLayout
+            val publicLayout = row.publicLayout
+            val remoteViewsUpdater = RemoteViewsUpdater(reInflateFlags, entry, remoteViewCache)
+            remoteViewsUpdater.setContentView(
+                FLAG_CONTENT_VIEW_CONTRACTED,
+                result.remoteViews.contracted,
+                result.inflatedContentView,
+                privateLayout::setContractedChild
+            )
+            remoteViewsUpdater.setContentView(
+                FLAG_CONTENT_VIEW_EXPANDED,
+                result.remoteViews.expanded,
+                result.inflatedExpandedView,
+                privateLayout::setExpandedChild
+            )
+            remoteViewsUpdater.setSmartReplies(
+                FLAG_CONTENT_VIEW_EXPANDED,
+                result.remoteViews.expanded,
+                result.expandedInflatedSmartReplies,
+                privateLayout::setExpandedInflatedSmartReplies
+            )
+            if (reInflateFlags and FLAG_CONTENT_VIEW_EXPANDED != 0) {
+                row.setExpandable(result.remoteViews.expanded != null)
+            }
+            remoteViewsUpdater.setContentView(
+                FLAG_CONTENT_VIEW_HEADS_UP,
+                result.remoteViews.headsUp,
+                result.inflatedHeadsUpView,
+                privateLayout::setHeadsUpChild
+            )
+            remoteViewsUpdater.setSmartReplies(
+                FLAG_CONTENT_VIEW_HEADS_UP,
+                result.remoteViews.headsUp,
+                result.headsUpInflatedSmartReplies,
+                privateLayout::setHeadsUpInflatedSmartReplies
+            )
+            remoteViewsUpdater.setContentView(
+                FLAG_CONTENT_VIEW_PUBLIC,
+                result.remoteViews.public,
+                result.inflatedPublicView,
+                publicLayout::setContractedChild
+            )
+            if (AsyncGroupHeaderViewInflation.isEnabled) {
+                remoteViewsUpdater.setContentView(
+                    FLAG_GROUP_SUMMARY_HEADER,
+                    result.remoteViews.normalGroupHeader,
+                    result.inflatedGroupHeaderView,
+                ) { views ->
+                    row.setIsMinimized(isMinimized)
+                    row.setGroupHeader(views)
+                }
+                remoteViewsUpdater.setContentView(
+                    FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
+                    result.remoteViews.minimizedGroupHeader,
+                    result.inflatedMinimizedGroupHeaderView,
+                ) { views ->
+                    row.setIsMinimized(isMinimized)
+                    row.setMinimizedGroupHeader(views)
+                }
+            }
+        }
+
+        private class RemoteViewsUpdater(
+            @InflationFlag private val reInflateFlags: Int,
+            private val entry: NotificationEntry,
+            private val remoteViewCache: NotifRemoteViewCache,
+        ) {
+            fun <V : View> setContentView(
+                @InflationFlag flagState: Int,
+                remoteViews: RemoteViews?,
+                view: V?,
+                setView: (V?) -> Unit,
+            ) {
+                val clearViewFlags = FLAG_CONTENT_VIEW_HEADS_UP or FLAG_CONTENT_VIEW_EXPANDED
+                val shouldClearView = flagState and clearViewFlags != 0
+                if (reInflateFlags and flagState != 0) {
+                    if (view != null) {
+                        setView(view)
+                        remoteViewCache.putCachedView(entry, flagState, remoteViews)
+                    } else if (shouldClearView && remoteViews == null) {
+                        setView(null)
+                        remoteViewCache.removeCachedView(entry, flagState)
+                    } else if (remoteViewCache.hasCachedView(entry, flagState)) {
+                        // Re-inflation case. Only update if it's still cached (i.e. view has not
+                        // been freed while inflating).
+                        remoteViewCache.putCachedView(entry, flagState, remoteViews)
+                    }
+                }
+            }
+
+            fun setSmartReplies(
+                @InflationFlag flagState: Int,
+                remoteViews: RemoteViews?,
+                smartReplies: InflatedSmartReplyViewHolder?,
+                setSmartReplies: (InflatedSmartReplyViewHolder?) -> Unit,
+            ) {
+                if (reInflateFlags and flagState != 0) {
+                    if (remoteViews != null) {
+                        setSmartReplies(smartReplies)
+                    } else {
+                        setSmartReplies(null)
+                    }
+                }
+            }
         }
 
         private fun createExpandedView(
