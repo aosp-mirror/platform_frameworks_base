@@ -120,3 +120,10 @@ flag {
     description: "Whether to enable min/max window size constraints when resizing a window in desktop windowing mode"
     bug: "327589741"
 }
+
+flag {
+    name: "show_desktop_windowing_dev_option"
+    namespace: "lse_desktop_experience"
+    description: "Whether to show developer option for enabling desktop windowing mode"
+    bug: "348193756"
+}
