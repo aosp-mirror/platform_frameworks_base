@@ -19,6 +19,7 @@ package com.android.settingslib.spa.framework.util
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -36,18 +37,23 @@ class AnnotatedStringResourceTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun testAnnotatedStringResource() {
+    fun annotatedStringResource() {
         composeTestRule.setContent {
             val annotatedString =
                 annotatedStringResource(R.string.test_annotated_string_resource)
 
-            val annotations = annotatedString.getStringAnnotations(0, annotatedString.length)
+            val annotations = annotatedString.getLinkAnnotations(0, annotatedString.length)
             assertThat(annotations).containsExactly(
                 AnnotatedString.Range(
-                    item = "https://www.android.com/",
+                    item = LinkAnnotation.Url(
+                        url = "https://www.android.com/",
+                        style = SpanStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            textDecoration = TextDecoration.Underline,
+                        ),
+                    ),
                     start = 31,
                     end = 35,
-                    tag = URL_SPAN_TAG,
                 )
             )
 
@@ -56,14 +62,6 @@ class AnnotatedStringResourceTest {
                     item = SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Normal),
                     start = 22,
                     end = 26,
-                ),
-                AnnotatedString.Range(
-                    item = SpanStyle(
-                        color = MaterialTheme.colorScheme.primary,
-                        textDecoration = TextDecoration.Underline,
-                    ),
-                    start = 31,
-                    end = 35,
                 ),
             )
         }
