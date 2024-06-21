@@ -206,14 +206,14 @@ public class UserWakeupStore {
      * @return true if an entry is found and the list of wakeups changes.
      */
     private boolean deleteWakeupFromUserStarts(int userId) {
-        int index;
         synchronized (mUserWakeupLock) {
-            index = mUserStarts.indexOfKey(userId);
+            final int index = mUserStarts.indexOfKey(userId);
             if (index >= 0) {
                 mUserStarts.removeAt(index);
+                return true;
             }
+            return false;
         }
-        return index >= 0;
     }
 
     /**
