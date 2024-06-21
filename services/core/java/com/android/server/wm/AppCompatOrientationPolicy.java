@@ -103,11 +103,11 @@ class AppCompatOrientationPolicy {
             return candidate;
         }
 
-        if (displayContent != null && mAppCompatOverrides
+        if (displayContent != null && mAppCompatOverrides.getAppCompatCameraOverrides()
                 .isOverrideOrientationOnlyForCameraEnabled()
-                && (displayContent.mDisplayRotationCompatPolicy == null
-                || !displayContent.mDisplayRotationCompatPolicy
-                .isActivityEligibleForOrientationOverride(mActivityRecord))) {
+                    && (displayContent.mDisplayRotationCompatPolicy == null
+                    || !displayContent.mDisplayRotationCompatPolicy
+                        .isActivityEligibleForOrientationOverride(mActivityRecord))) {
             return candidate;
         }
 

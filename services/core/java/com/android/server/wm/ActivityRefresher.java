@@ -77,10 +77,10 @@ class ActivityRefresher {
         final boolean cycleThroughStop =
                 mWmService.mLetterboxConfiguration
                         .isCameraCompatRefreshCycleThroughStopEnabled()
-                        && !activity.mLetterboxUiController
-                        .shouldRefreshActivityViaPauseForCameraCompat();
+                        && !activity.mAppCompatController.getAppCompatCameraOverrides()
+                            .shouldRefreshActivityViaPauseForCameraCompat();
 
-        activity.mLetterboxUiController.setIsRefreshRequested(true);
+        activity.mAppCompatController.getAppCompatCameraOverrides().setIsRefreshRequested(true);
         ProtoLog.v(WM_DEBUG_STATES,
                 "Refreshing activity for freeform camera compatibility treatment, "
                         + "activityRecord=%s", activity);
@@ -97,24 +97,26 @@ class ActivityRefresher {
                 }
             }, REFRESH_CALLBACK_TIMEOUT_MS);
         } catch (RemoteException e) {
-            activity.mLetterboxUiController.setIsRefreshRequested(false);
+            activity.mAppCompatController.getAppCompatCameraOverrides()
+                    .setIsRefreshRequested(false);
         }
     }
 
     boolean isActivityRefreshing(@NonNull ActivityRecord activity) {
-        return activity.mLetterboxUiController.isRefreshRequested();
+        return activity.mAppCompatController.getAppCompatCameraOverrides().isRefreshRequested();
     }
 
     void onActivityRefreshed(@NonNull ActivityRecord activity) {
         // TODO(b/333060789): can we tell that refresh did not happen by observing the activity
         //  state?
-        activity.mLetterboxUiController.setIsRefreshRequested(false);
+        activity.mAppCompatController.getAppCompatCameraOverrides().setIsRefreshRequested(false);
     }
 
     private boolean shouldRefreshActivity(@NonNull ActivityRecord activity,
             @NonNull Configuration newConfig, @NonNull Configuration lastReportedConfig) {
         return mWmService.mLetterboxConfiguration.isCameraCompatRefreshEnabled()
-                && activity.mLetterboxUiController.shouldRefreshActivityForCameraCompat()
+                && activity.mAppCompatController.getAppCompatOverrides()
+                    .getAppCompatCameraOverrides().shouldRefreshActivityForCameraCompat()
                 && ArrayUtils.find(mEvaluators.toArray(), evaluator ->
                 ((Evaluator) evaluator)
                         .shouldRefreshActivity(activity, newConfig, lastReportedConfig)) != null;

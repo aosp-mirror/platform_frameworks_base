@@ -1991,7 +1991,7 @@ public class TaskTests extends WindowTestsBase {
     public void getTaskInfoPropagatesCameraCompatMode() {
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopMostActivity();
-        activity.mLetterboxUiController
+        activity.mAppCompatController.getAppCompatCameraOverrides()
                 .setFreeformCameraCompatMode(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT);
 
         assertEquals(CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT,
