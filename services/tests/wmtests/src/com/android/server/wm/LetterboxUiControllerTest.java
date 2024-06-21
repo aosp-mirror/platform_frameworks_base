@@ -25,8 +25,6 @@ import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FRE
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
@@ -50,21 +48,17 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTA
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
-import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.AppCompatOrientationCapability.OrientationCapabilityState.MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP;
-import static com.android.server.wm.AppCompatOrientationCapability.OrientationCapabilityState.SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS;
 import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
 
 import static org.junit.Assert.assertEquals;
@@ -147,187 +141,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         spyOn(mLetterboxConfiguration);
 
         mController = new LetterboxUiController(mWm, mActivity);
-    }
-
-    // shouldIgnoreRequestedOrientation
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION})
-    public void testShouldIgnoreRequestedOrientation_activityRelaunching_returnsTrue() {
-        prepareActivityThatShouldIgnoreRequestedOrientationDuringRelaunch();
-
-        assertTrue(mActivity.mAppCompatController.getAppCompatCapability()
-                .getAppCompatOrientationCapability()
-                .shouldIgnoreRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED));
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION})
-    public void testShouldIgnoreRequestedOrientation_cameraCompatTreatment_returnsTrue() {
-        doReturn(true).when(mLetterboxConfiguration).isCameraCompatTreatmentEnabled();
-        doReturn(true).when(mLetterboxConfiguration)
-                .isCameraCompatTreatmentEnabledAtBuildTime();
-
-        // Recreate DisplayContent with DisplayRotationCompatPolicy
-        mActivity = setUpActivityWithComponent();
-        mController = new LetterboxUiController(mWm, mActivity);
-        prepareActivityThatShouldIgnoreRequestedOrientationDuringRelaunch();
-        mController.setRelaunchingAfterRequestedOrientationChanged(false);
-
-        spyOn(mDisplayContent.mDisplayRotationCompatPolicy);
-        doReturn(true).when(mDisplayContent.mDisplayRotationCompatPolicy)
-                .isTreatmentEnabledForActivity(eq(mActivity));
-
-        assertTrue(mActivity.mAppCompatController.getAppCompatCapability()
-                .getAppCompatOrientationCapability()
-                .shouldIgnoreRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED));
-    }
-
-    @Test
-    public void testShouldIgnoreRequestedOrientation_overrideDisabled_returnsFalse() {
-        prepareActivityThatShouldIgnoreRequestedOrientationDuringRelaunch();
-
-        assertFalse(mActivity.mAppCompatController.getAppCompatCapability()
-                .getAppCompatOrientationCapability()
-                .shouldIgnoreRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED));
-    }
-
-    @Test
-    public void testShouldIgnoreRequestedOrientation_propertyIsTrue_returnsTrue()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isPolicyForIgnoringRequestedOrientationEnabled();
-        mockThatProperty(PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION, /* value */ true);
-        mController = new LetterboxUiController(mWm, mActivity);
-        prepareActivityThatShouldIgnoreRequestedOrientationDuringRelaunch();
-
-        assertTrue(mActivity.mAppCompatController.getAppCompatCapability()
-                .getAppCompatOrientationCapability()
-                .shouldIgnoreRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED));
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION})
-    public void testShouldIgnoreRequestedOrientation_propertyIsFalseAndOverride_returnsFalse()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isPolicyForIgnoringRequestedOrientationEnabled();
-        mockThatProperty(PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION, /* value */ false);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-        prepareActivityThatShouldIgnoreRequestedOrientationDuringRelaunch();
-
-        assertFalse(mActivity.mAppCompatController.getAppCompatCapability()
-                .getAppCompatOrientationCapability()
-                .shouldIgnoreRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED));
-    }
-
-    @Test
-    public void testShouldIgnoreOrientationRequestLoop_overrideDisabled_returnsFalse() {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isPolicyForIgnoringRequestedOrientationEnabled();
-        doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
-        // Request 3 times to simulate orientation request loop
-        for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
-            assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
-                    /* expectedCount */ 0);
-        }
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
-    public void testShouldIgnoreOrientationRequestLoop_propertyIsFalseAndOverride_returnsFalse()
-            throws Exception {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isPolicyForIgnoringRequestedOrientationEnabled();
-        mockThatProperty(PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED,
-                /* value */ false);
-        doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        // Request 3 times to simulate orientation request loop
-        for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
-            assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
-                    /* expectedCount */ 0);
-        }
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
-    public void testShouldIgnoreOrientationRequestLoop_isLetterboxed_returnsFalse() {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isPolicyForIgnoringRequestedOrientationEnabled();
-        doReturn(true).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
-
-        // Request 3 times to simulate orientation request loop
-        for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
-            assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
-                    /* expectedCount */ i);
-        }
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
-    public void testShouldIgnoreOrientationRequestLoop_noLoop_returnsFalse() {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isPolicyForIgnoringRequestedOrientationEnabled();
-        doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
-
-        // No orientation request loop
-        assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
-                /* expectedCount */ 0);
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
-    public void testShouldIgnoreOrientationRequestLoop_timeout_returnsFalse()
-            throws InterruptedException {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isPolicyForIgnoringRequestedOrientationEnabled();
-        doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
-
-        for (int i = MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i > 0; i--) {
-            assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
-                    /* expectedCount */ 0);
-            Thread.sleep(SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS);
-        }
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
-    public void testShouldIgnoreOrientationRequestLoop_returnsTrue() {
-        doReturn(true).when(mLetterboxConfiguration)
-                .isPolicyForIgnoringRequestedOrientationEnabled();
-        doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
-
-        for (int i = 0; i < MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
-            assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
-                    /* expectedCount */ i);
-        }
-        assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ true,
-                /* expectedCount */ MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP);
-    }
-
-    private void assertShouldIgnoreOrientationRequestLoop(boolean shouldIgnore, int expectedCount) {
-        if (shouldIgnore) {
-            assertTrue(mController.shouldIgnoreOrientationRequestLoop());
-        } else {
-            assertFalse(mController.shouldIgnoreOrientationRequestLoop());
-        }
-        assertEquals(expectedCount, mController.getSetOrientationRequestCounter());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH})
-    public void testShouldIgnoreRequestedOrientation_flagIsDisabled_returnsFalse() {
-        prepareActivityThatShouldIgnoreRequestedOrientationDuringRelaunch();
-        doReturn(false).when(mLetterboxConfiguration)
-                .isPolicyForIgnoringRequestedOrientationEnabled();
-
-        assertFalse(mActivity.mAppCompatController.getAppCompatCapability()
-                .getAppCompatOrientationCapability()
-                .shouldIgnoreRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED));
     }
 
     // shouldRefreshActivityForCameraCompat
