@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.domain.interactor
+package com.android.systemui.scene.domain.startable
 
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
@@ -32,7 +32,9 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.power.domain.interactor.powerInteractor
-import com.android.systemui.scene.domain.startable.SceneContainerStartable
+import com.android.systemui.scene.domain.interactor.sceneBackInteractor
+import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.session.shared.shadeSessionStorage
 import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.settings.displayTracker
