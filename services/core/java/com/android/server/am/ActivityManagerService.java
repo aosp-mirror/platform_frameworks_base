@@ -10013,8 +10013,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (crashInfo != null && crashInfo.stackTrace != null) {
                     sb.append(crashInfo.stackTrace);
                 }
-                boolean shouldAddLogs = logcatLines > 0 || kernelLogLines > 0;
-                if (!runSynchronously && shouldAddLogs) {
+                boolean shouldAddLogs = (logcatLines > 0 || kernelLogLines > 0)
+                        && (Flags.collectLogcatOnRunSynchronously() || !runSynchronously);
+                if (shouldAddLogs) {
                     sb.append("\n");
                     if (logcatLines > 0) {
                         fetchLogcatBuffers(sb, logcatLines, LOGCAT_TIMEOUT_SEC,
