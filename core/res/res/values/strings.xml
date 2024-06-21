@@ -3833,6 +3833,11 @@
     <!-- Message of notification shown when Test Harness Mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="test_harness_mode_notification_message">Perform a factory reset to disable Test Harness Mode.</string>
 
+    <!-- Title of notification shown when device is in the wrong Headless System User Mode configuration. [CHAR LIMIT=NONE] -->
+    <string name="wrong_hsum_configuration_notification_title">Wrong HSUM build configuration</string>
+    <!-- Message of notification shown when device is in the wrong Headless System User Mode configuration. [CHAR LIMIT=NONE] -->
+    <string name="wrong_hsum_configuration_notification_message">The Headless System User Mode state of this device differs from its build configuration. Please factory reset the device.</string>
+
     <!-- Title of notification shown when serial console is enabled. [CHAR LIMIT=NONE] -->
     <string name="console_running_notification_title">Serial console enabled</string>
     <!-- Message of notification shown when serial console is enabled. [CHAR LIMIT=NONE] -->

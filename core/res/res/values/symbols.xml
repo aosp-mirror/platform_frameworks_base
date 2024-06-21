@@ -2153,6 +2153,8 @@
   <java-symbol type="string" name="adbwifi_active_notification_title" />
   <java-symbol type="string" name="test_harness_mode_notification_title" />
   <java-symbol type="string" name="test_harness_mode_notification_message" />
+  <java-symbol type="string" name="wrong_hsum_configuration_notification_title" />
+  <java-symbol type="string" name="wrong_hsum_configuration_notification_message" />
   <java-symbol type="string" name="console_running_notification_title" />
   <java-symbol type="string" name="console_running_notification_message" />
   <java-symbol type="string" name="mte_override_notification_title" />
