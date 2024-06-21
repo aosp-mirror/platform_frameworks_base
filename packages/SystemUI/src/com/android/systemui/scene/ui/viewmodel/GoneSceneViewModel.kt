@@ -64,14 +64,25 @@ constructor(
                     // TODO(b/338577208): Remove this once we add Dual Shade invocation zones.
                     shadeMode is ShadeMode.Dual
             ) {
-                put(
-                    Swipe(
-                        pointerCount = 2,
-                        fromSource = Edge.Top,
-                        direction = SwipeDirection.Down,
-                    ),
-                    UserActionResult(SceneFamilies.QuickSettings)
-                )
+                if (shadeInteractor.shadeAlignment == Alignment.BottomEnd) {
+                    put(
+                        Swipe(
+                            pointerCount = 2,
+                            fromSource = Edge.Bottom,
+                            direction = SwipeDirection.Up,
+                        ),
+                        UserActionResult(SceneFamilies.QuickSettings, OpenBottomShade)
+                    )
+                } else {
+                    put(
+                        Swipe(
+                            pointerCount = 2,
+                            fromSource = Edge.Top,
+                            direction = SwipeDirection.Down,
+                        ),
+                        UserActionResult(SceneFamilies.QuickSettings)
+                    )
+                }
             }
 
             if (shadeInteractor.shadeAlignment == Alignment.BottomEnd) {
