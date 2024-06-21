@@ -30607,7 +30607,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setPointerIcon(PointerIcon)} for mouse devices. Subclasses may override this to
      * customize the icon for the given pointer.
      *
-     * For example, the pointer icon for a stylus pointer can be resolved in the following way:
+     * For example, to always show the PointerIcon.TYPE_HANDWRITING icon for a stylus pointer,
+     * the event can be resolved in the following way:
      * <code><pre>
      * &#64;Override
      * public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
@@ -30617,7 +30618,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *             && (toolType == MotionEvent.TOOL_TYPE_STYLUS
      *                     || toolType == MotionEvent.TOOL_TYPE_ERASER)) {
      *         // Show this pointer icon only if this pointer is a stylus.
-     *         return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_WAIT);
+     *         return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_HANDWRITING);
      *     }
      *     // Use the default logic for determining the pointer icon for other non-stylus pointers,
      *     // like for the mouse cursor.
