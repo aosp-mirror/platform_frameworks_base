@@ -4455,6 +4455,7 @@ public class NotificationStackScrollLayout
     }
 
     void goToFullShade(long delay) {
+        SceneContainerFlag.assertInLegacyMode();
         mGoToFullShadeNeedsAnimation = true;
         mGoToFullShadeDelay = delay;
         mNeedsAnimation = true;
