@@ -1097,7 +1097,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             int yTranslation = mResources.getDimensionPixelSize(R.dimen.disappear_y_translation);
 
             AnimatorSet anims = new AnimatorSet();
-            ObjectAnimator yAnim = ObjectAnimator.ofFloat(mView, View.TRANSLATION_Y, yTranslation);
+            ObjectAnimator yAnim = ObjectAnimator.ofFloat(mViewFlipper, View.TRANSLATION_Y,
+                    yTranslation);
             ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mUserSwitcherViewGroup, View.ALPHA,
                     0f);
 
