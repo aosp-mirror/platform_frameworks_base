@@ -34,6 +34,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.ui.viewmodel.notificationsShadeSceneViewModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -56,7 +57,7 @@ class NotificationsShadeSceneViewModelTest : SysuiTestCase() {
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
 
-    private val underTest = kosmos.notificationsShadeSceneViewModel
+    private val underTest by lazy { kosmos.notificationsShadeSceneViewModel }
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockscreen() =
@@ -65,6 +66,7 @@ class NotificationsShadeSceneViewModelTest : SysuiTestCase() {
             lockDevice()
 
             assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(destinationScenes?.get(Swipe.Down)).isNull()
             assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value)
                 .isEqualTo(Scenes.Lockscreen)
         }
@@ -77,6 +79,33 @@ class NotificationsShadeSceneViewModelTest : SysuiTestCase() {
             unlockDevice()
 
             assertThat(destinationScenes?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(destinationScenes?.get(Swipe.Down)).isNull()
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun downTransitionSceneKey_deviceLocked_bottomAligned_lockscreen() =
+        testScope.runTest {
+            kosmos.fakeShadeRepository.setDualShadeAlignedToBottom(true)
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            lockDevice()
+
+            assertThat(destinationScenes?.get(Swipe.Down)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(destinationScenes?.get(Swipe.Up)).isNull()
+            assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value)
+                .isEqualTo(Scenes.Lockscreen)
+        }
+
+    @Test
+    fun downTransitionSceneKey_deviceUnlocked_bottomAligned_gone() =
+        testScope.runTest {
+            kosmos.fakeShadeRepository.setDualShadeAlignedToBottom(true)
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            lockDevice()
+            unlockDevice()
+
+            assertThat(destinationScenes?.get(Swipe.Down)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat(destinationScenes?.get(Swipe.Up)).isNull()
             assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
         }
 
