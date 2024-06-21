@@ -21,7 +21,9 @@ import android.content.res.Resources
 import android.graphics.PointF
 import android.graphics.Rect
 import android.os.IBinder
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.window.WindowContainerToken
@@ -36,6 +38,7 @@ import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -53,20 +56,31 @@ import org.mockito.MockitoAnnotations
 class DragPositioningCallbackUtilityTest {
     @Mock
     private lateinit var mockWindowDecoration: WindowDecoration<*>
+
     @Mock
     private lateinit var taskToken: WindowContainerToken
+
     @Mock
     private lateinit var taskBinder: IBinder
+
     @Mock
     private lateinit var mockDisplayController: DisplayController
+
     @Mock
     private lateinit var mockDisplayLayout: DisplayLayout
+
     @Mock
     private lateinit var mockDisplay: Display
+
     @Mock
     private lateinit var mockContext: Context
+
     @Mock
     private lateinit var mockResources: Resources
+
+    @JvmField
+    @Rule
+    val setFlagsRule = SetFlagsRule()
 
     @Before
     fun setup() {
@@ -323,6 +337,49 @@ class DragPositioningCallbackUtilityTest {
         assertThat(repositionTaskBounds.bottom).isEqualTo(STARTING_BOUNDS.bottom - 50)
     }
 
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS)
+    fun testChangeBounds_windowSizeExceedsStableBounds_shouldBeAllowedToChangeBounds() {
+        val startingPoint =
+            PointF(OFF_CENTER_STARTING_BOUNDS.right.toFloat(),
+                OFF_CENTER_STARTING_BOUNDS.bottom.toFloat())
+        val repositionTaskBounds = Rect(OFF_CENTER_STARTING_BOUNDS)
+        // Increase height and width by STABLE_BOUNDS. Subtract by 5px so that it doesn't reach
+        // the disallowed drag area.
+        val offset = 5
+        val newX = STABLE_BOUNDS.right.toFloat() - offset
+        val newY = STABLE_BOUNDS.bottom.toFloat() - offset
+        val delta = DragPositioningCallbackUtility.calculateDelta(newX, newY, startingPoint)
+
+        DragPositioningCallbackUtility.changeBounds(CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM,
+            repositionTaskBounds, OFF_CENTER_STARTING_BOUNDS, STABLE_BOUNDS, delta,
+            mockDisplayController, mockWindowDecoration)
+        assertThat(repositionTaskBounds.width()).isGreaterThan(STABLE_BOUNDS.right)
+        assertThat(repositionTaskBounds.height()).isGreaterThan(STABLE_BOUNDS.bottom)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS)
+    fun testChangeBoundsInDesktopMode_windowSizeExceedsStableBounds_shouldBeLimitedToDisplaySize() {
+        whenever(DesktopModeStatus.canEnterDesktopMode(mockContext)).thenReturn(true)
+        val startingPoint =
+            PointF(OFF_CENTER_STARTING_BOUNDS.right.toFloat(),
+                OFF_CENTER_STARTING_BOUNDS.bottom.toFloat())
+        val repositionTaskBounds = Rect(OFF_CENTER_STARTING_BOUNDS)
+        // Increase height and width by STABLE_BOUNDS. Subtract by 5px so that it doesn't reach
+        // the disallowed drag area.
+        val offset = 5
+        val newX = STABLE_BOUNDS.right.toFloat() - offset
+        val newY = STABLE_BOUNDS.bottom.toFloat() - offset
+        val delta = DragPositioningCallbackUtility.calculateDelta(newX, newY, startingPoint)
+
+        DragPositioningCallbackUtility.changeBounds(CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM,
+            repositionTaskBounds, OFF_CENTER_STARTING_BOUNDS, STABLE_BOUNDS, delta,
+            mockDisplayController, mockWindowDecoration)
+        assertThat(repositionTaskBounds.width()).isLessThan(STABLE_BOUNDS.right)
+        assertThat(repositionTaskBounds.height()).isLessThan(STABLE_BOUNDS.bottom)
+    }
+
     private fun initializeTaskInfo(taskMinWidth: Int = MIN_WIDTH, taskMinHeight: Int = MIN_HEIGHT) {
         mockWindowDecoration.mTaskInfo = ActivityManager.RunningTaskInfo().apply {
             taskId = TASK_ID
@@ -347,6 +404,7 @@ class DragPositioningCallbackUtilityTest {
         private const val NAVBAR_HEIGHT = 50
         private val DISPLAY_BOUNDS = Rect(0, 0, 2400, 1600)
         private val STARTING_BOUNDS = Rect(0, 0, 100, 100)
+        private val OFF_CENTER_STARTING_BOUNDS = Rect(-100, -100, 10, 10)
         private val DISALLOWED_RESIZE_AREA = Rect(
             DISPLAY_BOUNDS.left,
             DISPLAY_BOUNDS.bottom - NAVBAR_HEIGHT,
