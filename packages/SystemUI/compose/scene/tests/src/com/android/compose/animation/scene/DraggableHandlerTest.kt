@@ -1233,4 +1233,17 @@ class DraggableHandlerTest {
         advanceUntilIdle()
         assertIdle(SceneB)
     }
+
+    @Test
+    fun interceptingTransitionReplacesCurrentTransition() = runGestureTest {
+        val controller = onDragStarted(overSlop = up(fractionOfScreen = 0.5f))
+        val transition = assertThat(layoutState.transitionState).isTransition()
+        controller.onDragStopped(velocity = 0f)
+
+        // Intercept the transition.
+        onDragStartedImmediately()
+        val newTransition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(newTransition).isNotSameInstanceAs(transition)
+        assertThat(newTransition.replacedTransition).isSameInstanceAs(transition)
+    }
 }
