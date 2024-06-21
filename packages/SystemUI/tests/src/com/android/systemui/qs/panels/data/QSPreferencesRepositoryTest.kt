@@ -19,7 +19,7 @@ package com.android.systemui.qs.panels.data
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.UserInfo
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -36,7 +36,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class QSPreferencesRepositoryTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val underTest = with(kosmos) { qsPreferencesRepository }

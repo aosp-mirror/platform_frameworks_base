@@ -205,7 +205,7 @@ public class TestDreamEnvironment {
 
         @Override
         public DreamOverlayConnectionHandler createOverlayConnection(
-                ComponentName overlayComponent) {
+                ComponentName overlayComponent, Runnable onDisconnected) {
             return mDreamOverlayConnectionHandler;
         }
 

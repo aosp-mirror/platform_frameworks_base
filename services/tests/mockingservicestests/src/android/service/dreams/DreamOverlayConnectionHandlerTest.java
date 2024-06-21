@@ -49,10 +49,6 @@ import java.util.function.Consumer;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DreamOverlayConnectionHandlerTest {
-    private static final int MIN_CONNECTION_DURATION_MS = 100;
-    private static final int MAX_RECONNECT_ATTEMPTS = 3;
-    private static final int BASE_RECONNECT_DELAY_MS = 50;
-
     @Mock
     private Context mContext;
     @Mock
@@ -63,6 +59,8 @@ public class DreamOverlayConnectionHandlerTest {
     private IDreamOverlay mOverlayService;
     @Mock
     private IDreamOverlayClient mOverlayClient;
+    @Mock
+    private Runnable mOnDisconnectRunnable;
 
     private TestLooper mTestLooper;
     private DreamOverlayConnectionHandler mDreamOverlayConnectionHandler;
@@ -75,9 +73,7 @@ public class DreamOverlayConnectionHandlerTest {
                 mContext,
                 mTestLooper.getLooper(),
                 mServiceIntent,
-                MIN_CONNECTION_DURATION_MS,
-                MAX_RECONNECT_ATTEMPTS,
-                BASE_RECONNECT_DELAY_MS,
+                mOnDisconnectRunnable,
                 new TestInjector(mConnection));
     }
 
@@ -119,12 +115,14 @@ public class DreamOverlayConnectionHandlerTest {
         mTestLooper.dispatchAll();
         // No client yet, so we shouldn't have executed
         verify(consumer, never()).accept(mOverlayClient);
+        verify(mOnDisconnectRunnable, never()).run();
 
         provideClient();
         // Service disconnected before looper could handle the message.
         disconnectService();
         mTestLooper.dispatchAll();
         verify(consumer, never()).accept(mOverlayClient);
+        verify(mOnDisconnectRunnable).run();
     }
 
     @Test
@@ -237,8 +235,7 @@ public class DreamOverlayConnectionHandlerTest {
 
         @Override
         public PersistentServiceConnection<IDreamOverlay> buildConnection(Context context,
-                Handler handler, Intent serviceIntent, int minConnectionDurationMs,
-                int maxReconnectAttempts, int baseReconnectDelayMs) {
+                Handler handler, Intent serviceIntent) {
             return mConnection;
         }
     }

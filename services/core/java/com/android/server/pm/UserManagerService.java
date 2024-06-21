@@ -5918,6 +5918,7 @@ public class UserManagerService extends IUserManager.Stub {
         return userData;
     }
 
+    /** For testing only! Directly, unnaturally removes userId from list of users. */
     @VisibleForTesting
     void removeUserInfo(@UserIdInt int userId) {
         synchronized (mUsersLock) {

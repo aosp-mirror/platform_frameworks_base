@@ -483,7 +483,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private float mBottomAreaShadeAlpha;
     final ValueAnimator mBottomAreaShadeAlphaAnimator;
     private final AnimatableProperty mPanelAlphaAnimator = AnimatableProperty.from("panelAlpha",
-            NotificationPanelView::setPanelAlphaInternal,
+            (view, alpha) -> {
+                setAlphaInternal(alpha);
+            },
             NotificationPanelView::getCurrentPanelAlpha,
             R.id.panel_alpha_animator_tag, R.id.panel_alpha_animator_start_tag,
             R.id.panel_alpha_animator_end_tag);
@@ -3074,6 +3076,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
     }
 
+    private void setAlphaInternal(float alpha) {
+        mKeyguardInteractor.setPanelAlpha(alpha / 255f);
+        mView.setPanelAlphaInternal(alpha);
+    }
+
     @Override
     public void setAlphaChangeAnimationEndAction(Runnable r) {
         mPanelAlphaEndAction = r;
@@ -3383,7 +3390,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         /** Updates the views to the initial state for the fold to AOD animation. */
         @Override
         public void prepareFoldToAodAnimation() {
-            if (!MigrateClocksToBlueprint.isEnabled()) {
+            if (MigrateClocksToBlueprint.isEnabled()) {
+                setDozing(true /* dozing */, false /* animate */);
+            } else {
                 // Force show AOD UI even if we are not locked
                 showAodUi();
             }

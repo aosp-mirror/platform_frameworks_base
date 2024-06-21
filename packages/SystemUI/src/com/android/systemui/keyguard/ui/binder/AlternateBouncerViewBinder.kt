@@ -86,7 +86,10 @@ constructor(
                     privateFlags =
                         WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY or
                             WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
+                    // Avoid announcing window title.
+                    accessibilityTitle = " "
                 }
+
     private var alternateBouncerView: ConstraintLayout? = null
 
     override fun start() {
@@ -112,13 +115,28 @@ constructor(
     }
 
     private fun removeViewFromWindowManager() {
-        if (alternateBouncerView == null || !alternateBouncerView!!.isAttachedToWindow) {
-            return
-        }
+        alternateBouncerView?.let {
+            alternateBouncerView = null
+            if (it.isAttachedToWindow) {
+                it.removeOnAttachStateChangeListener(onAttachAddBackGestureHandler)
+                Log.d(TAG, "Removing alternate bouncer view immediately")
+                windowManager.get().removeView(it)
+            } else {
+                // once the view is attached, remove it
+                it.addOnAttachStateChangeListener(
+                    object : View.OnAttachStateChangeListener {
+                        override fun onViewAttachedToWindow(view: View) {
+                            it.removeOnAttachStateChangeListener(this)
+                            it.removeOnAttachStateChangeListener(onAttachAddBackGestureHandler)
+                            Log.d(TAG, "Removing alternate bouncer view on attached")
+                            windowManager.get().removeView(it)
+                        }
 
-        windowManager.get().removeView(alternateBouncerView)
-        alternateBouncerView!!.removeOnAttachStateChangeListener(onAttachAddBackGestureHandler)
-        alternateBouncerView = null
+                        override fun onViewDetachedFromWindow(view: View) {}
+                    }
+                )
+            }
+        }
     }
 
     private val onAttachAddBackGestureHandler =
@@ -148,7 +166,7 @@ constructor(
         }
 
     private fun addViewToWindowManager() {
-        if (alternateBouncerView?.isAttachedToWindow == true) {
+        if (alternateBouncerView != null) {
             return
         }
 
@@ -156,6 +174,7 @@ constructor(
             layoutInflater.get().inflate(R.layout.alternate_bouncer, null, false)
                 as ConstraintLayout
 
+        Log.d(TAG, "Adding alternate bouncer view")
         windowManager.get().addView(alternateBouncerView, layoutParams)
         alternateBouncerView!!.addOnAttachStateChangeListener(onAttachAddBackGestureHandler)
     }
@@ -304,6 +323,7 @@ constructor(
             }
         }
     }
+
     companion object {
         private const val TAG = "AlternateBouncerViewBinder"
         private const val swipeTag = "AlternateBouncer-SWIPE"

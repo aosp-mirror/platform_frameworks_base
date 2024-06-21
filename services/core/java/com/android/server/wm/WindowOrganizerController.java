@@ -609,11 +609,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         int effects = TRANSACT_EFFECTS_NONE;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
+        mService.mTaskSupervisor.beginDeferResume();
+        boolean deferResume = true;
         mService.mTaskSupervisor.setDeferRootVisibilityUpdate(true /* deferUpdate */);
-        final boolean shouldDeferTransitionReady = transition != null && !t.isEmpty()
-                && (transition.isCollecting() || Flags.alwaysDeferTransitionWhenApplyWct());
-        if (shouldDeferTransitionReady) {
-            transition.deferTransitionReady();
+        boolean deferTransitionReady = false;
+        if (transition != null && !t.isEmpty()) {
+            if (transition.isCollecting()) {
+                deferTransitionReady = true;
+                transition.deferTransitionReady();
+            } else if (Flags.alwaysDeferTransitionWhenApplyWct()) {
+                Slog.w(TAG, "Transition is not collecting when applyTransaction."
+                        + " transition=" + transition + " state=" + transition.getState());
+                transition = null;
+            }
         }
         try {
             final ArraySet<WindowContainer<?>> haveConfigChanges = new ArraySet<>();
@@ -750,6 +758,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
                 mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
+                mService.mTaskSupervisor.endDeferResume();
+                deferResume = false;
                 // Already calls ensureActivityConfig
                 mService.mRootWindowContainer.ensureActivitiesVisible();
                 mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -767,10 +777,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 mService.mWindowManager.mWindowPlacerLocked.requestTraversal();
             }
         } finally {
-            if (shouldDeferTransitionReady) {
+            if (deferTransitionReady) {
                 transition.continueTransitionReady();
             }
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
+            if (deferResume) {
+                mService.mTaskSupervisor.endDeferResume();
+            }
             mService.continueWindowLayout();
         }
         return effects;

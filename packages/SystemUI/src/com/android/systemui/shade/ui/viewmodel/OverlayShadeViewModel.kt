@@ -22,6 +22,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,6 +39,7 @@ class OverlayShadeViewModel
 constructor(
     @Application applicationScope: CoroutineScope,
     private val sceneInteractor: SceneInteractor,
+    shadeInteractor: ShadeInteractor
 ) {
     /** The scene to show in the background when the overlay shade is open. */
     val backgroundScene: StateFlow<SceneKey> =
@@ -48,6 +50,9 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = Scenes.Lockscreen,
             )
+
+    /** Dictates whether the panel is aligned to the top or the bottom. */
+    val panelAlignment = shadeInteractor.shadeAlignment
 
     /** Notifies that the user has clicked the semi-transparent background scrim. */
     fun onScrimClicked() {

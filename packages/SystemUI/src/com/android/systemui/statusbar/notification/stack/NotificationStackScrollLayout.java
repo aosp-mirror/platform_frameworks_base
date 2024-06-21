@@ -837,7 +837,7 @@ public class NotificationStackScrollLayout
             y = (int) mScrollViewFields.getStackTop();
             drawDebugInfo(canvas, y, Color.RED, /* label= */ "getStackTop() = " + y);
 
-            y = (int) mScrollViewFields.getStackCutoff();
+            y = (int) mAmbientState.getStackCutoff();
             drawDebugInfo(canvas, y, Color.MAGENTA, /* label= */ "getStackCutoff() = " + y);
 
             y = (int) mScrollViewFields.getHeadsUpTop();
@@ -1221,7 +1221,7 @@ public class NotificationStackScrollLayout
 
     @Override
     public void setStackCutoff(float stackCutoff) {
-        mScrollViewFields.setStackCutoff(stackCutoff);
+        mAmbientState.setStackCutoff(stackCutoff);
     }
 
     @Override

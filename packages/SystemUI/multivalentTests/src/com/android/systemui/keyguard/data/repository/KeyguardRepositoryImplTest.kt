@@ -140,6 +140,27 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun panelAlpha() =
+        testScope.runTest {
+            assertThat(underTest.panelAlpha.value).isEqualTo(1f)
+
+            underTest.setPanelAlpha(0.1f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.1f)
+
+            underTest.setPanelAlpha(0.2f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.2f)
+
+            underTest.setPanelAlpha(0.3f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.3f)
+
+            underTest.setPanelAlpha(0.5f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.5f)
+
+            underTest.setPanelAlpha(1.0f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(1f)
+        }
+
+    @Test
     fun topClippingBounds() =
         testScope.runTest {
             assertThat(underTest.topClippingBounds.value).isNull()

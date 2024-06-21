@@ -180,7 +180,13 @@ constructor(
                     mediaData.instanceId
                 )
                 mediaFilterRepository.addMediaDataLoadingState(
-                    MediaDataLoadingModel.Loaded(lastActiveId)
+                    MediaDataLoadingModel.Loaded(
+                        lastActiveId,
+                        receivedSmartspaceCardLatency =
+                            (systemClock.currentTimeMillis() - data.headphoneConnectionTimeMillis)
+                                .toInt(),
+                        isSsReactivated = true
+                    )
                 )
                 mediaLoadingLogger.logMediaLoaded(
                     mediaData.instanceId,

@@ -19,7 +19,6 @@ package com.android.server.notification;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -31,7 +30,6 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.notification.Condition;
-import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
 import android.util.ArraySet;
@@ -54,8 +52,6 @@ public class EventConditionProvider extends SystemConditionProviderService {
     private static final String TAG = "ConditionProviders.ECP";
     private static final boolean DEBUG = Log.isLoggable("ConditionProviders", Log.DEBUG);
 
-    public static final ComponentName COMPONENT =
-            new ComponentName("android", EventConditionProvider.class.getName());
     private static final String NOT_SHOWN = "...";
     private static final String SIMPLE_NAME = EventConditionProvider.class.getSimpleName();
     private static final String ACTION_EVALUATE = SIMPLE_NAME + ".EVALUATE";
@@ -79,11 +75,6 @@ public class EventConditionProvider extends SystemConditionProviderService {
         mThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
         mThread.start();
         mWorker = new Handler(mThread.getLooper());
-    }
-
-    @Override
-    public ComponentName getComponent() {
-        return COMPONENT;
     }
 
     @Override
@@ -164,16 +155,6 @@ public class EventConditionProvider extends SystemConditionProviderService {
                 evaluateSubscriptions();
             }
         }
-    }
-
-    @Override
-    public void attachBase(Context base) {
-        attachBaseContext(base);
-    }
-
-    @Override
-    public IConditionProvider asInterface() {
-        return (IConditionProvider) onBind(null);
     }
 
     private void reloadTrackers() {

@@ -22,8 +22,8 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings.SettingNotFoundException
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -36,7 +36,7 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.eq
 
 /** Tests for [SettingsProxy]. */
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper
 class SettingsProxyTest : SysuiTestCase() {

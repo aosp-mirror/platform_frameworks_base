@@ -1134,6 +1134,15 @@ public class ZenModeHelper {
                 modified = true;
             }
 
+            // Allow updating the CPS backing system rules (e.g. for custom manual -> schedule)
+            if (Flags.modesUi()
+                    && (origin == UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI || origin == UPDATE_ORIGIN_USER)
+                    && Objects.equals(rule.pkg, SystemZenRules.PACKAGE_ANDROID)
+                    && !Objects.equals(rule.component, azr.getOwner())) {
+                rule.component = azr.getOwner();
+                modified = true;
+            }
+
             if (!Objects.equals(rule.conditionId, azr.getConditionId())) {
                 rule.conditionId = azr.getConditionId();
                 modified = true;

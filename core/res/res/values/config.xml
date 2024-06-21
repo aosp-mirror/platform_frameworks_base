@@ -567,14 +567,6 @@
          It has been updated to affect other plug types. -->
     <bool name="config_keepDreamingWhenUnplugging">false</bool>
 
-    <!-- The timeout (in ms) to wait before attempting to reconnect to the dream overlay service if
-         it becomes disconnected -->
-    <integer name="config_dreamOverlayReconnectTimeoutMs">1000</integer> <!-- 1 second -->
-    <!-- The maximum number of times to attempt reconnecting to the dream overlay service -->
-    <integer name="config_dreamOverlayMaxReconnectAttempts">3</integer>
-    <!-- The duration after which the dream overlay connection should be considered stable -->
-    <integer name="config_minDreamOverlayDurationMs">10000</integer> <!-- 10 seconds -->
-
     <!-- Auto-rotation behavior -->
 
     <!-- If true, enables auto-rotation features using the accelerometer.
@@ -3917,6 +3909,7 @@
         <item>countdown</item>
         <item>schedule</item>
         <item>event</item>
+        <item>custom_manual</item>
     </string-array>
 
     <!-- Priority repeat caller threshold, in minutes -->
@@ -5807,6 +5800,9 @@
     <!-- The action name for the default profcollect report uploader app. -->
     <string name="config_defaultProfcollectReportUploaderAction" translatable="false"></string>
 
+    <!-- Names of packages excluded by Profcollect onCameraOpened observer. -->
+    <string-array name="config_profcollectOnCameraOpenedSkipPackages" translatable="false"></string-array>
+
     <!-- The default value used for RawContacts.ACCOUNT_NAME when contacts are inserted without this
          column set. These contacts are stored locally on the device and will not be removed even
          if no android.account.Account with this name exists. A null string will be used if the
@@ -6969,6 +6965,9 @@
          Note that, indefinitely repeating vibrations are not allowed as shutdown vibrations. -->
     <string name="config_defaultShutdownVibrationFile" />
 
+    <!-- Whether or not vibration is disabled during shutdown -->
+    <bool name="config_disableShutdownVibrationInZen">false</bool>
+
     <!-- Whether single finger panning is enabled by default when magnification is on -->
     <bool name="config_enable_a11y_magnification_single_panning">false</bool>
 
@@ -7084,6 +7083,9 @@
 
     <!-- Whether the system uses auto-suspend mode. -->
     <bool name="config_useAutoSuspend">true</bool>
+
+    <!-- Whether close/dismiss buttons are supported on notifications. -->
+    <bool name="config_notificationCloseButtonSupported">false</bool>
 
     <!-- Whether to show GAIA education screen during account login of private space setup.
          OEM/Partner can explicitly opt to disable the screen. -->

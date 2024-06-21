@@ -23,6 +23,7 @@
 #include <aidl/android/os/IHintManager.h>
 #include <aidl/android/os/IHintSession.h>
 #include <android-base/stringprintf.h>
+#include <android-base/thread_annotations.h>
 #include <android/binder_manager.h>
 #include <android/binder_status.h>
 #include <android/performance_hint.h>
@@ -111,26 +112,26 @@ private:
     // HAL preferred update rate
     const int64_t mPreferredRateNanos;
     // Target duration for choosing update rate
-    int64_t mTargetDurationNanos;
+    int64_t mTargetDurationNanos GUARDED_BY(sHintMutex);
     // First target hit timestamp
-    int64_t mFirstTargetMetTimestamp;
+    int64_t mFirstTargetMetTimestamp GUARDED_BY(sHintMutex);
     // Last target hit timestamp
-    int64_t mLastTargetMetTimestamp;
+    int64_t mLastTargetMetTimestamp GUARDED_BY(sHintMutex);
     // Last hint reported from sendHint indexed by hint value
-    std::vector<int64_t> mLastHintSentTimestamp;
+    std::vector<int64_t> mLastHintSentTimestamp GUARDED_BY(sHintMutex);
     // Cached samples
-    std::vector<hal::WorkDuration> mActualWorkDurations;
-    std::string mSessionName;
-    static int64_t sIDCounter;
+    std::vector<hal::WorkDuration> mActualWorkDurations GUARDED_BY(sHintMutex);
+    std::string mSessionName GUARDED_BY(sHintMutex);
+    static int64_t sIDCounter GUARDED_BY(sHintMutex);
     // The most recent set of thread IDs
-    std::vector<int32_t> mLastThreadIDs;
-    std::optional<hal::SessionConfig> mSessionConfig;
+    std::vector<int32_t> mLastThreadIDs GUARDED_BY(sHintMutex);
+    std::optional<hal::SessionConfig> mSessionConfig GUARDED_BY(sHintMutex);
     // Tracing helpers
-    void traceThreads(std::vector<int32_t>& tids);
-    void tracePowerEfficient(bool powerEfficient);
-    void traceActualDuration(int64_t actualDuration);
-    void traceBatchSize(size_t batchSize);
-    void traceTargetDuration(int64_t targetDuration);
+    void traceThreads(std::vector<int32_t>& tids) REQUIRES(sHintMutex);
+    void tracePowerEfficient(bool powerEfficient) REQUIRES(sHintMutex);
+    void traceActualDuration(int64_t actualDuration) REQUIRES(sHintMutex);
+    void traceBatchSize(size_t batchSize) REQUIRES(sHintMutex);
+    void traceTargetDuration(int64_t targetDuration) REQUIRES(sHintMutex);
 };
 
 static std::shared_ptr<IHintManager>* gIHintManagerForTesting = nullptr;

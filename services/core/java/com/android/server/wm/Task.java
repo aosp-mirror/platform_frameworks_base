@@ -1994,6 +1994,12 @@ class Task extends TaskFragment {
         final boolean wasInMultiWindowMode = inMultiWindowMode();
         final boolean wasInPictureInPicture = inPinnedWindowingMode();
         super.onConfigurationChanged(newParentConfig);
+        if (mDisplayContent == null) {
+            // This should be initializing from Task.Builder. The onConfigurationChanged will be
+            // called again when this task is attached to hierarchy. Early return here because the
+            // following operations are no-op for a non-attached task.
+            return;
+        }
         // Only need to update surface size here since the super method will handle updating
         // surface position.
         updateSurfaceSize(getSyncTransaction());
