@@ -1181,9 +1181,11 @@ public class NotificationStackScrollLayout
         updateAlgorithmLayoutMinHeight();
         updateOwnTranslationZ();
 
-        // Give The Algorithm information regarding the QS height so it can layout notifications
-        // properly. Needed for some devices that grows notifications down-to-top
-        mStackScrollAlgorithm.updateQSFrameTop(mQsHeader == null ? 0 : mQsHeader.getHeight());
+        if (!SceneContainerFlag.isEnabled()) {
+            // Give The Algorithm information regarding the QS height so it can layout notifications
+            // properly. Needed for some devices that grows notifications down-to-top
+            mStackScrollAlgorithm.updateQSFrameTop(mQsHeader == null ? 0 : mQsHeader.getHeight());
+        }
 
         // Once the layout has finished, we don't need to animate any scrolling clampings anymore.
         mAnimateStackYForContentHeightChange = false;
@@ -1811,6 +1813,7 @@ public class NotificationStackScrollLayout
     }
 
     public void setQsHeader(ViewGroup qsHeader) {
+        SceneContainerFlag.assertInLegacyMode();
         mQsHeader = qsHeader;
     }
 
@@ -2662,6 +2665,7 @@ public class NotificationStackScrollLayout
     }
 
     public void setMaxTopPadding(int maxTopPadding) {
+        SceneContainerFlag.assertInLegacyMode();
         mMaxTopPadding = maxTopPadding;
     }
 
@@ -2682,6 +2686,7 @@ public class NotificationStackScrollLayout
     }
 
     public float getTopPaddingOverflow() {
+        SceneContainerFlag.assertInLegacyMode();
         return mTopPaddingOverflow;
     }
 
@@ -4641,6 +4646,7 @@ public class NotificationStackScrollLayout
     }
 
     public boolean isEmptyShadeViewVisible() {
+        SceneContainerFlag.assertInLegacyMode();
         return mEmptyShadeView.isVisible();
     }
 
@@ -4919,6 +4925,7 @@ public class NotificationStackScrollLayout
     }
 
     public void setQsFullScreen(boolean qsFullScreen) {
+        SceneContainerFlag.assertInLegacyMode();
         if (FooterViewRefactor.isEnabled()) {
             if (qsFullScreen == mQsFullScreen) {
                 return;  // no change
@@ -5095,6 +5102,7 @@ public class NotificationStackScrollLayout
     }
 
     public void setExpandingVelocity(float expandingVelocity) {
+        SceneContainerFlag.assertInLegacyMode();
         mAmbientState.setExpandingVelocity(expandingVelocity);
     }
 
