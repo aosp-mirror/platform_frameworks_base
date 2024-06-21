@@ -49,6 +49,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -129,7 +130,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
@@ -994,7 +994,8 @@ private fun CtaTileInViewModeContent(
         shape = RoundedCornerShape(68.dp, 34.dp, 68.dp, 34.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(vertical = 38.dp, horizontal = 70.dp),
+            modifier = Modifier.fillMaxSize().padding(vertical = 32.dp, horizontal = 50.dp),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
@@ -1005,41 +1006,43 @@ private fun CtaTileInViewModeContent(
             Spacer(modifier = Modifier.size(6.dp))
             Text(
                 text = stringResource(R.string.cta_label_to_edit_widget),
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge,
+                fontSize = nonScalableTextSize(22.dp),
+                lineHeight = nonScalableTextSize(28.dp),
             )
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.size(16.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
             ) {
                 OutlinedButton(
+                    modifier = Modifier.fillMaxHeight(),
                     colors =
                         ButtonDefaults.buttonColors(
                             contentColor = colors.onPrimary,
                         ),
                     border = BorderStroke(width = 1.0.dp, color = colors.primaryContainer),
-                    contentPadding = Dimensions.ButtonPadding,
+                    contentPadding = PaddingValues(26.dp, 8.dp),
                     onClick = viewModel::onDismissCtaTile,
                 ) {
                     Text(
                         text = stringResource(R.string.cta_tile_button_to_dismiss),
-                        fontSize = 12.sp,
+                        fontSize = nonScalableTextSize(14.dp),
                     )
                 }
-                Spacer(modifier = Modifier.size(14.dp))
                 Button(
+                    modifier = Modifier.fillMaxHeight(),
                     colors =
                         ButtonDefaults.buttonColors(
                             containerColor = colors.primaryContainer,
                             contentColor = colors.onPrimaryContainer,
                         ),
-                    contentPadding = Dimensions.ButtonPadding,
+                    contentPadding = PaddingValues(26.dp, 8.dp),
                     onClick = viewModel::onOpenWidgetEditor
                 ) {
                     Text(
                         text = stringResource(R.string.cta_tile_button_to_open_widget_editor),
-                        fontSize = 12.sp,
+                        fontSize = nonScalableTextSize(14.dp),
                     )
                 }
             }
@@ -1350,6 +1353,13 @@ fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composabl
         content()
     }
 }
+
+/**
+ * Text size converted from dp value to the equivalent sp value using the current screen density,
+ * ensuring it does not scale with the font size setting.
+ */
+@Composable
+private fun nonScalableTextSize(sizeInDp: Dp) = with(LocalDensity.current) { sizeInDp.toSp() }
 
 /**
  * Returns the `contentPadding` of the grid. Use the vertical padding to push the grid content area
