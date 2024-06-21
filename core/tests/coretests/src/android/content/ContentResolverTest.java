@@ -87,7 +87,7 @@ public class ContentResolverTest {
         bitmap.compress(Bitmap.CompressFormat.PNG, 90, mImage.getOutputStream());
 
         final AssetFileDescriptor afd = new AssetFileDescriptor(
-                ParcelFileDescriptor.dup(mImage.getFileDescriptor()), 0, mSize, null);
+                new ParcelFileDescriptor(mImage.getFileDescriptor()), 0, mSize, null);
         when(mProvider.openTypedAssetFile(any(), any(), any(), any(), any())).thenReturn(
                 afd);
     }
