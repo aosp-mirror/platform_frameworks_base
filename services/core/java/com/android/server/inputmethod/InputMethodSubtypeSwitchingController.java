@@ -163,13 +163,12 @@ final class InputMethodSubtypeSwitchingController {
     @NonNull
     static List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(
             boolean includeAuxiliarySubtypes, boolean isScreenLocked, boolean forImeMenu,
-            @NonNull Context context, @NonNull InputMethodMap methodMap,
-            @UserIdInt int userId) {
+            @NonNull Context context, @NonNull InputMethodSettings settings) {
+        final int userId = settings.getUserId();
         final Context userAwareContext = context.getUserId() == userId
                 ? context
                 : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
         final String mSystemLocaleStr = SystemLocaleWrapper.get(userId).get(0).toLanguageTag();
-        final InputMethodSettings settings = InputMethodSettings.create(methodMap, userId);
 
         final ArrayList<InputMethodInfo> imis = settings.getEnabledInputMethodList();
         if (imis.isEmpty()) {
@@ -487,13 +486,13 @@ final class InputMethodSubtypeSwitchingController {
     private ControllerImpl mController;
 
     InputMethodSubtypeSwitchingController(@NonNull Context context,
-            @NonNull InputMethodMap methodMap, @UserIdInt int userId) {
+            @NonNull InputMethodSettings settings) {
         mContext = context;
-        mUserId = userId;
+        mUserId = settings.getUserId();
         mController = ControllerImpl.createFrom(null,
                 getSortedInputMethodAndSubtypeList(
                         false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
-                        false /* forImeMenu */, context, methodMap, userId));
+                        false /* forImeMenu */, context, settings));
     }
 
     @AnyThread
@@ -507,11 +506,11 @@ final class InputMethodSubtypeSwitchingController {
         mController.onUserActionLocked(imi, subtype);
     }
 
-    public void resetCircularListLocked(@NonNull InputMethodMap methodMap) {
+    public void resetCircularListLocked(@NonNull InputMethodSettings settings) {
         mController = ControllerImpl.createFrom(mController,
                 getSortedInputMethodAndSubtypeList(
                         false /* includeAuxiliarySubtypes */, false /* isScreenLocked */,
-                        false /* forImeMenu */, mContext, methodMap, mUserId));
+                        false /* forImeMenu */, mContext, settings));
     }
 
     @Nullable
