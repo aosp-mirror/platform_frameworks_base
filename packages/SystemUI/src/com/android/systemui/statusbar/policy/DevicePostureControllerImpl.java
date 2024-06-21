@@ -31,8 +31,8 @@ import com.android.systemui.util.Assert;
 
 import kotlin.Unit;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -42,7 +42,13 @@ import javax.inject.Inject;
 public class DevicePostureControllerImpl implements DevicePostureController {
     /** From androidx.window.common.COMMON_STATE_USE_BASE_STATE */
     private static final int COMMON_STATE_USE_BASE_STATE = 1000;
-    private final List<Callback> mListeners = new ArrayList<>();
+    /**
+     * Despite this is always used only from the main thread, it might be that some listener
+     * unregisters itself while we're sending the update, ending up modifying this while we're
+     * iterating it.
+     * Keeping a threadsafe list of listeners helps preventing ConcurrentModificationExceptions.
+     */
+    private final List<Callback> mListeners = new CopyOnWriteArrayList<>();
     private final List<DeviceState> mSupportedStates;
     private DeviceState mCurrentDeviceState;
     private int mCurrentDevicePosture = DEVICE_POSTURE_UNKNOWN;
