@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.dagger
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.data.repository.InfiniteGridSizeRepository
-import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Qualifier
 
-@SysUISingleton
-class InfiniteGridSizeInteractor @Inject constructor(repo: InfiniteGridSizeRepository) {
-    val columns: StateFlow<Int> = repo.columns
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class PaginatedBaseLayoutType

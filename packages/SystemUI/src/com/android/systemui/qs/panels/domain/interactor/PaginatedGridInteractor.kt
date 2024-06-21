@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.data.repository.PaginatedGridRepository
 import javax.inject.Inject
 
 @SysUISingleton
-class PartitionedGridViewModel
+class PaginatedGridInteractor
 @Inject
-constructor(
-    iconTilesViewModel: IconTilesViewModel,
-    gridSizeViewModel: FixedColumnsSizeViewModel,
-    iconLabelVisibilityViewModel: IconLabelVisibilityViewModel,
-) :
-    IconTilesViewModel by iconTilesViewModel,
-    FixedColumnsSizeViewModel by gridSizeViewModel,
-    IconLabelVisibilityViewModel by iconLabelVisibilityViewModel
+constructor(paginatedGridRepository: PaginatedGridRepository) {
+    val rows = paginatedGridRepository.rows
+
+    val defaultRows = 4
+}

@@ -16,17 +16,18 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.domain.interactor.InfiniteGridSizeInteractor
-import javax.inject.Inject
+import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-interface InfiniteGridSizeViewModel {
-    val columns: StateFlow<Int>
-}
-
-@SysUISingleton
-class InfiniteGridSizeViewModelImpl @Inject constructor(interactor: InfiniteGridSizeInteractor) :
-    InfiniteGridSizeViewModel {
-    override val columns: StateFlow<Int> = interactor.columns
+fun MockTileViewModel(
+    spec: TileSpec,
+    state: StateFlow<QSTile.State> = MutableStateFlow(QSTile.State())
+): TileViewModel = mock {
+    whenever(this.spec).thenReturn(spec)
+    whenever(this.state).thenReturn(state)
+    whenever(this.currentState).thenReturn(state.value)
 }
