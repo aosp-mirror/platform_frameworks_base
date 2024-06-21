@@ -100,7 +100,6 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
-    @Mock private lateinit var user: UserInfo
     @Mock private lateinit var providerInfo: AppWidgetProviderInfo
 
     private val kosmos = testKosmos()
@@ -315,6 +314,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun dismissCta_hidesCtaTileAndShowsPopup_thenHidesPopupAfterTimeout() =
         testScope.runTest {
+            setIsMainUser(true)
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             val communalContent by collectLastValue(underTest.communalContent)
@@ -338,6 +338,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun popup_onDismiss_hidesImmediately() =
         testScope.runTest {
+            setIsMainUser(true)
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             val currentPopup by collectLastValue(underTest.currentPopup)
@@ -743,13 +744,17 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     private suspend fun setIsMainUser(isMainUser: Boolean) {
-        whenever(user.isMain).thenReturn(isMainUser)
-        userRepository.setUserInfos(listOf(user))
-        userRepository.setSelectedUserInfo(user)
+        val user = if (isMainUser) MAIN_USER_INFO else SECONDARY_USER_INFO
+        with(userRepository) {
+            setUserInfos(listOf(user))
+            setSelectedUserInfo(user)
+        }
+        kosmos.fakeUserTracker.set(userInfos = listOf(user), selectedUserIndex = 0)
     }
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
+        val SECONDARY_USER_INFO = UserInfo(1, "secondary", 0)
 
         @JvmStatic
         @Parameters(name = "{0}")

@@ -52,10 +52,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -75,12 +77,15 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -153,7 +158,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CommunalHub(
     modifier: Modifier = Modifier,
@@ -378,6 +383,33 @@ fun CommunalHub(
                 onCancel = viewModel::onEnableWorkProfileDialogCancel
             )
         }
+
+        if (viewModel is CommunalEditModeViewModel) {
+            val showBottomSheet by viewModel.showDisclaimer.collectAsStateWithLifecycle(false)
+
+            if (showBottomSheet) {
+                val scope = rememberCoroutineScope()
+                val sheetState = rememberModalBottomSheetState()
+                val colors = LocalAndroidColorScheme.current
+
+                ModalBottomSheet(
+                    onDismissRequest = viewModel::onDisclaimerDismissed,
+                    sheetState = sheetState,
+                    dragHandle = null,
+                    containerColor = colors.surfaceContainer,
+                ) {
+                    DisclaimerBottomSheetContent {
+                        scope
+                            .launch { sheetState.hide() }
+                            .invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    viewModel.onDisclaimerDismissed()
+                                }
+                            }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -387,6 +419,47 @@ private fun onKeyEvent(viewModel: BaseCommunalViewModel) {
 
 private fun onMotionEvent(viewModel: BaseCommunalViewModel) {
     viewModel.signalUserInteraction()
+}
+
+@Composable
+private fun DisclaimerBottomSheetContent(onButtonClicked: () -> Unit) {
+    val colors = LocalAndroidColorScheme.current
+
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Widgets,
+            contentDescription = null,
+            tint = colors.primary,
+            modifier = Modifier.size(32.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.communal_widgets_disclaimer_title),
+            style = MaterialTheme.typography.headlineMedium,
+            color = colors.onSurface,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.communal_widgets_disclaimer_text),
+            color = colors.onSurfaceVariant,
+        )
+        Button(
+            modifier =
+                Modifier.padding(horizontal = 26.dp, vertical = 16.dp)
+                    .widthIn(min = 200.dp)
+                    .heightIn(min = 56.dp),
+            onClick = { onButtonClicked() }
+        ) {
+            Text(
+                stringResource(R.string.communal_widgets_disclaimer_button),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
 }
 
 /**
