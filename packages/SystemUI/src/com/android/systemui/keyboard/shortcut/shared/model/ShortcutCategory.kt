@@ -16,4 +16,25 @@
 
 package com.android.systemui.keyboard.shortcut.shared.model
 
-data class ShortcutCommand(val keyCodes: List<Int>)
+enum class ShortcutCategoryType {
+    SYSTEM,
+    MULTI_TASKING,
+}
+
+data class ShortcutCategory(
+    val type: ShortcutCategoryType,
+    val subCategories: List<ShortcutSubCategory>
+)
+
+class ShortcutCategoryBuilder(val type: ShortcutCategoryType) {
+    private val subCategories = mutableListOf<ShortcutSubCategory>()
+
+    fun subCategory(label: String, shortcuts: List<Shortcut>) {
+        subCategories += ShortcutSubCategory(label, shortcuts)
+    }
+
+    fun build() = ShortcutCategory(type, subCategories)
+}
+
+fun shortcutCategory(type: ShortcutCategoryType, block: ShortcutCategoryBuilder.() -> Unit) =
+    ShortcutCategoryBuilder(type).apply(block).build()
