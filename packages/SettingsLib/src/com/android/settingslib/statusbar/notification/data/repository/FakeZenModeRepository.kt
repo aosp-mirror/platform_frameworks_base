@@ -18,19 +18,18 @@ package com.android.settingslib.statusbar.notification.data.repository
 
 import android.app.NotificationManager
 import android.provider.Settings
-import com.android.settingslib.statusbar.notification.data.model.ZenMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeNotificationsSoundPolicyRepository : NotificationsSoundPolicyRepository {
+class FakeZenModeRepository : ZenModeRepository {
 
     private val mutableNotificationPolicy = MutableStateFlow<NotificationManager.Policy?>(null)
-    override val notificationPolicy: StateFlow<NotificationManager.Policy?>
+    override val consolidatedNotificationPolicy: StateFlow<NotificationManager.Policy?>
         get() = mutableNotificationPolicy.asStateFlow()
 
-    private val mutableZenMode = MutableStateFlow<ZenMode?>(ZenMode(Settings.Global.ZEN_MODE_OFF))
-    override val zenMode: StateFlow<ZenMode?>
+    private val mutableZenMode = MutableStateFlow(Settings.Global.ZEN_MODE_OFF)
+    override val globalZenMode: StateFlow<Int>
         get() = mutableZenMode.asStateFlow()
 
     init {
@@ -41,12 +40,12 @@ class FakeNotificationsSoundPolicyRepository : NotificationsSoundPolicyRepositor
         mutableNotificationPolicy.value = policy
     }
 
-    fun updateZenMode(zenMode: ZenMode?) {
+    fun updateZenMode(zenMode: Int) {
         mutableZenMode.value = zenMode
     }
 }
 
-fun FakeNotificationsSoundPolicyRepository.updateNotificationPolicy(
+fun FakeZenModeRepository.updateNotificationPolicy(
     priorityCategories: Int = 0,
     priorityCallSenders: Int = NotificationManager.Policy.PRIORITY_SENDERS_ANY,
     priorityMessageSenders: Int = NotificationManager.Policy.CONVERSATION_SENDERS_NONE,
