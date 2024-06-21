@@ -5410,6 +5410,15 @@
     <permission android:name="android.permission.BIND_TV_INPUT"
         android:protectionLevel="signature|privileged" />
 
+    <!-- This permission is required among systems services to always keep the
+         binding with TvInputManagerService.
+         <p>This should only be used by the OEM TvInputService.
+         <p>Protection level: signature|privileged|vendorPrivileged
+         @hide
+    -->
+    <permission android:name="android.permission.ALWAYS_BOUND_TV_INPUT"
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
+
     <!-- Must be required by a {@link android.media.tv.interactive.TvInteractiveAppService}
          to ensure that only the system can bind to it.
          <p>Protection level: signature|privileged
