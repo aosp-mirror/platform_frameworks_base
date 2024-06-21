@@ -103,9 +103,6 @@ final class LetterboxUiController {
 
     private final ActivityRecord mActivityRecord;
 
-    // TODO(b/265576778): Cache other overrides as well.
-
-
     private boolean mShowWallpaperForLetterboxBackground;
 
     // TODO(b/315140179): Make mUserAspectRatio final
