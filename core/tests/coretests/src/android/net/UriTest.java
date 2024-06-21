@@ -18,6 +18,7 @@ package android.net;
 
 import android.content.ContentUris;
 import android.os.Parcel;
+import android.platform.test.annotations.AsbSecurityTest;
 
 import androidx.test.filters.SmallTest;
 
@@ -86,6 +87,16 @@ public class UriTest extends TestCase {
         assertNull(u.getPath());
         assertNull(u.getAuthority());
         assertNull(u.getHost());
+    }
+
+    @AsbSecurityTest(cveBugId = 261721900)
+    @SmallTest
+    public void testSchemeSanitization() {
+        Uri uri = new Uri.Builder()
+                .scheme("http://https://evil.com:/te:st/")
+                .authority("google.com").path("one/way").build();
+        assertEquals("httphttpsevil.com:/te:st/", uri.getScheme());
+        assertEquals("httphttpsevil.com:/te:st/://google.com/one/way", uri.toString());
     }
 
     @SmallTest
