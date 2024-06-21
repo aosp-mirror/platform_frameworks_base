@@ -8293,7 +8293,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     @Override
     protected int getOverrideOrientation() {
-        return mLetterboxUiController.overrideOrientationIfNeeded(super.getOverrideOrientation());
+        return mAppCompatController.getOrientationPolicy()
+                .overrideOrientationIfNeeded(super.getOverrideOrientation());
     }
 
     /**
@@ -10825,7 +10826,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(SHOULD_OVERRIDE_MIN_ASPECT_RATIO,
                 mLetterboxUiController.shouldOverrideMinAspectRatio());
         proto.write(SHOULD_IGNORE_ORIENTATION_REQUEST_LOOP,
-                mLetterboxUiController.shouldIgnoreOrientationRequestLoop());
+                mAppCompatController.getAppCompatCapability().getAppCompatOrientationCapability()
+                        .shouldIgnoreOrientationRequestLoop());
         proto.write(SHOULD_OVERRIDE_FORCE_RESIZE_APP,
                 mLetterboxUiController.shouldOverrideForceResizeApp());
         proto.write(SHOULD_ENABLE_USER_ASPECT_RATIO_SETTINGS,

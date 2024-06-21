@@ -66,7 +66,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
 import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
-import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -151,27 +150,6 @@ final class LetterboxUiController {
         }
     }
 
-    /**
-     * Whether an app is calling {@link android.app.Activity#setRequestedOrientation}
-     * in a loop and orientation request should be ignored.
-     *
-     * <p>This should only be called once in response to
-     * {@link android.app.Activity#setRequestedOrientation}. See
-     * {@link #shouldIgnoreRequestedOrientation} for more details.
-     *
-     * <p>This treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Flag gating the treatment is enabled
-     *     <li>Opt-out component property isn't enabled
-     *     <li>Per-app override is enabled
-     *     <li>App has requested orientation more than 2 times within 1-second
-     *     timer and activity is not letterboxed for fixed orientation
-     * </ul>
-     */
-    boolean shouldIgnoreOrientationRequestLoop() {
-        return getAppCompatCapability().getAppCompatOrientationCapability()
-                .shouldIgnoreOrientationRequestLoop();
-    }
 
     @VisibleForTesting
     int getSetOrientationRequestCounter() {
@@ -297,12 +275,6 @@ final class LetterboxUiController {
      */
     boolean shouldUseDisplayLandscapeNaturalOrientation() {
         return getAppCompatCapability().shouldUseDisplayLandscapeNaturalOrientation();
-    }
-
-    @ScreenOrientation
-    int overrideOrientationIfNeeded(@ScreenOrientation int candidate) {
-        return mActivityRecord.mAppCompatController.getOrientationPolicy()
-                .overrideOrientationIfNeeded(candidate);
     }
 
     boolean isOverrideOrientationOnlyForCameraEnabled() {
