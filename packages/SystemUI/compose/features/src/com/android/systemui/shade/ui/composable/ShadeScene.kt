@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -474,9 +473,9 @@ private fun SceneScope.SplitShade(
                     BrightnessMirror(
                         viewModel = viewModel.brightnessMirrorViewModel,
                         qsSceneAdapter = viewModel.qsSceneAdapter,
-                        // Need to remove the offset of the header height, as the mirror uses
-                        // the position of the Brightness slider in the window
-                        modifier = Modifier.offset(y = -ShadeHeader.Dimensions.CollapsedHeight)
+                        // Need to use the offset measured from the container as the header
+                        // has to be accounted for
+                        measureFromContainer = true
                     )
                     Column(
                         verticalArrangement = Arrangement.Top,
