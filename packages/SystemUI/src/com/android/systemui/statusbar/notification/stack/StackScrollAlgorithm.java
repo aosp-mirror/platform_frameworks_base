@@ -445,12 +445,26 @@ public class StackScrollAlgorithm {
         state.visibleChildren.clear();
         state.visibleChildren.ensureCapacity(childCount);
         int notGoneIndex = 0;
+        boolean emptyShadeVisible = false;
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = (ExpandableView) mHostView.getChildAt(i);
             if (v.getVisibility() != View.GONE) {
                 if (v == ambientState.getShelf()) {
                     continue;
                 }
+                if (FooterViewRefactor.isEnabled()) {
+                    if (v instanceof EmptyShadeView) {
+                        emptyShadeVisible = true;
+                    }
+                    if (v instanceof FooterView) {
+                        if (emptyShadeVisible || notGoneIndex == 0) {
+                            // if the empty shade is visible or the footer is the first visible
+                            // view, we're in a transitory state so let's leave the footer alone.
+                            continue;
+                        }
+                    }
+                }
+
                 notGoneIndex = updateNotGoneIndex(state, notGoneIndex, v);
                 if (v instanceof ExpandableNotificationRow row) {
 
