@@ -2545,7 +2545,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
             final ChangeInfo changeInfo = changes.get(wc);
             // Reject no-ops, unless wallpaper
-            if (!changeInfo.hasChanged() && wc.asWallpaperToken() == null) {
+            if (!changeInfo.hasChanged()
+                    && (!Flags.ensureWallpaperInTransitions() || wc.asWallpaperToken() == null)) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "  Rejecting as no-op: %s", wc);
                 continue;
