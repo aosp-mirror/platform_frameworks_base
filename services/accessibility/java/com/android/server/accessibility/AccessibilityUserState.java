@@ -779,6 +779,7 @@ class AccessibilityUserState {
     public ArraySet<String> getShortcutTargetsLocked(@UserShortcutType int shortcutType) {
         return new ArraySet<>(getShortcutTargetsInternalLocked(shortcutType));
     }
+
     private ArraySet<String> getShortcutTargetsInternalLocked(@UserShortcutType int shortcutType) {
         if (shortcutType == UserShortcutType.HARDWARE) {
             return mAccessibilityShortcutKeyTargets;
