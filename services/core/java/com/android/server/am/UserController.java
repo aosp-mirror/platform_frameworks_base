@@ -154,9 +154,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -223,9 +220,18 @@ class UserController implements Handler.Callback {
     private static final int USER_SWITCH_CALLBACKS_TIMEOUT_MS = 5 * 1000;
 
     /**
+     * Amount of time waited for
+     * {@link ActivityTaskManagerInternal.ScreenObserver#onKeyguardStateChanged} callbacks to be
+     * called after calling {@link WindowManagerService#lockDeviceNow}.
+     * Otherwise, we should throw a {@link RuntimeException} and never dismiss the
+     * {@link UserSwitchingDialog}.
+     */
+    static final int SHOW_KEYGUARD_TIMEOUT_MS = 20 * 1000;
+
+    /**
      * Amount of time waited for {@link WindowManagerService#dismissKeyguard} callbacks to be
      * called after dismissing the keyguard.
-     * Otherwise, we should move on to dismiss the dialog {@link #dismissUserSwitchDialog()}
+     * Otherwise, we should move on to dismiss the dialog {@link #dismissUserSwitchDialog}}
      * and report user switch is complete {@link #REPORT_USER_SWITCH_COMPLETE_MSG}.
      */
     private static final int DISMISS_KEYGUARD_TIMEOUT_MS = 2 * 1000;
@@ -1822,15 +1828,8 @@ class UserController implements Handler.Callback {
                 updateProfileRelatedCaches();
                 mInjector.getWindowManager().setCurrentUser(userId);
                 mInjector.reportCurWakefulnessUsageEvent();
-                // Once the internal notion of the active user has switched, we lock the device
-                // with the option to show the user switcher on the keyguard.
                 if (userSwitchUiEnabled) {
                     mInjector.getWindowManager().setSwitchingUser(true);
-                    // Only lock if the user has a secure keyguard PIN/Pattern/Pwd
-                    if (mInjector.getKeyguardManager().isDeviceSecure(userId)) {
-                        // Make sure the device is locked before moving on with the user switch
-                        mInjector.lockDeviceNowAndWaitForKeyguardShown();
-                    }
                 }
 
             } else {
@@ -2341,32 +2340,54 @@ class UserController implements Handler.Callback {
 
     @VisibleForTesting
     void completeUserSwitch(int oldUserId, int newUserId) {
-        final boolean isUserSwitchUiEnabled = isUserSwitchUiEnabled();
-        // serialize each conditional step
-        await(
-                // STEP 1 - If there is no challenge set, dismiss the keyguard right away
-                isUserSwitchUiEnabled && !mInjector.getKeyguardManager().isDeviceSecure(newUserId),
-                mInjector::dismissKeyguard,
-                () -> await(
-                        // STEP 2 - If user switch ui was enabled, dismiss user switch dialog
-                        isUserSwitchUiEnabled,
-                        this::dismissUserSwitchDialog,
-                        () -> {
-                            // STEP 3 - Send REPORT_USER_SWITCH_COMPLETE_MSG to broadcast
-                            // ACTION_USER_SWITCHED & call UserSwitchObservers.onUserSwitchComplete
-                            mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
-                            mHandler.sendMessage(mHandler.obtainMessage(
-                                    REPORT_USER_SWITCH_COMPLETE_MSG, oldUserId, newUserId));
-                        }
-                ));
+        final Runnable sendUserSwitchCompleteMessage = () -> {
+            mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
+            mHandler.sendMessage(mHandler.obtainMessage(
+                    REPORT_USER_SWITCH_COMPLETE_MSG, oldUserId, newUserId));
+        };
+        if (isUserSwitchUiEnabled()) {
+            if (mInjector.getKeyguardManager().isDeviceSecure(newUserId)) {
+                this.showKeyguard(() -> dismissUserSwitchDialog(sendUserSwitchCompleteMessage));
+            } else {
+                this.dismissKeyguard(() -> dismissUserSwitchDialog(sendUserSwitchCompleteMessage));
+            }
+        } else {
+            sendUserSwitchCompleteMessage.run();
+        }
     }
 
-    private void await(boolean condition, Consumer<Runnable> conditionalStep, Runnable nextStep) {
-        if (condition) {
-            conditionalStep.accept(nextStep);
-        } else {
-            nextStep.run();
-        }
+    protected void showKeyguard(Runnable runnable) {
+        runWithTimeout(mInjector::showKeyguard, SHOW_KEYGUARD_TIMEOUT_MS, runnable, () -> {
+            throw new RuntimeException(
+                    "Keyguard is not shown in " + SHOW_KEYGUARD_TIMEOUT_MS + " ms.");
+        }, "showKeyguard");
+    }
+
+    protected void dismissKeyguard(Runnable runnable) {
+        runWithTimeout(mInjector::dismissKeyguard, DISMISS_KEYGUARD_TIMEOUT_MS, runnable, runnable,
+                "dismissKeyguard");
+    }
+
+    private void runWithTimeout(Consumer<Runnable> task, int timeoutMs, Runnable onSuccess,
+            Runnable onTimeout, String traceMsg) {
+        final AtomicInteger state = new AtomicInteger(0); // state = 0 (RUNNING)
+
+        asyncTraceBegin(traceMsg, 0);
+
+        mHandler.postDelayed(() -> {
+            if (state.compareAndSet(0, 1)) { // state = 1 (TIMEOUT)
+                asyncTraceEnd(traceMsg, 0);
+                Slogf.w(TAG, "Timeout: %s did not finish in %d ms", traceMsg, timeoutMs);
+                onTimeout.run();
+            }
+        }, timeoutMs);
+
+        task.accept(() -> {
+            if (state.compareAndSet(0, 2)) { // state = 2 (SUCCESS)
+                asyncTraceEnd(traceMsg, 0);
+                onSuccess.run();
+            }
+        });
     }
 
     private void moveUserToForeground(UserState uss, int newUserId) {
@@ -3805,29 +3826,45 @@ class UserController implements Handler.Callback {
             return IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
         }
 
-        protected void dismissKeyguard(Runnable runnable) {
-            final AtomicBoolean isFirst = new AtomicBoolean(true);
-            final Runnable runOnce = () -> {
-                if (isFirst.getAndSet(false)) {
-                    runnable.run();
-                }
-            };
+        protected void showKeyguard(Runnable runnable) {
+            if (getWindowManager().isKeyguardLocked()) {
+                runnable.run();
+                return;
+            }
+            getActivityTaskManagerInternal().registerScreenObserver(
+                    new ActivityTaskManagerInternal.ScreenObserver() {
+                        @Override
+                        public void onAwakeStateChanged(boolean isAwake) {
 
-            mHandler.postDelayed(runOnce, DISMISS_KEYGUARD_TIMEOUT_MS);
+                        }
+
+                        @Override
+                        public void onKeyguardStateChanged(boolean isShowing) {
+                            if (isShowing) {
+                                getActivityTaskManagerInternal().unregisterScreenObserver(this);
+                                runnable.run();
+                            }
+                        }
+                    }
+            );
+            getWindowManager().lockDeviceNow();
+        }
+
+        protected void dismissKeyguard(Runnable runnable) {
             getWindowManager().dismissKeyguard(new IKeyguardDismissCallback.Stub() {
                 @Override
                 public void onDismissError() throws RemoteException {
-                    mHandler.post(runOnce);
+                    runnable.run();
                 }
 
                 @Override
                 public void onDismissSucceeded() throws RemoteException {
-                    mHandler.post(runOnce);
+                    runnable.run();
                 }
 
                 @Override
                 public void onDismissCancelled() throws RemoteException {
-                    mHandler.post(runOnce);
+                    runnable.run();
                 }
             }, /* message= */ null);
         }
@@ -3852,44 +3889,6 @@ class UserController implements Handler.Callback {
 
         void onSystemUserVisibilityChanged(boolean visible) {
             getUserManagerInternal().onSystemUserVisibilityChanged(visible);
-        }
-
-        void lockDeviceNowAndWaitForKeyguardShown() {
-            if (getWindowManager().isKeyguardLocked()) {
-                return;
-            }
-
-            final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
-            t.traceBegin("lockDeviceNowAndWaitForKeyguardShown");
-
-            final CountDownLatch latch = new CountDownLatch(1);
-            ActivityTaskManagerInternal.ScreenObserver screenObserver =
-                    new ActivityTaskManagerInternal.ScreenObserver() {
-                        @Override
-                        public void onAwakeStateChanged(boolean isAwake) {
-
-                        }
-
-                        @Override
-                        public void onKeyguardStateChanged(boolean isShowing) {
-                            if (isShowing) {
-                                latch.countDown();
-                            }
-                        }
-                    };
-
-            getActivityTaskManagerInternal().registerScreenObserver(screenObserver);
-            getWindowManager().lockDeviceNow();
-            try {
-                if (!latch.await(20, TimeUnit.SECONDS)) {
-                    throw new RuntimeException("Keyguard is not shown in 20 seconds");
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } finally {
-                getActivityTaskManagerInternal().unregisterScreenObserver(screenObserver);
-                t.traceEnd();
-            }
         }
     }
 }
