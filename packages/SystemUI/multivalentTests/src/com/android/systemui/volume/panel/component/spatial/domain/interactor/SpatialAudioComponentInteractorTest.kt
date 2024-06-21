@@ -65,16 +65,20 @@ class SpatialAudioComponentInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private lateinit var underTest: SpatialAudioComponentInteractor
+
+    private val bluetoothDevice: BluetoothDevice = mock {}
     private val a2dpProfile: A2dpProfile = mock {
         whenever(profileId).thenReturn(BluetoothProfile.A2DP)
+        whenever(isEnabled(bluetoothDevice)).thenReturn(false)
     }
     private val leAudioProfile: LeAudioProfile = mock {
         whenever(profileId).thenReturn(BluetoothProfile.LE_AUDIO)
+        whenever(isEnabled(bluetoothDevice)).thenReturn(true)
     }
     private val hearingAidProfile: HearingAidProfile = mock {
         whenever(profileId).thenReturn(BluetoothProfile.HEARING_AID)
+        whenever(isEnabled(bluetoothDevice)).thenReturn(false)
     }
-    private val bluetoothDevice: BluetoothDevice = mock {}
 
     @Before
     fun setup() {
