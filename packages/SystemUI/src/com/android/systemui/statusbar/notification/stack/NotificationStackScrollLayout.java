@@ -1440,22 +1440,40 @@ public class NotificationStackScrollLayout
     @VisibleForTesting
     public void updateStackEndHeightAndStackHeight(float fraction) {
         final float oldStackHeight = mAmbientState.getStackHeight();
-        if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
-            final float endHeight = updateStackEndHeight(
-                    getHeight(), getEmptyBottomMargin(), getTopPadding());
+        if (SceneContainerFlag.isEnabled()) {
+            final float endHeight;
+            if (!shouldSkipHeightUpdate()) {
+                endHeight = updateStackEndHeight();
+            } else {
+                endHeight = mAmbientState.getStackEndHeight();
+            }
             updateStackHeight(endHeight, fraction);
         } else {
-            // Always updateStackHeight to prevent jumps in the stack height when this fraction
-            // suddenly reapplies after a freeze.
-            final float endHeight = mAmbientState.getStackEndHeight();
-            updateStackHeight(endHeight, fraction);
+            if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
+                final float endHeight = updateStackEndHeight(
+                        getHeight(), getEmptyBottomMargin(), getTopPadding());
+                updateStackHeight(endHeight, fraction);
+            } else {
+                // Always updateStackHeight to prevent jumps in the stack height when this fraction
+                // suddenly reapplies after a freeze.
+                final float endHeight = mAmbientState.getStackEndHeight();
+                updateStackHeight(endHeight, fraction);
+            }
         }
         if (oldStackHeight != mAmbientState.getStackHeight()) {
             requestChildrenUpdate();
         }
     }
 
+    private float updateStackEndHeight() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        float height = Math.max(0f, mAmbientState.getStackCutoff() - mAmbientState.getStackTop());
+        mAmbientState.setStackEndHeight(height);
+        return height;
+    }
+
     private float updateStackEndHeight(float height, float bottomMargin, float topPadding) {
+        SceneContainerFlag.assertInLegacyMode();
         final float stackEndHeight;
         if (mMaxDisplayedNotifications != -1) {
             // The stack intrinsic height already contains the correct value when there is a limit
