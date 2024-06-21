@@ -98,7 +98,8 @@ public final class DisplayBrightnessController {
     // The controller for the automatic brightness level.
     // TODO(b/265415257): Move to the automatic brightness strategy
     @Nullable
-    private AutomaticBrightnessController mAutomaticBrightnessController;
+    @VisibleForTesting
+    AutomaticBrightnessController mAutomaticBrightnessController;
 
     /**
      * The constructor of DisplayBrightnessController.
@@ -300,13 +301,18 @@ public final class DisplayBrightnessController {
     /**
      * Notifies the brightnessSetting to persist the supplied brightness value.
      */
-    public void setBrightness(float brightnessValue) {
+    public void setBrightness(float brightnessValue, float maxBrightness) {
         // Update the setting, which will eventually call back into DPC to have us actually
         // update the display with the new value.
         mBrightnessSetting.setBrightness(brightnessValue);
         if (mDisplayId == Display.DEFAULT_DISPLAY && mPersistBrightnessNitsForDefaultDisplay) {
             float nits = convertToNits(brightnessValue);
-            if (nits >= 0) {
+            float currentlyStoredNits = mBrightnessSetting.getBrightnessNitsForDefaultDisplay();
+            // Don't override settings if the brightness is set to max, but the currently
+            // stored value is greater. On multi-screen device, when switching between a
+            // screen with a wider brightness range and one with a narrower brightness range,
+            // the stored value shouldn't change.
+            if (nits >= 0 && !(brightnessValue == maxBrightness && currentlyStoredNits > nits)) {
                 mBrightnessSetting.setBrightnessNitsForDefaultDisplay(nits);
             }
         }
@@ -315,15 +321,15 @@ public final class DisplayBrightnessController {
     /**
      * Notifies the brightnessSetting to persist the supplied brightness value for a user.
      */
-    public void setBrightness(float brightnessValue, int userSerial) {
+    public void setBrightness(float brightnessValue, int userSerial, float maxBrightness) {
         mBrightnessSetting.setUserSerial(userSerial);
-        setBrightness(brightnessValue);
+        setBrightness(brightnessValue, maxBrightness);
     }
 
     /**
      * Sets the current screen brightness, and notifies the BrightnessSetting about the change.
      */
-    public void updateScreenBrightnessSetting(float brightnessValue) {
+    public void updateScreenBrightnessSetting(float brightnessValue, float maxBrightness) {
         synchronized (mLock) {
             if (!BrightnessUtils.isValidBrightnessValue(brightnessValue)
                     || brightnessValue == mCurrentScreenBrightness) {
@@ -332,7 +338,7 @@ public final class DisplayBrightnessController {
             setCurrentScreenBrightnessLocked(brightnessValue);
         }
         notifyCurrentScreenBrightness();
-        setBrightness(brightnessValue);
+        setBrightness(brightnessValue, maxBrightness);
     }
 
     /**
@@ -502,7 +508,7 @@ public final class DisplayBrightnessController {
                 float brightnessForDefaultDisplay = getBrightnessFromNits(
                         brightnessNitsForDefaultDisplay);
                 if (BrightnessUtils.isValidBrightnessValue(brightnessForDefaultDisplay)) {
-                    mBrightnessSetting.setBrightness(brightnessForDefaultDisplay);
+                    mBrightnessSetting.setBrightnessNoNotify(brightnessForDefaultDisplay);
                     currentBrightnessSetting = brightnessForDefaultDisplay;
                 }
             }
