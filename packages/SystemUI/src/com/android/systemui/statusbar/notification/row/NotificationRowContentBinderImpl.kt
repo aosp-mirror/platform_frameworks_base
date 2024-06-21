@@ -46,6 +46,10 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED
+import com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_EXPANDED
+import com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP
+import com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_SINGLELINE
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED
@@ -255,39 +259,29 @@ constructor(
     ) {
         when (inflateFlag) {
             FLAG_CONTENT_VIEW_CONTRACTED ->
-                row.privateLayout.performWhenContentInactive(
-                    NotificationContentView.VISIBLE_TYPE_CONTRACTED
-                ) {
+                row.privateLayout.performWhenContentInactive(VISIBLE_TYPE_CONTRACTED) {
                     row.privateLayout.setContractedChild(null)
                     remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED)
                 }
             FLAG_CONTENT_VIEW_EXPANDED ->
-                row.privateLayout.performWhenContentInactive(
-                    NotificationContentView.VISIBLE_TYPE_EXPANDED
-                ) {
+                row.privateLayout.performWhenContentInactive(VISIBLE_TYPE_EXPANDED) {
                     row.privateLayout.setExpandedChild(null)
                     remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)
                 }
             FLAG_CONTENT_VIEW_HEADS_UP ->
-                row.privateLayout.performWhenContentInactive(
-                    NotificationContentView.VISIBLE_TYPE_HEADSUP
-                ) {
+                row.privateLayout.performWhenContentInactive(VISIBLE_TYPE_HEADSUP) {
                     row.privateLayout.setHeadsUpChild(null)
                     remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)
                     row.privateLayout.setHeadsUpInflatedSmartReplies(null)
                 }
             FLAG_CONTENT_VIEW_PUBLIC ->
-                row.publicLayout.performWhenContentInactive(
-                    NotificationContentView.VISIBLE_TYPE_CONTRACTED
-                ) {
+                row.publicLayout.performWhenContentInactive(VISIBLE_TYPE_CONTRACTED) {
                     row.publicLayout.setContractedChild(null)
                     remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC)
                 }
             FLAG_CONTENT_VIEW_SINGLE_LINE -> {
                 if (AsyncHybridViewInflation.isEnabled) {
-                    row.privateLayout.performWhenContentInactive(
-                        NotificationContentView.VISIBLE_TYPE_SINGLELINE
-                    ) {
+                    row.privateLayout.performWhenContentInactive(VISIBLE_TYPE_SINGLELINE) {
                         row.privateLayout.setSingleLineView(null)
                     }
                 }
@@ -308,32 +302,22 @@ constructor(
         @InflationFlag contentViews: Int
     ) {
         if (contentViews and FLAG_CONTENT_VIEW_CONTRACTED != 0) {
-            row.privateLayout.removeContentInactiveRunnable(
-                NotificationContentView.VISIBLE_TYPE_CONTRACTED
-            )
+            row.privateLayout.removeContentInactiveRunnable(VISIBLE_TYPE_CONTRACTED)
         }
         if (contentViews and FLAG_CONTENT_VIEW_EXPANDED != 0) {
-            row.privateLayout.removeContentInactiveRunnable(
-                NotificationContentView.VISIBLE_TYPE_EXPANDED
-            )
+            row.privateLayout.removeContentInactiveRunnable(VISIBLE_TYPE_EXPANDED)
         }
         if (contentViews and FLAG_CONTENT_VIEW_HEADS_UP != 0) {
-            row.privateLayout.removeContentInactiveRunnable(
-                NotificationContentView.VISIBLE_TYPE_HEADSUP
-            )
+            row.privateLayout.removeContentInactiveRunnable(VISIBLE_TYPE_HEADSUP)
         }
         if (contentViews and FLAG_CONTENT_VIEW_PUBLIC != 0) {
-            row.publicLayout.removeContentInactiveRunnable(
-                NotificationContentView.VISIBLE_TYPE_CONTRACTED
-            )
+            row.publicLayout.removeContentInactiveRunnable(VISIBLE_TYPE_CONTRACTED)
         }
         if (
             AsyncHybridViewInflation.isEnabled &&
                 contentViews and FLAG_CONTENT_VIEW_SINGLE_LINE != 0
         ) {
-            row.privateLayout.removeContentInactiveRunnable(
-                NotificationContentView.VISIBLE_TYPE_SINGLELINE
-            )
+            row.privateLayout.removeContentInactiveRunnable(VISIBLE_TYPE_SINGLELINE)
         }
     }
 
@@ -847,10 +831,7 @@ constructor(
                     callback = callback,
                     parentLayout = privateLayout,
                     existingView = privateLayout.contractedChild,
-                    existingWrapper =
-                        privateLayout.getVisibleWrapper(
-                            NotificationContentView.VISIBLE_TYPE_CONTRACTED
-                        ),
+                    existingWrapper = privateLayout.getVisibleWrapper(VISIBLE_TYPE_CONTRACTED),
                     runningInflations = runningInflations,
                     applyCallback = applyCallback,
                     logger = logger
@@ -891,10 +872,7 @@ constructor(
                         callback = callback,
                         parentLayout = privateLayout,
                         existingView = privateLayout.expandedChild,
-                        existingWrapper =
-                            privateLayout.getVisibleWrapper(
-                                NotificationContentView.VISIBLE_TYPE_EXPANDED
-                            ),
+                        existingWrapper = privateLayout.getVisibleWrapper(VISIBLE_TYPE_EXPANDED),
                         runningInflations = runningInflations,
                         applyCallback = applyCallback,
                         logger = logger
@@ -936,10 +914,7 @@ constructor(
                         callback = callback,
                         parentLayout = privateLayout,
                         existingView = privateLayout.headsUpChild,
-                        existingWrapper =
-                            privateLayout.getVisibleWrapper(
-                                NotificationContentView.VISIBLE_TYPE_HEADSUP
-                            ),
+                        existingWrapper = privateLayout.getVisibleWrapper(VISIBLE_TYPE_HEADSUP),
                         runningInflations = runningInflations,
                         applyCallback = applyCallback,
                         logger = logger
@@ -979,10 +954,7 @@ constructor(
                     callback = callback,
                     parentLayout = publicLayout,
                     existingView = publicLayout.contractedChild,
-                    existingWrapper =
-                        publicLayout.getVisibleWrapper(
-                            NotificationContentView.VISIBLE_TYPE_CONTRACTED
-                        ),
+                    existingWrapper = publicLayout.getVisibleWrapper(VISIBLE_TYPE_CONTRACTED),
                     runningInflations = runningInflations,
                     applyCallback = applyCallback,
                     logger = logger
