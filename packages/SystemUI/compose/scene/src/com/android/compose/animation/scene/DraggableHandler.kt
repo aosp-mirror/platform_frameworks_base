@@ -913,7 +913,6 @@ internal class NestedScrollHandlerImpl(
     private val topOrLeftBehavior: NestedScrollBehavior,
     private val bottomOrRightBehavior: NestedScrollBehavior,
     private val isExternalOverscrollGesture: () -> Boolean,
-    private val pointersInfo: () -> PointersInfo,
 ) {
     private val layoutState = layoutImpl.state
     private val draggableHandler = layoutImpl.draggableHandler(orientation)
@@ -925,36 +924,34 @@ internal class NestedScrollHandlerImpl(
         // moving on to the next scene.
         var canChangeScene = false
 
+        val actionUpOrLeft =
+            Swipe(
+                direction =
+                    when (orientation) {
+                        Orientation.Horizontal -> SwipeDirection.Left
+                        Orientation.Vertical -> SwipeDirection.Up
+                    },
+                pointerCount = 1,
+            )
+
+        val actionDownOrRight =
+            Swipe(
+                direction =
+                    when (orientation) {
+                        Orientation.Horizontal -> SwipeDirection.Right
+                        Orientation.Vertical -> SwipeDirection.Down
+                    },
+                pointerCount = 1,
+            )
+
         fun hasNextScene(amount: Float): Boolean {
             val transitionState = layoutState.transitionState
             val scene = transitionState.currentScene
             val fromScene = layoutImpl.scene(scene)
             val nextScene =
                 when {
-                    amount < 0f -> {
-                        val actionUpOrLeft =
-                            Swipe(
-                                direction =
-                                    when (orientation) {
-                                        Orientation.Horizontal -> SwipeDirection.Left
-                                        Orientation.Vertical -> SwipeDirection.Up
-                                    },
-                                pointerCount = pointersInfo().pointersDown,
-                            )
-                        fromScene.userActions[actionUpOrLeft]
-                    }
-                    amount > 0f -> {
-                        val actionDownOrRight =
-                            Swipe(
-                                direction =
-                                    when (orientation) {
-                                        Orientation.Horizontal -> SwipeDirection.Right
-                                        Orientation.Vertical -> SwipeDirection.Down
-                                    },
-                                pointerCount = pointersInfo().pointersDown,
-                            )
-                        fromScene.userActions[actionDownOrRight]
-                    }
+                    amount < 0f -> fromScene.userActions[actionUpOrLeft]
+                    amount > 0f -> fromScene.userActions[actionDownOrRight]
                     else -> null
                 }
             if (nextScene != null) return true
@@ -1052,11 +1049,10 @@ internal class NestedScrollHandlerImpl(
             canContinueScroll = { true },
             canScrollOnFling = false,
             onStart = { offsetAvailable ->
-                val pointers = pointersInfo()
                 dragController =
                     draggableHandler.onDragStarted(
-                        pointersDown = pointers.pointersDown,
-                        startedPosition = pointers.startedPosition,
+                        pointersDown = 1,
+                        startedPosition = null,
                         overSlop = if (isIntercepting) 0f else offsetAvailable,
                     )
             },

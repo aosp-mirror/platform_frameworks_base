@@ -113,8 +113,7 @@ class DraggableHandlerTest {
                     orientation = draggableHandler.orientation,
                     topOrLeftBehavior = nestedScrollBehavior,
                     bottomOrRightBehavior = nestedScrollBehavior,
-                    isExternalOverscrollGesture = { isExternalOverscrollGesture },
-                    pointersInfo = { PointersInfo(pointersDown = 1, startedPosition = Offset.Zero) }
+                    isExternalOverscrollGesture = { isExternalOverscrollGesture }
                 )
                 .connection
 
