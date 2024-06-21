@@ -26,8 +26,8 @@ class NotificationSettingsInteractor(
     val isNotificationHistoryEnabled = repository.isNotificationHistoryEnabled
 
     /** Should notifications be visible on the lockscreen? */
-    val isShowNotificationsOnLockScreenEnabled: StateFlow<Boolean> =
-        repository.isShowNotificationsOnLockScreenEnabled
+    suspend fun isShowNotificationsOnLockScreenEnabled(): StateFlow<Boolean> =
+        repository.isShowNotificationsOnLockScreenEnabled()
 
     suspend fun setShowNotificationsOnLockscreenEnabled(enabled: Boolean) {
         repository.setShowNotificationsOnLockscreenEnabled(enabled)
@@ -35,7 +35,7 @@ class NotificationSettingsInteractor(
 
     /** Toggles the setting to show or hide notifications on the lock screen. */
     suspend fun toggleShowNotificationsOnLockscreenEnabled() {
-        val current = repository.isShowNotificationsOnLockScreenEnabled.value
+        val current = repository.isShowNotificationsOnLockScreenEnabled().value
         repository.setShowNotificationsOnLockscreenEnabled(!current)
     }
 }
