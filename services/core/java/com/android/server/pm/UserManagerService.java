@@ -62,6 +62,8 @@ import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatsManager;
 import android.app.admin.DevicePolicyEventLogger;
@@ -147,6 +149,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.SetScreenLockDialogActivity;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.DumpUtils;
@@ -1070,6 +1074,8 @@ public class UserManagerService extends IUserManager.Stub {
         if (isAutoLockingPrivateSpaceOnRestartsEnabled()) {
             autoLockPrivateSpace();
         }
+
+        showHsumNotificationIfNeeded();
     }
 
     private boolean isAutoLockingPrivateSpaceOnRestartsEnabled() {
@@ -4163,6 +4169,48 @@ public class UserManagerService extends IUserManager.Stub {
         mUpdatingSystemUserMode = true;
     }
 
+    /**
+     * If the device's actual HSUM status differs from that which is defined by its build
+     * configuration, warn the user. Ignores HSUM emulated status, since that isn't relevant.
+     *
+     * The goal is to inform dogfooders that they need to factory reset the device to align their
+     * device with its build configuration.
+     */
+    private void showHsumNotificationIfNeeded() {
+        if (RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER == isHeadlessSystemUserMode()) {
+            // Actual state does match the configuration. Great!
+            return;
+        }
+        if (Build.isDebuggable()
+                && !TextUtils.isEmpty(SystemProperties.get(SYSTEM_USER_MODE_EMULATION_PROPERTY))) {
+            // Ignore any device that has been playing around with HSUM emulation.
+            return;
+        }
+        Slogf.w(LOG_TAG, "Posting warning that device's HSUM status doesn't match the build's.");
+
+        final String title = mContext
+                .getString(R.string.wrong_hsum_configuration_notification_title);
+        final String message = mContext
+                .getString(R.string.wrong_hsum_configuration_notification_message);
+
+        final Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.DEVELOPER)
+                        .setSmallIcon(R.drawable.stat_sys_adb)
+                        .setWhen(0)
+                        .setOngoing(true)
+                        .setTicker(title)
+                        .setDefaults(0)
+                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .build();
+
+        final NotificationManager notificationManager =
+                mContext.getSystemService(NotificationManager.class);
+        notificationManager.notifyAsUser(
+                null, SystemMessage.NOTE_WRONG_HSUM_STATUS, notification, UserHandle.ALL);
+    }
 
     private ResilientAtomicFile getUserListFile() {
         File tempBackup = new File(mUserListFile.getParent(), mUserListFile.getName() + ".backup");
