@@ -30,6 +30,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityRecord.State.STOPPED;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -245,6 +246,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertTrue("Animation scheduled", backNavigationInfo.isPrepareRemoteAnimation());
 
         // reset drawing status
+        testCase.recordBack.setState(STOPPED, "stopped");
         backNavigationInfo.onBackNavigationFinished(false);
         mBackNavigationController.clearBackAnimations();
         makeWindowVisibleAndDrawn(testCase.recordFront.findMainWindow());
@@ -550,7 +552,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         }).when(appWindow.mSession).setOnBackInvokedCallbackInfo(eq(appWindow.mClient), any());
 
         addToWindowMap(appWindow, true);
-        dispatcher.attachToWindow(appWindow.mSession, appWindow.mClient, null);
+        dispatcher.attachToWindow(appWindow.mSession, appWindow.mClient, null, null);
 
 
         OnBackInvokedCallback appCallback = createBackCallback(appLatch);
@@ -937,6 +939,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         testCase.recordFront = record2;
         testCase.windowBack = window1;
         testCase.windowFront = window2;
+        record1.setState(STOPPED, "stopped");
         return testCase;
     }
 

@@ -28,9 +28,9 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -55,7 +55,7 @@ import java.util.Collections;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class PluginManagerTest extends SysuiTestCase {
     private static final String PRIVILEGED_PACKAGE = "com.android.systemui";

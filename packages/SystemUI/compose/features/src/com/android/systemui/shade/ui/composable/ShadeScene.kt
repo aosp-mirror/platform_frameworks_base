@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -82,6 +83,7 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
+import com.android.systemui.notifications.ui.composable.NotificationStackCutoffGuideline
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.composable.BrightnessMirror
 import com.android.systemui.qs.ui.composable.QSMediaMeasurePolicy
@@ -350,6 +352,11 @@ private fun SceneScope.SingleShade(
                 notificationsPlaceable.placeRelative(x = 0, y = maxNotifScrimTop.value.roundToInt())
             }
         }
+        NotificationStackCutoffGuideline(
+            stackScrollView = notificationStackScrollView,
+            viewModel = viewModel.notifications,
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+        )
     }
 }
 
@@ -529,6 +536,7 @@ private fun SceneScope.SplitShade(
                     viewModel = viewModel.notifications,
                     maxScrimTop = { 0f },
                     shouldPunchHoleBehindScrim = false,
+                    shouldReserveSpaceForNavBar = false,
                     shadeMode = ShadeMode.Split,
                     modifier =
                         Modifier.weight(1f)
@@ -538,5 +546,10 @@ private fun SceneScope.SplitShade(
                 )
             }
         }
+        NotificationStackCutoffGuideline(
+            stackScrollView = notificationStackScrollView,
+            viewModel = viewModel.notifications,
+            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+        )
     }
 }

@@ -84,7 +84,11 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -937,6 +941,228 @@ public class ApplicationExitInfoTest {
 
         for (int i = list.size() - 1; i >= 0; i--) {
             assertTrue(list.get(i).equals(original.get(i)));
+        }
+    }
+
+    private ApplicationExitInfo createExitInfo(int i) {
+        ApplicationExitInfo info = new ApplicationExitInfo();
+        info.setPid(i);
+        info.setTimestamp(1000 + i);
+        info.setPackageUid(2000);
+        return info;
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private ArrayList<ApplicationExitInfo> getExitInfosHelper(
+            AppExitInfoTracker.AppExitInfoContainer container, int filterPid, int maxNum) {
+        ArrayList<ApplicationExitInfo> infos = new ArrayList<ApplicationExitInfo>();
+        container.getExitInfosLocked(filterPid, maxNum, infos);
+        return infos;
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private void checkAreHelper(AppExitInfoTracker.AppExitInfoContainer container, int filterPid,
+            int maxNum, List<Integer> expected, Function<ApplicationExitInfo, Integer> func) {
+        ArrayList<Integer> values = new ArrayList<Integer>();
+        getExitInfosHelper(container, filterPid, maxNum)
+                .forEach((exitInfo) -> values.add(func.apply(exitInfo)));
+        assertEquals(values, expected);
+
+        HashMap<Integer, Integer> expectedMultiset = new HashMap<Integer, Integer>();
+        expected.forEach(
+                (elem) -> expectedMultiset.put(elem, expectedMultiset.getOrDefault(elem, 0) + 1));
+        // `maxNum` isn't a parameter supported by `forEachRecordLocked()s`, but we can emulate it
+        // by stopping iteration when we've seen enough elements.
+        int[] numElementsToObserveWrapped = {maxNum};
+        container.forEachRecordLocked((exitInfo) -> {
+            // Same thing as above, `filterPid` isn't a parameter supported out of the box for
+            // `forEachRecordLocked()`, but we emulate it here.
+            if (filterPid > 0 && filterPid != exitInfo.getPid()) {
+                return AppExitInfoTracker.FOREACH_ACTION_NONE;
+            }
+
+            Integer key = func.apply(exitInfo);
+            assertTrue(expectedMultiset.toString(), expectedMultiset.containsKey(key));
+            Integer references = expectedMultiset.get(key);
+            if (references == 1) {
+                expectedMultiset.remove(key);
+            } else {
+                expectedMultiset.put(key, references - 1);
+            }
+            if (--numElementsToObserveWrapped[0] == 0) {
+                return AppExitInfoTracker.FOREACH_ACTION_STOP_ITERATION;
+            }
+            return AppExitInfoTracker.FOREACH_ACTION_NONE;
+        });
+        assertEquals(expectedMultiset.size(), 0);
+    }
+
+    private void checkPidsAre(AppExitInfoTracker.AppExitInfoContainer container, int filterPid,
+            int maxNum, List<Integer> expectedPids) {
+        checkAreHelper(container, filterPid, maxNum, expectedPids, (exitInfo) -> exitInfo.getPid());
+    }
+
+    private void checkPidsAre(
+            AppExitInfoTracker.AppExitInfoContainer container, List<Integer> expectedPids) {
+        checkPidsAre(container, 0, 0, expectedPids);
+    }
+
+    private void checkTimestampsAre(AppExitInfoTracker.AppExitInfoContainer container,
+            int filterPid, int maxNum, List<Integer> expectedTimestamps) {
+        checkAreHelper(container, filterPid, maxNum, expectedTimestamps,
+                (exitInfo) -> (int) exitInfo.getTimestamp());
+    }
+
+    private void checkTimestampsAre(
+            AppExitInfoTracker.AppExitInfoContainer container, List<Integer> expectedTimestamps) {
+        checkTimestampsAre(container, 0, 0, expectedTimestamps);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private AppExitInfoTracker.AppExitInfoContainer createBasicContainer() {
+        AppExitInfoTracker.AppExitInfoContainer container =
+                mAppExitInfoTracker.new AppExitInfoContainer(3);
+        container.addExitInfoLocked(createExitInfo(10));
+        container.addExitInfoLocked(createExitInfo(30));
+        container.addExitInfoLocked(createExitInfo(20));
+        return container;
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    public void testContainerGetExitInfosIsSortedNewestFirst() throws Exception {
+        AppExitInfoTracker.AppExitInfoContainer container = createBasicContainer();
+        checkPidsAre(container, Arrays.asList(30, 20, 10));
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    public void testContainerRemovesOldestReports() throws Exception {
+        AppExitInfoTracker.AppExitInfoContainer container = createBasicContainer();
+        container.addExitInfoLocked(createExitInfo(40));
+        checkPidsAre(container, Arrays.asList(40, 30, 20));
+
+        container.addExitInfoLocked(createExitInfo(50));
+        checkPidsAre(container, Arrays.asList(50, 40, 30));
+
+        container.addExitInfoLocked(createExitInfo(45));
+        checkPidsAre(container, Arrays.asList(50, 45, 40));
+
+        // Adding an older report shouldn't remove the newer ones.
+        container.addExitInfoLocked(createExitInfo(15));
+        checkPidsAre(container, Arrays.asList(50, 45, 40));
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    public void testContainerFilterByPid() throws Exception {
+        AppExitInfoTracker.AppExitInfoContainer container = createBasicContainer();
+        assertEquals(1, getExitInfosHelper(container, 30, 0).size());
+        assertEquals(30, getExitInfosHelper(container, 0, 0).get(0).getPid());
+
+        assertEquals(1, getExitInfosHelper(container, 30, 0).size());
+        assertEquals(20, getExitInfosHelper(container, 20, 0).get(0).getPid());
+
+        assertEquals(1, getExitInfosHelper(container, 10, 0).size());
+        assertEquals(10, getExitInfosHelper(container, 10, 0).get(0).getPid());
+
+        assertEquals(0, getExitInfosHelper(container, 1337, 0).size());
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    public void testContainerLimitQuantityOfResults() throws Exception {
+        AppExitInfoTracker.AppExitInfoContainer container = createBasicContainer();
+        checkPidsAre(container, /* filterPid */ 30, /* maxNum */ 1, Arrays.asList(30));
+        checkPidsAre(container, /* filterPid */ 30, /* maxNum */ 1000, Arrays.asList(30));
+
+        checkPidsAre(container, /* filterPid */ 20, /* maxNum */ 1, Arrays.asList(20));
+        checkPidsAre(container, /* filterPid */ 20, /* maxNum */ 1000, Arrays.asList(20));
+
+        checkPidsAre(container, /* filterPid */ 10, /* maxNum */ 1, Arrays.asList(10));
+        checkPidsAre(container, /* filterPid */ 10, /* maxNum */ 1000, Arrays.asList(10));
+
+        checkPidsAre(container, /* filterPid */ 1337, /* maxNum */ 1, Arrays.asList());
+        checkPidsAre(container, /* filterPid */ 1337, /* maxNum */ 1000, Arrays.asList());
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    public void testContainerLastExitInfoForPid() throws Exception {
+        AppExitInfoTracker.AppExitInfoContainer container = createBasicContainer();
+        assertEquals(30, container.getLastExitInfoForPid(30).getPid());
+        assertEquals(20, container.getLastExitInfoForPid(20).getPid());
+        assertEquals(10, container.getLastExitInfoForPid(10).getPid());
+        assertEquals(null, container.getLastExitInfoForPid(1337));
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    public void testContainerCanHoldMultipleFromSamePid() throws Exception {
+        AppExitInfoTracker.AppExitInfoContainer container = createBasicContainer();
+        ApplicationExitInfo info = createExitInfo(100);
+        ApplicationExitInfo info2 = createExitInfo(100);
+        ApplicationExitInfo info3 = createExitInfo(100);
+        info2.setTimestamp(1337);
+        info3.setTimestamp(31337);
+
+        container.addExitInfoLocked(info);
+        assertEquals(1100, container.getLastExitInfoForPid(100).getTimestamp());
+        container.addExitInfoLocked(info2);
+        assertEquals(1337, container.getLastExitInfoForPid(100).getTimestamp());
+        container.addExitInfoLocked(info3);
+        assertEquals(31337, container.getLastExitInfoForPid(100).getTimestamp());
+
+        checkPidsAre(container, Arrays.asList(100, 100, 100));
+        checkTimestampsAre(container, Arrays.asList(31337, 1337, 1100));
+
+        checkPidsAre(container, /* filterPid */ 100, /* maxNum */ 0, Arrays.asList(100, 100, 100));
+        checkTimestampsAre(
+                container, /* filterPid */ 100, /* maxNum */ 0, Arrays.asList(31337, 1337, 1100));
+
+        checkPidsAre(container, /* filterPid */ 100, /* maxNum */ 2, Arrays.asList(100, 100));
+        checkTimestampsAre(
+                container, /* filterPid */ 100, /* maxNum */ 2, Arrays.asList(31337, 1337));
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    public void testContainerIteration() throws Exception {
+        AppExitInfoTracker.AppExitInfoContainer container = createBasicContainer();
+        checkPidsAre(container, Arrays.asList(30, 20, 10));
+
+        // Unfortunately relying on order for this test, which is implemented as "last inserted" ->
+        // "first inserted". Note that this is insertion order, not timestamp. Thus, it's 20 -> 30
+        // -> 10, as defined by `createBasicContainer()`.
+        List<Integer> elements = Arrays.asList(20, 30, 10);
+        for (int i = 0, size = elements.size(); i < size; i++) {
+            ArrayList<Integer> processedEntries = new ArrayList<Integer>();
+            final int finalIndex = i;
+            container.forEachRecordLocked((exitInfo) -> {
+                processedEntries.add(new Integer(exitInfo.getPid()));
+                if (exitInfo.getPid() == elements.get(finalIndex)) {
+                    return AppExitInfoTracker.FOREACH_ACTION_STOP_ITERATION;
+                }
+                return AppExitInfoTracker.FOREACH_ACTION_NONE;
+            });
+            assertEquals(processedEntries, elements.subList(0, i + 1));
+        }
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    public void testContainerIterationRemove() throws Exception {
+        for (int pidToRemove : Arrays.asList(30, 20, 10)) {
+            AppExitInfoTracker.AppExitInfoContainer container = createBasicContainer();
+            container.forEachRecordLocked((exitInfo) -> {
+                if (exitInfo.getPid() == pidToRemove) {
+                    return AppExitInfoTracker.FOREACH_ACTION_REMOVE_ITEM;
+                }
+                return AppExitInfoTracker.FOREACH_ACTION_NONE;
+            });
+            ArrayList<Integer> pidsRemaining = new ArrayList<Integer>(Arrays.asList(30, 20, 10));
+            pidsRemaining.remove(new Integer(pidToRemove));
+            checkPidsAre(container, pidsRemaining);
         }
     }
 

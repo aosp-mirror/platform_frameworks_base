@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.res.Configuration;
+import android.os.Handler;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 
@@ -65,6 +66,8 @@ import dagger.Lazy;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -120,6 +123,10 @@ public class NavBarHelperTest extends SysuiTestCase {
     EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
     @Mock
     NotificationShadeWindowController mNotificationShadeWindowController;
+    @Mock
+    Handler mBgHandler;
+
+    @Captor ArgumentCaptor<Runnable> mRunnableArgumentCaptor;
     ConfigurationController mConfigurationController = new FakeConfigurationController();
 
     private AccessibilityManager.AccessibilityServicesStateChangeListener
@@ -149,7 +156,7 @@ public class NavBarHelperTest extends SysuiTestCase {
                 () -> Optional.of(mock(CentralSurfaces.class)), mock(KeyguardStateController.class),
                 mNavigationModeController, mEdgeBackGestureHandlerFactory, mWm, mUserTracker,
                 mDisplayTracker, mNotificationShadeWindowController, mConfigurationController,
-                mDumpManager, mCommandQueue, mSynchronousExecutor);
+                mDumpManager, mCommandQueue, mSynchronousExecutor, mBgHandler);
     }
 
     @Test
@@ -203,8 +210,10 @@ public class NavBarHelperTest extends SysuiTestCase {
                 .updateAccessibilityServicesState();
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateAssistantAvailable(anyBoolean(), anyBoolean());
+        verify(mBgHandler).post(mRunnableArgumentCaptor.capture());
+        mRunnableArgumentCaptor.getValue().run();
         verify(mNavbarTaskbarStateUpdater, times(1))
-                .updateRotationWatcherState(anyInt());
+                .updateRotationWatcherState(anyInt(), anyBoolean());
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateWallpaperVisibility(anyBoolean(), anyInt());
     }

@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.Flags.FLAG_MODES_API;
 import static android.app.Flags.FLAG_MODES_UI;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -32,6 +33,7 @@ import android.app.Flags;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.net.Uri;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
@@ -79,16 +81,17 @@ public class ZenModeDiffTest extends UiServiceTestCase {
                     : Set.of("version", "manualRule", "automaticRules");
 
     // Differences for flagged fields are only generated if the flag is enabled.
-    // "Metadata" fields (userModifiedFields & co, deletionInstant) are not compared.
+    // "Metadata" fields (userModifiedFields, deletionInstant, disabledOrigin) are not compared.
     private static final Set<String> ZEN_RULE_EXEMPT_FIELDS =
             android.app.Flags.modesApi()
                     ? Set.of("userModifiedFields", "zenPolicyUserModifiedFields",
-                            "zenDeviceEffectsUserModifiedFields", "deletionInstant")
+                            "zenDeviceEffectsUserModifiedFields", "deletionInstant",
+                            "disabledOrigin")
                     : Set.of(RuleDiff.FIELD_TYPE, RuleDiff.FIELD_TRIGGER_DESCRIPTION,
                             RuleDiff.FIELD_ICON_RES, RuleDiff.FIELD_ALLOW_MANUAL,
                             RuleDiff.FIELD_ZEN_DEVICE_EFFECTS, "userModifiedFields",
                             "zenPolicyUserModifiedFields", "zenDeviceEffectsUserModifiedFields",
-                            "deletionInstant");
+                            "deletionInstant", "disabledOrigin");
 
     // allowPriorityChannels is flagged by android.app.modes_api
     public static final Set<String> ZEN_MODE_CONFIG_FLAGGED_FIELDS =
@@ -201,8 +204,8 @@ public class ZenModeDiffTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_MODES_API)
     public void testConfigDiff_fieldDiffs_flagOn() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
         // these two start the same
         ZenModeConfig c1 = new ZenModeConfig();
         ZenModeConfig c2 = new ZenModeConfig();

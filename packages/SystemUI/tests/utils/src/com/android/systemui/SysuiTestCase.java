@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
@@ -297,7 +296,7 @@ public abstract class SysuiTestCase {
     }
 
     public static boolean isRobolectricTest() {
-        return !isRavenwoodTest() && Build.FINGERPRINT.contains("robolectric");
+        return !isRavenwoodTest() && !System.getProperty("java.vm.name").equals("Dalvik");
     }
 
     protected boolean isScreenshotTest() {

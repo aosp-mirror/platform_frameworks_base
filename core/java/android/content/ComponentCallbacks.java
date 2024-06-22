@@ -58,7 +58,9 @@ public interface ComponentCallbacks {
      * @deprecated Since API level 14 this is superseded by
      *             {@link ComponentCallbacks2#onTrimMemory}.
      *             Since API level 34 this is never called.
-     *             Apps targeting API level 34 and above may provide an empty implementation.
+     *             If you're overriding ComponentCallbacks2#onTrimMemory and
+     *             your minSdkVersion is greater than API 14, you can provide
+     *             an empty implementation for this method.
      */
     @Deprecated
     void onLowMemory();

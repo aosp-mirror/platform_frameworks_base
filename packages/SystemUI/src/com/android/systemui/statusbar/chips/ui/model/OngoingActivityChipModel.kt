@@ -28,6 +28,8 @@ sealed class OngoingActivityChipModel {
     data class Shown(
         /** The icon to show on the chip. */
         val icon: Icon,
+        /** What colors to use for the chip. */
+        val colors: ColorsModel,
         /**
          * The time this event started, used to show the timer.
          *

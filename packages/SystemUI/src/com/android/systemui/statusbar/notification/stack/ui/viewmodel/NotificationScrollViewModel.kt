@@ -90,8 +90,10 @@ constructor(
                             1f
                         } else if (
                             shadeMode != ShadeMode.Split &&
-                                transitionState.fromScene in SceneFamilies.Home &&
-                                transitionState.toScene in quickSettingsScene
+                                (transitionState.fromScene in SceneFamilies.Home &&
+                                    transitionState.toScene == quickSettingsScene) ||
+                                (transitionState.fromScene == quickSettingsScene &&
+                                    transitionState.toScene in SceneFamilies.Home)
                         ) {
                             // during QS expansion, increase fraction at same rate as scrim alpha,
                             // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.

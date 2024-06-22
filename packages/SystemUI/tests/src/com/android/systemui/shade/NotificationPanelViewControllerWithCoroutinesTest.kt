@@ -19,11 +19,11 @@
 package com.android.systemui.shade
 
 import android.platform.test.annotations.EnableFlags
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewStub
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.CollectionUtils
 import com.android.keyguard.KeyguardClockSwitch.LARGE
@@ -55,7 +55,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class NotificationPanelViewControllerWithCoroutinesTest :

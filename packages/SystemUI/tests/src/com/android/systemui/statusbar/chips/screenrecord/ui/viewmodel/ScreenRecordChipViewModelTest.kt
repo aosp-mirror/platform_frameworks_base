@@ -32,6 +32,7 @@ import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.screenrecord.ui.view.EndScreenRecordingDialogDelegate
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -106,6 +107,16 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             val icon = (latest as OngoingActivityChipModel.Shown).icon
             assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_screenrecord)
+        }
+
+    @Test
+    fun chip_colorsAreRed() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+
+            assertThat((latest as OngoingActivityChipModel.Shown).colors).isEqualTo(ColorsModel.Red)
         }
 
     @Test

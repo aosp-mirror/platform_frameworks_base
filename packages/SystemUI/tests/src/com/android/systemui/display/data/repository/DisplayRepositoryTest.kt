@@ -126,6 +126,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
         // All subscribers are done, unregister should have been called.
         verify(displayManager).unregisterDisplayListener(any())
     }
+
     @Test
     fun onDisplayAdded_propagated() =
         testScope.runTest {
@@ -455,6 +456,16 @@ class DisplayRepositoryTest : SysuiTestCase() {
             )
             displayListener.value.onDisplayChanged(Display.DEFAULT_DISPLAY)
             assertThat(defaultDisplayOff).isFalse()
+        }
+
+    @Test
+    fun displayFlow_startsWithDefaultDisplayBeforeAnyEvent() =
+        testScope.runTest {
+            setDisplays(Display.DEFAULT_DISPLAY)
+
+            val value by latestDisplayFlowValue()
+
+            assertThat(value?.ids()).containsExactly(Display.DEFAULT_DISPLAY)
         }
 
     private fun Iterable<Display>.ids(): List<Int> = map { it.displayId }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
@@ -41,9 +42,11 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
     private lateinit var underTest: DeviceBasedSatelliteViewModel
     private lateinit var interactor: DeviceBasedSatelliteInteractor

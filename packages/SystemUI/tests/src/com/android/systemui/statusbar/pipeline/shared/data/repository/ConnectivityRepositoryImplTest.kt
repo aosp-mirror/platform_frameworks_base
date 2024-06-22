@@ -25,6 +25,7 @@ import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import android.net.vcn.VcnTransportInfo
 import android.net.wifi.WifiInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -50,6 +51,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -57,6 +59,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
     private lateinit var underTest: ConnectivityRepositoryImpl

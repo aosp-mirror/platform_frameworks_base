@@ -121,3 +121,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_taskbar_on_phones"
+    namespace: "multitasking"
+    description: "Enables taskbar on phones"
+    bug: "348007377"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

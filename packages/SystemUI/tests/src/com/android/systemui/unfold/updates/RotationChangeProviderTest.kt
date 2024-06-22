@@ -21,9 +21,9 @@ import android.hardware.display.DisplayManager
 import android.os.HandlerThread
 import android.os.Looper
 import android.os.Process
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.updates.RotationChangeProvider.RotationListener
@@ -41,7 +41,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @RunWithLooper
 class RotationChangeProviderTest : SysuiTestCase() {

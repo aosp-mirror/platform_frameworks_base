@@ -129,17 +129,23 @@
     <skip />
     <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
     <skip />
+    <!-- no translation found for screenrecord_stop_dialog_message_specific_app (5285148796772616326) -->
+    <skip />
     <!-- no translation found for screenrecord_stop_dialog_button (2883812564938194350) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_title (9212915050910250438) -->
     <skip />
     <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
     <skip />
+    <!-- no translation found for share_to_app_stop_dialog_message_specific_app (124371406810544777) -->
+    <skip />
     <!-- no translation found for share_to_app_stop_dialog_button (6334056916284230217) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
+    <skip />
+    <!-- no translation found for cast_to_other_device_stop_dialog_message_specific_app (4891536209254041850) -->
     <skip />
     <!-- no translation found for cast_to_other_device_stop_dialog_button (6420183747435521834) -->
     <skip />
@@ -303,10 +309,8 @@
     <skip />
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Bluetootha używają funkcje takie jak szybkie udostępnianie czy Znajdź moje urządzenie"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth włączy się jutro rano"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (7545274861795853838) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (3069309588231072128) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Udostępnij dźwięk"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Udostępnia dźwięk"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> naładowania baterii"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Dźwięk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Zestaw słuchawkowy"</string>
@@ -1197,6 +1201,8 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Kliknij, aby uzyskać więcej informacji"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nie ustawiono alarmu"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"Wprowadź blokadę ekranu"</string>
+    <!-- no translation found for accessibility_side_fingerprint_indicator_label (1673807833352363712) -->
+    <skip />
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Czytnik linii papilarnych"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"uwierzytelnij"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"otwórz urządzenie"</string>

@@ -37,7 +37,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-interface DraggableHandler {
+internal interface DraggableHandler {
     /**
      * Start a drag in the given [startedPosition], with the given [overSlop] and number of
      * [pointersDown].
@@ -51,7 +51,7 @@ interface DraggableHandler {
  * The [DragController] provides control over the transition between two scenes through the [onDrag]
  * and [onStop] methods.
  */
-interface DragController {
+internal interface DragController {
     /** Drag the current scene by [delta] pixels. */
     fun onDrag(delta: Float)
 
@@ -395,10 +395,11 @@ private class DragControllerImpl(
             if (
                 distance != DistanceUnspecified &&
                     shouldCommitSwipe(
-                        offset,
-                        distance,
-                        velocity,
+                        offset = offset,
+                        distance = distance,
+                        velocity = velocity,
                         wasCommitted = swipeTransition._currentScene == toScene,
+                        requiresFullDistanceSwipe = swipeTransition.requiresFullDistanceSwipe,
                     )
             ) {
                 targetScene = toScene
@@ -472,7 +473,12 @@ private class DragControllerImpl(
         distance: Float,
         velocity: Float,
         wasCommitted: Boolean,
+        requiresFullDistanceSwipe: Boolean,
     ): Boolean {
+        if (requiresFullDistanceSwipe && !wasCommitted) {
+            return offset / distance >= 1f
+        }
+
         fun isCloserToTarget(): Boolean {
             return (offset - distance).absoluteValue < offset.absoluteValue
         }
@@ -530,6 +536,8 @@ private fun SwipeTransition(
         userActionDistanceScope = layoutImpl.userActionDistanceScope,
         orientation = orientation,
         isUpOrLeft = isUpOrLeft,
+        requiresFullDistanceSwipe = result.requiresFullDistanceSwipe,
+        replacedTransition = null,
     )
 }
 
@@ -543,7 +551,10 @@ private fun SwipeTransition(old: SwipeTransition): SwipeTransition {
             _toScene = old._toScene,
             userActionDistanceScope = old.userActionDistanceScope,
             orientation = old.orientation,
-            isUpOrLeft = old.isUpOrLeft
+            isUpOrLeft = old.isUpOrLeft,
+            lastDistance = old.lastDistance,
+            requiresFullDistanceSwipe = old.requiresFullDistanceSwipe,
+            replacedTransition = old,
         )
         .apply {
             _currentScene = old._currentScene
@@ -561,8 +572,11 @@ private class SwipeTransition(
     val userActionDistanceScope: UserActionDistanceScope,
     override val orientation: Orientation,
     override val isUpOrLeft: Boolean,
+    val requiresFullDistanceSwipe: Boolean,
+    replacedTransition: SwipeTransition?,
+    var lastDistance: Float = DistanceUnspecified,
 ) :
-    TransitionState.Transition(_fromScene.key, _toScene.key),
+    TransitionState.Transition(_fromScene.key, _toScene.key, replacedTransition),
     TransitionState.HasOverscrollProperties {
     var _currentScene by mutableStateOf(_fromScene)
     override val currentScene: SceneKey
@@ -619,8 +633,6 @@ private class SwipeTransition(
             override val absoluteDistance: Float
                 get() = distance().absoluteValue
         }
-
-    private var lastDistance = DistanceUnspecified
 
     /** Whether [TransitionState.Transition.finish] was called on this transition. */
     var isFinishing = false

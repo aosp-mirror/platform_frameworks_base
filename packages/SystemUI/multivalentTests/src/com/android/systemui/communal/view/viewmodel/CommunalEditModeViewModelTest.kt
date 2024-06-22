@@ -40,6 +40,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalTutorialReposit
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalPrefsInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
@@ -48,6 +49,8 @@ import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -57,6 +60,7 @@ import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
+import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -104,10 +108,12 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         smartspaceRepository = kosmos.fakeSmartspaceRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
         communalSceneInteractor = kosmos.communalSceneInteractor
+        kosmos.fakeUserRepository.setUserInfos(listOf(MAIN_USER_INFO))
         kosmos.fakeUserTracker.set(
             userInfos = listOf(MAIN_USER_INFO),
             selectedUserIndex = 0,
         )
+        kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
         whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
 
         underTest =
@@ -120,6 +126,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                 uiEventLogger,
                 logcatLogBuffer("CommunalEditModeViewModelTest"),
                 kosmos.testDispatcher,
+                kosmos.communalPrefsInteractor,
             )
     }
 
@@ -311,6 +318,29 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             assertFalse(success)
         }
     }
+
+    @Test
+    fun showDisclaimer_trueAfterEditModeShowing() =
+        testScope.runTest {
+            val showDisclaimer by collectLastValue(underTest.showDisclaimer)
+
+            assertThat(showDisclaimer).isFalse()
+            underTest.setEditModeState(EditModeState.SHOWING)
+            assertThat(showDisclaimer).isTrue()
+        }
+
+    @Test
+    fun showDisclaimer_falseWhenDismissed() =
+        testScope.runTest {
+            underTest.setEditModeState(EditModeState.SHOWING)
+            kosmos.fakeUserRepository.setSelectedUserInfo(MAIN_USER_INFO)
+
+            val showDisclaimer by collectLastValue(underTest.showDisclaimer)
+
+            assertThat(showDisclaimer).isTrue()
+            underTest.onDisclaimerDismissed()
+            assertThat(showDisclaimer).isFalse()
+        }
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)

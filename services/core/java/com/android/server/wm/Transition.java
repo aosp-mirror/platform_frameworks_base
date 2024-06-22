@@ -1903,7 +1903,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         } else {
             final List<TransitionInfo.Change> changes = info.getChanges();
             for (int i = changes.size() - 1; i >= 0; --i) {
-                if (mTargets.get(i).mContainer.asActivityRecord() != null) {
+                final WindowContainer<?> container = mTargets.get(i).mContainer;
+                if (container.asActivityRecord() != null
+                        || (container.asTask() != null
+                                && mOverrideOptions.getOverrideTaskTransition())) {
                     changes.get(i).setAnimationOptions(mOverrideOptions);
                     // TODO(b/295805497): Extract mBackgroundColor from AnimationOptions.
                     changes.get(i).setBackgroundColor(mOverrideOptions.getBackgroundColor());
@@ -2541,9 +2544,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (wc.asWindowState() != null) continue;
 
             final ChangeInfo changeInfo = changes.get(wc);
-
-            // Reject no-ops
-            if (!changeInfo.hasChanged()) {
+            // Reject no-ops, unless wallpaper
+            if (!changeInfo.hasChanged() && wc.asWallpaperToken() == null) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "  Rejecting as no-op: %s", wc);
                 continue;
@@ -2816,6 +2818,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final Rect parentBounds = parent.getBounds();
             change.setEndRelOffset(bounds.left - parentBounds.left,
                     bounds.top - parentBounds.top);
+            if (Flags.activityEmbeddingOverlayPresentationFlag()) {
+                change.setEndParentSize(parentBounds.width(), parentBounds.height());
+            }
             int endRotation = target.getWindowConfiguration().getRotation();
             if (activityRecord != null) {
                 // TODO(b/227427984): Shell needs to aware letterbox.

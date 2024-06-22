@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
 import android.os.UserHandle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
@@ -43,6 +44,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
@@ -51,6 +53,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
 
     @Mock

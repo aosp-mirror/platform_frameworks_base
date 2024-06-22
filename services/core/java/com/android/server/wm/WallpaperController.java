@@ -764,10 +764,10 @@ class WallpaperController {
 
     void collectTopWallpapers(Transition transition) {
         if (mFindResults.hasTopShowWhenLockedWallpaper()) {
-            transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper);
+            transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper.mToken);
         }
         if (mFindResults.hasTopHideWhenLockedWallpaper()) {
-            transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper);
+            transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper.mToken);
         }
     }
 

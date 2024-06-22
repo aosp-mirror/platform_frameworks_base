@@ -260,8 +260,9 @@ class TransparentPolicy {
 
         private void start(@NonNull ActivityRecord firstOpaqueActivity) {
             mFirstOpaqueActivity = firstOpaqueActivity;
-            mFirstOpaqueActivity.mTransparentPolicy
-                    .mDestroyListeners.add(mActivityRecord.mTransparentPolicy);
+            mFirstOpaqueActivity.mAppCompatController.getTransparentPolicy()
+                    .mDestroyListeners.add(mActivityRecord.mAppCompatController
+                            .getTransparentPolicy());
             inheritFromOpaque(firstOpaqueActivity);
             final WindowContainer<?> parent = mActivityRecord.getParent();
             mLetterboxConfigListener = WindowContainer.overrideConfigurationPropagation(
@@ -312,8 +313,9 @@ class TransparentPolicy {
             mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
             mInheritedCompatDisplayInsets = null;
             if (mFirstOpaqueActivity != null) {
-                mFirstOpaqueActivity.mTransparentPolicy
-                        .mDestroyListeners.remove(mActivityRecord.mTransparentPolicy);
+                mFirstOpaqueActivity.mAppCompatController.getTransparentPolicy()
+                        .mDestroyListeners.remove(mActivityRecord.mAppCompatController
+                                .getTransparentPolicy());
             }
             mFirstOpaqueActivity = null;
         }

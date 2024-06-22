@@ -414,7 +414,8 @@ public class AudioDeviceBroker {
         }
         if (!mScoManagedByAudio) {
             boolean isBtScoRequested = isBluetoothScoRequested();
-            if (isBtScoRequested && (!wasBtScoRequested || !isBluetoothScoActive())) {
+            if (isBtScoRequested && (!wasBtScoRequested || !isBluetoothScoActive()
+                    || !mBtHelper.isBluetoothScoRequestedInternally())) {
                 if (!mBtHelper.startBluetoothSco(scoAudioMode, eventSource)) {
                     Log.w(TAG, "setCommunicationRouteForClient: failure to start BT SCO for uid: "
                             + uid);
@@ -1148,13 +1149,14 @@ public class AudioDeviceBroker {
     }
 
     /*package*/ void setBluetoothScoOn(boolean on, String eventSource) {
-        if (AudioService.DEBUG_COMM_RTE) {
-            Log.v(TAG, "setBluetoothScoOn: " + on + " " + eventSource);
-        }
         synchronized (mBluetoothAudioStateLock) {
+            boolean isBtScoRequested = isBluetoothScoRequested();
+            Log.i(TAG, "setBluetoothScoOn: " + on + ", mBluetoothScoOn: "
+                    + mBluetoothScoOn + ", isBtScoRequested: " + isBtScoRequested
+                    + ", from: " + eventSource);
             mBluetoothScoOn = on;
             updateAudioHalBluetoothState();
-            postUpdateCommunicationRouteClient(isBluetoothScoRequested(), eventSource);
+            postUpdateCommunicationRouteClient(isBtScoRequested, eventSource);
         }
     }
 

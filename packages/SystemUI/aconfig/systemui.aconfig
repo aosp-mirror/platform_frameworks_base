@@ -421,10 +421,13 @@ flag {
 }
 
 flag {
-   name: "fast_unlock_transition"
+   name: "faster_unlock_transition"
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"
    bug: "298186160"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -864,6 +867,13 @@ flag {
 }
 
 flag {
+    name: "keyboard_touchpad_contextual_education"
+    namespace: "systemui"
+    description: "Allow showing education for physical keyboard and touchpad"
+    bug: "317496783"
+}
+
+flag {
   name: "dream_overlay_bouncer_swipe_direction_filtering"
   namespace: "systemui"
   description: "do not initiate bouncer swipe when the direction is opposite of the expansion"
@@ -878,16 +888,6 @@ flag {
     namespace: "systemui"
     description: "Pilfer at most once per input session"
     bug: "333596426"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    name: "shade_collapse_activity_launch_fix"
-    namespace: "systemui"
-    description: "Avoid collapsing the shade on activity launch if it is already collapsed, as this causes a flicker."
-    bug: "331591373"
     metadata {
       purpose: PURPOSE_BUGFIX
     }
