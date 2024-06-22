@@ -1296,8 +1296,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
             final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
 
-            mSwitchingController = new InputMethodSubtypeSwitchingController(context,
-                    settings.getMethodMap(), settings.getUserId());
+            mSwitchingController = new InputMethodSubtypeSwitchingController(context, settings);
             getUserData(mCurrentUserId).mHardwareKeyboardShortcutController.update(settings);
             mMenuController = new InputMethodMenuController(this);
             mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
@@ -3042,10 +3041,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         // TODO: Instantiate mSwitchingController for each user.
         if (userId == mSwitchingController.getUserId()) {
-            mSwitchingController.resetCircularListLocked(settings.getMethodMap());
+            mSwitchingController.resetCircularListLocked(settings);
         } else {
-            mSwitchingController = new InputMethodSubtypeSwitchingController(mContext,
-                    settings.getMethodMap(), userId);
+            mSwitchingController = new InputMethodSubtypeSwitchingController(mContext, settings);
         }
         getUserData(userId).mHardwareKeyboardShortcutController.update(settings);
         sendOnNavButtonFlagsChangedLocked();
@@ -4922,7 +4920,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     final List<ImeSubtypeListItem> imList = InputMethodSubtypeSwitchingController
                             .getSortedInputMethodAndSubtypeList(
                                     showAuxSubtypes, isScreenLocked, true /* forImeMenu */,
-                                    mContext, settings.getMethodMap(), settings.getUserId());
+                                    mContext, settings);
                     if (imList.isEmpty()) {
                         Slog.w(TAG, "Show switching menu failed, imList is empty,"
                                 + " showAuxSubtypes: " + showAuxSubtypes
@@ -5312,10 +5310,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         // TODO: Instantiate mSwitchingController for each user.
         if (userId == mSwitchingController.getUserId()) {
-            mSwitchingController.resetCircularListLocked(settings.getMethodMap());
+            mSwitchingController.resetCircularListLocked(settings);
         } else {
-            mSwitchingController = new InputMethodSubtypeSwitchingController(mContext,
-                    settings.getMethodMap(), mCurrentUserId);
+            mSwitchingController = new InputMethodSubtypeSwitchingController(mContext, settings);
         }
         getUserData(userId).mHardwareKeyboardShortcutController.update(settings);
 
