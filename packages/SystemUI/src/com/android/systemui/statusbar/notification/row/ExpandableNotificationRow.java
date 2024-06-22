@@ -2950,24 +2950,21 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mShowingPublicInitialized && mShowingPublic == oldShowingPublic) {
             return;
         }
-        float oldAlpha = getContentView().getAlpha();
 
         if (!animated) {
-            mPublicLayout.animate().cancel();
-            mPrivateLayout.animate().cancel();
-            if (mChildrenContainer != null) {
-                mChildrenContainer.animate().cancel();
+            if (!NotificationContentAlphaOptimization.isEnabled()
+                    || mShowingPublic != oldShowingPublic) {
+                // Don't reset the alpha or cancel the animation if the showing layout doesn't
+                // change
+                mPublicLayout.animate().cancel();
+                mPrivateLayout.animate().cancel();
+                if (mChildrenContainer != null) {
+                    mChildrenContainer.animate().cancel();
+                }
+                resetAllContentAlphas();
             }
-            resetAllContentAlphas();
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
             updateChildrenVisibility();
-            if (NotificationContentAlphaOptimization.isEnabled()) {
-                // We want to set the old alpha to the now-showing layout to avoid breaking an
-                // on-going animation
-                if (oldAlpha != 1f) {
-                    setAlphaAndLayerType(mShowingPublic ? mPublicLayout : mPrivateLayout, oldAlpha);
-                }
-            }
         } else {
             animateShowingPublic(delay, duration, mShowingPublic);
         }
