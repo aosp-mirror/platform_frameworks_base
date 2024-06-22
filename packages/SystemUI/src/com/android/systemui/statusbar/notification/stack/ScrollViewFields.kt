@@ -32,8 +32,6 @@ import java.util.function.Consumer
 class ScrollViewFields {
     /** Used to produce the clipping path */
     var scrimClippingShape: ShadeScrimShape? = null
-    /** Y coordinate in view pixels of the top of the notification stack */
-    var stackTop: Float = 0f
     /** Y coordinate in view pixels of the top of the HUN */
     var headsUpTop: Float = 0f
     /** Whether the notifications are scrolled all the way to the top (i.e. when freshly opened) */
@@ -76,7 +74,6 @@ class ScrollViewFields {
     fun dump(pw: IndentingPrintWriter) {
         pw.printSection("StackViewStates") {
             pw.println("scrimClippingShape", scrimClippingShape)
-            pw.println("stackTop", stackTop)
             pw.println("headsUpTop", headsUpTop)
             pw.println("isScrolledToTop", isScrolledToTop)
         }

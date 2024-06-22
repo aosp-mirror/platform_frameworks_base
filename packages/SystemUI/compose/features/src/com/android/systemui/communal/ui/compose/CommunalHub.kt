@@ -49,13 +49,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -75,12 +78,15 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -124,7 +130,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
@@ -153,7 +158,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CommunalHub(
     modifier: Modifier = Modifier,
@@ -378,6 +383,33 @@ fun CommunalHub(
                 onCancel = viewModel::onEnableWorkProfileDialogCancel
             )
         }
+
+        if (viewModel is CommunalEditModeViewModel) {
+            val showBottomSheet by viewModel.showDisclaimer.collectAsStateWithLifecycle(false)
+
+            if (showBottomSheet) {
+                val scope = rememberCoroutineScope()
+                val sheetState = rememberModalBottomSheetState()
+                val colors = LocalAndroidColorScheme.current
+
+                ModalBottomSheet(
+                    onDismissRequest = viewModel::onDisclaimerDismissed,
+                    sheetState = sheetState,
+                    dragHandle = null,
+                    containerColor = colors.surfaceContainer,
+                ) {
+                    DisclaimerBottomSheetContent {
+                        scope
+                            .launch { sheetState.hide() }
+                            .invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    viewModel.onDisclaimerDismissed()
+                                }
+                            }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -387,6 +419,47 @@ private fun onKeyEvent(viewModel: BaseCommunalViewModel) {
 
 private fun onMotionEvent(viewModel: BaseCommunalViewModel) {
     viewModel.signalUserInteraction()
+}
+
+@Composable
+private fun DisclaimerBottomSheetContent(onButtonClicked: () -> Unit) {
+    val colors = LocalAndroidColorScheme.current
+
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Widgets,
+            contentDescription = null,
+            tint = colors.primary,
+            modifier = Modifier.size(32.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.communal_widgets_disclaimer_title),
+            style = MaterialTheme.typography.headlineMedium,
+            color = colors.onSurface,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.communal_widgets_disclaimer_text),
+            color = colors.onSurfaceVariant,
+        )
+        Button(
+            modifier =
+                Modifier.padding(horizontal = 26.dp, vertical = 16.dp)
+                    .widthIn(min = 200.dp)
+                    .heightIn(min = 56.dp),
+            onClick = { onButtonClicked() }
+        ) {
+            Text(
+                stringResource(R.string.communal_widgets_disclaimer_button),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+    }
 }
 
 /**
@@ -921,7 +994,8 @@ private fun CtaTileInViewModeContent(
         shape = RoundedCornerShape(68.dp, 34.dp, 68.dp, 34.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(vertical = 38.dp, horizontal = 70.dp),
+            modifier = Modifier.fillMaxSize().padding(vertical = 32.dp, horizontal = 50.dp),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
@@ -932,41 +1006,43 @@ private fun CtaTileInViewModeContent(
             Spacer(modifier = Modifier.size(6.dp))
             Text(
                 text = stringResource(R.string.cta_label_to_edit_widget),
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge,
+                fontSize = nonScalableTextSize(22.dp),
+                lineHeight = nonScalableTextSize(28.dp),
             )
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.size(16.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
             ) {
                 OutlinedButton(
+                    modifier = Modifier.fillMaxHeight(),
                     colors =
                         ButtonDefaults.buttonColors(
                             contentColor = colors.onPrimary,
                         ),
                     border = BorderStroke(width = 1.0.dp, color = colors.primaryContainer),
-                    contentPadding = Dimensions.ButtonPadding,
+                    contentPadding = PaddingValues(26.dp, 8.dp),
                     onClick = viewModel::onDismissCtaTile,
                 ) {
                     Text(
                         text = stringResource(R.string.cta_tile_button_to_dismiss),
-                        fontSize = 12.sp,
+                        fontSize = nonScalableTextSize(14.dp),
                     )
                 }
-                Spacer(modifier = Modifier.size(14.dp))
                 Button(
+                    modifier = Modifier.fillMaxHeight(),
                     colors =
                         ButtonDefaults.buttonColors(
                             containerColor = colors.primaryContainer,
                             contentColor = colors.onPrimaryContainer,
                         ),
-                    contentPadding = Dimensions.ButtonPadding,
+                    contentPadding = PaddingValues(26.dp, 8.dp),
                     onClick = viewModel::onOpenWidgetEditor
                 ) {
                     Text(
                         text = stringResource(R.string.cta_tile_button_to_open_widget_editor),
-                        fontSize = 12.sp,
+                        fontSize = nonScalableTextSize(14.dp),
                     )
                 }
             }
@@ -1277,6 +1353,13 @@ fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composabl
         content()
     }
 }
+
+/**
+ * Text size converted from dp value to the equivalent sp value using the current screen density,
+ * ensuring it does not scale with the font size setting.
+ */
+@Composable
+private fun nonScalableTextSize(sizeInDp: Dp) = with(LocalDensity.current) { sizeInDp.toSp() }
 
 /**
  * Returns the `contentPadding` of the grid. Use the vertical padding to push the grid content area

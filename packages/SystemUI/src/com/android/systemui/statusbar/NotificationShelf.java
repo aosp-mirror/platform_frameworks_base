@@ -94,7 +94,6 @@ public class NotificationShelf extends ActivatableNotificationView {
     private float mCornerAnimationDistance;
     private float mActualWidth = -1;
     private int mMaxIconsOnLockscreen;
-    private int mNotificationScrimPadding;
     private boolean mCanModifyColorOfNotifications;
     private boolean mCanInteract;
     private NotificationStackScrollLayout mHostLayout;
@@ -138,7 +137,6 @@ public class NotificationShelf extends ActivatableNotificationView {
         mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         mPaddingBetweenElements = res.getDimensionPixelSize(R.dimen.notification_divider_height);
         mMaxIconsOnLockscreen = res.getInteger(R.integer.max_notif_icons_on_lockscreen);
-        mNotificationScrimPadding = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
 
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         final int newShelfHeight = res.getDimensionPixelOffset(R.dimen.notification_shelf_height);
@@ -265,7 +263,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
 
         final float stackBottom = SceneContainerFlag.isEnabled()
-                ? getStackBottom(ambientState)
+                ? ambientState.getStackTop() + ambientState.getStackHeight()
                 : ambientState.getStackY() + ambientState.getStackHeight();
 
         if (viewState.hidden) {
@@ -276,19 +274,6 @@ public class NotificationShelf extends ActivatableNotificationView {
         } else {
             viewState.setYTranslation(stackBottom - viewState.height);
         }
-    }
-
-    /**
-     * bottom-most position, where we can draw the stack
-     */
-    private float getStackBottom(AmbientState ambientState) {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
-        float stackBottom = ambientState.getStackCutoff() - mNotificationScrimPadding;
-        if (ambientState.isExpansionChanging()) {
-            stackBottom = MathUtils.lerp(stackBottom * StackScrollAlgorithm.START_FRACTION,
-                    stackBottom, ambientState.getExpansionFraction());
-        }
-        return stackBottom;
     }
 
     private int getSpeedBumpIndex() {

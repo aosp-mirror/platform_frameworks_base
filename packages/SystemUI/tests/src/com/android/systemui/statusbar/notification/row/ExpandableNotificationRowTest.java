@@ -793,6 +793,73 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
+    public void isExpanded_onKeyguard_allowOnKeyguardExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(true);
+        row.setUserExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded(/*allowOnKeyguard =*/ true)).isTrue();
+    }
+    @Test
+    public void isExpanded_onKeyguard_notAllowOnKeyguardNotExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(true);
+        row.setUserExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded(/*allowOnKeyguard =*/ false)).isFalse();
+    }
+
+    @Test
+    public void isExpanded_systemExpanded_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void isExpanded_systemChildExpanded_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemChildExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void isExpanded_userExpanded_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setUserExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void isExpanded_userExpandedFalse_notExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setUserExpanded(false);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
     public void onDisappearAnimationFinished_shouldSetFalse_headsUpAnimatingAway()
             throws Exception {
         final ExpandableNotificationRow row = mNotificationTestHelper.createRow();

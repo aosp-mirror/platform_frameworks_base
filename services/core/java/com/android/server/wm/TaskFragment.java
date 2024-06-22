@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.isFloating;
 import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -2248,8 +2249,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         void resolveTmpOverrides(DisplayContent dc, Configuration parentConfig,
                 boolean isFixedRotationTransforming) {
             mParentAppBoundsOverride = new Rect(parentConfig.windowConfiguration.getAppBounds());
+            mTmpOverrideConfigOrientation = parentConfig.orientation;
             final Insets insets;
-            if (mUseOverrideInsetsForConfig && dc != null) {
+            if (mUseOverrideInsetsForConfig && dc != null
+                    && !isFloating(parentConfig.windowConfiguration.getWindowingMode())) {
                 // Insets are decoupled from configuration by default from V+, use legacy
                 // compatibility behaviour for apps targeting SDK earlier than 35
                 // (see applySizeOverrideIfNeeded).

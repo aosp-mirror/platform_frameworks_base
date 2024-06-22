@@ -839,80 +839,6 @@ class ElementTest {
     }
 
     @Test
-    fun elementTransitionDuringNestedScrollWith2Pointers() {
-        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
-        // detected as a drag event.
-        var touchSlop = 0f
-        val translateY = 10.dp
-        val layoutWidth = 200.dp
-        val layoutHeight = 400.dp
-
-        val state =
-            rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
-                    initialScene = SceneA,
-                    transitions =
-                        transitions {
-                            from(SceneA, to = SceneB) {
-                                translate(TestElements.Foo, y = translateY)
-                            }
-                        },
-                )
-                    as MutableSceneTransitionLayoutStateImpl
-            }
-
-        rule.setContent {
-            touchSlop = LocalViewConfiguration.current.touchSlop
-            SceneTransitionLayout(
-                state = state,
-                modifier = Modifier.size(layoutWidth, layoutHeight)
-            ) {
-                scene(
-                    SceneA,
-                    userActions = mapOf(Swipe(SwipeDirection.Down, pointerCount = 2) to SceneB)
-                ) {
-                    Box(
-                        Modifier
-                            // Unconsumed scroll gesture will be intercepted by STL
-                            .verticalNestedScrollToScene()
-                            // A scrollable that does not consume the scroll gesture
-                            .scrollable(
-                                rememberScrollableState(consumeScrollDelta = { 0f }),
-                                Orientation.Vertical
-                            )
-                            .fillMaxSize()
-                    ) {
-                        Spacer(Modifier.element(TestElements.Foo).fillMaxSize())
-                    }
-                }
-                scene(SceneB) { Spacer(Modifier.fillMaxSize()) }
-            }
-        }
-
-        assertThat(state.transitionState).isIdle()
-        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
-        fooElement.assertTopPositionInRootIsEqualTo(0.dp)
-
-        // Swipe down with 2 pointers by half of verticalSwipeDistance.
-        rule.onRoot().performTouchInput {
-            val middleTop = Offset((layoutWidth / 2).toPx(), 0f)
-            repeat(2) { i -> down(pointerId = i, middleTop) }
-            repeat(2) { i ->
-                // Scroll 50%
-                moveBy(
-                    pointerId = i,
-                    delta = Offset(0f, touchSlop + layoutHeight.toPx() * 0.5f),
-                    delayMillis = 1_000,
-                )
-            }
-        }
-
-        val transition = assertThat(state.transitionState).isTransition()
-        assertThat(transition).hasProgress(0.5f)
-        fooElement.assertTopPositionInRootIsEqualTo(translateY * 0.5f)
-    }
-
-    @Test
     fun elementTransitionWithDistanceDuringOverscroll() {
         val layoutWidth = 200.dp
         val layoutHeight = 400.dp
@@ -2087,5 +2013,43 @@ class ElementTest {
         interruptionProgress = 0f
         rule.onNode(isElement(TestElements.Foo, SceneA)).assertPositionInRootIsEqualTo(20.dp, 30.dp)
         rule.onNode(isElement(TestElements.Foo, SceneB)).assertIsNotDisplayed()
+    }
+
+    @Test
+    fun replacedTransitionDoesNotTriggerInterruption() = runTest {
+        val state = rule.runOnIdle { MutableSceneTransitionLayoutStateImpl(SceneA) }
+
+        @Composable
+        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+            Box(modifier.element(TestElements.Foo).size(10.dp))
+        }
+
+        rule.setContent {
+            SceneTransitionLayout(state) {
+                scene(SceneA) { Foo() }
+                scene(SceneB) { Foo(Modifier.offset(40.dp, 60.dp)) }
+            }
+        }
+
+        // Start A => B at 50%.
+        val aToB1 =
+            transition(from = SceneA, to = SceneB, progress = { 0.5f }, onFinish = neverFinish())
+        rule.runOnUiThread { state.startTransition(aToB1) }
+        rule.onNode(isElement(TestElements.Foo, SceneA)).assertIsNotDisplayed()
+        rule.onNode(isElement(TestElements.Foo, SceneB)).assertPositionInRootIsEqualTo(20.dp, 30.dp)
+
+        // Replace A => B by another A => B at 100%. Even with interruption progress at 100%, Foo
+        // should be at (40dp, 60dp) given that aToB1 was replaced by aToB2.
+        val aToB2 =
+            transition(
+                from = SceneA,
+                to = SceneB,
+                progress = { 1f },
+                interruptionProgress = { 1f },
+                replacedTransition = aToB1,
+            )
+        rule.runOnUiThread { state.startTransition(aToB2) }
+        rule.onNode(isElement(TestElements.Foo, SceneA)).assertIsNotDisplayed()
+        rule.onNode(isElement(TestElements.Foo, SceneB)).assertPositionInRootIsEqualTo(40.dp, 60.dp)
     }
 }

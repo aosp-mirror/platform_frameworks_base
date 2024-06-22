@@ -26,6 +26,7 @@ import androidx.activity.result.ActivityResultLauncher
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Flags.enableWidgetPickerSizeFilter
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalPrefsInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
@@ -42,6 +43,7 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
+import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
@@ -67,6 +69,7 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     @CommunalLog logBuffer: LogBuffer,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val communalPrefsInteractor: CommunalPrefsInteractor,
 ) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
 
     private val logger = Logger(logBuffer, "CommunalEditModeViewModel")
@@ -76,9 +79,16 @@ constructor(
     override val isCommunalContentVisible: Flow<Boolean> =
         communalSceneInteractor.editModeState.map { it == EditModeState.SHOWING }
 
+    val showDisclaimer: Flow<Boolean> =
+        allOf(isCommunalContentVisible, not(communalPrefsInteractor.isDisclaimerDismissed))
+
+    fun onDisclaimerDismissed() {
+        communalPrefsInteractor.setDisclaimerDismissed()
+    }
+
     /**
-     * Emits when edit mode activity can show, after we've transitioned to [KeyguardState.GONE]
-     * and edit mode is open.
+     * Emits when edit mode activity can show, after we've transitioned to [KeyguardState.GONE] and
+     * edit mode is open.
      */
     val canShowEditMode =
         allOf(

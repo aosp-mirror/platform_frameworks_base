@@ -21,8 +21,8 @@ import android.content.Context;
 import android.service.notification.NotificationListenerService;
 
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.settingslib.statusbar.notification.data.repository.NotificationsSoundPolicyRepository;
-import com.android.settingslib.statusbar.notification.data.repository.NotificationsSoundPolicyRepositoryImpl;
+import com.android.settingslib.statusbar.notification.data.repository.ZenModeRepository;
+import com.android.settingslib.statusbar.notification.data.repository.ZenModeRepositoryImpl;
 import com.android.settingslib.statusbar.notification.domain.interactor.NotificationsSoundPolicyInteractor;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
@@ -279,19 +279,19 @@ public interface NotificationsModule {
 
     @Provides
     @SysUISingleton
-    public static NotificationsSoundPolicyRepository provideNotificationsSoundPolicyRepository(
+    static ZenModeRepository provideZenModeRepository(
             Context context,
             NotificationManager notificationManager,
             @Application CoroutineScope coroutineScope,
             @Background CoroutineContext coroutineContext) {
-        return new NotificationsSoundPolicyRepositoryImpl(context, notificationManager,
+        return new ZenModeRepositoryImpl(context, notificationManager,
                 coroutineScope, coroutineContext);
     }
 
     @Provides
     @SysUISingleton
-    public static NotificationsSoundPolicyInteractor provideNotificationsSoundPolicyInteractror(
-            NotificationsSoundPolicyRepository repository) {
+    static NotificationsSoundPolicyInteractor provideNotificationsSoundPolicyInteractor(
+            ZenModeRepository repository) {
         return new NotificationsSoundPolicyInteractor(repository);
     }
 }

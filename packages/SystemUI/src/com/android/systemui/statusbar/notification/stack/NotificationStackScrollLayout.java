@@ -834,7 +834,7 @@ public class NotificationStackScrollLayout
         drawDebugInfo(canvas, y, Color.RED, /* label= */ "y = " + y);
 
         if (SceneContainerFlag.isEnabled()) {
-            y = (int) mScrollViewFields.getStackTop();
+            y = (int) mAmbientState.getStackTop();
             drawDebugInfo(canvas, y, Color.RED, /* label= */ "getStackTop() = " + y);
 
             y = (int) mAmbientState.getStackCutoff();
@@ -1181,9 +1181,11 @@ public class NotificationStackScrollLayout
         updateAlgorithmLayoutMinHeight();
         updateOwnTranslationZ();
 
-        // Give The Algorithm information regarding the QS height so it can layout notifications
-        // properly. Needed for some devices that grows notifications down-to-top
-        mStackScrollAlgorithm.updateQSFrameTop(mQsHeader == null ? 0 : mQsHeader.getHeight());
+        if (!SceneContainerFlag.isEnabled()) {
+            // Give The Algorithm information regarding the QS height so it can layout notifications
+            // properly. Needed for some devices that grows notifications down-to-top
+            mStackScrollAlgorithm.updateQSFrameTop(mQsHeader == null ? 0 : mQsHeader.getHeight());
+        }
 
         // Once the layout has finished, we don't need to animate any scrolling clampings anymore.
         mAnimateStackYForContentHeightChange = false;
@@ -1214,7 +1216,7 @@ public class NotificationStackScrollLayout
 
     @Override
     public void setStackTop(float stackTop) {
-        mScrollViewFields.setStackTop(stackTop);
+        mAmbientState.setStackTop(stackTop);
         // TODO(b/332574413): replace the following with using stackTop
         updateTopPadding(stackTop, isAddOrRemoveAnimationPending());
     }
@@ -1424,11 +1426,7 @@ public class NotificationStackScrollLayout
         if (mAmbientState.isBouncerInTransit() && mQsExpansionFraction > 0f) {
             fraction = BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(fraction);
         }
-        // TODO(b/322228881): Clean up scene container vs legacy behavior in NSSL
-        if (SceneContainerFlag.isEnabled()) {
-            // stackY should be driven by scene container, not NSSL
-            mAmbientState.setStackY(getTopPadding());
-        } else {
+        if (!SceneContainerFlag.isEnabled()) {
             final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
             mAmbientState.setStackY(stackY);
         }
@@ -1442,22 +1440,40 @@ public class NotificationStackScrollLayout
     @VisibleForTesting
     public void updateStackEndHeightAndStackHeight(float fraction) {
         final float oldStackHeight = mAmbientState.getStackHeight();
-        if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
-            final float endHeight = updateStackEndHeight(
-                    getHeight(), getEmptyBottomMargin(), getTopPadding());
+        if (SceneContainerFlag.isEnabled()) {
+            final float endHeight;
+            if (!shouldSkipHeightUpdate()) {
+                endHeight = updateStackEndHeight();
+            } else {
+                endHeight = mAmbientState.getStackEndHeight();
+            }
             updateStackHeight(endHeight, fraction);
         } else {
-            // Always updateStackHeight to prevent jumps in the stack height when this fraction
-            // suddenly reapplies after a freeze.
-            final float endHeight = mAmbientState.getStackEndHeight();
-            updateStackHeight(endHeight, fraction);
+            if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
+                final float endHeight = updateStackEndHeight(
+                        getHeight(), getEmptyBottomMargin(), getTopPadding());
+                updateStackHeight(endHeight, fraction);
+            } else {
+                // Always updateStackHeight to prevent jumps in the stack height when this fraction
+                // suddenly reapplies after a freeze.
+                final float endHeight = mAmbientState.getStackEndHeight();
+                updateStackHeight(endHeight, fraction);
+            }
         }
         if (oldStackHeight != mAmbientState.getStackHeight()) {
             requestChildrenUpdate();
         }
     }
 
+    private float updateStackEndHeight() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        float height = Math.max(0f, mAmbientState.getStackCutoff() - mAmbientState.getStackTop());
+        mAmbientState.setStackEndHeight(height);
+        return height;
+    }
+
     private float updateStackEndHeight(float height, float bottomMargin, float topPadding) {
+        SceneContainerFlag.assertInLegacyMode();
         final float stackEndHeight;
         if (mMaxDisplayedNotifications != -1) {
             // The stack intrinsic height already contains the correct value when there is a limit
@@ -1811,6 +1827,7 @@ public class NotificationStackScrollLayout
     }
 
     public void setQsHeader(ViewGroup qsHeader) {
+        SceneContainerFlag.assertInLegacyMode();
         mQsHeader = qsHeader;
     }
 
@@ -2662,6 +2679,7 @@ public class NotificationStackScrollLayout
     }
 
     public void setMaxTopPadding(int maxTopPadding) {
+        SceneContainerFlag.assertInLegacyMode();
         mMaxTopPadding = maxTopPadding;
     }
 
@@ -2682,6 +2700,7 @@ public class NotificationStackScrollLayout
     }
 
     public float getTopPaddingOverflow() {
+        SceneContainerFlag.assertInLegacyMode();
         return mTopPaddingOverflow;
     }
 
@@ -3721,7 +3740,7 @@ public class NotificationStackScrollLayout
 
     protected boolean isInsideQsHeader(MotionEvent ev) {
         if (SceneContainerFlag.isEnabled()) {
-            return ev.getY() < mScrollViewFields.getStackTop();
+            return ev.getY() < mAmbientState.getStackTop();
         }
 
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
@@ -4641,6 +4660,7 @@ public class NotificationStackScrollLayout
     }
 
     public boolean isEmptyShadeViewVisible() {
+        SceneContainerFlag.assertInLegacyMode();
         return mEmptyShadeView.isVisible();
     }
 
@@ -4919,6 +4939,7 @@ public class NotificationStackScrollLayout
     }
 
     public void setQsFullScreen(boolean qsFullScreen) {
+        SceneContainerFlag.assertInLegacyMode();
         if (FooterViewRefactor.isEnabled()) {
             if (qsFullScreen == mQsFullScreen) {
                 return;  // no change
@@ -5095,6 +5116,7 @@ public class NotificationStackScrollLayout
     }
 
     public void setExpandingVelocity(float expandingVelocity) {
+        SceneContainerFlag.assertInLegacyMode();
         mAmbientState.setExpandingVelocity(expandingVelocity);
     }
 
