@@ -12886,7 +12886,14 @@ package android.service.notification {
     field public static final String KEY_SENSITIVE_CONTENT = "key_sensitive_content";
     field public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
     field public static final String KEY_TEXT_REPLIES = "key_text_replies";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String KEY_TYPE = "key_type";
     field public static final String KEY_USER_SENTIMENT = "key_user_sentiment";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_CONTENT_RECOMMENDATION = 4; // 0x4
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_NEWS = 3; // 0x3
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_OTHER = 0; // 0x0
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_PROMOTION = 1; // 0x1
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_SOCIAL_MEDIA = 2; // 0x2
+    field @FlaggedApi("android.service.notification.notification_classification") public static final int TYPE_UNKNOWN = -1; // 0xffffffff
   }
 
   public abstract class NotificationAssistantService extends android.service.notification.NotificationListenerService {

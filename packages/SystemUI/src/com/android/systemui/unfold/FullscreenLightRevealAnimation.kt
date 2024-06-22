@@ -81,7 +81,10 @@ constructor(
 
     private var currentRotation: Int = context.display.rotation
     private var root: SurfaceControlViewHost? = null
-    private var scrimView: LightRevealScrim? = null
+
+    /** The scrim view that is used to reveal the screen. */
+    var scrimView: LightRevealScrim? = null
+        private set
 
     private val rotationWatcher = RotationWatcher()
     private val internalDisplayInfos: List<DisplayInfo> =

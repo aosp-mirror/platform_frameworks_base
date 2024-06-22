@@ -511,6 +511,9 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.iconResName = ICON_RES_NAME;
         rule.triggerDescription = TRIGGER_DESC;
         rule.deletionInstant = Instant.ofEpochMilli(1701790147000L);
+        if (Flags.modesUi()) {
+            rule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_USER;
+        }
 
         Parcel parcel = Parcel.obtain();
         rule.writeToParcel(parcel, 0);
@@ -540,6 +543,9 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.triggerDescription, parceled.triggerDescription);
         assertEquals(rule.zenPolicy, parceled.zenPolicy);
         assertEquals(rule.deletionInstant, parceled.deletionInstant);
+        if (Flags.modesUi()) {
+            assertEquals(rule.disabledOrigin, parceled.disabledOrigin);
+        }
 
         assertEquals(rule, parceled);
         assertEquals(rule.hashCode(), parceled.hashCode());
@@ -620,6 +626,9 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.iconResName = ICON_RES_NAME;
         rule.triggerDescription = TRIGGER_DESC;
         rule.deletionInstant = Instant.ofEpochMilli(1701790147000L);
+        if (Flags.modesUi()) {
+            rule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_APP;
+        }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         writeRuleXml(rule, baos);
@@ -653,6 +662,9 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.triggerDescription, fromXml.triggerDescription);
         assertEquals(rule.iconResName, fromXml.iconResName);
         assertEquals(rule.deletionInstant, fromXml.deletionInstant);
+        if (Flags.modesUi()) {
+            assertEquals(rule.disabledOrigin, fromXml.disabledOrigin);
+        }
     }
 
     @Test

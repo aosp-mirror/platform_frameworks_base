@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.chips.casttootherdevice.ui.view.EndCastToO
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractor
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
@@ -85,6 +86,7 @@ constructor(
                     CAST_TO_OTHER_DEVICE_ICON,
                     ContentDescription.Resource(R.string.accessibility_casting),
                 ),
+            colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
             createDialogLaunchOnClickListener(

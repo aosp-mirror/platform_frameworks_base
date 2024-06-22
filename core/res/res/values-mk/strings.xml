@@ -209,7 +209,7 @@
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Контактирајте со IT-администраторот за да дознаете повеќе"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"Услуга за виртуелна географска граница"</string>
     <string name="country_detector" msgid="7023275114706088854">"Детектор на земја"</string>
-    <string name="location_service" msgid="2439187616018455546">"Услуга за локација"</string>
+    <string name="location_service" msgid="2439187616018455546">"Локациска услуга"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Услуга GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Услуга за известување од сензорот"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Услуга за самрак"</string>
@@ -498,9 +498,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"пристапи кон наредби на давателот на дополнителна локација"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Овозможува апликацијата да пристапи кон дополнителни наредби на давател на локација. Ова може да овозможи апликацијата да го попечи функционирањето на GPS или други извори на локација."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"пристап до прецизната локација само во преден план"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Апликацијава може да ја добие вашата прецизна локација од „Услугите според локација“ кога се користи. „Услугите според локација“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата. Ова може да го зголеми користењето на батеријата."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Апликацијава може да ја добие вашата прецизна локација од „Локациските услуги“ кога се користи. „Локациските услуги“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата. Ова може да го зголеми користењето на батеријата."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"пристап до приближната локација само во преден план"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Апликацијава може да ја добие вашата приближна локација од „Услугите според локација“ кога се користи. „Услугите според локација“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Апликацијава може да ја добие вашата приближна локација од „Локациските услуги“ кога се користи. „Локациските услуги“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"пристап до локацијата во заднина"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Апликацијава може да пристапува до локацијата во секое време, дури и кога не се користи."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"менува аудио поставки"</string>

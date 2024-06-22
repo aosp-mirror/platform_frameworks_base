@@ -3,6 +3,8 @@ package com.android.systemui.screenshot
 import android.content.ComponentName
 import android.graphics.Bitmap
 import android.net.Uri
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.Display.TYPE_EXTERNAL
@@ -12,9 +14,11 @@ import android.view.Display.TYPE_VIRTUAL
 import android.view.Display.TYPE_WIFI
 import android.view.WindowManager
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.ScreenshotRequest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.display.data.repository.display
@@ -39,7 +43,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TakeScreenshotExecutorTest : SysuiTestCase() {
 
@@ -77,6 +81,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_severalDisplays_callsControllerForEachOne() =
         testScope.runTest {
             val internalDisplay = display(TYPE_INTERNAL, id = 0)
@@ -108,6 +113,32 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
+    fun executeScreenshots_severalDisplaysShelfUi_justCallsOne() =
+        testScope.runTest {
+            val internalDisplay = display(TYPE_INTERNAL, id = 0)
+            val externalDisplay = display(TYPE_EXTERNAL, id = 1)
+            setDisplays(internalDisplay, externalDisplay)
+            val onSaved = { _: Uri? -> }
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            verify(controllerFactory).create(eq(internalDisplay), any())
+
+            val capturer = ArgumentCaptor<ScreenshotData>()
+
+            verify(controller0).handleScreenshot(capturer.capture(), any(), any())
+            assertThat(capturer.value.displayId).isEqualTo(0)
+
+            assertThat(eventLogger.numLogs()).isEqualTo(1)
+            assertThat(eventLogger.get(0).eventId)
+                .isEqualTo(ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_OTHER.id)
+            assertThat(eventLogger.get(0).packageName).isEqualTo(topComponent.packageName)
+
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_providedImageType_callsOnlyDefaultDisplayController() =
         testScope.runTest {
             val internalDisplay = display(TYPE_INTERNAL, id = 0)
@@ -139,6 +170,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_onlyVirtualDisplays_noInteractionsWithControllers() =
         testScope.runTest {
             setDisplays(display(TYPE_VIRTUAL, id = 0), display(TYPE_VIRTUAL, id = 1))
@@ -150,6 +182,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_allowedTypes_allCaptured() =
         testScope.runTest {
             whenever(controllerFactory.create(any(), any())).thenReturn(controller0)
@@ -168,6 +201,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_reportsOnFinishedOnlyWhenBothFinished() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -193,6 +227,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_oneFinishesOtherFails_reportFailsOnlyAtTheEnd() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -220,6 +255,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_allDisplaysFail_reportsFail() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -247,6 +283,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun onDestroy_propagatedToControllers() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -259,6 +296,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun removeWindows_propagatedToControllers() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -273,6 +311,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun onCloseSystemDialogsReceived_propagatedToControllers() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -287,6 +326,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun onCloseSystemDialogsReceived_someControllerHavePendingTransitions() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -303,6 +343,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_controllerCalledWithRequestProcessorReturnValue() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0))
@@ -324,6 +365,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_errorFromProcessor_logsScreenshotRequested() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -341,6 +383,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_errorFromProcessor_logsUiError() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -358,6 +401,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_errorFromProcessorOnDefaultDisplay_showsErrorNotification() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -384,6 +428,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_errorFromScreenshotController_reportsRequested() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -404,6 +449,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_errorFromScreenshotController_reportsError() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -424,6 +470,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_SHELF_UI2)
     fun executeScreenshots_errorFromScreenshotController_showsErrorNotification() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))

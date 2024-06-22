@@ -459,9 +459,16 @@ data class UserActionResult(
 
     /** The key of the transition that should be used. */
     val transitionKey: TransitionKey? = null,
+
+    /**
+     * If `true`, the swipe will be committed and we will settle to [toScene] if only if the user
+     * swiped at least the swipe distance, i.e. the transition progress was already equal to or
+     * bigger than 100% when the user released their finger. `
+     */
+    val requiresFullDistanceSwipe: Boolean = false,
 )
 
-interface UserActionDistance {
+fun interface UserActionDistance {
     /**
      * Return the **absolute** distance of the user action given the size of the scene we are
      * animating from and the [orientation].

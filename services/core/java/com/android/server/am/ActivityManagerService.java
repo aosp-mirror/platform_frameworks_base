@@ -5550,9 +5550,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i=0; i<intents.length; i++) {
                 Intent intent = intents[i];
                 if (intent != null) {
-                    if (intent.hasFileDescriptors()) {
-                        throw new IllegalArgumentException("File descriptors passed in Intent");
-                    }
+                    intent.prepareToEnterSystemServer();
                     if (type == ActivityManager.INTENT_SENDER_BROADCAST &&
                             (intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
                         throw new IllegalArgumentException(
@@ -5585,7 +5583,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                     intents[i] = new Intent(intent);
-                    intents[i].removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
                 }
             }
             if (resolvedTypes != null && resolvedTypes.length != intents.length) {
@@ -10238,19 +10235,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         addStartInfoTimestampInternal(key, timestampNs, userId, callingUid);
     }
 
-    @Override
-    public void reportStartInfoViewTimestamps(long renderThreadDrawStartTimeNs,
-            long framePresentedTimeNs) {
-        int callingUid = Binder.getCallingUid();
-        int userId = UserHandle.getUserId(callingUid);
-        addStartInfoTimestampInternal(
-                ApplicationStartInfo.START_TIMESTAMP_INITIAL_RENDERTHREAD_FRAME,
-                renderThreadDrawStartTimeNs, userId, callingUid);
-        addStartInfoTimestampInternal(
-                ApplicationStartInfo.START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE,
-                framePresentedTimeNs, userId, callingUid);
-    }
-
     private void addStartInfoTimestampInternal(int key, long timestampNs, int userId, int uid) {
         mProcessList.getAppStartInfoTracker().addTimestampToStart(
                 Settings.getPackageNameForUid(mContext, uid),
@@ -13961,12 +13945,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceNotIsolatedCaller("startService");
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
         if (service != null) {
-            // Refuse possible leaked file descriptors
-            if (service.hasFileDescriptors()) {
-                throw new IllegalArgumentException("File descriptors passed in Intent");
-            }
-            // Remove existing mismatch flag so it can be properly updated later
-            service.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
+            service.prepareToEnterSystemServer();
         }
 
         if (callingPackage == null) {
@@ -14203,12 +14182,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
 
         if (service != null) {
-            // Refuse possible leaked file descriptors
-            if (service.hasFileDescriptors()) {
-                throw new IllegalArgumentException("File descriptors passed in Intent");
-            }
-            // Remove existing mismatch flag so it can be properly updated later
-            service.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
+            service.prepareToEnterSystemServer();
         }
 
         if (callingPackage == null) {
@@ -16242,12 +16216,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final Intent verifyBroadcastLocked(Intent intent) {
         if (intent != null) {
-            // Refuse possible leaked file descriptors
-            if (intent.hasFileDescriptors()) {
-                throw new IllegalArgumentException("File descriptors passed in Intent");
-            }
-            // Remove existing mismatch flag so it can be properly updated later
-            intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
+            intent.prepareToEnterSystemServer();
         }
 
         int flags = intent.getFlags();
@@ -16307,6 +16276,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             String[] excludedPackages, int appOp, Bundle bOptions,
             boolean serialized, boolean sticky, int userId) {
         enforceNotIsolatedCaller("broadcastIntent");
+
         synchronized(this) {
             intent = verifyBroadcastLocked(intent);
 
@@ -16320,6 +16290,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Permission regimes around sender-supplied broadcast options.
             enforceBroadcastOptionPermissionsInternal(bOptions, callingUid);
 
+            final ComponentName cn = intent.getComponent();
+
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "broadcastIntent:" + (cn != null ? cn.toString() : intent.getAction()));
+
             final long origId = Binder.clearCallingIdentity();
             try {
                 return broadcastIntentLocked(callerApp,
@@ -16330,6 +16306,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         callingPid, userId, BackgroundStartPrivileges.NONE, null, null);
             } finally {
                 Binder.restoreCallingIdentity(origId);
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
     }

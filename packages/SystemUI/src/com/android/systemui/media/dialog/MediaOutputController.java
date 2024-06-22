@@ -85,6 +85,7 @@ import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.media.dialog.MediaItem.MediaItemType;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
@@ -110,6 +111,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -661,28 +663,38 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                             /* connectedMediaDevice */ null,
                             devices,
                             needToHandleMutingExpectedDevice);
+                } else {
+                    // selected device exist
+                    return categorizeMediaItemsLocked(
+                            connectedMediaDevice,
+                            devices,
+                            /* needToHandleMutingExpectedDevice */ false);
                 }
-                // selected device exist
-                return categorizeMediaItemsLocked(
-                        connectedMediaDevice,
-                        devices,
-                        /* needToHandleMutingExpectedDevice */ false);
             }
             // To keep the same list order
             final List<MediaDevice> targetMediaDevices = new ArrayList<>();
             final Map<Integer, MediaItem> dividerItems = new HashMap<>();
+
+            Map<String, MediaDevice> idToMediaDeviceMap =
+                    devices.stream()
+                            .collect(Collectors.toMap(MediaDevice::getId, Function.identity()));
+
             for (MediaItem originalMediaItem : oldMediaItems) {
-                for (MediaDevice newDevice : devices) {
-                    if (originalMediaItem.getMediaDevice().isPresent()
-                            && TextUtils.equals(originalMediaItem.getMediaDevice().get().getId(),
-                            newDevice.getId())) {
-                        targetMediaDevices.add(newDevice);
-                        break;
+                switch (originalMediaItem.getMediaItemType()) {
+                    case MediaItemType.TYPE_GROUP_DIVIDER -> {
+                        dividerItems.put(
+                                oldMediaItems.indexOf(originalMediaItem), originalMediaItem);
                     }
-                }
-                if (originalMediaItem.getMediaItemType()
-                        == MediaItem.MediaItemType.TYPE_GROUP_DIVIDER) {
-                    dividerItems.put(oldMediaItems.indexOf(originalMediaItem), originalMediaItem);
+                    case MediaItemType.TYPE_DEVICE -> {
+                        String originalMediaItemId =
+                                originalMediaItem.getMediaDevice().orElseThrow().getId();
+                        if (idToMediaDeviceMap.containsKey(originalMediaItemId)) {
+                            targetMediaDevices.add(idToMediaDeviceMap.get(originalMediaItemId));
+                        }
+                    }
+                    case MediaItemType.TYPE_PAIR_NEW_DEVICE -> {
+                        // Do nothing.
+                    }
                 }
             }
             if (targetMediaDevices.size() != devices.size()) {
@@ -723,12 +735,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 finalMediaItems.add(0, MediaItem.createDeviceMediaItem(device));
             } else {
                 if (device.isSuggestedDevice() && !suggestedDeviceAdded) {
-                    attachGroupDivider(finalMediaItems, mContext.getString(
-                            R.string.media_output_group_title_suggested_device));
+                    addSuggestedDeviceGroupDivider(finalMediaItems);
                     suggestedDeviceAdded = true;
                 } else if (!device.isSuggestedDevice() && !displayGroupAdded) {
-                    attachGroupDivider(finalMediaItems, mContext.getString(
-                            R.string.media_output_group_title_speakers_and_displays));
+                    addSpeakersAndDisplaysGroupDivider(finalMediaItems);
                     displayGroupAdded = true;
                 }
                 finalMediaItems.add(MediaItem.createDeviceMediaItem(device));
@@ -738,8 +748,17 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return finalMediaItems;
     }
 
-    private void attachGroupDivider(List<MediaItem> mediaItems, String title) {
-        mediaItems.add(MediaItem.createGroupDividerMediaItem(title));
+    private void addSuggestedDeviceGroupDivider(List<MediaItem> mediaItems) {
+        mediaItems.add(
+                MediaItem.createGroupDividerMediaItem(
+                        mContext.getString(R.string.media_output_group_title_suggested_device)));
+    }
+
+    private void addSpeakersAndDisplaysGroupDivider(List<MediaItem> mediaItems) {
+        mediaItems.add(
+                MediaItem.createGroupDividerMediaItem(
+                        mContext.getString(
+                                R.string.media_output_group_title_speakers_and_displays)));
     }
 
     private void attachConnectNewDeviceItemIfNeeded(List<MediaItem> mediaItems) {

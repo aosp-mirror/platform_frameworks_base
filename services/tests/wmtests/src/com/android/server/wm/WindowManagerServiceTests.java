@@ -78,7 +78,6 @@ import android.app.IApplicationThread;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.Process;
@@ -94,7 +93,6 @@ import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.ContentRecordingSession;
 import android.view.IWindow;
-import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -265,69 +263,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRelayoutExitingWindow_legacy() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_WINDOW_SESSION_RELAYOUT_INFO);
-
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
-        final WindowSurfaceController surfaceController = mock(WindowSurfaceController.class);
-        win.mWinAnimator.mSurfaceController = surfaceController;
-        win.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
-        doReturn(true).when(surfaceController).hasSurface();
-        spyOn(win.mTransitionController);
-        doReturn(true).when(win.mTransitionController).isShellTransitionsEnabled();
-        doReturn(true).when(win.mTransitionController).inTransition(
-                eq(win.mActivityRecord));
-        win.mViewVisibility = View.VISIBLE;
-        win.mHasSurface = true;
-        win.mActivityRecord.mAppStopped = true;
-        mWm.mWindowMap.put(win.mClient.asBinder(), win);
-        spyOn(mWm.mWindowPlacerLocked);
-        // Skip unnecessary operations of relayout.
-        doNothing().when(mWm.mWindowPlacerLocked).performSurfacePlacement(anyBoolean());
-        final int w = 100;
-        final int h = 200;
-        final ClientWindowFrames outFrames = new ClientWindowFrames();
-        final MergedConfiguration outConfig = new MergedConfiguration();
-        final SurfaceControl outSurfaceControl = new SurfaceControl();
-        final InsetsState outInsetsState = new InsetsState();
-        final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
-        final Bundle outBundle = new Bundle();
-        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
-                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
-        // The window is in transition, so its destruction is deferred.
-        assertTrue(win.mAnimatingExit);
-        assertFalse(win.mDestroying);
-        assertTrue(win.mTransitionController.mAnimatingExitWindows.contains(win));
-
-        win.mAnimatingExit = false;
-        win.mViewVisibility = View.VISIBLE;
-        win.mActivityRecord.setVisibleRequested(false);
-        win.mActivityRecord.setVisible(false);
-        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
-                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
-        // Because the window is already invisible, it doesn't need to apply exiting animation
-        // and WMS#tryStartExitingAnimation() will destroy the surface directly.
-        assertFalse(win.mAnimatingExit);
-        assertFalse(win.mHasSurface);
-        assertNull(win.mWinAnimator.mSurfaceController);
-
-        // Invisible requested activity should not get the last config even if its view is visible.
-        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
-                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
-        assertEquals(0, outConfig.getMergedConfiguration().densityDpi);
-        // Non activity window can still get the last config.
-        win.mActivityRecord = null;
-        win.fillClientWindowFramesAndConfiguration(outFrames, outConfig,
-                null /* outActivityWindowInfo*/, false /* useLatestConfig */,
-                true /* relayoutVisible */);
-        assertEquals(win.getConfiguration().densityDpi,
-                outConfig.getMergedConfiguration().densityDpi);
-    }
-
-    @Test
     public void testRelayoutExitingWindow() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_WINDOW_SESSION_RELAYOUT_INFO);
-
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
         final WindowSurfaceController surfaceController = mock(WindowSurfaceController.class);
         win.mWinAnimator.mSurfaceController = surfaceController;
@@ -483,15 +419,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
             win.mRelayoutSeq = 1;
             seq = 2;
         }
-        if (Flags.windowSessionRelayoutInfo()) {
-            mWm.relayoutWindow(win.mSession, win.mClient, newParams, 100, 200, View.VISIBLE, 0, seq,
-                    0, new WindowRelayoutResult());
-        } else {
-            mWm.relayoutWindow(win.mSession, win.mClient, newParams, 100, 200, View.VISIBLE, 0, seq,
-                    0, new ClientWindowFrames(), new MergedConfiguration(),
-                    new SurfaceControl(), new InsetsState(), new InsetsSourceControl.Array(),
-                    new Bundle());
-        }
+        mWm.relayoutWindow(win.mSession, win.mClient, newParams, 100, 200, View.VISIBLE, 0, seq,
+                0, new WindowRelayoutResult());
 
         ArgumentCaptor<Integer> changedFlags = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> changedPrivateFlags = ArgumentCaptor.forClass(Integer.class);
@@ -1364,70 +1293,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRelayout_appWindowSendActivityWindowInfo_legacy() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
-        mSetFlagsRule.disableFlags(Flags.FLAG_WINDOW_SESSION_RELAYOUT_INFO);
-
-        // Skip unnecessary operations of relayout.
-        spyOn(mWm.mWindowPlacerLocked);
-        doNothing().when(mWm.mWindowPlacerLocked).performSurfacePlacement(anyBoolean());
-
-        final Task task = createTask(mDisplayContent);
-        final WindowState win = createAppWindow(task, ACTIVITY_TYPE_STANDARD, "appWindow");
-        mWm.mWindowMap.put(win.mClient.asBinder(), win);
-
-        final int w = 100;
-        final int h = 200;
-        final ClientWindowFrames outFrames = new ClientWindowFrames();
-        final MergedConfiguration outConfig = new MergedConfiguration();
-        final SurfaceControl outSurfaceControl = new SurfaceControl();
-        final InsetsState outInsetsState = new InsetsState();
-        final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
-        final Bundle outBundle = new Bundle();
-
-        final ActivityRecord activity = win.mActivityRecord;
-        final ActivityWindowInfo expectedInfo = new ActivityWindowInfo();
-        expectedInfo.set(true, new Rect(0, 0, 1000, 2000), new Rect(0, 0, 500, 2000));
-        doReturn(expectedInfo).when(activity).getActivityWindowInfo();
-        activity.setVisibleRequested(false);
-        activity.setVisible(false);
-
-        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
-                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
-
-        // No latest reported value, so return empty when activity is invisible
-        final ActivityWindowInfo activityWindowInfo = outBundle.getParcelable(
-                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
-        assertEquals(new ActivityWindowInfo(), activityWindowInfo);
-
-        activity.setVisibleRequested(true);
-        activity.setVisible(true);
-
-        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
-                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
-
-        // Report the latest when activity is visible.
-        final ActivityWindowInfo activityWindowInfo2 = outBundle.getParcelable(
-                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
-        assertEquals(expectedInfo, activityWindowInfo2);
-
-        expectedInfo.set(false, new Rect(0, 0, 1000, 2000), new Rect(0, 0, 1000, 2000));
-        activity.setVisibleRequested(false);
-        activity.setVisible(false);
-
-        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
-                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
-
-        // Report the last reported value when activity is invisible.
-        final ActivityWindowInfo activityWindowInfo3 = outBundle.getParcelable(
-                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
-        assertEquals(activityWindowInfo2, activityWindowInfo3);
-    }
-
-    @Test
     public void testRelayout_appWindowSendActivityWindowInfo() {
         mSetFlagsRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
-        mSetFlagsRule.enableFlags(Flags.FLAG_WINDOW_SESSION_RELAYOUT_INFO);
 
         // Skip unnecessary operations of relayout.
         spyOn(mWm.mWindowPlacerLocked);

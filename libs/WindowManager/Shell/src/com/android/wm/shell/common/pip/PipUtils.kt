@@ -34,6 +34,7 @@ import com.android.internal.protolog.common.ProtoLog
 import com.android.wm.shell.Flags
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /** A class that includes convenience methods.  */
 object PipUtils {
@@ -149,16 +150,16 @@ object PipUtils {
         val appBoundsAspRatio = appBounds.width().toFloat() / appBounds.height()
         val width: Int
         val height: Int
-        var left = 0
-        var top = 0
+        var left = appBounds.left
+        var top = appBounds.top
         if (appBoundsAspRatio < aspectRatio) {
             width = appBounds.width()
-            height = Math.round(width / aspectRatio)
-            top = (appBounds.height() - height) / 2
+            height = (width / aspectRatio).roundToInt()
+            top = appBounds.top + (appBounds.height() - height) / 2
         } else {
             height = appBounds.height()
-            width = Math.round(height * aspectRatio)
-            left = (appBounds.width() - width) / 2
+            width = (height * aspectRatio).roundToInt()
+            left = appBounds.left + (appBounds.width() - width) / 2
         }
         return Rect(left, top, left + width, top + height)
     }

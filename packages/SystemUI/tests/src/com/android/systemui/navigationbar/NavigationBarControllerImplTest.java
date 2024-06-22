@@ -21,6 +21,7 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.wm.shell.Flags.enableTaskbarNavbarUnification;
+import static com.android.wm.shell.Flags.enableTaskbarOnPhones;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -142,10 +143,11 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testCreateNavigationBarsIncludeDefaultTrue() {
-        assumeFalse(enableTaskbarNavbarUnification());
+        assumeFalse(enableTaskbarNavbarUnification() && enableTaskbarOnPhones());
 
         // Large screens may be using taskbar and the logic is different
         mNavigationBarController.mIsLargeScreen = false;
+        mNavigationBarController.mIsPhone = true;
         doNothing().when(mNavigationBarController).createNavigationBar(any(), any(), any());
 
         mNavigationBarController.createNavigationBars(true, null);
@@ -291,6 +293,17 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testShouldRenderTaskbar_taskbarNotRenderedOnPhone() {
+        assumeFalse(enableTaskbarOnPhones());
+
+        mNavigationBarController.mIsLargeScreen = false;
+        mNavigationBarController.mIsPhone = true;
+        assertFalse(mNavigationBarController.supportsTaskbar());
+    }
+
+    @Test
+    public void testShouldRenderTaskbar_taskbarRenderedOnPhone() {
+        assumeTrue(enableTaskbarNavbarUnification() && enableTaskbarOnPhones());
+
         mNavigationBarController.mIsLargeScreen = false;
         mNavigationBarController.mIsPhone = true;
         assertFalse(mNavigationBarController.supportsTaskbar());

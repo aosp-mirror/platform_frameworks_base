@@ -90,7 +90,11 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             )
             reset(transitionRepository)
 
+            kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(null)
             kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+            assertThat(transitionRepository).noTransitionsStarted()
+
             kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(true)
             runCurrent()
             kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(null)

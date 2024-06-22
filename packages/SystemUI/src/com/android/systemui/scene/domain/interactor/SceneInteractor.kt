@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -102,7 +103,14 @@ constructor(
      * 2. When transitioning, which scenes are being transitioned between.
      * 3. When transitioning, what the progress of the transition is.
      */
-    val transitionState: StateFlow<ObservableTransitionState> = repository.transitionState
+    val transitionState: StateFlow<ObservableTransitionState> =
+        repository.transitionState
+            .onEach { logger.logSceneTransition(it) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = repository.transitionState.value,
+            )
 
     /**
      * The key of the scene that the UI is currently transitioning to or `null` if there is no

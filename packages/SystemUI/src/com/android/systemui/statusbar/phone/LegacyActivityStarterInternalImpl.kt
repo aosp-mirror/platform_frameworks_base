@@ -247,9 +247,10 @@ constructor(
         val actuallyShowOverLockscreen =
             showOverLockscreen &&
                 intent.isActivity &&
-                    (skipLockscreenChecks || activityIntentHelper.wouldPendingShowOverLockscreen(
-                    intent,
-                    lockScreenUserManager.currentUserId
+                (skipLockscreenChecks ||
+                    activityIntentHelper.wouldPendingShowOverLockscreen(
+                        intent,
+                        lockScreenUserManager.currentUserId
                     ))
 
         val animate =
@@ -470,12 +471,16 @@ constructor(
                         shadeControllerLazy.get().collapseShadeForActivityStart()
                     }
                     if (communalHub()) {
-                        communalSceneInteractor.snapToSceneForActivityStart(CommunalScenes.Blank)
+                        communalSceneInteractor.changeSceneForActivityStartOnDismissKeyguard()
                     }
                     return deferred
                 }
 
                 override fun willRunAnimationOnKeyguard(): Boolean {
+                    if (communalHub() && communalSceneInteractor.isIdleOnCommunal.value) {
+                        // Override to false when launching activity over the hub that requires auth
+                        return false
+                    }
                     return willAnimateOnKeyguard
                 }
             }
@@ -557,7 +562,7 @@ constructor(
                 override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                     super.onTransitionAnimationStart(isExpandingFullyAbove)
                     if (communalHub()) {
-                        communalSceneInteractor.snapToSceneForActivityStart(
+                        communalSceneInteractor.snapToScene(
                             CommunalScenes.Blank,
                             ActivityTransitionAnimator.TIMINGS.totalDuration
                         )

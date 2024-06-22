@@ -24,6 +24,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.call.domain.interactor.CallChipInteractor
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
@@ -65,6 +66,7 @@ constructor(
                                     com.android.internal.R.drawable.ic_phone,
                                     contentDescription = null,
                                 ),
+                            colors = ColorsModel.Themed,
                             startTimeMs = startTimeInElapsedRealtime,
                         ) {
                             if (state.intent != null) {

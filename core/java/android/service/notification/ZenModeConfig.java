@@ -262,15 +262,12 @@ public class ZenModeConfig implements Parcelable {
     private static final String CONDITION_ATT_SOURCE = "source";
     private static final String CONDITION_ATT_FLAGS = "flags";
 
-    private static final String ZEN_POLICY_TAG = "zen_policy";
-
     private static final String MANUAL_TAG = "manual";
     private static final String AUTOMATIC_TAG = "automatic";
     private static final String AUTOMATIC_DELETED_TAG = "deleted";
 
     private static final String RULE_ATT_ID = "ruleId";
     private static final String RULE_ATT_ENABLED = "enabled";
-    private static final String RULE_ATT_SNOOZING = "snoozing";
     private static final String RULE_ATT_NAME = "name";
     private static final String RULE_ATT_PKG = "pkg";
     private static final String RULE_ATT_COMPONENT = "component";
@@ -286,6 +283,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_ICON = "rule_icon";
     private static final String RULE_ATT_TRIGGER_DESC = "triggerDesc";
     private static final String RULE_ATT_DELETION_INSTANT = "deletionInstant";
+    private static final String RULE_ATT_DISABLED_ORIGIN = "disabledOrigin";
 
     private static final String DEVICE_EFFECT_DISPLAY_GRAYSCALE = "zdeDisplayGrayscale";
     private static final String DEVICE_EFFECT_SUPPRESS_AMBIENT_DISPLAY =
@@ -1170,6 +1168,10 @@ public class ZenModeConfig implements Parcelable {
             if (deletionInstant != null) {
                 rt.deletionInstant = Instant.ofEpochMilli(deletionInstant);
             }
+            if (Flags.modesUi()) {
+                rt.disabledOrigin = safeInt(parser, RULE_ATT_DISABLED_ORIGIN,
+                        UPDATE_ORIGIN_UNKNOWN);
+            }
         }
         return rt;
     }
@@ -1223,6 +1225,9 @@ public class ZenModeConfig implements Parcelable {
             if (rule.deletionInstant != null) {
                 out.attributeLong(null, RULE_ATT_DELETION_INSTANT,
                         rule.deletionInstant.toEpochMilli());
+            }
+            if (Flags.modesUi()) {
+                out.attributeInt(null, RULE_ATT_DISABLED_ORIGIN, rule.disabledOrigin);
             }
         }
     }
@@ -2373,7 +2378,7 @@ public class ZenModeConfig implements Parcelable {
 
         public int userId = UserHandle.USER_NULL;  // USER_NULL = unspecified - use current user
         public String calName;  // CalendarContract.Calendars.DISPLAY_NAME, or null for any
-        public Long calendarId; // Calendars._ID, or null if restored from < Q calendar
+        @Nullable public Long calendarId; // Calendars._ID, or null if restored from < Q calendar
         public int reply;
 
         @Override
@@ -2403,6 +2408,33 @@ public class ZenModeConfig implements Parcelable {
         public static int resolveUserId(int userId) {
             return userId == UserHandle.USER_NULL ? ActivityManager.getCurrentUser() : userId;
         }
+    }
+
+    // ==== Built-in system condition: custom manual ====
+
+    public static final String CUSTOM_MANUAL_PATH = "custom_manual";
+    private static final Uri CUSTOM_MANUAL_CONDITION_ID =
+            new Uri.Builder().scheme(Condition.SCHEME)
+                    .authority(SYSTEM_AUTHORITY)
+                    .appendPath(CUSTOM_MANUAL_PATH)
+                    .build();
+
+    /** Returns the condition id used for manual (not automatically triggered) custom rules. */
+    public static Uri toCustomManualConditionId() {
+        return CUSTOM_MANUAL_CONDITION_ID;
+    }
+
+    /**
+     * Returns whether the supplied {@link Uri} corresponds to the condition id used for manual (not
+     * automatically triggered) custom rules.
+     */
+    public static boolean isValidCustomManualConditionId(Uri conditionId) {
+        return CUSTOM_MANUAL_CONDITION_ID.equals(conditionId);
+    }
+
+    /** Returns the {@link ComponentName} of the custom manual condition provider. */
+    public static ComponentName getCustomManualConditionProvider() {
+        return new ComponentName(SYSTEM_AUTHORITY, "CustomManualConditionProvider");
     }
 
     // ==== End built-in system conditions ====
@@ -2487,6 +2519,8 @@ public class ZenModeConfig implements Parcelable {
         @ZenPolicy.ModifiableField public int zenPolicyUserModifiedFields;
         @ZenDeviceEffects.ModifiableField public int zenDeviceEffectsUserModifiedFields;
         @Nullable public Instant deletionInstant; // Only set on deleted rules.
+        @FlaggedApi(Flags.FLAG_MODES_UI)
+        @ConfigChangeOrigin public int disabledOrigin = UPDATE_ORIGIN_UNKNOWN;
 
         public ZenRule() { }
 
@@ -2524,6 +2558,9 @@ public class ZenModeConfig implements Parcelable {
                 zenDeviceEffectsUserModifiedFields = source.readInt();
                 if (source.readInt() == 1) {
                     deletionInstant = Instant.ofEpochMilli(source.readLong());
+                }
+                if (Flags.modesUi()) {
+                    disabledOrigin = source.readInt();
                 }
             }
         }
@@ -2599,6 +2636,9 @@ public class ZenModeConfig implements Parcelable {
                 } else {
                     dest.writeInt(0);
                 }
+                if (Flags.modesUi()) {
+                    dest.writeInt(disabledOrigin);
+                }
             }
         }
 
@@ -2643,6 +2683,9 @@ public class ZenModeConfig implements Parcelable {
                 }
                 if (deletionInstant != null) {
                     sb.append(",deletionInstant=").append(deletionInstant);
+                }
+                if (Flags.modesUi()) {
+                    sb.append(",disabledOrigin=").append(disabledOrigin);
                 }
             }
 
@@ -2697,7 +2740,7 @@ public class ZenModeConfig implements Parcelable {
                     && other.modified == modified;
 
             if (Flags.modesApi()) {
-                return finalEquals
+                finalEquals = finalEquals
                         && Objects.equals(other.zenDeviceEffects, zenDeviceEffects)
                         && other.allowManualInvocation == allowManualInvocation
                         && Objects.equals(other.iconResName, iconResName)
@@ -2708,6 +2751,11 @@ public class ZenModeConfig implements Parcelable {
                         && other.zenDeviceEffectsUserModifiedFields
                             == zenDeviceEffectsUserModifiedFields
                         && Objects.equals(other.deletionInstant, deletionInstant);
+
+                if (Flags.modesUi()) {
+                    finalEquals = finalEquals
+                            && other.disabledOrigin == disabledOrigin;
+                }
             }
 
             return finalEquals;
@@ -2716,11 +2764,21 @@ public class ZenModeConfig implements Parcelable {
         @Override
         public int hashCode() {
             if (Flags.modesApi()) {
-                return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
-                        component, configurationActivity, pkg, id, enabler, zenPolicy,
-                        zenDeviceEffects, modified, allowManualInvocation, iconResName,
-                        triggerDescription, type, userModifiedFields, zenPolicyUserModifiedFields,
-                        zenDeviceEffectsUserModifiedFields, deletionInstant);
+                if (Flags.modesUi()) {
+                    return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
+                            component, configurationActivity, pkg, id, enabler, zenPolicy,
+                            zenDeviceEffects, modified, allowManualInvocation, iconResName,
+                            triggerDescription, type, userModifiedFields,
+                            zenPolicyUserModifiedFields,
+                            zenDeviceEffectsUserModifiedFields, deletionInstant, disabledOrigin);
+                } else {
+                    return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
+                            component, configurationActivity, pkg, id, enabler, zenPolicy,
+                            zenDeviceEffects, modified, allowManualInvocation, iconResName,
+                            triggerDescription, type, userModifiedFields,
+                            zenPolicyUserModifiedFields,
+                            zenDeviceEffectsUserModifiedFields, deletionInstant);
+                }
             }
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
                     component, configurationActivity, pkg, id, enabler, zenPolicy, modified);

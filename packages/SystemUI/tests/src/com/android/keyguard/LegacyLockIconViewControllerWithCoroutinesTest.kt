@@ -16,8 +16,8 @@
 
 package com.android.keyguard
 
-import android.testing.AndroidTestingRunner
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.LockIconView.ICON_LOCK
 import com.android.systemui.doze.util.getBurnInOffset
@@ -33,7 +33,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class LegacyLockIconViewControllerWithCoroutinesTest : LegacyLockIconViewControllerBaseTest() {
 
