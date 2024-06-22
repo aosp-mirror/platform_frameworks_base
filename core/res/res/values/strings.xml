@@ -788,11 +788,7 @@
     <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=24] -->
     <string name="global_action_lockdown">Lockdown</string>
 
-    <!-- Text to use when the number in a notification info is too large
-         (greater than status_bar_notification_info_maxnum, defined in
-         values/config.xml) and must be truncated. May need to be localized
-         for most appropriate textual indicator of "more than X".
-         [CHAR LIMIT=4] -->
+    <!-- @deprecated No longer used. -->
     <string name="status_bar_notification_info_overflow">999+</string>
 
     <!-- The divider symbol between different parts of the notification header. not translatable [CHAR LIMIT=1] -->
@@ -4844,19 +4840,19 @@
     <!-- Text spoken when accessibility shortcut warning dialog is shown. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_spoken_feedback">Release the volume keys. To turn on <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g>, press and hold both volume keys again for 3 seconds.</string>
 
-    <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
-    <string name="accessibility_button_prompt_text">Choose a feature to use when you tap the accessibility button:</string>
+    <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar or in gesture navigation. [CHAR LIMIT=none]-->
+    <string name="accessibility_button_prompt_text">Choose a feature</string>
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_prompt_text">Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):</string>
+    <string name="accessibility_gesture_prompt_text">Choose a feature</string>
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_prompt_text">Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):</string>
+    <string name="accessibility_gesture_3finger_prompt_text">Choose a feature</string>
 
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
-    <string name="accessibility_button_instructional_text">To switch between features, touch &amp; hold the accessibility button.</string>
+    <string name="accessibility_button_instructional_text">The feature will open next time you tap the accessibility button.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_instructional_text">To switch between features, swipe up with two fingers and hold.</string>
+    <string name="accessibility_gesture_instructional_text">The feature will open next time you use this shortcut. Swipe up with two fingers from the bottom of your screen and release quickly.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_instructional_text">To switch between features, swipe up with three fingers and hold.</string>
+    <string name="accessibility_gesture_3finger_instructional_text">The feature will open next time you use this shortcut. Swipe up with three fingers from the bottom of your screen and release quickly.</string>
 
     <!-- Text used to describe system navigation features, shown within a UI allowing a user to assign system magnification features to the Accessibility button in the navigation bar. -->
     <string name="accessibility_magnification_chooser_text">Magnification</string>

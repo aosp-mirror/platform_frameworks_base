@@ -495,6 +495,10 @@ private fun prepareInterruption(
     transition: TransitionState.Transition,
     previousTransition: TransitionState.Transition,
 ) {
+    if (transition.replacedTransition == previousTransition) {
+        return
+    }
+
     val sceneStates = element.sceneStates
     fun updatedSceneState(key: SceneKey): Element.SceneState? {
         return sceneStates[key]?.also { it.selfUpdateValuesBeforeInterruption() }

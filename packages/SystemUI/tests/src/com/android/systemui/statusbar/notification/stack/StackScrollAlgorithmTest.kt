@@ -8,9 +8,12 @@ import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation.getContentAlpha
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.res.R
@@ -66,7 +69,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         EmptyShadeView(context, /* attrs= */ null).apply {
             layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
         }
-    private val footerView = FooterView(context, /*attrs=*/ null)
+    private val footerView = FooterView(context, /* attrs= */ null)
     @OptIn(ExperimentalCoroutinesApi::class)
     private val ambientState =
         AmbientState(
@@ -126,6 +129,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer // TODO(b/332574413) cover hun bounds integration with tests
     fun resetViewStates_defaultHunWhenShadeIsOpening_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
@@ -168,6 +172,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer // TODO(b/332574413) cover hun bounds integration with tests
     @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_defaultHun_showingQS_newHeadsUpAnim_hunTranslatedToMax() {
         // Given: the shade is open and scrolled to the bottom to show the QuickSettings
@@ -184,6 +189,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer // TODO(b/332574413) cover hun bounds integration with tests
     @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_hunAnimatingAway_showingQS_newHeadsUpAnim_hunTranslatedToBottomOfScreen() {
         // Given: the shade is open and scrolled to the bottom to show the QuickSettings
@@ -272,6 +278,27 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableSceneContainer
+    fun resetViewStates_emptyShadeView_isCenteredVertically_withSceneContainer() {
+        stackScrollAlgorithm.initView(context)
+        hostView.removeAllViews()
+        hostView.addView(emptyShadeView)
+        ambientState.layoutMaxHeight = maxPanelHeight.toInt()
+
+        val stackTop = 200f
+        val stackBottom = 2000f
+        val stackHeight = stackBottom - stackTop
+        ambientState.stackTop = stackTop
+        ambientState.stackCutoff = stackBottom
+
+        stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
+
+        val centeredY = stackTop + stackHeight / 2f - emptyShadeView.height / 2f
+        assertThat(emptyShadeView.viewState.yTranslation).isEqualTo(centeredY)
+    }
+
+    @Test
+    @DisableSceneContainer
     fun resetViewStates_emptyShadeView_isCenteredVertically() {
         stackScrollAlgorithm.initView(context)
         hostView.removeAllViews()
@@ -523,6 +550,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
     }
 
+    @DisableFlags(Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR)
     @Test
     fun resetViewStates_clearAllInProgress_allRowsRemoved_emptyShade_footerHidden() {
         ambientState.isClearAllInProgress = true
@@ -1157,6 +1185,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         assertFalse(stackScrollAlgorithm.shouldHunAppearFromBottom(ambientState, viewState))
     }
+
     // endregion
 
     private fun createHunViewMock(

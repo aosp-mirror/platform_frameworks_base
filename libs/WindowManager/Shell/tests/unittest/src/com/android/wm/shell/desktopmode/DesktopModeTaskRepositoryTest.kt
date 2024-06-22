@@ -119,86 +119,91 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
-    fun isOnlyActiveNonClosingTask_noActiveNonClosingTasks() {
-        // Not an active task
-        assertThat(repo.isOnlyActiveNonClosingTask(1)).isFalse()
+    fun isOnlyVisibleNonClosingTask_noTasks() {
+        // No visible tasks
+        assertThat(repo.isOnlyVisibleNonClosingTask(1)).isFalse()
         assertThat(repo.isClosingTask(1)).isFalse()
     }
 
     @Test
-    fun isOnlyActiveNonClosingTask_singleActiveNonClosingTask() {
-        repo.addActiveTask(DEFAULT_DISPLAY, 1)
-        // The only active task
-        assertThat(repo.isActiveTask(1)).isTrue()
+    fun isOnlyVisibleNonClosingTask_singleVisibleNonClosingTask() {
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
+
+        // The only visible task
+        assertThat(repo.isVisibleTask(1)).isTrue()
         assertThat(repo.isClosingTask(1)).isFalse()
-        assertThat(repo.isOnlyActiveNonClosingTask(1)).isTrue()
-        // Not an active task
-        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(1)).isTrue()
+        // Not a visible task
+        assertThat(repo.isVisibleTask(99)).isFalse()
         assertThat(repo.isClosingTask(99)).isFalse()
-        assertThat(repo.isOnlyActiveNonClosingTask(99)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(99)).isFalse()
     }
 
     @Test
-    fun isOnlyActiveNonClosingTask_singleActiveClosingTask() {
-        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+    fun isOnlyVisibleNonClosingTask_singleVisibleClosingTask() {
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
         repo.addClosingTask(DEFAULT_DISPLAY, 1)
-        // The active task that's closing
-        assertThat(repo.isActiveTask(1)).isTrue()
+
+        // A visible task that's closing
+        assertThat(repo.isVisibleTask(1)).isTrue()
         assertThat(repo.isClosingTask(1)).isTrue()
-        assertThat(repo.isOnlyActiveNonClosingTask(1)).isFalse()
-        // Not an active task
-        assertThat(repo.isActiveTask(99)).isFalse()
-        assertThat(repo.isOnlyActiveNonClosingTask(99)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(1)).isFalse()
+        // Not a visible task
+        assertThat(repo.isVisibleTask(99)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(99)).isFalse()
     }
 
     @Test
-    fun isOnlyActiveNonClosingTask_singleActiveMinimizedTask() {
-        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+    fun isOnlyVisibleNonClosingTask_singleVisibleMinimizedTask() {
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
         repo.minimizeTask(DEFAULT_DISPLAY, 1)
-        // The active task that's closing
-        assertThat(repo.isActiveTask(1)).isTrue()
+
+        // The visible task that's closing
+        assertThat(repo.isVisibleTask(1)).isTrue()
         assertThat(repo.isMinimizedTask(1)).isTrue()
-        assertThat(repo.isOnlyActiveNonClosingTask(1)).isFalse()
-        // Not an active task
-        assertThat(repo.isActiveTask(99)).isFalse()
-        assertThat(repo.isOnlyActiveNonClosingTask(99)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(1)).isFalse()
+        // Not a visible task
+        assertThat(repo.isVisibleTask(99)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(99)).isFalse()
     }
 
     @Test
-    fun isOnlyActiveNonClosingTask_multipleActiveNonClosingTasks() {
-        repo.addActiveTask(DEFAULT_DISPLAY, 1)
-        repo.addActiveTask(DEFAULT_DISPLAY, 2)
+    fun isOnlyVisibleNonClosingTask_multipleVisibleNonClosingTasks() {
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = true)
+
         // Not the only task
-        assertThat(repo.isActiveTask(1)).isTrue()
+        assertThat(repo.isVisibleTask(1)).isTrue()
         assertThat(repo.isClosingTask(1)).isFalse()
-        assertThat(repo.isOnlyActiveNonClosingTask(1)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(1)).isFalse()
         // Not the only task
-        assertThat(repo.isActiveTask(2)).isTrue()
+        assertThat(repo.isVisibleTask(2)).isTrue()
         assertThat(repo.isClosingTask(2)).isFalse()
-        assertThat(repo.isOnlyActiveNonClosingTask(2)).isFalse()
-        // Not an active task
-        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(2)).isFalse()
+        // Not a visible task
+        assertThat(repo.isVisibleTask(99)).isFalse()
         assertThat(repo.isClosingTask(99)).isFalse()
-        assertThat(repo.isOnlyActiveNonClosingTask(99)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(99)).isFalse()
     }
 
     @Test
-    fun isOnlyActiveNonClosingTask_multipleDisplays() {
-        repo.addActiveTask(DEFAULT_DISPLAY, 1)
-        repo.addActiveTask(DEFAULT_DISPLAY, 2)
-        repo.addActiveTask(SECOND_DISPLAY, 3)
+    fun isOnlyVisibleNonClosingTask_multipleDisplays() {
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = true)
+        repo.updateVisibleFreeformTasks(SECOND_DISPLAY, taskId = 3, visible = true)
+
         // Not the only task on DEFAULT_DISPLAY
-        assertThat(repo.isActiveTask(1)).isTrue()
-        assertThat(repo.isOnlyActiveNonClosingTask(1)).isFalse()
+        assertThat(repo.isVisibleTask(1)).isTrue()
+        assertThat(repo.isOnlyVisibleNonClosingTask(1)).isFalse()
         // Not the only task on DEFAULT_DISPLAY
-        assertThat(repo.isActiveTask(2)).isTrue()
-        assertThat(repo.isOnlyActiveNonClosingTask(2)).isFalse()
-        // The only active task on SECOND_DISPLAY
-        assertThat(repo.isActiveTask(3)).isTrue()
-        assertThat(repo.isOnlyActiveNonClosingTask(3)).isTrue()
-        // Not an active task
-        assertThat(repo.isActiveTask(99)).isFalse()
-        assertThat(repo.isOnlyActiveNonClosingTask(99)).isFalse()
+        assertThat(repo.isVisibleTask(2)).isTrue()
+        assertThat(repo.isOnlyVisibleNonClosingTask(2)).isFalse()
+        // The only visible task on SECOND_DISPLAY
+        assertThat(repo.isVisibleTask(3)).isTrue()
+        assertThat(repo.isOnlyVisibleNonClosingTask(3)).isTrue()
+        // Not a visible task
+        assertThat(repo.isVisibleTask(99)).isFalse()
+        assertThat(repo.isOnlyVisibleNonClosingTask(99)).isFalse()
     }
 
     @Test
