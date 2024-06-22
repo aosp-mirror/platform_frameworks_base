@@ -56,6 +56,8 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.systemui.Dumpable;
@@ -64,12 +66,14 @@ import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shared.rotation.RotationPolicyUtil;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -108,6 +112,7 @@ public final class NavBarHelper implements
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Executor mMainExecutor;
+    private final Handler mBgHandler;
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -160,13 +165,15 @@ public final class NavBarHelper implements
 
     // Listens for changes to display rotation
     private final IRotationWatcher mRotationWatcher = new IRotationWatcher.Stub() {
+        @WorkerThread
         @Override
         public void onRotationChanged(final int rotation) {
             // We need this to be scheduled as early as possible to beat the redrawing of
             // window in response to the orientation change.
+            @Nullable Boolean isRotationLocked = RotationPolicyUtil.isRotationLocked(mContext);
             mHandler.postAtFrontOfQueue(() -> {
                 mRotationWatcherRotation = rotation;
-                dispatchRotationChanged(rotation);
+                dispatchRotationChanged(rotation, isRotationLocked);
             });
         }
     };
@@ -194,7 +201,8 @@ public final class NavBarHelper implements
             ConfigurationController configurationController,
             DumpManager dumpManager,
             CommandQueue commandQueue,
-            @Main Executor mainExecutor) {
+            @Main Executor mainExecutor,
+            @Background Handler bgHandler) {
         // b/319489709: This component shouldn't be running for a non-primary user
         if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             Log.wtf(TAG, "Unexpected initialization for non-primary user", new Throwable());
@@ -215,6 +223,7 @@ public final class NavBarHelper implements
         mDefaultDisplayId = displayTracker.getDefaultDisplayId();
         mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
         mMainExecutor = mainExecutor;
+        mBgHandler = bgHandler;
 
         mNavBarMode = navigationModeController.addListener(this);
         mCommandQueue.addCallback(this);
@@ -322,7 +331,13 @@ public final class NavBarHelper implements
             listener.updateAssistantAvailable(mAssistantAvailable, mLongPressHomeEnabled);
         }
         listener.updateWallpaperVisibility(mWallpaperVisible, mDefaultDisplayId);
-        listener.updateRotationWatcherState(mRotationWatcherRotation);
+
+        mBgHandler.post(() -> {
+            Boolean isRotationLocked = RotationPolicyUtil.isRotationLocked(mContext);
+            mMainExecutor.execute(
+                    () -> listener.updateRotationWatcherState(
+                            mRotationWatcherRotation, isRotationLocked));
+        });
     }
 
     /**
@@ -526,9 +541,9 @@ public final class NavBarHelper implements
         }
     }
 
-    private void dispatchRotationChanged(int rotation) {
+    private void dispatchRotationChanged(int rotation, @Nullable Boolean isRotationLocked) {
         for (NavbarTaskbarStateUpdater listener : mStateListeners) {
-            listener.updateRotationWatcherState(rotation);
+            listener.updateRotationWatcherState(rotation, isRotationLocked);
         }
     }
 
@@ -544,7 +559,7 @@ public final class NavBarHelper implements
         void updateAccessibilityServicesState();
         void updateAssistantAvailable(boolean available, boolean longPressHomeEnabled);
         default void updateWallpaperVisibility(boolean visible, int displayId) {}
-        default void updateRotationWatcherState(int rotation) {}
+        default void updateRotationWatcherState(int rotation, @Nullable Boolean isRotationLocked) {}
     }
 
     /** Data class to help Taskbar/Navbar initiate state correctly when switching between the two.*/
