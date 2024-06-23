@@ -16,10 +16,7 @@
 
 package com.android.companiondevicemanager;
 
-import static android.companion.CompanionDeviceManager.REASON_CANCELED;
-import static android.companion.CompanionDeviceManager.REASON_DISCOVERY_TIMEOUT;
-import static android.companion.CompanionDeviceManager.REASON_INTERNAL_ERROR;
-import static android.companion.CompanionDeviceManager.REASON_USER_REJECTED;
+import static android.companion.CompanionDeviceManager.RESULT_CANCELED;
 import static android.companion.CompanionDeviceManager.RESULT_DISCOVERY_TIMEOUT;
 import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
 import static android.companion.CompanionDeviceManager.RESULT_USER_REJECTED;
@@ -234,8 +231,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         boolean forCancelDialog = intent.getBooleanExtra(EXTRA_FORCE_CANCEL_CONFIRMATION, false);
         if (forCancelDialog) {
             Slog.i(TAG, "Cancelling the user confirmation");
-            cancel(/* discoveryTimeOut */ false, /* userRejected */ false,
-                    /* internalError */ false);
+            cancel(RESULT_CANCELED);
             return;
         }
 
@@ -243,8 +239,14 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         // yet). We can only "process" one request at a time.
         final IAssociationRequestCallback appCallback = IAssociationRequestCallback.Stub
                 .asInterface(intent.getExtras().getBinder(EXTRA_APPLICATION_CALLBACK));
+
+        if (appCallback == null) {
+            return;
+        }
+        Slog.e(TAG, "More than one AssociationRequests are processing.");
+
         try {
-            requireNonNull(appCallback).onFailure("Busy.");
+            appCallback.onFailure(RESULT_INTERNAL_ERROR);
         } catch (RemoteException ignore) {
         }
     }
@@ -255,8 +257,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
 
         // TODO: handle config changes without cancelling.
         if (!isDone()) {
-            cancel(/* discoveryTimeOut */ false,
-                    /* userRejected */ false, /* internalError */ false); // will finish()
+            cancel(RESULT_CANCELED); // will finish()
         }
     }
 
@@ -330,8 +331,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
                 && CompanionDeviceDiscoveryService.getScanResult().getValue().isEmpty()) {
             synchronized (LOCK) {
                 if (sDiscoveryStarted) {
-                    cancel(/* discoveryTimeOut */ true,
-                            /* userRejected */ false, /* internalError */ false);
+                    cancel(RESULT_DISCOVERY_TIMEOUT);
                 }
             }
         }
@@ -371,7 +371,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         mCdmServiceReceiver.send(RESULT_CODE_ASSOCIATION_APPROVED, data);
     }
 
-    private void cancel(boolean discoveryTimeout, boolean userRejected, boolean internalError) {
+    private void cancel(int failureCode) {
         if (isDone()) {
             Slog.w(TAG, "Already done: " + (mApproved ? "Approved" : "Cancelled"));
             return;
@@ -379,35 +379,19 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         mCancelled = true;
 
         // Stop discovery service if it was used.
-        if (!mRequest.isSelfManaged() || discoveryTimeout) {
+        if (!mRequest.isSelfManaged()) {
             CompanionDeviceDiscoveryService.stop(this);
-        }
-
-        final String cancelReason;
-        final int resultCode;
-        if (userRejected) {
-            cancelReason = REASON_USER_REJECTED;
-            resultCode = RESULT_USER_REJECTED;
-        } else if (discoveryTimeout) {
-            cancelReason = REASON_DISCOVERY_TIMEOUT;
-            resultCode = RESULT_DISCOVERY_TIMEOUT;
-        } else if (internalError) {
-            cancelReason = REASON_INTERNAL_ERROR;
-            resultCode = RESULT_INTERNAL_ERROR;
-        } else {
-            cancelReason = REASON_CANCELED;
-            resultCode = CompanionDeviceManager.RESULT_CANCELED;
         }
 
         // First send callback to the app directly...
         try {
-            Slog.i(TAG, "Sending onFailure to app due to reason=" + cancelReason);
-            mAppCallback.onFailure(cancelReason);
+            Slog.i(TAG, "Sending onFailure to app due to failureCode=" + failureCode);
+            mAppCallback.onFailure(failureCode);
         } catch (RemoteException ignore) {
         }
 
         // ... then set result and finish ("sending" onActivityResult()).
-        setResultAndFinish(null, resultCode);
+        setResultAndFinish(null, failureCode);
     }
 
     private void setResultAndFinish(@Nullable AssociationInfo association, int resultCode) {
@@ -452,8 +436,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
             }
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
-            cancel(/* discoveryTimeout */ false,
-                    /* userRejected */ false, /* internalError */ true);
+            cancel(RESULT_INTERNAL_ERROR);
             return;
         }
 
@@ -637,7 +620,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         // Disable the button, to prevent more clicks.
         v.setEnabled(false);
 
-        cancel(/* discoveryTimeout */ false, /* userRejected */ true, /* internalError */ false);
+        cancel(RESULT_USER_REJECTED);
     }
 
     private void onShowHelperDialog(View view) {
@@ -763,7 +746,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
 
     @Override
     public void onShowHelperDialogFailed() {
-        cancel(/* discoveryTimeout */ false, /* userRejected */ false, /* internalError */ true);
+        cancel(RESULT_INTERNAL_ERROR);
     }
 
     @Override

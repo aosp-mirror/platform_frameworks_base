@@ -47,7 +47,7 @@ class DesktopModeTaskRepository {
         val visibleTasks: ArraySet<Int> = ArraySet(),
         val minimizedTasks: ArraySet<Int> = ArraySet(),
         // Tasks that are closing, but are still visible
-        //  TODO(b/332682201): Remove when the repository state is updated via TransitionObserver
+        // TODO(b/332682201): Remove when the repository state is updated via TransitionObserver
         val closingTasks: ArraySet<Int> = ArraySet(),
         // Tasks currently in freeform mode, ordered from top to bottom (top is at index 0).
         val freeformTasksInZOrder: ArrayList<Int> = ArrayList(),
@@ -234,17 +234,16 @@ class DesktopModeTaskRepository {
     }
 
     /**
-     * Check if a task with the given [taskId] is the only active, non-closing, not-minimized task
+     * Check if a task with the given [taskId] is the only visible, non-closing, not-minimized task
      * on its display
      */
-    fun isOnlyActiveNonClosingTask(taskId: Int): Boolean {
-        return displayData.valueIterator().asSequence().any { data ->
-            data.activeTasks
+    fun isOnlyVisibleNonClosingTask(taskId: Int): Boolean =
+        displayData.valueIterator().asSequence().any { data ->
+            data.visibleTasks
                 .subtract(data.closingTasks)
                 .subtract(data.minimizedTasks)
                 .singleOrNull() == taskId
         }
-    }
 
     /** Get a set of the active tasks for given [displayId] */
     fun getActiveTasks(displayId: Int): ArraySet<Int> {

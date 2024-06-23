@@ -46,12 +46,14 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.annotation.NonNull;
+
+import com.android.server.wm.utils.TestComponentStack;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -318,20 +320,22 @@ public class TransparentPolicyTest extends WindowTestsBase {
      */
     private static class TransparentPolicyRobotTest {
 
+        @NonNull
         private final ActivityTaskManagerService mAtm;
-
+        @NonNull
         private final Task mTask;
-
-        private final ActivityStackTest mActivityStack;
-
+        @NonNull
+        private final TestComponentStack<ActivityRecord> mActivityStack;
+        @NonNull
         private WindowConfiguration mTopActivityWindowConfiguration;
 
-        private TransparentPolicyRobotTest(ActivityTaskManagerService atm, Task task,
-                                           ActivityRecord opaqueActivity) {
+        private TransparentPolicyRobotTest(@NonNull ActivityTaskManagerService atm,
+                                           @NonNull Task task,
+                                           @NonNull ActivityRecord opaqueActivity) {
             mAtm = atm;
             mTask = task;
-            mActivityStack = new ActivityStackTest();
-            mActivityStack.pushActivity(opaqueActivity);
+            mActivityStack = new TestComponentStack<>();
+            mActivityStack.push(opaqueActivity);
             spyOn(opaqueActivity.mAppCompatController.getTransparentPolicy());
         }
 
@@ -361,7 +365,7 @@ public class TransparentPolicyTest extends WindowTestsBase {
                 mTask.addChild(newActivity);
             }
             spyOn(newActivity.mAppCompatController.getTransparentPolicy());
-            mActivityStack.pushActivity(newActivity);
+            mActivityStack.push(newActivity);
         }
 
         void attachTopActivityToTask() {
@@ -595,46 +599,6 @@ public class TransparentPolicyTest extends WindowTestsBase {
             display.getDisplayRotation().setRotation(rotation);
             display.computeScreenConfiguration(c);
             display.onRequestedOverrideConfigurationChanged(c);
-        }
-
-        /**
-         * Contains all the ActivityRecord launched in the test. This is different from what's in
-         * the Task because activities are added here even if not added to tasks.
-         */
-        private static class ActivityStackTest {
-            private final List<ActivityRecord> mActivities = new ArrayList<>();
-
-            void pushActivity(ActivityRecord activityRecord) {
-                mActivities.add(activityRecord);
-            }
-
-            void applyToTop(Consumer<ActivityRecord> consumer) {
-                consumer.accept(top());
-            }
-
-            ActivityRecord getFromTop(int fromTop) {
-                return mActivities.get(mActivities.size() - fromTop - 1);
-            }
-
-            ActivityRecord base() {
-                return mActivities.get(0);
-            }
-
-            ActivityRecord top() {
-                return mActivities.get(mActivities.size() - 1);
-            }
-
-            // Allows access to the activity at position beforeLast from the top.
-            // If fromTop = 0 the activity used is the top one.
-            void applyTo(int fromTop, Consumer<ActivityRecord> consumer) {
-                consumer.accept(getFromTop(fromTop));
-            }
-
-            void applyToAll(Consumer<ActivityRecord> consumer) {
-                for (int i = mActivities.size() - 1; i >= 0; i--) {
-                    consumer.accept(mActivities.get(i));
-                }
-            }
         }
     }
 }

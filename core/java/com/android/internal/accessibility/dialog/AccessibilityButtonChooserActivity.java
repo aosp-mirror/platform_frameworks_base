@@ -29,8 +29,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.text.TextUtils;
-import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -73,16 +71,11 @@ public class AccessibilityButtonChooserActivity extends Activity {
             promptPrologue.setText(isTouchExploreOn
                     ? R.string.accessibility_gesture_3finger_prompt_text
                     : R.string.accessibility_gesture_prompt_text);
-        }
 
-        if (TextUtils.isEmpty(component)) {
             final TextView prompt = findViewById(R.id.accessibility_button_prompt);
-            if (isGestureNavigateEnabled) {
-                prompt.setText(isTouchExploreOn
-                        ? R.string.accessibility_gesture_3finger_instructional_text
-                        : R.string.accessibility_gesture_instructional_text);
-            }
-            prompt.setVisibility(View.VISIBLE);
+            prompt.setText(isTouchExploreOn
+                    ? R.string.accessibility_gesture_3finger_instructional_text
+                    : R.string.accessibility_gesture_instructional_text);
         }
 
         mTargets.addAll(getTargets(this, SOFTWARE));

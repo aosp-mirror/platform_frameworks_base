@@ -113,8 +113,7 @@ class DraggableHandlerTest {
                     orientation = draggableHandler.orientation,
                     topOrLeftBehavior = nestedScrollBehavior,
                     bottomOrRightBehavior = nestedScrollBehavior,
-                    isExternalOverscrollGesture = { isExternalOverscrollGesture },
-                    pointersInfo = { PointersInfo(pointersDown = 1, startedPosition = Offset.Zero) }
+                    isExternalOverscrollGesture = { isExternalOverscrollGesture }
                 )
                 .connection
 
@@ -1232,5 +1231,18 @@ class DraggableHandlerTest {
         otherController.onDragStopped(velocity = 0f)
         advanceUntilIdle()
         assertIdle(SceneB)
+    }
+
+    @Test
+    fun interceptingTransitionReplacesCurrentTransition() = runGestureTest {
+        val controller = onDragStarted(overSlop = up(fractionOfScreen = 0.5f))
+        val transition = assertThat(layoutState.transitionState).isTransition()
+        controller.onDragStopped(velocity = 0f)
+
+        // Intercept the transition.
+        onDragStartedImmediately()
+        val newTransition = assertThat(layoutState.transitionState).isTransition()
+        assertThat(newTransition).isNotSameInstanceAs(transition)
+        assertThat(newTransition.replacedTransition).isSameInstanceAs(transition)
     }
 }

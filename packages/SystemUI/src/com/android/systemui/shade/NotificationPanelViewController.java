@@ -1044,6 +1044,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                                 mView.setTranslationY(0f);
                             })
                             .start();
+                } else {
+                    mView.postDelayed(() -> {
+                        instantCollapse();
+                    }, unlockAnimationStartDelay);
                 }
             }
         }

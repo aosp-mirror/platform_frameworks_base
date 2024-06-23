@@ -19,7 +19,6 @@ package com.android.systemui.communal.domain.interactor
 import android.os.userManager
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.repository.communalMediaRepository
-import com.android.systemui.communal.data.repository.communalPrefsRepository
 import com.android.systemui.communal.data.repository.communalWidgetRepository
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.flags.Flags
@@ -46,7 +45,7 @@ val Kosmos.communalInteractor by Fixture {
         broadcastDispatcher = broadcastDispatcher,
         communalSceneInteractor = communalSceneInteractor,
         widgetRepository = communalWidgetRepository,
-        communalPrefsRepository = communalPrefsRepository,
+        communalPrefsInteractor = communalPrefsInteractor,
         mediaRepository = communalMediaRepository,
         smartspaceRepository = smartspaceRepository,
         keyguardInteractor = keyguardInteractor,

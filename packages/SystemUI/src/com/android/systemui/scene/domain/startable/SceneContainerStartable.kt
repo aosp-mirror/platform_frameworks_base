@@ -22,6 +22,7 @@ import android.app.StatusBarManager
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.UiEventLogger
+import com.android.internal.policy.IKeyguardStateCallback
 import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -126,6 +127,8 @@ constructor(
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
+
+    private val keyguardStateCallbacks = mutableListOf<IKeyguardStateCallback>()
 
     override fun start() {
         if (SceneContainerFlag.isEnabled) {
