@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProj
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
 import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
 import com.android.systemui.statusbar.chips.screenrecord.ui.view.EndScreenRecordingDialogDelegate
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
@@ -60,6 +61,7 @@ constructor(
                         OngoingActivityChipModel.Shown(
                             // TODO(b/332662551): Also provide a content description.
                             icon = Icon.Resource(ICON, contentDescription = null),
+                            colors = ColorsModel.Red,
                             startTimeMs = systemClock.elapsedRealtime(),
                             createDialogLaunchOnClickListener(
                                 createDelegate(state.recordedTask),

@@ -85,6 +85,7 @@ public class AppClipsTrampolineActivity extends Activity {
     static final String ACTION_FINISH_FROM_TRAMPOLINE = TAG + "FINISH_FROM_TRAMPOLINE";
     static final String EXTRA_RESULT_RECEIVER = TAG + "RESULT_RECEIVER";
     static final String EXTRA_CALLING_PACKAGE_NAME = TAG + "CALLING_PACKAGE_NAME";
+    static final String EXTRA_CALLING_PACKAGE_TASK_ID = TAG + "CALLING_PACKAGE_TASK_ID";
     private static final ApplicationInfoFlags APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0);
 
     private final NoteTaskController mNoteTaskController;
@@ -193,12 +194,14 @@ public class AppClipsTrampolineActivity extends Activity {
         ComponentName componentName = ComponentName.unflattenFromString(
                     getString(R.string.config_screenshotAppClipsActivityComponent));
         String callingPackageName = getCallingPackage();
+        int callingPackageTaskId = getTaskId();
 
         Intent intent = new Intent()
                 .setComponent(componentName)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .putExtra(EXTRA_RESULT_RECEIVER, mResultReceiver)
-                .putExtra(EXTRA_CALLING_PACKAGE_NAME, callingPackageName);
+                .putExtra(EXTRA_CALLING_PACKAGE_NAME, callingPackageName)
+                .putExtra(EXTRA_CALLING_PACKAGE_TASK_ID, callingPackageTaskId);
         try {
             startActivity(intent);
 

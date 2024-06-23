@@ -19,6 +19,7 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -30,12 +31,14 @@ import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MediaTttUtilsTest : SysuiTestCase() {
 
     private lateinit var appIconFromPackageName: Drawable

@@ -64,13 +64,6 @@ class LockStateTrackingRule : TestRule {
         wait("not trusted") { trustState.trusted == false }
     }
 
-    // TODO(b/299298338) remove this when removing FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2
-    fun assertUnlockedButNotReally() {
-        wait("device unlocked") { !keyguardManager.isDeviceLocked }
-        wait("not trusted") { trustState.trusted == false }
-        wait("keyguard locked") { windowManager.isKeyguardLocked }
-    }
-
     fun assertUnlockedAndTrusted() {
         wait("device unlocked") { !keyguardManager.isDeviceLocked }
         wait("trusted") { trustState.trusted == true }

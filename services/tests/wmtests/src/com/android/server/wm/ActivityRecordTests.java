@@ -1639,6 +1639,15 @@ public class ActivityRecordTests extends WindowTestsBase {
         clearInvocations(mDefaultDisplay);
     }
 
+    @Test
+    public void testCompleteResume_updateCompatDisplayInsets() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        doReturn(true).when(activity).shouldCreateCompatDisplayInsets();
+        activity.setState(RESUMED, "test");
+        activity.completeResumeLocked();
+        assertNotNull(activity.getCompatDisplayInsets());
+    }
+
     /**
      * Verify destroy activity request completes successfully.
      */

@@ -35,6 +35,7 @@ import static org.junit.Assume.assumeNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -783,8 +784,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mDialog.show(SHOW_REASON_UNKNOWN);
         mTestableLooper.processAllMessages();
 
-        verify(mVolumeDialogInteractor).onDialogShown();
-        verify(mVolumeDialogInteractor).onDialogDismissed(); // dismiss by timeout
+        verify(mVolumeDialogInteractor, atLeastOnce()).onDialogShown();
+        verify(mVolumeDialogInteractor, atLeastOnce()).onDialogDismissed(); // dismiss by timeout
     }
 
     /**

@@ -740,11 +740,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
 
             // WHEN we have media that was recently played, but not currently active
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
-            val controlCommonModel =
-                MediaCommonModel.MediaControl(
-                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
-                    true
-                )
+            val mediaLoadingModel = MediaDataLoadingModel.Loaded(dataMain.instanceId)
+            var controlCommonModel = MediaCommonModel.MediaControl(mediaLoadingModel, true)
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
             repository.setOrderedMedia()
             assertThat(currentMedia).containsExactly(controlCommonModel)
@@ -758,7 +755,15 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
             // THEN we should treat the media as active instead
-            val dataCurrentAndActive = dataCurrent.copy(active = true)
+            val dataCurrentAndActive =
+                dataMain.copy(active = true, lastActive = clock.elapsedRealtime())
+            controlCommonModel =
+                controlCommonModel.copy(
+                    mediaLoadingModel.copy(
+                        receivedSmartspaceCardLatency = 100,
+                        isSsReactivated = true
+                    )
+                )
             assertThat(currentMedia).containsExactly(controlCommonModel)
             assertThat(
                     hasActiveMediaOrRecommendation(
@@ -800,11 +805,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val currentMedia by collectLastValue(repository.currentMedia)
             // WHEN we have media that was recently played, but not currently active
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
-            val controlCommonModel =
-                MediaCommonModel.MediaControl(
-                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
-                    true
-                )
+            val mediaLoadingModel = MediaDataLoadingModel.Loaded(dataMain.instanceId)
+            var controlCommonModel = MediaCommonModel.MediaControl(mediaLoadingModel, true)
             val recsCommonModel =
                 MediaCommonModel.MediaRecommendations(
                     SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
@@ -824,7 +826,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
             // THEN we should treat the media as active instead
-            val dataCurrentAndActive = dataCurrent.copy(active = true)
+            val dataCurrentAndActive =
+                dataMain.copy(active = true, lastActive = clock.elapsedRealtime())
             verify(listener)
                 .onMediaDataLoaded(
                     eq(KEY),
@@ -849,6 +852,13 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                 )
                 .isTrue()
             // Smartspace update should also be propagated but not prioritized.
+            controlCommonModel =
+                controlCommonModel.copy(
+                    mediaLoadingModel.copy(
+                        receivedSmartspaceCardLatency = 100,
+                        isSsReactivated = true
+                    )
+                )
             assertThat(currentMedia).containsExactly(controlCommonModel, recsCommonModel)
             verify(listener)
                 .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
@@ -909,7 +919,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             runCurrent()
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
-            val dataCurrentAndActive = dataCurrent.copy(active = true)
+            val dataCurrentAndActive =
+                dataMain.copy(active = true, lastActive = clock.elapsedRealtime())
             verify(listener)
                 .onMediaDataLoaded(
                     eq(KEY),
@@ -1063,11 +1074,8 @@ class MediaDataFilterImplTest : SysuiTestCase() {
                 MediaCommonModel.MediaRecommendations(
                     SmartspaceMediaLoadingModel.Loaded(SMARTSPACE_KEY)
                 )
-            val controlCommonModel =
-                MediaCommonModel.MediaControl(
-                    MediaDataLoadingModel.Loaded(dataMain.instanceId),
-                    true
-                )
+            val mediaLoadingModel = MediaDataLoadingModel.Loaded(dataMain.instanceId)
+            var controlCommonModel = MediaCommonModel.MediaControl(mediaLoadingModel, true)
             // WHEN we have media that was recently played, but not currently active
             val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
@@ -1086,7 +1094,15 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
             // THEN we should treat the media as active instead
-            val dataCurrentAndActive = dataCurrent.copy(active = true)
+            val dataCurrentAndActive =
+                dataMain.copy(active = true, lastActive = clock.elapsedRealtime())
+            controlCommonModel =
+                controlCommonModel.copy(
+                    mediaLoadingModel.copy(
+                        receivedSmartspaceCardLatency = 100,
+                        isSsReactivated = true
+                    )
+                )
             verify(listener)
                 .onMediaDataLoaded(
                     eq(KEY),

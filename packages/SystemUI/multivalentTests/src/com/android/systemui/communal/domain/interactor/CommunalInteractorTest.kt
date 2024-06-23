@@ -488,8 +488,16 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun ctaTile_afterDismiss_doesNotShow() =
         testScope.runTest {
+            // Set to main user, so we can dismiss the tile for the main user.
+            val user = userRepository.asMainUser()
+            userTracker.set(
+                userInfos = listOf(user),
+                selectedUserIndex = 0,
+            )
+            runCurrent()
+
             tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-            communalPrefsRepository.setCtaDismissedForCurrentUser()
+            communalPrefsRepository.setCtaDismissed(user)
 
             val ctaTileContent by collectLastValue(underTest.ctaTileContent)
 

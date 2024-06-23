@@ -19,7 +19,6 @@ package com.android.server.companion.association;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
-import static android.companion.CompanionDeviceManager.REASON_INTERNAL_ERROR;
 import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
 import static android.content.ComponentName.createRelative;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -183,7 +182,7 @@ public class AssociationRequestsProcessor {
             String errorMessage = "3p apps are not allowed to create associations on watch.";
             Slog.e(TAG, errorMessage);
             try {
-                callback.onFailure(errorMessage);
+                callback.onFailure(RESULT_INTERNAL_ERROR);
             } catch (RemoteException e) {
                 // ignored
             }
@@ -252,8 +251,9 @@ public class AssociationRequestsProcessor {
         } catch (SecurityException e) {
             // Since, at this point the caller is our own UI, we need to catch the exception on
             // forward it back to the application via the callback.
+            Slog.e(TAG, e.getMessage());
             try {
-                callback.onFailure(e.getMessage());
+                callback.onFailure(RESULT_INTERNAL_ERROR);
             } catch (RemoteException ignore) {
             }
             return;
@@ -378,7 +378,7 @@ public class AssociationRequestsProcessor {
             // Send the association back via the app's callback
             if (callback != null) {
                 try {
-                    callback.onFailure(REASON_INTERNAL_ERROR);
+                    callback.onFailure(RESULT_INTERNAL_ERROR);
                 } catch (RemoteException ignore) {
                 }
             }

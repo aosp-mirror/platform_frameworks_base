@@ -284,9 +284,9 @@ constructor(
     private fun DeviceEntryIconView.IconType.toAccessibilityHintType():
         DeviceEntryIconView.AccessibilityHintType {
         return when (this) {
+            DeviceEntryIconView.IconType.FINGERPRINT,
             DeviceEntryIconView.IconType.LOCK -> DeviceEntryIconView.AccessibilityHintType.BOUNCER
             DeviceEntryIconView.IconType.UNLOCK -> DeviceEntryIconView.AccessibilityHintType.ENTER
-            DeviceEntryIconView.IconType.FINGERPRINT,
             DeviceEntryIconView.IconType.NONE -> DeviceEntryIconView.AccessibilityHintType.NONE
         }
     }

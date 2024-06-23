@@ -62,7 +62,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.CastController.CastDevice;
+import com.android.systemui.statusbar.policy.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -521,8 +521,7 @@ public class PhoneStatusBarPolicy
     private void updateCast() {
         boolean isCasting = false;
         for (CastDevice device : mCast.getCastDevices()) {
-            if (device.state == CastDevice.STATE_CONNECTING
-                    || device.state == CastDevice.STATE_CONNECTED) {
+            if (device.isCasting()) {
                 isCasting = true;
                 break;
             }

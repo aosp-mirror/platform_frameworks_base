@@ -179,7 +179,8 @@ public class UtilsTest {
         // The rest of the bits are not allowed to integrate with the public APIs
         for (int i = 8; i < 32; i++) {
             final int authenticator = 1 << i;
-            if (authenticator == Authenticators.DEVICE_CREDENTIAL) {
+            if (authenticator == Authenticators.DEVICE_CREDENTIAL
+                    || authenticator == Authenticators.MANDATORY_BIOMETRICS) {
                 continue;
             }
             assertFalse(Utils.isValidAuthenticatorConfig(1 << i));

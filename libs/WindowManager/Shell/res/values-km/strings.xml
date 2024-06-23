@@ -84,6 +84,10 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"ពពុះ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"គ្រប់គ្រង"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"បានច្រានចោល​សារលេចឡើង។"</string>
+    <!-- no translation found for bubble_shortcut_label (666269077944378311) -->
+    <skip />
+    <!-- no translation found for bubble_shortcut_long_label (6088437544312894043) -->
+    <skip />
     <string name="restart_button_description" msgid="4564728020654658478">"ចុចដើម្បី​ចាប់ផ្ដើម​កម្មវិធី​នេះឡើងវិញសម្រាប់ទិដ្ឋភាពកាន់តែប្រសើរ"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"ផ្លាស់ប្ដូរសមាមាត្រ​របស់កម្មវិធីនេះនៅក្នុងការកំណត់"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"ប្ដូរ​​សមាមាត្រ"</string>

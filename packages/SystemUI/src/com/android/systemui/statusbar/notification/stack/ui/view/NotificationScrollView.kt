@@ -50,8 +50,11 @@ interface NotificationScrollView {
     /** set the y position in px of the top of the stack in this view's coordinates */
     fun setStackTop(stackTop: Float)
 
-    /** set the y position in px of the bottom of the stack in this view's coordinates */
-    fun setStackBottom(stackBottom: Float)
+    /**
+     * set the bottom-most acceptable y-position of the bottom of the notification stack/ shelf /
+     * footer.
+     */
+    fun setStackCutoff(stackBottom: Float)
 
     /** set the y position in px of the top of the HUN in this view's coordinates */
     fun setHeadsUpTop(headsUpTop: Float)
@@ -61,8 +64,10 @@ interface NotificationScrollView {
 
     /** Set a consumer for synthetic scroll events */
     fun setSyntheticScrollConsumer(consumer: Consumer<Float>?)
+
     /** Set a consumer for current gesture overscroll events */
     fun setCurrentGestureOverscrollConsumer(consumer: Consumer<Boolean>?)
+
     /** Set a consumer for heads up height changed events */
     fun setHeadsUpHeightConsumer(consumer: Consumer<Float>?)
 

@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.WakeSleepReason.FOLD
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
@@ -368,7 +369,12 @@ constructor(
                     // being delayed in KeyguardViewMediator
                     KeyguardState.DREAMING -> TO_DREAMING_DURATION + 100.milliseconds
                     KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
-                    KeyguardState.AOD -> TO_AOD_DURATION
+                    KeyguardState.AOD ->
+                        if (powerInteractor.detailedWakefulness.value.lastSleepReason == FOLD) {
+                            TO_AOD_FOLD_DURATION
+                        } else {
+                            TO_AOD_DURATION
+                        }
                     KeyguardState.DOZING -> TO_DOZING_DURATION
                     KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> TO_DREAMING_HOSTED_DURATION
                     KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
@@ -385,6 +391,7 @@ constructor(
         val TO_DREAMING_HOSTED_DURATION = 933.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
+        val TO_AOD_FOLD_DURATION = 1100.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION
         val TO_GONE_DURATION = 633.milliseconds
         val TO_GLANCEABLE_HUB_DURATION = 1.seconds

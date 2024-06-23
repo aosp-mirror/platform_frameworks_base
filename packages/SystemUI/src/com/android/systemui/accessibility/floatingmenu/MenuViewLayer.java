@@ -205,8 +205,9 @@ class MenuViewLayer extends FrameLayout implements
                         return;
                     }
 
-                    setAccessibilityServiceState(getContext(), serviceComponentName, /* enabled= */
-                            false);
+                    setAccessibilityServiceState(
+                            getContext(), serviceComponentName, /* enabled= */ false,
+                            mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT));
                 });
             }
 
@@ -334,6 +335,7 @@ class MenuViewLayer extends FrameLayout implements
         mDragToInteractView.updateResources();
         mDismissView.updateResources();
         mDragToInteractAnimationController.updateResources();
+        mMenuAnimationController.skipAnimations();
     }
 
     @Override

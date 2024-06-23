@@ -123,7 +123,7 @@ constructor(
             resources.getFloat(R.dimen.shortcut_helper_screen_width_fraction)
         // maxWidth needs to be set before the sheet is drawn, otherwise the call will have no
         // effect.
-        val screenWidth = resources.displayMetrics.widthPixels
+        val screenWidth = windowManager.maximumWindowMetrics.bounds.width()
         bottomSheetBehavior.maxWidth = (sheetScreenWidthFraction * screenWidth).toInt()
     }
 
@@ -132,7 +132,7 @@ constructor(
             val safeDrawingInsets = insets.safeDrawing
             // Make sure the bottom sheet is not covered by the status bar.
             bottomSheetBehavior.maxHeight =
-                resources.displayMetrics.heightPixels - safeDrawingInsets.top
+                windowManager.maximumWindowMetrics.bounds.height() - safeDrawingInsets.top
             // Make sure the contents inside of the bottom sheet are not hidden by system bars, or
             // cutouts.
             bottomSheet.updatePadding(

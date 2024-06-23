@@ -28,7 +28,6 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
-import com.android.systemui.communal.data.repository.CommunalPrefsRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
@@ -99,7 +98,7 @@ constructor(
     @Background val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     private val widgetRepository: CommunalWidgetRepository,
-    private val communalPrefsRepository: CommunalPrefsRepository,
+    private val communalPrefsInteractor: CommunalPrefsInteractor,
     private val mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
@@ -325,7 +324,7 @@ constructor(
     }
 
     /** Dismiss the CTA tile from the hub in view mode. */
-    suspend fun dismissCtaTile() = communalPrefsRepository.setCtaDismissedForCurrentUser()
+    suspend fun dismissCtaTile() = communalPrefsInteractor.setCtaDismissed()
 
     /** Add a widget at the specified position. */
     fun addWidget(
@@ -461,7 +460,7 @@ constructor(
 
     /** CTA tile to be displayed in the glanceable hub (view mode). */
     val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> =
-        communalPrefsRepository.isCtaDismissed.map { isDismissed ->
+        communalPrefsInteractor.isCtaDismissed.map { isDismissed ->
             if (isDismissed) emptyList() else listOf(CommunalContentModel.CtaTileInViewMode())
         }
 

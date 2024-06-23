@@ -379,6 +379,10 @@ package android.app {
     method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
     method public void setUserVisibleTaskShown(boolean);
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String NEWS_ID = "android.app.news";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String PROMOTIONS_ID = "android.app.promotions";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String RECS_ID = "android.app.recs";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String SOCIAL_MEDIA_ID = "android.app.social";
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {

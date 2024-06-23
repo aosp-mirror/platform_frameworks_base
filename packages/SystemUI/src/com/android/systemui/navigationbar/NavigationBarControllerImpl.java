@@ -23,6 +23,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGAT
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 import static com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen;
 import static com.android.wm.shell.Flags.enableTaskbarNavbarUnification;
+import static com.android.wm.shell.Flags.enableTaskbarOnPhones;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -285,8 +286,10 @@ public class NavigationBarControllerImpl implements
 
     @VisibleForTesting
     boolean supportsTaskbar() {
-        // Enable for tablets, unfolded state on a foldable device or (non handheld AND flag is set)
-        return mIsLargeScreen || (!mIsPhone && enableTaskbarNavbarUnification());
+        // Enable for tablets, unfolded state on a foldable device, (non handheld AND flag is set),
+        // or handheld when enableTaskbarOnPhones() returns true.
+        boolean foldedOrPhone = !mIsPhone || enableTaskbarOnPhones();
+        return mIsLargeScreen || (foldedOrPhone && enableTaskbarNavbarUnification());
     }
 
     private final CommandQueue.Callbacks mCommandQueueCallbacks = new CommandQueue.Callbacks() {

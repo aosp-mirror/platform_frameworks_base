@@ -1924,7 +1924,11 @@ public final class SystemServer implements Dumpable {
             startRotationResolverService(context, t);
             startSystemCaptionsManagerService(context, t);
             startTextToSpeechManagerService(context, t);
-            startWearableSensingService(t);
+            if (!isWatch || !android.server.Flags.removeWearableSensingServiceFromWear()) {
+                startWearableSensingService(t);
+            } else {
+                Slog.d(TAG, "Not starting WearableSensingService");
+            }
             startOnDeviceIntelligenceService(t);
 
             if (deviceHasConfigString(
@@ -2640,9 +2644,13 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(MediaMetricsManagerService.class);
             t.traceEnd();
 
-            t.traceBegin("StartBackgroundInstallControlService");
-            mSystemServiceManager.startService(BackgroundInstallControlService.class);
-            t.traceEnd();
+            if (!com.android.server.flags.Flags.optionalBackgroundInstallControl()
+                    || SystemProperties.getBoolean(
+                            "ro.system_settings.service.backgound_install_control_enabled", true)) {
+                t.traceBegin("StartBackgroundInstallControlService");
+                mSystemServiceManager.startService(BackgroundInstallControlService.class);
+                t.traceEnd();
+            }
         }
 
         t.traceBegin("StartMediaProjectionManager");
