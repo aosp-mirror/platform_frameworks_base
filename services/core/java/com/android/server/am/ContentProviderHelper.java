@@ -35,6 +35,7 @@ import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_E
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerService.TAG_MU;
+import static com.android.server.am.Flags.serviceBindingOomAdjPolicy;
 
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -319,8 +320,10 @@ public class ContentProviderHelper {
 
                     checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                     final int verifiedAdj = cpr.proc.mState.getVerifiedAdj();
-                    boolean success = mService.updateOomAdjLocked(cpr.proc,
-                            OOM_ADJ_REASON_GET_PROVIDER);
+                    boolean success = !serviceBindingOomAdjPolicy()
+                            || mService.mOomAdjuster.evaluateProviderConnectionAdd(r, cpr.proc)
+                            ? mService.updateOomAdjLocked(cpr.proc, OOM_ADJ_REASON_GET_PROVIDER)
+                            : true;
                     // XXX things have changed so updateOomAdjLocked doesn't actually tell us
                     // if the process has been successfully adjusted.  So to reduce races with
                     // it, we will check whether the process still exists.  Note that this doesn't
@@ -1249,9 +1252,9 @@ public class ContentProviderHelper {
             ProviderInfo cpi = providers.get(i);
             boolean singleton = mService.isSingleton(cpi.processName, cpi.applicationInfo,
                     cpi.name, cpi.flags);
-            if (singleton && app.userId != UserHandle.USER_SYSTEM) {
-                // This is a singleton provider, but a user besides the
-                // default user is asking to initialize a process it runs
+            if (isSingletonOrSystemUserOnly(cpi) && app.userId != UserHandle.USER_SYSTEM) {
+                // This is a singleton or a SYSTEM user only provider, but a user besides the
+                // SYSTEM user is asking to initialize a process it runs
                 // in...  well, no, it doesn't actually run in this process,
                 // it runs in the process of the default user.  Get rid of it.
                 providers.remove(i);
@@ -1398,8 +1401,7 @@ public class ContentProviderHelper {
                                     final boolean processMatch =
                                             Objects.equals(pi.processName, app.processName)
                                             || pi.multiprocess;
-                                    final boolean userMatch = !mService.isSingleton(
-                                            pi.processName, pi.applicationInfo, pi.name, pi.flags)
+                                    final boolean userMatch = !isSingletonOrSystemUserOnly(pi)
                                             || app.userId == UserHandle.USER_SYSTEM;
                                     final boolean isInstantApp = pi.applicationInfo.isInstantApp();
                                     final boolean splitInstalled = pi.splitName == null
@@ -1530,7 +1532,9 @@ public class ContentProviderHelper {
             }
             mService.stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid,
                     cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
-            if (updateOomAdj) {
+            if (updateOomAdj && (!serviceBindingOomAdjPolicy()
+                    || mService.mOomAdjuster.evaluateProviderConnectionRemoval(conn.client,
+                            cpr.proc))) {
                 mService.updateOomAdjLocked(conn.provider.proc, OOM_ADJ_REASON_REMOVE_PROVIDER);
             }
         }
@@ -1984,5 +1988,14 @@ public class ContentProviderHelper {
             mCloneProfileAuthorityRedirectionCache.put(auth, isAuthRedirected);
             return isAuthRedirected;
         }
+    }
+
+    /**
+     * Returns true if Provider is either singleUser or systemUserOnly provider.
+     */
+    private boolean isSingletonOrSystemUserOnly(ProviderInfo pi) {
+        return (android.multiuser.Flags.enableSystemUserOnlyForServicesAndProviders()
+                && mService.isSystemUserOnly(pi.flags))
+                || mService.isSingleton(pi.processName, pi.applicationInfo, pi.name, pi.flags);
     }
 }

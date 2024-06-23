@@ -16,11 +16,12 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow.FlowBuilder
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -35,23 +36,34 @@ import kotlinx.coroutines.flow.Flow
 class LockscreenToGoneTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
 
-    private val transitionAnimation =
+    private val transitionAnimation: FlowBuilder =
         animationFlow.setup(
             duration = FromLockscreenTransitionInteractor.TO_GONE_DURATION,
-            stepFlow = interactor.transition(KeyguardState.LOCKSCREEN, KeyguardState.GONE),
+            from = KeyguardState.LOCKSCREEN,
+            to = KeyguardState.GONE,
         )
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
-            duration = 250.milliseconds,
+            duration = 200.milliseconds,
             onStep = { 1 - it },
             onFinish = { 0f },
             onCancel = { 1f },
         )
+
+    fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        return transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStart = { startAlpha = viewState.alpha() },
+            onStep = { MathUtils.lerp(startAlpha, 0f, it) },
+            onFinish = { 0f },
+            onCancel = { 1f },
+        )
+    }
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)

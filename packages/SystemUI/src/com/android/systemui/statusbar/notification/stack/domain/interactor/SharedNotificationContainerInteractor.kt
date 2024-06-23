@@ -18,12 +18,15 @@
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import android.content.Context
+import com.android.systemui.Flags.centralizedStatusBarHeightFix
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.res.R
+import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.statusbar.policy.SplitShadeStateController
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -45,6 +48,7 @@ constructor(
     private val splitShadeStateController: SplitShadeStateController,
     keyguardInteractor: KeyguardInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+    largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
 ) {
 
     private val _topPosition = MutableStateFlow(0f)
@@ -72,7 +76,11 @@ constructor(
                             getDimensionPixelSize(R.dimen.notification_panel_margin_bottom),
                         marginTop = getDimensionPixelSize(R.dimen.notification_panel_margin_top),
                         marginTopLargeScreen =
-                            getDimensionPixelSize(R.dimen.large_screen_shade_header_height),
+                            if (centralizedStatusBarHeightFix()) {
+                                largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
+                            } else {
+                                getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
+                            },
                         keyguardSplitShadeTopMargin =
                             getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin),
                     )

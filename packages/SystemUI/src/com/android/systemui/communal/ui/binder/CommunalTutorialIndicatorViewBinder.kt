@@ -18,7 +18,6 @@
 package com.android.systemui.communal.ui.binder
 
 import android.widget.TextView
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -32,16 +31,14 @@ object CommunalTutorialIndicatorViewBinder {
     fun bind(
         view: TextView,
         viewModel: CommunalTutorialIndicatorViewModel,
+        isPreviewMode: Boolean = false,
     ): DisposableHandle {
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch {
-                        viewModel.showIndicator.collect { isVisible ->
-                            updateView(
-                                view = view,
-                                isIndicatorVisible = isVisible,
-                            )
+                        viewModel.showIndicator(isPreviewMode).collect { showIndicator ->
+                            view.isVisible = showIndicator
                         }
                     }
 
@@ -50,19 +47,5 @@ object CommunalTutorialIndicatorViewBinder {
             }
 
         return disposableHandle
-    }
-
-    private fun updateView(
-        isIndicatorVisible: Boolean,
-        view: TextView,
-    ) {
-        if (!isIndicatorVisible) {
-            view.isGone = true
-            return
-        }
-
-        if (!view.isVisible) {
-            view.isVisible = true
-        }
     }
 }

@@ -46,6 +46,7 @@ import static com.android.server.policy.WindowManagerPolicy.ACTION_PASS_TO_USER;
 import static java.util.Collections.unmodifiableMap;
 
 import android.content.Context;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -57,11 +58,17 @@ import com.android.internal.util.test.FakeSettingsProviderRule;
 
 import org.junit.After;
 import org.junit.Rule;
+import org.junit.rules.RuleChain;
 
 import java.util.Map;
 
 class ShortcutKeyTestBase {
-    @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+
+    @Rule
+    public RuleChain rules = RuleChain.outerRule(mSettingsProviderRule).around(mSetFlagsRule);
 
     TestPhoneWindowManager mPhoneWindowManager;
     DispatchedKeyHandler mDispatchedKeyHandler = event -> false;

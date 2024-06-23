@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.content.pm.PackageManager.FEATURE_WINDOW_MAGNIFICATION;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT;
 
 import static com.android.internal.messages.nano.SystemMessageProto.SystemMessage.NOTE_A11Y_WINDOW_MAGNIFICATION_FEATURE;
@@ -44,6 +45,7 @@ import android.testing.TestableContext;
 import androidx.test.InstrumentationRegistry;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -70,6 +72,13 @@ public class WindowMagnificationPromptControllerTest {
     private WindowMagnificationPromptController mWindowMagnificationPromptController;
     private BroadcastReceiver mReceiver;
 
+    /**
+     *  return whether window magnification is supported for current test context.
+     */
+    private boolean isWindowModeSupported() {
+        return mTestableContext.getPackageManager().hasSystemFeature(FEATURE_WINDOW_MAGNIFICATION);
+    }
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -78,6 +87,9 @@ public class WindowMagnificationPromptControllerTest {
         setWindowMagnificationPromptSettings(true);
         mWindowMagnificationPromptController = new WindowMagnificationPromptController(
                 mTestableContext, TEST_USER);
+
+        // skip test if window magnification is not supported to prevent fail results.
+        Assume.assumeTrue(isWindowModeSupported());
     }
 
     @After
@@ -111,8 +123,8 @@ public class WindowMagnificationPromptControllerTest {
         final Intent intent = new Intent(ACTION_TURN_ON_IN_SETTINGS);
         mReceiver.onReceive(mTestableContext, intent);
 
-        assertThat(Settings.Secure.getInt(mResolver, ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT,
-                -1)).isEqualTo(0);
+        assertThat(Settings.Secure.getIntForUser(mResolver,
+                ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT, -1, TEST_USER)).isEqualTo(0);
         verify(mTestableContext.getSpyContext()).unregisterReceiver(mReceiver);
     }
 

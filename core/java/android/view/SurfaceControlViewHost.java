@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -30,7 +31,10 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.window.ISurfaceSyncGroup;
+import android.window.InputTransferToken;
 import android.window.WindowTokenClient;
+
+import com.android.window.flags.Flags;
 
 import dalvik.system.CloseGuard;
 
@@ -150,15 +154,16 @@ public class SurfaceControlViewHost {
     public static final class SurfacePackage implements Parcelable {
         private SurfaceControl mSurfaceControl;
         private final IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
-        private final IBinder mInputToken;
+        private final InputTransferToken mInputTransferToken;
         @NonNull
         private final ISurfaceControlViewHost mRemoteInterface;
 
         SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection,
-                IBinder inputToken, @NonNull ISurfaceControlViewHost ri) {
+                InputTransferToken inputTransferToken,
+                @NonNull ISurfaceControlViewHost ri) {
             mSurfaceControl = sc;
             mAccessibilityEmbeddedConnection = connection;
-            mInputToken = inputToken;
+            mInputTransferToken = inputTransferToken;
             mRemoteInterface = ri;
         }
 
@@ -178,7 +183,7 @@ public class SurfaceControlViewHost {
                 mSurfaceControl = new SurfaceControl(otherSurfaceControl, "SurfacePackage");
             }
             mAccessibilityEmbeddedConnection = other.mAccessibilityEmbeddedConnection;
-            mInputToken = other.mInputToken;
+            mInputTransferToken = other.mInputTransferToken;
             mRemoteInterface = other.mRemoteInterface;
         }
 
@@ -188,9 +193,8 @@ public class SurfaceControlViewHost {
             mSurfaceControl.setUnreleasedWarningCallSite("SurfacePackage(Parcel)");
             mAccessibilityEmbeddedConnection = IAccessibilityEmbeddedConnection.Stub.asInterface(
                     in.readStrongBinder());
-            mInputToken = in.readStrongBinder();
-            mRemoteInterface = ISurfaceControlViewHost.Stub.asInterface(
-                in.readStrongBinder());
+            mInputTransferToken = InputTransferToken.CREATOR.createFromParcel(in);
+            mRemoteInterface = ISurfaceControlViewHost.Stub.asInterface(in.readStrongBinder());
         }
 
         /**
@@ -269,7 +273,7 @@ public class SurfaceControlViewHost {
         public void writeToParcel(@NonNull Parcel out, int flags) {
             mSurfaceControl.writeToParcel(out, flags);
             out.writeStrongBinder(mAccessibilityEmbeddedConnection.asBinder());
-            out.writeStrongBinder(mInputToken);
+            mInputTransferToken.writeToParcel(out, flags);
             out.writeStrongBinder(mRemoteInterface.asBinder());
         }
 
@@ -287,13 +291,23 @@ public class SurfaceControlViewHost {
         }
 
         /**
-         * Returns an input token used which can be used to request focus on the embedded surface
-         * or to transfer touch gesture to the embedded surface.
+         * Gets an {@link InputTransferToken} which can be used to request focus on the embedded
+         * surface or to transfer touch gesture to the embedded surface.
          *
-         * @hide
+         * @return the InputTransferToken associated with {@link SurfacePackage} or {@code null} if
+         * the embedded hasn't set up its view or doesn't have input.
+         * @see WindowManager#transferTouchGesture(InputTransferToken, InputTransferToken)
          */
-        public IBinder getInputToken() {
-            return mInputToken;
+        @Nullable
+        @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+        public InputTransferToken getInputTransferToken() {
+            return mInputTransferToken;
+        }
+
+        @Override
+        public String toString() {
+            return "{inputTransferToken=" + getInputTransferToken() + " remoteInterface="
+                    + getRemoteInterface() + "}";
         }
 
         public static final @NonNull Creator<SurfacePackage> CREATOR
@@ -335,7 +349,27 @@ public class SurfaceControlViewHost {
      */
     public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
             @Nullable IBinder hostToken) {
-        this(context, display, hostToken, "untracked");
+        this(context, display, hostToken == null ? null : new InputTransferToken(hostToken),
+                "untracked");
+
+    }
+
+    /**
+     * Construct a new SurfaceControlViewHost. The root Surface will be
+     * allocated internally and is accessible via getSurfacePackage().
+     * <p>
+     * The hostInputTransferToken parameter allows the host and embedded to be associated with
+     * each other to allow transferring touch gesture and focus. This is also used for ANR
+     * reporting. It's accessible from {@link AttachedSurfaceControl#getInputTransferToken()}.
+     *
+     * @param context                The Context object for your activity or application.
+     * @param display                The Display the hierarchy will be placed on.
+     * @param hostInputTransferToken The host input transfer token, as discussed above.
+     */
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
+            @Nullable InputTransferToken hostInputTransferToken) {
+        this(context, display, hostInputTransferToken, "untracked");
     }
 
     /**
@@ -353,7 +387,7 @@ public class SurfaceControlViewHost {
      * @hide
      */
     public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
-            @Nullable IBinder hostToken, @NonNull String callsite) {
+            @Nullable InputTransferToken hostToken, @NonNull String callsite) {
         mSurfaceControl = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("SurfaceControlViewHost")
@@ -533,20 +567,20 @@ public class SurfaceControlViewHost {
      *
      * @hide
      */
-    public IBinder getInputTransferToken() {
+    public InputTransferToken getInputTransferToken() {
         return mWm.getInputTransferToken(getWindowToken().asBinder());
     }
 
     private void addWindowToken(WindowManager.LayoutParams attrs) {
-        final WindowManagerImpl wm =
-                (WindowManagerImpl) mViewRoot.mContext.getSystemService(Context.WINDOW_SERVICE);
+        final WindowManager wm =
+                (WindowManager) mViewRoot.mContext.getSystemService(Context.WINDOW_SERVICE);
         attrs.token = wm.getDefaultToken();
     }
 
     /**
-     * Transfer the currently in progress touch gesture to the parent
-     * (if any) of this SurfaceControlViewHost. This requires that the
-     * SurfaceControlViewHost was created with an associated hostInputToken.
+     * Transfer the currently in progress touch gesture to the parent (if any) of this
+     * SurfaceControlViewHost. This requires that the SurfaceControlViewHost was created with an
+     * associated host {@link InputTransferToken}.
      *
      * @return Whether the touch stream was transferred.
      */
@@ -554,13 +588,14 @@ public class SurfaceControlViewHost {
         if (mViewRoot == null) {
             return false;
         }
-
-        final IWindowSession realWm = WindowManagerGlobal.getWindowSession();
-        try {
-            return realWm.transferEmbeddedTouchFocusToHost(mViewRoot.mWindow);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+        final WindowManager wm =
+                (WindowManager) mViewRoot.mContext.getSystemService(Context.WINDOW_SERVICE);
+        InputTransferToken embeddedToken = getInputTransferToken();
+        InputTransferToken hostToken = mWm.mHostInputTransferToken;
+        if (embeddedToken == null || hostToken == null) {
+            Log.w(TAG, "Failed to transferTouchGestureToHost. Host or embedded token is null");
+            return false;
         }
-        return false;
+        return wm.transferTouchGesture(getInputTransferToken(), mWm.mHostInputTransferToken);
     }
 }

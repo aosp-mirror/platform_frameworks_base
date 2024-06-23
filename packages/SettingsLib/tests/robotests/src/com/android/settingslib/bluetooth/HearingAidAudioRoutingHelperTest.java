@@ -18,8 +18,10 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +45,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,6 +82,8 @@ public class HearingAidAudioRoutingHelperTest {
         when(mAudioDeviceInfo.getAddress()).thenReturn(TEST_DEVICE_ADDRESS);
         when(mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(
                 new AudioDeviceInfo[]{mAudioDeviceInfo});
+        doReturn(Collections.emptyList()).when(mAudioManager).getPreferredDevicesForStrategy(
+                any(AudioProductStrategy.class));
         when(mAudioStrategy.getAudioAttributesForLegacyStreamType(
                 AudioManager.STREAM_MUSIC))
                 .thenReturn((new AudioAttributes.Builder()).build());
@@ -92,12 +97,26 @@ public class HearingAidAudioRoutingHelperTest {
     }
 
     @Test
-    public void setPreferredDeviceRoutingStrategies_valueAuto_callRemoveStrategy() {
+    public void setPreferredDeviceRoutingStrategies_hadValueThenValueAuto_callRemoveStrategy() {
+        when(mAudioManager.getPreferredDeviceForStrategy(mAudioStrategy)).thenReturn(
+                mHearingDeviceAttribute);
+
         mHelper.setPreferredDeviceRoutingStrategies(List.of(mAudioStrategy),
                 mHearingDeviceAttribute,
                 HearingAidAudioRoutingConstants.RoutingValue.AUTO);
 
         verify(mAudioManager, atLeastOnce()).removePreferredDeviceForStrategy(mAudioStrategy);
+    }
+
+    @Test
+    public void setPreferredDeviceRoutingStrategies_NoValueThenValueAuto_notCallRemoveStrategy() {
+        when(mAudioManager.getPreferredDeviceForStrategy(mAudioStrategy)).thenReturn(null);
+
+        mHelper.setPreferredDeviceRoutingStrategies(List.of(mAudioStrategy),
+                mHearingDeviceAttribute,
+                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+
+        verify(mAudioManager, never()).removePreferredDeviceForStrategy(mAudioStrategy);
     }
 
     @Test

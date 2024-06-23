@@ -50,6 +50,7 @@ import java.util.Collection;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@android.platform.test.annotations.EnabledOnRavenwood
 public class DreamOverlayStateControllerTest extends SysuiTestCase {
     @Mock
     DreamOverlayStateController.Callback mCallback;

@@ -183,16 +183,22 @@ public class EvemuParserTest {
     }
 
     private void assertInjectEvent(Event event, int eventType, int eventCode, int value) {
+        assertInjectEvent(event, eventType, eventCode, value, 0);
+    }
+
+    private void assertInjectEvent(Event event, int eventType, int eventCode, int value,
+                                   long timestampOffsetMicros) {
         assertThat(event).isNotNull();
         assertThat(event.getCommand()).isEqualTo(Event.Command.INJECT);
         assertThat(event.getInjections()).asList()
                 .containsExactly(eventType, eventCode, value).inOrder();
+        assertThat(event.getTimestampOffsetMicros()).isEqualTo(timestampOffsetMicros);
     }
 
-    private void assertDelayEvent(Event event, int durationMillis) {
+    private void assertDelayEvent(Event event, int durationNanos) {
         assertThat(event).isNotNull();
         assertThat(event.getCommand()).isEqualTo(Event.Command.DELAY);
-        assertThat(event.getDurationMillis()).isEqualTo(durationMillis);
+        assertThat(event.getDurationNanos()).isEqualTo(durationNanos);
     }
 
     @Test
@@ -207,7 +213,7 @@ public class EvemuParserTest {
         EvemuParser parser = new EvemuParser(reader);
         assertThat(parser.getNextEvent().getCommand()).isEqualTo(Event.Command.REGISTER);
         assertThat(parser.getNextEvent().getCommand()).isEqualTo(Event.Command.DELAY);
-        assertInjectEvent(parser.getNextEvent(), 0x2, 0x0, 1);
+        assertInjectEvent(parser.getNextEvent(), 0x2, 0x0, 1, -1);
         assertInjectEvent(parser.getNextEvent(), 0x2, 0x1, -2);
         assertInjectEvent(parser.getNextEvent(), 0x0, 0x0, 0);
     }
@@ -228,17 +234,17 @@ public class EvemuParserTest {
         assertThat(parser.getNextEvent().getCommand()).isEqualTo(Event.Command.REGISTER);
         assertThat(parser.getNextEvent().getCommand()).isEqualTo(Event.Command.DELAY);
 
-        assertInjectEvent(parser.getNextEvent(), 0x1, 0x15, 1);
+        assertInjectEvent(parser.getNextEvent(), 0x1, 0x15, 1, -1);
         assertInjectEvent(parser.getNextEvent(), 0x0, 0x0, 0);
 
-        assertDelayEvent(parser.getNextEvent(), 10);
+        assertDelayEvent(parser.getNextEvent(), 10_000_000);
 
-        assertInjectEvent(parser.getNextEvent(), 0x1, 0x15, 0);
+        assertInjectEvent(parser.getNextEvent(), 0x1, 0x15, 0, 10_000);
         assertInjectEvent(parser.getNextEvent(), 0x0, 0x0, 0);
 
-        assertDelayEvent(parser.getNextEvent(), 1000);
+        assertDelayEvent(parser.getNextEvent(), 1_000_000_000);
 
-        assertInjectEvent(parser.getNextEvent(), 0x1, 0x15, 1);
+        assertInjectEvent(parser.getNextEvent(), 0x1, 0x15, 1, 1_000_000);
         assertInjectEvent(parser.getNextEvent(), 0x0, 0x0, 0);
     }
 
@@ -449,7 +455,7 @@ public class EvemuParserTest {
         assertThat(regEvent.getBus()).isEqualTo(0x001d);
         assertThat(regEvent.getVendorId()).isEqualTo(0x6cb);
         assertThat(regEvent.getProductId()).isEqualTo(0x0000);
-        // TODO(b/302297266): check version ID once it's supported
+        assertThat(regEvent.getVersionId()).isEqualTo(0x0000);
 
         assertThat(regEvent.getConfiguration().get(UinputControlCode.UI_SET_PROPBIT.getValue()))
                 .asList().containsExactly(0, 2);
@@ -477,7 +483,7 @@ public class EvemuParserTest {
 
         assertThat(parser.getNextEvent().getCommand()).isEqualTo(Event.Command.DELAY);
 
-        assertInjectEvent(parser.getNextEvent(), 0x3, 0x39, 0);
+        assertInjectEvent(parser.getNextEvent(), 0x3, 0x39, 0, -1);
         assertInjectEvent(parser.getNextEvent(), 0x3, 0x35, 891);
         assertInjectEvent(parser.getNextEvent(), 0x3, 0x36, 333);
         assertInjectEvent(parser.getNextEvent(), 0x3, 0x3a, 56);
@@ -490,8 +496,8 @@ public class EvemuParserTest {
         assertInjectEvent(parser.getNextEvent(), 0x3, 0x18, 56);
         assertInjectEvent(parser.getNextEvent(), 0x0, 0x0, 0);
 
-        assertDelayEvent(parser.getNextEvent(), 6);
+        assertDelayEvent(parser.getNextEvent(), 6_080_000);
 
-        assertInjectEvent(parser.getNextEvent(), 0x3, 0x0035, 888);
+        assertInjectEvent(parser.getNextEvent(), 0x3, 0x0035, 888, 6_080);
     }
 }

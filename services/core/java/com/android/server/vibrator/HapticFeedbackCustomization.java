@@ -19,8 +19,8 @@ package com.android.server.vibrator;
 import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.os.VibrationEffect;
-import android.os.vibrator.Flags;
 import android.os.VibratorInfo;
+import android.os.vibrator.Flags;
 import android.os.vibrator.persistence.ParsedVibration;
 import android.os.vibrator.persistence.VibrationXmlParser;
 import android.text.TextUtils;
@@ -73,8 +73,6 @@ import java.io.IOException;
  *
  * <p>After a successful parsing of the customization XML file, it returns a {@link SparseArray}
  * that maps each customized haptic feedback effect ID to its respective {@link VibrationEffect}.
- *
- * @hide
  */
 final class HapticFeedbackCustomization {
     private static final String TAG = "HapticFeedbackCustomization";
@@ -104,8 +102,6 @@ final class HapticFeedbackCustomization {
      * @throws {@link IOException} if an IO error occurs while parsing the customization XML.
      * @throws {@link CustomizationParserException} for any non-IO error that occurs when parsing
      *      the XML, like an invalid XML content or an invalid haptic feedback constant.
-     *
-     * @hide
      */
     @Nullable
     static SparseArray<VibrationEffect> loadVibrations(Resources res, VibratorInfo vibratorInfo)
@@ -202,8 +198,6 @@ final class HapticFeedbackCustomization {
 
     /**
      * Represents an error while parsing a haptic feedback customization XML.
-     *
-     * @hide
      */
     static final class CustomizationParserException extends Exception {
         private CustomizationParserException(String message) {

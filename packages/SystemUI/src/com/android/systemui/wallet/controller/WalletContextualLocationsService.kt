@@ -6,9 +6,12 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.android.systemui.Flags.registerNewWalletCardInBackground
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -21,6 +24,7 @@ import kotlinx.coroutines.launch
 class WalletContextualLocationsService
 @Inject
 constructor(
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val controller: WalletContextualSuggestionsController,
     private val featureFlags: FeatureFlags,
 ) : LifecycleService() {
@@ -29,20 +33,30 @@ constructor(
 
     @VisibleForTesting
     constructor(
+        dispatcher: CoroutineDispatcher,
         controller: WalletContextualSuggestionsController,
         featureFlags: FeatureFlags,
         scope: CoroutineScope,
-    ) : this(controller, featureFlags) {
+    ) : this(dispatcher, controller, featureFlags) {
         this.scope = scope
     }
-
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
-        scope.launch {
-            controller.allWalletCards.collect { cards ->
-                val cardsSize = cards.size
-                Log.i(TAG, "Number of cards registered $cardsSize")
-                listener?.registerNewWalletCards(cards)
+        if (registerNewWalletCardInBackground()) {
+            scope.launch(backgroundDispatcher) {
+                controller.allWalletCards.collect { cards ->
+                    val cardsSize = cards.size
+                    Log.i(TAG, "Number of cards registered $cardsSize")
+                    listener?.registerNewWalletCards(cards)
+                }
+            }
+        } else {
+            scope.launch {
+                controller.allWalletCards.collect { cards ->
+                    val cardsSize = cards.size
+                    Log.i(TAG, "Number of cards registered $cardsSize")
+                    listener?.registerNewWalletCards(cards)
+                }
             }
         }
         return binder
@@ -77,15 +91,15 @@ constructor(
         controller.setSuggestionCardIds(storeLocations.toSet())
     }
 
-    private val binder: IWalletContextualLocationsService.Stub
-    = object : IWalletContextualLocationsService.Stub() {
-        override fun addWalletCardsUpdatedListener(listener: IWalletCardsUpdatedListener) {
-            addWalletCardsUpdatedListenerInternal(listener)
+    private val binder: IWalletContextualLocationsService.Stub =
+        object : IWalletContextualLocationsService.Stub() {
+            override fun addWalletCardsUpdatedListener(listener: IWalletCardsUpdatedListener) {
+                addWalletCardsUpdatedListenerInternal(listener)
+            }
+            override fun onWalletContextualLocationsStateUpdated(storeLocations: List<String>) {
+                onWalletContextualLocationsStateUpdatedInternal(storeLocations)
+            }
         }
-        override fun onWalletContextualLocationsStateUpdated(storeLocations: List<String>) {
-            onWalletContextualLocationsStateUpdatedInternal(storeLocations)
-        }
-    }
 
     companion object {
         private const val TAG = "WalletContextualLocationsService"

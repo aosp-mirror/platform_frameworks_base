@@ -26,7 +26,6 @@ import androidx.wear.compose.material.MaterialTheme
 import com.android.credentialmanager.ui.WearApp
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.system.exitProcess
 
 @AndroidEntryPoint(ComponentActivity::class)
 class CredentialSelectorActivity : Hilt_CredentialSelectorActivity() {
@@ -42,7 +41,7 @@ class CredentialSelectorActivity : Hilt_CredentialSelectorActivity() {
             MaterialTheme {
                 WearApp(
                     viewModel = viewModel,
-                    onCloseApp = { exitProcess(0) },
+                    onCloseApp = { finish() },
                 )
             }
         }

@@ -16,11 +16,12 @@
 
 package com.android.settingslib.testutils.shadow;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.PermissionChecker;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;

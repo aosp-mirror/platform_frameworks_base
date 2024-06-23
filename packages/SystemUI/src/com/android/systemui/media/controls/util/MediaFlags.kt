@@ -58,4 +58,7 @@ constructor(
     /** Check whether to use scene framework */
     fun isSceneContainerEnabled() =
         sceneContainerFlags.isEnabled() && MediaInSceneContainerFlag.isEnabled
+
+    /** Check whether to use media refactor code */
+    fun isMediaControlsRefactorEnabled() = MediaControlsRefactorFlag.isEnabled
 }

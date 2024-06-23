@@ -20,6 +20,7 @@ package android.util;
  * Implementation of a {@link android.util.Printer} that sends its output
  * to the system log.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LogPrinter implements Printer {
     private final int mPriority;
     private final String mTag;

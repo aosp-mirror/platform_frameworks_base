@@ -20,10 +20,12 @@ import static android.view.View.MeasureSpec.UNSPECIFIED;
 
 import android.graphics.Canvas;
 import android.graphics.RecordingCanvas;
+import android.graphics.RectF;
 import android.graphics.RenderNode;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.text.NonEditableTextGenerator.TextType;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.test.InstrumentationRegistry;
@@ -79,7 +81,7 @@ public class TextViewSetTextMeasurePerfTest {
         mCached = cached;
         mTextPaint = new TextPaint();
         mTextPaint.setTextSize(10);
-        mLineWidth = Integer.MAX_VALUE;
+        mLineWidth = 2048;
     }
 
     /**
@@ -106,7 +108,9 @@ public class TextViewSetTextMeasurePerfTest {
             state.resumeTiming();
 
             textView.setText(text);
-            textView.measure(AT_MOST | mLineWidth, UNSPECIFIED);
+            textView.measure(
+                    View.MeasureSpec.makeMeasureSpec(mLineWidth, AT_MOST),
+                    UNSPECIFIED);
         }
     }
 
@@ -129,10 +133,16 @@ public class TextViewSetTextMeasurePerfTest {
         while (state.keepRunning()) {
 
             state.pauseTiming();
-            final RecordingCanvas canvas = node.start(1200, 200);
-            int save = canvas.save();
             textView.setTextLocale(Locale.UK);
             textView.setTextLocale(Locale.US);
+            textView.measure(
+                    View.MeasureSpec.makeMeasureSpec(mLineWidth, AT_MOST),
+                    UNSPECIFIED);
+            RectF bounds = textView.getLayout().computeDrawingBoundingBox();
+            final RecordingCanvas canvas = node.start(
+                    (int) Math.ceil(bounds.width()),
+                    (int) Math.ceil(bounds.height()));
+            int save = canvas.save();
             if (!mCached) Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 

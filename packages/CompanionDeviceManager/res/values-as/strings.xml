@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"মাইক্ৰ’ফ’ন"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"কল লগ"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"নিকটৱৰ্তী ডিভাইচ"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"মিডিয়া আউটপুট সলনি কৰক"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ফট’ আৰু মিডিয়া"</string>
-    <string name="permission_notification" msgid="693762568127741203">"জাননী"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"জাননী"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"এপ্"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"ষ্ট্ৰীম কৰি থকা হৈছে"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"ফ’ন কল কৰিব আৰু পৰিচালনা কৰিব পাৰে"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ফ’নৰ কল লগ পঢ়িব আৰু লিখিব পাৰে"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"এছএমএছ বাৰ্তা পঠিয়াব আৰু চাব পাৰে"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"আপোনাৰ সম্পৰ্কসূচী এক্সেছ কৰিব পাৰে"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"আপোনাৰ কেলেণ্ডাৰ এক্সেছ কৰিব পাৰে"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"অডিঅ’ ৰেকৰ্ড কৰিব পাৰে"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"নিকটৱৰ্তী ডিভাইচসমূহ বিচাৰিব, সেইসমূহৰ সৈতে সংযুক্ত হ’ব আৰু সেইসমূহৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিব পাৰে"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"সম্পৰ্কসূচী, বাৰ্তা আৰু ফট’ৰ দৰে তথ্যকে ধৰি আটাইবোৰ জাননী পঢ়িব পাৰে"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"ফ’ন কল কৰক আৰু সেয়া পৰিচলনা কৰক"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"ফ’নৰ কল লগ পঢ়ক আৰু লিখক"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"এছএমএছ বার্তাবোৰ প্ৰেৰণ কৰক আৰু চাওক"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"আপোনাৰ সম্পৰ্কসূচী এক্সেছ কৰক"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"আপোনাৰ কেলেণ্ডাৰ এক্সেছ কৰক"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"অডিঅ’ ৰেকৰ্ড কৰক"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"নিকটৱৰ্তী ডিভাইচসমূহ বিচাৰক, সেইসমূহৰ সৈতে সংযোগ কৰক আৰু সেইসমূহৰ প্ৰাসংগিক অৱস্থান নিৰ্ধাৰণ কৰক"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"সম্পৰ্কসূচী, বাৰ্তা আৰু ফট’ৰ দৰে তথ্যকে ধৰি আটাইবোৰ জাননী পঢ়ক"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• সম্পৰ্কসূচী, বাৰ্তা আৰু ফট’ৰ দৰে তথ্যকে ধৰি আটাইবোৰ জাননী পঢ়ক&lt;br/&gt;• জাননী পঠিয়াওক&lt;br/&gt;&lt;br/&gt;আপুনি যিকোনো সময়তে ছেটিং &gt; জাননীলৈ গৈ এই এপ্‌টোৰ জাননী পঢ়া আৰু পঠিওৱাৰ সক্ষমতা পৰিচালনা কৰিব পাৰে।"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"আপোনাৰ ফ’নৰ এপ্ ষ্ট্ৰীম কৰক"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"আপোনাৰ ফ’নৰ পৰা এপ্‌ আৰু ছিষ্টেমৰ অন্য সুবিধাসমূহ ষ্ট্ৰীম কৰক"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"উপলব্ধ ডিভাইচৰ সূচী এখন এক্সেছ কৰক আৰু কোনটোৱে ষ্ট্ৰীম কৰে অথবা অন্য এপৰ পৰা অডিঅ’ অথবা ভিডিঅ’ কাষ্ট কৰে সেয়া নিয়ন্ত্ৰণ কৰক"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"ফ’ন"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"টেবলেট"</string>
 </resources>

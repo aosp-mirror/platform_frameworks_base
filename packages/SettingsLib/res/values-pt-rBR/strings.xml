@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Imagem"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Headphone"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Periférico de entrada"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"Aparelhos auditivos"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi desligado."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi desconectado"</string>
@@ -436,7 +437,7 @@
     <string name="transcode_default" msgid="3784803084573509491">"Considerar que os apps são compatíveis com formatos modernos"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostrar notificações de transcodificação"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Desativar cache da transcodificação"</string>
-    <string name="widevine_settings_title" msgid="4023329801172572917">"Configurações o Widevine"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Configurações de Widevine"</string>
     <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forçar substituição do L3"</string>
     <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Selecione para forçar a substituição do L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serviços em execução"</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"A correção de cor pode ser útil caso você queira:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;ver cores mais nítidas;&lt;/li&gt; &lt;li&gt;&amp;nbsp;remover cores para que você possa se concentrar.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Substituído por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - Carregamento suspenso para proteger a bateria"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g>: verifique o acessório de carregamento"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Tempo restante aproximado: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Tempo restante aproximado: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Tempo restante aproximado, com base no seu uso: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> até a conclusão"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> até a conclusão"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Carregamento otimizado"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Carregamento otimizado"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> (carregando)"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconhecido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Carregando"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregando rápido"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Carregando sem fio"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Carregando"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Não está carregando"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Conectado sem carregar"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Conectado, mas não está carregando"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Carregada"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Carga completa"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Carregamento suspenso"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada pelo admin"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlada pelas configurações restritas"</string>
     <string name="disabled" msgid="8017887509554714950">"Desativado"</string>
@@ -518,7 +522,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado do registro de IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registrado"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Não registrado"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Não disponível"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Indisponível"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"O MAC é randomizado"</string>
     <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 dispositivo conectado}one{# dispositivo conectado}other{# dispositivos conectados}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mais tempo."</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Perguntar sempre"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Até você desativar"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este telefone"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Este tablet"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Este telefone"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Este tablet"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Alto-falante da base"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Falha ao criar um novo usuário"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Falha ao criar um novo convidado"</string>
     <string name="user_nickname" msgid="262624187455825083">"Apelido"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"Seu nome e foto vão ficar visíveis para qualquer pessoa que use este dispositivo."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Adicionar usuário"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Adicionar visitante"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remover visitante"</string>
@@ -636,7 +641,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Excluir"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Salvar"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Sair do modo visitante"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"Redefinir Sessão de visitante"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Redefinir sessão de visitante"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Sair do modo visitante"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Todas as atividades serão excluídas ao sair"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Você pode salvar ou excluir sua atividade ao sair"</string>
@@ -689,7 +694,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Padrão"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ligar tela"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir que a tela seja ligada"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permitir que um app ligue a tela. Se permitido, o app vai poder ligar a tela a qualquer momento sem uma intent explícita."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permitir que um app ative a tela. Com sua autorização, o app vai poder ligar a tela a qualquer momento, sem você pedir."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão do app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se você transmitir o app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou mudar a saída, a transmissão atual será interrompida"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

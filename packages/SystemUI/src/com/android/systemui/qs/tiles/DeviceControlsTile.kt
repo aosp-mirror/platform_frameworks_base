@@ -26,7 +26,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.res.R
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE
@@ -112,7 +112,7 @@ class DeviceControlsTile @Inject constructor(
             putExtra(ControlsUiController.EXTRA_ANIMATE, true)
         }
         val animationController = view?.let {
-            ActivityLaunchAnimator.Controller.fromView(
+            ActivityTransitionAnimator.Controller.fromView(
                     it, InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE)
         }
 

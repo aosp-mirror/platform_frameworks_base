@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"بينما ننطلق نحو مستقبل بدون كلمات مرور، ستظل كلمات المرور متوفّرة إلى جانب مفاتيح المرور."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"اختيار المكان الذي تريد حفظ <xliff:g id="CREATETYPES">%1$s</xliff:g> فيه"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"اختَر مدير كلمات مرور لحفظ معلوماتك وتسجيل الدخول بشكل أسرع في المرة القادمة."</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"هل تريد إنشاء مفتاح مرور لتطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\"؟"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"هل تريد حفظ كلمة المرور لتطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\"؟"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"هل تريد إنشاء مفتاح مرور لتسجيل الدخول إلى تطبيق <xliff:g id="APPNAME">%1$s</xliff:g>؟"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"هل تريد حفظ كلمة المرور لتسجيل الدخول إلى تطبيق <xliff:g id="APPNAME">%1$s</xliff:g>؟"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"هل تريد حفظ معلومات تسجيل الدخول لتطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\"؟"</string>
     <string name="passkey" msgid="632353688396759522">"مفتاح المرور"</string>
     <string name="password" msgid="6738570945182936667">"كلمة المرور"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"من جهاز آخر"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"استخدام جهاز مختلف"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"تم إلغاء الطلب بواسطة \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"خيارات تسجيل الدخول"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"المزيد"</string>
 </resources>

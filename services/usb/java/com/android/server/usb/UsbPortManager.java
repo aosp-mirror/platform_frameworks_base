@@ -319,6 +319,16 @@ public class UsbPortManager implements IBinder.DeathRecipient {
     }
 
     /**
+     * Returns true if the provided port supports changing its mode.
+     */
+    public boolean isModeChangeSupported(String portId) {
+        synchronized (mLock) {
+            final PortInfo portInfo = mPorts.get(portId);
+            return portInfo != null ? portInfo.mCanChangeMode : false;
+        }
+    }
+
+    /**
      * Enables/disables contaminant detection.
      *
      * @param portId port identifier.

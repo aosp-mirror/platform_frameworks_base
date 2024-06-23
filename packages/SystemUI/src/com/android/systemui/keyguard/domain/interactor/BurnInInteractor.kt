@@ -63,17 +63,19 @@ constructor(
                 burnInHelperWrapper.burnInProgressOffset()
             )
 
-    val keyguardBurnIn: Flow<BurnInModel> =
-        combine(
-                burnInOffset(R.dimen.burn_in_prevention_offset_x, isXAxis = true),
-                burnInOffset(R.dimen.burn_in_prevention_offset_y, isXAxis = false).map {
-                    it * 2 -
-                        context.resources.getDimensionPixelSize(R.dimen.burn_in_prevention_offset_y)
+    /** Given the max x,y dimens, determine the current translation shifts. */
+    fun burnIn(xDimenResourceId: Int, yDimenResourceId: Int): Flow<BurnInModel> {
+        return combine(
+                burnInOffset(xDimenResourceId, isXAxis = true),
+                burnInOffset(yDimenResourceId, isXAxis = false).map {
+                    it * 2 - context.resources.getDimensionPixelSize(yDimenResourceId)
                 }
             ) { translationX, translationY ->
                 BurnInModel(translationX, translationY, burnInHelperWrapper.burnInScale())
             }
             .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Lazily, BurnInModel())
+    }
 
     /**
      * Use for max burn-in offsets that are NOT specified in pixels. This flow will recalculate the

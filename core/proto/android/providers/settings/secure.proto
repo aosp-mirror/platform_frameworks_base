@@ -93,13 +93,15 @@ message SecureSettingsProto {
         optional SettingProto hearing_aid_ringtone_routing = 46 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto hearing_aid_call_routing = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto hearing_aid_media_routing = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto hearing_aid_system_sounds_routing = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto hearing_aid_notification_routing = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_magnification_joystick_enabled = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Settings for font scaling
         optional SettingProto accessibility_font_scaling_has_been_changed = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_force_invert_color_enabled = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_magnification_two_finger_triple_tap_enabled = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto qs_targets = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_pinch_to_zoom_anywhere_enabled = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_single_finger_panning_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     }
     optional Accessibility accessibility = 2;
@@ -143,6 +145,7 @@ message SecureSettingsProto {
         optional SettingProto long_press_home_enabled = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto search_press_hold_nav_handle_enabled = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto search_long_press_home_enabled = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto visual_query_accessibility_detection_enabled = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Assist assist = 7;
 
@@ -612,6 +615,7 @@ message SecureSettingsProto {
     }
     optional Sounds sounds = 72;
 
+    optional SettingProto stylus_pointer_icon_enabled = 99 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto swipe_bottom_to_notification_enabled = 82 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Defines whether managed profile ringtones should be synced from its
     // parent profile.
@@ -720,5 +724,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 99;
+    // Next tag = 100;
 }

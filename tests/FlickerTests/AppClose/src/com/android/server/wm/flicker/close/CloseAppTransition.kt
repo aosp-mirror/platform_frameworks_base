@@ -17,12 +17,12 @@
 package com.android.server.wm.flicker.close
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.flicker.subject.layers.LayersTraceSubject.Companion.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.common.traces.component.ComponentNameMatcher.Companion.LAUNCHER
 import android.tools.device.apphelpers.StandardAppHelper
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.subject.layers.LayersTraceSubject.Companion.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.component.ComponentNameMatcher.Companion.LAUNCHER
 import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper

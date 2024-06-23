@@ -84,7 +84,7 @@
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Frakoblet"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Kobler fra…"</string>
-    <string name="bluetooth_connecting" msgid="5871702668260192755">"Kobler til…"</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"Kobler til …"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Koblet til <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Kobler til …"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Koblet til (ingen telefon) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Bildefremviser"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Øretelefoner"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Inndata fra ytre utstyrsenheter"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"Høreapparater"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wifi er av."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wifi er frakoblet."</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Fargekorrigering kan være nyttig når du vil&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;se farger mer nøyaktig&lt;/li&gt; &lt;li&gt;&amp;nbsp;fjerne farger for å gjøre det enklere å fokusere&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overstyres av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladingen er satt på vent for å beskytte batteriet"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> – sjekk ladetilbehøret"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> igjen"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> igjen (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> igjen basert på bruken din"</string>
@@ -475,7 +478,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Fulladet om <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Fulladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladingen er optimalisert"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladingen er optimalisert"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – lader"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ukjent"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Lader"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Lader raskt"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Lader trådløst"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Lader"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Lader ikke"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Tilkoblet, lader ikke"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Tilkoblet, men lader ikke"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Ladet"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Fulladet"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Ladingen er satt på vent"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrollert av administratoren"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kontrollert av en begrenset innstilling"</string>
     <string name="disabled" msgid="8017887509554714950">"Slått av"</string>
@@ -547,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Spør hver gang"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Til du slår av"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nå nettopp"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Denne telefonen"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Dette nettbrettet"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Denne telefonen"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Dette nettbrettet"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dokkhøyttaler"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ekstern enhet"</string>
@@ -615,6 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Kunne ikke opprette noen ny bruker"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Kunne ikke opprette en ny gjest"</string>
     <string name="user_nickname" msgid="262624187455825083">"Kallenavn"</string>
+    <string name="edit_user_info_message" msgid="5199468585059260053">"Navnet og bildet ditt blir synlige for alle som bruker denne enheten."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Legg til bruker"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Legg til gjest"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjern gjesten"</string>
@@ -652,7 +657,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Slått av"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Slått på"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Enheten din må startes på nytt for at denne endringen skal tre i kraft. Start på nytt nå eller avbryt."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Hodetelefoner med kabel"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"hodetelefoner med kabel"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"På"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Av"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Bytting av operatørnettverk"</string>

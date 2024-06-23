@@ -21,8 +21,8 @@ import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.TestPackageParser2;
 
 import junit.framework.Assert;

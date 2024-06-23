@@ -32,7 +32,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
@@ -193,7 +192,7 @@ public class SurfaceAnimator {
             return;
         }
         mAnimation.startAnimation(mLeash, t, type, mInnerAnimationFinishedCallback);
-        if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+        if (ProtoLog.isEnabled(WM_DEBUG_ANIM)) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             mAnimation.dump(pw, "");

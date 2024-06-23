@@ -113,10 +113,48 @@ flag {
 }
 
 flag {
+    name: "relative_reference_intent_filters"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable relative reference intent filters"
+    bug: "307556883"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "fix_duplicated_flags"
     namespace: "package_manager_service"
     description: "Feature flag to fix duplicated PackageManager flag values"
     bug: "314815969"
+}
+
+flag {
+    name: "provide_info_of_apk_in_apex"
+    namespace: "package_manager_service"
+    description: "Feature flag to provide the information of APK-in-APEX"
+    bug: "306329516"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "improve_home_app_behavior"
+    namespace: "package_manager_service"
+    description: "Feature flag to improve the uninstallation and preferred activity of home app."
+    bug: "310801107"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "introduce_media_processing_type"
+    namespace: "backstage_power"
+    description: "Add a new FGS type for media processing use cases."
+    bug: "317788011"
+}
+
+flag {
+    name: "encode_app_intent"
+    namespace: "package_manager_service"
+    description: "Feature flag to encode app intent."
+    bug: "281848623"
 }
 
 flag {
@@ -125,5 +163,66 @@ flag {
     namespace: "package_manager_service"
     description: "Feature flag to enable recoverability detection feature. It includes GMS core rollback and improvements to rescue party."
     bug: "291135724"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "fix_system_apps_first_install_time"
+    namespace: "package_manager_service"
+    description: "Feature flag to fix the first-install timestamps for system apps."
+    bug: "321258605"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "allow_sdk_sandbox_query_intent_activities"
+    namespace: "package_manager_service"
+    description: "Feature flag to allow the sandbox SDK to query intent activities of the client app."
+    bug: "295842134"
+}
+
+flag {
+    name: "emergency_install_permission"
+    namespace: "permissions"
+    description: "Feature flag to enable permission EMERGENCY_INSTALL_PACKAGES"
+    bug: "321080601"
+}
+
+flag {
+    name: "asl_in_apk_app_metadata_source"
+    namespace: "package_manager_service"
+    description: "Feature flag to allow to know if the Android Safety Label (ASL) of an app is provided by the app's APK itself, or provided by an installer."
+    bug: "287487923"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "force_multi_arch_native_libs_match"
+    namespace: "package_manager_service"
+    description: "Feature flag to force an multiArch app's native libraries to match with the natively supported ABIs of the device"
+    bug: "282783453"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "set_pre_verified_domains"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable pre-verified domains"
+    bug: "307327678"
+}
+
+flag {
+    name: "restrict_nonpreloads_system_shareduids"
+    namespace: "package_manager_service"
+    description: "Feature flag to restrict apps from joining system shared uids"
+    bug: "308573169"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "min_target_sdk_24"
+    namespace: "responsible_apis"
+    description: "Feature flag to bump min target sdk to 24"
+    bug: "297603927"
     is_fixed_read_only: true
 }

@@ -26,6 +26,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.SystemClock;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -35,6 +38,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,6 +56,10 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SQLiteDatabaseTest {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final String TAG = "SQLiteDatabaseTest";
 
@@ -247,6 +255,7 @@ public class SQLiteDatabaseTest {
 
         final String query = "--comment\nSELECT count(*) from t1";
 
+        database.beginTransactionReadOnly();
         try {
             for (int i = count; i > 0; i--) {
                 ticker.arriveAndAwaitAdvance();
@@ -260,6 +269,7 @@ public class SQLiteDatabaseTest {
         } catch (Throwable t) {
             errors.add(t);
         } finally {
+            database.endTransaction();
             ticker.arriveAndDeregister();
         }
     }
@@ -346,5 +356,51 @@ public class SQLiteDatabaseTest {
         assertEquals(6, r);
 
         assertTrue("ReadThread failed with errors: " + errors, errors.isEmpty());
+    }
+
+    @RequiresFlagsEnabled(Flags.FLAG_SQLITE_ALLOW_TEMP_TABLES)
+    @Test
+    public void testTempTable() {
+        boolean allowed;
+        allowed = true;
+        mDatabase.beginTransactionReadOnly();
+        try {
+            mDatabase.execSQL("CREATE TEMP TABLE t1 (i int, j int);");
+            mDatabase.execSQL("INSERT INTO t1 (i, j) VALUES (2, 20)");
+            mDatabase.execSQL("INSERT INTO t1 (i, j) VALUES (3, 30)");
+
+            final String sql = "SELECT i FROM t1 WHERE j = 30";
+            try (SQLiteRawStatement s = mDatabase.createRawStatement(sql)) {
+                assertTrue(s.step());
+                assertEquals(3, s.getColumnInt(0));
+            }
+
+        } catch (SQLiteException e) {
+            allowed = false;
+        } finally {
+            mDatabase.endTransaction();
+        }
+        assertTrue(allowed);
+
+        // Repeat the test on the main schema.
+        allowed = true;
+        mDatabase.beginTransactionReadOnly();
+        try {
+            mDatabase.execSQL("CREATE TABLE t2 (i int, j int);");
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (2, 20)");
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (3, 30)");
+
+            final String sql = "SELECT i FROM t2 WHERE j = 30";
+            try (SQLiteRawStatement s = mDatabase.createRawStatement(sql)) {
+                assertTrue(s.step());
+                assertEquals(3, s.getColumnInt(0));
+            }
+
+        } catch (SQLiteException e) {
+            allowed = false;
+        } finally {
+            mDatabase.endTransaction();
+        }
+        assertFalse(allowed);
     }
 }

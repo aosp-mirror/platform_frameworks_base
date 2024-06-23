@@ -19,7 +19,8 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
 import com.android.settingslib.Utils
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -41,14 +43,15 @@ class DeviceEntryForegroundViewModel
 @Inject
 constructor(
     val context: Context,
-    configurationRepository: ConfigurationRepository, // TODO (b/309655554): create & use interactor
+    configurationInteractor: ConfigurationInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     deviceEntryIconViewModel: DeviceEntryIconViewModel,
+    udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
-    private val isShowingAod: Flow<Boolean> =
+    private val isShowingAodOrDozing: Flow<Boolean> =
         transitionInteractor.startedKeyguardState.map { keyguardState ->
-            keyguardState == KeyguardState.AOD
+            keyguardState == KeyguardState.AOD || keyguardState == KeyguardState.DOZING
         }
 
     private fun getColor(usingBackgroundProtection: Boolean): Int {
@@ -61,22 +64,31 @@ constructor(
 
     private val color: Flow<Int> =
         deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBgProtection ->
-            configurationRepository.onAnyConfigurationChange
+            configurationInteractor.onAnyConfigurationChange
                 .map { getColor(useBgProtection) }
                 .onStart { emit(getColor(useBgProtection)) }
         }
 
+    // While dozing, the display can show the AOD UI; show the AOD udfps when dozing
     private val useAodIconVariant: Flow<Boolean> =
-        combine(isShowingAod, deviceEntryUdfpsInteractor.isUdfpsSupported) {
-                isTransitionToAod,
-                isUdfps ->
-                isTransitionToAod && isUdfps
+        deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest { udfspEnrolled ->
+            if (udfspEnrolled) {
+                isShowingAodOrDozing.distinctUntilChanged()
+            } else {
+                flowOf(false)
             }
-            .distinctUntilChanged()
+        }
+
     private val padding: Flow<Int> =
-        configurationRepository.scaleForResolution.map { scale ->
-            (context.resources.getDimensionPixelSize(R.dimen.lock_icon_padding) * scale)
-                .roundToInt()
+        deviceEntryUdfpsInteractor.isUdfpsSupported.flatMapLatest { udfpsSupported ->
+            if (udfpsSupported) {
+                udfpsOverlayInteractor.iconPadding
+            } else {
+                configurationInteractor.scaleForResolution.map { scale ->
+                    (context.resources.getDimensionPixelSize(R.dimen.lock_icon_padding) * scale)
+                        .roundToInt()
+                }
+            }
         }
 
     val viewModel: Flow<ForegroundIconViewModel> =

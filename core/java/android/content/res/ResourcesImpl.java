@@ -200,7 +200,7 @@ public class ResourcesImpl {
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;
         mConfiguration.setToDefaults();
-        updateConfiguration(config, metrics, displayAdjustments.getCompatibilityInfo());
+        updateConfigurationImpl(config, metrics, displayAdjustments.getCompatibilityInfo(), true);
     }
 
     public DisplayAdjustments getDisplayAdjustments() {
@@ -273,14 +273,27 @@ public class ResourcesImpl {
         throw new NotFoundException("String resource name " + name);
     }
 
+    private static boolean isIntLike(@NonNull String s) {
+        if (s.isEmpty() || s.length() > 10) return false;
+        for (int i = 0, size = s.length(); i < size; i++) {
+            final char c = s.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     int getIdentifier(String name, String defType, String defPackage) {
         if (name == null) {
             throw new NullPointerException("name is null");
         }
-        try {
-            return Integer.parseInt(name);
-        } catch (Exception e) {
-            // Ignore
+        if (isIntLike(name)) {
+            try {
+                return Integer.parseInt(name);
+            } catch (Exception e) {
+                // Ignore
+            }
         }
         return mAssets.getResourceIdentifier(name, defType, defPackage);
     }
@@ -389,7 +402,12 @@ public class ResourcesImpl {
     }
 
     public void updateConfiguration(Configuration config, DisplayMetrics metrics,
-                                    CompatibilityInfo compat) {
+            CompatibilityInfo compat) {
+        updateConfigurationImpl(config, metrics, compat, false);
+    }
+
+    private void updateConfigurationImpl(Configuration config, DisplayMetrics metrics,
+                                    CompatibilityInfo compat, boolean forceAssetsRefresh) {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "ResourcesImpl#updateConfiguration");
         try {
             synchronized (mAccessLock) {
@@ -515,7 +533,7 @@ public class ResourcesImpl {
                     keyboardHidden = mConfiguration.keyboardHidden;
                 }
 
-                mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
+                mAssets.setConfigurationInternal(mConfiguration.mcc, mConfiguration.mnc,
                         defaultLocale,
                         selectedLocales,
                         mConfiguration.orientation,
@@ -526,7 +544,7 @@ public class ResourcesImpl {
                         mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
                         mConfiguration.screenLayout, mConfiguration.uiMode,
                         mConfiguration.colorMode, mConfiguration.getGrammaticalGender(),
-                        Build.VERSION.RESOURCES_SDK_INT);
+                        Build.VERSION.RESOURCES_SDK_INT, forceAssetsRefresh);
 
                 if (DEBUG_CONFIG) {
                     Slog.i(TAG, "**** Updating config of " + this + ": final config is "

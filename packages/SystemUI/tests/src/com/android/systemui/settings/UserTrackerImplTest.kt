@@ -177,7 +177,7 @@ class UserTrackerImplTest : SysuiTestCase() {
         verify(context)
                 .registerReceiverForAllUsers(eq(tracker), capture(captor), isNull(), eq(handler))
         with(captor.value) {
-            assertThat(countActions()).isEqualTo(7)
+            assertThat(countActions()).isEqualTo(11)
             assertThat(hasAction(Intent.ACTION_LOCALE_CHANGED)).isTrue()
             assertThat(hasAction(Intent.ACTION_USER_INFO_CHANGED)).isTrue()
             assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)).isTrue()
@@ -185,6 +185,10 @@ class UserTrackerImplTest : SysuiTestCase() {
             assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_ADDED)).isTrue()
             assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_REMOVED)).isTrue()
             assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_PROFILE_ADDED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_PROFILE_REMOVED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_PROFILE_AVAILABLE)).isTrue()
+            assertThat(hasAction(Intent.ACTION_PROFILE_UNAVAILABLE)).isTrue()
         }
     }
 
@@ -367,7 +371,6 @@ class UserTrackerImplTest : SysuiTestCase() {
 
         val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
         verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
-        captor.value.onBeforeUserSwitching(newID)
         captor.value.onUserSwitching(newID, userSwitchingReply)
 
         assertThat(callback.calledOnUserChanging).isEqualTo(0)

@@ -20,11 +20,10 @@ package com.android.server.display.mode;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.Mode.INVALID_MODE_ID;
 
-
 import static com.android.server.display.mode.DisplayModeDirector.SYNCHRONIZED_REFRESH_RATE_TOLERANCE;
 import static com.android.server.display.mode.Vote.PRIORITY_LIMIT_MODE;
-import static com.android.server.display.mode.Vote.PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE;
 import static com.android.server.display.mode.Vote.PRIORITY_SYNCHRONIZED_REFRESH_RATE;
+import static com.android.server.display.mode.Vote.PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE;
 import static com.android.server.display.mode.VotesStorage.GLOBAL_ID;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -43,6 +42,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfigInterface;
+import android.test.mock.MockContentResolver;
 import android.view.Display;
 import android.view.DisplayInfo;
 
@@ -51,21 +51,26 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.sensors.SensorManagerInternal;
 
+import junitparams.JUnitParamsRunner;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import junitparams.JUnitParamsRunner;
-
-
 @SmallTest
 @RunWith(JUnitParamsRunner.class)
 public class DisplayObserverTest {
+    @Rule
+    public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+
     private static final int EXTERNAL_DISPLAY = 1;
     private static final int MAX_WIDTH = 1920;
     private static final int MAX_HEIGHT = 1080;
@@ -120,6 +125,8 @@ public class DisplayObserverTest {
         mContext = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mResources = mock(Resources.class);
         when(mContext.getResources()).thenReturn(mResources);
+        MockContentResolver resolver = mSettingsProviderRule.mockContentResolver(mContext);
+        when(mContext.getContentResolver()).thenReturn(resolver);
         when(mResources.getInteger(R.integer.config_externalDisplayPeakRefreshRate))
                 .thenReturn(0);
         when(mResources.getInteger(R.integer.config_externalDisplayPeakWidth))

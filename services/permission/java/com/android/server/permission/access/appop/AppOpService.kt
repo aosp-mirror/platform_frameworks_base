@@ -17,6 +17,7 @@
 package com.android.server.permission.access.appop
 
 import android.app.AppOpsManager
+import android.companion.virtual.VirtualDeviceManager
 import android.os.Handler
 import android.os.UserHandle
 import android.util.ArrayMap
@@ -213,7 +214,10 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
                     val uid = key.first
                     val appOpCode = key.second
 
-                    listener.onUidModeChanged(uid, appOpCode, mode)
+                    listener.onUidModeChanged(uid,
+                        appOpCode,
+                        mode,
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT)
                 }
             }
 

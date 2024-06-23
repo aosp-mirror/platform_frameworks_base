@@ -29,8 +29,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import com.android.packageinstaller.R;
-import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
-import com.android.packageinstaller.v2.model.installstagedata.InstallSuccess;
+import com.android.packageinstaller.v2.model.InstallStage;
+import com.android.packageinstaller.v2.model.InstallSuccess;
 import com.android.packageinstaller.v2.ui.InstallActionListener;
 import java.util.List;
 

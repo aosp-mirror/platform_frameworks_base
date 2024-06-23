@@ -219,14 +219,11 @@ class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
     }
 
     private fun isRankingVisibilitySecret(entry: NotificationEntry): Boolean {
-        return if (featureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
-            // ranking.lockscreenVisibilityOverride contains possibly out of date DPC and Setting
-            // info, and NotificationLockscreenUserManagerImpl is already listening for updates
-            // to those
-            entry.ranking.channel.lockscreenVisibility == VISIBILITY_SECRET
-        } else {
-            entry.ranking.lockscreenVisibilityOverride == VISIBILITY_SECRET
-        }
+        // ranking.lockscreenVisibilityOverride contains possibly out of date DPC and Setting
+        // info, and NotificationLockscreenUserManagerImpl is already listening for updates
+        // to those
+        return entry.ranking.channel != null && entry.ranking.channel.lockscreenVisibility ==
+                    VISIBILITY_SECRET
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) = pw.asIndenting().run {

@@ -67,8 +67,8 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             S_UI8,
             YCBCR_P010,
             R_8,
-            R_16_UINT,
-            RG_1616_UINT,
+            R_16,
+            RG_1616,
             RGBA_10101010,
     })
     public @interface Format {
@@ -114,12 +114,20 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /** Format: 8 bits red */
     @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
     public static final int R_8           = 0x38;
-    /** Format: 16 bits red */
+    /**
+     * Format: 16 bits red. When sampled on the GPU this is represented as an
+     * unsigned integer instead of implicit unsigned normalize.
+     * For more information see https://www.khronos.org/opengl/wiki/Normalized_Integer
+     */
     @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
-    public static final int R_16_UINT     = 0x39;
-    /** Format: 16 bits each red, green */
+    public static final int R_16          = 0x39;
+    /**
+     * Format: 16 bits each red, green. When sampled on the GPU this is represented
+     * as an unsigned integer instead of implicit unsigned normalize.
+     * For more information see https://www.khronos.org/opengl/wiki/Normalized_Integer
+     */
     @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
-    public static final int RG_1616_UINT  = 0x3a;
+    public static final int RG_1616       = 0x3a;
     /** Format: 10 bits each red, green, blue, alpha */
     @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
     public static final int RGBA_10101010 = 0x3b;

@@ -53,7 +53,7 @@ public:
 
     static float measureText(const Paint* paint, minikin::Bidi bidiFlags, const Typeface* typeface,
                              const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-                             float* advances, minikin::MinikinRect* bounds);
+                             float* advances, minikin::MinikinRect* bounds, uint32_t* clusterCount);
 
     static minikin::MinikinExtent getFontExtent(const Paint* paint, minikin::Bidi bidiFlags,
                                                 const Typeface* typeface, const uint16_t* buf,

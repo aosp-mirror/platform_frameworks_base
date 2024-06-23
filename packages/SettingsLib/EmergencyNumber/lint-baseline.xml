@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="5" by="lint 4.1.0" client="cli" variant="all" version="4.1.0">
+<issues format="6" by="lint 8.4.0-alpha01" type="baseline" client="" dependencies="true" name="" variant="all" version="8.4.0-alpha01">
 
     <issue
         id="NewApi"
@@ -8,7 +8,7 @@
         errorLine2="                                        ~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/EmergencyNumber/src/com/android/settingslib/emergencynumber/EmergencyNumberUtils.java"
-            line="77"
+            line="81"
             column="41"/>
     </issue>
 
@@ -19,7 +19,7 @@
         errorLine2="                                            ~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/EmergencyNumber/src/com/android/settingslib/emergencynumber/EmergencyNumberUtils.java"
-            line="78"
+            line="82"
             column="45"/>
     </issue>
 
@@ -30,18 +30,18 @@
         errorLine2="                                                             ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/EmergencyNumber/src/com/android/settingslib/emergencynumber/EmergencyNumberUtils.java"
-            line="78"
+            line="82"
             column="62"/>
     </issue>
 
     <issue
         id="NewApi"
         message="Call requires API level 29 (current min is 21): `android.telephony.TelephonyManager#getEmergencyNumberList`"
-        errorLine1="        Map&lt;Integer, List&lt;EmergencyNumber>> allLists = mTelephonyManager.getEmergencyNumberList("
+        errorLine1="        Map&lt;Integer, List&lt;EmergencyNumber&gt;&gt; allLists = mTelephonyManager.getEmergencyNumberList("
         errorLine2="                                                                         ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/EmergencyNumber/src/com/android/settingslib/emergencynumber/EmergencyNumberUtils.java"
-            line="173"
+            line="177"
             column="74"/>
     </issue>
 
@@ -52,7 +52,7 @@
         errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/EmergencyNumber/src/com/android/settingslib/emergencynumber/EmergencyNumberUtils.java"
-            line="196"
+            line="200"
             column="41"/>
     </issue>
 
@@ -63,7 +63,7 @@
         errorLine2="                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/EmergencyNumber/src/com/android/settingslib/emergencynumber/EmergencyNumberUtils.java"
-            line="219"
+            line="223"
             column="69"/>
     </issue>
 
@@ -74,7 +74,7 @@
         errorLine2="                                        ~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/EmergencyNumber/src/com/android/settingslib/emergencynumber/EmergencyNumberUtils.java"
-            line="234"
+            line="238"
             column="41"/>
     </issue>
 
@@ -85,7 +85,7 @@
         errorLine2="                                                   ~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/EmergencyNumber/src/com/android/settingslib/emergencynumber/EmergencyNumberUtils.java"
-            line="251"
+            line="255"
             column="52"/>
     </issue>
 

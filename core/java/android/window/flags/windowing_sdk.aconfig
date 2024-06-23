@@ -3,13 +3,6 @@ container: "system"
 
 # Project link: https://gantry.corp.google.com/projects/android_platform_windowing_sdk/changes
 
-flag {
-    namespace: "windowing_sdk"
-    name: "sync_window_config_update_flag"
-    description: "Whether the feature to sync different window-related config updates is enabled"
-    bug: "260873529"
-}
-
 # Using a fixed read only flag because there are ClientTransaction scheduling before
 # WindowManagerService creation.
 flag {
@@ -24,7 +17,7 @@ flag {
     namespace: "windowing_sdk"
     name: "activity_embedding_overlay_presentation_flag"
     description: "Whether the overlay presentation feature is enabled"
-    bug: "243518738"
+    bug: "293370683"
 }
 
 flag {
@@ -36,16 +29,9 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "window_state_resize_item_flag"
-    description: "Whether to dispatch window resize through ClientTransaction is enabled"
-    bug: "301870955"
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "fullscreen_dim_flag"
     description: "Whether to allow showing fullscreen dim on ActivityEmbedding split"
-    bug: "253533308"
+    bug: "293797706"
 }
 
 flag {
@@ -53,4 +39,43 @@ flag {
     name: "activity_embedding_interactive_divider_flag"
     description: "Whether the interactive divider feature is enabled"
     bug: "293654166"
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "untrusted_embedding_any_app_permission"
+    description: "Feature flag to enable the permission to embed any app in untrusted mode."
+    bug: "293647332"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "activity_window_info_flag"
+    description: "To dispatch ActivityWindowInfo through ClientTransaction"
+    bug: "287582673"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "untrusted_embedding_state_sharing"
+    description: "Feature flag to enable state sharing in untrusted embedding when apps opt in."
+    bug: "293647332"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "embedded_activity_back_nav_flag"
+    description: "Refines embedded activity back navigation behavior"
+    bug: "293642394"
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "cover_display_opt_in"
+    description: "Properties to allow apps and activities to opt-in to cover display rendering"
+    bug: "312530526"
+    is_fixed_read_only: true
 }

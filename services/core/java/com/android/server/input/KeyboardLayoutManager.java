@@ -16,10 +16,11 @@
 
 package com.android.server.input;
 
-import static com.android.server.input.KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEFAULT;
-import static com.android.server.input.KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE;
-import static com.android.server.input.KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_USER;
-import static com.android.server.input.KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD;
+import static android.hardware.input.KeyboardLayoutSelectionResult.FAILED;
+import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_USER;
+import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEVICE;
+import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD;
+import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEFAULT;
 
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
@@ -46,6 +47,7 @@ import android.content.res.XmlResourceParser;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.KeyboardLayout;
+import android.hardware.input.KeyboardLayoutSelectionResult;
 import android.icu.lang.UScript;
 import android.icu.util.ULocale;
 import android.os.Bundle;
@@ -76,8 +78,9 @@ import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.XmlUtils;
+import com.android.server.LocalServices;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.input.KeyboardMetricsCollector.KeyboardConfigurationEvent;
-import com.android.server.input.KeyboardMetricsCollector.LayoutSelectionCriteria;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import libcore.io.Streams;
@@ -128,7 +131,8 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     // This cache stores "best-matched" layouts so that we don't need to run the matching
     // algorithm repeatedly.
     @GuardedBy("mKeyboardLayoutCache")
-    private final Map<String, KeyboardLayoutInfo> mKeyboardLayoutCache = new ArrayMap<>();
+    private final Map<String, KeyboardLayoutSelectionResult> mKeyboardLayoutCache =
+            new ArrayMap<>();
     private final Object mImeInfoLock = new Object();
     @Nullable
     @GuardedBy("mImeInfoLock")
@@ -197,7 +201,7 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         final KeyboardIdentifier keyboardIdentifier = new KeyboardIdentifier(inputDevice);
         KeyboardConfiguration config = mConfiguredKeyboards.get(deviceId);
         if (config == null) {
-            config = new KeyboardConfiguration();
+            config = new KeyboardConfiguration(deviceId);
             mConfiguredKeyboards.put(deviceId, config);
         }
 
@@ -220,17 +224,17 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         } else {
             Set<String> selectedLayouts = new HashSet<>();
             List<ImeInfo> imeInfoList = getImeInfoListForLayoutMapping();
-            List<KeyboardLayoutInfo> layoutInfoList = new ArrayList<>();
+            List<KeyboardLayoutSelectionResult> resultList = new ArrayList<>();
             boolean hasMissingLayout = false;
             for (ImeInfo imeInfo : imeInfoList) {
                 // Check if the layout has been previously configured
-                KeyboardLayoutInfo layoutInfo = getKeyboardLayoutForInputDeviceInternal(
+                KeyboardLayoutSelectionResult result = getKeyboardLayoutForInputDeviceInternal(
                         keyboardIdentifier, imeInfo);
-                boolean noLayoutFound = layoutInfo == null || layoutInfo.mDescriptor == null;
+                boolean noLayoutFound = result.getLayoutDescriptor() == null;
                 if (!noLayoutFound) {
-                    selectedLayouts.add(layoutInfo.mDescriptor);
+                    selectedLayouts.add(result.getLayoutDescriptor());
                 }
-                layoutInfoList.add(layoutInfo);
+                resultList.add(result);
                 hasMissingLayout |= noLayoutFound;
             }
 
@@ -258,7 +262,7 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                     }
 
                     if (shouldLogConfiguration) {
-                        logKeyboardConfigurationEvent(inputDevice, imeInfoList, layoutInfoList,
+                        logKeyboardConfigurationEvent(inputDevice, imeInfoList, resultList,
                                 !mDataStore.hasInputDeviceEntry(key));
                     }
                 } finally {
@@ -755,10 +759,10 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         String keyboardLayoutDescriptor;
         if (useNewSettingsUi()) {
             synchronized (mImeInfoLock) {
-                KeyboardLayoutInfo layoutInfo = getKeyboardLayoutForInputDeviceInternal(
+                KeyboardLayoutSelectionResult result = getKeyboardLayoutForInputDeviceInternal(
                         new KeyboardIdentifier(identifier, languageTag, layoutType),
                         mCurrentImeInfo);
-                keyboardLayoutDescriptor = layoutInfo == null ? null : layoutInfo.mDescriptor;
+                keyboardLayoutDescriptor = result.getLayoutDescriptor();
             }
         } else {
             keyboardLayoutDescriptor = getCurrentKeyboardLayoutForInputDevice(identifier);
@@ -786,26 +790,26 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     }
 
     @AnyThread
-    @Nullable
-    public String getKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @Nullable InputMethodSubtype imeSubtype) {
+    @NonNull
+    public KeyboardLayoutSelectionResult getKeyboardLayoutForInputDevice(
+            InputDeviceIdentifier identifier, @UserIdInt int userId,
+            @NonNull InputMethodInfo imeInfo, @Nullable InputMethodSubtype imeSubtype) {
         if (!useNewSettingsUi()) {
             Slog.e(TAG, "getKeyboardLayoutForInputDevice() API not supported");
-            return null;
+            return FAILED;
         }
         InputDevice inputDevice = getInputDevice(identifier);
         if (inputDevice == null || inputDevice.isVirtual() || !inputDevice.isFullKeyboard()) {
-            return null;
+            return FAILED;
         }
         KeyboardIdentifier keyboardIdentifier = new KeyboardIdentifier(inputDevice);
-        KeyboardLayoutInfo layoutInfo = getKeyboardLayoutForInputDeviceInternal(
+        KeyboardLayoutSelectionResult result = getKeyboardLayoutForInputDeviceInternal(
                 keyboardIdentifier, new ImeInfo(userId, imeInfo, imeSubtype));
         if (DEBUG) {
             Slog.d(TAG, "getKeyboardLayoutForInputDevice() " + identifier.toString() + ", userId : "
-                    + userId + ", subtype = " + imeSubtype + " -> " + layoutInfo);
+                    + userId + ", subtype = " + imeSubtype + " -> " + result);
         }
-        return layoutInfo != null ? layoutInfo.mDescriptor : null;
+        return result;
     }
 
     @AnyThread
@@ -940,13 +944,13 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     }
 
     @Nullable
-    private KeyboardLayoutInfo getKeyboardLayoutForInputDeviceInternal(
+    private KeyboardLayoutSelectionResult getKeyboardLayoutForInputDeviceInternal(
             KeyboardIdentifier keyboardIdentifier, @Nullable ImeInfo imeInfo) {
         String layoutKey = new LayoutKey(keyboardIdentifier, imeInfo).toString();
         synchronized (mDataStore) {
             String layout = mDataStore.getKeyboardLayout(keyboardIdentifier.toString(), layoutKey);
             if (layout != null) {
-                return new KeyboardLayoutInfo(layout, LAYOUT_SELECTION_CRITERIA_USER);
+                return new KeyboardLayoutSelectionResult(layout, LAYOUT_SELECTION_CRITERIA_USER);
             }
         }
 
@@ -959,17 +963,17 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                 KeyboardLayout[] layoutList = getKeyboardLayoutListForInputDeviceInternal(
                         keyboardIdentifier, imeInfo);
                 // Call auto-matching algorithm to find the best matching layout
-                KeyboardLayoutInfo layoutInfo =
+                KeyboardLayoutSelectionResult result =
                         getDefaultKeyboardLayoutBasedOnImeInfo(keyboardIdentifier, imeInfo,
                                 layoutList);
-                mKeyboardLayoutCache.put(layoutKey, layoutInfo);
-                return layoutInfo;
+                mKeyboardLayoutCache.put(layoutKey, result);
+                return result;
             }
         }
     }
 
-    @Nullable
-    private static KeyboardLayoutInfo getDefaultKeyboardLayoutBasedOnImeInfo(
+    @NonNull
+    private static KeyboardLayoutSelectionResult getDefaultKeyboardLayoutBasedOnImeInfo(
             KeyboardIdentifier keyboardIdentifier, @Nullable ImeInfo imeInfo,
             KeyboardLayout[] layoutList) {
         Arrays.sort(layoutList);
@@ -984,7 +988,7 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                                     + "vendor and product Ids. " + keyboardIdentifier
                                     + " : " + layout.getDescriptor());
                 }
-                return new KeyboardLayoutInfo(layout.getDescriptor(),
+                return new KeyboardLayoutSelectionResult(layout.getDescriptor(),
                         LAYOUT_SELECTION_CRITERIA_DEVICE);
             }
         }
@@ -1002,13 +1006,14 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                                     + "HW information (Language tag and Layout type). "
                                     + keyboardIdentifier + " : " + layoutDesc);
                 }
-                return new KeyboardLayoutInfo(layoutDesc, LAYOUT_SELECTION_CRITERIA_DEVICE);
+                return new KeyboardLayoutSelectionResult(layoutDesc,
+                        LAYOUT_SELECTION_CRITERIA_DEVICE);
             }
         }
 
         if (imeInfo == null || imeInfo.mImeSubtypeHandle == null || imeInfo.mImeSubtype == null) {
             // Can't auto select layout based on IME info is null
-            return null;
+            return FAILED;
         }
 
         InputMethodSubtype subtype = imeInfo.mImeSubtype;
@@ -1025,9 +1030,10 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                             + layoutDesc);
         }
         if (layoutDesc != null) {
-            return new KeyboardLayoutInfo(layoutDesc, LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD);
+            return new KeyboardLayoutSelectionResult(layoutDesc,
+                    LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD);
         }
-        return null;
+        return FAILED;
     }
 
     @Nullable
@@ -1093,19 +1099,26 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
     @MainThread
     private void maybeUpdateNotification() {
-        if (mConfiguredKeyboards.size() == 0) {
-            hideKeyboardLayoutNotification();
-            return;
-        }
+        List<KeyboardConfiguration> configurations = new ArrayList<>();
         for (int i = 0; i < mConfiguredKeyboards.size(); i++) {
+            int deviceId = mConfiguredKeyboards.keyAt(i);
+            KeyboardConfiguration config = mConfiguredKeyboards.valueAt(i);
+            if (isVirtualDevice(deviceId)) {
+                continue;
+            }
             // If we have a keyboard with no selected layouts, we should always show missing
             // layout notification even if there are other keyboards that are configured properly.
-            if (!mConfiguredKeyboards.valueAt(i).hasConfiguredLayouts()) {
+            if (!config.hasConfiguredLayouts()) {
                 showMissingKeyboardLayoutNotification();
                 return;
             }
+            configurations.add(config);
         }
-        showConfiguredKeyboardLayoutNotification();
+        if (configurations.size() == 0) {
+            hideKeyboardLayoutNotification();
+            return;
+        }
+        showConfiguredKeyboardLayoutNotification(configurations);
     }
 
     @MainThread
@@ -1185,10 +1198,11 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     }
 
     @MainThread
-    private void showConfiguredKeyboardLayoutNotification() {
+    private void showConfiguredKeyboardLayoutNotification(
+            List<KeyboardConfiguration> configurations) {
         final Resources r = mContext.getResources();
 
-        if (mConfiguredKeyboards.size() != 1) {
+        if (configurations.size() != 1) {
             showKeyboardLayoutNotification(
                     r.getString(R.string.keyboard_layout_notification_multiple_selected_title),
                     r.getString(R.string.keyboard_layout_notification_multiple_selected_message),
@@ -1196,8 +1210,8 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
             return;
         }
 
-        final InputDevice inputDevice = getInputDevice(mConfiguredKeyboards.keyAt(0));
-        final KeyboardConfiguration config = mConfiguredKeyboards.valueAt(0);
+        final KeyboardConfiguration config = configurations.get(0);
+        final InputDevice inputDevice = getInputDevice(config.getDeviceId());
         if (inputDevice == null || !config.hasConfiguredLayouts()) {
             return;
         }
@@ -1236,21 +1250,23 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     }
 
     private void logKeyboardConfigurationEvent(@NonNull InputDevice inputDevice,
-            @NonNull List<ImeInfo> imeInfoList, @NonNull List<KeyboardLayoutInfo> layoutInfoList,
+            @NonNull List<ImeInfo> imeInfoList,
+            @NonNull List<KeyboardLayoutSelectionResult> resultList,
             boolean isFirstConfiguration) {
-        if (imeInfoList.isEmpty() || layoutInfoList.isEmpty()) {
+        if (imeInfoList.isEmpty() || resultList.isEmpty()) {
             return;
         }
         KeyboardConfigurationEvent.Builder configurationEventBuilder =
                 new KeyboardConfigurationEvent.Builder(inputDevice).setIsFirstTimeConfiguration(
                         isFirstConfiguration);
         for (int i = 0; i < imeInfoList.size(); i++) {
-            KeyboardLayoutInfo layoutInfo = layoutInfoList.get(i);
+            KeyboardLayoutSelectionResult result = resultList.get(i);
             String layoutName = null;
             int layoutSelectionCriteria = LAYOUT_SELECTION_CRITERIA_DEFAULT;
-            if (layoutInfo != null && layoutInfo.mDescriptor != null) {
-                layoutSelectionCriteria = layoutInfo.mSelectionCriteria;
-                KeyboardLayoutDescriptor d = KeyboardLayoutDescriptor.parse(layoutInfo.mDescriptor);
+            if (result != null && result.getLayoutDescriptor() != null) {
+                layoutSelectionCriteria = result.getSelectionCriteria();
+                KeyboardLayoutDescriptor d = KeyboardLayoutDescriptor.parse(
+                        result.getLayoutDescriptor());
                 if (d != null) {
                     layoutName = d.keyboardLayoutName;
                 }
@@ -1356,6 +1372,13 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         return false;
     }
 
+    @VisibleForTesting
+    public boolean isVirtualDevice(int deviceId) {
+        VirtualDeviceManagerInternal vdm = LocalServices.getService(
+                VirtualDeviceManagerInternal.class);
+        return vdm != null && vdm.isInputDeviceOwnedByVirtualDevice(deviceId);
+    }
+
     private static int[] getScriptCodes(@Nullable Locale locale) {
         if (locale == null) {
             return new int[0];
@@ -1430,10 +1453,21 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     }
 
     private static class KeyboardConfiguration {
+
         // If null or empty, it means no layout is configured for the device. And user needs to
         // manually set up the device.
         @Nullable
         private Set<String> mConfiguredLayouts;
+
+        private final int mDeviceId;
+
+        private KeyboardConfiguration(int deviceId) {
+            mDeviceId = deviceId;
+        }
+
+        private int getDeviceId() {
+            return mDeviceId;
+        }
 
         private boolean hasConfiguredLayouts() {
             return mConfiguredLayouts != null && !mConfiguredLayouts.isEmpty();
@@ -1446,33 +1480,6 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
         private void setConfiguredLayouts(Set<String> configuredLayouts) {
             mConfiguredLayouts = configuredLayouts;
-        }
-    }
-
-    private static class KeyboardLayoutInfo {
-        @Nullable
-        private final String mDescriptor;
-        @LayoutSelectionCriteria
-        private final int mSelectionCriteria;
-
-        private KeyboardLayoutInfo(@Nullable String descriptor,
-                @LayoutSelectionCriteria int selectionCriteria) {
-            mDescriptor = descriptor;
-            mSelectionCriteria = selectionCriteria;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof KeyboardLayoutInfo) {
-                return Objects.equals(mDescriptor, ((KeyboardLayoutInfo) obj).mDescriptor)
-                        && mSelectionCriteria == ((KeyboardLayoutInfo) obj).mSelectionCriteria;
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return 31 * mSelectionCriteria + mDescriptor.hashCode();
         }
     }
 

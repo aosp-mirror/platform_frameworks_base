@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,6 +27,7 @@ import android.os.CancellationSignal;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.animation.Interpolator;
+import android.view.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -78,6 +80,20 @@ public interface WindowInsetsController {
     int APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS = 1 << 6;
 
     /**
+     * Makes the caption bar transparent.
+     */
+    @FlaggedApi(Flags.FLAG_CUSTOMIZABLE_WINDOW_HEADERS)
+    int APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND = 1 << 7;
+
+    /**
+     * When {@link WindowInsetsController#APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND} is set,
+     * changes the foreground color of the caption bars so that the items on the bar can be read
+     * clearly on light backgrounds.
+     */
+    @FlaggedApi(Flags.FLAG_CUSTOMIZABLE_WINDOW_HEADERS)
+    int APPEARANCE_LIGHT_CAPTION_BARS = 1 << 8;
+
+    /**
      * Determines the appearance of system bars.
      * @hide
      */
@@ -85,7 +101,8 @@ public interface WindowInsetsController {
     @IntDef(flag = true, value = {APPEARANCE_OPAQUE_STATUS_BARS, APPEARANCE_OPAQUE_NAVIGATION_BARS,
             APPEARANCE_LOW_PROFILE_BARS, APPEARANCE_LIGHT_STATUS_BARS,
             APPEARANCE_LIGHT_NAVIGATION_BARS, APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS,
-            APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS})
+            APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS,
+            APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND, APPEARANCE_LIGHT_CAPTION_BARS})
     @interface Appearance {
     }
 

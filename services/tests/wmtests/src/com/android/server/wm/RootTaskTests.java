@@ -140,7 +140,7 @@ public class RootTaskTests extends WindowTestsBase {
 
         final WindowContainer parent = activity1.getTask().getParent();
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, parent.getOrientation());
-        mDisplayContent.mClosingApps.add(activity2);
+        activity2.setVisibleRequested(false);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, parent.getOrientation());
     }
 
@@ -823,8 +823,7 @@ public class RootTaskTests extends WindowTestsBase {
                 .build();
 
         doReturn(false).when(secondActivity).occludesParent();
-        homeRootTask.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                false /* preserveWindows */);
+        homeRootTask.ensureActivitiesVisible(null /* starting */);
 
         assertTrue(firstActivity.shouldBeVisible());
     }
@@ -1419,8 +1418,7 @@ public class RootTaskTests extends WindowTestsBase {
 
         // Any common path that updates activity visibility should clear the unknown visibility
         // records that are no longer visible according to hierarchy.
-        task.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                false /* preserveWindows */);
+        task.ensureActivitiesVisible(null /* starting */);
         // Assume the top activity relayouted, just remove it directly.
         unknownAppVisibilityController.appRemovedOrHidden(activities[1]);
         // All unresolved records should be removed.
@@ -1441,8 +1439,7 @@ public class RootTaskTests extends WindowTestsBase {
         doNothing().when(mSupervisor).startSpecificActivity(any(), anyBoolean(),
                 anyBoolean());
 
-        task.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                false /* preserveWindows */);
+        task.ensureActivitiesVisible(null /* starting */);
         verify(mSupervisor).startSpecificActivity(any(), eq(false) /* andResume */,
                 anyBoolean());
     }

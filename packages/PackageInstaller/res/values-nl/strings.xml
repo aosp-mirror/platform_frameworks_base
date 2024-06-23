@@ -44,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Onbekende apps kunnen niet worden geïnstalleerd door deze gebruiker"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Deze gebruiker mag geen apps installeren"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="archive" msgid="4447791830199354721">"Archiveren"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Toch updaten"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Apps beheren"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Geen ruimte beschikbaar"</string>
@@ -58,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Update verwijderen"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> maakt deel uit van de volgende app:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Wil je deze app verwijderen?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"Je persoonsgegevens worden opgeslagen"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Deze app archiveren voor alle gebruikers? Je persoonsgegevens worden opgeslagen."</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Deze app in je werkprofiel archiveren? Je persoonsgegevens worden opgeslagen."</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Deze app voor <xliff:g id="USERNAME">%1$s</xliff:g> archiveren? Je persoonsgegevens worden opgeslagen."</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Wil je deze app in je privéruimte archiveren? Je persoonsgegevens worden opgeslagen."</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Wil je deze app verwijderen voor "<b>"alle"</b>" gebruikers? Deze app en de gegevens ervan worden verwijderd voor "<b>"alle"</b>" gebruikers van het apparaat."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Wil je deze app verwijderen voor de gebruiker <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Wil je deze app verwijderen uit je werkprofiel?"</string>
@@ -77,8 +83,8 @@
     <string name="uninstall_failed" msgid="1847750968168364332">"Verwijdering mislukt."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> kan niet worden verwijderd."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon verwijderen…"</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan actieve apparaatbeheer-app niet verwijderen"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan actieve apparaatbeheer-app niet verwijderen voor <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan actieve app voor apparaatbeheer niet verwijderen"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan actieve app voor apparaatbeheer niet verwijderen voor <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Deze app is vereist voor sommige gebruikers of profielen en is verwijderd voor andere"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Deze app is vereist voor je profiel en kan niet worden verwijderd."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Deze app is vereist door je apparaatbeheerder en kan niet worden verwijderd."</string>
@@ -86,29 +92,28 @@
     <string name="manage_users" msgid="1243995386982560813">"Gebruikers beheren"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> kan niet worden verwijderd."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Er is een probleem opgetreden bij het parseren van het pakket."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Acties voor installeren/verwijderen niet ondersteund op Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"App uitvoeren…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Onbekend"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Uit veiligheidsoverwegingen heeft je tablet momenteel geen toestemming om onbekende apps van deze bron te installeren. Je kunt dit wijzigen via Instellingen."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Uit veiligheidsoverwegingen heeft je tv momenteel geen toestemming om onbekende apps van deze bron te installeren. Je kunt dit wijzigen via Instellingen."</string>
     <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Uit veiligheidsoverwegingen heeft je smartwatch momenteel geen toestemming om onbekende apps van deze bron te installeren. Je kunt dit wijzigen via Instellingen."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Uit veiligheidsoverwegingen heeft je telefoon momenteel geen toestemming om onbekende apps van deze bron te installeren. Je kunt dit wijzigen via Instellingen."</string>
-    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Je telefoon en persoonsgegevens zijn kwetsbaarder voor aanvallen door onbekende apps. Als je deze app installeert, ga je ermee akkoord dat je verantwoordelijk bent voor eventuele schade aan je telefoon of gegevensverlies als gevolg van het gebruik van de app."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Je telefoon en persoonsgegevens zijn kwetsbaarder voor aanvallen door onbekende apps. Door deze app te installeren, ga je ermee akkoord dat je verantwoordelijk bent voor eventuele schade aan je telefoon of gegevensverlies als gevolg van het gebruik van de app."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Je tablet en persoonsgegevens zijn kwetsbaarder voor aanvallen door onbekende apps. Als je deze app installeert, ga je ermee akkoord dat je verantwoordelijk bent voor eventuele schade aan je tablet of gegevensverlies als gevolg van het gebruik van de app."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Je tv en persoonsgegevens zijn kwetsbaarder voor aanvallen door onbekende apps. Als je deze app installeert, ga je ermee akkoord dat je verantwoordelijk bent voor eventuele schade aan je tv of gegevensverlies als gevolg van het gebruik van de app."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> archiveren?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Doorgaan"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Instellingen"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear-apps installeren/verwijderen"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Melding dat app is geïnstalleerd"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Installatie voltooid"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\'<xliff:g id="APPNAME">%1$s</xliff:g>\' is geïnstalleerd"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> herstellen via <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> herstellen via <xliff:g id="INSTALLERNAME">%2$s</xliff:g>?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"Deze app wordt gedownload op de achtergrond"</string>
     <string name="restore" msgid="8460854736328970444">"Herstellen"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Je bent offline"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Deze app wordt automatisch hersteld als je verbinding hebt met internet"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"Check de internetverbinding en probeer het opnieuw als je deze app wilt herstellen"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Er is iets misgegaan"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Er is iets misgegaan bij het herstellen van deze app"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Onvoldoende opslagruimte"</string>
@@ -116,8 +121,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Actie vereist"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Voer de volgende stappen uit om deze app te herstellen"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> is uitgezet"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Zet <xliff:g id="INSTALLERNAME">%1$s</xliff:g> aan via Instellingen om deze app te herstellen"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> is verwijderd"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Je moet <xliff:g id="INSTALLERNAME">%1$s</xliff:g> installeren om deze app te herstellen"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Doorgaan"</string>

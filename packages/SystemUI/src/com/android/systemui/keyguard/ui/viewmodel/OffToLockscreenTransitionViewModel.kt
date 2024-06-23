@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -27,14 +27,14 @@ import kotlinx.coroutines.flow.Flow
 class OffToLockscreenTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) {
 
     private val transitionAnimation =
         animationFlow.setup(
             duration = 250.milliseconds,
-            stepFlow = interactor.offToLockscreenTransition
+            from = KeyguardState.OFF,
+            to = KeyguardState.LOCKSCREEN,
         )
 
     val shortcutsAlpha: Flow<Float> =

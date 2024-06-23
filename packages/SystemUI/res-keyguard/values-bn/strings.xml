@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চার্জ হচ্ছে"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • দ্রুত চার্জ হচ্ছে"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ধীরে চার্জ হচ্ছে"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ব্যাটারি ভাল রাখতে চার্জিং অপ্টিমাইজ করা হয়েছে"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চার্জিং অ্যাক্সেসরিতে সমস্যা রয়েছে"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ব্যাটারিকে সুরক্ষিত রাখতে চার্জিং হোল্ড করা হয়েছে"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চার্জিং অ্যাক্সেসরি চেক করুন"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"নেটওয়ার্ক লক করা আছে"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"কোনও সিম নেই"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ব্যবহারযোগ্য নয় এমন সিম।"</string>

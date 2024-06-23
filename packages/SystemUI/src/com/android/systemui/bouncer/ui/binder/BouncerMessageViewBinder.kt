@@ -23,11 +23,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.keyguard.BouncerKeyguardMessageArea
 import com.android.keyguard.KeyguardMessageArea
 import com.android.keyguard.KeyguardMessageAreaController
+import com.android.systemui.Flags
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.bouncer.shared.model.Message
 import com.android.systemui.bouncer.ui.BouncerMessageView
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.BouncerLogger
 import kotlinx.coroutines.launch
@@ -39,10 +38,9 @@ object BouncerMessageViewBinder {
         interactor: BouncerMessageInteractor,
         factory: KeyguardMessageAreaController.Factory,
         bouncerLogger: BouncerLogger,
-        featureFlags: FeatureFlags
     ) {
         view.repeatWhenAttached {
-            if (!featureFlags.isEnabled(Flags.REVAMPED_BOUNCER_MESSAGES)) {
+            if (!Flags.revampedBouncerMessages()) {
                 view.primaryMessageView?.disable()
                 view.secondaryMessageView?.disable()
                 return@repeatWhenAttached

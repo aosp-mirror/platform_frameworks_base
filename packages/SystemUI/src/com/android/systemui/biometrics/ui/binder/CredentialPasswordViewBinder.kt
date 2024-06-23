@@ -12,12 +12,12 @@ import android.window.OnBackInvokedDispatcher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.ui.CredentialPasswordView
 import com.android.systemui.biometrics.ui.CredentialView
 import com.android.systemui.biometrics.ui.IPinPad
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -42,7 +42,7 @@ object CredentialPasswordViewBinder {
         view.repeatWhenAttached {
             // the header info never changes - do it early
             val header = viewModel.header.first()
-            passwordField.setTextOperationUser(UserHandle.of(header.user.deviceCredentialOwnerId))
+            passwordField.setTextOperationUser(UserHandle.of(header.user.userIdForPasswordEntry))
             viewModel.inputFlags.firstOrNull()?.let { flags -> passwordField.inputType = flags }
             if (requestFocusForInput) {
                 passwordField.requestFocus()

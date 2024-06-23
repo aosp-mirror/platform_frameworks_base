@@ -24,18 +24,81 @@ java_library {
     visibility: ["//visibility:public"],
 }
 
+java_library_host {
+    name: "ravenwood-helper-libcore-runtime.host",
+    srcs: [
+        "runtime-helper-src/libcore-fake/**/*.java",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_host_for_device {
+    name: "ravenwood-helper-libcore-runtime",
+    libs: [
+        "ravenwood-helper-libcore-runtime.host",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "ravenwood-helper-framework-runtime",
+    srcs: [
+        "runtime-helper-src/framework/**/*.java",
+    ],
+    libs: [
+        "framework-minus-apex.ravenwood",
+        "ravenwood-junit",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+// Combine ravenwood-helper-*-runtime and create a single library, which we include
+// in the ravenwood runtime.
+// We do it this way rather than including the individual jars in the runtime, because
+// for some reason we couldn't include a java_host_for_device module in the ravenwood runtime.
+java_library {
+    name: "ravenwood-helper-runtime",
+    defaults: ["ravenwood-internal-only-visibility-java"],
+    static_libs: [
+        "ravenwood-helper-framework-runtime",
+        "ravenwood-helper-libcore-runtime",
+    ],
+}
+
 java_library {
     name: "ravenwood-junit-impl",
     srcs: [
         "junit-src/**/*.java",
         "junit-impl-src/**/*.java",
     ],
+    static_libs: [
+        "androidx.test.monitor-for-device",
+    ],
     libs: [
+        "android.test.mock",
         "framework-minus-apex.ravenwood",
+        "ravenwood-framework",
+        "services.core.ravenwood",
         "junit",
     ],
     sdk_version: "core_current",
     visibility: ["//frameworks/base"],
+    jarjar_rules: ":ravenwood-services-jarjar-rules",
+}
+
+// Separated out from ravenwood-junit-impl since it needs to compile
+// against `module_current`
+java_library {
+    name: "ravenwood-junit-impl-flag",
+    srcs: [
+        "junit-flag-src/**/*.java",
+    ],
+    sdk_version: "module_current",
+    libs: [
+        "junit",
+        "flag-junit",
+    ],
+    visibility: ["//visibility:public"],
 }
 
 // Carefully compiles against only test_current to support tests that
@@ -47,17 +110,47 @@ java_library {
     srcs: [
         "junit-src/**/*.java",
         "junit-stub-src/**/*.java",
+        "junit-flag-src/**/*.java",
     ],
     sdk_version: "test_current",
     libs: [
         "junit",
+        "flag-junit",
     ],
     visibility: ["//visibility:public"],
 }
 
-java_host_for_device {
-    name: "core-xml-for-device",
-    libs: [
-        "core-xml-for-host",
+// Library used to publish a handful of `android.ravenwood` APIs into
+// the Ravenwood BCP; we don't want to publish these APIs into the BCP
+// on physical devices, which is why this is a separate library
+java_library {
+    name: "ravenwood-framework",
+    srcs: [
+        "framework-src/**/*.java",
     ],
+    libs: [
+        "framework-minus-apex.ravenwood",
+    ],
+    sdk_version: "core_current",
+    visibility: ["//visibility:public"],
+}
+
+java_host_for_device {
+    name: "androidx.test.monitor-for-device",
+    libs: [
+        "androidx.test.monitor-for-host",
+    ],
+}
+
+java_device_for_host {
+    name: "androidx.test.monitor-for-host",
+    libs: [
+        "androidx.test.monitor",
+    ],
+}
+
+filegroup {
+    name: "ravenwood-services-jarjar-rules",
+    srcs: ["ravenwood-services-jarjar-rules.txt"],
+    visibility: ["//frameworks/base"],
 }

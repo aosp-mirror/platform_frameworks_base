@@ -140,7 +140,13 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
                     wrapUpAndFinish();
                     return;
                 }
-
+                // Check if the action was finished before the callback was called.
+                // See {@link HdmiCecFeatureAction#finish}.
+                if (mState == STATE_NONE) {
+                    Slog.v(TAG, "Action was already finished before the callback was called.");
+                    wrapUpAndFinish();
+                    return;
+                }
                 Slog.v(TAG, "Device detected: " + ackedAddress);
                 allocateDevices(ackedAddress);
                 if (mDelayPeriod > 0) {
@@ -453,7 +459,6 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
             wrapUpAndFinish();
             return;
         }
-
         // If finished current stage, move on to next stage.
         if (mProcessedDeviceCount == mDevices.size()) {
             mProcessedDeviceCount = 0;

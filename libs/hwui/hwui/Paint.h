@@ -25,6 +25,7 @@
 #include <minikin/FontFamily.h>
 #include <minikin/FontFeature.h>
 #include <minikin/Hyphenator.h>
+#include <minikin/Layout.h>
 
 #include <string>
 
@@ -144,6 +145,9 @@ public:
     bool isDevKern() const { return mDevKern; }
     void setDevKern(bool d) { mDevKern = d; }
 
+    minikin::RunFlag getRunFlag() const { return mRunFlag; }
+    void setRunFlag(minikin::RunFlag runFlag) { mRunFlag = runFlag; }
+
     // Deprecated -- bitmapshaders will be taking this flag explicitly
     bool isFilterBitmap() const { return mFilterBitmap; }
     void setFilterBitmap(bool filter) { mFilterBitmap = filter; }
@@ -188,6 +192,7 @@ private:
     bool mStrikeThru = false;
     bool mUnderline = false;
     bool mDevKern = false;
+    minikin::RunFlag mRunFlag = minikin::RunFlag::NONE;
 };
 
 }  // namespace android

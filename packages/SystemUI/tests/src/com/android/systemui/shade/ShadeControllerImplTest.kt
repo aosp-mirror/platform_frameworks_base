@@ -22,17 +22,22 @@ import android.view.Display
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.IStatusBarService
-import com.android.keyguard.TestScopeProvider
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -45,6 +50,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
+import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,6 +65,10 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class ShadeControllerImplTest : SysuiTestCase() {
     private val executor = FakeExecutor(FakeSystemClock())
+    private val testDispatcher = StandardTestDispatcher()
+    private val activeNotificationsRepository = ActiveNotificationListRepository()
+    private val kosmos = Kosmos()
+    private val testScope = kosmos.testScope
 
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var keyguardStateController: KeyguardStateController
@@ -70,7 +80,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var assistManager: AssistManager
     @Mock private lateinit var gutsManager: NotificationGutsManager
-    @Mock private lateinit var shadeViewController: ShadeViewController
+    @Mock private lateinit var npvc: NotificationPanelViewController
     @Mock private lateinit var nswvc: NotificationShadeWindowViewController
     @Mock private lateinit var display: Display
     @Mock private lateinit var touchLog: LogBuffer
@@ -79,11 +89,14 @@ class ShadeControllerImplTest : SysuiTestCase() {
 
     private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor by lazy {
         WindowRootViewVisibilityInteractor(
-            TestScopeProvider.getTestScope(),
+            testScope,
             WindowRootViewVisibilityRepository(iStatusBarService, executor),
             FakeKeyguardRepository(),
             headsUpManager,
             PowerInteractorFactory.create().powerInteractor,
+            ActiveNotificationsInteractor(activeNotificationsRepository, testDispatcher),
+            kosmos.sceneContainerFlags,
+            kosmos::sceneInteractor,
         )
     }
 
@@ -107,7 +120,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 deviceProvisionedController,
                 notificationShadeWindowController,
                 windowManager,
-                Lazy { shadeViewController },
+                Lazy { npvc },
                 Lazy { assistManager },
                 Lazy { gutsManager },
             )
@@ -121,9 +134,9 @@ class ShadeControllerImplTest : SysuiTestCase() {
 
         // Trying to open it does nothing.
         shadeController.animateExpandShade()
-        verify(shadeViewController, never()).expandToNotifications()
+        verify(npvc, never()).expandToNotifications()
         shadeController.animateExpandQs()
-        verify(shadeViewController, never()).expand(ArgumentMatchers.anyBoolean())
+        verify(npvc, never()).expand(ArgumentMatchers.anyBoolean())
     }
 
     @Test
@@ -132,15 +145,15 @@ class ShadeControllerImplTest : SysuiTestCase() {
 
         // Can now be opened.
         shadeController.animateExpandShade()
-        verify(shadeViewController).expandToNotifications()
+        verify(npvc).expandToNotifications()
         shadeController.animateExpandQs()
-        verify(shadeViewController).expandToQs()
+        verify(npvc).expandToQs()
     }
 
     @Test
     fun cancelExpansionAndCollapseShade_callsCancelCurrentTouch() {
         // GIVEN the shade is tracking a touch
-        whenever(shadeViewController.isTracking).thenReturn(true)
+        whenever(npvc.isTracking).thenReturn(true)
 
         // WHEN cancelExpansionAndCollapseShade is called
         shadeController.cancelExpansionAndCollapseShade()
@@ -152,7 +165,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
     @Test
     fun cancelExpansionAndCollapseShade_doesNotCallAnimateCollapseShade_whenCollapsed() {
         // GIVEN the shade is tracking a touch
-        whenever(shadeViewController.isTracking).thenReturn(false)
+        whenever(npvc.isTracking).thenReturn(false)
 
         // WHEN cancelExpansionAndCollapseShade is called
         shadeController.cancelExpansionAndCollapseShade()

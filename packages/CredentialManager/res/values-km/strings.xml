@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"នៅពេលដែលយើងឈានទៅរកអនាគតដែលគ្មានពាក្យសម្ងាត់ ពាក្យសម្ងាត់នៅតែអាចប្រើបានរួមជាមួយកូដសម្ងាត់។"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ជ្រើសរើសកន្លែង​ដែលត្រូវរក្សាទុក<xliff:g id="CREATETYPES">%1$s</xliff:g>របស់អ្នក"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ជ្រើសរើស​កម្មវិធីគ្រប់គ្រងពាក្យសម្ងាត់ ដើម្បីរក្សាទុក​ព័ត៌មានរបស់អ្នក និងចូលគណនី​បានកាន់តែរហ័ស​នៅពេលលើកក្រោយ"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"បង្កើត​កូដសម្ងាត់​សម្រាប់ <xliff:g id="APPNAME">%1$s</xliff:g> ឬ?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"រក្សាទុក​ពាក្យសម្ងាត់​សម្រាប់ <xliff:g id="APPNAME">%1$s</xliff:g> ឬ?"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"បង្កើតកូដសម្ងាត់ ដើម្បីចូលគណនី <xliff:g id="APPNAME">%1$s</xliff:g> ឬ?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"រក្សាទុកពាក្យសម្ងាត់ ដើម្បីចូលគណនី <xliff:g id="APPNAME">%1$s</xliff:g> ឬ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"រក្សាទុក​ព័ត៌មានអំពី​ការចូលគណនីសម្រាប់ <xliff:g id="APPNAME">%1$s</xliff:g> ឬ?"</string>
     <string name="passkey" msgid="632353688396759522">"កូដសម្ងាត់"</string>
     <string name="password" msgid="6738570945182936667">"ពាក្យសម្ងាត់"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ពីឧបករណ៍ផ្សេងទៀត"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ប្រើឧបករណ៍ផ្សេង"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"បានបោះបង់សំណើដោយ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"ជម្រើស​ចូលគណនី"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"ច្រើនទៀត"</string>
 </resources>

@@ -43,6 +43,7 @@ import org.junit.runner.RunWith
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class WifiInteractorImplTest : SysuiTestCase() {
 
     private lateinit var underTest: WifiInteractor

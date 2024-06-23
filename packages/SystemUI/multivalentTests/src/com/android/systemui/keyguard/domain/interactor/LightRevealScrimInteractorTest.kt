@@ -19,50 +19,40 @@ package com.android.systemui.keyguard.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.fakeLightRevealScrimRepository
 import com.android.systemui.keyguard.data.repository.FakeLightRevealScrimRepository
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.testKosmos
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.anyBoolean
-import org.mockito.Mockito.never
-import org.mockito.Mockito.reset
-import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import org.mockito.Spy
+import org.mockito.Mockito
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class LightRevealScrimInteractorTest : SysuiTestCase() {
-    private val fakeKeyguardTransitionRepository = FakeKeyguardTransitionRepository()
+    val kosmos =
+        testKosmos().apply {
+            this.fakeLightRevealScrimRepository = Mockito.spy(FakeLightRevealScrimRepository())
+        }
 
-    @Spy private val fakeLightRevealScrimRepository = FakeLightRevealScrimRepository()
+    private val fakeLightRevealScrimRepository = kosmos.fakeLightRevealScrimRepository
 
-    private val testScope = TestScope()
+    private val fakeKeyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val testScope = kosmos.testScope
 
-    private val keyguardTransitionInteractor =
-        KeyguardTransitionInteractorFactory.create(
-                scope = testScope.backgroundScope,
-                repository = fakeKeyguardTransitionRepository,
-            )
-            .keyguardTransitionInteractor
-
-    private lateinit var underTest: LightRevealScrimInteractor
+    private val underTest = kosmos.lightRevealScrimInteractor
 
     private val reveal1 =
         object : LightRevealEffect {
@@ -73,18 +63,6 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
         object : LightRevealEffect {
             override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {}
         }
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
-        underTest =
-            LightRevealScrimInteractor(
-                keyguardTransitionInteractor,
-                fakeLightRevealScrimRepository,
-                testScope.backgroundScope,
-                mock()
-            )
-    }
 
     @Test
     fun lightRevealEffect_doesNotChangeDuringKeyguardTransition() =
@@ -118,42 +96,5 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
             assertEquals(values, listOf(reveal1, reveal2))
 
             job.cancel()
-        }
-
-    @Test
-    fun lightRevealEffect_startsAnimationOnlyForDifferentStateTargets() =
-        testScope.runTest {
-            runCurrent()
-            reset(fakeLightRevealScrimRepository)
-
-            fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.OFF,
-                    to = KeyguardState.OFF
-                )
-            )
-            runCurrent()
-            verify(fakeLightRevealScrimRepository, never()).startRevealAmountAnimator(anyBoolean())
-
-            fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.DOZING,
-                    to = KeyguardState.LOCKSCREEN
-                )
-            )
-            runCurrent()
-            verify(fakeLightRevealScrimRepository).startRevealAmountAnimator(true)
-
-            fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.DOZING
-                )
-            )
-            runCurrent()
-            verify(fakeLightRevealScrimRepository).startRevealAmountAnimator(false)
         }
 }

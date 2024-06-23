@@ -27,6 +27,7 @@ import android.os.FileUtils;
 import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -43,20 +44,20 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * Persister that saves recent tasks into disk.
@@ -129,11 +130,9 @@ public class TaskPersister implements PersisterQueue.Listener {
                 ImageWriteQueueItem.class);
     }
 
+    /** Reads task ids from file. This should not be called in lock. */
     @NonNull
-    SparseBooleanArray loadPersistedTaskIdsForUser(int userId) {
-        if (mTaskIdsInFile.get(userId) != null) {
-            return mTaskIdsInFile.get(userId).clone();
-        }
+    SparseBooleanArray readPersistedTaskIdsFromFileForUser(int userId) {
         final SparseBooleanArray persistedTaskIds = new SparseBooleanArray();
         synchronized (mIoLock) {
             BufferedReader reader = null;
@@ -154,10 +153,9 @@ public class TaskPersister implements PersisterQueue.Listener {
                 IoUtils.closeQuietly(reader);
             }
         }
-        mTaskIdsInFile.put(userId, persistedTaskIds);
-        return persistedTaskIds.clone();
+        Slog.i(TAG, "Loaded persisted task ids for user " + userId);
+        return persistedTaskIds;
     }
-
 
     @VisibleForTesting
     void writePersistedTaskIdsForUser(@NonNull SparseBooleanArray taskIds, int userId) {
@@ -181,6 +179,10 @@ public class TaskPersister implements PersisterQueue.Listener {
                 IoUtils.closeQuietly(writer);
             }
         }
+    }
+
+    void setPersistedTaskIds(int userId, @NonNull SparseBooleanArray taskIds) {
+        mTaskIdsInFile.put(userId, taskIds);
     }
 
     void unloadUserDataFromMemory(int userId) {
@@ -241,7 +243,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         return item != null ? item.mImage : null;
     }
 
-    private String fileToString(File file) {
+    private static String fileToString(File file) {
         final String newline = System.lineSeparator();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -272,44 +274,64 @@ public class TaskPersister implements PersisterQueue.Listener {
         return null;
     }
 
-    List<Task> restoreTasksForUserLocked(final int userId, SparseBooleanArray preaddedTasks) {
-        final ArrayList<Task> tasks = new ArrayList<Task>();
-        ArraySet<Integer> recoveredTaskIds = new ArraySet<Integer>();
-
-        File userTasksDir = getUserTasksDir(userId);
-
-        File[] recentFiles = userTasksDir.listFiles();
+    /** Loads task files from disk. This should not be called in lock. */
+    static RecentTaskFiles loadTasksForUser(int userId) {
+        final ArrayList<RecentTaskFile> taskFiles = new ArrayList<>();
+        final File userTasksDir = getUserTasksDir(userId);
+        final File[] recentFiles = userTasksDir.listFiles();
         if (recentFiles == null) {
-            Slog.e(TAG, "restoreTasksForUserLocked: Unable to list files from " + userTasksDir);
+            Slog.i(TAG, "loadTasksForUser: Unable to list files from " + userTasksDir
+                    + " exists=" + userTasksDir.exists());
+            return new RecentTaskFiles(new File[0], taskFiles);
+        }
+        for (File taskFile : recentFiles) {
+            if (!taskFile.getName().endsWith(TASK_FILENAME_SUFFIX)) {
+                continue;
+            }
+            final int taskId;
+            try {
+                taskId = Integer.parseInt(taskFile.getName().substring(
+                        0 /* beginIndex */,
+                        taskFile.getName().length() - TASK_FILENAME_SUFFIX.length()));
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Unexpected task file name", e);
+                continue;
+            }
+            try {
+                taskFiles.add(new RecentTaskFile(taskId, taskFile));
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to read file: " + fileToString(taskFile), e);
+                taskFile.delete();
+            }
+        }
+        return new RecentTaskFiles(recentFiles, taskFiles);
+    }
+
+    /** Restores tasks from raw bytes (no read storage operation). */
+    ArrayList<Task> restoreTasksForUserLocked(int userId, RecentTaskFiles recentTaskFiles,
+            IntArray existedTaskIds) {
+        final ArrayList<Task> tasks = new ArrayList<>();
+        final ArrayList<RecentTaskFile> taskFiles = recentTaskFiles.mLoadedFiles;
+        if (taskFiles.isEmpty()) {
             return tasks;
         }
 
-        for (int taskNdx = 0; taskNdx < recentFiles.length; ++taskNdx) {
-            File taskFile = recentFiles[taskNdx];
+        final ArraySet<Integer> recoveredTaskIds = new ArraySet<>();
+        for (int taskNdx = 0; taskNdx < taskFiles.size(); ++taskNdx) {
+            final RecentTaskFile recentTask = taskFiles.get(taskNdx);
+            if (existedTaskIds.contains(recentTask.mTaskId)) {
+                Slog.w(TAG, "Task #" + recentTask.mTaskId
+                        + " has already been created, so skip restoring");
+                continue;
+            }
+            final File taskFile = recentTask.mFile;
             if (DEBUG) {
                 Slog.d(TAG, "restoreTasksForUserLocked: userId=" + userId
                         + ", taskFile=" + taskFile.getName());
             }
 
-            if (!taskFile.getName().endsWith(TASK_FILENAME_SUFFIX)) {
-                continue;
-            }
-            try {
-                final int taskId = Integer.parseInt(taskFile.getName().substring(
-                        0 /* beginIndex */,
-                        taskFile.getName().length() - TASK_FILENAME_SUFFIX.length()));
-                if (preaddedTasks.get(taskId, false)) {
-                    Slog.w(TAG, "Task #" + taskId +
-                            " has already been created so we don't restore again");
-                    continue;
-                }
-            } catch (NumberFormatException e) {
-                Slog.w(TAG, "Unexpected task file name", e);
-                continue;
-            }
-
             boolean deleteFile = false;
-            try (InputStream is = new FileInputStream(taskFile)) {
+            try (InputStream is = recentTask.mXmlContent) {
                 final TypedXmlPullParser in = Xml.resolvePullParser(is);
 
                 int event;
@@ -345,7 +367,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                                 } else if (userId != task.mUserId) {
                                     // Should not happen.
                                     Slog.wtf(TAG, "Task with userId " + task.mUserId + " found in "
-                                            + userTasksDir.getAbsolutePath());
+                                            + taskFile.getAbsolutePath());
                                 } else {
                                     // Looks fine.
                                     mTaskSupervisor.setNextTaskIdForUser(taskId, userId);
@@ -377,7 +399,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         }
 
         if (!DEBUG) {
-            removeObsoleteFiles(recoveredTaskIds, userTasksDir.listFiles());
+            removeObsoleteFiles(recoveredTaskIds, recentTaskFiles.mUserTaskFiles);
         }
 
         // Fix up task affiliation from taskIds
@@ -456,7 +478,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         SparseArray<SparseBooleanArray> changedTaskIdsPerUser = new SparseArray<>();
         synchronized (mService.mGlobalLock) {
             for (int userId : mRecentTasks.usersWithRecentsLoadedLocked()) {
-                SparseBooleanArray taskIdsToSave = mRecentTasks.getTaskIdsForUser(userId);
+                SparseBooleanArray taskIdsToSave = mRecentTasks.getTaskIdsForLoadedUser(userId);
                 SparseBooleanArray persistedIdsInFile = mTaskIdsInFile.get(userId);
                 if (persistedIdsInFile != null && persistedIdsInFile.equals(taskIdsToSave)) {
                     continue;
@@ -510,6 +532,30 @@ public class TaskPersister implements PersisterQueue.Listener {
     private static boolean createParentDirectory(String filePath) {
         File parentDir = new File(filePath).getParentFile();
         return parentDir.isDirectory() || parentDir.mkdir();
+    }
+
+    private static class RecentTaskFile {
+        final int mTaskId;
+        final File mFile;
+        final ByteArrayInputStream mXmlContent;
+
+        RecentTaskFile(int taskId, File file) throws IOException {
+            mTaskId = taskId;
+            mFile = file;
+            mXmlContent = new ByteArrayInputStream(Files.readAllBytes(file.toPath()));
+        }
+    }
+
+    static class RecentTaskFiles {
+        /** All files under the user task directory. */
+        final File[] mUserTaskFiles;
+        /** The successfully loaded files. */
+        final ArrayList<RecentTaskFile> mLoadedFiles;
+
+        RecentTaskFiles(File[] userFiles, ArrayList<RecentTaskFile> loadedFiles) {
+            mUserTaskFiles = userFiles;
+            mLoadedFiles = loadedFiles;
+        }
     }
 
     private static class TaskWriteQueueItem implements PersisterQueue.WriteQueueItem {

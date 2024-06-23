@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.content.Context
+import androidx.annotation.GravityInt
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -39,27 +40,30 @@ import com.android.compose.theme.PlatformTheme
  *   )
  * }
  *
- * dialogLaunchAnimator.showFromView(dialog, viewThatWasClicked)
+ * dialogTransitionAnimator.showFromView(dialog, viewThatWasClicked)
  * ```
  *
  * @param context the [Context] in which the dialog will be constructed.
  * @param dismissOnDeviceLock whether the dialog should be automatically dismissed when the device
  *   is locked (true by default).
+ * @param dialogGravity is one of the [android.view.Gravity] and determines dialog position on the
+ *   screen.
  */
 fun SystemUIDialogFactory.create(
     context: Context = this.applicationContext,
     theme: Int = SystemUIDialog.DEFAULT_THEME,
     dismissOnDeviceLock: Boolean = SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
+    @GravityInt dialogGravity: Int? = null,
     content: @Composable (SystemUIDialog) -> Unit,
 ): ComponentSystemUIDialog {
-    val dialog = create(context, theme, dismissOnDeviceLock)
+    val dialog = create(context, theme, dismissOnDeviceLock, dialogGravity)
 
     // Create the dialog so that it is properly constructed before we set the Compose content.
     // Otherwise, the ComposeView won't render properly.
     dialog.create()
 
     // Set the content. Note that the background of the dialog is drawn on the DecorView of the
-    // dialog directly, which makes it automatically work nicely with DialogLaunchAnimator.
+    // dialog directly, which makes it automatically work nicely with DialogTransitionAnimator.
     dialog.setContentView(
         ComposeView(context).apply {
             setContent {

@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> saniye sonra <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yönlendirilmedi"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yönlendirilmedi"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Hücresel ağ güvenliği"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Ayarları incele"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Cihaz tanımlayıcısına erişildi"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Cihazınızın benzersiz tanımlayıcısı (IMSI), <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ile <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> arasında <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> bağlantısındaki bir ağ tarafından <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> kez kaydedildi."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ağına şifrelenmiş bağlantı"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Artık daha güvenli bir hücresel ağa bağlısınız."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ağına şifrelenmemiş bağlantı"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Şifrelenmemiş bir hücresel ağa bağlısınız. Aramalarınız, mesajlarınız ve verileriniz takip edilebilir."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Hücresel güvenlik ayarları"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Daha fazla bilgi"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Özellik kodu tamamlandı."</string>
     <string name="fcError" msgid="5325116502080221346">"Bağlantı sorunu veya geçersiz özellik kodu."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Tamam"</string>
@@ -370,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Uygulamanın hücre yayını mesajları geldiğinde bunları yönlendirmek için hücre yayını modülüne bağlanmasına izin verir. Hücre yayını uyarıları bazı konumlarda acil durumlar hakkında sizi uyarmak için kullanılır. Zararlı uygulamalar acil durum hücre yayını alındığında cihazınızın performansını ve çalışmasını olumsuz etkileyebilir."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Devam eden aramaları yönetme"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Uygulamanın, cihazınızda devam eden aramalarla ilgili bilgileri görüp kontrol etmesine izin verir."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Bilinen son hücre kimliğine erişme."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Uygulamalara, telefon işlevlerinin sağladığı bilinen son hücre kimliğine erişim izni verir."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"hücre yayını mesajlarını oku"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Uygulamaya, cihazınız tarafından alınan hücre yayını mesajlarını okuma izni verir. Hücre yayını uyarıları bazı yerlerde acil durumlar konusunda sizi uyarmak için gönderilir. Kötü amaçlı uygulamalar acil hücre yayını alındığında cihazınızın performansına ya da çalışmasına engel olabilir."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"abone olunan yayınları okuma"</string>
@@ -434,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Uygulamanın \"systemExempted\" türüyle ön plan hizmetlerini kullanmasına izin verir"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\"fileManagement\" türündeki ön plan hizmetini çalıştırma"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Uygulamanın \"fileManagement\" türündeki ön plan hizmetlerini kullanmasına izin verir."</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"\"mediaProcessing\" türündeki ön plan hizmetini çalıştırma"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Uygulamanın \"mediaProcessing\" türüyle ön plan hizmetlerini kullanmasına izin verir"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" türüyle ön plan hizmetini çalıştırma"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Uygulamanın \"specialUse\" türüyle ön plan hizmetlerini kullanmasına izin verir"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"uygulama depolama alanını ölç"</string>
@@ -539,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Uygulamaya, telefonunun kızıl ötesi vericisini kullanma izni verir."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"duvar kağıdını ayarla"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Uygulamaya, sistem duvar kağıdını ayarlama izni verir."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Gizli profillere erişim"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Uygulamanın gizli profillere erişmesine izin verir."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"duvar kâğıdımın boyutunu ayarla"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Uygulamaya, sistem duvar kağıdı için boyut ipuçlarını ayarlama izni verir."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"saat dilimini ayarla"</string>
@@ -632,7 +648,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekran kilidi kullan"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Devam etmek için ekran kilidinizi girin"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Sensöre sıkıca bastırın"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Parmak izi tanınamadı. Tekrar deneyin."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Parmak izi tanınmadı. Tekrar deneyin."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Parmak izi sensörünü temizleyip tekrar deneyin"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Sensörü temizleyip tekrar deneyin"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Sensöre sıkıca bastırın"</string>
@@ -650,18 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Parmak izi kimlik doğrulaması yapıldı"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Yüz kimliği doğrulandı"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Yüz kimliği doğrulandı, lütfen onayla\'ya basın"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Parmak izi donanımı kullanılamıyor."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Parmak izi donanımı kullanılamıyor"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Parmak izi ayarlanamıyor"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Parmak izi kurulumu zaman aşımına uğradı. Tekrar deneyin."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Parmak izi işlemi iptal edildi."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Parmak izi işlemi kullanıcı tarafından iptal edildi."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Parmak izi işlemi iptal edildi"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Parmak izi işlemi kullanıcı tarafından iptal edildi"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Çok fazla deneme yapıldı. Bunun yerine ekran kilidini kullanın."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Çok fazla deneme yapıldı. Bunun yerine ekran kilidini kullanın."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Parmak izi işlenemiyor. Tekrar deneyin."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Parmak izi kaydedilmedi."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Bu cihazda parmak izi sensörü yok."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensör geçici olarak devre dışı bırakıldı."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Parmak izi sensörü kullanılamıyor. Bir onarım hizmeti sağlayıcıyı ziyaret edin"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Parmak izi kaydedilmedi"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Bu cihazda parmak izi sensörü yok"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sensör geçici olarak devre dışı bırakıldı"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Parmak izi sensörü kullanılamıyor. Bir onarım hizmeti sağlayıcıyı ziyaret edin."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Güç düğmesine basıldı"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. parmak"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Parmak izi kullan"</string>
@@ -696,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Yüzünüz görünmüyor. Telefonunuzu göz hizasında tutun."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Çok fazla hareket ediyorsunuz. Telefonu sabit tutun."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Lütfen yüzünüzü yeniden kaydedin."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Yüz tanınamadı. Tekrar deneyin."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Yüz tanınmadı. Tekrar deneyin."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Başınızın konumunu hafifçe değiştirin"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Telefonunuza daha doğrudan bakın"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Telefonunuza daha doğrudan bakın"</string>
@@ -807,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Uygulamanın, sensör verilerini 200 Hz\'den daha yüksek bir hızda örneklemesine olanak tanır"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"uygulamayı kullanıcı işlemi olmadan güncelleme"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"İzin sahibinin, daha önce yüklediği uygulamayı kullanıcı işlemi olmadan güncellemesine izin verir"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"Diğer uygulamalara ait E2EE iletişim anahtarlarının doğrulama durumlarını güncelleme"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Uygulamanın diğer uygulamalara ait E2EE iletişim anahtarlarının doğrulama durumlarını güncellemesine izin verir."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetler."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekran kilidini açma denemelerini izle"</string>
@@ -1376,8 +1394,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Bağlı cihaz şarj ediliyor. Diğer seçenekler için dokunun."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analog ses aksesuarı algılandı"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Takılan cihaz bu telefonla uyumlu değil. Daha fazla bilgi edinmek için dokunun."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB hata ayıklaması bağlandı"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB hata ayıklamayı kapatmak için dokunun"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB üzerinden hata ayıklama bağlandı"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB üzerinden hata ayıklamayı kapatmak için dokunun"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB hata ayıklamasını devre dışı bırakmak için seçin."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Kablosuz hata ayıklama bağlı"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Kablosuz hata ayıklamayı kapatmak için dokunun"</string>
@@ -1906,6 +1924,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Hafta sonu"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Etkinlik"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Uyku"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> tarafından yönetiliyor"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Açık"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Kapalı"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> bazı sesleri kapatıyor"</string>
@@ -1925,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Doğrulandı"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Genişlet"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Daralt"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Daraltıldı"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Genişletildi"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"genişletmeyi aç/kapat"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB Çevre Birimi Bağlantı Noktası"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1965,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"İş uygulamaları devam ettirilsin mi?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Devam ettir"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Acil durum"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ekran kilidi ayarlayın"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ekran kilidi ayarla"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Özel alanı kullanmak için cihazda ekran kilidi ayarlayın"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Uygulama kullanılamıyor"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulaması şu anda kullanılamıyor."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> kullanılamıyor"</string>
@@ -2341,8 +2365,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Ekrana yansıtılamıyor"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Farklı kablo kullanarak tekrar deneyin"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Cihazınız çok ısındığı için soğuyana kadar ekrana yansıtılamaz"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kablo, ekranları desteklemeyebilir"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C kablonuz ekranlara doğru şekilde bağlanamayabilir"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen açık"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, içeriği göstermek için her iki ekranı da kullanıyor"</string>
@@ -2366,4 +2388,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"İş 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Paylaşılan"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Uyduya otomatik olarak bağlandı"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Mobil veya kablosuz ağa bağlı olmadan mesaj alıp gönderebilirsiniz"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mesajlar\'ı aç"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"İşleyiş şekli"</string>
 </resources>

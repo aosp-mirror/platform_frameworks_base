@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionS
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_CARRIER_ID
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_CARRIER_NETWORK_CHANGE
@@ -32,6 +33,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullM
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_EMERGENCY
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_IS_GSM
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_IS_IN_SERVICE
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_IS_NTN
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_OPERATOR
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_PRIMARY_LEVEL
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_ROAMING
@@ -41,6 +43,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.F
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -64,6 +67,17 @@ class DemoMobileConnectionRepository(
                 _carrierId.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), _carrierId.value)
+
+    private val _inflateSignalStrength: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val inflateSignalStrength =
+        _inflateSignalStrength
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = "inflate",
+                _inflateSignalStrength.value
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), _inflateSignalStrength.value)
 
     private val _isEmergencyOnly = MutableStateFlow(false)
     override val isEmergencyOnly =
@@ -108,6 +122,17 @@ class DemoMobileConnectionRepository(
                 _isInService.value
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), _isInService.value)
+
+    private val _isNonTerrestrial = MutableStateFlow(false)
+    override val isNonTerrestrial =
+        _isNonTerrestrial
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = COL_IS_NTN,
+                _isNonTerrestrial.value
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), _isNonTerrestrial.value)
 
     private val _isGsm = MutableStateFlow(false)
     override val isGsm =
@@ -178,7 +203,16 @@ class DemoMobileConnectionRepository(
             .logDiffsForTable(tableLogBuffer, columnPrefix = "", _resolvedNetworkType.value)
             .stateIn(scope, SharingStarted.WhileSubscribed(), _resolvedNetworkType.value)
 
-    override val numberOfLevels = MutableStateFlow(MobileConnectionRepository.DEFAULT_NUM_LEVELS)
+    override val numberOfLevels =
+        _inflateSignalStrength
+            .map { shouldInflate ->
+                if (shouldInflate) {
+                    DEFAULT_NUM_LEVELS + 1
+                } else {
+                    DEFAULT_NUM_LEVELS
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), DEFAULT_NUM_LEVELS)
 
     override val dataEnabled = MutableStateFlow(true)
 
@@ -211,6 +245,8 @@ class DemoMobileConnectionRepository(
 
         _carrierId.value = event.carrierId ?: INVALID_SUBSCRIPTION_ID
 
+        _inflateSignalStrength.value = event.inflateStrength
+
         cdmaRoaming.value = event.roaming
         _isRoaming.value = event.roaming
         // TODO(b/261029387): not yet supported
@@ -227,6 +263,7 @@ class DemoMobileConnectionRepository(
             (event.activity ?: TelephonyManager.DATA_ACTIVITY_NONE).toMobileDataActivityModel()
         _carrierNetworkChangeActive.value = event.carrierNetworkChange
         _resolvedNetworkType.value = resolvedNetworkType
+        _isNonTerrestrial.value = event.ntn
 
         isAllowedDuringAirplaneMode.value = false
         hasPrioritizedNetworkCapabilities.value = event.slice
@@ -239,7 +276,6 @@ class DemoMobileConnectionRepository(
         carrierName.value = NetworkNameModel.SubscriptionDerived(CARRIER_MERGED_NAME)
         // TODO(b/276943904): is carrierId a thing with carrier merged networks?
         _carrierId.value = INVALID_SUBSCRIPTION_ID
-        numberOfLevels.value = event.numberOfLevels
         cdmaRoaming.value = false
         _primaryLevel.value = event.level
         _cdmaLevel.value = event.level

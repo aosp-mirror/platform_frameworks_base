@@ -19,4 +19,5 @@ package com.android.systemui.keyguard.data.repository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 
-val Kosmos.biometricSettingsRepository by Fixture { FakeBiometricSettingsRepository() }
+val Kosmos.fakeBiometricSettingsRepository by Fixture { FakeBiometricSettingsRepository() }
+val Kosmos.biometricSettingsRepository by Fixture { fakeBiometricSettingsRepository }

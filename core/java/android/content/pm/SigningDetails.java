@@ -31,6 +31,8 @@ import com.android.internal.util.DataClass;
 
 import libcore.util.HexEncoding;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
@@ -49,6 +51,7 @@ public final class SigningDetails implements Parcelable {
 
     private static final String TAG = "SigningDetails";
 
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef({SignatureSchemeVersion.UNKNOWN,
             SignatureSchemeVersion.JAR,
             SignatureSchemeVersion.SIGNING_BLOCK_V2,

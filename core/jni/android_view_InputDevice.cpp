@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-#include <input/Input.h>
+#include "android_view_InputDevice.h"
 
 #include <android_runtime/AndroidRuntime.h>
+#include <com_android_input_flags.h>
+#include <input/Input.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
-
 #include <nativehelper/ScopedLocalRef.h>
 
-#include "android_view_InputDevice.h"
 #include "android_view_KeyCharacterMap.h"
-
 #include "core_jni_helpers.h"
 
 namespace android {
@@ -34,6 +33,7 @@ static struct {
 
     jmethodID ctor;
     jmethodID addMotionRange;
+    jmethodID setShouldSmoothScroll;
 } gInputDeviceClassInfo;
 
 jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& deviceInfo) {
@@ -103,6 +103,18 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
         }
     }
 
+    if (com::android::input::flags::input_device_view_behavior_api()) {
+        const InputDeviceViewBehavior& viewBehavior = deviceInfo.getViewBehavior();
+        std::optional<bool> defaultSmoothScroll = viewBehavior.shouldSmoothScroll;
+        if (defaultSmoothScroll.has_value()) {
+            env->CallVoidMethod(inputDeviceObj.get(), gInputDeviceClassInfo.setShouldSmoothScroll,
+                                *defaultSmoothScroll);
+            if (env->ExceptionCheck()) {
+                return NULL;
+            }
+        }
+    }
+
     return env->NewLocalRef(inputDeviceObj.get());
 }
 
@@ -118,6 +130,8 @@ int register_android_view_InputDevice(JNIEnv* env)
 
     gInputDeviceClassInfo.addMotionRange =
             GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "addMotionRange", "(IIFFFFF)V");
+    gInputDeviceClassInfo.setShouldSmoothScroll =
+            GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "setShouldSmoothScroll", "(Z)V");
     return 0;
 }
 

@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.testng.Assert.assertEquals;
@@ -33,18 +34,19 @@ import android.content.pm.UserProperties;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.provider.Settings;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.util.ArraySet;
 import android.util.Slog;
 
 import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -222,6 +224,8 @@ public final class UserManagerTest {
                 .isEqualTo(cloneUserProperties.getCrossProfileContentSharingStrategy());
         assertThrows(SecurityException.class, cloneUserProperties::getDeleteAppWithParent);
         assertThrows(SecurityException.class, cloneUserProperties::getAlwaysVisible);
+        assertThat(typeProps.getProfileApiVisibility()).isEqualTo(
+                cloneUserProperties.getProfileApiVisibility());
         compareDrawables(mUserManager.getUserBadge(),
                 Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
@@ -344,7 +348,10 @@ public final class UserManagerTest {
         assertThrows(SecurityException.class, privateProfileUserProperties::getDeleteAppWithParent);
         assertThrows(SecurityException.class,
                 privateProfileUserProperties::getAllowStoppingUserWithDelayedLocking);
-
+        assertThat(typeProps.getProfileApiVisibility()).isEqualTo(
+                privateProfileUserProperties.getProfileApiVisibility());
+        assertThat(typeProps.areItemsRestrictedOnHomeScreen())
+                .isEqualTo(privateProfileUserProperties.areItemsRestrictedOnHomeScreen());
         compareDrawables(mUserManager.getUserBadge(),
                 Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
@@ -1630,6 +1637,121 @@ public final class UserManagerTest {
             }
         }
         assertThat(mainUserCount).isEqualTo(1);
+    }
+
+    @Test
+    public void testAddUserAccountData_validStringValuesAreSaved_validBundleIsSaved() {
+        assumeManagedUsersSupported();
+
+        String userName = "User";
+        String accountName = "accountName";
+        String accountType = "accountType";
+        String arrayKey = "StringArrayKey";
+        String stringKey = "StringKey";
+        String intKey = "IntKey";
+        String nestedBundleKey = "PersistableBundleKey";
+        String value1 = "Value 1";
+        String value2 = "Value 2";
+        String value3 = "Value 3";
+
+        UserInfo userInfo = mUserManager.createUser(userName,
+                UserManager.USER_TYPE_FULL_SECONDARY, 0);
+
+        PersistableBundle accountOptions = new PersistableBundle();
+        String[] stringArray = {value1, value2};
+        accountOptions.putInt(intKey, 1234);
+        PersistableBundle nested = new PersistableBundle();
+        nested.putString(stringKey, value3);
+        accountOptions.putPersistableBundle(nestedBundleKey, nested);
+        accountOptions.putStringArray(arrayKey, stringArray);
+
+        mUserManager.clearSeedAccountData();
+        mUserManager.setSeedAccountData(mContext.getUserId(), accountName,
+                accountType, accountOptions);
+
+        //assert userName accountName and accountType were saved correctly
+        assertTrue(mUserManager.getUserInfo(userInfo.id).name.equals(userName));
+        assertTrue(mUserManager.getSeedAccountName().equals(accountName));
+        assertTrue(mUserManager.getSeedAccountType().equals(accountType));
+
+        //assert bundle with correct values was added
+        assertThat(mUserManager.getSeedAccountOptions().containsKey(arrayKey)).isTrue();
+        assertThat(mUserManager.getSeedAccountOptions().getPersistableBundle(nestedBundleKey)
+                .getString(stringKey)).isEqualTo(value3);
+        assertThat(mUserManager.getSeedAccountOptions().getStringArray(arrayKey)[0])
+                .isEqualTo(value1);
+
+        mUserManager.removeUser(userInfo.id);
+    }
+
+    @Test
+    public void testAddUserAccountData_invalidStringValuesAreTruncated_invalidBundleIsDropped() {
+        assumeManagedUsersSupported();
+
+        String tooLongString = generateLongString();
+        String userName = "User " + tooLongString;
+        String accountType = "Account Type " + tooLongString;
+        String accountName = "accountName " + tooLongString;
+        String arrayKey = "StringArrayKey";
+        String stringKey = "StringKey";
+        String intKey = "IntKey";
+        String nestedBundleKey = "PersistableBundleKey";
+        String value1 = "Value 1";
+        String value2 = "Value 2";
+
+        UserInfo userInfo = mUserManager.createUser(userName,
+                UserManager.USER_TYPE_FULL_SECONDARY, 0);
+
+        PersistableBundle accountOptions = new PersistableBundle();
+        String[] stringArray = {value1, value2};
+        accountOptions.putInt(intKey, 1234);
+        PersistableBundle nested = new PersistableBundle();
+        nested.putString(stringKey, tooLongString);
+        accountOptions.putPersistableBundle(nestedBundleKey, nested);
+        accountOptions.putStringArray(arrayKey, stringArray);
+        mUserManager.clearSeedAccountData();
+        mUserManager.setSeedAccountData(mContext.getUserId(), accountName,
+                accountType, accountOptions);
+
+        //assert userName was truncated
+        assertTrue(mUserManager.getUserInfo(userInfo.id).name.length()
+                == UserManager.MAX_USER_NAME_LENGTH);
+
+        //assert accountName and accountType got truncated
+        assertTrue(mUserManager.getSeedAccountName().length()
+                == UserManager.MAX_ACCOUNT_STRING_LENGTH);
+        assertTrue(mUserManager.getSeedAccountType().length()
+                == UserManager.MAX_ACCOUNT_STRING_LENGTH);
+
+        //assert bundle with invalid values was dropped
+        assertThat(mUserManager.getSeedAccountOptions() == null).isTrue();
+
+        mUserManager.removeUser(userInfo.id);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_ENABLE_HIDING_PROFILES)
+    public void testGetProfileIdsExcludingHidden() throws Exception {
+        int mainUserId = mUserManager.getMainUser().getIdentifier();
+        final UserInfo profile = createProfileForUser("Profile",
+                UserManager.USER_TYPE_PROFILE_PRIVATE, mainUserId);
+
+        final int[] allProfiles = mUserManager.getProfileIds(mainUserId, /* enabledOnly */ false);
+        final int[] profilesExcludingHidden = mUserManager.getProfileIdsExcludingHidden(
+                mainUserId, /* enabledOnly */ false);
+
+        assertThat(allProfiles).asList().contains(profile.id);
+        assertThat(profilesExcludingHidden).asList().doesNotContain(profile.id);
+    }
+
+    private String generateLongString() {
+        String partialString = "Test Name Test Name Test Name Test Name Test Name Test Name Test "
+                + "Name Test Name Test Name Test Name "; //String of length 100
+        StringBuilder resultString = new StringBuilder();
+        for (int i = 0; i < 600; i++) {
+            resultString.append(partialString);
+        }
+        return resultString.toString();
     }
 
     private boolean isPackageInstalledForUser(String packageName, int userId) {

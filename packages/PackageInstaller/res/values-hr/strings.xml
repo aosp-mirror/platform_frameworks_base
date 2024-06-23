@@ -44,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Ovaj korisnik ne može instalirati nepoznate aplikacije"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ovaj korisnik nema dopuštenje za instaliranje aplikacija"</string>
     <string name="ok" msgid="7871959885003339302">"U redu"</string>
+    <string name="archive" msgid="4447791830199354721">"Arhiviraj"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Ipak ažuriraj"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Upravljanje apl."</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nema dovoljno mjesta"</string>
@@ -58,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Deinstalacija ažuriranja"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"Aktivnost <xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> dio je sljedeće aplikacije:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Želite li deinstalirati ovu aplikaciju?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"Vaši će se osobni podaci spremiti"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Želite li arhivirati ovu aplikaciju za sve korisnike? Vaši će se osobni podaci spremiti"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Želite li arhivirati ovu aplikaciju na poslovnom profilu? Vaši će se osobni podaci spremiti"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Želite li arhivirati ovu aplikaciju za korisnika <xliff:g id="USERNAME">%1$s</xliff:g>? Vaši će se osobni podaci spremiti"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Želite li arhivirati ovu aplikaciju iz svojeg privatnog prostora? Vaši će se osobni podaci spremiti"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Želite li deinstalirati tu aplikaciju za "<b>"sve"</b>" korisnike? Aplikacija i njezini podaci bit će uklonjeni sa "<b>"svih"</b>" korisnika na uređaju."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Želite li deinstalirati tu aplikaciju za korisnika <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Želite li deinstalirati tu aplikaciju s poslovnog profila?"</string>
@@ -86,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"Upravljaj korisnicima"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g> nije moguće instalirati."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Došlo je do problema pri analiziranju paketa."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Radnje instaliranja i deinstaliranja nisu podržane na Wearu."</string>
     <string name="message_staging" msgid="8032722385658438567">"Postavljanje aplikacije…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Nepoznato"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Iz sigurnosnih razloga tablet trenutačno nema dopuštenje za instaliranje nepoznatih aplikacija iz ovog izvora. To možete promijeniti u Postavkama."</string>
@@ -98,17 +102,18 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Vaš tablet i osobni podaci podložniji su napadima nepoznatih aplikacija. Instaliranjem te aplikacije prihvaćate odgovornost za oštećenje tableta ili gubitak podataka do kojih može doći uslijed njezine upotrebe."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Vaš TV i osobni podaci podložniji su napadima nepoznatih aplikacija. Instaliranjem te aplikacije prihvaćate odgovornost za oštećenje televizora ili gubitak podataka do kojih može doći uslijed njezine upotrebe."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"Želite li arhivirati aplikaciju <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Nastavi"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Postavke"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instaliranje/deinstaliranje Wear apl."</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Obavijest o instaliranoj aplikaciji"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Uspješno instalirano"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"Aplikacija \"<xliff:g id="APPNAME">%1$s</xliff:g>\" uspješno je instalirana"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"Želite li vratiti aplikaciju <xliff:g id="APPNAME">%1$s</xliff:g> putem aplikacije <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Želite li vratiti aplikaciju <xliff:g id="APPNAME">%1$s</xliff:g> putem aplikacije <xliff:g id="INSTALLERNAME">%2$s</xliff:g>?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"Ova aplikacija počet će se preuzimati u pozadini"</string>
     <string name="restore" msgid="8460854736328970444">"Vrati"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Niste povezani s internetom"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Aplikacija će se automatski vratiti kad se povežete s internetom"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"Da biste vratili ovu aplikaciju, provjerite internetsku vezu i pokušajte ponovo"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Nešto nije u redu"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Došlo je do problema s vraćanjem aplikacije"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Nema dovoljno prostora za pohranu"</string>
@@ -116,8 +121,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Potrebna je radnja"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Da biste vratili aplikaciju, slijedite upute u nastavku"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> – onemogućeno"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Da biste vratili aplikaciju, u postavkama omogućite sljedeće: <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> – deinstalirano"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Da biste vratili aplikaciju, instalirajte sljedeće: <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Nastavi"</string>

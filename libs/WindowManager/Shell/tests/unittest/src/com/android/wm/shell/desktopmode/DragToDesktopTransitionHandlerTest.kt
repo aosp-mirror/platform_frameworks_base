@@ -24,7 +24,6 @@ import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_CANCEL_D
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
-import java.util.function.Supplier
 import junit.framework.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
@@ -34,9 +33,11 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
+import java.util.function.Supplier
 
 /** Tests of [DragToDesktopTransitionHandler]. */
 @SmallTest
@@ -150,6 +151,23 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
+    fun startDragToDesktop_anotherTransitionInProgress_startDropped() {
+        val task = createTask()
+        val dragAnimator = mock<MoveToDesktopAnimator>()
+
+        // Simulate attempt to start two drag to desktop transitions.
+        startDragToDesktopTransition(task, dragAnimator)
+        startDragToDesktopTransition(task, dragAnimator)
+
+        // Verify transition only started once.
+        verify(transitions, times(1)).startTransition(
+                eq(TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP),
+                any(),
+                eq(handler)
+        )
+    }
+
+    @Test
     fun cancelDragToDesktop_startWasReady_cancel() {
         val task = createTask()
         val dragAnimator = mock<MoveToDesktopAnimator>()
@@ -189,6 +207,32 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         verifyZeroInteractions(dragAnimator)
     }
 
+    @Test
+    fun cancelDragToDesktop_transitionNotInProgress_dropCancel() {
+        // Then cancel is called before the transition was started.
+        handler.cancelDragToDesktopTransition()
+
+        // Verify cancel is dropped.
+        verify(transitions, never()).startTransition(
+                eq(TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP),
+                any(),
+                eq(handler)
+        )
+    }
+
+    @Test
+    fun finishDragToDesktop_transitionNotInProgress_dropFinish() {
+        // Then finish is called before the transition was started.
+        handler.finishDragToDesktopTransition(WindowContainerTransaction())
+
+        // Verify finish is dropped.
+        verify(transitions, never()).startTransition(
+                eq(TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP),
+                any(),
+                eq(handler)
+        )
+    }
+
     private fun startDragToDesktopTransition(
         task: RunningTaskInfo,
         dragAnimator: MoveToDesktopAnimator
@@ -202,7 +246,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                 )
             )
             .thenReturn(token)
-        handler.startDragToDesktopTransition(task.taskId, dragAnimator, mock())
+        handler.startDragToDesktopTransition(task.taskId, dragAnimator)
         return token
     }
 

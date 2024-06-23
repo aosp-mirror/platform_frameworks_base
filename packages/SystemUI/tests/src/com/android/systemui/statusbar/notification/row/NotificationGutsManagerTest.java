@@ -42,6 +42,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -67,9 +69,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -85,6 +87,8 @@ import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -120,7 +124,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
 
-    private TestScope mTestScope = TestScopeProvider.getTestScope();
+    private KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private TestScope mTestScope = mKosmos.getTestScope();
     private JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private TestableLooper mTestableLooper;
@@ -156,6 +161,12 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     @Mock private UserManager mUserManager;
 
+    private final ActiveNotificationListRepository mActiveNotificationListRepository =
+            new ActiveNotificationListRepository();
+    private final ActiveNotificationsInteractor mActiveNotificationsInteractor =
+            new ActiveNotificationsInteractor(mActiveNotificationListRepository,
+                    StandardTestDispatcher(null, null));
+
     private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
 
     @Before
@@ -171,7 +182,11 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 new WindowRootViewVisibilityRepository(mBarService, mExecutor),
                 new FakeKeyguardRepository(),
                 mHeadsUpManager,
-                PowerInteractorFactory.create().getPowerInteractor());
+                PowerInteractorFactory.create().getPowerInteractor(),
+                mActiveNotificationsInteractor,
+                mKosmos.getFakeSceneContainerFlags(),
+                () -> mKosmos.getSceneInteractor()
+        );
 
         mGutsManager = new NotificationGutsManager(
                 mContext,

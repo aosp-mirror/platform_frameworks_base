@@ -21,8 +21,6 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static android.app.admin.WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST;
 import static android.app.admin.WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST;
-import static android.app.admin.flags.Flags.dumpsysPolicyEngineMigrationEnabled;
-import static android.app.admin.flags.Flags.policyEngineMigrationV2Enabled;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 
 import static com.android.server.devicepolicy.DevicePolicyManagerService.LOG_TAG;
@@ -41,6 +39,7 @@ import android.app.admin.PackagePolicy;
 import android.app.admin.PasswordPolicy;
 import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.WifiSsidPolicy;
+import android.app.admin.flags.Flags;
 import android.graphics.Color;
 import android.net.wifi.WifiSsid;
 import android.os.Bundle;
@@ -1297,7 +1296,7 @@ class ActiveAdmin {
         pw.print("encryptionRequested=");
         pw.println(encryptionRequested);
 
-        if (!dumpsysPolicyEngineMigrationEnabled()) {
+        if (!Flags.dumpsysPolicyEngineMigrationEnabled()) {
             pw.print("disableCamera=");
             pw.println(disableCamera);
 
@@ -1316,7 +1315,8 @@ class ActiveAdmin {
             UserRestrictionsUtils.dumpRestrictions(pw, "  ", userRestrictions);
         }
 
-        if (!policyEngineMigrationV2Enabled() || !dumpsysPolicyEngineMigrationEnabled()) {
+        if (!Flags.policyEngineMigrationV2Enabled()
+                || !Flags.dumpsysPolicyEngineMigrationEnabled()) {
             pw.print("mUsbDataSignaling=");
             pw.println(mUsbDataSignalingEnabled);
         }

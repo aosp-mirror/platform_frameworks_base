@@ -20,7 +20,7 @@ import android.annotation.UserIdInt
 import android.content.Context
 import android.content.DialogInterface
 import com.android.settingslib.R
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.phone.SystemUIDialog
 
@@ -32,7 +32,7 @@ class ExitGuestDialog(
     private val targetUserId: Int,
     isKeyguardShowing: Boolean,
     private val falsingManager: FalsingManager,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val onExitGuestUserListener: OnExitGuestUserListener,
 ) : SystemUIDialog(context) {
 
@@ -59,7 +59,7 @@ class ExitGuestDialog(
 
                 if (isGuestEphemeral) {
                     if (which == BUTTON_POSITIVE) {
-                        dialogLaunchAnimator.dismissStack(this@ExitGuestDialog)
+                        dialogTransitionAnimator.dismissStack(this@ExitGuestDialog)
                         // Ephemeral guest: exit guest, guest is removed by the system
                         // on exit, since its marked ephemeral
                         onExitGuestUserListener.onExitGuestUser(guestUserId, targetUserId, false)
@@ -70,7 +70,7 @@ class ExitGuestDialog(
                 } else {
                     when (which) {
                         BUTTON_POSITIVE -> {
-                            dialogLaunchAnimator.dismissStack(this@ExitGuestDialog)
+                            dialogTransitionAnimator.dismissStack(this@ExitGuestDialog)
                             // Non-ephemeral guest: exit guest, guest is not removed by the system
                             // on exit, since its marked non-ephemeral
                             onExitGuestUserListener.onExitGuestUser(
@@ -80,7 +80,7 @@ class ExitGuestDialog(
                             )
                         }
                         BUTTON_NEGATIVE -> {
-                            dialogLaunchAnimator.dismissStack(this@ExitGuestDialog)
+                            dialogTransitionAnimator.dismissStack(this@ExitGuestDialog)
                             // Non-ephemeral guest: remove guest and then exit
                             onExitGuestUserListener.onExitGuestUser(guestUserId, targetUserId, true)
                         }

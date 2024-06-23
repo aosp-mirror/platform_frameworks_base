@@ -46,7 +46,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Prefs;
 import com.android.systemui.animation.DialogCuj;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -82,7 +82,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private final ZenModeController mController;
     private final SharedPreferences mSharedPreferences;
     private final UserSettingObserver mSettingZenDuration;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final QSZenModeDialogMetricsLogger mQSZenDialogMetricsLogger;
 
     private boolean mListening;
@@ -101,14 +101,14 @@ public class DndTile extends QSTileImpl<BooleanState> {
             ZenModeController zenModeController,
             @Main SharedPreferences sharedPreferences,
             SecureSettings secureSettings,
-            DialogLaunchAnimator dialogLaunchAnimator
+            DialogTransitionAnimator dialogTransitionAnimator
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = zenModeController;
         mSharedPreferences = sharedPreferences;
         mController.observe(getLifecycle(), mZenCallback);
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mSettingZenDuration = new UserSettingObserver(secureSettings, mUiHandler,
                 Settings.Secure.ZEN_DURATION, getHost().getUserId()) {
             @Override
@@ -184,7 +184,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                     mUiHandler.post(() -> {
                         Dialog dialog = makeZenModeDialog();
                         if (view != null) {
-                            mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(
+                            mDialogTransitionAnimator.showFromView(dialog, view, new DialogCuj(
                                             InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
                                             INTERACTION_JANK_TAG),
                                     /* animateBackgroundBoundsChange= */ false);

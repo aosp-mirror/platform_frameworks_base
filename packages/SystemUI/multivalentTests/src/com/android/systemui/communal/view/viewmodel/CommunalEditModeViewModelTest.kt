@@ -17,49 +17,57 @@
 package com.android.systemui.communal.view.viewmodel
 
 import android.app.smartspace.SmartspaceTarget
-import android.os.PowerManager
+import android.appwidget.AppWidgetProviderInfo
+import android.content.pm.UserInfo
+import android.os.UserHandle
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
-import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
+import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.media.controls.ui.MediaHost
-import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
+import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import javax.inject.Provider
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
-    @Mock private lateinit var shadeViewController: ShadeViewController
-    @Mock private lateinit var powerManager: PowerManager
+    @Mock private lateinit var uiEventLogger: UiEventLogger
+    @Mock private lateinit var providerInfo: AppWidgetProviderInfo
 
-    private lateinit var testScope: TestScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
-    private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var communalRepository: FakeCommunalRepository
     private lateinit var tutorialRepository: FakeCommunalTutorialRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
@@ -71,27 +79,28 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        testScope = TestScope()
-
-        val withDeps = CommunalInteractorFactory.create()
-        keyguardRepository = withDeps.keyguardRepository
-        communalRepository = withDeps.communalRepository
-        tutorialRepository = withDeps.tutorialRepository
-        widgetRepository = withDeps.widgetRepository
-        smartspaceRepository = withDeps.smartspaceRepository
-        mediaRepository = withDeps.mediaRepository
+        tutorialRepository = kosmos.fakeCommunalTutorialRepository
+        widgetRepository = kosmos.fakeCommunalWidgetRepository
+        smartspaceRepository = kosmos.fakeSmartspaceRepository
+        mediaRepository = kosmos.fakeCommunalMediaRepository
+        kosmos.fakeUserTracker.set(
+            userInfos = listOf(MAIN_USER_INFO),
+            selectedUserIndex = 0,
+        )
+        whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
 
         underTest =
             CommunalEditModeViewModel(
-                withDeps.communalInteractor,
-                Provider { shadeViewController },
-                powerManager,
+                kosmos.communalInteractor,
+                kosmos.communalSettingsInteractor,
                 mediaHost,
+                uiEventLogger,
+                logcatLogBuffer("CommunalEditModeViewModelTest"),
             )
     }
 
     @Test
-    fun communalContent_onlyWidgetsAreShownInEditMode() =
+    fun communalContent_onlyWidgetsAndCtaTileAreShownInEditMode() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
@@ -101,12 +110,12 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                     CommunalWidgetContentModel(
                         appWidgetId = 0,
                         priority = 30,
-                        providerInfo = mock(),
+                        providerInfo = providerInfo,
                     ),
                     CommunalWidgetContentModel(
                         appWidgetId = 1,
                         priority = 20,
-                        providerInfo = mock(),
+                        providerInfo = providerInfo,
                     ),
                 )
             widgetRepository.setCommunalWidgets(widgets)
@@ -119,15 +128,96 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             smartspaceRepository.setCommunalSmartspaceTargets(listOf(target))
 
             // Media playing.
-            mediaRepository.mediaPlaying.value = true
+            mediaRepository.mediaActive()
 
             val communalContent by collectLastValue(underTest.communalContent)
 
-            // Only Widgets are shown.
-            assertThat(communalContent?.size).isEqualTo(2)
+            // Only Widgets and CTA tile are shown.
+            assertThat(communalContent?.size).isEqualTo(3)
             assertThat(communalContent?.get(0))
-                .isInstanceOf(CommunalContentModel.Widget::class.java)
+                .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(1))
-                .isInstanceOf(CommunalContentModel.Widget::class.java)
+                .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
+            assertThat(communalContent?.get(2))
+                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
         }
+
+    @Test
+    fun selectedKey_onReorderWidgets_isCleared() =
+        testScope.runTest {
+            val selectedKey by collectLastValue(underTest.selectedKey)
+
+            val key = CommunalContentModel.KEY.widget(123)
+            underTest.setSelectedKey(key)
+            assertThat(selectedKey).isEqualTo(key)
+
+            underTest.onReorderWidgetStart()
+            assertThat(selectedKey).isNull()
+        }
+
+    @Test
+    fun deleteWidget() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
+
+            // Widgets available.
+            val widgets =
+                listOf(
+                    CommunalWidgetContentModel(
+                        appWidgetId = 0,
+                        priority = 30,
+                        providerInfo = providerInfo,
+                    ),
+                    CommunalWidgetContentModel(
+                        appWidgetId = 1,
+                        priority = 20,
+                        providerInfo = providerInfo,
+                    ),
+                )
+            widgetRepository.setCommunalWidgets(widgets)
+
+            val communalContent by collectLastValue(underTest.communalContent)
+
+            // Widgets and CTA tile are shown.
+            assertThat(communalContent?.size).isEqualTo(3)
+            assertThat(communalContent?.get(0))
+                .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
+            assertThat(communalContent?.get(1))
+                .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
+            assertThat(communalContent?.get(2))
+                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
+
+            underTest.onDeleteWidget(widgets.get(0).appWidgetId)
+
+            // Only one widget and CTA tile remain.
+            assertThat(communalContent?.size).isEqualTo(2)
+            val item = communalContent?.get(0)
+            val appWidgetId =
+                if (item is CommunalContentModel.WidgetContent) item.appWidgetId else null
+            assertThat(appWidgetId).isEqualTo(widgets.get(1).appWidgetId)
+            assertThat(communalContent?.get(1))
+                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
+        }
+
+    @Test
+    fun reorderWidget_uiEventLogging_start() {
+        underTest.onReorderWidgetStart()
+        verify(uiEventLogger).log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_START)
+    }
+
+    @Test
+    fun reorderWidget_uiEventLogging_end() {
+        underTest.onReorderWidgetEnd()
+        verify(uiEventLogger).log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_FINISH)
+    }
+
+    @Test
+    fun reorderWidget_uiEventLogging_cancel() {
+        underTest.onReorderWidgetCancel()
+        verify(uiEventLogger).log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_CANCEL)
+    }
+
+    private companion object {
+        val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
+    }
 }

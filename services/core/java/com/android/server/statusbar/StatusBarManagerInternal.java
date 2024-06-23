@@ -18,6 +18,7 @@ package com.android.server.statusbar;
 
 import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
+import android.content.ComponentName;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -223,9 +224,11 @@ public interface StatusBarManagerInternal {
     void showRearDisplayDialog(int currentBaseState);
 
     /**
-     * Called when requested to go to fullscreen from the active split app.
+     * Called when requested to go to fullscreen from the focused app.
+     *
+     * @param displayId of the current display.
      */
-    void goToFullscreenFromSplit();
+    void moveFocusedTaskToFullscreen(int displayId);
 
     /**
      * Enters stage split from a current running app.
@@ -241,4 +244,22 @@ public interface StatusBarManagerInternal {
      * @see com.android.internal.statusbar.IStatusBar#showMediaOutputSwitcher
      */
     void showMediaOutputSwitcher(String packageName);
+
+    /**
+     * Add a tile to the Quick Settings Panel
+     * @param tile the ComponentName of the {@link android.service.quicksettings.TileService}
+     * @param end if true, the tile will be added at the end. If false, at the beginning.
+     */
+    void addQsTileToFrontOrEnd(ComponentName tile, boolean end);
+
+    /**
+     * Remove the tile from the Quick Settings Panel
+     * @param tile the ComponentName of the {@link android.service.quicksettings.TileService}
+     */
+    void removeQsTile(ComponentName tile);
+
+    /**
+     * Called when requested to enter desktop from an app.
+     */
+    void enterDesktop(int displayId);
 }

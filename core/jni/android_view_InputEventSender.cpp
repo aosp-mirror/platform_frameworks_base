@@ -73,7 +73,7 @@ private:
     uint32_t mNextPublishedSeq;
 
     const std::string getInputChannelName() {
-        return mInputPublisher.getChannel()->getName();
+        return mInputPublisher.getChannel().getName();
     }
 
     int handleEvent(int receiveFd, int events, void* data) override;
@@ -102,8 +102,8 @@ NativeInputEventSender::~NativeInputEventSender() {
 }
 
 status_t NativeInputEventSender::initialize() {
-    auto&& receiveFd = mInputPublisher.getChannel()->getFd();
-    mMessageQueue->getLooper()->addFd(receiveFd.get(), 0, ALOOPER_EVENT_INPUT, this, NULL);
+    const int receiveFd = mInputPublisher.getChannel().getFd();
+    mMessageQueue->getLooper()->addFd(receiveFd, 0, ALOOPER_EVENT_INPUT, this, NULL);
     return OK;
 }
 
@@ -112,7 +112,7 @@ void NativeInputEventSender::dispose() {
         LOG(DEBUG) << "channel '" << getInputChannelName() << "' ~ Disposing input event sender.";
     }
 
-    mMessageQueue->getLooper()->removeFd(mInputPublisher.getChannel()->getFd().get());
+    mMessageQueue->getLooper()->removeFd(mInputPublisher.getChannel().getFd());
 }
 
 status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* event) {
@@ -359,7 +359,7 @@ static jboolean nativeSendKeyEvent(JNIEnv* env, jclass clazz, jlong senderPtr,
         jint seq, jobject eventObj) {
     sp<NativeInputEventSender> sender =
             reinterpret_cast<NativeInputEventSender*>(senderPtr);
-    const KeyEvent event = android_view_KeyEvent_toNative(env, eventObj);
+    const KeyEvent event = android_view_KeyEvent_obtainAsCopy(env, eventObj);
     status_t status = sender->sendKeyEvent(seq, &event);
     return !status;
 }

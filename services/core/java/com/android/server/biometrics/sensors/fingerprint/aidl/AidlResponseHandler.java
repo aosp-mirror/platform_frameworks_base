@@ -25,6 +25,7 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.util.Slog;
 
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
@@ -34,9 +35,9 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
-import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
+import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.RemovalConsumer;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
@@ -59,6 +60,21 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
         void onHardwareUnavailable();
     }
 
+    /**
+     * Interface to send results to the AidlResponseHandler's owner.
+     */
+    public interface AidlResponseHandlerCallback {
+        /**
+         * Invoked when enrollment is successful.
+         */
+        void onEnrollSuccess();
+
+        /**
+         * Invoked when the HAL sends ERROR_HW_UNAVAILABLE.
+         */
+        void onHardwareUnavailable();
+    }
+
     private static final String TAG = "AidlResponseHandler";
 
     @NonNull
@@ -68,28 +84,49 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
     private final int mSensorId;
     private final int mUserId;
     @NonNull
-    private final LockoutCache mLockoutCache;
+    private final LockoutTracker mLockoutTracker;
     @NonNull
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     @NonNull
     private final AuthSessionCoordinator mAuthSessionCoordinator;
     @NonNull
     private final HardwareUnavailableCallback mHardwareUnavailableCallback;
+    @NonNull
+    private final AidlResponseHandlerCallback mAidlResponseHandlerCallback;
 
     public AidlResponseHandler(@NonNull Context context,
             @NonNull BiometricScheduler scheduler, int sensorId, int userId,
-            @NonNull LockoutCache lockoutTracker,
+            @NonNull LockoutTracker lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull AuthSessionCoordinator authSessionCoordinator,
             @NonNull HardwareUnavailableCallback hardwareUnavailableCallback) {
+        this(context, scheduler, sensorId, userId, lockoutTracker, lockoutResetDispatcher,
+                authSessionCoordinator, hardwareUnavailableCallback,
+                new AidlResponseHandlerCallback() {
+                    @Override
+                    public void onEnrollSuccess() {}
+
+                    @Override
+                    public void onHardwareUnavailable() {}
+                });
+    }
+
+    public AidlResponseHandler(@NonNull Context context,
+            @NonNull BiometricScheduler scheduler, int sensorId, int userId,
+            @NonNull LockoutTracker lockoutTracker,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull AuthSessionCoordinator authSessionCoordinator,
+            @NonNull HardwareUnavailableCallback hardwareUnavailableCallback,
+            @NonNull AidlResponseHandlerCallback aidlResponseHandlerCallback) {
         mContext = context;
         mScheduler = scheduler;
         mSensorId = sensorId;
         mUserId = userId;
-        mLockoutCache = lockoutTracker;
+        mLockoutTracker = lockoutTracker;
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mAuthSessionCoordinator = authSessionCoordinator;
         mHardwareUnavailableCallback = hardwareUnavailableCallback;
+        mAidlResponseHandlerCallback = aidlResponseHandlerCallback;
     }
 
     @Override
@@ -105,27 +142,26 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
     @Override
     public void onChallengeGenerated(long challenge) {
         handleResponse(FingerprintGenerateChallengeClient.class, (c) -> c.onChallengeGenerated(
-                mSensorId, mUserId, challenge), null);
+                mSensorId, mUserId, challenge));
     }
 
     @Override
     public void onChallengeRevoked(long challenge) {
         handleResponse(FingerprintRevokeChallengeClient.class, (c) -> c.onChallengeRevoked(
-                challenge), null);
+                challenge));
     }
 
     /**
      * Handles acquired messages sent by the HAL (specifically for HIDL HAL).
      */
     public void onAcquired(int acquiredInfo, int vendorCode) {
-        handleResponse(AcquisitionClient.class, (c) -> c.onAcquired(acquiredInfo, vendorCode),
-                null);
+        handleResponse(AcquisitionClient.class, (c) -> c.onAcquired(acquiredInfo, vendorCode));
     }
 
     @Override
     public void onAcquired(byte info, int vendorCode) {
         handleResponse(AcquisitionClient.class, (c) -> c.onAcquired(
-                AidlConversionUtils.toFrameworkAcquiredInfo(info), vendorCode), null);
+                AidlConversionUtils.toFrameworkAcquiredInfo(info), vendorCode));
     }
 
     /**
@@ -135,9 +171,13 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
         handleResponse(ErrorConsumer.class, (c) -> {
             c.onError(error, vendorCode);
             if (error == Error.HW_UNAVAILABLE) {
-                mHardwareUnavailableCallback.onHardwareUnavailable();
+                if (Flags.deHidl()) {
+                    mAidlResponseHandlerCallback.onHardwareUnavailable();
+                } else {
+                    mHardwareUnavailableCallback.onHardwareUnavailable();
+                }
             }
-        }, null);
+        });
     }
 
     @Override
@@ -158,8 +198,12 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
                 .getUniqueName(mContext, currentUserId);
         final Fingerprint fingerprint = new Fingerprint(name, currentUserId,
                 enrollmentId, mSensorId);
-        handleResponse(FingerprintEnrollClient.class, (c) -> c.onEnrollResult(fingerprint,
-                remaining), null);
+        handleResponse(FingerprintEnrollClient.class, (c) -> {
+            c.onEnrollResult(fingerprint, remaining);
+            if (remaining == 0) {
+                mAidlResponseHandlerCallback.onEnrollSuccess();
+            }
+        });
     }
 
     @Override
@@ -184,13 +228,12 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
 
     @Override
     public void onLockoutTimed(long durationMillis) {
-        handleResponse(LockoutConsumer.class, (c) -> c.onLockoutTimed(durationMillis),
-                null);
+        handleResponse(LockoutConsumer.class, (c) -> c.onLockoutTimed(durationMillis));
     }
 
     @Override
     public void onLockoutPermanent() {
-        handleResponse(LockoutConsumer.class, LockoutConsumer::onLockoutPermanent, null);
+        handleResponse(LockoutConsumer.class, LockoutConsumer::onLockoutPermanent);
     }
 
     @Override
@@ -198,7 +241,7 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
         handleResponse(FingerprintResetLockoutClient.class,
                 FingerprintResetLockoutClient::onLockoutCleared,
                 (c) -> FingerprintResetLockoutClient.resetLocalLockoutStateToNone(
-                        mSensorId, mUserId, mLockoutCache, mLockoutResetDispatcher,
+                        mSensorId, mUserId, mLockoutTracker, mLockoutResetDispatcher,
                         mAuthSessionCoordinator, Utils.getCurrentStrength(mSensorId),
                         -1 /* requestId */));
     }
@@ -206,49 +249,74 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
     @Override
     public void onInteractionDetected() {
         handleResponse(FingerprintDetectClient.class,
-                FingerprintDetectClient::onInteractionDetected, null);
+                FingerprintDetectClient::onInteractionDetected);
     }
 
     @Override
     public void onEnrollmentsEnumerated(int[] enrollmentIds) {
         if (enrollmentIds.length > 0) {
             for (int i = 0; i < enrollmentIds.length; i++) {
-                final Fingerprint fp = new Fingerprint("", enrollmentIds[i], mSensorId);
-                int finalI = i;
-                handleResponse(EnumerateConsumer.class, (c) -> c.onEnumerationResult(fp,
-                        enrollmentIds.length - finalI - 1), null);
+                onEnrollmentEnumerated(enrollmentIds[i],
+                        enrollmentIds.length - i - 1 /* remaining */);
             }
         } else {
-            handleResponse(EnumerateConsumer.class, (c) -> c.onEnumerationResult(null,
-                    0), null);
+            handleResponse(EnumerateConsumer.class, (c) -> c.onEnumerationResult(
+                    null /* identifier */,
+                    0 /* remaining */));
         }
+    }
+
+    /**
+     * Handle enumerated fingerprint.
+     */
+    public void onEnrollmentEnumerated(int enrollmentId, int remaining) {
+        final Fingerprint fp = new Fingerprint("", enrollmentId, mSensorId);
+        handleResponse(EnumerateConsumer.class, (c) -> c.onEnumerationResult(fp, remaining));
+    }
+
+    /**
+     * Handle removal of fingerprint.
+     */
+    public void onEnrollmentRemoved(int enrollmentId, int remaining) {
+        final Fingerprint fp = new Fingerprint("", enrollmentId, mSensorId);
+        handleResponse(RemovalConsumer.class, (c) -> c.onRemoved(fp, remaining));
     }
 
     @Override
     public void onEnrollmentsRemoved(int[] enrollmentIds) {
         if (enrollmentIds.length > 0) {
             for (int i  = 0; i < enrollmentIds.length; i++) {
-                final Fingerprint fp = new Fingerprint("", enrollmentIds[i], mSensorId);
-                int finalI = i;
-                handleResponse(RemovalConsumer.class, (c) -> c.onRemoved(fp,
-                        enrollmentIds.length - finalI - 1), null);
+                onEnrollmentRemoved(enrollmentIds[i], enrollmentIds.length - i - 1 /* remaining */);
             }
         } else {
-            handleResponse(RemovalConsumer.class, (c) -> c.onRemoved(null, 0),
-                    null);
+            handleResponse(RemovalConsumer.class, (c) -> c.onRemoved(null /* identifier */,
+                    0 /* remaining */));
         }
     }
 
     @Override
     public void onAuthenticatorIdRetrieved(long authenticatorId) {
         handleResponse(FingerprintGetAuthenticatorIdClient.class,
-                (c) -> c.onAuthenticatorIdRetrieved(authenticatorId), null);
+                (c) -> c.onAuthenticatorIdRetrieved(authenticatorId));
     }
 
     @Override
     public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
         handleResponse(FingerprintInvalidationClient.class, (c) -> c.onAuthenticatorIdInvalidated(
-                newAuthenticatorId), null);
+                newAuthenticatorId));
+    }
+
+    /**
+     * Handle clients which are not supported in HIDL HAL.
+     */
+    public <T extends BaseClientMonitor> void onUnsupportedClientScheduled(Class<T> className) {
+        Slog.e(TAG, className + " is not supported in the HAL.");
+        handleResponse(className, (c) -> c.cancel());
+    }
+
+    private <T> void handleResponse(@NonNull Class<T> className,
+            @NonNull Consumer<T> action) {
+        handleResponse(className, action, null /* alternateAction */);
     }
 
     private <T> void handleResponse(@NonNull Class<T> className,

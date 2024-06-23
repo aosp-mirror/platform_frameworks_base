@@ -53,17 +53,21 @@ public class DragAndDropEventLogger {
     /**
      * Logs the start of a drag.
      */
-    public InstanceId logStart(DragEvent event) {
-        final ClipDescription description = event.getClipDescription();
-        final ClipData data = event.getClipData();
-        final ClipData.Item item = data.getItemAt(0);
-        mInstanceId = item.getIntent().getParcelableExtra(
-                ClipDescription.EXTRA_LOGGING_INSTANCE_ID);
+    public InstanceId logStart(DragSession session) {
+        mInstanceId = session.appData != null
+                ? session.appData.getParcelableExtra(ClipDescription.EXTRA_LOGGING_INSTANCE_ID,
+                        InstanceId.class)
+                : null;
         if (mInstanceId == null) {
             mInstanceId = mIdSequence.newInstanceId();
         }
-        mActivityInfo = item.getActivityInfo();
-        log(getStartEnum(description), mActivityInfo);
+        mActivityInfo = session.activityInfo;
+        if (session.appData != null) {
+            log(getStartEnum(session.getClipDescription()), mActivityInfo);
+        } else {
+            // TODO(b/255649902): Update this once we have a new enum
+            log(DragAndDropUiEventEnum.GLOBAL_APP_DRAG_START_ACTIVITY, mActivityInfo);
+        }
         return mInstanceId;
     }
 

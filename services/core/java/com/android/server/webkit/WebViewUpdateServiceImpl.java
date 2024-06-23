@@ -17,7 +17,6 @@ package com.android.server.webkit;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
@@ -30,12 +29,8 @@ import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
-import com.android.server.LocalServices;
-import com.android.server.PinnerService;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -92,8 +87,6 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
 
     private static final int MULTIPROCESS_SETTING_ON_VALUE = Integer.MAX_VALUE;
     private static final int MULTIPROCESS_SETTING_OFF_VALUE = Integer.MIN_VALUE;
-
-    private static final String PIN_GROUP = "webview";
 
     private final SystemInterface mSystemInterface;
     private final Context mContext;
@@ -346,34 +339,6 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
         return newPackage;
     }
 
-    private void pinWebviewIfRequired(ApplicationInfo appInfo) {
-        PinnerService pinnerService = LocalServices.getService(PinnerService.class);
-        int webviewPinQuota = pinnerService.getWebviewPinQuota();
-        if (webviewPinQuota <= 0) {
-            return;
-        }
-
-        pinnerService.unpinGroup(PIN_GROUP);
-
-        ArrayList<String> apksToPin = new ArrayList<>();
-        boolean pinSharedFirst = appInfo.metaData.getBoolean("PIN_SHARED_LIBS_FIRST", true);
-        for (String sharedLib : appInfo.sharedLibraryFiles) {
-            apksToPin.add(sharedLib);
-        }
-        apksToPin.add(appInfo.sourceDir);
-        if (!pinSharedFirst) {
-            // We want to prioritize pinning of the native library that is most likely used by apps
-            // which in some build flavors live in the main apk and as a shared library for others.
-            Collections.reverse(apksToPin);
-        }
-        for (String apk : apksToPin) {
-            if (webviewPinQuota <= 0) {
-                break;
-            }
-            int bytesPinned = pinnerService.pinFile(apk, webviewPinQuota, appInfo, PIN_GROUP);
-            webviewPinQuota -= bytesPinned;
-        }
-    }
     /**
      * This is called when we change WebView provider, either when the current provider is
      * updated or a new provider is chosen / takes precedence.
@@ -382,7 +347,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
         synchronized (mLock) {
             mAnyWebViewInstalled = true;
             if (mNumRelroCreationsStarted == mNumRelroCreationsFinished) {
-                pinWebviewIfRequired(newPackage.applicationInfo);
+                mSystemInterface.pinWebviewIfRequired(newPackage.applicationInfo);
                 mCurrentWebViewPackage = newPackage;
 
                 // The relro creations might 'finish' (not start at all) before

@@ -35,7 +35,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.Utils;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.complication.dagger.DreamHomeControlsComplicationComponent;
 import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.dagger.ControlsComponent;
@@ -275,8 +275,9 @@ public class DreamHomeControlsComplication implements Complication {
                     .putExtra(ControlsUiController.EXTRA_ANIMATE, true)
                     .putExtra(ControlsUiController.EXIT_TO_DREAM, true);
 
-            final ActivityLaunchAnimator.Controller controller =
-                    v != null ? ActivityLaunchAnimator.Controller.fromView(v, null /* cujType */)
+            final ActivityTransitionAnimator.Controller controller =
+                    v != null
+                            ? ActivityTransitionAnimator.Controller.fromView(v, null /* cujType */)
                             : null;
             if (mControlsComponent.getVisibility() == AVAILABLE) {
                 // Controls can be made visible.

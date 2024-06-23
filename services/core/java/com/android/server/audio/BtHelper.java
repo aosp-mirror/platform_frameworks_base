@@ -58,6 +58,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.utils.EventLogger;
@@ -324,7 +325,8 @@ public class BtHelper {
         // AUDIO_FORMAT_DEFAULT as native audio policy manager expects a specific audio format
         // only if audio HW module selection based on format is supported for the device type.
         if (!(profile == BluetoothProfile.A2DP
-                || (profile == BluetoothProfile.LE_AUDIO && isLeOutput))) {
+                || (isLeOutput && ((profile == BluetoothProfile.LE_AUDIO)
+                        || (profile == BluetoothProfile.LE_AUDIO_BROADCAST))))) {
             return AudioSystem.AUDIO_FORMAT_DEFAULT;
         }
         @AudioSystem.AudioFormatNativeEnumForBtCodec int codec =
@@ -468,7 +470,8 @@ public class BtHelper {
                     + index + " volume=" + volume);
         }
         AudioService.sVolumeLogger.enqueue(new AudioServiceEvents.VolumeEvent(
-                AudioServiceEvents.VolumeEvent.VOL_SET_LE_AUDIO_VOL, index, maxIndex));
+                AudioServiceEvents.VolumeEvent.VOL_SET_LE_AUDIO_VOL, streamType, index,
+                maxIndex, /*caller=*/null));
         try {
             mLeAudio.setVolume(volume);
         } catch (Exception e) {
@@ -632,16 +635,17 @@ public class BtHelper {
             return;
         }
         List<BluetoothDevice> activeDevices = adapter.getActiveDevices(profile);
-        if (activeDevices.isEmpty() || activeDevices.get(0) == null) {
-            return;
+        BluetoothProfileConnectionInfo bpci = new BluetoothProfileConnectionInfo(profile);
+        for (BluetoothDevice device : activeDevices) {
+            if (device == null) {
+                continue;
+            }
+            AudioDeviceBroker.BtDeviceChangedData data = new AudioDeviceBroker.BtDeviceChangedData(
+                    device, null, bpci, "mBluetoothProfileServiceListener");
+            AudioDeviceBroker.BtDeviceInfo info = mDeviceBroker.createBtDeviceInfo(
+                    data, device, BluetoothProfile.STATE_CONNECTED);
+            mDeviceBroker.postBluetoothActiveDevice(info, 0 /* delay */);
         }
-        AudioDeviceBroker.BtDeviceChangedData data = new AudioDeviceBroker.BtDeviceChangedData(
-                activeDevices.get(0), null, new BluetoothProfileConnectionInfo(profile),
-                "mBluetoothProfileServiceListener");
-        AudioDeviceBroker.BtDeviceInfo info =
-                mDeviceBroker.createBtDeviceInfo(data, activeDevices.get(0),
-                        BluetoothProfile.STATE_CONNECTED);
-        mDeviceBroker.postBluetoothActiveDevice(info, 0 /* delay */);
     }
 
     // @GuardedBy("mDeviceBroker.mSetModeLock")
@@ -676,8 +680,11 @@ public class BtHelper {
         if (adapter != null) {
             List<BluetoothDevice> activeDevices =
                     adapter.getActiveDevices(BluetoothProfile.HEADSET);
-            if (activeDevices.size() > 0 && activeDevices.get(0) != null) {
-                onSetBtScoActiveDevice(activeDevices.get(0));
+            for (BluetoothDevice device : activeDevices) {
+                if (device == null) {
+                    continue;
+                }
+                onSetBtScoActiveDevice(device);
             }
         } else {
             Log.e(TAG, "onHeadsetProfileConnected: Null BluetoothAdapter");
@@ -1076,8 +1083,8 @@ public class BtHelper {
         return mLeAudio.getGroupId(device);
     }
 
-    /*package*/ List<String> getLeAudioGroupAddresses(int groupId) {
-        List<String> addresses = new ArrayList<String>();
+    /*package*/ List<Pair<String, String>> getLeAudioGroupAddresses(int groupId) {
+        List<Pair<String, String>> addresses = new ArrayList<>();
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null || mLeAudio == null) {
             return addresses;
@@ -1085,7 +1092,7 @@ public class BtHelper {
         List<BluetoothDevice> activeDevices = adapter.getActiveDevices(BluetoothProfile.LE_AUDIO);
         for (BluetoothDevice device : activeDevices) {
             if (device != null && mLeAudio.getGroupId(device) == groupId) {
-                addresses.add(device.getAddress());
+                addresses.add(new Pair(device.getAddress(), device.getIdentityAddress()));
             }
         }
         return addresses;

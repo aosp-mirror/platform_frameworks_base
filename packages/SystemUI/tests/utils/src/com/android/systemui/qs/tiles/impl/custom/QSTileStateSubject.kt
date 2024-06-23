@@ -70,7 +70,7 @@ private constructor(failureMetadata: FailureMetadata, subject: QSTileState?) :
         }
 
         /** Shortcut for `Truth.assertAbout(states()).that(state)`. */
-        fun assertThat(state: QSTileState?): QSTileStateSubject =
-            Truth.assertAbout(states()).that(state)
+        fun assertThat(actual: QSTileState?): QSTileStateSubject =
+            Truth.assertAbout(states()).that(actual)
     }
 }

@@ -147,11 +147,7 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
 }
 
 sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(const SkBitmap& bitmap) {
-#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-    if (bitmap.colorType() == kAlpha_8_SkColorType &&
-        !uirenderer::HardwareBitmapUploader::hasAlpha8Support()) {
-        return nullptr;
-    }
+#ifdef __ANDROID__  // Layoutlib does not support hardware acceleration
     return uirenderer::HardwareBitmapUploader::allocateHardwareBitmap(bitmap);
 #else
     return Bitmap::allocateHeapBitmap(bitmap.info());

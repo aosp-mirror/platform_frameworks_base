@@ -35,9 +35,6 @@ internal class DesktopModeFocusedWindowDecorationViewHolder(
     }
 
     override fun bindData(taskInfo: RunningTaskInfo) {
-        taskInfo.taskDescription?.statusBarColor?.let { captionColor ->
-            captionView.setBackgroundColor(captionColor)
-        }
         captionHandle.imageTintList = ColorStateList.valueOf(getCaptionHandleBarColor(taskInfo))
     }
 

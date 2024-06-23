@@ -17,6 +17,7 @@
 package com.android.settingslib;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doReturn;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyResourcesManager;
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -83,6 +85,19 @@ public class RestrictedPreferenceHelperTest {
         mHelper.onBindViewHolder(mViewHolder);
 
         verify(summaryView).setText("test");
+        verify(summaryView, never()).setVisibility(View.GONE);
+    }
+
+    @Test
+    public void bindPreference_disabledByEcm_shouldDisplayDisabledSummary() {
+        final TextView summaryView = mock(TextView.class, RETURNS_DEEP_STUBS);
+        when(mViewHolder.itemView.findViewById(android.R.id.summary))
+                .thenReturn(summaryView);
+
+        mHelper.setDisabledByEcm(mock(Intent.class));
+        mHelper.onBindViewHolder(mViewHolder);
+
+        verify(mPreference).setSummary(R.string.disabled_by_app_ops_text);
         verify(summaryView, never()).setVisibility(View.GONE);
     }
 

@@ -21,6 +21,7 @@ import android.content.Context
 import android.media.AudioManager
 import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.flags.Flags
 import com.android.systemui.res.R
 
 private val backgroundOn = R.drawable.settingslib_switch_bar_bg_on
@@ -36,6 +37,7 @@ private val actionAccessibilityLabelDisconnect =
 /** Factories to create different types of Bluetooth device items from CachedBluetoothDevice. */
 internal abstract class DeviceItemFactory {
     abstract fun isFilterMatched(
+        context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager?
     ): Boolean
@@ -45,6 +47,7 @@ internal abstract class DeviceItemFactory {
 
 internal class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
+        context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager?
     ): Boolean {
@@ -71,6 +74,7 @@ internal class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
 
 internal class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
+        context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager?
     ): Boolean {
@@ -99,10 +103,18 @@ internal class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
 
 internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
+        context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager?
     ): Boolean {
-        return BluetoothUtils.isConnectedBluetoothDevice(cachedDevice, audioManager)
+        return if (Flags.enableHideExclusivelyManagedBluetoothDevice()) {
+            !BluetoothUtils.isExclusivelyManagedBluetoothDevice(
+                context,
+                cachedDevice.getDevice()
+            ) && BluetoothUtils.isConnectedBluetoothDevice(cachedDevice, audioManager)
+        } else {
+            BluetoothUtils.isConnectedBluetoothDevice(cachedDevice, audioManager)
+        }
     }
 
     override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {
@@ -125,10 +137,18 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
 
 internal class SavedDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
+        context: Context,
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager?
     ): Boolean {
-        return cachedDevice.bondState == BluetoothDevice.BOND_BONDED && !cachedDevice.isConnected
+        return if (Flags.enableHideExclusivelyManagedBluetoothDevice()) {
+            !BluetoothUtils.isExclusivelyManagedBluetoothDevice(
+                context,
+                cachedDevice.getDevice()
+            ) && cachedDevice.bondState == BluetoothDevice.BOND_BONDED && !cachedDevice.isConnected
+        } else {
+            cachedDevice.bondState == BluetoothDevice.BOND_BONDED && !cachedDevice.isConnected
+        }
     }
 
     override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {

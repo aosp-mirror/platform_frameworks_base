@@ -16,60 +16,41 @@
 
 package com.android.systemui.statusbar.notification.shelf.ui.viewbinder
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.common.ui.ConfigurationState
-import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.app.tracing.traceSection
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationShelf
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotificationIconViewStore
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerShelfViewBinder
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.ActivatableNotificationViewBinder
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 /** Binds a [NotificationShelf] to its [view model][NotificationShelfViewModel]. */
 object NotificationShelfViewBinder {
-    fun bind(
+    suspend fun bind(
         shelf: NotificationShelf,
         viewModel: NotificationShelfViewModel,
-        configuration: ConfigurationState,
-        systemBarUtilsState: SystemBarUtilsState,
         falsingManager: FalsingManager,
-        iconViewBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
+        nicBinder: NotificationIconContainerShelfViewBinder,
         notificationIconAreaController: NotificationIconAreaController,
-        shelfIconViewStore: ShelfNotificationIconViewStore,
-    ) {
+    ): Unit = coroutineScope {
         ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
         shelf.apply {
-            if (NotificationIconContainerRefactor.isEnabled) {
-                NotificationIconContainerViewBinder.bindWhileAttached(
-                    shelfIcons,
-                    viewModel.icons,
-                    configuration,
-                    systemBarUtilsState,
-                    iconViewBindingFailureTracker,
-                    shelfIconViewStore,
-                )
-            } else {
-                notificationIconAreaController.setShelfIcons(shelfIcons)
-            }
-            repeatWhenAttached {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    launch {
-                        viewModel.canModifyColorOfNotifications.collect(
-                            ::setCanModifyColorOfNotifications
-                        )
-                    }
-                    launch { viewModel.isClickable.collect(::setCanInteract) }
-                    registerViewListenersWhileAttached(shelf, viewModel)
+            traceSection("NotifShelf#bindShelfIcons") {
+                if (NotificationIconContainerRefactor.isEnabled) {
+                    launch { nicBinder.bind(shelfIcons) }
+                } else {
+                    notificationIconAreaController.setShelfIcons(shelfIcons)
                 }
             }
+            launch {
+                viewModel.canModifyColorOfNotifications.collect(::setCanModifyColorOfNotifications)
+            }
+            launch { viewModel.isClickable.collect(::setCanInteract) }
+            registerViewListenersWhileAttached(shelf, viewModel)
         }
     }
 

@@ -16,6 +16,14 @@ flag {
 }
 
 flag {
+  name: "enforce_edge_to_edge"
+  namespace: "windowing_frontend"
+  description: "Make app go edge-to-edge when targeting SDK level 35 or greater"
+  bug: "309578419"
+  is_fixed_read_only: true
+}
+
+flag {
     name: "defer_display_updates"
     namespace: "windowing_frontend"
     description: "Feature flag for deferring DisplayManager updates to WindowManager if Shell transition is running"
@@ -54,9 +62,40 @@ flag {
 }
 
 flag {
-    name: "predictive_back_system_animations"
+    name: "predictive_back_system_anims"
     namespace: "systemui"
     description: "Predictive back for system animations"
-    bug: "309545085"
+    bug: "320510464"
+}
+
+flag {
+    name: "activity_snapshot_by_default"
+    namespace: "systemui"
+    description: "Enable record activity snapshot by default"
+    bug: "259497289"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "supports_multi_instance_system_ui"
+    namespace: "multitasking"
+    description: "Feature flag to enable a multi-instance system ui component property."
+    bug: "262864589"
+    is_fixed_read_only: true
+}
+
+flag {
+  name: "delegate_unhandled_drags"
+  namespace: "multitasking"
+  description: "Enables delegating unhandled drags to SystemUI"
+  bug: "320797628"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "insets_decoupled_configuration"
+  namespace: "windowing_frontend"
+  description: "Configuration decoupled from insets"
+  bug: "151861875"
+  is_fixed_read_only: true
 }

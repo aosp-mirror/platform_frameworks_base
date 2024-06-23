@@ -16,13 +16,16 @@
 
 package com.android.systemui.media.controls.ui.composable
 
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.contains
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.media.controls.ui.MediaCarouselController
-import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController
+import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.util.animation.MeasurementInput
 
 private object MediaCarousel {
@@ -45,6 +48,20 @@ fun SceneScope.MediaCarousel(
 
     AndroidView(
         modifier = modifier.element(MediaCarousel.Elements.Content),
-        factory = { _ -> carouselController.mediaFrame },
+        factory = { context ->
+            FrameLayout(context).apply {
+                val mediaFrame = carouselController.mediaFrame
+                (mediaFrame.parent as? ViewGroup)?.removeView(mediaFrame)
+                addView(mediaFrame)
+            }
+        },
+        update = {
+            if (it.contains(carouselController.mediaFrame)) {
+                return@AndroidView
+            }
+            val mediaFrame = carouselController.mediaFrame
+            (mediaFrame.parent as? ViewGroup)?.removeView(mediaFrame)
+            it.addView(mediaFrame)
+        },
     )
 }

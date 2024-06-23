@@ -18,18 +18,40 @@ package com.android.credentialmanager.ui.mappers
 
 import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.CredentialSelectorUiState
+import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry.PerUserNameEntries
+import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.model.get.CredentialEntryInfo
 
-fun Request.Get.toGet(): CredentialSelectorUiState.Get {
-    // TODO: b/301206470 returning a hard coded state for MVP
-    if (true) return CredentialSelectorUiState.Get.SingleProviderSinglePassword
+fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
+    val accounts = providerInfos
+        .flatMap { it.credentialEntryList }
+        .groupBy { it.userName}
+        .entries
+        .toList()
 
-    return if (providerInfos.size == 1) {
-        if (providerInfos.first().credentialEntryList.size == 1) {
-            CredentialSelectorUiState.Get.SingleProviderSinglePassword
+    return if (isPrimary) {
+        if (accounts.size == 1) {
+            CredentialSelectorUiState.Get.SingleEntry(
+                accounts[0].value.minWith(comparator)
+            )
         } else {
-            TODO() // b/301206470 - Implement other get flows
+            CredentialSelectorUiState.Get.SingleEntryPerAccount(
+                accounts.map { it.value.minWith(comparator) }.sortedWith(comparator)
+            )
         }
     } else {
-        TODO() // b/301206470 - Implement other get flows
+        CredentialSelectorUiState.Get.MultipleEntry(
+            accounts = accounts.map { PerUserNameEntries(
+                it.key,
+                it.value.sortedWith(comparator)
+            )
+            },
+            actionEntryList = providerInfos.flatMap { it.actionEntryList },
+            authenticationEntryList = providerInfos.flatMap { it.authenticationEntryList }
+        )
     }
 }
+val comparator = compareBy<CredentialEntryInfo> { entryInfo ->
+    // Passkey type always go first
+    entryInfo.credentialType.let { if (it == CredentialType.PASSKEY) 0 else 1 }
+}.thenByDescending { it.lastUsedTimeMillis ?: 0 }

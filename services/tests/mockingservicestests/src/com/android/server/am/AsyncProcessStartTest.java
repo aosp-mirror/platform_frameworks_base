@@ -221,6 +221,7 @@ public class AsyncProcessStartTest {
         r.setStartUid(myUid());
         r.setHostingRecord(new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST));
         r.makeActive(thread, mAms.mProcessStats);
+        ProcessRecord.updateProcessRecordNodes(r);
         doNothing().when(r).killLocked(any(), any(), anyInt(), anyInt(), anyBoolean(),
                 anyBoolean());
 

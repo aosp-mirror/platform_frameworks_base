@@ -30,6 +30,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.android.settingslib.spa.framework.common.NullPageProvider
 
 /**
  * Add the [Composable] to the [NavGraphBuilder] with animation
@@ -49,11 +50,13 @@ internal fun NavGraphBuilder.animatedComposable(
     arguments = arguments,
     deepLinks = deepLinks,
     enterTransition = {
-        slideIntoContainer(
-            towards = AnimatedContentTransitionScope.SlideDirection.Start,
-            animationSpec = slideInEffect,
-            initialOffset = offsetFunc,
-        ) + fadeIn(animationSpec = fadeInEffect)
+        if (initialState.destination.route != NullPageProvider.name) {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                animationSpec = slideInEffect,
+                initialOffset = offsetFunc,
+            ) + fadeIn(animationSpec = fadeInEffect)
+        } else null
     },
     exitTransition = {
         slideOutOfContainer(

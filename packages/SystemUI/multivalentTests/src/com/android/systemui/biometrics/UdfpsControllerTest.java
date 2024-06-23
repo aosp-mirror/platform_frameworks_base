@@ -63,6 +63,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -75,7 +76,8 @@ import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.udfps.InteractionEvent;
 import com.android.systemui.biometrics.udfps.NormalizedTouchData;
@@ -85,18 +87,24 @@ import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayView
 import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.data.repository.FakePowerRepository;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.shared.model.WakeSleepReason;
+import com.android.systemui.power.shared.model.WakefulnessState;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
@@ -124,7 +132,7 @@ import org.mockito.junit.MockitoRule;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Provider;
+import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -204,9 +212,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private SystemUIDialogManager mSystemUIDialogManager;
     @Mock
-    private ActivityLaunchAnimator mActivityLaunchAnimator;
+    private ActivityTransitionAnimator mActivityTransitionAnimator;
     @Mock
     private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
+    @Mock
+    private ShadeInteractor mShadeInteractor;
     @Mock
     private SinglePointerTouchProcessor mSinglePointerTouchProcessor;
     @Mock
@@ -214,9 +224,9 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock
-    private UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
+    private UdfpsOverlayInteractor mUdfpsOverlayInteractor;
     @Mock
-    private Provider<UdfpsKeyguardViewModels> mUdfpsKeyguardViewModels;
+    private UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
 
@@ -224,6 +234,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
     private IUdfpsOverlayController mOverlayController;
+    @Captor
+    private ArgumentCaptor<View> mViewCaptor;
     @Captor
     private ArgumentCaptor<UdfpsView.OnTouchListener> mTouchListenerCaptor;
     @Captor
@@ -237,6 +249,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ScreenLifecycle.Observer mScreenObserver;
     private FingerprintSensorPropertiesInternal mOpticalProps;
     private FingerprintSensorPropertiesInternal mUltrasonicProps;
+    private PowerInteractor mPowerInteractor;
+    private FakePowerRepository mPowerRepository;
     @Mock
     private InputManager mInputManager;
     @Mock
@@ -252,6 +266,19 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        mPowerRepository = new FakePowerRepository();
+        mPowerInteractor = new PowerInteractor(
+                mPowerRepository,
+                mock(FalsingCollector.class),
+                mock(ScreenOffAnimationController.class),
+                mStatusBarStateController
+        );
+        mPowerRepository.updateWakefulness(
+                WakefulnessState.AWAKE,
+                WakeSleepReason.POWER_BUTTON,
+                WakeSleepReason.OTHER,
+                /* powerButtonLaunchGestureTriggered */ false
+        );
         mContext.getOrCreateTestableResources()
                 .addOverride(com.android.internal.R.bool.config_ignoreUdfpsVote, false);
 
@@ -330,22 +357,24 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 mSystemUIDialogManager,
                 mLatencyTracker,
-                mActivityLaunchAnimator,
+                mActivityTransitionAnimator,
                 mBiometricExecutor,
                 mPrimaryBouncerInteractor,
+                mShadeInteractor,
                 mSinglePointerTouchProcessor,
                 mSessionTracker,
                 mAlternateBouncerInteractor,
                 mInputManager,
-                mock(KeyguardFaceAuthInteractor.class),
+                mock(DeviceEntryFaceAuthInteractor.class),
                 mUdfpsKeyguardAccessibilityDelegate,
-                mUdfpsKeyguardViewModels,
                 mSelectedUserInteractor,
                 mFpsUnlockTracker,
                 mKeyguardTransitionInteractor,
                 mDeviceEntryUdfpsTouchOverlayViewModel,
-                mDefaultUdfpsTouchOverlayViewModel
-
+                mDefaultUdfpsTouchOverlayViewModel,
+                mUdfpsOverlayInteractor,
+                mPowerInteractor,
+                mock(CoroutineScope.class)
         );
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
@@ -498,7 +527,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         final float[] scaleFactor = new float[]{1f, displayHeight[1] / (float) displayHeight[0]};
         final int[] rotation = new int[]{Surface.ROTATION_0, Surface.ROTATION_90};
         final UdfpsOverlayParams oldParams = new UdfpsOverlayParams(sensorBounds[0],
-                sensorBounds[0], displayWidth[0], displayHeight[0], scaleFactor[0], rotation[0]);
+                sensorBounds[0], displayWidth[0], displayHeight[0], scaleFactor[0], rotation[0],
+                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
 
         for (int i1 = 0; i1 <= 1; ++i1) {
             for (int i2 = 0; i2 <= 1; ++i2) {
@@ -507,7 +537,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                         for (int i5 = 0; i5 <= 1; ++i5) {
                             final UdfpsOverlayParams newParams = new UdfpsOverlayParams(
                                     sensorBounds[i1], sensorBounds[i1], displayWidth[i2],
-                                    displayHeight[i3], scaleFactor[i4], rotation[i5]);
+                                    displayHeight[i3], scaleFactor[i4], rotation[i5],
+                                    FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
 
                             if (newParams.equals(oldParams)) {
                                 continue;
@@ -522,8 +553,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
                                     mOpticalProps.sensorId,
                                     BiometricRequestConstants.REASON_ENROLL_ENROLLING,
                                     mUdfpsOverlayControllerCallback);
+
                             mFgExecutor.runAllReady();
-                            verify(mWindowManager).addView(any(), any());
+                            verify(mWindowManager).addView(mViewCaptor.capture(), any());
+                            when(mViewCaptor.getValue().getParent())
+                                    .thenReturn(mock(ViewGroup.class));
 
                             // Update overlay parameters.
                             reset(mWindowManager);
@@ -551,7 +585,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // Initialize the overlay.
         mUdfpsController.updateOverlayParams(mOpticalProps,
                 new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
-                        scaleFactor, rotation));
+                        scaleFactor, rotation, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL));
 
         // Show the overlay.
         mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
@@ -562,7 +596,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // Update overlay with the same parameters.
         mUdfpsController.updateOverlayParams(mOpticalProps,
                 new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
-                        scaleFactor, rotation));
+                        scaleFactor, rotation, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL));
         mFgExecutor.runAllReady();
 
         // Ensure the overlay was not recreated.
@@ -644,7 +678,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // Test ROTATION_0
         mUdfpsController.updateOverlayParams(testParams.sensorProps,
                 new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
-                        scaleFactor, Surface.ROTATION_0));
+                        scaleFactor, Surface.ROTATION_0,
+                        FingerprintSensorProperties.TYPE_UDFPS_OPTICAL));
         MotionEvent event = obtainMotionEvent(ACTION_DOWN, displayWidth, displayHeight, touchMinor,
                 touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
@@ -659,7 +694,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         reset(mFingerprintManager);
         mUdfpsController.updateOverlayParams(testParams.sensorProps,
                 new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
-                        scaleFactor, Surface.ROTATION_90));
+                        scaleFactor, Surface.ROTATION_90,
+                        FingerprintSensorProperties.TYPE_UDFPS_OPTICAL));
         event = obtainMotionEvent(ACTION_DOWN, displayHeight, 0, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
         mBiometricExecutor.runAllReady();
@@ -673,7 +709,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         reset(mFingerprintManager);
         mUdfpsController.updateOverlayParams(testParams.sensorProps,
                 new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
-                        scaleFactor, Surface.ROTATION_270));
+                        scaleFactor, Surface.ROTATION_270,
+                        FingerprintSensorProperties.TYPE_UDFPS_OPTICAL));
         event = obtainMotionEvent(ACTION_DOWN, 0, displayWidth, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
         mBiometricExecutor.runAllReady();
@@ -687,7 +724,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         reset(mFingerprintManager);
         mUdfpsController.updateOverlayParams(testParams.sensorProps,
                 new UdfpsOverlayParams(sensorBounds, sensorBounds, displayWidth, displayHeight,
-                        scaleFactor, Surface.ROTATION_180));
+                        scaleFactor, Surface.ROTATION_180,
+                        FingerprintSensorProperties.TYPE_UDFPS_OPTICAL));
         // ROTATION_180 is not supported. It should be treated like ROTATION_0.
         event = obtainMotionEvent(ACTION_DOWN, displayWidth, displayHeight, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
@@ -1212,6 +1250,40 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // THEN the touch is NOT pilfered
         verify(mInputManager, never()).pilferPointers(any());
+    }
+
+    @Test
+    public void onDownTouchReceivedWithoutPreviousUp() throws RemoteException {
+        final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
+                0L);
+        final TouchProcessorResult processorResultDown =
+                new TouchProcessorResult.ProcessedTouch(InteractionEvent.DOWN,
+                        -1 /* pointerId */, touchData);
+
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricRequestConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+
+        // WHEN ACTION_DOWN is received and touch is within sensor
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultDown);
+        MotionEvent firstDownEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, firstDownEvent);
+        mBiometricExecutor.runAllReady();
+        firstDownEvent.recycle();
+
+        // And another ACTION_DOWN is received without an ACTION_UP before
+        MotionEvent secondDownEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, secondDownEvent);
+        mBiometricExecutor.runAllReady();
+        secondDownEvent.recycle();
+
+        // THEN the touch is still processed
+        verify(mFingerprintManager, times(2)).onPointerDown(anyLong(), anyInt(), anyInt(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(),
+                anyBoolean());
     }
 
     @Test

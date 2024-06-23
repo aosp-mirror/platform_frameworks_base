@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4470785958457506021">"सहयोगी डिवाइस मैनेजर"</string>
+    <string name="app_label" msgid="4470785958457506021">"कंपैनियन डिवाइस मैनेजर"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"क्या &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; को ऐक्सेस करने के लिए &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ऐप्लिकेशन को अनुमति देनी है?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"स्मार्टवॉच"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; से मैनेज किया जाने वाला डिवाइस चुनें"</string>
@@ -26,7 +26,7 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"डिवाइस"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"यह ऐप्लिकेशन, आपके <xliff:g id="DEVICE_NAME">%1$s</xliff:g> पर इन अनुमतियों को ऐक्सेस कर पाएगा"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; को अपने फ़ोन से यह जानकारी ऐक्सेस करने की अनुमति दें"</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"क्रॉस-डिवाइस से जुड़ी सेवाएं"</string>
+    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Cross-device services"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> आपके <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> की ओर से, आपके डिवाइसों के बीच ऐप्लिकेशन स्ट्रीम करने की अनुमति मांग रहा है"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"माइक्रोफ़ोन"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"कॉल लॉग"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"आस-पास मौजूद डिवाइस"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"मीडिया आउटपुट बदलें"</string>
     <string name="permission_storage" msgid="6831099350839392343">"फ़ोटो और मीडिया"</string>
-    <string name="permission_notification" msgid="693762568127741203">"सूचनाएं"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"सूचनाएं"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ऐप्लिकेशन"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"स्ट्रीमिंग"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"फ़ोन कॉल करने और उन्हें मैनेज करने की अनुमति है"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"कॉल लॉग देखने और उसमें बदलाव करने की अनुमति है"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"एसएमएस भेजने और उन्हें देखने की अनुमति है"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"आपकी संपर्क सूची को ऐक्सेस करने की अनुमति है"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"कैलेंडर को ऐक्सेस करने की अनुमति है"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"ऑडियो को रिकॉर्ड किया जा सकता है"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"आपको आस-पास मौजूद डिवाइसों को खोजने, उनसे कनेक्ट करने, और उनकी जगह की जानकारी का पता लगाने की अनुमति है"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"इससे सभी सूचनाएं देखी जा सकती हैं. इनमें संपर्क, मैसेज, और फ़ोटो जैसी जानकारी शामिल होती है"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"फ़ोन कॉल करने और उन्हें मैनेज करने की अनुमति दें"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"कॉल लॉग की जानकारी देखने और उसमें बदलाव करने की अनुमति दें"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"एसएमएस (मैसेज) भेजने और देखने की अनुमति दें"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"अपने संपर्कों को ऐक्सेस करने की अनुमति दें"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"अपने कैलेंडर को ऐक्सेस करने की अनुमति दें"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"ऑडियो रिकॉर्ड करने की अनुमति दें"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"आस-पास मौजूद डिवाइसों को खोजने, उनसे कनेक्ट करने, और उनकी जगह की जानकारी का पता लगाने की अनुमति दें"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"सभी सूचनाएं देखने की अनुमति दें. जैसे, संपर्क, मैसेज, और फ़ोटो की जानकारी"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• सभी सूचनाएं देखने की अनुमति दें. जैसे, संपर्क, मैसेज, और फ़ोटो की जानकारी&lt;br/&gt;• सूचनाएं भेजने की अनुमति दें&lt;br/&gt;&lt;br/&gt;सेटिंग &gt; सूचनाएं में जाकर इस ऐप्लिकेशन के लिए, सूचनाओं को देखने और उनमें बदलाव करने की अनुमति में कभी भी बदलाव किया जा सकता है."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"अपने फ़ोन पर मौजूद ऐप्लिकेशन स्ट्रीम करें"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"अपने फ़ोन से ऐप्लिकेशन और सिस्टम की दूसरी सुविधाओं को स्ट्रीम करें"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"उपलब्ध डिवाइसों की लिस्ट देखें. साथ ही, कंट्रोल करें कि कौनसा डिवाइस, स्ट्रीम कर सकता है या दूसरे ऐप्लिकेशन से ऑडियो या वीडियो कास्ट कर सकता है"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"फ़ोन"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"टैबलेट"</string>
 </resources>

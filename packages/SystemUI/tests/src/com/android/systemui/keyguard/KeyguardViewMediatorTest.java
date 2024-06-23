@@ -21,10 +21,12 @@ import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT;
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.systemui.Flags.FLAG_REFACTOR_GET_CURRENT_USER;
+import static com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR;
 import static com.android.systemui.keyguard.KeyguardViewMediator.DELAYED_KEYGUARD_ACTION;
 import static com.android.systemui.keyguard.KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT;
 import static com.android.systemui.keyguard.KeyguardViewMediator.REBOOT_MAINLINE_UPDATE;
@@ -72,6 +74,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
@@ -84,7 +87,7 @@ import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
@@ -92,10 +95,10 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
@@ -149,6 +152,7 @@ import kotlinx.coroutines.test.TestScope;
 @TestableLooper.RunWithLooper
 @SmallTest
 public class KeyguardViewMediatorTest extends SysuiTestCase {
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private KeyguardViewMediator mViewMediator;
 
     private final TestScope mTestScope = TestScopeProvider.getTestScope();
@@ -183,7 +187,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ShadeController mShadeController;
     private NotificationShadeWindowController mNotificationShadeWindowController;
     private @Mock DreamOverlayStateController mDreamOverlayStateController;
-    private @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
+    private @Mock ActivityTransitionAnimator mActivityTransitionAnimator;
     private @Mock ScrimController mScrimController;
     private @Mock IActivityTaskManager mActivityTaskManagerService;
     private @Mock SysuiColorExtractor mColorExtractor;
@@ -264,10 +268,11 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mSceneContainerFlags);
+                mSceneContainerFlags,
+                mKosmos::getCommunalInteractor);
         mFeatureFlags = new FakeFeatureFlags();
-        mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
         mSetFlagsRule.enableFlags(FLAG_REFACTOR_GET_CURRENT_USER);
+        mSetFlagsRule.disableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR);
 
         DejankUtils.setImmediate(true);
 
@@ -305,6 +310,28 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testRaceCondition_doNotRegisterCentralSurfacesImmediately() {
+        create(false);
+
+        // GIVEN central surfaces is not registered with KeyguardViewMediator, but a call to enable
+        // keyguard comes in
+        mViewMediator.onSystemReady();
+        mViewMediator.setKeyguardEnabled(true);
+        TestableLooper.get(this).processAllMessages();
+
+        // If this step has been reached, then system ui has not crashed. Now register
+        // CentralSurfaces
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+        register();
+        TestableLooper.get(this).moveTimeForward(100);
+        TestableLooper.get(this).processAllMessages();
+
+        // THEN keyguard is shown
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void onLockdown_showKeyguard_evenIfKeyguardIsNotEnabledExternally() {
         // GIVEN keyguard is not enabled and isn't showing
         mViewMediator.onSystemReady();
@@ -320,6 +347,83 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         // THEN keyguard is shown
         TestableLooper.get(this).processAllMessages();
         assertTrue(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void showKeyguardAfterKeyguardNotEnabled() {
+        // GIVEN feature is enabled
+        final FoldGracePeriodProvider mockedFoldGracePeriodProvider =
+                mock(FoldGracePeriodProvider.class);
+        mViewMediator.mFoldGracePeriodProvider = mockedFoldGracePeriodProvider;
+        when(mockedFoldGracePeriodProvider.isEnabled()).thenReturn(true);
+        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
+
+        // GIVEN keyguard is not enabled and isn't showing
+        mViewMediator.onSystemReady();
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+        captureKeyguardUpdateMonitorCallback();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+
+        // WHEN showKeyguard is requested
+        mViewMediator.showDismissibleKeyguard();
+
+        // THEN keyguard is shown
+        TestableLooper.get(this).processAllMessages();
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void doNotShowKeyguard_deviceNotProvisioned() {
+        // GIVEN feature is enabled
+        final FoldGracePeriodProvider mockedFoldGracePeriodProvider =
+                mock(FoldGracePeriodProvider.class);
+        mViewMediator.mFoldGracePeriodProvider = mockedFoldGracePeriodProvider;
+        when(mockedFoldGracePeriodProvider.isEnabled()).thenReturn(true);
+
+        // GIVEN keyguard is not enabled and isn't showing
+        mViewMediator.onSystemReady();
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+        captureKeyguardUpdateMonitorCallback();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+
+        // WHEN device is NOT provisioned
+        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(false);
+
+        // WHEN showKeyguard is requested
+        mViewMediator.showDismissibleKeyguard();
+
+        // THEN keyguard is NOT shown
+        TestableLooper.get(this).processAllMessages();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void showKeyguardAfterKeyguardNotEnabled_featureNotEnabled() {
+        // GIVEN feature is NOT enabled
+        final FoldGracePeriodProvider mockedFoldGracePeriodProvider =
+                mock(FoldGracePeriodProvider.class);
+        mViewMediator.mFoldGracePeriodProvider = mockedFoldGracePeriodProvider;
+        when(mockedFoldGracePeriodProvider.isEnabled()).thenReturn(false);
+        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
+
+        // GIVEN keyguard is not enabled and isn't showing
+        mViewMediator.onSystemReady();
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+        captureKeyguardUpdateMonitorCallback();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+
+        // WHEN showKeyguard is requested
+        mViewMediator.showDismissibleKeyguard();
+
+        // THEN keyguard is still NOT shown
+        TestableLooper.get(this).processAllMessages();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
     }
 
     @Test
@@ -547,6 +651,25 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testBouncerPrompt_deviceLockedByAdaptiveAuth() {
+        // GIVEN no trust agents enabled and biometrics aren't enrolled
+        when(mUpdateMonitor.isTrustUsuallyManaged(anyInt())).thenReturn(false);
+        when(mUpdateMonitor.isUnlockingWithBiometricsPossible(anyInt())).thenReturn(false);
+
+        // WHEN the strong auth reason is SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST
+        KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                mock(KeyguardUpdateMonitor.StrongAuthTracker.class);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(strongAuthTracker);
+        when(strongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+        when(strongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST);
+
+        // THEN the bouncer prompt reason should return PROMPT_REASON_ADAPTIVE_AUTH_REQUEST
+        assertEquals(KeyguardSecurityView.PROMPT_REASON_ADAPTIVE_AUTH_REQUEST,
+                mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
+    }
+
+    @Test
     public void testBouncerPrompt_deviceRestartedDueToMainlineUpdate() {
         // GIVEN biometrics enrolled
         when(mUpdateMonitor.isUnlockingWithBiometricsPossible(anyInt())).thenReturn(true);
@@ -650,7 +773,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testUpdateIsKeyguardAfterOccludeAnimationEnds() {
-        mViewMediator.mOccludeAnimationController.onLaunchAnimationEnd(
+        mViewMediator.mOccludeAnimationController.onTransitionAnimationEnd(
                 false /* isExpandingFullyAbove */);
 
         // Since the updateIsKeyguard call is delayed during the animation, ensure it's called once
@@ -660,7 +783,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testUpdateIsKeyguardAfterOccludeAnimationIsCancelled() {
-        mViewMediator.mOccludeAnimationController.onLaunchAnimationCancelled(
+        mViewMediator.mOccludeAnimationController.onTransitionAnimationCancelled(
                 null /* newKeyguardOccludedState */);
 
         // Since the updateIsKeyguard call is delayed during the animation, ensure it's called if
@@ -1087,6 +1210,11 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     private void createAndStartViewMediator(boolean orderUnlockAndWake) {
+        create(orderUnlockAndWake);
+        register();
+    }
+
+    private void create(boolean orderUnlockAndWake) {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_orderUnlockAndWake, orderUnlockAndWake);
 
@@ -1123,7 +1251,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mWallpaperRepository,
                 () -> mShadeController,
                 () -> mNotificationShadeWindowController,
-                () -> mActivityLaunchAnimator,
+                () -> mActivityTransitionAnimator,
                 () -> mScrimController,
                 mActivityTaskManagerService,
                 mFeatureFlags,
@@ -1137,7 +1265,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mSelectedUserInteractor,
                 mKeyguardInteractor);
         mViewMediator.start();
+    }
 
+    private void register() {
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);
     }
 

@@ -51,10 +51,11 @@ import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.NotificationMessagingUtil;
@@ -546,13 +547,13 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         // Create a policy to allow channels through, which means shouldIntercept is false
         ZenModeConfig config = new ZenModeConfig();
         Policy policy = config.toNotificationPolicy(new ZenPolicy.Builder()
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_PRIORITY)
+                .allowPriorityChannels(true)
                 .build());
         assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
 
         // Now create a policy which does not allow priority channels:
         policy = config.toNotificationPolicy(new ZenPolicy.Builder()
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .allowPriorityChannels(false)
                 .build());
         assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
     }

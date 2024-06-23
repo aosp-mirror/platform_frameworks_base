@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.server.wm.CtsWindowInfoUtils.assertAndDumpWindowState;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 
@@ -39,8 +40,10 @@ import android.view.WindowManager;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.wm.utils.CommonUtils;
 import com.android.window.flags.Flags;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -74,6 +77,11 @@ public class TrustedOverlayTests {
         mActivityRule.getScenario().onActivity(activity -> {
             mActivity = activity;
         });
+    }
+
+    @After
+    public void tearDown() {
+        CommonUtils.waitUntilActivityRemoved(mActivity);
     }
 
     @RequiresFlagsDisabled(Flags.FLAG_SURFACE_TRUSTED_OVERLAY)
@@ -138,11 +146,8 @@ public class TrustedOverlayTests {
                     return false;
                 }, TIMEOUT_S, TimeUnit.SECONDS);
 
-        if (!foundTrusted[0]) {
-            CtsWindowInfoUtils.dumpWindowsOnScreen(TAG, mName.getMethodName());
-        }
-
-        assertTrue("Failed to find window or was not marked trusted", foundTrusted[0]);
+        assertAndDumpWindowState(TAG, "Failed to find window or was not marked trusted",
+                foundTrusted[0]);
     }
 
     private void testTrustedOverlayChildHelper(boolean expectedTrustedChild)

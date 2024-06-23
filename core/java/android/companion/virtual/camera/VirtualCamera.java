@@ -18,7 +18,9 @@ package android.companion.virtual.camera;
 
 import android.annotation.FlaggedApi;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
@@ -84,6 +86,8 @@ public final class VirtualCamera implements Closeable {
      * Returns the id of this virtual camera instance.
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     @NonNull
     public String getId() {
         return mCameraId;

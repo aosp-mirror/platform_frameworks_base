@@ -87,18 +87,31 @@ final class HotwordAudioStreamCopier {
     }
 
     /**
-     * Starts copying the audio streams in the given {@link HotwordDetectedResult}.
-     * <p>
-     * The returned {@link HotwordDetectedResult} is identical the one that was passed in, except
-     * that the {@link ParcelFileDescriptor}s within {@link HotwordDetectedResult#getAudioStreams()}
-     * are replaced with descriptors from pipes managed by {@link HotwordAudioStreamCopier}. The
-     * returned value should be passed on to the client (i.e., the voice interactor).
-     * </p>
-     *
-     * @throws IOException If there was an error creating the managed pipe.
+     * Calls {@link #startCopyingAudioStreams(HotwordDetectedResult, boolean)} and notifies
+     * AppOpsManager of the {@link AppOpsManager#OPSTR_RECORD_AUDIO_HOTWORD} operation.
      */
     @NonNull
     public HotwordDetectedResult startCopyingAudioStreams(@NonNull HotwordDetectedResult result)
+            throws IOException {
+        return startCopyingAudioStreams(result, /* shouldNotifyAppOpsManager= */ true);
+    }
+
+    /**
+     * Starts copying the audio streams in the given {@link HotwordDetectedResult}.
+     *
+     * <p>The returned {@link HotwordDetectedResult} is identical the one that was passed in, except
+     * that the {@link ParcelFileDescriptor}s within {@link HotwordDetectedResult#getAudioStreams()}
+     * are replaced with descriptors from pipes managed by {@link HotwordAudioStreamCopier}. The
+     * returned value should be passed on to the client (i.e., the voice interactor).
+     *
+     * @param result The {@link HotwordDetectedResult} to copy from.
+     * @param shouldNotifyAppOpsManager Whether the {@link AppOpsManager} should be notified of the
+     *     {@link AppOpsManager#OPSTR_RECORD_AUDIO_HOTWORD} operation during the copy.
+     * @throws IOException If there was an error creating the managed pipe.
+     */
+    @NonNull
+    public HotwordDetectedResult startCopyingAudioStreams(
+            @NonNull HotwordDetectedResult result, boolean shouldNotifyAppOpsManager)
             throws IOException {
         List<HotwordAudioStream> audioStreams = result.getAudioStreams();
         if (audioStreams.isEmpty()) {
@@ -154,8 +167,12 @@ final class HotwordAudioStreamCopier {
 
         String resultTaskId = TASK_ID_PREFIX + System.identityHashCode(result);
         mExecutorService.execute(
-                new HotwordDetectedResultCopyTask(resultTaskId, copyTaskInfos,
-                        totalMetadataBundleSizeBytes, totalInitialAudioSizeBytes));
+                new HotwordDetectedResultCopyTask(
+                        resultTaskId,
+                        copyTaskInfos,
+                        totalMetadataBundleSizeBytes,
+                        totalInitialAudioSizeBytes,
+                        shouldNotifyAppOpsManager));
 
         return result.buildUpon().setAudioStreams(newAudioStreams).build();
     }
@@ -178,13 +195,19 @@ final class HotwordAudioStreamCopier {
         private final int mTotalMetadataSizeBytes;
         private final int mTotalInitialAudioSizeBytes;
         private final ExecutorService mExecutorService = Executors.newCachedThreadPool();
+        private final boolean mShouldNotifyAppOpsManager;
 
-        HotwordDetectedResultCopyTask(String resultTaskId, List<CopyTaskInfo> copyTaskInfos,
-                int totalMetadataSizeBytes, int totalInitialAudioSizeBytes) {
+        HotwordDetectedResultCopyTask(
+                String resultTaskId,
+                List<CopyTaskInfo> copyTaskInfos,
+                int totalMetadataSizeBytes,
+                int totalInitialAudioSizeBytes,
+                boolean shouldNotifyAppOpsManager) {
             mResultTaskId = resultTaskId;
             mCopyTaskInfos = copyTaskInfos;
             mTotalMetadataSizeBytes = totalMetadataSizeBytes;
             mTotalInitialAudioSizeBytes = totalInitialAudioSizeBytes;
+            mShouldNotifyAppOpsManager = shouldNotifyAppOpsManager;
         }
 
         @Override
@@ -200,55 +223,14 @@ final class HotwordAudioStreamCopier {
                         mVoiceInteractorUid));
             }
 
-            if (mAppOpsManager.startOpNoThrow(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD,
-                    mVoiceInteractorUid, mVoiceInteractorPackageName,
-                    mVoiceInteractorAttributionTag, OP_MESSAGE) == MODE_ALLOWED) {
-                try {
-                    HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
-                            HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__STARTED,
-                            mVoiceInteractorUid, mTotalInitialAudioSizeBytes,
-                            mTotalMetadataSizeBytes, size);
-                    // TODO(b/244599891): Set timeout, close after inactivity
-                    mExecutorService.invokeAll(tasks);
-
-                    // We are including the non-streamed initial audio
-                    // (HotwordAudioStream.getInitialAudio()) bytes in the "stream" size metrics.
-                    int totalStreamSizeBytes = mTotalInitialAudioSizeBytes;
-                    for (SingleAudioStreamCopyTask task : tasks) {
-                        totalStreamSizeBytes += task.mTotalCopiedBytes;
-                    }
-
-                    Slog.i(TAG, mResultTaskId + ": Task was completed. Total bytes egressed: "
-                            + totalStreamSizeBytes + " (including " + mTotalInitialAudioSizeBytes
-                            + " bytes NOT streamed), total metadata bundle size bytes: "
-                            + mTotalMetadataSizeBytes);
-                    HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
-                            HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__ENDED,
-                            mVoiceInteractorUid, totalStreamSizeBytes, mTotalMetadataSizeBytes,
-                            size);
-                } catch (InterruptedException e) {
-                    // We are including the non-streamed initial audio
-                    // (HotwordAudioStream.getInitialAudio()) bytes in the "stream" size metrics.
-                    int totalStreamSizeBytes = mTotalInitialAudioSizeBytes;
-                    for (SingleAudioStreamCopyTask task : tasks) {
-                        totalStreamSizeBytes += task.mTotalCopiedBytes;
-                    }
-
-                    HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
-                            HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__INTERRUPTED_EXCEPTION,
-                            mVoiceInteractorUid, totalStreamSizeBytes, mTotalMetadataSizeBytes,
-                            size);
-                    Slog.i(TAG, mResultTaskId + ": Task was interrupted. Total bytes egressed: "
-                            + totalStreamSizeBytes + " (including " + mTotalInitialAudioSizeBytes
-                            + " bytes NOT streamed), total metadata bundle size bytes: "
-                            + mTotalMetadataSizeBytes);
-                    bestEffortPropagateError(e.getMessage());
-                } finally {
-                    mAppOpsManager.finishOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD,
-                            mVoiceInteractorUid, mVoiceInteractorPackageName,
-                            mVoiceInteractorAttributionTag);
-                }
-            } else {
+            if (mShouldNotifyAppOpsManager
+                    && mAppOpsManager.startOpNoThrow(
+                                    AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD,
+                                    mVoiceInteractorUid,
+                                    mVoiceInteractorPackageName,
+                                    mVoiceInteractorAttributionTag,
+                                    OP_MESSAGE)
+                            != MODE_ALLOWED) {
                 HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
                         HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__NO_PERMISSION,
                         mVoiceInteractorUid, /* streamSizeBytes= */ 0, /* bundleSizeBytes= */ 0,
@@ -258,6 +240,56 @@ final class HotwordAudioStreamCopier {
                                 + " uid=" + mVoiceInteractorUid
                                 + " packageName=" + mVoiceInteractorPackageName
                                 + " attributionTag=" + mVoiceInteractorAttributionTag);
+                return;
+            }
+            try {
+                HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                        HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__STARTED,
+                        mVoiceInteractorUid, mTotalInitialAudioSizeBytes,
+                        mTotalMetadataSizeBytes, size);
+                // TODO(b/244599891): Set timeout, close after inactivity
+                mExecutorService.invokeAll(tasks);
+
+                // We are including the non-streamed initial audio
+                // (HotwordAudioStream.getInitialAudio()) bytes in the "stream" size metrics.
+                int totalStreamSizeBytes = mTotalInitialAudioSizeBytes;
+                for (SingleAudioStreamCopyTask task : tasks) {
+                    totalStreamSizeBytes += task.mTotalCopiedBytes;
+                }
+
+                Slog.i(TAG, mResultTaskId + ": Task was completed. Total bytes egressed: "
+                        + totalStreamSizeBytes + " (including " + mTotalInitialAudioSizeBytes
+                        + " bytes NOT streamed), total metadata bundle size bytes: "
+                        + mTotalMetadataSizeBytes);
+                HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                        HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__ENDED,
+                        mVoiceInteractorUid, totalStreamSizeBytes, mTotalMetadataSizeBytes,
+                        size);
+            } catch (InterruptedException e) {
+                // We are including the non-streamed initial audio
+                // (HotwordAudioStream.getInitialAudio()) bytes in the "stream" size metrics.
+                int totalStreamSizeBytes = mTotalInitialAudioSizeBytes;
+                for (SingleAudioStreamCopyTask task : tasks) {
+                    totalStreamSizeBytes += task.mTotalCopiedBytes;
+                }
+
+                HotwordMetricsLogger.writeAudioEgressEvent(mDetectorType,
+                        HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__EVENT__INTERRUPTED_EXCEPTION,
+                        mVoiceInteractorUid, totalStreamSizeBytes, mTotalMetadataSizeBytes,
+                        size);
+                Slog.i(TAG, mResultTaskId + ": Task was interrupted. Total bytes egressed: "
+                        + totalStreamSizeBytes + " (including " + mTotalInitialAudioSizeBytes
+                        + " bytes NOT streamed), total metadata bundle size bytes: "
+                        + mTotalMetadataSizeBytes);
+                bestEffortPropagateError(e.getMessage());
+            } finally {
+                if (mShouldNotifyAppOpsManager) {
+                    mAppOpsManager.finishOp(
+                            AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD,
+                            mVoiceInteractorUid,
+                            mVoiceInteractorPackageName,
+                            mVoiceInteractorAttributionTag);
+                }
             }
         }
 

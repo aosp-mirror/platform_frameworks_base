@@ -45,7 +45,6 @@ import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 import androidx.window.extensions.core.util.function.Consumer;
-import androidx.window.util.DataProducer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,10 +55,6 @@ import java.util.Set;
 /**
  * Reference implementation of androidx.window.extensions.layout OEM interface for use with
  * WindowManager Jetpack.
- *
- * NOTE: This version is a work in progress and under active development. It MUST NOT be used in
- * production builds since the interface can still change before reaching stable version.
- * Please refer to {@link androidx.window.sidecar.SampleSidecarImpl} instead.
  */
 public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private static final String TAG = WindowLayoutComponentImpl.class.getSimpleName();
@@ -71,7 +66,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             new ArrayMap<>();
 
     @GuardedBy("mLock")
-    private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
+    private final DeviceStateManagerFoldingFeatureProducer mFoldingFeatureProducer;
 
     @GuardedBy("mLock")
     private final List<CommonFoldingFeature> mLastReportedFoldingFeatures = new ArrayList<>();
@@ -87,12 +82,17 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private final RawConfigurationChangedListener mRawConfigurationChangedListener =
             new RawConfigurationChangedListener();
 
+    private final SupportedWindowFeatures mSupportedWindowFeatures;
+
     public WindowLayoutComponentImpl(@NonNull Context context,
             @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
         mFoldingFeatureProducer = foldingFeatureProducer;
         mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
+        final List<DisplayFoldFeature> displayFoldFeatures =
+                DisplayFoldFeatureUtil.extractDisplayFoldFeatures(mFoldingFeatureProducer);
+        mSupportedWindowFeatures = new SupportedWindowFeatures.Builder(displayFoldFeatures).build();
     }
 
     /**
@@ -283,6 +283,15 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         }
     }
 
+    /**
+     * Returns the {@link SupportedWindowFeatures} for the device. This list does not change over
+     * time.
+     */
+    @NonNull
+    public SupportedWindowFeatures getSupportedWindowFeatures() {
+        return mSupportedWindowFeatures;
+    }
+
     /** @see #getWindowLayoutInfo(Context, List) */
     private WindowLayoutInfo getWindowLayoutInfo(int displayId,
             @NonNull WindowConfiguration windowConfiguration,
@@ -356,7 +365,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             }
             if (featureRect.left == 0
                     && featureRect.width() != windowConfiguration.getBounds().width()) {
-                Log.wtf(TAG, "Horizontal FoldingFeature must have full width."
+                Log.w(TAG, "Horizontal FoldingFeature must have full width."
                         + " BaseFeatureRect: " + baseFeature.getRect()
                         + ", FeatureRect: " + featureRect
                         + ", WindowConfiguration: " + windowConfiguration);
@@ -364,7 +373,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             }
             if (featureRect.top == 0
                     && featureRect.height() != windowConfiguration.getBounds().height()) {
-                Log.wtf(TAG, "Vertical FoldingFeature must have full height."
+                Log.w(TAG, "Vertical FoldingFeature must have full height."
                         + " BaseFeatureRect: " + baseFeature.getRect()
                         + ", FeatureRect: " + featureRect
                         + ", WindowConfiguration: " + windowConfiguration);

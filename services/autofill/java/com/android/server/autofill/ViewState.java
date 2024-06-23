@@ -162,6 +162,11 @@ final class ViewState {
         return mPrimaryFillResponse;
     }
 
+    @Nullable
+    FillResponse getSecondaryResponse() {
+        return mSecondaryFillResponse;
+    }
+
     void setResponse(FillResponse response) {
         setResponse(response, /* isPrimary= */ true);
     }

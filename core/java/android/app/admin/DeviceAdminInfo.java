@@ -16,6 +16,9 @@
 
 package android.app.admin;
 
+import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -176,7 +179,18 @@ public final class DeviceAdminInfo implements Parcelable {
      */
     public static final int HEADLESS_DEVICE_OWNER_MODE_AFFILIATED = 1;
 
-    @IntDef({HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED, HEADLESS_DEVICE_OWNER_MODE_AFFILIATED})
+    /**
+     * Value for {@link #getHeadlessDeviceOwnerMode} which indicates that this DPC should be
+     * provisioned into the first secondary user when on a Headless System User Mode device.
+     *
+     * <p>This mode only allows a single secondary user on the device blocking the creation of
+     * additional secondary users.
+     */
+    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
+    public static final int HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER = 2;
+
+    @IntDef({HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED, HEADLESS_DEVICE_OWNER_MODE_AFFILIATED,
+            HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER})
     @Retention(RetentionPolicy.SOURCE)
     private @interface HeadlessDeviceOwnerMode {}
 
@@ -373,6 +387,8 @@ public final class DeviceAdminInfo implements Parcelable {
                         mHeadlessDeviceOwnerMode = HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
                     } else if (deviceOwnerModeStringValue.equalsIgnoreCase("affiliated")) {
                         mHeadlessDeviceOwnerMode = HEADLESS_DEVICE_OWNER_MODE_AFFILIATED;
+                    } else if (deviceOwnerModeStringValue.equalsIgnoreCase("single_user")) {
+                        mHeadlessDeviceOwnerMode = HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
                     } else {
                         throw new XmlPullParserException("headless-system-user mode must be valid");
                     }

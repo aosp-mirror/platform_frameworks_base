@@ -179,7 +179,10 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
             if (physicalDisplayUpdated) {
                 onDisplayUpdated(transition, fromRotation, startBounds);
             } else {
-                transition.setAllReady();
+                final TransitionRequestInfo.DisplayChange displayChange =
+                        getCurrentDisplayChange(fromRotation, startBounds);
+                mDisplayContent.mTransitionController.requestStartTransition(transition,
+                        /* startTask= */ null, /* remoteTransition= */ null, displayChange);
             }
         });
     }
@@ -204,15 +207,8 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
         return new DisplayInfo(mNonOverrideDisplayInfo);
     }
 
-    /**
-     * Called when physical display is updated, this could happen e.g. on foldable
-     * devices when the physical underlying display is replaced. This method should be called
-     * when the new display info is already applied to the WM hierarchy.
-     *
-     * @param fromRotation rotation before the display change
-     * @param startBounds  display bounds before the display change
-     */
-    private void onDisplayUpdated(@NonNull Transition transition, int fromRotation,
+    @NonNull
+    private TransitionRequestInfo.DisplayChange getCurrentDisplayChange(int fromRotation,
             @NonNull Rect startBounds) {
         final Rect endBounds = new Rect(0, 0, mDisplayContent.mInitialDisplayWidth,
                 mDisplayContent.mInitialDisplayHeight);
@@ -224,6 +220,23 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
         displayChange.setEndAbsBounds(endBounds);
         displayChange.setStartRotation(fromRotation);
         displayChange.setEndRotation(toRotation);
+        return displayChange;
+    }
+
+    /**
+     * Called when physical display is updated, this could happen e.g. on foldable
+     * devices when the physical underlying display is replaced. This method should be called
+     * when the new display info is already applied to the WM hierarchy.
+     *
+     * @param fromRotation rotation before the display change
+     * @param startBounds  display bounds before the display change
+     */
+    private void onDisplayUpdated(@NonNull Transition transition, int fromRotation,
+            @NonNull Rect startBounds) {
+        final int toRotation = mDisplayContent.getRotation();
+
+        final TransitionRequestInfo.DisplayChange displayChange =
+                getCurrentDisplayChange(fromRotation, startBounds);
         displayChange.setPhysicalDisplayChanged(true);
 
         mDisplayContent.mTransitionController.requestStartTransition(transition,

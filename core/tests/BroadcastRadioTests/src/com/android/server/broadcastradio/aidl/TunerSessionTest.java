@@ -31,6 +31,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertThrows;
 
+import android.Manifest;
 import android.app.compat.CompatChanges;
 import android.graphics.Bitmap;
 import android.hardware.broadcastradio.ConfigFlag;
@@ -56,6 +57,8 @@ import android.os.UserHandle;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
@@ -171,6 +174,10 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
     @Before
     public void setup() throws Exception {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation()
+                .adoptShellPermissionIdentity(Manifest.permission.LOG_COMPAT_CHANGE,
+                        Manifest.permission.READ_COMPAT_CHANGE_CONFIG);
+
         doReturn(true).when(() -> CompatChanges.isChangeEnabled(
                 eq(ConversionUtils.RADIO_U_VERSION_REQUIRED), anyInt()));
         doReturn(USER_ID_1).when(mUserHandleMock).getIdentifier();

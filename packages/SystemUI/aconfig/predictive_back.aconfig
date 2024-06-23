@@ -1,0 +1,30 @@
+package: "com.android.systemui"
+container: "system"
+
+flag {
+    name: "predictive_back_sysui"
+    namespace: "systemui"
+    description: "Predictive Back Dispatching for SysUI"
+    bug: "327737297"
+}
+
+flag {
+    name: "predictive_back_animate_shade"
+    namespace: "systemui"
+    description: "Enable Shade Animations"
+    bug: "327732946"
+}
+
+flag {
+    name: "predictive_back_animate_bouncer"
+    namespace: "systemui"
+    description: "Enable Predictive Back Animation in Bouncer"
+    bug: "327733487"
+}
+
+flag {
+    name: "predictive_back_animate_dialogs"
+    namespace: "systemui"
+    description: "Enable Predictive Back Animation for SysUI dialogs"
+    bug: "327721544"
+}

@@ -19,10 +19,12 @@ package com.android.wm.shell.recents;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.wm.shell.util.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
 
@@ -58,10 +60,10 @@ import com.android.internal.os.IResultReceiver;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -591,7 +593,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 cancel("transit_sleep");
                 return;
             }
-            if (mKeyguardLocked || (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
+            if (mKeyguardLocked || (info.getFlags() & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "[%d] RecentsController.merge: keyguard is locked", mInstanceId);
                 // We will not accept new changes if we are swiping over the keyguard.
@@ -928,7 +930,14 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 Slog.e(TAG, "Duplicate call to finish");
                 return;
             }
-            if (!toHome) {
+
+            boolean returningToApp = !toHome
+                    && !mWillFinishToHome
+                    && mPausingTasks != null
+                    && mState == STATE_NORMAL;
+            if (returningToApp && allAppsAreTranslucent(mPausingTasks)) {
+                mHomeTransitionObserver.notifyHomeVisibilityChanged(true);
+            } else if (!toHome) {
                 // For some transitions, we may have notified home activity that it became visible.
                 // We need to notify the observer that we are no longer going home.
                 mHomeTransitionObserver.notifyHomeVisibilityChanged(false);
@@ -947,7 +956,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 if (toHome) wct.reorder(mRecentsTask, true /* toTop */);
                 else wct.restoreTransientOrder(mRecentsTask);
             }
-            if (!toHome && !mWillFinishToHome && mPausingTasks != null && mState == STATE_NORMAL) {
+            if (returningToApp) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION, "  returning to app");
                 // The gesture is returning to the pausing-task(s) rather than continuing with
                 // recents, so end the transition by moving the app back to the top (and also
@@ -1020,7 +1029,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                 "RecentsController.finishInner: no valid PiP leash;"
                                         + "mPipTransaction=%s, mPipTask=%s, mPipTaskId=%d",
-                                mPipTransaction.toString(), mPipTask.toString(), mPipTaskId);
+                                mPipTransaction, mPipTask, mPipTaskId);
                     } else {
                         t.show(pipLeash);
                         PictureInPictureSurfaceTransaction.apply(mPipTransaction, pipLeash, t);
@@ -1045,6 +1054,18 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     Slog.e(TAG, "Failed to report transition finished", e);
                 }
             }
+        }
+
+        private boolean allAppsAreTranslucent(ArrayList<TaskState> tasks) {
+            if (tasks == null || tasks.isEmpty()) {
+                return false;
+            }
+            for (int i = tasks.size() - 1; i >= 0; --i) {
+                if (!tasks.get(i).mIsTranslucent) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private void cleanUpPausingOrClosingTask(TaskState task, WindowContainerTransaction wct,
@@ -1117,6 +1138,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         /** The surface/leash of the task provided by Core. */
         SurfaceControl mTaskSurface;
 
+        /** True when the task is translucent.  */
+        final boolean mIsTranslucent;
+
         /** The (local) animation-leash created for this task. Only non-null for leafs. */
         @Nullable
         SurfaceControl mLeash;
@@ -1125,6 +1149,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             mToken = change.getContainer();
             mTaskInfo = change.getTaskInfo();
             mTaskSurface = change.getLeash();
+            mIsTranslucent = (change.getFlags() & FLAG_TRANSLUCENT) != 0;
             mLeash = leash;
         }
 

@@ -29,7 +29,6 @@ import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupAnnotations;
-import android.app.backup.BackupManager;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -51,6 +50,7 @@ import com.android.server.LocalServices;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FileMetadata;
+import com.android.server.backup.Flags;
 import com.android.server.backup.KeyValueAdbRestoreEngine;
 import com.android.server.backup.OperationStorage;
 import com.android.server.backup.OperationStorage.OpType;
@@ -157,13 +157,19 @@ public class FullRestoreEngine extends RestoreEngine {
         mMonitor = monitor;
         mOnlyPackage = onlyPackage;
         mAllowApks = allowApks;
-        mBuffer = new byte[32 * 1024];
         mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
         mIsAdbRestore = isAdbRestore;
         mUserId = backupManagerService.getUserId();
         mBackupEligibilityRules = backupEligibilityRules;
+
+        if (Flags.enableMaxSizeWritesToPipes()) {
+            // Linux pipe capacity (buffer size) is 16 pages where each page is 4KB
+            mBuffer = new byte[64 * 1024]; // 64KB
+        } else {
+            mBuffer = new byte[32 * 1024];
+        }
     }
 
     @VisibleForTesting

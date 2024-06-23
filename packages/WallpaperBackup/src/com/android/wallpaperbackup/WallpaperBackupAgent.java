@@ -18,11 +18,13 @@ package com.android.wallpaperbackup;
 
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
+import static android.app.WallpaperManager.ORIENTATION_UNKNOWN;
 
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_INELIGIBLE;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_METADATA;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_WALLPAPER;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_QUOTA_EXCEEDED;
+import static com.android.window.flags.Flags.multiCrop;
 
 import android.app.AppGlobals;
 import android.app.WallpaperManager;
@@ -37,24 +39,35 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Xml;
+import android.view.Display;
+import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Backs up and restores wallpaper and metadata related to it.
@@ -97,6 +110,9 @@ public class WallpaperBackupAgent extends BackupAgent {
     @VisibleForTesting
     static final String WALLPAPER_INFO_STAGE = "wallpaper-info-stage";
 
+    @VisibleForTesting
+    static final String WALLPAPER_BACKUP_DEVICE_INFO_STAGE = "wallpaper-backup-device-info-stage";
+
     static final String EMPTY_SENTINEL = "empty";
     static final String QUOTA_SENTINEL = "quota";
 
@@ -104,6 +120,11 @@ public class WallpaperBackupAgent extends BackupAgent {
     static final String PREFS_NAME = "wbprefs.xml";
     static final String SYSTEM_GENERATION = "system_gen";
     static final String LOCK_GENERATION = "lock_gen";
+
+    /**
+     * An approximate area threshold to compare device dimension similarity
+     */
+    static final int AREA_THRESHOLD = 50; // TODO (b/327637867): determine appropriate threshold
 
     // If this file exists, it means we exceeded our quota last time
     private File mQuotaFile;
@@ -115,6 +136,8 @@ public class WallpaperBackupAgent extends BackupAgent {
 
     private boolean mSystemHasLiveComponent;
     private boolean mLockHasLiveComponent;
+
+    private DisplayManager mDisplayManager;
 
     @Override
     public void onCreate() {
@@ -132,6 +155,8 @@ public class WallpaperBackupAgent extends BackupAgent {
 
         mBackupManager = new BackupManager(getBaseContext());
         mEventLogger = new WallpaperEventLogger(mBackupManager, /* wallpaperAgent */ this);
+
+        mDisplayManager = getSystemService(DisplayManager.class);
     }
 
     @Override
@@ -170,9 +195,11 @@ public class WallpaperBackupAgent extends BackupAgent {
             mSystemHasLiveComponent = mWallpaperManager.getWallpaperInfo(FLAG_SYSTEM) != null;
             mLockHasLiveComponent = mWallpaperManager.getWallpaperInfo(FLAG_LOCK) != null;
 
+            // performing backup of each file based on order of importance
             backupWallpaperInfoFile(/* sysOrLockChanged= */ sysChanged || lockChanged, data);
             backupSystemWallpaperFile(sharedPrefs, sysChanged, sysGeneration, data);
             backupLockWallpaperFileIfItExists(sharedPrefs, lockChanged, lockGeneration, data);
+            backupDeviceInfoFile(data);
         } catch (Exception e) {
             Slog.e(TAG, "Unable to back up wallpaper", e);
             mEventLogger.onBackupException(e);
@@ -184,6 +211,54 @@ public class WallpaperBackupAgent extends BackupAgent {
             // quota.
             mQuotaFile.delete();
         }
+    }
+
+    /**
+     * This method backs up the device dimension information. The device data will always get
+     * overwritten when triggering a backup
+     */
+    private void backupDeviceInfoFile(FullBackupDataOutput data)
+            throws IOException {
+        final File deviceInfoStage = new File(getFilesDir(), WALLPAPER_BACKUP_DEVICE_INFO_STAGE);
+
+        // save the dimensions of the device with xml formatting
+        Point dimensions = getScreenDimensions();
+        Display smallerDisplay = getSmallerDisplayIfExists();
+        Point secondaryDimensions = smallerDisplay != null ? getRealSize(smallerDisplay) :
+                new Point(0, 0);
+
+        deviceInfoStage.createNewFile();
+        FileOutputStream fstream = new FileOutputStream(deviceInfoStage, false);
+        TypedXmlSerializer out = Xml.resolveSerializer(fstream);
+        out.startDocument(null, true);
+        out.startTag(null, "dimensions");
+
+        out.startTag(null, "width");
+        out.text(String.valueOf(dimensions.x));
+        out.endTag(null, "width");
+
+        out.startTag(null, "height");
+        out.text(String.valueOf(dimensions.y));
+        out.endTag(null, "height");
+
+        if (smallerDisplay != null) {
+            out.startTag(null, "secondarywidth");
+            out.text(String.valueOf(secondaryDimensions.x));
+            out.endTag(null, "secondarywidth");
+
+            out.startTag(null, "secondaryheight");
+            out.text(String.valueOf(secondaryDimensions.y));
+            out.endTag(null, "secondaryheight");
+        }
+
+        out.endTag(null, "dimensions");
+        out.endDocument();
+        fstream.flush();
+        FileUtils.sync(fstream);
+        fstream.close();
+
+        if (DEBUG) Slog.v(TAG, "Storing device dimension data");
+        backupFile(deviceInfoStage, data);
     }
 
     private void backupWallpaperInfoFile(boolean sysOrLockChanged, FullBackupDataOutput data)
@@ -359,9 +434,22 @@ public class WallpaperBackupAgent extends BackupAgent {
         final File infoStage = new File(filesDir, WALLPAPER_INFO_STAGE);
         final File imageStage = new File(filesDir, SYSTEM_WALLPAPER_STAGE);
         final File lockImageStage = new File(filesDir, LOCK_WALLPAPER_STAGE);
+        final File deviceDimensionsStage = new File(filesDir, WALLPAPER_BACKUP_DEVICE_INFO_STAGE);
         boolean lockImageStageExists = lockImageStage.exists();
 
         try {
+            // Parse the device dimensions of the source device and compare with target to
+            // to identify whether we need to skip the remainder of the restore process
+            Pair<Point, Point> sourceDeviceDimensions = parseDeviceDimensions(
+                    deviceDimensionsStage);
+
+            Point targetDeviceDimensions = getScreenDimensions();
+            if (sourceDeviceDimensions != null && targetDeviceDimensions != null
+                    && isSourceDeviceSignificantlySmallerThanTarget(sourceDeviceDimensions.first,
+                    targetDeviceDimensions)) {
+                Slog.d(TAG, "The source device is significantly smaller than target");
+            }
+
             // First parse the live component name so that we know for logging if we care about
             // logging errors with the image restore.
             ComponentName wpService = parseWallpaperComponent(infoStage, "wp");
@@ -395,6 +483,7 @@ public class WallpaperBackupAgent extends BackupAgent {
             infoStage.delete();
             imageStage.delete();
             lockImageStage.delete();
+            deviceDimensionsStage.delete();
 
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             prefs.edit()
@@ -402,6 +491,66 @@ public class WallpaperBackupAgent extends BackupAgent {
                     .putInt(LOCK_GENERATION, -1)
                     .commit();
         }
+    }
+
+    /**
+     * This method parses the given file for the backed up device dimensions
+     *
+     * @param deviceDimensions the file which holds the device dimensions
+     * @return the backed up device dimensions
+     */
+    private Pair<Point, Point> parseDeviceDimensions(File deviceDimensions) {
+        int width = 0, height = 0, secondaryHeight = 0, secondaryWidth = 0;
+        try {
+            TypedXmlPullParser parser = Xml.resolvePullParser(
+                    new FileInputStream(deviceDimensions));
+
+            while (parser.next() != XmlPullParser.END_TAG) {
+                if (parser.getEventType() != XmlPullParser.START_TAG) {
+                    continue;
+                }
+
+                String name = parser.getName();
+
+                switch (name) {
+                    case "width":
+                        String widthText = readText(parser);
+                        width = Integer.valueOf(widthText);
+                        break;
+
+                    case "height":
+                        String textHeight = readText(parser);
+                        height = Integer.valueOf(textHeight);
+                        break;
+
+                    case "secondarywidth":
+                        String secondaryWidthText = readText(parser);
+                        secondaryWidth = Integer.valueOf(secondaryWidthText);
+                        break;
+
+                    case "secondaryheight":
+                        String secondaryHeightText = readText(parser);
+                        secondaryHeight = Integer.valueOf(secondaryHeightText);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return new Pair<>(new Point(width, height), new Point(secondaryWidth, secondaryHeight));
+
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static String readText(TypedXmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        String result = "";
+        if (parser.next() == XmlPullParser.TEXT) {
+            result = parser.getText();
+            parser.nextTag();
+        }
+        return result;
     }
 
     @VisibleForTesting
@@ -432,6 +581,27 @@ public class WallpaperBackupAgent extends BackupAgent {
     private void restoreFromStage(File stage, File info, String hintTag, int which)
             throws IOException {
         if (stage.exists()) {
+            if (multiCrop()) {
+                SparseArray<Rect> cropHints = parseCropHints(info, hintTag);
+                if (cropHints != null) {
+                    Slog.i(TAG, "Got restored wallpaper; applying which=" + which
+                            + "; cropHints = " + cropHints);
+                    try (FileInputStream in = new FileInputStream(stage)) {
+                        mWallpaperManager.setStreamWithCrops(in, cropHints, true, which);
+                    }
+                    // And log the success
+                    if ((which & FLAG_SYSTEM) > 0) {
+                        mEventLogger.onSystemImageWallpaperRestored();
+                    }
+                    if ((which & FLAG_LOCK) > 0) {
+                        mEventLogger.onLockImageWallpaperRestored();
+                    }
+                } else {
+                    logRestoreError(which, ERROR_NO_METADATA);
+                }
+                return;
+            }
+
             // Parse the restored info file to find the crop hint.  Note that this currently
             // relies on a priori knowledge of the wallpaper info file schema.
             Rect cropHint = parseCropHint(info, hintTag);
@@ -499,6 +669,47 @@ public class WallpaperBackupAgent extends BackupAgent {
         }
 
         return cropHint;
+    }
+
+    private SparseArray<Rect> parseCropHints(File wallpaperInfo, String sectionTag) {
+        SparseArray<Rect> cropHints = new SparseArray<>();
+        try (FileInputStream stream = new FileInputStream(wallpaperInfo)) {
+            XmlPullParser parser = Xml.resolvePullParser(stream);
+            int type;
+            do {
+                type = parser.next();
+                if (type != XmlPullParser.START_TAG) continue;
+                String tag = parser.getName();
+                if (!sectionTag.equals(tag)) continue;
+                for (Pair<Integer, String> pair: List.of(
+                        new Pair<>(WallpaperManager.PORTRAIT, "Portrait"),
+                        new Pair<>(WallpaperManager.LANDSCAPE, "Landscape"),
+                        new Pair<>(WallpaperManager.SQUARE_PORTRAIT, "SquarePortrait"),
+                        new Pair<>(WallpaperManager.SQUARE_LANDSCAPE, "SquareLandscape"))) {
+                    Rect cropHint = new Rect(
+                            getAttributeInt(parser, "cropLeft" + pair.second, 0),
+                            getAttributeInt(parser, "cropTop" + pair.second, 0),
+                            getAttributeInt(parser, "cropRight" + pair.second, 0),
+                            getAttributeInt(parser, "cropBottom" + pair.second, 0));
+                    if (!cropHint.isEmpty()) cropHints.put(pair.first, cropHint);
+                }
+                if (cropHints.size() == 0) {
+                    // migration case: the crops per screen orientation are not specified.
+                    // use the old attributes to restore the crop for one screen orientation.
+                    Rect cropHint = new Rect(
+                            getAttributeInt(parser, "cropLeft", 0),
+                            getAttributeInt(parser, "cropTop", 0),
+                            getAttributeInt(parser, "cropRight", 0),
+                            getAttributeInt(parser, "cropBottom", 0));
+                    if (!cropHint.isEmpty()) cropHints.put(ORIENTATION_UNKNOWN, cropHint);
+                }
+            } while (type != XmlPullParser.END_DOCUMENT);
+        } catch (Exception e) {
+            // Whoops; can't process the info file at all.  Report failure.
+            Slog.w(TAG, "Failed to parse restored crops: " + e.getMessage());
+            return null;
+        }
+        return cropHints;
     }
 
     private ComponentName parseWallpaperComponent(File wallpaperInfo, String sectionTag) {
@@ -622,6 +833,94 @@ public class WallpaperBackupAgent extends BackupAgent {
                 }
             }
         };
+    }
+
+    /**
+     * This method retrieves the dimensions of the largest display of the device
+     *
+     * @return a @{Point} object that contains the dimensions of the largest display on the device
+     */
+    private Point getScreenDimensions() {
+        Point largetDimensions = null;
+        int maxArea = 0;
+
+        for (Display display : getInternalDisplays()) {
+            Point displaySize = getRealSize(display);
+
+            int width = displaySize.x;
+            int height = displaySize.y;
+            int area = width * height;
+
+            if (area > maxArea) {
+                maxArea = area;
+                largetDimensions = displaySize;
+            }
+        }
+
+        return largetDimensions;
+    }
+
+    private Point getRealSize(Display display) {
+        DisplayInfo displayInfo = new DisplayInfo();
+        display.getDisplayInfo(displayInfo);
+        return new Point(displayInfo.logicalWidth, displayInfo.logicalHeight);
+    }
+
+    /**
+     * This method returns the smaller display on a multi-display device
+     *
+     * @return Display that corresponds to the smaller display on a device or null if ther is only
+     * one Display on a device
+     */
+    private Display getSmallerDisplayIfExists() {
+        List<Display> internalDisplays = getInternalDisplays();
+        Point largestDisplaySize = getScreenDimensions();
+
+        // Find the first non-matching internal display
+        for (Display display : internalDisplays) {
+            Point displaySize = getRealSize(display);
+            if (displaySize.x != largestDisplaySize.x || displaySize.y != largestDisplaySize.y) {
+                return display;
+            }
+        }
+
+        // If no smaller display found, return null, as there is only a single display
+        return null;
+    }
+
+    /**
+     * This method retrieves the collection of Display objects available in the device.
+     * i.e. non-external displays are ignored
+     *
+     * @return list of displays corresponding to each display in the device
+     */
+    private List<Display> getInternalDisplays() {
+        Display[] allDisplays = mDisplayManager.getDisplays(
+                DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
+
+        List<Display> internalDisplays = new ArrayList<>();
+        for (Display display : allDisplays) {
+            if (display.getType() == Display.TYPE_INTERNAL) {
+                internalDisplays.add(display);
+            }
+        }
+        return internalDisplays;
+    }
+
+    /**
+     * This method compares the source and target dimensions, and returns true if there is a
+     * significant difference in area between them and the source dimensions are smaller than the
+     * target dimensions.
+     *
+     * @param sourceDimensions is the dimensions of the source device
+     * @param targetDimensions is the dimensions of the target device
+     */
+    @VisibleForTesting
+    boolean isSourceDeviceSignificantlySmallerThanTarget(Point sourceDimensions,
+            Point targetDimensions) {
+        int rawAreaDelta = (targetDimensions.x * targetDimensions.y)
+                - (sourceDimensions.x * sourceDimensions.y);
+        return rawAreaDelta > AREA_THRESHOLD;
     }
 
     @VisibleForTesting

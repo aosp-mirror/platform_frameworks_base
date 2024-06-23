@@ -102,9 +102,9 @@ public final class RowContentBindParams {
      * @see InflationFlag
      */
     public void markContentViewsFreeable(@InflationFlag int contentViews) {
-        @InflationFlag int existingContentViews = contentViews &= mContentViews;
+        @InflationFlag int existingFreeableContentViews = contentViews &= mContentViews;
         mContentViews &= ~contentViews;
-        mDirtyContentViews |= existingContentViews;
+        mDirtyContentViews |= existingFreeableContentViews;
     }
 
     public @InflationFlag int getContentViews() {

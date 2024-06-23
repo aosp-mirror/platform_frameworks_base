@@ -22,6 +22,8 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.SignedPackage;
+import android.content.pm.SignedPackageParcel;
 import android.os.Binder;
 import android.os.ISystemConfig;
 import android.util.ArrayMap;
@@ -118,6 +120,26 @@ public class SystemConfigService extends SystemService {
                     .filter(preventUserDisablePackage ->
                             pmi.canQueryPackage(Binder.getCallingUid(), preventUserDisablePackage))
                     .collect(toList());
+        }
+
+        @Override
+        public List<SignedPackageParcel> getEnhancedConfirmationTrustedPackages() {
+            getContext().enforceCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_ENHANCED_CONFIRMATION_STATES,
+                    "Caller must hold " + Manifest.permission.MANAGE_ENHANCED_CONFIRMATION_STATES);
+
+            return SystemConfig.getInstance().getEnhancedConfirmationTrustedPackages().stream()
+                    .map(SignedPackage::getData).toList();
+        }
+
+        @Override
+        public List<SignedPackageParcel> getEnhancedConfirmationTrustedInstallers() {
+            getContext().enforceCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_ENHANCED_CONFIRMATION_STATES,
+                    "Caller must hold " + Manifest.permission.MANAGE_ENHANCED_CONFIRMATION_STATES);
+
+            return SystemConfig.getInstance().getEnhancedConfirmationTrustedInstallers().stream()
+                    .map(SignedPackage::getData).toList();
         }
     };
 

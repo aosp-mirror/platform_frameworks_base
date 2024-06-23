@@ -20,11 +20,13 @@ import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.view.InputChannel;
 import android.view.MotionEvent;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IInputMethodSession;
@@ -69,20 +71,26 @@ oneway interface IInputMethod {
 
     void setSessionEnabled(IInputMethodSession session, boolean enabled);
 
-    void showSoftInput(in IBinder showInputToken, in @nullable ImeTracker.Token statsToken,
-            int flags, in ResultReceiver resultReceiver);
+    void showSoftInput(in IBinder showInputToken, in ImeTracker.Token statsToken, int flags,
+            in ResultReceiver resultReceiver);
 
-    void hideSoftInput(in IBinder hideInputToken, in @nullable ImeTracker.Token statsToken,
-            int flags, in ResultReceiver resultReceiver);
+    void hideSoftInput(in IBinder hideInputToken, in ImeTracker.Token statsToken, int flags,
+            in ResultReceiver resultReceiver);
 
     void updateEditorToolType(int toolType);
 
     void changeInputMethodSubtype(in InputMethodSubtype subtype);
 
-    void canStartStylusHandwriting(int requestId);
+    void canStartStylusHandwriting(int requestId,
+            in IConnectionlessHandwritingCallback connectionlessCallback,
+            in CursorAnchorInfo cursorAnchorInfo, boolean isConnectionlessForDelegation);
 
     void startStylusHandwriting(int requestId, in InputChannel channel,
             in List<MotionEvent> events);
+
+    void commitHandwritingDelegationTextIfAvailable();
+
+    void discardHandwritingDelegationText();
 
     void initInkWindow();
 

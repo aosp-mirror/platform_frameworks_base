@@ -26,6 +26,7 @@ import android.os.Looper;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.KernelCpuSpeedReader;
@@ -70,7 +71,9 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     MockBatteryStatsImpl(Clock clock, File historyDirectory, Handler handler,
             PowerStatsUidResolver powerStatsUidResolver) {
-        super(clock, historyDirectory, handler, powerStatsUidResolver);
+        super(clock, historyDirectory, handler, powerStatsUidResolver,
+                mock(FrameworkStatsLogger.class), mock(BatteryStatsHistory.TraceDelegate.class),
+                mock(BatteryStatsHistory.EventLogger.class));
         initTimersAndCounters();
         setMaxHistoryBuffer(128 * 1024);
 
@@ -107,7 +110,9 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     public Queue<UidToRemove> getPendingRemovedUids() {
-        return mPendingRemovedUids;
+        synchronized (this) {
+            return mPendingRemovedUids;
+        }
     }
 
     public boolean isOnBattery() {
@@ -271,6 +276,14 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     public void writeSyncLocked() {
     }
 
+    public void setHandler(Handler handler) {
+        mHandler = handler;
+    }
+
+    @Override
+    protected void updateBatteryPropertiesLocked() {
+    }
+
     public static class DummyExternalStatsSync implements ExternalStatsSync {
         public int flags = 0;
 
@@ -315,4 +328,3 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         }
     }
 }
-

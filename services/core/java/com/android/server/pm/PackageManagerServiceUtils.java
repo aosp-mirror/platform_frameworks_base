@@ -23,13 +23,19 @@ import static android.content.pm.SigningDetails.CertCapabilities.SHARED_USER_ID;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
+import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
+import static com.android.server.pm.PackageInstallerSession.APP_METADATA_FILE_ACCESS_MODE;
+import static com.android.server.pm.PackageInstallerSession.getAppMetadataSizeLimit;
+import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_IN_APK_PATH;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
+import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
+import static com.android.server.pm.PackageManagerService.DEFAULT_NATIVE_LIBRARY_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageManagerService.RANDOM_CODEPATH_PREFIX;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
@@ -69,6 +75,7 @@ import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
+import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
@@ -129,13 +136,17 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Class containing helper methods for the PackageManagerService.
@@ -194,7 +205,7 @@ public class PackageManagerServiceUtils {
      */
     @Overridable
     @ChangeId
-    @Disabled  /* Enforcement reverted in T: b/274147456 */
+    @Disabled
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**
@@ -853,7 +864,7 @@ public class PackageManagerServiceUtils {
             FileUtils.copy(fileIn, outputStream);
             // Flush anything in buffer before chmod, because any writes after chmod will fail.
             outputStream.flush();
-            Os.fchmod(outputStream.getFD(), 0644);
+            Os.fchmod(outputStream.getFD(), DEFAULT_FILE_ACCESS_MODE);
             atomicFile.finishWrite(outputStream);
             return PackageManager.INSTALL_SUCCEEDED;
         } catch (IOException e) {
@@ -1081,8 +1092,8 @@ public class PackageManagerServiceUtils {
 
         final File targetFile = new File(targetDir, targetName);
         final FileDescriptor targetFd = Os.open(targetFile.getAbsolutePath(),
-                O_RDWR | O_CREAT, 0644);
-        Os.chmod(targetFile.getAbsolutePath(), 0644);
+                O_RDWR | O_CREAT, DEFAULT_FILE_ACCESS_MODE);
+        Os.chmod(targetFile.getAbsolutePath(), DEFAULT_FILE_ACCESS_MODE);
         FileInputStream source = null;
         try {
             source = new FileInputStream(sourcePath);
@@ -1188,8 +1199,7 @@ public class PackageManagerServiceUtils {
     public static void applyEnforceIntentFilterMatching(
             PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
-            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            int filterCallingUid) {
+            Intent intent, String resolvedType, int filterCallingUid) {
         if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
 
         // Do not enforce filter matching when the caller is system or root
@@ -1199,10 +1209,9 @@ public class PackageManagerServiceUtils {
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
 
-        final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
-
-        final boolean enforce = compat.isChangeEnabledByUidInternal(
-                ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, filterCallingUid);
+        final boolean enforce = android.security.Flags.enforceIntentFilterMatch()
+                && compat.isChangeEnabledByUidInternal(
+                        ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, filterCallingUid);
 
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
@@ -1233,8 +1242,7 @@ public class PackageManagerServiceUtils {
             boolean match = false;
             for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
                 IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
-                if (IntentResolver.intentMatchesFilter(
-                        intentFilter, intent, resolvedType, defaultOnly)) {
+                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
                     match = true;
                     break;
                 }
@@ -1243,6 +1251,9 @@ public class PackageManagerServiceUtils {
                 ActivityManagerUtils.logUnsafeIntentEvent(
                         UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH,
                         filterCallingUid, intent, resolvedType, enforce);
+                if (android.security.Flags.enforceIntentFilterMatch()) {
+                    intent.addExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
+                }
                 if (enforce) {
                     Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
                     Slog.w(TAG, "Access blocked: " + comp.getComponentName());
@@ -1551,5 +1562,154 @@ public class PackageManagerServiceUtils {
      */
     public static boolean isInstalledByAdb(String initiatingPackageName) {
         return initiatingPackageName == null || SHELL_PACKAGE_NAME.equals(initiatingPackageName);
+    }
+
+    /**
+     * Extract the app.metadata file from apk.
+     */
+    public static boolean extractAppMetadataFromApk(String apkPath, File appMetadataFile) {
+        boolean found = false;
+        try (ZipInputStream zipInputStream =
+                     new ZipInputStream(new FileInputStream(new File(apkPath)))) {
+            ZipEntry zipEntry = null;
+            while ((zipEntry = zipInputStream.getNextEntry()) != null) {
+                if (zipEntry.getName().equals(APP_METADATA_FILE_IN_APK_PATH)) {
+                    found = true;
+                    try (FileOutputStream out = new FileOutputStream(appMetadataFile)) {
+                        FileUtils.copy(zipInputStream, out);
+                    }
+                    if (appMetadataFile.length() > getAppMetadataSizeLimit()) {
+                        appMetadataFile.delete();
+                        return false;
+                    }
+                    Os.chmod(appMetadataFile.getAbsolutePath(), APP_METADATA_FILE_ACCESS_MODE);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, e.getMessage());
+            return false;
+        }
+        return found;
+    }
+
+    public static void linkFilesToOldDirs(@NonNull Installer installer,
+                                           @NonNull String packageName,
+                                           @NonNull File newPath,
+                                           @Nullable Set<File> oldPaths) {
+        if (oldPaths == null || oldPaths.isEmpty()) {
+            return;
+        }
+        if (IncrementalManager.isIncrementalPath(newPath.getPath())) {
+            //TODO(b/291212866): handle incremental installs
+            return;
+        }
+        final File[] filesInNewPath = newPath.listFiles();
+        if (filesInNewPath == null || filesInNewPath.length == 0) {
+            return;
+        }
+        final List<File> splitApks = new ArrayList<>();
+        for (File file : filesInNewPath) {
+            if (!file.isDirectory() && file.toString().endsWith(".apk")) {
+                splitApks.add(file);
+            }
+        }
+        if (splitApks.isEmpty()) {
+            return;
+        }
+        final File[] splitApkNames = splitApks.toArray(new File[0]);
+        for (File oldPath : oldPaths) {
+            if (!oldPath.exists()) {
+                continue;
+            }
+            linkFilesAndSetModes(installer, packageName, newPath, oldPath, splitApkNames,
+                    DEFAULT_FILE_ACCESS_MODE);
+            linkNativeLibraries(installer, packageName, newPath, oldPath, LIB_DIR_NAME);
+            linkNativeLibraries(installer, packageName, newPath, oldPath, LIB64_DIR_NAME);
+        }
+
+    }
+
+    private static void linkNativeLibraries(@NonNull Installer installer,
+                                            @NonNull String packageName,
+                                            @NonNull File sourcePath, @NonNull File targetPath,
+                                            @NonNull String libDirName) {
+        final File sourceLibDir = new File(sourcePath, libDirName);
+        if (!sourceLibDir.exists()) {
+            return;
+        }
+        final File targetLibDir = new File(targetPath, libDirName);
+        if (!targetLibDir.exists()) {
+            try {
+                NativeLibraryHelper.createNativeLibrarySubdir(targetLibDir);
+            } catch (IOException e) {
+                Slog.w(PackageManagerService.TAG, "Failed to create native library dir at <"
+                        + targetLibDir + ">", e);
+                return;
+            }
+        }
+        final File[] archs = sourceLibDir.listFiles();
+        if (archs == null) {
+            return;
+        }
+        for (File arch : archs) {
+            final File targetArchDir = new File(targetLibDir, arch.getName());
+            if (!targetArchDir.exists()) {
+                try {
+                    NativeLibraryHelper.createNativeLibrarySubdir(targetArchDir);
+                } catch (IOException e) {
+                    Slog.w(PackageManagerService.TAG, "Failed to create native library subdir at <"
+                            + targetArchDir + ">", e);
+                    continue;
+                }
+            }
+            final File sourceArchDir = new File(sourceLibDir, arch.getName());
+            final File[] files = sourceArchDir.listFiles();
+            if (files == null || files.length == 0) {
+                continue;
+            }
+            linkFilesAndSetModes(installer, packageName, sourceArchDir, targetArchDir, files,
+                    DEFAULT_NATIVE_LIBRARY_FILE_ACCESS_MODE);
+        }
+    }
+
+    // Link the files with specified names from under the sourcePath to be under the targetPath
+    private static void linkFilesAndSetModes(@NonNull Installer installer, String packageName,
+            @NonNull File sourcePath, @NonNull File targetPath, @NonNull File[] files, int mode) {
+        for (File file : files) {
+            final String fileName = file.getName();
+            final File sourceFile = new File(sourcePath, fileName);
+            final File targetFile = new File(targetPath, fileName);
+            if (targetFile.exists()) {
+                if (DEBUG) {
+                    Slog.d(PackageManagerService.TAG, "Skipping existing linked file <"
+                            + targetFile + ">");
+                }
+                continue;
+            }
+            try {
+                installer.linkFile(packageName, fileName,
+                        sourcePath.getAbsolutePath(), targetPath.getAbsolutePath());
+                if (DEBUG) {
+                    Slog.d(PackageManagerService.TAG, "Linked <"
+                            + sourceFile + "> to <" + targetFile + ">");
+                }
+            } catch (Installer.InstallerException e) {
+                Slog.w(PackageManagerService.TAG, "Failed to link native library <"
+                        + sourceFile + "> to <" + targetFile + ">", e);
+                continue;
+            }
+            try {
+                Os.chmod(targetFile.getAbsolutePath(), mode);
+            } catch (ErrnoException e) {
+                Slog.w(PackageManagerService.TAG, "Failed to set mode for linked file <"
+                        + targetFile + ">", e);
+                continue;
+            }
+            if (!SELinux.restorecon(targetFile)) {
+                Slog.w(PackageManagerService.TAG, "Failed to restorecon for linked file <"
+                        + targetFile + ">");
+            }
+        }
     }
 }

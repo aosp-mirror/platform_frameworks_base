@@ -16,6 +16,7 @@
 
 package com.android.server.input
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
@@ -23,6 +24,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
+import android.hardware.input.KeyboardLayoutSelectionResult
 import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
 import android.hardware.input.InputManagerGlobal
@@ -36,12 +38,12 @@ import android.util.proto.ProtoOutputStream
 import android.view.InputDevice
 import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodSubtype
-import androidx.test.core.R
 import androidx.test.core.app.ApplicationProvider
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.os.KeyboardConfiguredProto
 import com.android.internal.util.FrameworkStatsLog
 import com.android.modules.utils.testing.ExtendedMockitoRule
+import com.android.test.input.R
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -129,6 +131,8 @@ class KeyboardLayoutManagerTests {
 
     @Mock
     private lateinit var packageManager: PackageManager
+    @Mock
+    private lateinit var notificationManager: NotificationManager
     private lateinit var keyboardLayoutManager: KeyboardLayoutManager
 
     private lateinit var imeInfo: InputMethodInfo
@@ -163,6 +167,8 @@ class KeyboardLayoutManagerTests {
         keyboardLayoutManager = Mockito.spy(
             KeyboardLayoutManager(context, native, dataStore, testLooper.looper)
         )
+        Mockito.`when`(context.getSystemService(Mockito.eq(Context.NOTIFICATION_SERVICE)))
+                .thenReturn(notificationManager)
         setupInputDevices()
         setupBroadcastReceiver()
         setupIme()
@@ -520,13 +526,13 @@ class KeyboardLayoutManagerTests {
                 keyboardDevice.identifier, USER_ID, imeInfo, imeSubtype,
                 ENGLISH_UK_LAYOUT_DESCRIPTOR
             )
-            val keyboardLayout =
+            assertEquals(
+                "Default UI: getKeyboardLayoutForInputDevice API should always return " +
+                        "KeyboardLayoutSelectionResult.FAILED",
+                KeyboardLayoutSelectionResult.FAILED,
                 keyboardLayoutManager.getKeyboardLayoutForInputDevice(
                     keyboardDevice.identifier, USER_ID, imeInfo, imeSubtype
                 )
-            assertNull(
-                "Default UI: getKeyboardLayoutForInputDevice API should always return null",
-                keyboardLayout
             )
         }
     }
@@ -540,12 +546,14 @@ class KeyboardLayoutManagerTests {
                 keyboardDevice.identifier, USER_ID, imeInfo, imeSubtype,
                 ENGLISH_UK_LAYOUT_DESCRIPTOR
             )
-            assertEquals(
-                "New UI: getKeyboardLayoutForInputDevice API should return the set layout",
-                ENGLISH_UK_LAYOUT_DESCRIPTOR,
+            var result =
                 keyboardLayoutManager.getKeyboardLayoutForInputDevice(
                     keyboardDevice.identifier, USER_ID, imeInfo, imeSubtype
                 )
+            assertEquals(
+                "New UI: getKeyboardLayoutForInputDevice API should return the set layout",
+                ENGLISH_UK_LAYOUT_DESCRIPTOR,
+                result.layoutDescriptor
             )
 
             // This should replace previously set layout
@@ -553,12 +561,14 @@ class KeyboardLayoutManagerTests {
                 keyboardDevice.identifier, USER_ID, imeInfo, imeSubtype,
                 ENGLISH_US_LAYOUT_DESCRIPTOR
             )
-            assertEquals(
-                "New UI: getKeyboardLayoutForInputDevice API should return the last set layout",
-                ENGLISH_US_LAYOUT_DESCRIPTOR,
+            result =
                 keyboardLayoutManager.getKeyboardLayoutForInputDevice(
                     keyboardDevice.identifier, USER_ID, imeInfo, imeSubtype
                 )
+            assertEquals(
+                "New UI: getKeyboardLayoutForInputDevice API should return the last set layout",
+                ENGLISH_US_LAYOUT_DESCRIPTOR,
+                result.layoutDescriptor
             )
         }
     }
@@ -729,17 +739,20 @@ class KeyboardLayoutManagerTests {
                 createImeSubtypeForLanguageTag("ru"),
                 createLayoutDescriptor("keyboard_layout_russian")
             )
-            assertNull(
-                "New UI: getDefaultKeyboardLayoutForInputDevice should return null when no " +
-                        "layout available",
+            assertEquals(
+                "New UI: getDefaultKeyboardLayoutForInputDevice should return " +
+                        "KeyboardLayoutSelectionResult.FAILED when no layout available",
+                KeyboardLayoutSelectionResult.FAILED,
                 keyboardLayoutManager.getKeyboardLayoutForInputDevice(
                     keyboardDevice.identifier, USER_ID, imeInfo,
                     createImeSubtypeForLanguageTag("it")
                 )
             )
-            assertNull(
-                "New UI: getDefaultKeyboardLayoutForInputDevice should return null when no " +
-                        "layout for script code is available",
+            assertEquals(
+                "New UI: getDefaultKeyboardLayoutForInputDevice should return " +
+                        "KeyboardLayoutSelectionResult.FAILED when no layout for script code is" +
+                        "available",
+                KeyboardLayoutSelectionResult.FAILED,
                 keyboardLayoutManager.getKeyboardLayoutForInputDevice(
                     keyboardDevice.identifier, USER_ID, imeInfo,
                     createImeSubtypeForLanguageTag("en-Deva")
@@ -806,8 +819,10 @@ class KeyboardLayoutManagerTests {
                 createImeSubtypeForLanguageTagAndLayoutType("ru", ""),
                 createLayoutDescriptor("keyboard_layout_russian")
             )
-            assertNull("New UI: getDefaultKeyboardLayoutForInputDevice should return null when " +
-                    "no layout for script code is available",
+            assertEquals("New UI: getDefaultKeyboardLayoutForInputDevice should return " +
+                    "KeyboardLayoutSelectionResult.FAILED when no layout for script code is" +
+                    "available",
+                KeyboardLayoutSelectionResult.FAILED,
                 keyboardLayoutManager.getKeyboardLayoutForInputDevice(
                     keyboardDevice.identifier, USER_ID, imeInfo,
                     createImeSubtypeForLanguageTagAndLayoutType("en-Deva-US", "")
@@ -860,14 +875,16 @@ class KeyboardLayoutManagerTests {
                         ArgumentMatchers.anyBoolean(),
                         ArgumentMatchers.eq(keyboardDevice.vendorId),
                         ArgumentMatchers.eq(keyboardDevice.productId),
-                        ArgumentMatchers.eq(createByteArray(
+                        ArgumentMatchers.eq(
+                            createByteArray(
                                 KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
                                 LAYOUT_TYPE_DEFAULT,
                                 GERMAN_LAYOUT_NAME,
-                                KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD,
+                                KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD,
                                 "de-Latn",
-                                LAYOUT_TYPE_QWERTZ),
+                                LAYOUT_TYPE_QWERTZ
                             ),
+                        ),
                         ArgumentMatchers.eq(keyboardDevice.deviceBus),
                 )
             }
@@ -888,13 +905,16 @@ class KeyboardLayoutManagerTests {
                         ArgumentMatchers.anyBoolean(),
                         ArgumentMatchers.eq(englishQwertyKeyboardDevice.vendorId),
                         ArgumentMatchers.eq(englishQwertyKeyboardDevice.productId),
-                        ArgumentMatchers.eq(createByteArray(
+                        ArgumentMatchers.eq(
+                            createByteArray(
                                 "en",
                                 LAYOUT_TYPE_QWERTY,
                                 ENGLISH_US_LAYOUT_NAME,
-                                KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE,
+                                KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEVICE,
                                 "de-Latn",
-                                LAYOUT_TYPE_QWERTZ)),
+                                LAYOUT_TYPE_QWERTZ
+                            )
+                        ),
                         ArgumentMatchers.eq(keyboardDevice.deviceBus),
                 )
             }
@@ -913,14 +933,16 @@ class KeyboardLayoutManagerTests {
                         ArgumentMatchers.anyBoolean(),
                         ArgumentMatchers.eq(keyboardDevice.vendorId),
                         ArgumentMatchers.eq(keyboardDevice.productId),
-                        ArgumentMatchers.eq(createByteArray(
+                        ArgumentMatchers.eq(
+                            createByteArray(
                                 KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
                                 LAYOUT_TYPE_DEFAULT,
                                 "Default",
-                                KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEFAULT,
+                                KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEFAULT,
                                 KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
-                                LAYOUT_TYPE_DEFAULT),
+                                LAYOUT_TYPE_DEFAULT
                             ),
+                        ),
                         ArgumentMatchers.eq(keyboardDevice.deviceBus),
                 )
             }
@@ -946,17 +968,60 @@ class KeyboardLayoutManagerTests {
         }
     }
 
+    @Test
+    fun testNotificationShown_onInputDeviceChanged() {
+        val imeInfos = listOf(KeyboardLayoutManager.ImeInfo(0, imeInfo, createImeSubtype()))
+        Mockito.doReturn(imeInfos).`when`(keyboardLayoutManager).imeInfoListForLayoutMapping
+        Mockito.doReturn(false).`when`(keyboardLayoutManager).isVirtualDevice(
+            ArgumentMatchers.eq(keyboardDevice.id)
+        )
+        NewSettingsApiFlag(true).use {
+            keyboardLayoutManager.onInputDeviceChanged(keyboardDevice.id)
+            ExtendedMockito.verify(
+                notificationManager,
+                Mockito.times(1)
+            ).notifyAsUser(
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.anyInt(),
+                ArgumentMatchers.any(),
+                ArgumentMatchers.any()
+            )
+        }
+    }
+
+    @Test
+    fun testNotificationNotShown_onInputDeviceChanged_forVirtualDevice() {
+        val imeInfos = listOf(KeyboardLayoutManager.ImeInfo(0, imeInfo, createImeSubtype()))
+        Mockito.doReturn(imeInfos).`when`(keyboardLayoutManager).imeInfoListForLayoutMapping
+        Mockito.doReturn(true).`when`(keyboardLayoutManager).isVirtualDevice(
+            ArgumentMatchers.eq(keyboardDevice.id)
+        )
+        NewSettingsApiFlag(true).use {
+            keyboardLayoutManager.onInputDeviceChanged(keyboardDevice.id)
+            ExtendedMockito.verify(
+                notificationManager,
+                Mockito.never()
+            ).notifyAsUser(
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.anyInt(),
+                ArgumentMatchers.any(),
+                ArgumentMatchers.any()
+            )
+        }
+    }
+
     private fun assertCorrectLayout(
         device: InputDevice,
         imeSubtype: InputMethodSubtype,
         expectedLayout: String
     ) {
+        val result = keyboardLayoutManager.getKeyboardLayoutForInputDevice(
+            device.identifier, USER_ID, imeInfo, imeSubtype
+        )
         assertEquals(
             "New UI: getDefaultKeyboardLayoutForInputDevice should return $expectedLayout",
             expectedLayout,
-            keyboardLayoutManager.getKeyboardLayoutForInputDevice(
-                device.identifier, USER_ID, imeInfo, imeSubtype
-            )
+            result.layoutDescriptor
         )
     }
 

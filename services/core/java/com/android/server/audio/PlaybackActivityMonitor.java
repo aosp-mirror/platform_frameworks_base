@@ -38,6 +38,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioPlaybackConfiguration.FormatInfo;
 import android.media.AudioPlaybackConfiguration.PlayerMuteEvent;
 import android.media.AudioSystem;
+import android.media.FadeManagerConfiguration;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.PlayerBase;
 import android.media.VolumeShaper;
@@ -83,6 +84,8 @@ public final class PlaybackActivityMonitor
     /*package*/ static final int VOLUME_SHAPER_SYSTEM_FADEOUT_ID = 2;
     /*package*/ static final int VOLUME_SHAPER_SYSTEM_MUTE_AWAIT_CONNECTION_ID = 3;
     /*package*/ static final int VOLUME_SHAPER_SYSTEM_STRONG_DUCK_ID = 4;
+    /*package*/ static final String EVENT_TYPE_FADE_OUT = "fading out";
+    /*package*/ static final String EVENT_TYPE_FADE_IN = "fading in";
 
     // ducking settings for a "normal duck" at -14dB
     private static final VolumeShaper.Configuration DUCK_VSHAPE =
@@ -156,8 +159,7 @@ public final class PlaybackActivityMonitor
     private final int mMaxAlarmVolume;
     private int mPrivilegedAlarmActiveCount = 0;
     private final Consumer<AudioDeviceAttributes> mMuteAwaitConnectionTimeoutCb;
-    private final FadeOutManager mFadeOutManager;
-
+    private final FadeOutManager mFadeOutManager = new FadeOutManager();
 
     PlaybackActivityMonitor(Context context, int maxAlarmVolume,
             Consumer<AudioDeviceAttributes> muteTimeoutCallback) {
@@ -167,7 +169,6 @@ public final class PlaybackActivityMonitor
         AudioPlaybackConfiguration.sPlayerDeathMonitor = this;
         mMuteAwaitConnectionTimeoutCb = muteTimeoutCallback;
         initEventHandler();
-        mFadeOutManager = new FadeOutManager(new FadeConfigurations());
     }
 
     //=================================================================
@@ -971,6 +972,12 @@ public final class PlaybackActivityMonitor
         return mFadeOutManager.getFadeInDelayForOffendersMillis(aa);
     }
 
+    @Override
+    public boolean shouldEnforceFade() {
+        return mFadeOutManager.isFadeEnabled();
+    }
+
+
     //=================================================================
     // Track playback activity listeners
 
@@ -1008,6 +1015,27 @@ public final class PlaybackActivityMonitor
                             new ArrayList<AudioPlaybackConfiguration>(mPlayers.values()));
             }
         }
+    }
+
+    int setFadeManagerConfiguration(int focusType, FadeManagerConfiguration fadeMgrConfig) {
+        return mFadeOutManager.setFadeManagerConfiguration(fadeMgrConfig);
+    }
+
+    int clearFadeManagerConfiguration(int focusType) {
+        return mFadeOutManager.clearFadeManagerConfiguration();
+    }
+
+    FadeManagerConfiguration getFadeManagerConfiguration(int focusType) {
+        return mFadeOutManager.getFadeManagerConfiguration();
+    }
+
+    int setTransientFadeManagerConfiguration(int focusType,
+            FadeManagerConfiguration fadeMgrConfig) {
+        return mFadeOutManager.setTransientFadeManagerConfiguration(fadeMgrConfig);
+    }
+
+    int clearTransientFadeManagerConfiguration(int focusType) {
+        return mFadeOutManager.clearTransientFadeManagerConfiguration();
     }
 
     /**
@@ -1178,11 +1206,13 @@ public final class PlaybackActivityMonitor
                     return;
                 }
                 try {
-                    sEventLogger.enqueue((new DuckEvent(apc, skipRamp, mUseStrongDuck))
-                            .printLog(TAG));
-                    apc.getPlayerProxy().applyVolumeShaper(
-                            mUseStrongDuck ? STRONG_DUCK_VSHAPE : DUCK_VSHAPE,
-                            skipRamp ? PLAY_SKIP_RAMP : PLAY_CREATE_IF_NEEDED);
+                    VolumeShaper.Configuration config =
+                            mUseStrongDuck ? STRONG_DUCK_VSHAPE : DUCK_VSHAPE;
+                    VolumeShaper.Operation operation =
+                            skipRamp ? PLAY_SKIP_RAMP : PLAY_CREATE_IF_NEEDED;
+                    sEventLogger.enqueue((new DuckEvent(apc, skipRamp, mUseStrongDuck, config,
+                            operation)).printLog(TAG));
+                    apc.getPlayerProxy().applyVolumeShaper(config, operation);
                     mDuckedPlayers.add(piid);
                 } catch (Exception e) {
                     Log.e(TAG, "Error ducking player piid:" + piid + " uid:" + mUid, e);
@@ -1342,21 +1372,36 @@ public final class PlaybackActivityMonitor
         private final boolean mSkipRamp;
         private final int mClientUid;
         private final int mClientPid;
+        private final int mPlayerType;
+        private final AudioAttributes mPlayerAttr;
+        private final VolumeShaper.Configuration mConfig;
+        private final VolumeShaper.Operation mOperation;
 
         abstract String getVSAction();
 
-        VolumeShaperEvent(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp) {
+        VolumeShaperEvent(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp,
+                VolumeShaper.Configuration config, VolumeShaper.Operation operation) {
             mPlayerIId = apc.getPlayerInterfaceId();
             mSkipRamp = skipRamp;
             mClientUid = apc.getClientUid();
             mClientPid = apc.getClientPid();
+            mPlayerAttr = apc.getAudioAttributes();
+            mPlayerType = apc.getPlayerType();
+            mConfig = config;
+            mOperation = operation;
         }
 
         @Override
         public String eventToString() {
-            return new StringBuilder(getVSAction()).append(" player piid:").append(mPlayerIId)
-                    .append(" uid/pid:").append(mClientUid).append("/").append(mClientPid)
-                    .append(" skip ramp:").append(mSkipRamp).toString();
+            return getVSAction()
+                    + " player piid:" + mPlayerIId
+                    + " uid/pid:" + mClientUid + "/" + mClientPid
+                    + " skip ramp:" + mSkipRamp
+                    + " player type:"
+                    + AudioPlaybackConfiguration.toLogFriendlyPlayerType(mPlayerType)
+                    + " attr:" + mPlayerAttr
+                    + " config:" + mConfig
+                    + " operation:" + mOperation;
         }
     }
 
@@ -1368,9 +1413,10 @@ public final class PlaybackActivityMonitor
             return mUseStrongDuck ? "ducking (strong)" : "ducking";
         }
 
-        DuckEvent(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp, boolean useStrongDuck)
+        DuckEvent(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp, boolean useStrongDuck,
+                VolumeShaper.Configuration config, VolumeShaper.Operation operation)
         {
-            super(apc, skipRamp);
+            super(apc, skipRamp, config, operation);
             mUseStrongDuck = useStrongDuck;
         }
     }
@@ -1378,11 +1424,24 @@ public final class PlaybackActivityMonitor
     static final class FadeOutEvent extends VolumeShaperEvent {
         @Override
         String getVSAction() {
-            return "fading out";
+            return EVENT_TYPE_FADE_OUT;
         }
 
-        FadeOutEvent(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp) {
-            super(apc, skipRamp);
+        FadeOutEvent(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp,
+                VolumeShaper.Configuration config, VolumeShaper.Operation operation) {
+            super(apc, skipRamp, config, operation);
+        }
+    }
+
+    static final class FadeInEvent extends VolumeShaperEvent {
+        @Override
+        String getVSAction() {
+            return EVENT_TYPE_FADE_IN;
+        }
+
+        FadeInEvent(@NonNull AudioPlaybackConfiguration apc, boolean skipRamp,
+                VolumeShaper.Configuration config, VolumeShaper.Operation operation) {
+            super(apc, skipRamp, config, operation);
         }
     }
 

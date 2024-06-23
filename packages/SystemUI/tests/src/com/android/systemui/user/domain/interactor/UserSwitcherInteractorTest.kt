@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
@@ -39,13 +40,19 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.process.processWrapper
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.res.R
-import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
+import com.android.systemui.telephony.domain.interactor.telephonyInteractor
+import com.android.systemui.testKosmos
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -97,8 +104,8 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
     private lateinit var spyContext: Context
     private lateinit var userRepository: FakeUserRepository
     private lateinit var keyguardReply: KeyguardInteractorFactory.WithDependencies
@@ -120,15 +127,17 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
             SUPERVISED_USER_CREATION_APP_PACKAGE,
         )
 
-        utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+        kosmos.fakeFeatureFlagsClassic.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_SWITCH_USER_ON_BG)
         spyContext = spy(context)
-        keyguardReply = KeyguardInteractorFactory.create(featureFlags = utils.featureFlags)
+        keyguardReply =
+            KeyguardInteractorFactory.create(featureFlags = kosmos.fakeFeatureFlagsClassic)
         keyguardRepository = keyguardReply.repository
         userRepository = FakeUserRepository()
         refreshUsersScheduler =
             RefreshUsersScheduler(
                 applicationScope = testScope.backgroundScope,
-                mainDispatcher = utils.testDispatcher,
+                mainDispatcher = kosmos.testDispatcher,
                 repository = userRepository,
             )
     }
@@ -172,6 +181,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
             underTest.onRecordSelected(UserRecord(info = userInfos[1]), dialogShower)
+            runCurrent()
 
             verify(uiEventLogger, times(1))
                 .log(MultiUserActionsEvent.SWITCH_TO_USER_FROM_USER_SWITCHER)
@@ -191,6 +201,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
             underTest.onRecordSelected(UserRecord(info = userInfos.last()))
+            runCurrent()
 
             verify(uiEventLogger, times(1))
                 .log(MultiUserActionsEvent.SWITCH_TO_GUEST_FROM_USER_SWITCHER)
@@ -218,6 +229,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
             underTest.onRecordSelected(UserRecord(info = userInfos.last()))
+            runCurrent()
 
             verify(uiEventLogger, times(1))
                 .log(MultiUserActionsEvent.SWITCH_TO_RESTRICTED_USER_FROM_USER_SWITCHER)
@@ -358,7 +370,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun actions_deviceUnlocked_fullScreen() {
         createUserInteractor()
         testScope.runTest {
-            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            kosmos.fakeFeatureFlagsClassic.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 2, includeGuest = false)
 
             userRepository.setUserInfos(userInfos)
@@ -442,7 +454,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun actions_deviceLockedAddFromLockscreenSet_fullList_fullScreen() {
         createUserInteractor()
         testScope.runTest {
-            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            kosmos.fakeFeatureFlagsClassic.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -635,7 +647,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
 
             val refreshUsersCallCount = userRepository.refreshUsersCallCount
 
-            utils.telephonyRepository.setCallState(1)
+            kosmos.fakeTelephonyRepository.setCallState(1)
             runCurrent()
 
             assertThat(userRepository.refreshUsersCallCount).isEqualTo(refreshUsersCallCount + 1)
@@ -787,7 +799,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun userRecordsFullScreen() {
         createUserInteractor()
         testScope.runTest {
-            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            kosmos.fakeFeatureFlagsClassic.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 3, includeGuest = false)
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
             userRepository.setUserInfos(userInfos)
@@ -896,7 +908,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun showUserSwitcher_fullScreenEnabled_launchesFullScreenDialog() {
         createUserInteractor()
         testScope.runTest {
-            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            kosmos.fakeFeatureFlagsClassic.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
 
             val expandable = mock<Expandable>()
             underTest.showUserSwitcher(expandable)
@@ -1111,18 +1123,19 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
                 manager = manager,
                 headlessSystemUserMode = headlessSystemUserMode,
                 applicationScope = testScope.backgroundScope,
-                telephonyInteractor = utils.telephonyInteractor(),
+                telephonyInteractor = kosmos.telephonyInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
                 keyguardUpdateMonitor = keyguardUpdateMonitor,
-                backgroundDispatcher = utils.testDispatcher,
+                backgroundDispatcher = kosmos.testDispatcher,
+                mainDispatcher = kosmos.testDispatcher,
                 activityManager = activityManager,
                 refreshUsersScheduler = refreshUsersScheduler,
                 guestUserInteractor =
                     GuestUserInteractor(
                         applicationContext = spyContext,
                         applicationScope = testScope.backgroundScope,
-                        mainDispatcher = utils.testDispatcher,
-                        backgroundDispatcher = utils.testDispatcher,
+                        mainDispatcher = kosmos.testDispatcher,
+                        backgroundDispatcher = kosmos.testDispatcher,
                         manager = manager,
                         repository = userRepository,
                         deviceProvisionedController = deviceProvisionedController,
@@ -1133,8 +1146,9 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
                         resetOrExitSessionReceiver = resetOrExitSessionReceiver,
                     ),
                 uiEventLogger = uiEventLogger,
-                featureFlags = utils.featureFlags,
+                featureFlags = kosmos.fakeFeatureFlagsClassic,
                 userRestrictionChecker = mock(),
+                processWrapper = kosmos.processWrapper,
             )
     }
 

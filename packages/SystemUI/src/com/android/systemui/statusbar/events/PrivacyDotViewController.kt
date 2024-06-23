@@ -424,7 +424,8 @@ open class PrivacyDotViewController @Inject constructor(
         br = bottomRight
 
         val rtl = configurationController.isLayoutRtl
-        val dc = selectDesignatedCorner(0, rtl)
+        val currentRotation = RotationUtils.getExactRotation(tl.context)
+        val dc = selectDesignatedCorner(currentRotation, rtl)
 
         val index = dc.cornerIndex()
 

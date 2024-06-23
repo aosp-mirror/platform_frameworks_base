@@ -28,10 +28,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import android.app.Notification;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -40,9 +43,9 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository;
@@ -56,8 +59,11 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.logging.nano.Notifications;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -83,6 +89,7 @@ import kotlinx.coroutines.test.TestScope;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
+@DisableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
 public class NotificationLoggerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
@@ -106,10 +113,16 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private NotificationPanelLoggerFake mNotificationPanelLoggerFake =
             new NotificationPanelLoggerFake();
-    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private final TestScope mTestScope = mKosmos.getTestScope();
     private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     private final PowerInteractor mPowerInteractor =
             PowerInteractorFactory.create().getPowerInteractor();
+    private final ActiveNotificationListRepository mActiveNotificationListRepository =
+            new ActiveNotificationListRepository();
+    private final ActiveNotificationsInteractor mActiveNotificationsInteractor =
+            new ActiveNotificationsInteractor(mActiveNotificationListRepository,
+                    StandardTestDispatcher(null, null));
     private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
@@ -123,7 +136,10 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 new WindowRootViewVisibilityRepository(mBarService, mUiBgExecutor),
                 mKeyguardRepository,
                 mHeadsUpManager,
-                mPowerInteractor);
+                mPowerInteractor,
+                mActiveNotificationsInteractor,
+                mKosmos.getFakeSceneContainerFlags(),
+                () -> mKosmos.getSceneInteractor());
         mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
 
         mEntry = new NotificationEntryBuilder()

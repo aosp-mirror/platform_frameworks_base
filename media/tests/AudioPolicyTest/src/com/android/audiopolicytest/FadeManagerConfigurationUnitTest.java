@@ -16,7 +16,7 @@
 
 package com.android.audiopolicytest;
 
-import static com.android.media.flags.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
+import static android.media.audiopolicy.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
 
 import static org.junit.Assert.assertThrows;
 
@@ -45,8 +45,10 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @RequiresFlagsEnabled(FLAG_ENABLE_FADE_MANAGER_CONFIGURATION)
 public final class FadeManagerConfigurationUnitTest {
-    private static final long DEFAULT_FADE_OUT_DURATION_MS = 2_000;
-    private static final long DEFAULT_FADE_IN_DURATION_MS = 1_000;
+    private static final long DEFAULT_FADE_OUT_DURATION_MS =
+            FadeManagerConfiguration.getDefaultFadeOutDurationMillis();
+    private static final long DEFAULT_FADE_IN_DURATION_MS =
+            FadeManagerConfiguration.getDefaultFadeInDurationMillis();
     private static final long TEST_FADE_OUT_DURATION_MS = 1_500;
     private static final long TEST_FADE_IN_DURATION_MS = 750;
     private static final int TEST_INVALID_USAGE = -10;
@@ -259,16 +261,6 @@ public final class FadeManagerConfigurationUnitTest {
     }
 
     @Test
-    public void testSetFadeState_toEnableAuto() {
-        final int fadeStateAuto = FadeManagerConfiguration.FADE_STATE_ENABLED_AUTO;
-        FadeManagerConfiguration fmc = new FadeManagerConfiguration.Builder()
-                .setFadeState(fadeStateAuto).build();
-
-        expect.withMessage("Fade state when enabled for audio").that(fmc.getFadeState())
-                .isEqualTo(fadeStateAuto);
-    }
-
-    @Test
     public void testSetFadeState_toInvalid_fails() {
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
                 new FadeManagerConfiguration.Builder()
@@ -310,13 +302,13 @@ public final class FadeManagerConfigurationUnitTest {
     }
 
     @Test
-    public void testSetFadeVolShaperConfig_withNullVolumeShaper_getsNull() {
+    public void testSetFadeOutVolShaperConfig_withNullVolumeShaper_getsNull() {
         FadeManagerConfiguration fmc = new FadeManagerConfiguration.Builder(mFmc)
                 .setFadeOutVolumeShaperConfigForAudioAttributes(TEST_MEDIA_AUDIO_ATTRIBUTE,
                         /* VolumeShaper.Configuration= */ null)
                 .setFadeInVolumeShaperConfigForAudioAttributes(TEST_MEDIA_AUDIO_ATTRIBUTE,
                         /* VolumeShaper.Configuration= */ null)
-                .clearFadeableUsage(AudioAttributes.USAGE_MEDIA).build();
+                .clearFadeableUsages().addFadeableUsage(AudioAttributes.USAGE_MEDIA).build();
 
         expect.withMessage("Fade out volume shaper config set with null value")
                 .that(fmc.getFadeOutVolumeShaperConfigForAudioAttributes(
@@ -547,31 +539,13 @@ public final class FadeManagerConfigurationUnitTest {
     }
 
     @Test
-    public void testClearFadeableUsage() {
-        final int usageToClear = AudioAttributes.USAGE_MEDIA;
-        List<Integer> updatedUsages = new ArrayList<>(mFmc.getFadeableUsages());
-        updatedUsages.remove((Integer) usageToClear);
+    public void testClearFadeableUsages() {
+        FadeManagerConfiguration updatedFmc = new FadeManagerConfiguration.Builder(mFmc)
+                .clearFadeableUsages().addFadeableUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                .build();
 
-        FadeManagerConfiguration updatedFmc = new FadeManagerConfiguration
-                .Builder(mFmc).clearFadeableUsage(usageToClear).build();
-
-        expect.withMessage("Clear fadeable usage").that(updatedFmc.getFadeableUsages())
-                .containsExactlyElementsIn(updatedUsages);
-    }
-
-    @Test
-    public void testClearFadeableUsage_withInvalidUsage_fails() {
-        FadeManagerConfiguration.Builder fmcBuilder = new FadeManagerConfiguration.Builder(mFmc);
-
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
-                fmcBuilder.clearFadeableUsage(TEST_INVALID_USAGE)
-        );
-
-        FadeManagerConfiguration fmc = fmcBuilder.build();
-        expect.withMessage("Clear invalid usage").that(thrown).hasMessageThat()
-                .contains("Invalid usage");
-        expect.withMessage("Fadeable usages").that(fmc.getFadeableUsages())
-                .containsExactlyElementsIn(mFmc.getFadeableUsages());
+        expect.withMessage("Clear fadeable usages").that(updatedFmc.getFadeableUsages())
+                .containsExactlyElementsIn(List.of(AudioAttributes.USAGE_VOICE_COMMUNICATION));
     }
 
     @Test
@@ -673,7 +647,7 @@ public final class FadeManagerConfigurationUnitTest {
     }
 
     @Test
-    public void testClearUnfadeableContentType() {
+    public void testClearUnfadeableContentTypes() {
         List<Integer> unfadeableContentTypes = new ArrayList<>(Arrays.asList(
                 AudioAttributes.CONTENT_TYPE_MOVIE,
                 AudioAttributes.CONTENT_TYPE_SONIFICATION
@@ -682,23 +656,10 @@ public final class FadeManagerConfigurationUnitTest {
 
         FadeManagerConfiguration updatedFmc = new FadeManagerConfiguration.Builder()
                 .setUnfadeableContentTypes(unfadeableContentTypes)
-                .clearUnfadeableContentType(contentTypeToClear).build();
+                .clearUnfadeableContentTypes().build();
 
-        unfadeableContentTypes.remove((Integer) contentTypeToClear);
         expect.withMessage("Unfadeable content types").that(updatedFmc.getUnfadeableContentTypes())
-                .containsExactlyElementsIn(unfadeableContentTypes);
-    }
-
-    @Test
-    public void testClearUnfadeableContentType_withInvalidContentType_fails() {
-        FadeManagerConfiguration.Builder fmcBuilder = new FadeManagerConfiguration.Builder(mFmc);
-
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
-                fmcBuilder.clearUnfadeableContentType(TEST_INVALID_CONTENT_TYPE).build()
-        );
-
-        expect.withMessage("Invalid content type exception").that(thrown).hasMessageThat()
-                .contains("Invalid content type");
+                .isEmpty();
     }
 
     @Test
@@ -735,7 +696,7 @@ public final class FadeManagerConfigurationUnitTest {
     }
 
     @Test
-    public void testClearUnfadebaleUid() {
+    public void testClearUnfadebaleUids() {
         final List<Integer> unfadeableUids = List.of(
                 TEST_UID_1,
                 TEST_UID_2
@@ -744,10 +705,9 @@ public final class FadeManagerConfigurationUnitTest {
                 .setUnfadeableUids(unfadeableUids).build();
 
         FadeManagerConfiguration updatedFmc = new FadeManagerConfiguration.Builder(fmc)
-                .clearUnfadeableUid(TEST_UID_1).build();
+                .clearUnfadeableUids().build();
 
-        expect.withMessage("Unfadeable uids").that(updatedFmc.getUnfadeableUids())
-                .isEqualTo(List.of(TEST_UID_2));
+        expect.withMessage("Unfadeable uids").that(updatedFmc.getUnfadeableUids()).isEmpty();
     }
 
     @Test

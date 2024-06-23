@@ -34,6 +34,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class FaceHelpMessageDeferralTest : SysuiTestCase() {
     val threshold = .75f
     @Mock lateinit var logger: BiometricMessageDeferralLogger
@@ -219,6 +220,7 @@ class FaceHelpMessageDeferralTest : SysuiTestCase() {
             threshold,
             logger,
             dumpManager,
+            "0",
         )
     }
 }

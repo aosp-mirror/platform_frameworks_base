@@ -22,11 +22,15 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.time.FakeSystemClock
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
@@ -70,6 +74,34 @@ class ManagedProfileControllerImplTest : SysuiTestCase() {
         setupWorkingProfile(2)
 
         Assert.assertEquals(true, controller.hasActiveProfile())
+    }
+
+    @Test
+    fun callbackRemovedWhileDispatching_doesntCrash() {
+        var remove = false
+        val callback =
+            object : ManagedProfileController.Callback {
+                override fun onManagedProfileChanged() {
+                    if (remove) {
+                        controller.removeCallback(this)
+                    }
+                }
+
+                override fun onManagedProfileRemoved() {
+                    if (remove) {
+                        controller.removeCallback(this)
+                    }
+                }
+            }
+        controller.addCallback(callback)
+        controller.addCallback(TestCallback)
+
+        remove = true
+        setupWorkingProfile(1)
+
+        val captor = argumentCaptor<UserTracker.Callback>()
+        verify(userTracker).addCallback(capture(captor), any())
+        captor.value.onProfilesChanged(userManager.getEnabledProfiles(1))
     }
 
     private fun setupWorkingProfile(userId: Int) {

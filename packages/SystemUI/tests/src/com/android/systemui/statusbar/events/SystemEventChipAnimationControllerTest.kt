@@ -51,7 +51,7 @@ import org.mockito.MockitoAnnotations
 class SystemEventChipAnimationControllerTest : SysuiTestCase() {
     private lateinit var controller: SystemEventChipAnimationController
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
     @Mock private lateinit var sbWindowController: StatusBarWindowController
     @Mock private lateinit var insetsProvider: StatusBarContentInsetsProvider
 

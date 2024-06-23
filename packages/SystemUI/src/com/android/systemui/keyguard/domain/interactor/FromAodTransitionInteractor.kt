@@ -19,18 +19,22 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -38,48 +42,84 @@ class FromAodTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
-    override val transitionInteractor: KeyguardTransitionInteractor,
-    @Application private val scope: CoroutineScope,
+    transitionInteractor: KeyguardTransitionInteractor,
+    @Background private val scope: CoroutineScope,
+    @Background bgDispatcher: CoroutineDispatcher,
+    @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
+    private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.AOD,
+        transitionInteractor = transitionInteractor,
+        mainDispatcher = mainDispatcher,
+        bgDispatcher = bgDispatcher,
     ) {
 
     override fun start() {
-        listenForAodToLockscreenOrOccluded()
+        listenForAodToLockscreen()
+        listenForAodToPrimaryBouncer()
         listenForAodToGone()
+        listenForAodToOccluded()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private fun listenForAodToLockscreenOrOccluded() {
+    /**
+     * There are cases where the transition to AOD begins but never completes, such as tapping power
+     * during an incoming phone call when unlocked. In this case, GONE->AOD should be interrupted to
+     * run AOD->OCCLUDED.
+     */
+    private fun listenForAodToOccluded() {
+        scope.launch {
+            keyguardInteractor.isKeyguardOccluded
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { (isOccluded, lastStartedStep) ->
+                    if (isOccluded && lastStartedStep.to == KeyguardState.AOD) {
+                        startTransitionTo(
+                            toState = KeyguardState.OCCLUDED,
+                            modeOnCanceled = TransitionModeOnCanceled.RESET
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForAodToLockscreen() {
         scope.launch {
             keyguardInteractor
                 .dozeTransitionTo(DozeStateModel.FINISH)
                 .sample(
-                    combine(
-                        transitionInteractor.startedKeyguardTransitionStep,
-                        keyguardInteractor.isKeyguardOccluded,
-                        ::Pair
-                    ),
-                    ::toTriple
+                    keyguardInteractor.isKeyguardShowing,
+                    startedKeyguardTransitionStep,
+                    keyguardInteractor.isKeyguardOccluded,
+                    keyguardInteractor.biometricUnlockState,
+                    keyguardInteractor.primaryBouncerShowing,
                 )
-                .collect { (_, lastStartedStep, occluded) ->
-                    if (lastStartedStep.to == KeyguardState.AOD) {
-                        val toState =
-                            if (occluded) KeyguardState.OCCLUDED else KeyguardState.LOCKSCREEN
+                .collect {
+                    (
+                        _,
+                        isKeyguardShowing,
+                        lastStartedStep,
+                        occluded,
+                        biometricUnlockState,
+                        primaryBouncerShowing) ->
+                    if (
+                        lastStartedStep.to == KeyguardState.AOD &&
+                            !occluded &&
+                            !isWakeAndUnlock(biometricUnlockState) &&
+                            isKeyguardShowing &&
+                            !primaryBouncerShowing
+                    ) {
                         val modeOnCanceled =
-                            if (
-                                toState == KeyguardState.LOCKSCREEN &&
-                                    lastStartedStep.from == KeyguardState.LOCKSCREEN
-                            ) {
+                            if (lastStartedStep.from == KeyguardState.LOCKSCREEN) {
                                 TransitionModeOnCanceled.REVERSE
+                            } else if (lastStartedStep.from == KeyguardState.GONE) {
+                                TransitionModeOnCanceled.RESET
                             } else {
                                 TransitionModeOnCanceled.LAST_VALUE
                             }
-
                         startTransitionTo(
-                            toState = toState,
+                            toState = KeyguardState.LOCKSCREEN,
                             modeOnCanceled = modeOnCanceled,
                         )
                     }
@@ -87,20 +127,64 @@ constructor(
         }
     }
 
-    private fun listenForAodToGone() {
+    /**
+     * If there is a biometric lockout and FPS is tapped while on AOD, it should go directly to the
+     * PRIMARY_BOUNCER.
+     */
+    private fun listenForAodToPrimaryBouncer() {
         scope.launch {
-            keyguardInteractor.biometricUnlockState
-                .sample(transitionInteractor.finishedKeyguardState, ::Pair)
-                .collect { pair ->
-                    val (biometricUnlockState, keyguardState) = pair
+            keyguardInteractor.primaryBouncerShowing
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { (isBouncerShowing, lastStartedTransitionStep) ->
+                    if (isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.AOD) {
+                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                    }
+                }
+        }
+    }
+
+    private fun listenForAodToGone() {
+        if (KeyguardWmStateRefactor.isEnabled) {
+            return
+        }
+
+        scope.launch {
+            powerInteractor.isAwake
+                .debounce(50L)
+                .sample(
+                    keyguardInteractor.biometricUnlockState,
+                    startedKeyguardTransitionStep,
+                    keyguardInteractor.isKeyguardShowing,
+                    keyguardInteractor.isKeyguardDismissible,
+                )
+                .collect {
+                    (
+                        isAwake,
+                        biometricUnlockState,
+                        lastStartedTransitionStep,
+                        isKeyguardShowing,
+                        isKeyguardDismissible) ->
+                    KeyguardWmStateRefactor.assertInLegacyMode()
                     if (
-                        keyguardState == KeyguardState.AOD && isWakeAndUnlock(biometricUnlockState)
+                        isAwake &&
+                            lastStartedTransitionStep.to == KeyguardState.AOD &&
+                            (isWakeAndUnlock(biometricUnlockState) ||
+                                (!isKeyguardShowing && isKeyguardDismissible))
                     ) {
                         startTransitionTo(KeyguardState.GONE)
                     }
                 }
         }
     }
+
+    /**
+     * Dismisses AOD and transitions to GONE. This is called whenever authentication occurs while on
+     * AOD.
+     */
+    fun dismissAod() {
+        scope.launch { startTransitionTo(KeyguardState.GONE) }
+    }
+
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
@@ -113,6 +197,7 @@ constructor(
     }
 
     companion object {
+        const val TAG = "FromAodTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_LOCKSCREEN_DURATION = 500.milliseconds
         val TO_GONE_DURATION = DEFAULT_DURATION

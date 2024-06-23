@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.location.interactor
 
+import android.platform.test.annotations.EnabledOnRavenwood
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -42,6 +43,7 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class LocationTileUserActionInteractorTest : SysuiTestCase() {
 

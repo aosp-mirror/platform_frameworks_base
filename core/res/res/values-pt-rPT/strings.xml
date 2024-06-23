@@ -154,6 +154,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> após <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Não reencaminhado"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Não reencaminhado"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Segurança da rede móvel"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Reveja as definições"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Identificador do dispositivo acedido"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Uma rede na ligação <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> registou o identificador único (IMSI) do seu dispositivo <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> vezes no período entre a(s) <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> e a(s) <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Ligação encriptada a <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"O dispositivo está agora ligado a uma rede móvel mais segura."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Ligação não encriptada à rede <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"O dispositivo está ligado a uma rede móvel não encriptada. As suas chamadas, mensagens e dados estão vulneráveis a uma interceção."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Definições de segurança da rede móvel"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Saber mais"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Código de funcionalidade completo."</string>
     <string name="fcError" msgid="5325116502080221346">"Problema de ligação ou código de funcionalidade inválido."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -371,6 +381,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Permite que a app se vincule ao módulo de difusão celular para encaminhar mensagens de difusão celular à medida que são recebidas. Os alertas de difusão celular são fornecidos em algumas localizações para avisar sobre situações de emergência. As aplicações maliciosas podem interferir com o desempenho ou funcionamento do seu dispositivo quando for recebida uma difusão celular de emergência."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Gerir chamadas em curso"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Permite que uma app veja detalhes acerca das chamadas em curso no seu dispositivo e controle essas chamadas."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Acesso à última identidade do telemóvel conhecida."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Permite que uma app aceda à última identidade do telemóvel conhecida fornecida pela telefonia."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"ler mensagens de transmissão celular"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permite que a app leia mensagens de transmissão celular recebidas pelo seu dispositivo. Os alertas de transmissão celular são fornecidos em algumas localizações para avisá-lo sobre situações de emergência. As aplicações maliciosas podem interferir com o desempenho ou funcionamento do seu dispositivo quando for recebida uma transmissão celular de emergência."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"ler feeds subscritos"</string>
@@ -435,6 +447,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Permite que a app use serviços em primeiro plano com o tipo \"systemExempted\""</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"executar o serviço em primeiro plano com o tipo \"fileManagement\""</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Permite que a app use serviços em primeiro plano com o tipo \"fileManagement\""</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"executar o serviço em primeiro plano com o tipo \"mediaProcessing\""</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Permite que a app use serviços em primeiro plano com o tipo \"mediaProcessing\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"executar o serviço em primeiro plano com o tipo \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Permite que a app use serviços em primeiro plano com o tipo \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"medir espaço de armazenamento da app"</string>
@@ -540,6 +554,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Permite que a app utilize o transmissor de infravermelhos do telemóvel."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"definir imagem de fundo"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Permite à app definir a imagem de fundo do sistema."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Aceder a perfis ocultos"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Permite que a app aceda a perfis ocultos."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ajustar o tamanho da imagem de fundo"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Permite que a app defina as sugestões de tamanho da imagem de fundo do sistema."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"definir fuso horário"</string>
@@ -633,7 +649,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar o bloqueio de ecrã"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduza o bloqueio de ecrã para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Prima firmemente o sensor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Impossível reconhecer impressão digital. Volte a tentar."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Impressão digital não reconhecida. Tente novamente."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpe o sensor de impressões digitais e tente novamente"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpe o sensor e tente novamente"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Prima firmemente o sensor"</string>
@@ -651,18 +667,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"A impressão digital foi autenticada."</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Rosto autenticado."</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Rosto autenticado. Prima Confirmar."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware de impressão digital não disponível."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Hardware de impressão digital não disponível"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Não é possível configurar a impressão digital"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"A configuração da impressão digital expirou. Tente novamente."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operação de impressão digital cancelada."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Operação de impressão digital cancelada pelo utilizador."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Operação de impressão digital cancelada"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Operação de impressão digital cancelada pelo utilizador"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Demasiadas tentativas. Em alternativa, use o bloqueio de ecrã."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Demasiadas tentativas. Em alternativa, use o bloqueio de ecrã."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Não é possível processar a impressão digital. Tente novamente."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nenhuma impressão digital registada."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo não tem sensor de impressões digitais."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor temporariamente desativado."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Não é possível usar o sensor de impressões digitais. Visite um fornecedor de serviços de reparação"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Nenhuma impressão digital configurada"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Este dispositivo não tem sensor de impressões digitais."</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sensor temporariamente desativado"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Não é possível usar o sensor de impressões digitais. Visite um fornecedor de serviços de reparação."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Botão ligar/desligar premido"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar a impressão digital"</string>
@@ -697,7 +713,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Rosto não detetado. Segure o telemóvel ao nível dos olhos"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Demasiado movimento. Mantenha o telemóvel firme."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Volte a inscrever o rosto."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Impossível reconhecer o rosto. Tente novamente."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Rosto não reconhecido. Tente novamente."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Altere ligeiramente a posição da sua cabeça"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Olhe mais diretamente para o telemóvel"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Olhe mais diretamente para o telemóvel"</string>
@@ -808,6 +824,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que a app obtenha uma amostra dos dados de sensores a uma taxa superior a 200 Hz."</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"atualizar a app sem a ação do utilizador"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permite que o proprietário atualize a app que instalou anteriormente sem a ação do utilizador"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"atualizar os estados de validação das chaves de contacto E2EE pertencentes a outras apps"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Permite que a app atualize os estados de validação das chaves de contacto E2EE pertencentes a outras apps"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Definir regras de palavra-passe"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controlar o comprimento e os carateres permitidos nos PINs e nas palavras-passe do bloqueio de ecrã."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorizar tentativas de desbloqueio do ecrã"</string>
@@ -827,7 +845,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Apagar os dados do tablet sem avisar através de uma reposição de dados de fábrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Apagar os dados do seu dispositivo Android TV sem avisar ao efetuar uma reposição de dados de fábrica."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Apague os dados do sistema de infoentretenimento sem aviso ao executar uma reposição de dados de fábrica."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Apaga os dados do telemóvel sem avisar ao efetuar uma reposição de dados de fábrica."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Apaga os dados do telemóvel sem avisar repondo os dados de fábrica."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Apague os dados do perfil"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Apagar os dados do utilizador"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Apagar os dados deste utilizador neste tablet sem aviso."</string>
@@ -1130,7 +1148,7 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"em <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"em <xliff:g id="COUNT">%d</xliff:g> a"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Há # minuto}many{Há # minutos}other{Há # minutos}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Há # hora}many{Há # horas}other{Há # horas}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{há # hora}many{há # horas}other{há # horas}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Há # dia}many{Há # dias}other{Há # dias}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Há # ano}many{Há # anos}other{Há # anos}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}many{# minutos}other{# minutos}}"</string>
@@ -1292,13 +1310,13 @@
     <string name="volume_call" msgid="7625321655265747433">"Volume da chamada recebida"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volume de chamada recebida em Bluetooth"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Volume do alarme"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Volume de notificações"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Volume das notificações"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volume de Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Volume do toque"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volume de chamadas"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Volume de multimédia"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume de notificações"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume das notificações"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Toque predefinido"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Predefinição (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Nenhum"</string>
@@ -1400,7 +1418,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"PARTILHAR"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECUSAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Escolher o método de entrada"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Manter no ecrã enquanto o teclado físico estiver ativo"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Mantê-lo no ecrã enquanto o teclado físico estiver ativo"</string>
     <string name="hardware" msgid="3611039921284836033">"Usar o teclado no ecrã"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configure o dispositivo <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configure teclados físicos"</string>
@@ -1883,7 +1901,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"A Poupança de bateria ativa o tema escuro e limita ou desativa a atividade em segundo plano, alguns efeitos visuais, determinadas funcionalidades e algumas ligações de rede."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"A Poupança de bateria ativa o tema escuro e limita ou desativa a atividade em segundo plano, alguns efeitos visuais, determinadas funcionalidades e algumas ligações de rede."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas apps enviem ou recebam dados em segundo plano. Uma determinada app que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas apps enviem ou recebam dados em segundo plano. Qualquer app que esteja a usar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nelas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durante um minuto (até à[s] {formattedTime})}many{Durante # minutos (até à[s] {formattedTime})}other{Durante # minutos (até à[s] {formattedTime})}}"</string>
@@ -1907,6 +1925,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fim de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"A dormir"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gerido por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Ativada"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desativada"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> está a desativar alguns sons."</string>
@@ -1926,6 +1945,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Validada"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Expandir"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Reduzir"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Reduzido"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Expandido"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"ativar/desativar expansão"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Porta periférica USB para Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1951,7 +1972,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Adicionar utilizador supervisionado"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Adicionar um idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferência de região"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Intr. nome do idioma"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Introduza o idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugeridos"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Sugeridas"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Idiomas sugeridos"</string>
@@ -1966,6 +1987,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Retomar apps de trabalho?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Retomar"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergência"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Defina um bloqueio de ecrã"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Definir bloqueio de ecrã"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Defina um bloqueio para usar o espaço privado"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"A app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"De momento, a app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponível"</string>
@@ -2042,7 +2066,7 @@
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Quer atualizar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> em "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"Atualizar estes itens no serviço "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Guardar"</string>
-    <string name="autofill_save_no" msgid="9212826374207023544">"Não, obrigado"</string>
+    <string name="autofill_save_no" msgid="9212826374207023544">"Não"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Agora não"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"Nunca"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Atualizar"</string>
@@ -2098,11 +2122,11 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Câmara"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Microfone"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"sobrepõe-se a outras aplicações no ecrã"</string>
-    <string name="notification_feedback_indicator" msgid="663476517711323016">"Fornecer feedback"</string>
-    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Esta notificação foi promovida para Predefinida. Toque para fornecer feedback."</string>
-    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificação foi despromovida para Silenciosa. Toque para fornecer feedback."</string>
-    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificação passou para uma classificação superior. Toque para fornecer feedback."</string>
-    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificação passou para uma classificação inferior. Toque para fornecer feedback."</string>
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Dar feedback"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Esta notificação foi promovida para Predefinida. Toque para dar feedback."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificação foi despromovida para Silenciosa. Toque para dar feedback."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificação passou para uma classificação superior. Toque para dar feedback."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificação passou para uma classificação inferior. Toque para dar feedback."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notificações melhoradas"</string>
     <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"As ações e as respostas sugeridas são agora fornecidas por notificações melhoradas. As notificações adaptáveis do Android já não são suportadas."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
@@ -2342,8 +2366,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Não é possível espelhar para o ecrã"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Use um cabo diferente e tente novamente"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"O dispositivo está demasiado quente e não consegue espelhar para o ecrã até arrefecer"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"O cabo pode não suportar ecrãs"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"O cabo USB-C pode não se ligar a ecrãs corretamente"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Funcionalidade Dual Screen ativada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> está a usar ambos os ecrãs para mostrar conteúdo"</string>
@@ -2367,4 +2389,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Trabalho 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Teste"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Comum"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Ligação de satélite estabelecida automaticamente"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Pode enviar e receber mensagens sem uma rede móvel ou Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abre a app Mensagens"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
 </resources>

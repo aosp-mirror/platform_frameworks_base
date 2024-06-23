@@ -39,7 +39,16 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
     MenuViewLayerController(Context context, WindowManager windowManager,
             AccessibilityManager accessibilityManager, SecureSettings secureSettings) {
         mWindowManager = windowManager;
-        mMenuViewLayer = new MenuViewLayer(context, windowManager, accessibilityManager, this,
+
+        MenuViewModel menuViewModel = new MenuViewModel(
+                context, accessibilityManager, secureSettings);
+        MenuViewAppearance menuViewAppearance = new MenuViewAppearance(context, windowManager);
+
+        mMenuViewLayer = new MenuViewLayer(context, windowManager, accessibilityManager,
+                menuViewModel,
+                menuViewAppearance,
+                new MenuView(context, menuViewModel, menuViewAppearance, secureSettings),
+                this,
                 secureSettings);
     }
 

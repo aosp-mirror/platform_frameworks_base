@@ -60,6 +60,12 @@ data class AuthenticationFlags(val userId: Int, val flag: Int) {
             LockPatternUtils.StrongAuthTracker
                 .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT
         )
+
+    val isSomeAuthRequiredAfterAdaptiveAuthRequest =
+        containsFlag(
+            flag,
+            LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST
+        )
 }
 
 private fun containsFlag(haystack: Int, needle: Int): Boolean {

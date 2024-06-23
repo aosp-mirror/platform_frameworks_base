@@ -19,6 +19,8 @@ package com.android.internal.util;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 
+// Exported to Mainline modules; cannot use annotations
+// @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class HexDump
 {
     private final static char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };

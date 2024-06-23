@@ -16,33 +16,37 @@
 
 package com.android.systemui.authentication.domain.interactor
 
-import com.android.app.tracing.TraceUtils.Companion.withContext
+import android.os.UserHandle
+import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
-import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Password
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
+import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
+import com.android.systemui.authentication.shared.model.AuthenticationWipeModel.WipeTarget
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
-import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -61,8 +65,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val repository: AuthenticationRepository,
-    private val userRepository: UserRepository,
-    private val clock: SystemClock,
+    private val selectedUserInteractor: SelectedUserInteractor,
 ) {
     /**
      * The currently-configured authentication method. This determines how the authentication
@@ -83,13 +86,6 @@ constructor(
      * proceed.
      */
     val authenticationMethod: Flow<AuthenticationMethodModel> = repository.authenticationMethod
-
-    /**
-     * The current authentication lockout (aka "throttling") state, set when the user has to wait
-     * before being able to try another authentication attempt. `null` indicates lockout isn't
-     * active.
-     */
-    val lockout: StateFlow<AuthenticationLockoutModel?> = repository.lockout
 
     /**
      * Whether the auto confirm feature is enabled for the currently-selected user.
@@ -130,26 +126,64 @@ constructor(
     /** Whether the pattern should be visible for the currently-selected user. */
     val isPatternVisible: StateFlow<Boolean> = repository.isPatternVisible
 
+    private val _onAuthenticationResult = MutableSharedFlow<Boolean>()
     /**
      * Emits the outcome (successful or unsuccessful) whenever a PIN/Pattern/Password security
      * challenge is attempted by the user in order to unlock the device.
      */
-    val authenticationChallengeResult: SharedFlow<Boolean> =
-        repository.authenticationChallengeResult
+    val onAuthenticationResult: SharedFlow<Boolean> = _onAuthenticationResult.asSharedFlow()
 
     /** Whether the "enhanced PIN privacy" setting is enabled for the current user. */
     val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> = repository.isPinEnhancedPrivacyEnabled
 
-    private var lockoutCountdownJob: Job? = null
+    /**
+     * The number of failed authentication attempts for the selected user since the last successful
+     * authentication.
+     */
+    val failedAuthenticationAttempts: StateFlow<Int> = repository.failedAuthenticationAttempts
 
-    init {
-        applicationScope.launch {
-            userRepository.selectedUserInfo
-                .map { it.id }
-                .distinctUntilChanged()
-                .collect { onSelectedUserChanged() }
+    /**
+     * Timestamp for when the current lockout (aka "throttling") will end, allowing the user to
+     * attempt authentication again. Returns `null` if no lockout is active.
+     *
+     * To be notified whenever a lockout is started, the caller should subscribe to
+     * [onAuthenticationResult].
+     *
+     * Note that the value is in milliseconds and matches [SystemClock.elapsedRealtime].
+     *
+     * Also note that the value may change when the selected user is changed.
+     */
+    val lockoutEndTimestamp: Long?
+        get() = repository.lockoutEndTimestamp
+
+    /**
+     * Models an imminent wipe risk to the user, profile, or device upon further unsuccessful
+     * authentication attempts.
+     *
+     * Returns `null` when there is no risk of wipe yet, or when there's no wipe policy set by the
+     * DevicePolicyManager.
+     */
+    val upcomingWipe: Flow<AuthenticationWipeModel?> =
+        repository.failedAuthenticationAttempts.map { failedAttempts ->
+            val failedAttemptsBeforeWipe = repository.getMaxFailedUnlockAttemptsForWipe()
+            if (failedAttemptsBeforeWipe == 0) {
+                return@map null // There is no restriction.
+            }
+
+            // The user has a DevicePolicyManager that requests a user/profile to be wiped after N
+            // attempts. Once the grace period is reached, show a dialog every time as a clear
+            // warning until the deletion fires.
+            val remainingAttemptsBeforeWipe = max(0, failedAttemptsBeforeWipe - failedAttempts)
+            if (remainingAttemptsBeforeWipe >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE) {
+                return@map null // There is no current risk of wiping the device.
+            }
+
+            AuthenticationWipeModel(
+                wipeTarget = getWipeTarget(),
+                failedAttempts = failedAttempts,
+                remainingAttempts = remainingAttemptsBeforeWipe,
+            )
         }
-    }
 
     /**
      * Returns the currently-configured authentication method. This determines how the
@@ -166,7 +200,8 @@ constructor(
     suspend fun getAuthenticationMethod() = repository.getAuthenticationMethod()
 
     /**
-     * Attempts to authenticate the user and unlock the device.
+     * Attempts to authenticate the user and unlock the device. May trigger lockout or wipe the
+     * user/profile/device data upon failure.
      *
      * If [tryAutoConfirm] is `true`, authentication is attempted if and only if the auth method
      * supports auto-confirming, and the input's length is at least the required length. Otherwise,
@@ -187,21 +222,7 @@ constructor(
         }
 
         val authMethod = getAuthenticationMethod()
-        val skipCheck =
-            when {
-                // Lockout is active, the UI layer should not have called this; skip the attempt.
-                lockout.value != null -> true
-                // The input is too short; skip the attempt.
-                input.isTooShort(authMethod) -> true
-                // Auto-confirm attempt when the feature is not enabled; skip the attempt.
-                tryAutoConfirm && !isAutoConfirmEnabled.value -> true
-                // Auto-confirm should skip the attempt if the pin entered is too short.
-                tryAutoConfirm &&
-                    authMethod == AuthenticationMethodModel.Pin &&
-                    input.size < repository.getPinLength() -> true
-                else -> false
-            }
-        if (skipCheck) {
+        if (shouldSkipAuthenticationAttempt(authMethod, tryAutoConfirm, input.size)) {
             return AuthenticationResult.SKIPPED
         }
 
@@ -210,108 +231,105 @@ constructor(
         val authenticationResult = repository.checkCredential(credential)
         credential.zeroize()
 
-        if (authenticationResult.isSuccessful || !tryAutoConfirm) {
-            repository.reportAuthenticationAttempt(
-                isSuccessful = authenticationResult.isSuccessful,
-            )
-        }
-
-        // Check if lockout should start and, if so, kick off the countdown:
-        if (!authenticationResult.isSuccessful && authenticationResult.lockoutDurationMs > 0) {
-            repository.apply {
-                setLockoutDuration(durationMs = authenticationResult.lockoutDurationMs)
-                reportLockoutStarted(durationMs = authenticationResult.lockoutDurationMs)
-                hasLockoutOccurred.value = true
-            }
-            startLockoutCountdown()
-        }
-
         if (authenticationResult.isSuccessful) {
-            // Since authentication succeeded, refresh lockout to make sure the state is completely
-            // reflecting the upstream source of truth.
-            refreshLockout()
+            repository.reportAuthenticationAttempt(isSuccessful = true)
+            _onAuthenticationResult.emit(true)
 
-            repository.hasLockoutOccurred.value = false
+            // Force a garbage collection in an attempt to erase any credentials left in memory.
+            // Do it after a 5-sec delay to avoid making the bouncer dismiss animation janky.
+            initiateGarbageCollection(delay = 5.seconds)
+
+            return AuthenticationResult.SUCCEEDED
         }
 
-        return if (authenticationResult.isSuccessful) {
-            AuthenticationResult.SUCCEEDED
-        } else {
-            AuthenticationResult.FAILED
+        // Authentication failed.
+
+        if (tryAutoConfirm) {
+            // Auto-confirm is active, the failed attempt should have no side-effects.
+            return AuthenticationResult.FAILED
         }
+
+        repository.reportAuthenticationAttempt(isSuccessful = false)
+
+        if (authenticationResult.lockoutDurationMs > 0) {
+            // Lockout has been triggered.
+            repository.reportLockoutStarted(authenticationResult.lockoutDurationMs)
+        }
+
+        _onAuthenticationResult.emit(false)
+        return AuthenticationResult.FAILED
     }
 
-    private fun List<Any>.isTooShort(authMethod: AuthenticationMethodModel): Boolean {
-        return when (authMethod) {
-            AuthenticationMethodModel.Pattern -> size < repository.minPatternLength
-            AuthenticationMethodModel.Password -> size < repository.minPasswordLength
+    private suspend fun shouldSkipAuthenticationAttempt(
+        authenticationMethod: AuthenticationMethodModel,
+        isAutoConfirmAttempt: Boolean,
+        inputLength: Int,
+    ): Boolean {
+        return when {
+            // Lockout is active, the UI layer should not have called this; skip the attempt.
+            repository.lockoutEndTimestamp != null -> true
+            // Auto-confirm attempt when the feature is not enabled; skip the attempt.
+            isAutoConfirmAttempt && !isAutoConfirmEnabled.value -> true
+            // The pin is too short; skip only if this is an auto-confirm attempt.
+            authenticationMethod == Pin && authenticationMethod.isInputTooShort(inputLength) ->
+                isAutoConfirmAttempt
+            // The input is too short.
+            authenticationMethod.isInputTooShort(inputLength) -> true
             else -> false
         }
     }
 
-    /** Starts refreshing the lockout state every second. */
-    private suspend fun startLockoutCountdown() {
-        cancelLockoutCountdown()
-        lockoutCountdownJob =
-            applicationScope.launch {
-                while (refreshLockout()) {
-                    delay(1.seconds.inWholeMilliseconds)
-                }
-            }
-    }
-
-    /** Cancels any lockout state countdown started in [startLockoutCountdown]. */
-    private fun cancelLockoutCountdown() {
-        lockoutCountdownJob?.cancel()
-        lockoutCountdownJob = null
-    }
-
-    /** Notifies that the currently-selected user has changed. */
-    private suspend fun onSelectedUserChanged() {
-        cancelLockoutCountdown()
-        if (refreshLockout()) {
-            startLockoutCountdown()
+    private suspend fun AuthenticationMethodModel.isInputTooShort(inputLength: Int): Boolean {
+        return when (this) {
+            Pattern -> inputLength < repository.minPatternLength
+            Password -> inputLength < repository.minPasswordLength
+            Pin -> inputLength < repository.getPinLength()
+            else -> false
         }
     }
 
     /**
-     * Refreshes the lockout state, hydrating the repository with the latest state.
-     *
-     * @return Whether lockout is active or not.
+     * @return Whether the current user, managed profile or whole device is next at risk of wipe.
      */
-    private suspend fun refreshLockout(): Boolean {
-        withContext("$TAG#refreshLockout", backgroundDispatcher) {
-            val failedAttemptCount = async { repository.getFailedAuthenticationAttemptCount() }
-            val deadline = async { repository.getLockoutEndTimestamp() }
-            val remainingMs = max(0, deadline.await() - clock.elapsedRealtime())
-            repository.lockout.value =
-                if (remainingMs > 0) {
-                    AuthenticationLockoutModel(
-                        failedAttemptCount = failedAttemptCount.await(),
-                        remainingSeconds = ceil(remainingMs / 1000f).toInt(),
-                    )
+    private suspend fun getWipeTarget(): WipeTarget {
+        // Check which profile has the strictest policy for failed authentication attempts.
+        val userToBeWiped = repository.getProfileWithMinFailedUnlockAttemptsForWipe()
+        return when (userToBeWiped) {
+            selectedUserInteractor.getSelectedUserId() ->
+                if (userToBeWiped == UserHandle.USER_SYSTEM) {
+                    WipeTarget.WholeDevice
                 } else {
-                    null // Lockout ended.
+                    WipeTarget.User
                 }
+
+            // Shouldn't happen at this stage; this is to maintain legacy behavior.
+            UserHandle.USER_NULL -> WipeTarget.WholeDevice
+            else -> WipeTarget.ManagedProfile
         }
-        return repository.lockout.value != null
     }
 
     private fun AuthenticationMethodModel.createCredential(
         input: List<Any>
     ): LockscreenCredential? {
         return when (this) {
-            is AuthenticationMethodModel.Pin ->
-                LockscreenCredential.createPin(input.joinToString(""))
-            is AuthenticationMethodModel.Password ->
-                LockscreenCredential.createPassword(input.joinToString(""))
-            is AuthenticationMethodModel.Pattern ->
+            is Pin -> LockscreenCredential.createPin(input.joinToString(""))
+            is Password -> LockscreenCredential.createPassword(input.joinToString(""))
+            is Pattern ->
                 LockscreenCredential.createPattern(
                     input
                         .map { it as AuthenticationPatternCoordinate }
                         .map { LockPatternView.Cell.of(it.y, it.x) }
                 )
             else -> null
+        }
+    }
+
+    private suspend fun initiateGarbageCollection(delay: Duration) {
+        applicationScope.launch(backgroundDispatcher) {
+            delay(delay)
+            System.gc()
+            System.runFinalization()
+            System.gc()
         }
     }
 

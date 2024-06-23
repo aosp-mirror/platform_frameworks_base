@@ -21,10 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Geef je pincode op"</string>
-    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Geef de pincode op"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Geef je patroon op"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Voer pincode in"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Voer je patroon in"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Teken het patroon"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Geef je wachtwoord op"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Voer je wachtwoord in"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Geef het wachtwoord op"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ongeldige kaart."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Opgeladen"</string>
@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladen"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Snel opladen"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Langzaam opladen"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladen geoptimaliseerd om de batterij te beschermen"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Probleem met oplaadaccessoire"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladen in de wacht gezet om batterij te beschermen"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Check je oplaadaccessoire"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netwerk vergrendeld"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Geen simkaart"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Onbruikbare simkaart."</string>
@@ -108,9 +108,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Patroon is vereist na opnieuw opstarten apparaat"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Pincode is vereist na opnieuw opstarten apparaat"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Wachtwoord is vereist na opnieuw opstarten apparaat"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Gebruik in plaats daarvan het patroon voor extra beveiliging"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Gebruik het patroon voor extra beveiliging"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Gebruik de pincode voor extra beveiliging"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Gebruik in plaats daarvan het wachtwoord voor extra beveiliging"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Gebruik het wachtwoord voor extra beveiliging"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Apparaat vergrendeld door beheerder"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Apparaat is handmatig vergrendeld"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Niet herkend"</string>

@@ -18,13 +18,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/desktop_mode_caption"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal">
 
     <ImageButton
         android:id="@+id/caption_handle"
-        android:layout_width="128dp"
+        android:layout_width="@dimen/desktop_mode_fullscreen_decor_caption_width"
         android:layout_height="@dimen/desktop_mode_fullscreen_decor_caption_height"
         android:paddingVertical="16dp"
         android:contentDescription="@string/handle_text"

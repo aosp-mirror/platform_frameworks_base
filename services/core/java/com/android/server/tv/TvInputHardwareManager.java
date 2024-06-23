@@ -60,6 +60,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Surface;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -88,15 +89,25 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final Context mContext;
     private final Listener mListener;
     private final TvInputHal mHal = new TvInputHal(this);
+
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
     private final SparseArray<Connection> mConnections = new SparseArray<>();
+    @GuardedBy("mLock")
     private final List<TvInputHardwareInfo> mHardwareList = new ArrayList<>();
+    @GuardedBy("mLock")
     private final List<HdmiDeviceInfo> mHdmiDeviceList = new ArrayList<>();
     /* A map from a device ID to the matching TV input ID. */
+    @GuardedBy("mLock")
     private final SparseArray<String> mHardwareInputIdMap = new SparseArray<>();
     /* A map from a HDMI logical address to the matching TV input ID. */
+    @GuardedBy("mLock")
     private final SparseArray<String> mHdmiInputIdMap = new SparseArray<>();
+    @GuardedBy("mLock")
     private final Map<String, TvInputInfo> mInputMap = new ArrayMap<>();
     /* A map from a HDMI input parent ID to the related input IDs. */
+    @GuardedBy("mLock")
     private final Map<String, List<String>> mHdmiParentInputMap = new ArrayMap<>();
 
     private final AudioManager mAudioManager;
@@ -114,15 +125,15 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private int mCurrentIndex = 0;
     private int mCurrentMaxIndex = 0;
 
+    @GuardedBy("mLock")
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
+    @GuardedBy("mLock")
     private final List<Message> mPendingHdmiDeviceEvents = new ArrayList<>();
-
+    @GuardedBy("mLock")
     private final List<Message> mPendingTvinputInfoEvents = new ArrayList<>();
 
     // Calls to mListener should happen here.
     private final Handler mHandler = new ListenerHandler();
-
-    private final Object mLock = new Object();
 
     public TvInputHardwareManager(Context context, Listener listener) {
         mContext = context;
@@ -141,7 +152,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     hdmiControlService.addDeviceEventListener(mHdmiDeviceEventListener);
                     hdmiControlService.addSystemAudioModeChangeListener(
                             mHdmiSystemAudioModeChangeListener);
-                    mHdmiDeviceList.addAll(hdmiControlService.getInputDevices());
+                    synchronized (mLock) {
+                        mHdmiDeviceList.addAll(hdmiControlService.getInputDevices());
+                    }
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Error registering listeners to HdmiControlService:", e);
                 }
@@ -172,6 +185,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    @GuardedBy("mLock")
     private void buildHardwareListLocked() {
         mHardwareList.clear();
         for (int i = 0; i < mConnections.size(); ++i) {
@@ -295,12 +309,31 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    public SparseArray<String> getHardwareInputIdMap() {
+        synchronized (mLock) {
+            return mHardwareInputIdMap.clone();
+        }
+    }
+
+    public SparseArray<String> getHdmiInputIdMap() {
+        synchronized (mLock) {
+            return mHdmiInputIdMap.clone();
+        }
+    }
+
+    public Map<String, TvInputInfo> getInputMap() {
+        synchronized (mLock) {
+            return Collections.unmodifiableMap(mInputMap);
+        }
+    }
+
     public Map<String, List<String>> getHdmiParentInputMap() {
         synchronized (mLock) {
             return Collections.unmodifiableMap(mHdmiParentInputMap);
         }
     }
 
+    @GuardedBy("mLock")
     private boolean checkUidChangedLocked(
             Connection connection, int callingUid, int resolvedUserId) {
         Integer connectionCallingUid = connection.getCallingUidLocked();
@@ -496,6 +529,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    @GuardedBy("mLock")
     private TvInputHardwareInfo findHardwareInfoForHdmiPortLocked(int port) {
         for (TvInputHardwareInfo hardwareInfo : mHardwareList) {
             if (hardwareInfo.getType() == TvInputHardwareInfo.TV_INPUT_TYPE_HDMI
@@ -506,6 +540,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         return null;
     }
 
+    @GuardedBy("mLock")
     private int findDeviceIdForInputIdLocked(String inputId) {
         for (int i = 0; i < mConnections.size(); ++i) {
             int key = mConnections.keyAt(i);
@@ -597,6 +632,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         return false;
     }
 
+    @GuardedBy("mLock")
     private void processPendingHdmiDeviceEventsLocked() {
         for (Iterator<Message> it = mPendingHdmiDeviceEvents.iterator(); it.hasNext(); ) {
             Message msg = it.next();
@@ -611,6 +647,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     }
 
 
+    @GuardedBy("mLock")
     private void processPendingTvInputInfoEventsLocked() {
         for (Iterator<Message> it = mPendingTvinputInfoEvents.iterator(); it.hasNext(); ) {
             Message msg = it.next();
@@ -748,6 +785,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
         // *Locked methods assume TvInputHardwareManager.mLock is held.
 
+        @GuardedBy("mLock")
         public void resetLocked(TvInputHardwareImpl hardware, ITvInputHardwareCallback callback,
                 TvInputInfo info, Integer callingUid, Integer resolvedUserId,
                 ResourceClientProfile profile) {
@@ -776,50 +814,62 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
 
+        @GuardedBy("mLock")
         public void updateConfigsLocked(TvStreamConfig[] configs) {
             mConfigs = configs;
         }
 
+        @GuardedBy("mLock")
         public TvInputHardwareInfo getHardwareInfoLocked() {
             return mHardwareInfo;
         }
 
+        @GuardedBy("mLock")
         public TvInputInfo getInfoLocked() {
             return mInfo;
         }
 
+        @GuardedBy("mLock")
         public ITvInputHardware getHardwareLocked() {
             return mHardware;
         }
 
+        @GuardedBy("mLock")
         public TvInputHardwareImpl getHardwareImplLocked() {
             return mHardware;
         }
 
+        @GuardedBy("mLock")
         public ITvInputHardwareCallback getCallbackLocked() {
             return mCallback;
         }
 
+        @GuardedBy("mLock")
         public TvStreamConfig[] getConfigsLocked() {
             return mConfigs;
         }
 
+        @GuardedBy("mLock")
         public Integer getCallingUidLocked() {
             return mCallingUid;
         }
 
+        @GuardedBy("mLock")
         public Integer getResolvedUserIdLocked() {
             return mResolvedUserId;
         }
 
+        @GuardedBy("mLock")
         public void setOnFirstFrameCapturedLocked(Runnable runnable) {
             mOnFirstFrameCaptured = runnable;
         }
 
+        @GuardedBy("mLock")
         public Runnable getOnFirstFrameCapturedLocked() {
             return mOnFirstFrameCaptured;
         }
 
+        @GuardedBy("mLock")
         public ResourceClientProfile getResourceClientProfileLocked() {
             return mResourceClientProfile;
         }
@@ -844,6 +894,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     + " }";
         }
 
+        @GuardedBy("mLock")
         public boolean updateCableConnectionStatusLocked(int cableConnectionStatus) {
             // Update connection status only if it's not default value
             if (cableConnectionStatus != TvInputHardwareInfo.CABLE_CONNECTION_STATUS_UNKNOWN
@@ -855,10 +906,12 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             return mIsCableConnectionStatusUpdated;
         }
 
+        @GuardedBy("mLock")
         private int getConfigsLengthLocked() {
             return mConfigs == null ? 0 : mConfigs.length;
         }
 
+        @GuardedBy("mLock")
         private int getInputStateLocked() {
             int configsLength = getConfigsLengthLocked();
             if (configsLength > 0) {
@@ -880,7 +933,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
     private class TvInputHardwareImpl extends ITvInputHardware.Stub {
         private final TvInputHardwareInfo mInfo;
-        private boolean mReleased = false;
         private final Object mImplLock = new Object();
 
         private final AudioManager.OnAudioPortUpdateListener mAudioListener =
@@ -909,28 +961,44 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 }
             }
         };
+        @GuardedBy("mImplLock")
+        private boolean mReleased = false;
+        @GuardedBy("mImplLock")
         private int mOverrideAudioType = AudioManager.DEVICE_NONE;
+        @GuardedBy("mImplLock")
         private String mOverrideAudioAddress = "";
+        @GuardedBy("mImplLock")
         private AudioDevicePort mAudioSource;
+        @GuardedBy("mImplLock")
         private List<AudioDevicePort> mAudioSink = new ArrayList<>();
+        @GuardedBy("mImplLock")
         private AudioPatch mAudioPatch = null;
         // Set to an invalid value for a volume, so that current volume can be applied at the
         // first call to updateAudioConfigLocked().
+        @GuardedBy("mImplLock")
         private float mCommittedVolume = -1f;
+        @GuardedBy("mImplLock")
         private float mSourceVolume = 0.0f;
 
+        @GuardedBy("mImplLock")
         private TvStreamConfig mActiveConfig = null;
 
+        @GuardedBy("mImplLock")
         private int mDesiredSamplingRate = 0;
+        @GuardedBy("mImplLock")
         private int mDesiredChannelMask = AudioFormat.CHANNEL_OUT_DEFAULT;
+        @GuardedBy("mImplLock")
         private int mDesiredFormat = AudioFormat.ENCODING_DEFAULT;
 
         public TvInputHardwareImpl(TvInputHardwareInfo info) {
             mInfo = info;
             mAudioManager.registerAudioPortUpdateListener(mAudioListener);
             if (mInfo.getAudioType() != AudioManager.DEVICE_NONE) {
-                mAudioSource = findAudioDevicePort(mInfo.getAudioType(), mInfo.getAudioAddress());
-                findAudioSinkFromAudioPolicy(mAudioSink);
+                synchronized (mImplLock) {
+                    mAudioSource =
+                            findAudioDevicePort(mInfo.getAudioType(), mInfo.getAudioAddress());
+                    findAudioSinkFromAudioPolicy(mAudioSink);
+                }
             }
         }
 
@@ -1025,6 +1093,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         /**
          * Update audio configuration (source, sink, patch) all up to current state.
          */
+        @GuardedBy("mImplLock")
         private void updateAudioConfigLocked() {
             boolean sinkUpdated = updateAudioSinkLocked();
             boolean sourceUpdated = updateAudioSourceLocked();
@@ -1204,6 +1273,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
 
+        @GuardedBy("mImplLock")
         private boolean updateAudioSourceLocked() {
             if (mInfo.getAudioType() == AudioManager.DEVICE_NONE) {
                 return false;
@@ -1214,6 +1284,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     : !mAudioSource.equals(previousSource);
         }
 
+        @GuardedBy("mImplLock")
         private boolean updateAudioSinkLocked() {
             if (mInfo.getAudioType() == AudioManager.DEVICE_NONE) {
                 return false;
@@ -1339,16 +1410,22 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     String inputId = mHardwareInputIdMap.get(deviceId);
 
                     if (inputId != null) {
-                        if (connection.updateCableConnectionStatusLocked(cableConnectionStatus)) {
-                            if (previousCableConnectionStatus != connection.getInputStateLocked()) {
-                                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                                    connection.getInputStateLocked(), 0, inputId).sendToTarget();
-                            }
-                        } else {
-                            if ((previousConfigsLength == 0)
-                                    != (connection.getConfigsLengthLocked() == 0)) {
-                                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                                    connection.getInputStateLocked(), 0, inputId).sendToTarget();
+                        synchronized (mLock) {
+                            if (connection.updateCableConnectionStatusLocked(
+                                        cableConnectionStatus)) {
+                                if (previousCableConnectionStatus
+                                        != connection.getInputStateLocked()) {
+                                    mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                                                    connection.getInputStateLocked(), 0, inputId)
+                                            .sendToTarget();
+                                }
+                            } else {
+                                if ((previousConfigsLength == 0)
+                                        != (connection.getConfigsLengthLocked() == 0)) {
+                                    mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                                                    connection.getInputStateLocked(), 0, inputId)
+                                            .sendToTarget();
+                                }
                             }
                         }
                     }

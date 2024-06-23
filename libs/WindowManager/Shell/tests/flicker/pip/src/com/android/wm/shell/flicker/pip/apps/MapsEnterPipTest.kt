@@ -26,9 +26,9 @@ import android.os.Looper
 import android.os.SystemClock
 import android.platform.test.annotations.Postsubmit
 import android.tools.device.apphelpers.MapsAppHelper
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
 import androidx.test.filters.RequiresDevice
 import org.junit.Assume
 import org.junit.FixMethodOrder
@@ -53,7 +53,7 @@ import org.junit.runners.Parameterized
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited from [PipTransition]
  *     2. Part of the test setup occurs automatically via
- *        [android.tools.device.flicker.legacy.runner.TransitionRunner],
+ *        [android.tools.flicker.legacy.runner.TransitionRunner],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
  * ```
@@ -136,6 +136,16 @@ open class MapsEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition
     }
 
     override val thisTransition: FlickerBuilder.() -> Unit = { transitions { tapl.goHome() } }
+
+    /** Checks [standardAppHelper] layer remains visible throughout the animation */
+    @Postsubmit
+    @Test
+    override fun pipAppLayerAlwaysVisible() {
+        // For Maps the transition goes through the UI mode change that adds a snapshot overlay so
+        // we assert only start/end layers matching the app instead.
+        flicker.assertLayersStart { this.isVisible(standardAppHelper.packageNameMatcher) }
+        flicker.assertLayersEnd { this.isVisible(standardAppHelper.packageNameMatcher) }
+    }
 
     @Postsubmit
     @Test

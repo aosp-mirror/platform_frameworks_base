@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import android.app.Flags;
 import android.app.NotificationManager.Policy;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
@@ -55,6 +56,10 @@ class ZenAdapters {
                     .showLights(policy.showLights())
                     .showPeeking(policy.showPeeking())
                     .showStatusBarIcons(policy.showStatusBarIcons());
+        }
+
+        if (Flags.modesApi()) {
+            zenPolicyBuilder.allowPriorityChannels(policy.allowPriorityChannels());
         }
 
         return zenPolicyBuilder.build();

@@ -19,6 +19,7 @@ import android.content.ContentResolver
 import android.database.ContentObserver
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.TestUnfoldTransitionProvider
@@ -36,6 +37,7 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
+@TestableLooper.RunWithLooper
 class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
 
     @Mock lateinit var sinkProvider: TransitionProgressListener

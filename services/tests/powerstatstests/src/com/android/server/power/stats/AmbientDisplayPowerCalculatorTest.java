@@ -21,6 +21,7 @@ import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_AMBIENT;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.BatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
@@ -34,10 +35,15 @@ import org.junit.runner.RunWith;
 @SmallTest
 @SuppressWarnings("GuardedBy")
 public class AmbientDisplayPowerCalculatorTest {
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private static final double PRECISION = 0.00001;
     private static final long MINUTE_IN_MS = 60 * 1000;
 
-    @Rule
+    @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
             .setAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 0, 10.0)
             .setNumDisplays(1);

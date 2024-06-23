@@ -15,12 +15,21 @@
  */
 package com.android.systemui.keyguard.ui.transitions
 
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToAodTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToDozingTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.DozingToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DozingToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.DozingToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToAodTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.GoneToDozingTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.GoneToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToAodTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel
@@ -28,6 +37,7 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenToPrimaryBouncerTran
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToAodTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTransitionViewModel
 import dagger.Binds
 import dagger.Module
@@ -37,6 +47,30 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 @Module
 abstract class DeviceEntryIconTransitionModule {
+    @Binds
+    @IntoSet
+    abstract fun alternateBouncerToAod(
+        impl: AlternateBouncerToAodTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun alternateBouncerToDozing(
+        impl: AlternateBouncerToDozingTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun alternateBouncerToGone(
+        impl: AlternateBouncerToGoneTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun alternateBouncerToPrimaryBouncer(
+        impl: AlternateBouncerToPrimaryBouncerTransitionViewModel
+    ): DeviceEntryIconTransition
+
     @Binds
     @IntoSet
     abstract fun aodToLockscreen(
@@ -49,8 +83,18 @@ abstract class DeviceEntryIconTransitionModule {
 
     @Binds
     @IntoSet
+    abstract fun dozingToGone(impl: DozingToGoneTransitionViewModel): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
     abstract fun dozingToLockscreen(
         impl: DozingToLockscreenTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun dozingToPrimaryBouncer(
+        impl: DozingToPrimaryBouncerTransitionViewModel
     ): DeviceEntryIconTransition
 
     @Binds
@@ -63,6 +107,12 @@ abstract class DeviceEntryIconTransitionModule {
     @IntoSet
     abstract fun lockscreenToAod(
         impl: LockscreenToAodTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun lockscreenToDozing(
+        impl: LockscreenToDozingTransitionViewModel
     ): DeviceEntryIconTransition
 
     @Binds
@@ -95,6 +145,16 @@ abstract class DeviceEntryIconTransitionModule {
 
     @Binds
     @IntoSet
+    abstract fun goneToLockscreen(
+        impl: GoneToLockscreenTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun goneToDozing(impl: GoneToDozingTransitionViewModel): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
     abstract fun occludedToAod(impl: OccludedToAodTransitionViewModel): DeviceEntryIconTransition
 
     @Binds
@@ -107,6 +167,12 @@ abstract class DeviceEntryIconTransitionModule {
     @IntoSet
     abstract fun primaryBouncerToAod(
         impl: PrimaryBouncerToAodTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun primaryBouncerToDozing(
+        impl: PrimaryBouncerToDozingTransitionViewModel
     ): DeviceEntryIconTransition
 
     @Binds

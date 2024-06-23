@@ -22,7 +22,9 @@ import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPL
 import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppCompatTaskInfo;
 import android.app.AppCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.content.Context;
@@ -33,6 +35,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
@@ -68,6 +71,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     @VisibleForTesting
     CompatUILayout mLayout;
 
+    private final float mHideScmTolerance;
+
     CompatUIWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, CompatUICallback callback,
             ShellTaskOrganizer.TaskListener taskListener, DisplayLayout displayLayout,
@@ -80,6 +85,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         mCompatUIHintsState = compatUIHintsState;
         mCompatUIConfiguration = compatUIConfiguration;
         mOnRestartButtonClicked = onRestartButtonClicked;
+        mHideScmTolerance = mCompatUIConfiguration.getHideSizeCompatRestartButtonTolerance();
     }
 
     @Override
@@ -99,7 +105,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected boolean eligibleToShowLayout() {
-        return mHasSizeCompat || shouldShowCameraControl();
+        return (mHasSizeCompat && shouldShowSizeCompatRestartButton(getLastTaskInfo()))
+                || shouldShowCameraControl();
     }
 
     @Override
@@ -206,6 +213,30 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         final int positionY = taskStableBounds.bottom - taskBounds.top
                 - mLayout.getMeasuredHeight();
         updateSurfacePosition(positionX, positionY);
+    }
+
+    @VisibleForTesting
+    boolean shouldShowSizeCompatRestartButton(@NonNull TaskInfo taskInfo) {
+        if (!Flags.allowHideScmButton()) {
+            return true;
+        }
+        final AppCompatTaskInfo appCompatTaskInfo = taskInfo.appCompatTaskInfo;
+        final Rect taskBounds = taskInfo.configuration.windowConfiguration.getBounds();
+        final int letterboxArea = computeArea(appCompatTaskInfo.topActivityLetterboxWidth,
+                appCompatTaskInfo.topActivityLetterboxHeight);
+        final int taskArea = computeArea(taskBounds.width(), taskBounds.height());
+        if (letterboxArea == 0 || taskArea == 0) {
+            return false;
+        }
+        final float percentageAreaOfLetterboxInTask = (float) letterboxArea / taskArea * 100;
+        return percentageAreaOfLetterboxInTask < mHideScmTolerance;
+    }
+
+    private int computeArea(int width, int height) {
+        if (width == 0 || height == 0) {
+            return 0;
+        }
+        return width * height;
     }
 
     private void updateVisibilityOfViews() {

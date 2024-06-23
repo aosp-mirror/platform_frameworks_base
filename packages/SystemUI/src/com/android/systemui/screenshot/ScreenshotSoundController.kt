@@ -18,7 +18,7 @@ package com.android.systemui.screenshot
 
 import android.media.MediaPlayer
 import android.util.Log
-import com.android.app.tracing.TraceUtils.Companion.async
+import com.android.app.tracing.coroutines.async
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.google.errorprone.annotations.CanIgnoreReturnValue
@@ -58,8 +58,16 @@ constructor(
         }
 
     override fun playCameraSound(): Deferred<Unit> {
-        return coroutineScope.async("playCameraSound", bgDispatcher) { player.await()?.start() }
+        return coroutineScope.async("playCameraSound", bgDispatcher) {
+            try {
+                player.await()?.start()
+            } catch (e: IllegalStateException) {
+                Log.w(TAG, "Screenshot sound failed to play", e)
+                releaseScreenshotSound()
+            }
+        }
     }
+
     override fun releaseScreenshotSound(): Deferred<Unit> {
         return coroutineScope.async("releaseScreenshotSound", bgDispatcher) {
             try {

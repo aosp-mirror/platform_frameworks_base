@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A parcelable class that wraps and retrieves the information of number, service category(s) and
@@ -300,8 +301,8 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         dest.writeInt(mEmergencyCallRouting);
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<EmergencyNumber> CREATOR =
-            new Parcelable.Creator<EmergencyNumber>() {
+    public static final @NonNull Creator<EmergencyNumber> CREATOR =
+            new Creator<EmergencyNumber>() {
                 @Override
                 public EmergencyNumber createFromParcel(Parcel in) {
                     return new EmergencyNumber(in);
@@ -500,12 +501,94 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
 
     @Override
     public String toString() {
-        return "EmergencyNumber:" + "Number-" + mNumber + "|CountryIso-" + mCountryIso
-                + "|Mnc-" + mMnc
-                + "|ServiceCategories-" + Integer.toBinaryString(mEmergencyServiceCategoryBitmask)
-                + "|Urns-" + mEmergencyUrns
-                + "|Sources-" + Integer.toBinaryString(mEmergencyNumberSourceBitmask)
-                + "|Routing-" + Integer.toBinaryString(mEmergencyCallRouting);
+        return String.format("[EmergencyNumber: %s, countryIso=%s, mnc=%s, src=%s, routing=%s, "
+                        + "categories=%s, urns=%s]",
+                mNumber,
+                mCountryIso,
+                mMnc,
+                sourceBitmaskToString(mEmergencyNumberSourceBitmask),
+                routingToString(mEmergencyCallRouting),
+                categoriesToString(mEmergencyServiceCategoryBitmask),
+                (mEmergencyUrns == null ? "" :
+                        mEmergencyUrns.stream().collect(Collectors.joining(","))));
+    }
+
+    /**
+     * @param categories emergency service category bitmask
+     * @return loggable string describing the category bitmask
+     */
+    private String categoriesToString(@EmergencyServiceCategories int categories) {
+        StringBuilder sb = new StringBuilder();
+        if ((categories & EMERGENCY_SERVICE_CATEGORY_AIEC) == EMERGENCY_SERVICE_CATEGORY_AIEC) {
+            sb.append("auto ");
+        }
+        if ((categories & EMERGENCY_SERVICE_CATEGORY_AMBULANCE)
+                == EMERGENCY_SERVICE_CATEGORY_AMBULANCE) {
+            sb.append("ambulance ");
+        }
+        if ((categories & EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE)
+                == EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE) {
+            sb.append("fire ");
+        }
+        if ((categories & EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD)
+                == EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD) {
+            sb.append("marine ");
+        }
+        if ((categories & EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE)
+                == EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE) {
+            sb.append("mountain ");
+        }
+        if ((categories & EMERGENCY_SERVICE_CATEGORY_POLICE) == EMERGENCY_SERVICE_CATEGORY_POLICE) {
+            sb.append("police ");
+        }
+        if ((categories & EMERGENCY_SERVICE_CATEGORY_MIEC) == EMERGENCY_SERVICE_CATEGORY_MIEC) {
+            sb.append("manual ");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * @param routing emergency call routing type
+     * @return loggable string describing the routing type.
+     */
+    private String routingToString(@EmergencyCallRouting int routing) {
+        return switch(routing) {
+            case EMERGENCY_CALL_ROUTING_EMERGENCY -> "emergency";
+            case EMERGENCY_CALL_ROUTING_NORMAL -> "normal";
+            case EMERGENCY_CALL_ROUTING_UNKNOWN -> "unknown";
+            default -> "🤷";
+        };
+    }
+
+    /**
+     * Builds a string describing the sources for an emergency number.
+     * @param sourceBitmask the source bitmask
+     * @return loggable string describing the sources.
+     */
+    private String sourceBitmaskToString(@EmergencyNumberSources int sourceBitmask) {
+        StringBuilder sb = new StringBuilder();
+        if ((sourceBitmask & EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING)
+                == EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING) {
+            sb.append("net ");
+        }
+        if ((sourceBitmask & EMERGENCY_NUMBER_SOURCE_SIM) == EMERGENCY_NUMBER_SOURCE_SIM) {
+            sb.append("sim ");
+        }
+        if ((sourceBitmask & EMERGENCY_NUMBER_SOURCE_DATABASE)
+                == EMERGENCY_NUMBER_SOURCE_DATABASE) {
+            sb.append("db ");
+        }
+        if ((sourceBitmask & EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG)
+                == EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG) {
+            sb.append("mdm ");
+        }
+        if ((sourceBitmask & EMERGENCY_NUMBER_SOURCE_DEFAULT) == EMERGENCY_NUMBER_SOURCE_DEFAULT) {
+            sb.append("def ");
+        }
+        if ((sourceBitmask & EMERGENCY_NUMBER_SOURCE_TEST) == EMERGENCY_NUMBER_SOURCE_TEST) {
+            sb.append("tst ");
+        }
+        return sb.toString();
     }
 
     @Override

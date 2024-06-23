@@ -25,6 +25,7 @@ package android.util;
  * @param <T> The class on which the property is declared.
  * @param <V> The type that this property represents.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class Property<T, V> {
 
     private final String mName;

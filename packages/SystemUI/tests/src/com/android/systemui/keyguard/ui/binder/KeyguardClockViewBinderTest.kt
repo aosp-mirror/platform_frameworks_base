@@ -21,13 +21,17 @@ import androidx.constraintlayout.helper.widget.Layer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardClockSwitch.LARGE
+import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.plugins.clocks.ClockFaceLayout
 import com.android.systemui.util.mockito.whenever
 import kotlin.test.Test
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -48,30 +52,58 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
     @Mock private lateinit var smallClockView: View
     @Mock private lateinit var smallClockFaceLayout: ClockFaceLayout
     @Mock private lateinit var largeClockFaceLayout: ClockFaceLayout
+    @Mock private lateinit var clockViewModel: KeyguardClockViewModel
+    private val clockSize = MutableStateFlow(LARGE)
+    private val currentClock: MutableStateFlow<ClockController?> = MutableStateFlow(null)
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-    }
-
-    @Test
-    fun addClockViews_nonWeatherClock() {
-        setupNonWeatherClock()
-        KeyguardClockViewBinder.addClockViews(clock, rootView, burnInLayer)
-        verify(rootView).addView(smallClockView)
-        verify(rootView).addView(largeClockView)
-        verify(burnInLayer).addView(smallClockView)
-        verify(burnInLayer, never()).addView(largeClockView)
+        whenever(clockViewModel.clockSize).thenReturn(clockSize)
+        whenever(clockViewModel.currentClock).thenReturn(currentClock)
+        whenever(clockViewModel.burnInLayer).thenReturn(burnInLayer)
     }
 
     @Test
     fun addClockViews_WeatherClock() {
         setupWeatherClock()
-        KeyguardClockViewBinder.addClockViews(clock, rootView, burnInLayer)
+        KeyguardClockViewBinder.addClockViews(clock, rootView)
         verify(rootView).addView(smallClockView)
         verify(rootView).addView(largeClockView)
-        verify(burnInLayer).addView(smallClockView)
+    }
+
+    @Test
+    fun addClockViews_nonWeatherClock() {
+        setupNonWeatherClock()
+        KeyguardClockViewBinder.addClockViews(clock, rootView)
+        verify(rootView).addView(smallClockView)
+        verify(rootView).addView(largeClockView)
+    }
+    @Test
+    fun addClockViewsToBurnInLayer_LargeWeatherClock() {
+        setupWeatherClock()
+        clockSize.value = LARGE
+        KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel)
+        verify(burnInLayer).removeView(smallClockView)
         verify(burnInLayer).addView(largeClockView)
+    }
+
+    @Test
+    fun addClockViewsToBurnInLayer_LargeNonWeatherClock() {
+        setupNonWeatherClock()
+        clockSize.value = LARGE
+        KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel)
+        verify(burnInLayer).removeView(smallClockView)
+        verify(burnInLayer, never()).addView(largeClockView)
+    }
+
+    @Test
+    fun addClockViewsToBurnInLayer_SmallClock() {
+        setupNonWeatherClock()
+        clockSize.value = SMALL
+        KeyguardClockViewBinder.updateBurnInLayer(rootView, clockViewModel)
+        verify(burnInLayer).addView(smallClockView)
+        verify(burnInLayer).removeView(largeClockView)
     }
 
     private fun setupWeatherClock() {
@@ -99,5 +131,7 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
         whenever(clock.smallClock).thenReturn(smallClock)
         whenever(largeClock.layout).thenReturn(largeClockFaceLayout)
         whenever(smallClock.layout).thenReturn(smallClockFaceLayout)
+        whenever(clockViewModel.clock).thenReturn(clock)
+        currentClock.value = clock
     }
 }

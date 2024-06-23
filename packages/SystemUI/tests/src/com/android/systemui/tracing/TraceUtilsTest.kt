@@ -12,7 +12,7 @@
  * permissions and limitations under the License.
  */
 
-package com.android.app.tracing
+package com.android.systemui.tracing
 
 import android.os.Handler
 import android.os.Looper
@@ -20,11 +20,13 @@ import android.os.Trace.TRACE_TAG_APP
 import android.testing.AndroidTestingRunner
 import android.util.Log
 import androidx.test.filters.SmallTest
+import com.android.app.tracing.TraceUtils.traceRunnable
+import com.android.app.tracing.namedRunnable
+import com.android.app.tracing.traceSection
 import com.android.systemui.SysuiTestCase
 import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -68,7 +70,6 @@ class TraceUtilsTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/267482189 - Enable once androidx.tracing >= 1.2.0-beta04")
     fun testLongTraceSection_doesNotThrow_whenUsingAndroidX() {
         androidx.tracing.Trace.beginSection(SECTION_NAME_THATS_TOO_LONG)
     }
@@ -84,17 +85,13 @@ class TraceUtilsTest : SysuiTestCase() {
     fun testLongTraceSection_doesNotThrow_whenUsedAsTraceNameSupplier() {
         Handler(Looper.getMainLooper())
             .runWithScissors(
-                TraceUtils.namedRunnable(SECTION_NAME_THATS_TOO_LONG) {
-                    Log.v(TAG, "TraceUtils.namedRunnable() block.")
-                },
+                namedRunnable(SECTION_NAME_THATS_TOO_LONG) { Log.v(TAG, "namedRunnable() block.") },
                 TEST_FAIL_TIMEOUT
             )
     }
 
     @Test
     fun testLongTraceSection_doesNotThrow_whenUsingTraceRunnable() {
-        TraceUtils.traceRunnable(SECTION_NAME_THATS_TOO_LONG) {
-            Log.v(TAG, "TraceUtils.traceRunnable() block.")
-        }
+        traceRunnable(SECTION_NAME_THATS_TOO_LONG) { Log.v(TAG, "traceRunnable() block.") }.run()
     }
 }

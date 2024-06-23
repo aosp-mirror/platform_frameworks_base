@@ -90,7 +90,7 @@ public class DeviceIconUtilTest {
     public void getIconResIdFromMediaRouteType_hdmi() {
         assertThat(new DeviceIconUtil(/* isTv */ false)
                 .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_HDMI))
-                .isEqualTo(R.drawable.ic_headphone);
+                .isEqualTo(R.drawable.ic_external_display);
     }
 
     @Test
@@ -101,10 +101,10 @@ public class DeviceIconUtilTest {
     }
 
     @Test
-    public void getIconResIdFromMediaRouteType_hdmiArc_isHeadphone() {
+    public void getIconResIdFromMediaRouteType_hdmiArc_isExternalDisplay() {
         assertThat(new DeviceIconUtil(/* isTv */ false)
                 .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_HDMI_ARC))
-                .isEqualTo(R.drawable.ic_headphone);
+                .isEqualTo(R.drawable.ic_external_display);
     }
 
     @Test
@@ -115,10 +115,10 @@ public class DeviceIconUtilTest {
     }
 
     @Test
-    public void getIconResIdFromMediaRouteType_hdmiEarc_isHeadphone() {
+    public void getIconResIdFromMediaRouteType_hdmiEarc_isExternalDisplay() {
         assertThat(new DeviceIconUtil(/* isTv */ false)
                 .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_HDMI_EARC))
-                .isEqualTo(R.drawable.ic_headphone);
+                .isEqualTo(R.drawable.ic_external_display);
     }
 
     @Test
@@ -229,10 +229,10 @@ public class DeviceIconUtilTest {
     }
 
     @Test
-    public void getIconResIdFromAudioDeviceType_hdmi_isHeadphone() {
+    public void getIconResIdFromAudioDeviceType_hdmi_isExternalDisplay() {
         assertThat(new DeviceIconUtil(/* isTv */ false)
                 .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_HDMI))
-                .isEqualTo(R.drawable.ic_headphone);
+                .isEqualTo(R.drawable.ic_external_display);
     }
 
     @Test
@@ -243,10 +243,10 @@ public class DeviceIconUtilTest {
     }
 
     @Test
-    public void getIconResIdFromAudioDeviceType_hdmiArc_isHeadphone() {
+    public void getIconResIdFromAudioDeviceType_hdmiArc_isExternalDisplay() {
         assertThat(new DeviceIconUtil(/* isTv */ false)
                 .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_HDMI_ARC))
-                .isEqualTo(R.drawable.ic_headphone);
+                .isEqualTo(R.drawable.ic_external_display);
     }
 
     @Test
@@ -257,10 +257,10 @@ public class DeviceIconUtilTest {
     }
 
     @Test
-    public void getIconResIdFromAudioDeviceType_hdmiEarc_isHeadphone() {
+    public void getIconResIdFromAudioDeviceType_hdmiEarc_isExternalDisplay() {
         assertThat(new DeviceIconUtil(/* isTv */ false)
                 .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_HDMI_EARC))
-                .isEqualTo(R.drawable.ic_headphone);
+                .isEqualTo(R.drawable.ic_external_display);
     }
 
     @Test

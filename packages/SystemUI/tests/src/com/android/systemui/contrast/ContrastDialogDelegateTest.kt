@@ -26,7 +26,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.model.SysUiState
@@ -67,9 +67,10 @@ class ContrastDialogDelegateTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         mDependency.injectTestDependency(FeatureFlags::class.java, FakeFeatureFlags())
         mDependency.injectTestDependency(SysUiState::class.java, sysuiState)
-        mDependency.injectMockDependency(DialogLaunchAnimator::class.java)
+        mDependency.injectMockDependency(DialogTransitionAnimator::class.java)
         whenever(sysuiState.setFlag(any(), any())).thenReturn(sysuiState)
-        whenever(sysuiDialogFactory.create(any())).thenReturn(sysuiDialog)
+        whenever(sysuiDialogFactory.create(any(SystemUIDialog.Delegate::class.java)))
+            .thenReturn(sysuiDialog)
         whenever(sysuiDialog.layoutInflater).thenReturn(LayoutInflater.from(mContext))
 
         whenever(mockUserTracker.userId).thenReturn(context.userId)
