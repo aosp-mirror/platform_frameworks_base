@@ -119,6 +119,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha: StateFlow<Float> = _keyguardAlpha
 
+    override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
+
     override val lastRootViewTapPosition: MutableStateFlow<Point?> = MutableStateFlow(null)
 
     override val ambientIndicationVisible: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -257,6 +259,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
+    }
+
+    override fun setPanelAlpha(alpha: Float) {
+        panelAlpha.value = alpha
     }
 
     fun setIsEncryptedOrLockdown(value: Boolean) {

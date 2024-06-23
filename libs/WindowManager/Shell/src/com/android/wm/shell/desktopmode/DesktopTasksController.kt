@@ -40,7 +40,6 @@ import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
-import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.RemoteTransition
 import android.window.TransitionInfo
@@ -76,6 +75,7 @@ import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.shared.DesktopModeStatus
 import com.android.wm.shell.shared.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
 import com.android.wm.shell.shared.DesktopModeStatus.useDesktopOverrideDensity
+import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -442,11 +442,20 @@ class DesktopTasksController(
      * active task.
      *
      * @param wct transaction to modify if the last active task is closed
+     * @param displayId display id of the window that's being closed
      * @param taskId task id of the window that's being closed
      */
-    fun onDesktopWindowClose(wct: WindowContainerTransaction, taskId: Int) {
-        if (desktopModeTaskRepository.isOnlyActiveTask(taskId)) {
+    fun onDesktopWindowClose(wct: WindowContainerTransaction, displayId: Int, taskId: Int) {
+        if (desktopModeTaskRepository.isOnlyVisibleNonClosingTask(taskId)) {
             removeWallpaperActivity(wct)
+        }
+        if (!desktopModeTaskRepository.addClosingTask(displayId, taskId)) {
+            // Could happen if the task hasn't been removed from closing list after it disappeared
+            KtProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopTasksController: the task with taskId=%d is already closing!",
+                taskId
+            )
         }
     }
 
@@ -870,8 +879,8 @@ class DesktopTasksController(
                     reason = "recents animation is running"
                     false
                 }
-                // Handle back navigation for the last window if wallpaper available
-                shouldRemoveWallpaper(request) -> true
+                // Handle task closing for the last window if wallpaper is available
+                shouldHandleTaskClosing(request) -> true
                 // Only handle open or to front transitions
                 request.type != TRANSIT_OPEN && request.type != TRANSIT_TO_FRONT -> {
                     reason = "transition type not handled (${request.type})"
@@ -909,7 +918,8 @@ class DesktopTasksController(
         val result =
             triggerTask?.let { task ->
                 when {
-                    request.type == TRANSIT_TO_BACK -> handleBackNavigation(task)
+                    // Check if the closing task needs to be handled
+                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(task)
                     // Check if the task has a top transparent activity
                     shouldLaunchAsModal(task) -> handleIncompatibleTaskLaunch(task)
                     // Check if the task has a top systemUI activity
@@ -951,13 +961,10 @@ class DesktopTasksController(
     private fun shouldLaunchAsModal(task: TaskInfo) =
         Flags.enableDesktopWindowingModalsPolicy() && isSingleTopActivityTranslucent(task)
 
-    private fun shouldRemoveWallpaper(request: TransitionRequestInfo): Boolean {
+    private fun shouldHandleTaskClosing(request: TransitionRequestInfo): Boolean {
         return Flags.enableDesktopWindowingWallpaperActivity() &&
-            request.type == TRANSIT_TO_BACK &&
-            request.triggerTask?.let { task ->
-                desktopModeTaskRepository.isOnlyActiveTask(task.taskId)
-            }
-                ?: false
+            TransitionUtil.isClosingType(request.type) &&
+            request.triggerTask != null
     }
 
     private fun handleFreeformTaskLaunch(
@@ -1024,17 +1031,26 @@ class DesktopTasksController(
         return WindowContainerTransaction().also { wct -> addMoveToFullscreenChanges(wct, task) }
     }
 
-    /** Handle back navigation by removing wallpaper activity if it's the last active task */
-    private fun handleBackNavigation(task: RunningTaskInfo): WindowContainerTransaction? {
-        if (
-            desktopModeTaskRepository.isOnlyActiveTask(task.taskId) &&
+    /** Handle task closing by removing wallpaper activity if it's the last active task */
+    private fun handleTaskClosing(task: RunningTaskInfo): WindowContainerTransaction? {
+        val wct = if (
+            desktopModeTaskRepository.isOnlyVisibleNonClosingTask(task.taskId) &&
                 desktopModeTaskRepository.wallpaperActivityToken != null
         ) {
             // Remove wallpaper activity when the last active task is removed
-            return WindowContainerTransaction().also { wct -> removeWallpaperActivity(wct) }
+            WindowContainerTransaction().also { wct -> removeWallpaperActivity(wct) }
         } else {
-            return null
+            null
         }
+        if (!desktopModeTaskRepository.addClosingTask(task.displayId, task.taskId)) {
+            // Could happen if the task hasn't been removed from closing list after it disappeared
+            KtProtoLog.w(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopTasksController: the task with taskId=%d is already closing!",
+                task.taskId
+            )
+        }
+        return wct
     }
 
     private fun addMoveToDesktopChanges(

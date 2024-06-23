@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.pipeline.shared.ui.binder
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.content.res.ColorStateList
+import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.widget.ImageView
 import androidx.lifecycle.Lifecycle
@@ -29,6 +31,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.ui.binder.ChipChronometerBinder
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel
@@ -84,17 +87,30 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
 
                 if (Flags.statusBarScreenSharingChips()) {
                     val chipView: View = view.requireViewById(R.id.ongoing_activity_chip)
+                    val chipContext = chipView.context
                     val chipIconView: ImageView =
                         chipView.requireViewById(R.id.ongoing_activity_chip_icon)
                     val chipTimeView: ChipChronometer =
                         chipView.requireViewById(R.id.ongoing_activity_chip_time)
+                    val chipBackgroundView =
+                        chipView.requireViewById<ChipBackgroundContainer>(
+                            R.id.ongoing_activity_chip_background
+                        )
                     launch {
                         viewModel.ongoingActivityChip.collect { chipModel ->
                             when (chipModel) {
                                 is OngoingActivityChipModel.Shown -> {
+                                    // Data
                                     IconViewBinder.bind(chipModel.icon, chipIconView)
                                     ChipChronometerBinder.bind(chipModel.startTimeMs, chipTimeView)
                                     chipView.setOnClickListener(chipModel.onClickListener)
+
+                                    // Colors
+                                    val textColor = chipModel.colors.text(chipContext)
+                                    chipIconView.imageTintList = ColorStateList.valueOf(textColor)
+                                    chipTimeView.setTextColor(textColor)
+                                    (chipBackgroundView.background as GradientDrawable).color =
+                                        chipModel.colors.background(chipContext)
 
                                     listener.onOngoingActivityStatusChanged(
                                         hasOngoingActivity = true

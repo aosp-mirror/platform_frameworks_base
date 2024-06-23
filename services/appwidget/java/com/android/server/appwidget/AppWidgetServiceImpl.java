@@ -17,6 +17,7 @@
 package com.android.server.appwidget;
 
 import static android.appwidget.flags.Flags.removeAppWidgetServiceIoFromCriticalPath;
+import static android.appwidget.flags.Flags.supportResumeRestoreAfterReboot;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -166,6 +167,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.LongSupplier;
 
 class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBackupProvider,
@@ -457,7 +460,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 break;
             case Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
                 added = true;
-                // Follow through
+                // fall through
             case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
                 pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                 break;
@@ -3571,6 +3574,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             }
 
             out.endTag(null, "gs");
+
+            if (supportResumeRestoreAfterReboot()
+                    && mBackupRestoreController.requiresPersistenceLocked()) {
+                AppWidgetXmlUtil.writeBackupRestoreControllerState(
+                        out, mBackupRestoreController.getStateLocked(userId));
+            }
+
             out.endDocument();
             return true;
         } catch (IOException e) {
@@ -3717,6 +3727,32 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         LoadedWidgetState loadedWidgets = new LoadedWidgetState(widget,
                                 hostTag, providerTag);
                         outLoadedWidgets.add(loadedWidgets);
+                    } else if (supportResumeRestoreAfterReboot()
+                            && AppWidgetXmlUtil.TAG_BACKUP_RESTORE_CONTROLLER_STATE.equals(tag)) {
+                        final BackupRestoreController.State s =
+                                AppWidgetXmlUtil.readBackupRestoreControllerState(parser);
+                        if (s == null) {
+                            continue;
+                        }
+                        final Set<String> prunedAppsInFile = s.getPrunedApps();
+                        if (prunedAppsInFile != null) {
+                            final Set<String> prunedAppsInMemory = mBackupRestoreController
+                                    .mPrunedAppsPerUser.get(userId);
+                            if (prunedAppsInMemory == null) {
+                                mBackupRestoreController.mPrunedAppsPerUser.put(
+                                        userId, prunedAppsInFile);
+                            } else {
+                                prunedAppsInMemory.addAll(prunedAppsInFile);
+                            }
+                        }
+                        loadUpdateRecords(s.getUpdatesByProvider(),
+                                this::findProviderByTag,
+                                mBackupRestoreController.mUpdatesByProvider::get,
+                                mBackupRestoreController.mUpdatesByProvider::put);
+                        loadUpdateRecords(s.getUpdatesByHost(),
+                                this::findHostByTag,
+                                mBackupRestoreController.mUpdatesByHost::get,
+                                mBackupRestoreController.mUpdatesByHost::put);
                     }
                 }
             } while (type != XmlPullParser.END_DOCUMENT);
@@ -3730,6 +3766,36 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         return version;
+    }
+
+    private <T> void loadUpdateRecords(
+            @Nullable final SparseArray<
+                    List<BackupRestoreController.RestoreUpdateRecord>> updatesOnFile,
+            @NonNull final Function<Integer, T> findKeyByTagCb,
+            @NonNull final Function<T, List<
+                    BackupRestoreController.RestoreUpdateRecord>> findRecordsCb,
+            @NonNull final BiConsumer<T, List<
+                    BackupRestoreController.RestoreUpdateRecord>> newRecordsCb) {
+        if (updatesOnFile == null) {
+            return;
+        }
+        for (int i = 0; i < updatesOnFile.size(); i++) {
+            final int tag = updatesOnFile.keyAt(i);
+            final List<
+                    BackupRestoreController.RestoreUpdateRecord
+                    > recordsOnFile = updatesOnFile.get(tag);
+            if (recordsOnFile == null || recordsOnFile.isEmpty()) {
+                continue;
+            }
+            final T key = findKeyByTagCb.apply(tag);
+            final List<BackupRestoreController.RestoreUpdateRecord> recordsInMemory =
+                    findRecordsCb.apply(key);
+            if (recordsInMemory != null) {
+                recordsInMemory.addAll(recordsOnFile);
+            } else  {
+                newRecordsCb.accept(key, recordsOnFile);
+            }
+        }
     }
 
     private void performUpgradeLocked(int fromVersion) {
@@ -4674,7 +4740,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private static final class Provider {
+    static final class Provider {
 
         ProviderId id;
         AppWidgetProviderInfo info;
@@ -4931,7 +4997,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private static final class Host {
+    static final class Host {
         HostId id;
         ArrayList<Widget> widgets = new ArrayList<>();
         IAppWidgetHost callbacks;
@@ -5250,10 +5316,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     /**
      * This class encapsulates the backup and restore logic for a user group state.
      */
-    private final class BackupRestoreController {
+    final class BackupRestoreController {
         private static final String TAG = "BackupRestoreController";
 
-        private static final boolean DEBUG = true;
+        private static final boolean DEBUG = AppWidgetServiceImpl.DEBUG;
 
         // Version of backed-up widget state.
         private static final int WIDGET_STATE_VERSION = 2;
@@ -5262,15 +5328,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         // a given package.  Keep track of what we've done so far here; the list is
         // cleared at the start of every system restore pass, but preserved through
         // any install-time restore operations.
+        @GuardedBy("AppWidgetServiceImpl.this.mLock")
         private final SparseArray<Set<String>> mPrunedAppsPerUser = new SparseArray<>();
 
-        private final HashMap<Provider, ArrayList<RestoreUpdateRecord>> mUpdatesByProvider =
-                new HashMap<>();
-        private final HashMap<Host, ArrayList<RestoreUpdateRecord>> mUpdatesByHost =
-                new HashMap<>();
+        @GuardedBy("AppWidgetServiceImpl.this.mLock")
+        final Map<Provider, List<RestoreUpdateRecord>> mUpdatesByProvider =
+                new ArrayMap<>();
 
-        @GuardedBy("mLock")
+        @GuardedBy("AppWidgetServiceImpl.this.mLock")
+        private final Map<Host, List<RestoreUpdateRecord>> mUpdatesByHost =
+                new ArrayMap<>();
+
+        @GuardedBy("AppWidgetServiceImpl.this.mLock")
         private boolean mHasSystemRestoreFinished;
+
+        @GuardedBy("AppWidgetServiceImpl.this.mLock")
+        public boolean requiresPersistenceLocked() {
+            if (mHasSystemRestoreFinished) {
+                // No need to persist intermediate states if system restore is already finished.
+                return false;
+            }
+            // If either of the internal states is non-empty, then we need to persist that
+            return !(mPrunedAppsPerUser.size() == 0 && mUpdatesByProvider.isEmpty()
+                    && mUpdatesByHost.isEmpty());
+        }
 
         public List<String> getWidgetParticipants(int userId) {
             if (DEBUG) {
@@ -5436,7 +5517,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 // If there's no live entry for this provider, add an inactive one
                                 // so that widget IDs referring to them can be properly allocated
 
-                                // Backup and resotre only for the parent profile.
+                                // Backup and restore only for the parent profile.
                                 ComponentName componentName = new ComponentName(pkg, cl);
 
                                 Provider p = findProviderLocked(componentName, userId);
@@ -5579,9 +5660,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
             final UserHandle userHandle = new UserHandle(userId);
             // Build the providers' broadcasts and send them off
-            Set<Map.Entry<Provider, ArrayList<RestoreUpdateRecord>>> providerEntries
+            Set<Map.Entry<Provider, List<RestoreUpdateRecord>>> providerEntries
                     = mUpdatesByProvider.entrySet();
-            for (Map.Entry<Provider, ArrayList<RestoreUpdateRecord>> e : providerEntries) {
+            for (Map.Entry<Provider, List<RestoreUpdateRecord>> e : providerEntries) {
                 // For each provider there's a list of affected IDs
                 Provider provider = e.getKey();
                 if (provider.zombie) {
@@ -5589,7 +5670,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     // We'll be called again when the provider is installed.
                     continue;
                 }
-                ArrayList<RestoreUpdateRecord> updates = e.getValue();
+                List<RestoreUpdateRecord> updates = e.getValue();
                 final int pending = countPendingUpdates(updates);
                 if (DEBUG) {
                     Slog.i(TAG, "Provider " + provider + " pending: " + pending);
@@ -5618,12 +5699,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             }
 
             // same thing per host
-            Set<Map.Entry<Host, ArrayList<RestoreUpdateRecord>>> hostEntries
+            Set<Map.Entry<Host, List<RestoreUpdateRecord>>> hostEntries
                     = mUpdatesByHost.entrySet();
-            for (Map.Entry<Host, ArrayList<RestoreUpdateRecord>> e : hostEntries) {
+            for (Map.Entry<Host, List<RestoreUpdateRecord>> e : hostEntries) {
                 Host host = e.getKey();
                 if (host.id.uid != UNKNOWN_UID) {
-                    ArrayList<RestoreUpdateRecord> updates = e.getValue();
+                    List<RestoreUpdateRecord> updates = e.getValue();
                     final int pending = countPendingUpdates(updates);
                     if (DEBUG) {
                         Slog.i(TAG, "Host " + host + " pending: " + pending);
@@ -5714,8 +5795,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return false;
         }
 
+        @GuardedBy("mLock")
         private void stashProviderRestoreUpdateLocked(Provider provider, int oldId, int newId) {
-            ArrayList<RestoreUpdateRecord> r = mUpdatesByProvider.get(provider);
+            List<RestoreUpdateRecord> r = mUpdatesByProvider.get(provider);
             if (r == null) {
                 r = new ArrayList<>();
                 mUpdatesByProvider.put(provider, r);
@@ -5732,7 +5814,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             r.add(new RestoreUpdateRecord(oldId, newId));
         }
 
-        private boolean alreadyStashed(ArrayList<RestoreUpdateRecord> stash,
+        private boolean alreadyStashed(List<RestoreUpdateRecord> stash,
                 final int oldId, final int newId) {
             final int N = stash.size();
             for (int i = 0; i < N; i++) {
@@ -5744,8 +5826,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return false;
         }
 
+        @GuardedBy("mLock")
         private void stashHostRestoreUpdateLocked(Host host, int oldId, int newId) {
-            ArrayList<RestoreUpdateRecord> r = mUpdatesByHost.get(host);
+            List<RestoreUpdateRecord> r = mUpdatesByHost.get(host);
             if (r == null) {
                 r = new ArrayList<>();
                 mUpdatesByHost.put(host, r);
@@ -5835,7 +5918,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     || widget.provider.getUserId() == userId);
         }
 
-        private int countPendingUpdates(ArrayList<RestoreUpdateRecord> updates) {
+        private int countPendingUpdates(List<RestoreUpdateRecord> updates) {
             int pending = 0;
             final int N = updates.size();
             for (int i = 0; i < N; i++) {
@@ -5847,9 +5930,28 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return pending;
         }
 
+        @GuardedBy("mLock")
+        @NonNull
+        private State getStateLocked(final int userId) {
+            final Set<String> prunedApps = mPrunedAppsPerUser.get(userId);
+            final SparseArray<List<RestoreUpdateRecord>> updatesByProvider = new SparseArray<>();
+            final SparseArray<List<RestoreUpdateRecord>> updatesByHost = new SparseArray<>();
+            mUpdatesByProvider.forEach((p, updates) -> {
+                if (p.getUserId() == userId) {
+                    updatesByProvider.put(p.tag, new ArrayList<>(updates));
+                }
+            });
+            mUpdatesByHost.forEach((h, updates) -> {
+                if (h.getUserId() == userId) {
+                    updatesByHost.put(h.tag, new ArrayList<>(updates));
+                }
+            });
+            return new State(prunedApps, updatesByProvider, updatesByHost);
+        }
+
         // Accumulate a list of updates that affect the given provider for a final
         // coalesced notification broadcast once restore is over.
-        private class RestoreUpdateRecord {
+        static class RestoreUpdateRecord {
             public int oldId;
             public int newId;
             public boolean notified;
@@ -5858,6 +5960,45 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 oldId = theOldId;
                 newId = theNewId;
                 notified = false;
+            }
+        }
+
+        static final class State {
+            // We need to make sure to wipe the pre-restore widget state only once for
+            // a given package.  Keep track of what we've done so far here; the list is
+            // cleared at the start of every system restore pass, but preserved through
+            // any install-time restore operations.
+            @Nullable
+            private final Set<String> mPrunedApps;
+
+            @Nullable
+            private final SparseArray<List<RestoreUpdateRecord>> mUpdatesByProvider;
+
+            @Nullable
+            private final SparseArray<List<RestoreUpdateRecord>> mUpdatesByHost;
+
+            State(
+                    @Nullable final Set<String> prunedApps,
+                    @Nullable final SparseArray<List<RestoreUpdateRecord>> updatesByProvider,
+                    @Nullable final SparseArray<List<RestoreUpdateRecord>> updatesByHost) {
+                mPrunedApps = prunedApps;
+                mUpdatesByProvider = updatesByProvider;
+                mUpdatesByHost = updatesByHost;
+            }
+
+            @Nullable
+            Set<String> getPrunedApps() {
+                return mPrunedApps;
+            }
+
+            @Nullable
+            SparseArray<List<BackupRestoreController.RestoreUpdateRecord>> getUpdatesByProvider() {
+                return mUpdatesByProvider;
+            }
+
+            @Nullable
+            SparseArray<List<BackupRestoreController.RestoreUpdateRecord>> getUpdatesByHost() {
+                return mUpdatesByHost;
             }
         }
     }

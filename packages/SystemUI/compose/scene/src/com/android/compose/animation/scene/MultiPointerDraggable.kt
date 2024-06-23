@@ -138,11 +138,26 @@ internal class MultiPointerDraggableNode(
             }
         }
 
+    private var _toFloat = orientation.toFunctionOffsetToFloat()
+
+    private fun Offset.toFloat(): Float = _toFloat(this)
+
+    private fun Orientation.toFunctionOffsetToFloat(): (Offset) -> Float =
+        when (this) {
+            Orientation.Vertical -> {
+                { it.y }
+            }
+            Orientation.Horizontal -> {
+                { it.x }
+            }
+        }
+
     var orientation: Orientation = orientation
         set(value) {
             // Reset the pointer input whenever orientation changed.
             if (value != field) {
                 field = value
+                _toFloat = field.toFunctionOffsetToFloat()
                 delegate.resetPointerInputHandler()
             }
         }
@@ -365,13 +380,6 @@ internal class MultiPointerDraggableNode(
 
         // We found a consumable event in the Main pass
         return event
-    }
-
-    private fun Offset.toFloat(): Float {
-        return when (orientation) {
-            Orientation.Vertical -> y
-            Orientation.Horizontal -> x
-        }
     }
 
     /**

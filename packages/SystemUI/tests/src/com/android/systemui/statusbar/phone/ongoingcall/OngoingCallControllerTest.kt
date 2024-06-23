@@ -25,11 +25,11 @@ import android.app.Person
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.service.notification.NotificationListenerService.REASON_USER_STOPPED
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS
@@ -80,7 +80,7 @@ private const val PROC_STATE_VISIBLE = ActivityManager.PROCESS_STATE_TOP
 private const val PROC_STATE_INVISIBLE = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
 class OngoingCallControllerTest : SysuiTestCase() {

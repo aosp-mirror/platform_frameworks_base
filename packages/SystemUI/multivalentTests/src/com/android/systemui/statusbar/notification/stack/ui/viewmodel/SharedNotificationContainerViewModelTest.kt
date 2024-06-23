@@ -23,11 +23,15 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX
 import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
+import com.android.systemui.communal.data.repository.communalSceneRepository
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.BrokenWithSceneContainer
@@ -133,6 +137,9 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     val largeScreenHeaderHelper
         get() = kosmos.mockLargeScreenHeaderHelper
+
+    val communalSceneRepository
+        get() = kosmos.communalSceneRepository
 
     lateinit var underTest: SharedNotificationContainerViewModel
 
@@ -845,26 +852,24 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @Test
     @DisableSceneContainer
     fun updateBounds_fromGone_withoutTransitions() =
-            testScope.runTest {
-                // Start step is already at 1.0
-                val runningStep = TransitionStep(GONE, AOD, 1.0f, TransitionState.RUNNING)
-                val finishStep = TransitionStep(GONE, AOD, 1.0f, TransitionState.FINISHED)
+        testScope.runTest {
+            // Start step is already at 1.0
+            val runningStep = TransitionStep(GONE, AOD, 1.0f, TransitionState.RUNNING)
+            val finishStep = TransitionStep(GONE, AOD, 1.0f, TransitionState.FINISHED)
 
-                val bounds by collectLastValue(underTest.bounds)
-                val top = 123f
-                val bottom = 456f
+            val bounds by collectLastValue(underTest.bounds)
+            val top = 123f
+            val bottom = 456f
 
-                kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(runningStep)
-                runCurrent()
-                kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(finishStep)
-                runCurrent()
-                keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
-                runCurrent()
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(runningStep)
+            runCurrent()
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(finishStep)
+            runCurrent()
+            keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
+            runCurrent()
 
-                assertThat(bounds).isEqualTo(
-                        NotificationContainerBounds(top = top, bottom = bottom)
-                )
-            }
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = top, bottom = bottom))
+        }
 
     @Test
     fun alphaOnFullQsExpansion() =
@@ -1020,6 +1025,230 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             assertThat(fadeIn[0]).isEqualTo(false)
         }
 
+    @Test
+    @BrokenWithSceneContainer(330311871)
+    fun alpha_isZero_fromPrimaryBouncerToGoneWhileCommunalSceneVisible() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor()
+            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+
+            showPrimaryBouncer()
+            showCommunalScene()
+
+            // PRIMARY_BOUNCER->GONE transition is started
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.STARTED,
+                    value = 0f,
+                )
+            )
+            runCurrent()
+
+            // PRIMARY_BOUNCER->GONE transition running
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.1f,
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isEqualTo(0f)
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.9f,
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isEqualTo(0f)
+
+            hideCommunalScene()
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.FINISHED,
+                    value = 1f
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    @BrokenWithSceneContainer(330311871)
+    fun alpha_fromPrimaryBouncerToGoneWhenCommunalSceneNotVisible() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor()
+            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+
+            showPrimaryBouncer()
+            hideCommunalScene()
+
+            // PRIMARY_BOUNCER->GONE transition is started
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            runCurrent()
+
+            // PRIMARY_BOUNCER->GONE transition running
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.1f,
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isIn(Range.closedOpen(0f, 1f))
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.9f,
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isIn(Range.closedOpen(0f, 1f))
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.FINISHED,
+                    value = 1f
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    @BrokenWithSceneContainer(330311871)
+    fun alpha_isZero_fromAlternateBouncerToGoneWhileCommunalSceneVisible() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor()
+            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+
+            showAlternateBouncer()
+            showCommunalScene()
+
+            // ALTERNATE_BOUNCER->GONE transition is started
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.STARTED,
+                    value = 0f,
+                )
+            )
+            runCurrent()
+
+            // ALTERNATE_BOUNCER->GONE transition running
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.1f,
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isEqualTo(0f)
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.9f,
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isEqualTo(0f)
+
+            hideCommunalScene()
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.FINISHED,
+                    value = 1f
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    @BrokenWithSceneContainer(330311871)
+    fun alpha_fromAlternateBouncerToGoneWhenCommunalSceneNotVisible() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor()
+            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+
+            showAlternateBouncer()
+            hideCommunalScene()
+
+            // ALTERNATE_BOUNCER->GONE transition is started
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            runCurrent()
+
+            // ALTERNATE_BOUNCER->GONE transition running
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.1f,
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isIn(Range.closedOpen(0f, 1f))
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.9f,
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isIn(Range.closedOpen(0f, 1f))
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = GONE,
+                    transitionState = TransitionState.FINISHED,
+                    value = 1f
+                )
+            )
+            runCurrent()
+            assertThat(alpha).isEqualTo(0f)
+        }
+
     private suspend fun TestScope.showLockscreen() {
         shadeTestUtil.setQsExpansion(0f)
         shadeTestUtil.setLockscreenShadeExpansion(0f)
@@ -1070,5 +1299,53 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             to = KeyguardState.LOCKSCREEN,
             testScope,
         )
+    }
+
+    private suspend fun TestScope.showPrimaryBouncer() {
+        shadeTestUtil.setQsExpansion(0f)
+        shadeTestUtil.setLockscreenShadeExpansion(0f)
+        runCurrent()
+        keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+        runCurrent()
+        kosmos.keyguardBouncerRepository.setPrimaryShow(true)
+        runCurrent()
+        keyguardTransitionRepository.sendTransitionSteps(
+            from = KeyguardState.GLANCEABLE_HUB,
+            to = KeyguardState.PRIMARY_BOUNCER,
+            testScope,
+        )
+    }
+
+    private suspend fun TestScope.showAlternateBouncer() {
+        shadeTestUtil.setQsExpansion(0f)
+        shadeTestUtil.setLockscreenShadeExpansion(0f)
+        runCurrent()
+        keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+        runCurrent()
+        kosmos.keyguardBouncerRepository.setPrimaryShow(false)
+        runCurrent()
+        keyguardTransitionRepository.sendTransitionSteps(
+            from = KeyguardState.GLANCEABLE_HUB,
+            to = KeyguardState.ALTERNATE_BOUNCER,
+            testScope,
+        )
+    }
+
+    private fun TestScope.showCommunalScene() {
+        val transitionState =
+            MutableStateFlow<ObservableTransitionState>(
+                ObservableTransitionState.Idle(CommunalScenes.Communal)
+            )
+        communalSceneRepository.setTransitionState(transitionState)
+        runCurrent()
+    }
+
+    private fun TestScope.hideCommunalScene() {
+        val transitionState =
+            MutableStateFlow<ObservableTransitionState>(
+                ObservableTransitionState.Idle(CommunalScenes.Blank)
+            )
+        communalSceneRepository.setTransitionState(transitionState)
+        runCurrent()
     }
 }

@@ -22,7 +22,7 @@ val Kosmos.partitionedGridViewModel by
     Kosmos.Fixture {
         PartitionedGridViewModel(
             iconTilesViewModel,
-            infiniteGridSizeViewModel,
+            fixedColumnsSizeViewModel,
             iconLabelVisibilityViewModel,
         )
     }

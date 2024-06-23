@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.isFloating;
 import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -2241,15 +2242,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     static class ConfigOverrideHint {
         @Nullable DisplayInfo mTmpOverrideDisplayInfo;
         @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
-        @Nullable Rect mTmpParentAppBoundsOverride;
+        @Nullable Rect mParentAppBoundsOverride;
         int mTmpOverrideConfigOrientation;
         boolean mUseOverrideInsetsForConfig;
 
         void resolveTmpOverrides(DisplayContent dc, Configuration parentConfig,
                 boolean isFixedRotationTransforming) {
-            mTmpParentAppBoundsOverride = new Rect(parentConfig.windowConfiguration.getAppBounds());
+            mParentAppBoundsOverride = new Rect(parentConfig.windowConfiguration.getAppBounds());
+            mTmpOverrideConfigOrientation = parentConfig.orientation;
             final Insets insets;
-            if (mUseOverrideInsetsForConfig && dc != null) {
+            if (mUseOverrideInsetsForConfig && dc != null
+                    && !isFloating(parentConfig.windowConfiguration.getWindowingMode())) {
                 // Insets are decoupled from configuration by default from V+, use legacy
                 // compatibility behaviour for apps targeting SDK earlier than 35
                 // (see applySizeOverrideIfNeeded).
@@ -2269,13 +2272,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             } else {
                 insets = Insets.NONE;
             }
-            mTmpParentAppBoundsOverride.inset(insets);
+            mParentAppBoundsOverride.inset(insets);
         }
 
         void resetTmpOverrides() {
             mTmpOverrideDisplayInfo = null;
             mTmpCompatInsets = null;
-            mTmpParentAppBoundsOverride = null;
             mTmpOverrideConfigOrientation = ORIENTATION_UNDEFINED;
         }
     }
@@ -2364,7 +2366,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final Rect containingAppBounds;
                 if (insideParentBounds) {
                     containingAppBounds = useOverrideInsetsForConfig
-                            ? overrideHint.mTmpParentAppBoundsOverride
+                            ? overrideHint.mParentAppBoundsOverride
                             : parentConfig.windowConfiguration.getAppBounds();
                 } else {
                     // Restrict appBounds to display non-decor rather than parent because the

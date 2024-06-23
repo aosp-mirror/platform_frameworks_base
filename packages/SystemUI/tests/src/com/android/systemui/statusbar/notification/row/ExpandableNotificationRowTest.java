@@ -328,7 +328,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(NotificationContentAlphaOptimization.FLAG_NAME)
-    public void setHideSensitive_changeContent_shouldNotDisturbAnimation() throws Exception {
+    public void setHideSensitive_changeContent_shouldResetAlpha() throws Exception {
 
         // Given: A sensitive row that has public version but is not hiding sensitive,
         // and is during an animation that sets its alpha value to be 0.5f
@@ -351,12 +351,12 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         // Then: The alpha value of private layout should be reset to 1, private layout be
         // INVISIBLE;
-        // The alpha value of public layout should be 0.5 to preserve the animation state, public
-        // layout should be VISIBLE
+        // The alpha value of public layout should be reset to 1 to avoid remaining transparent,
+        // public layout should be VISIBLE
         assertEquals(View.INVISIBLE, row.getPrivateLayout().getVisibility());
         assertEquals(1f, row.getPrivateLayout().getAlpha(), 0);
         assertEquals(View.VISIBLE, row.getPublicLayout().getVisibility());
-        assertEquals(0.5f, row.getPublicLayout().getAlpha(), 0);
+        assertEquals(1f, row.getPublicLayout().getAlpha(), 0);
     }
 
     @Test
@@ -790,6 +790,73 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         // THEN
         assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void isExpanded_onKeyguard_allowOnKeyguardExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(true);
+        row.setUserExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded(/*allowOnKeyguard =*/ true)).isTrue();
+    }
+    @Test
+    public void isExpanded_onKeyguard_notAllowOnKeyguardNotExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(true);
+        row.setUserExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded(/*allowOnKeyguard =*/ false)).isFalse();
+    }
+
+    @Test
+    public void isExpanded_systemExpanded_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void isExpanded_systemChildExpanded_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemChildExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void isExpanded_userExpanded_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setUserExpanded(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void isExpanded_userExpandedFalse_notExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setOnKeyguard(false);
+        row.setSystemExpanded(true);
+        row.setUserExpanded(false);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
     }
 
     @Test

@@ -88,6 +88,9 @@ final class UserDataRepository {
         @NonNull
         final InputMethodBindingController mBindingController;
 
+        @NonNull
+        final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController;
+
         /**
          * Intended to be instantiated only from this file.
          */
@@ -95,6 +98,8 @@ final class UserDataRepository {
                 @NonNull InputMethodBindingController bindingController) {
             mUserId = userId;
             mBindingController = bindingController;
+            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController(
+                    InputMethodSettings.createEmptyMap(userId));
         }
 
         @Override

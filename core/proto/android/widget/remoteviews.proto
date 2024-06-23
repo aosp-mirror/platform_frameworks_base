@@ -1,0 +1,60 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless optional by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+option java_multiple_files = true;
+
+package android.widget;
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+/**
+ * An android.widget.RemoteViews object. This is used by RemoteViews.createPreviewFromProto
+ * and RemoteViews.writePreviewToProto.
+ *
+ * Any addition of fields here will require an update to the parsing code in RemoteViews.java.
+ * Otherwise the field will be ignored when parsing (with a logged warning).
+ *
+ * Do not change the tag number or type of any fields in order to maintain compatibility with
+ * previous versions. If a field is deleted, use `reserved` to mark its tag number.
+ */
+message RemoteViewsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional int32 mode = 1;
+    optional string package_name = 2;
+    optional string layout_id = 3;
+    optional string light_background_layout_id = 4;
+    optional string view_id = 5;
+    optional SizeFProto ideal_size = 6;
+    optional int32 apply_flags = 7;
+    optional int64 provider_instance_id = 8;
+    // RemoteViews for different sizes (created with RemoteViews(Map<SizeF, RemoteViews)
+    // constructor).
+    repeated RemoteViewsProto sized_remoteviews = 9;
+    // RemoteViews for portrait/landscape (created with RemoteViews(RemoteViews, RemoteViews)i
+    // constructor).
+    optional RemoteViewsProto portrait_remoteviews = 10;
+    optional RemoteViewsProto landscape_remoteviews = 11;
+    optional bool is_root = 12;
+    optional bool has_draw_instructions = 13;
+}
+
+
+message SizeFProto {
+    optional float width = 1;
+    optional float height = 2;
+}

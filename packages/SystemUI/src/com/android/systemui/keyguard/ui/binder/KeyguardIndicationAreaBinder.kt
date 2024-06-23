@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewMode
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
+import com.android.systemui.util.kotlin.DisposableHandles
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,7 +54,15 @@ object KeyguardIndicationAreaBinder {
         viewModel: KeyguardIndicationAreaViewModel,
         indicationController: KeyguardIndicationController,
     ): DisposableHandle {
-        indicationController.setIndicationArea(view)
+        val disposables = DisposableHandles()
+
+        // As the indication controller is a singleton, reset the view back to the previous view
+        // once the current view is disposed.
+        val previous = indicationController.indicationArea
+        indicationController.indicationArea = view
+        disposables += DisposableHandle {
+            previous?.let { indicationController.indicationArea = it }
+        }
 
         val indicationText: TextView = view.requireViewById(R.id.keyguard_indication_text)
         val indicationTextBottom: TextView =
@@ -63,7 +72,7 @@ object KeyguardIndicationAreaBinder {
         view.clipToPadding = false
 
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
-        val disposableHandle =
+        disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch("$TAG#viewModel.alpha") {
@@ -126,7 +135,7 @@ object KeyguardIndicationAreaBinder {
                     }
                 }
             }
-        return disposableHandle
+        return disposables
     }
 
     private fun loadFromResources(view: View): ConfigurationBasedDimensions {

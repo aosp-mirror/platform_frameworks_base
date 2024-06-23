@@ -32,13 +32,6 @@ import java.util.function.Consumer
 class ScrollViewFields {
     /** Used to produce the clipping path */
     var scrimClippingShape: ShadeScrimShape? = null
-    /** Y coordinate in view pixels of the top of the notification stack */
-    var stackTop: Float = 0f
-    /**
-     * Y coordinate in view pixels above which the bottom of the notification stack / shelf / footer
-     * must be.
-     */
-    var stackBottom: Float = 0f
     /** Y coordinate in view pixels of the top of the HUN */
     var headsUpTop: Float = 0f
     /** Whether the notifications are scrolled all the way to the top (i.e. when freshly opened) */
@@ -70,17 +63,17 @@ class ScrollViewFields {
     /** send the [syntheticScroll] to the [syntheticScrollConsumer], if present. */
     fun sendSyntheticScroll(syntheticScroll: Float) =
         syntheticScrollConsumer?.accept(syntheticScroll)
+
     /** send [isCurrentGestureOverscroll] to the [currentGestureOverscrollConsumer], if present. */
     fun sendCurrentGestureOverscroll(isCurrentGestureOverscroll: Boolean) =
         currentGestureOverscrollConsumer?.accept(isCurrentGestureOverscroll)
+
     /** send the [headsUpHeight] to the [headsUpHeightConsumer], if present. */
     fun sendHeadsUpHeight(headsUpHeight: Float) = headsUpHeightConsumer?.accept(headsUpHeight)
 
     fun dump(pw: IndentingPrintWriter) {
         pw.printSection("StackViewStates") {
             pw.println("scrimClippingShape", scrimClippingShape)
-            pw.println("stackTop", stackTop)
-            pw.println("stackBottom", stackBottom)
             pw.println("headsUpTop", headsUpTop)
             pw.println("isScrolledToTop", isScrolledToTop)
         }

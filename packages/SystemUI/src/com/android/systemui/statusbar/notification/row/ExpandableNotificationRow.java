@@ -2011,6 +2011,21 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         };
     }
 
+    /**
+     * Retrieves an OnClickListener for the close button of a notification, which when invoked,
+     * dismisses the notificationc represented by the given ExpandableNotificationRow.
+     *
+     * @param row The ExpandableNotificationRow representing the notification to be dismissed.
+     * @return An OnClickListener instance that dismisses the notification(s) when invoked.
+     */
+    public View.OnClickListener getCloseButtonOnClickListener(ExpandableNotificationRow row) {
+        return v -> {
+            if (row != null) {
+                row.performDismiss(false);
+            }
+        };
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Trace.beginSection(appendTraceStyleTag("ExpNotRow#onMeasure"));
@@ -2935,24 +2950,21 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mShowingPublicInitialized && mShowingPublic == oldShowingPublic) {
             return;
         }
-        float oldAlpha = getContentView().getAlpha();
 
         if (!animated) {
-            mPublicLayout.animate().cancel();
-            mPrivateLayout.animate().cancel();
-            if (mChildrenContainer != null) {
-                mChildrenContainer.animate().cancel();
+            if (!NotificationContentAlphaOptimization.isEnabled()
+                    || mShowingPublic != oldShowingPublic) {
+                // Don't reset the alpha or cancel the animation if the showing layout doesn't
+                // change
+                mPublicLayout.animate().cancel();
+                mPrivateLayout.animate().cancel();
+                if (mChildrenContainer != null) {
+                    mChildrenContainer.animate().cancel();
+                }
+                resetAllContentAlphas();
             }
-            resetAllContentAlphas();
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
             updateChildrenVisibility();
-            if (NotificationContentAlphaOptimization.isEnabled()) {
-                // We want to set the old alpha to the now-showing layout to avoid breaking an
-                // on-going animation
-                if (oldAlpha != 1f) {
-                    setAlphaAndLayerType(mShowingPublic ? mPublicLayout : mPrivateLayout, oldAlpha);
-                }
-            }
         } else {
             animateShowingPublic(delay, duration, mShowingPublic);
         }

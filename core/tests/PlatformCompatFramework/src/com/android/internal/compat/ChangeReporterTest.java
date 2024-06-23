@@ -37,15 +37,20 @@ public class ChangeReporterTest {
         long myChangeId = 500L, otherChangeId = 600L;
         int myState = ChangeReporter.STATE_ENABLED, otherState = ChangeReporter.STATE_DISABLED;
 
-        assertTrue(reporter.shouldWriteToStatsLog(myUid, myChangeId, myState));
+        assertTrue(reporter.shouldWriteToStatsLog(false,
+                reporter.isAlreadyReported(myUid, myChangeId, myState)));
         reporter.reportChange(myUid, myChangeId, myState);
 
         // Same report will not be logged again.
-        assertFalse(reporter.shouldWriteToStatsLog(myUid, myChangeId, myState));
+        assertFalse(reporter.shouldWriteToStatsLog(false,
+                reporter.isAlreadyReported(myUid, myChangeId, myState)));
         // Other reports will be logged.
-        assertTrue(reporter.shouldWriteToStatsLog(otherUid, myChangeId, myState));
-        assertTrue(reporter.shouldWriteToStatsLog(myUid, otherChangeId, myState));
-        assertTrue(reporter.shouldWriteToStatsLog(myUid, myChangeId, otherState));
+        assertTrue(reporter.shouldWriteToStatsLog(false,
+                reporter.isAlreadyReported(otherUid, myChangeId, myState)));
+        assertTrue(reporter.shouldWriteToStatsLog(false,
+                reporter.isAlreadyReported(myUid, otherChangeId, myState)));
+        assertTrue(reporter.shouldWriteToStatsLog(false,
+                reporter.isAlreadyReported(myUid, myChangeId, otherState)));
     }
 
     @Test
@@ -55,15 +60,18 @@ public class ChangeReporterTest {
         long myChangeId = 500L;
         int myState = ChangeReporter.STATE_ENABLED;
 
-        assertTrue(reporter.shouldWriteToStatsLog(myUid, myChangeId, myState));
+        assertTrue(reporter.shouldWriteToStatsLog(false,
+                reporter.isAlreadyReported(myUid, myChangeId, myState)));
         reporter.reportChange(myUid, myChangeId, myState);
 
         // Same report will not be logged again.
-        assertFalse(reporter.shouldWriteToStatsLog(myUid, myChangeId, myState));
+        assertFalse(reporter.shouldWriteToStatsLog(false,
+                reporter.isAlreadyReported(myUid, myChangeId, myState)));
         reporter.resetReportedChanges(myUid);
 
         // Same report will be logged again after reset.
-        assertTrue(reporter.shouldWriteToStatsLog(myUid, myChangeId, myState));
+        assertTrue(reporter.shouldWriteToStatsLog(false,
+                reporter.isAlreadyReported(myUid, myChangeId, myState)));
     }
 
     @Test
@@ -195,5 +203,22 @@ public class ChangeReporterTest {
         // Report will be logged if the change is disabled and not the latest sdk but the flag is
         // off.
         assertTrue(reporter.shouldWriteToDebug(myUid, myChangeId, myDisabledState, false));
+    }
+
+    @Test
+    public void testDontLogSystemApps() {
+        // Verify we don't log an app if we know it's a system app when source is system server.
+        ChangeReporter systemServerReporter =
+                new ChangeReporter(ChangeReporter.SOURCE_SYSTEM_SERVER);
+
+        assertFalse(systemServerReporter.shouldWriteToStatsLog(true, false));
+        assertFalse(systemServerReporter.shouldWriteToStatsLog(true, true));
+
+        // Verify we don't log an app if we know it's a system app when source is unknown.
+        ChangeReporter unknownReporter =
+                new ChangeReporter(ChangeReporter.SOURCE_UNKNOWN_SOURCE);
+
+        assertFalse(unknownReporter.shouldWriteToStatsLog(true, false));
+        assertFalse(unknownReporter.shouldWriteToStatsLog(true, true));
     }
 }

@@ -19,8 +19,8 @@ package com.android.systemui.unfold.progress
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.FakeUnfoldTransitionProvider
@@ -29,7 +29,7 @@ import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
 class MainThreadUnfoldTransitionProgressProviderTest : SysuiTestCase() {

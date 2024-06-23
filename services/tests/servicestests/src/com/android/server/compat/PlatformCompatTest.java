@@ -29,6 +29,7 @@ import static org.testng.Assert.assertThrows;
 
 import android.compat.Compatibility.ChangeConfig;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Build;
@@ -36,6 +37,7 @@ import android.os.Build;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.compat.AndroidBuildClassifier;
+import com.android.internal.compat.ChangeReporter;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.server.LocalServices;
@@ -65,6 +67,8 @@ public class PlatformCompatTest {
     CompatConfig mCompatConfig;
     @Mock
     private AndroidBuildClassifier mBuildClassifier;
+    @Mock
+    private ChangeReporter mChangeReporter;
 
     @Before
     public void setUp() throws Exception {
@@ -78,7 +82,8 @@ public class PlatformCompatTest {
         when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
             .thenThrow(new PackageManager.NameNotFoundException());
         mCompatConfig = new CompatConfig(mBuildClassifier, mContext);
-        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig, mBuildClassifier);
+        mPlatformCompat =
+                new PlatformCompat(mContext, mCompatConfig, mBuildClassifier, mChangeReporter);
         // Assume userdebug/eng non-final build
         mCompatConfig.forceNonDebuggableFinalForTest(false);
         when(mBuildClassifier.isDebuggableBuild()).thenReturn(true);
@@ -100,7 +105,8 @@ public class PlatformCompatTest {
                 .addLoggingOnlyChangeWithId(7L)
                 .addDisabledOverridableChangeWithId(8L)
                 .build();
-        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig, mBuildClassifier);
+        mPlatformCompat =
+                new PlatformCompat(mContext, mCompatConfig, mBuildClassifier, mChangeReporter);
         assertThat(mPlatformCompat.listAllChanges()).asList().containsExactly(
                 new CompatibilityChangeInfo(1L, "", -1, -1, false, false, "", false),
                 new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, "", false),
@@ -128,7 +134,8 @@ public class PlatformCompatTest {
                 .addLoggingOnlyChangeWithId(7L)
                 .addEnableSinceSdkChangeWithId(31, 8L)
                 .build();
-        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig, mBuildClassifier);
+        mPlatformCompat =
+                new PlatformCompat(mContext, mCompatConfig, mBuildClassifier, mChangeReporter);
         assertThat(mPlatformCompat.listUIChanges()).asList().containsExactly(
                 new CompatibilityChangeInfo(1L, "", -1, -1, false, false, "", false),
                 new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, "", false),
@@ -146,7 +153,8 @@ public class PlatformCompatTest {
                 .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.O, 3L)
                 .build();
         mCompatConfig.forceNonDebuggableFinalForTest(true);
-        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig, mBuildClassifier);
+        mPlatformCompat =
+                new PlatformCompat(mContext, mCompatConfig, mBuildClassifier, mChangeReporter);
 
         // Before adding overrides.
         assertThat(mPlatformCompat.isChangeEnabledByPackageName(1, PACKAGE_NAME, 0)).isTrue();
@@ -368,5 +376,69 @@ public class PlatformCompatTest {
         mPlatformCompat.clearOverride(1, PACKAGE_NAME);
         // Listener not called when a non existing override is removed.
         verify(mListener1, never()).onCompatChange(PACKAGE_NAME);
+    }
+
+    @Test
+    public void testReportChange() throws Exception {
+        ApplicationInfo appInfo = ApplicationInfoBuilder.create().withUid(123).build();
+        mPlatformCompat.reportChange(1L, appInfo);
+        verify(mChangeReporter).reportChange(123, 1L, ChangeReporter.STATE_LOGGED, false, true);
+
+        ApplicationInfo systemAppInfo =
+                ApplicationInfoBuilder.create().withUid(123).systemApp().build();
+        mPlatformCompat.reportChange(1L, systemAppInfo);
+        verify(mChangeReporter).reportChange(123, 1L, ChangeReporter.STATE_LOGGED, true, true);
+    }
+
+    @Test
+    public void testReportChangeByPackageName() throws Exception {
+        when(mPackageManagerInternal.getApplicationInfo(
+                        eq(PACKAGE_NAME), eq(0L), anyInt(), anyInt()))
+                .thenReturn(
+                        ApplicationInfoBuilder.create()
+                                .withPackageName(PACKAGE_NAME)
+                                .withUid(123)
+                                .build());
+
+        mPlatformCompat.reportChangeByPackageName(1L, PACKAGE_NAME, 123);
+        verify(mChangeReporter).reportChange(123, 1L, ChangeReporter.STATE_LOGGED, false, true);
+
+        String SYSTEM_PACKAGE_NAME = "my.system.package";
+
+        when(mPackageManagerInternal.getApplicationInfo(
+                        eq(SYSTEM_PACKAGE_NAME), eq(0L), anyInt(), anyInt()))
+                .thenReturn(
+                        ApplicationInfoBuilder.create()
+                                .withPackageName(SYSTEM_PACKAGE_NAME)
+                                .withUid(123)
+                                .systemApp()
+                                .build());
+
+        mPlatformCompat.reportChangeByPackageName(1L, SYSTEM_PACKAGE_NAME, 123);
+        verify(mChangeReporter).reportChange(123, 1L, ChangeReporter.STATE_LOGGED, true, true);
+    }
+
+    @Test
+    public void testIsChangeEnabled() throws Exception {
+        mCompatConfig =
+                CompatConfigBuilder.create(mBuildClassifier, mContext)
+                        .addEnabledChangeWithId(1L)
+                        .addDisabledChangeWithId(2L)
+                        .addEnabledChangeWithId(3L)
+                        .build();
+        mCompatConfig.forceNonDebuggableFinalForTest(true);
+        mPlatformCompat =
+                new PlatformCompat(mContext, mCompatConfig, mBuildClassifier, mChangeReporter);
+
+        ApplicationInfo appInfo = ApplicationInfoBuilder.create().withUid(123).build();
+        assertThat(mPlatformCompat.isChangeEnabled(1L, appInfo)).isTrue();
+        verify(mChangeReporter).reportChange(123, 1L, ChangeReporter.STATE_ENABLED, false, false);
+        assertThat(mPlatformCompat.isChangeEnabled(2L, appInfo)).isFalse();
+        verify(mChangeReporter).reportChange(123, 2L, ChangeReporter.STATE_DISABLED, false, false);
+
+        ApplicationInfo systemAppInfo =
+                ApplicationInfoBuilder.create().withUid(123).systemApp().build();
+        assertThat(mPlatformCompat.isChangeEnabled(3L, systemAppInfo)).isTrue();
+        verify(mChangeReporter).reportChange(123, 3L, ChangeReporter.STATE_ENABLED, true, false);
     }
 }

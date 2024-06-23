@@ -179,6 +179,9 @@ public class NavigationBarTest extends SysuiTestCase {
     private SysUiState mMockSysUiState;
     @Mock
     private Handler mHandler;
+
+    @Mock
+    private Handler mBgHandler;
     @Mock
     private UserTracker mUserTracker;
     @Mock
@@ -277,7 +280,8 @@ public class NavigationBarTest extends SysuiTestCase {
                     mEdgeBackGestureHandlerFactory, mock(IWindowManager.class),
                     mock(UserTracker.class), mock(DisplayTracker.class),
                     mNotificationShadeWindowController, mock(ConfigurationController.class),
-                    mock(DumpManager.class), mock(CommandQueue.class), mSynchronousExecutor));
+                    mock(DumpManager.class), mock(CommandQueue.class), mSynchronousExecutor,
+                    mBgHandler));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
         });

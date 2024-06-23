@@ -19,7 +19,6 @@ package com.android.server.inputmethod;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
@@ -34,24 +33,13 @@ final class HardwareKeyboardShortcutController {
     @GuardedBy("ImfLock.class")
     private final ArrayList<InputMethodSubtypeHandle> mSubtypeHandles = new ArrayList<>();
 
-    @UserIdInt
-    private final int mUserId;
-
-    @AnyThread
-    @UserIdInt
-    int getUserId() {
-        return mUserId;
-    }
-
-    HardwareKeyboardShortcutController(@NonNull InputMethodMap methodMap, @UserIdInt int userId) {
-        mUserId = userId;
-        reset(methodMap);
+    HardwareKeyboardShortcutController(@NonNull InputMethodSettings settings) {
+        update(settings);
     }
 
     @GuardedBy("ImfLock.class")
-    void reset(@NonNull InputMethodMap methodMap) {
+    void update(@NonNull InputMethodSettings settings) {
         mSubtypeHandles.clear();
-        final InputMethodSettings settings = InputMethodSettings.create(methodMap, mUserId);
         final List<InputMethodInfo> inputMethods = settings.getEnabledInputMethodList();
         for (int i = 0; i < inputMethods.size(); ++i) {
             final InputMethodInfo imi = inputMethods.get(i);

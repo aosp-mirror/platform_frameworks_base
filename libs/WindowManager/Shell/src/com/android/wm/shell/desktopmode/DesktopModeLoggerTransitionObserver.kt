@@ -282,17 +282,23 @@ class DesktopModeLoggerTransitionObserver(
         visibleFreeformTaskInfos.putAll(postTransitionVisibleFreeformTasks)
     }
 
-    // TODO(b/326231724) - Add logging around taskInfoChanges Updates
     /** Compare the old and new state of taskInfos and identify and log the changes */
     private fun identifyAndLogTaskUpdates(
         sessionId: Int,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>
     ) {
-        // find new tasks that were added
         postTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
-            if (!preTransitionVisibleFreeformTasks.containsKey(taskId)) {
-                desktopModeEventLogger.logTaskAdded(sessionId, buildTaskUpdateForTask(taskInfo))
+            val currentTaskUpdate = buildTaskUpdateForTask(taskInfo)
+            val previousTaskInfo = preTransitionVisibleFreeformTasks[taskId]
+            when {
+                // new tasks added
+                previousTaskInfo == null ->
+                    desktopModeEventLogger.logTaskAdded(sessionId, currentTaskUpdate)
+                // old tasks that were resized or repositioned
+                // TODO(b/347935387): Log changes only once they are stable.
+                buildTaskUpdateForTask(previousTaskInfo) != currentTaskUpdate ->
+                    desktopModeEventLogger.logTaskInfoChanged(sessionId, currentTaskUpdate)
             }
         }
 
@@ -304,13 +310,17 @@ class DesktopModeLoggerTransitionObserver(
         }
     }
 
-    // TODO(b/326231724: figure out how to get taskWidth and taskHeight from TaskInfo
     private fun buildTaskUpdateForTask(taskInfo: TaskInfo): TaskUpdate {
-        val taskUpdate = TaskUpdate(taskInfo.taskId, taskInfo.userId)
-        // add task x, y if available
-        taskInfo.positionInParent?.let { taskUpdate.copy(taskX = it.x, taskY = it.y) }
-
-        return taskUpdate
+        val screenBounds = taskInfo.configuration.windowConfiguration.bounds
+        val positionInParent = taskInfo.positionInParent
+        return TaskUpdate(
+            instanceId = taskInfo.taskId,
+            uid = taskInfo.userId,
+            taskHeight = screenBounds.height(),
+            taskWidth = screenBounds.width(),
+            taskX = positionInParent.x,
+            taskY = positionInParent.y,
+        )
     }
 
     /** Get [EnterReason] for this session enter */

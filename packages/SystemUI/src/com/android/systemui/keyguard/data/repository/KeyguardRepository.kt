@@ -78,6 +78,8 @@ interface KeyguardRepository {
 
     val keyguardAlpha: StateFlow<Float>
 
+    val panelAlpha: MutableStateFlow<Float>
+
     /**
      * Observable for whether the keyguard is showing.
      *
@@ -250,6 +252,9 @@ interface KeyguardRepository {
     /** Sets the current amount of alpha that should be used for rendering the keyguard. */
     fun setKeyguardAlpha(alpha: Float)
 
+    /** Temporary shim for fading out content when the brightness slider is used */
+    fun setPanelAlpha(alpha: Float)
+
     /** Whether the device is actively dreaming */
     fun setDreaming(isDreaming: Boolean)
 
@@ -337,6 +342,8 @@ constructor(
 
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha = _keyguardAlpha.asStateFlow()
+
+    override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
 
     private val _clockShouldBeCentered = MutableStateFlow(true)
     override val clockShouldBeCentered: Flow<Boolean> = _clockShouldBeCentered.asStateFlow()
@@ -657,6 +664,10 @@ constructor(
 
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
+    }
+
+    override fun setPanelAlpha(alpha: Float) {
+        panelAlpha.value = alpha
     }
 
     override fun setDreaming(isDreaming: Boolean) {

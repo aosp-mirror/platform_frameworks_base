@@ -932,7 +932,8 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public @Nullable Object getSystemService(String name) {
+    // TODO(b/347269120): Re-add @Nullable
+    public Object getSystemService(String name) {
         return mBase.getSystemService(name);
     }
 

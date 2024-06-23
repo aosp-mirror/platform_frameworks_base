@@ -39,6 +39,7 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
 
     private val tag = "AvalancheController"
     private val debug = Compile.IS_DEBUG && Log.isLoggable(tag, Log.DEBUG)
+    var enableAtRuntime = true
 
     // HUN showing right now, in the floating state where full shade is hidden, on launcher or AOD
     @VisibleForTesting var headsUpEntryShowing: HeadsUpEntry? = null
@@ -81,13 +82,17 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
         dumpManager.registerNormalDumpable(tag, /* module */ this)
     }
 
+    fun isEnabled() : Boolean {
+        return NotificationThrottleHun.isEnabled && enableAtRuntime
+    }
+
     fun getShowingHunKey(): String {
         return getKey(headsUpEntryShowing)
     }
 
     /** Run or delay Runnable for given HeadsUpEntry */
     fun update(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             runnable.run()
             return
         }
@@ -143,7 +148,7 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
      * all Runnables associated with that entry.
      */
     fun delete(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             runnable.run()
             return
         }
@@ -184,7 +189,7 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
      *    BaseHeadsUpManager.HeadsUpEntry.calculateFinishTime to shorten display duration.
      */
     fun getDurationMs(entry: HeadsUpEntry, autoDismissMs: Int): Int {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             // Use default duration, like we did before AvalancheController existed
             return autoDismissMs
         }
@@ -233,7 +238,7 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
 
     /** Return true if entry is waiting to show. */
     fun isWaiting(key: String): Boolean {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             return false
         }
         for (entry in nextMap.keys) {
@@ -246,7 +251,7 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
 
     /** Return list of keys for huns waiting */
     fun getWaitingKeys(): MutableList<String> {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             return mutableListOf()
         }
         val keyList = mutableListOf<String>()
@@ -257,7 +262,7 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
     }
 
     fun getWaitingEntry(key: String): HeadsUpEntry? {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             return null
         }
         for (headsUpEntry in nextMap.keys) {
@@ -269,7 +274,7 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
     }
 
     fun getWaitingEntryList(): List<HeadsUpEntry> {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             return mutableListOf()
         }
         return nextMap.keys.toList()
@@ -310,11 +315,7 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
 
         // Remove runnable labels for dropped huns
         val listToDrop = nextList.subList(1, nextList.size)
-
-        // Log dropped HUNs
-        for (e in listToDrop) {
-            uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_DROPPED)
-        }
+        logDroppedHuns(listToDrop.size)
 
         if (debug) {
             // Clear runnable labels
@@ -329,6 +330,12 @@ constructor(dumpManager: DumpManager, private val uiEventLogger: UiEventLogger) 
 
         clearNext()
         showNow(headsUpEntryShowing!!, headsUpEntryShowingRunnableList)
+    }
+
+    fun logDroppedHuns(numDropped: Int) {
+        for (n in 1..numDropped) {
+            uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_DROPPED)
+        }
     }
 
     fun clearNext() {
