@@ -252,7 +252,8 @@ class BackNavigationController {
                 // skip if one of participant activity is translucent
                 backType = BackNavigationInfo.TYPE_CALLBACK;
             } else if (prevActivities.size() > 0) {
-                if (!isOccluded || isAllActivitiesCanShowWhenLocked(prevActivities)) {
+                if ((!isOccluded || isAllActivitiesCanShowWhenLocked(prevActivities))
+                        && isAllActivitiesCreated(prevActivities)) {
                     // We have another Activity in the same currentTask to go to
                     final WindowContainer parent = currentActivity.getParent();
                     final boolean canCustomize = parent != null
@@ -543,6 +544,17 @@ class BackNavigationController {
             @NonNull ArrayList<ActivityRecord> prevActivities) {
         for (int i = prevActivities.size() - 1; i >= 0; --i) {
             if (!prevActivities.get(i).canShowWhenLocked()) {
+                return false;
+            }
+        }
+        return !prevActivities.isEmpty();
+    }
+
+    private static boolean isAllActivitiesCreated(
+            @NonNull ArrayList<ActivityRecord> prevActivities) {
+        for (int i = prevActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord check = prevActivities.get(i);
+            if (check.isState(ActivityRecord.State.INITIALIZING)) {
                 return false;
             }
         }

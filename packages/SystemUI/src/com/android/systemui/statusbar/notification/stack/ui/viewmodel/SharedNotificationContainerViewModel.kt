@@ -21,6 +21,7 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.common.shared.model.NotificationContainerBounds
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
@@ -75,6 +76,7 @@ import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -136,6 +138,7 @@ constructor(
     private val primaryBouncerToLockscreenTransitionViewModel:
         PrimaryBouncerToLockscreenTransitionViewModel,
     private val aodBurnInViewModel: AodBurnInViewModel,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) : FlowDumperImpl(dumpManager) {
     private val statesForConstrainedNotifications: Set<KeyguardState> =
@@ -470,6 +473,19 @@ constructor(
             }
             .dumpWhileCollecting("isTransitioningToHiddenKeyguard")
 
+    val panelAlpha = keyguardInteractor.panelAlpha
+
+    private fun bouncerToGoneNotificationAlpha(viewState: ViewStateAccessor): Flow<Float> =
+        merge(
+                primaryBouncerToGoneTransitionViewModel.notificationAlpha,
+                alternateBouncerToGoneTransitionViewModel.notificationAlpha(viewState),
+            )
+            .sample(communalSceneInteractor.isCommunalVisible) { alpha, isCommunalVisible ->
+                // when glanceable hub is visible, hide notifications during the transition to GONE
+                if (isCommunalVisible) 0f else alpha
+            }
+            .dumpWhileCollecting("bouncerToGoneNotificationAlpha")
+
     fun keyguardAlpha(viewState: ViewStateAccessor): Flow<Float> {
         // All transition view models are mututally exclusive, and safe to merge
         val alphaTransitions =
@@ -477,7 +493,7 @@ constructor(
                 keyguardInteractor.dismissAlpha.dumpWhileCollecting(
                     "keyguardInteractor.dismissAlpha"
                 ),
-                alternateBouncerToGoneTransitionViewModel.notificationAlpha(viewState),
+                bouncerToGoneNotificationAlpha(viewState),
                 aodToGoneTransitionViewModel.notificationAlpha(viewState),
                 aodToLockscreenTransitionViewModel.notificationAlpha,
                 aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
@@ -495,8 +511,9 @@ constructor(
                 occludedToAodTransitionViewModel.lockscreenAlpha,
                 occludedToGoneTransitionViewModel.notificationAlpha(viewState),
                 occludedToLockscreenTransitionViewModel.lockscreenAlpha,
-                primaryBouncerToGoneTransitionViewModel.notificationAlpha,
                 primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,
+                glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
+                lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
             )
 
         return merge(

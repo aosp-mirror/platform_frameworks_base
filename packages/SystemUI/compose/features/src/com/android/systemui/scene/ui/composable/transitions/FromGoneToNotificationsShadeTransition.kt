@@ -16,10 +16,12 @@
 
 package com.android.systemui.scene.ui.composable.transitions
 
+import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TransitionBuilder
 
 fun TransitionBuilder.goneToNotificationsShadeTransition(
+    edge: Edge = Edge.Top,
     durationScale: Double = 1.0,
 ) {
-    toNotificationsShadeTransition(durationScale)
+    toNotificationsShadeTransition(edge, durationScale)
 }

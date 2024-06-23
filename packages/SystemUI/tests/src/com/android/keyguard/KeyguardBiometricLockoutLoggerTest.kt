@@ -17,7 +17,7 @@
 package com.android.keyguard
 
 import android.hardware.biometrics.BiometricSourceType
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEventLogger
@@ -38,7 +38,7 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
     @Mock

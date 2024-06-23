@@ -953,6 +953,18 @@
     <string name="enable_verbose_vendor_logging">Enable verbose vendor logging</string>
     <!-- UI debug setting: enable verbose vendor logging summary [CHAR LIMIT=NONE] -->
     <string name="enable_verbose_vendor_logging_summary">Include additional device-specific vendor logs in bug reports, which may contain private information, use more battery, and/or use more storage.</string>
+    <!-- UI debug setting: checkbox text to disable verbose vendor logging after one day [CHAR LIMIT=50] -->
+    <string name="enable_verbose_vendor_logging_checkbox">Disable after one day</string>
+    <!-- UI debug setting: verbose vendor logging notification title [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_notification_title">Verbose vendor logging has ended</string>
+    <!-- UI debug setting: verbose vendor logging notification summary [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_notification_summary">Enabled for one day</string>
+    <!-- UI debug setting: verbose vendor logging notification action text [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_notification_action">Enable for one more day</string>
+    <!-- UI debug setting: verbose vendor logging preference summary for disabling after one day [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_preference_summary_will_disable">Disables after one day</string>
+    <!-- UI debug setting: verbose vendor logging preference summary for leaving setting enabled indefinitely [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_preference_summary_on">Enabled indefinitely</string>
 
     <!-- UI debug setting: scaling factor for window animations [CHAR LIMIT=25] -->
     <string name="window_animation_scale_title">Window animation scale</string>
@@ -1349,6 +1361,9 @@
     <!-- Keywords for setting screen for controlling apps that can schedule alarms [CHAR LIMIT=100] -->
     <string name="keywords_alarms_and_reminders">schedule, alarm, reminder, clock</string>
 
+    <!-- Sound: Title for the Do not Disturb option and associated settings page. [CHAR LIMIT=50]-->
+    <string name="zen_mode_settings_title">Do Not Disturb</string>
+
     <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
     <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
     <!-- Do not disturb: Title for the Do not Disturb dialog to turn on Do not disturb. [CHAR LIMIT=50]-->
@@ -1374,6 +1389,9 @@
     <string name="zen_mode_duration_always_prompt_title">Ask every time</string>
     <!-- Do not disturb: Duration option to always have DND on until it is manually turned off [CHAR LIMIT=60] -->
     <string name="zen_mode_forever">Until you turn off</string>
+
+    <!-- [CHAR LIMIT=50] Zen mode settings: placeholder for a Contact name when the name is empty -->
+    <string name="zen_mode_starred_contacts_empty_name">(No name)</string>
 
     <!-- time label for event have that happened very recently [CHAR LIMIT=60] -->
     <string name="time_unit_just_now">Just now</string>

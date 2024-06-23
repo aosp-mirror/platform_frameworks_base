@@ -30,6 +30,7 @@ import android.platform.test.ravenwood.RavenwoodRule;
 
 import com.android.server.pm.UserManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -63,6 +64,7 @@ public final class UserDataRepositoryTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        SecureSettingsWrapper.startTestMode();
         mHandler = new Handler(Looper.getMainLooper());
         mBindingControllerFactory = new IntFunction<InputMethodBindingController>() {
 
@@ -71,6 +73,11 @@ public final class UserDataRepositoryTest {
                 return new InputMethodBindingController(userId, mMockInputMethodManagerService);
             }
         };
+    }
+
+    @After
+    public void tearDown() {
+        SecureSettingsWrapper.endTestMode();
     }
 
     @Test

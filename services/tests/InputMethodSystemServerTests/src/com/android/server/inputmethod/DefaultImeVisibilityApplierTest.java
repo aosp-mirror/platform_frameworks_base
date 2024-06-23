@@ -87,7 +87,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         synchronized (ImfLock.class) {
             mVisibilityApplier.performShowIme(new Binder() /* showInputToken */,
                     ImeTracker.Token.empty(), 0 /* showFlags */, null /* resultReceiver */,
-                    SHOW_SOFT_INPUT);
+                    SHOW_SOFT_INPUT, mUserId);
         }
         verifyShowSoftInput(false, true, 0 /* showFlags */);
     }
@@ -96,7 +96,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     public void testPerformHideIme() throws Exception {
         synchronized (ImfLock.class) {
             mVisibilityApplier.performHideIme(new Binder() /* hideInputToken */,
-                    ImeTracker.Token.empty(), null /* resultReceiver */, HIDE_SOFT_INPUT);
+                    ImeTracker.Token.empty(), null /* resultReceiver */, HIDE_SOFT_INPUT, mUserId);
         }
         verifyHideSoftInput(false, true);
     }
@@ -186,7 +186,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     @Test
     public void testShowImeScreenshot() {
         synchronized (ImfLock.class) {
-            mVisibilityApplier.showImeScreenshot(mWindowToken, Display.DEFAULT_DISPLAY);
+            mVisibilityApplier.showImeScreenshot(mWindowToken, Display.DEFAULT_DISPLAY, mUserId);
         }
 
         verify(mMockImeTargetVisibilityPolicy).showImeScreenshot(eq(mWindowToken),
@@ -196,7 +196,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     @Test
     public void testRemoveImeScreenshot() {
         synchronized (ImfLock.class) {
-            mVisibilityApplier.removeImeScreenshot(Display.DEFAULT_DISPLAY);
+            mVisibilityApplier.removeImeScreenshot(Display.DEFAULT_DISPLAY, mUserId);
         }
 
         verify(mMockImeTargetVisibilityPolicy).removeImeScreenshot(eq(Display.DEFAULT_DISPLAY));

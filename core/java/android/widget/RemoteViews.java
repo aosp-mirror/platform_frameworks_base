@@ -17,8 +17,10 @@
 package android.widget;
 
 import static android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL;
+import static android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO;
 import static android.appwidget.flags.Flags.drawDataParcel;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
+import static android.util.proto.ProtoInputStream.NO_MORE_FIELDS;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 
 import android.annotation.AttrRes;
@@ -94,6 +96,9 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.util.TypedValue.ComplexDimensionUnit;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.LayoutInflater.Filter;
@@ -7821,5 +7826,279 @@ public class RemoteViews implements Parcelable, Filter {
             mApplicationInfoCache = applicationInfoCache;
             mClassCookies = classCookies;
         }
+    }
+
+    /**
+     * Write this RemoteViews to proto.
+     * @hide
+     */
+    @FlaggedApi(FLAG_REMOTE_VIEWS_PROTO)
+    public void writePreviewToProto(@NonNull Context context, @NonNull ProtoOutputStream out) {
+        if (mApplication != null) {
+            // mApplication may be null if this was created with DrawInstructions constructor.
+            out.write(RemoteViewsProto.PACKAGE_NAME, mApplication.packageName);
+        }
+        Resources appResources = getContextForResourcesEnsuringCorrectCachedApkPaths(
+                context).getResources();
+        if (mLayoutId != 0) {
+            out.write(RemoteViewsProto.LAYOUT_ID, appResources.getResourceName(mLayoutId));
+        }
+        if (mLightBackgroundLayoutId != 0) {
+            out.write(RemoteViewsProto.LIGHT_BACKGROUND_LAYOUT_ID,
+                    appResources.getResourceName(mLightBackgroundLayoutId));
+        }
+        if (mViewId != 0 && mViewId != -1) {
+            out.write(RemoteViewsProto.VIEW_ID, appResources.getResourceName(mViewId));
+        }
+        out.write(RemoteViewsProto.IS_ROOT, mIsRoot);
+        out.write(RemoteViewsProto.APPLY_FLAGS, mApplyFlags);
+        out.write(RemoteViewsProto.HAS_DRAW_INSTRUCTIONS, mHasDrawInstructions);
+        if (mProviderInstanceId != -1) {
+            out.write(RemoteViewsProto.PROVIDER_INSTANCE_ID, mProviderInstanceId);
+        }
+
+        if (!hasMultipleLayouts()) {
+            out.write(RemoteViewsProto.MODE, MODE_NORMAL);
+            if (mIdealSize != null) {
+                final long token = out.start(RemoteViewsProto.IDEAL_SIZE);
+                out.write(SizeFProto.WIDTH, mIdealSize.getWidth());
+                out.write(SizeFProto.HEIGHT, mIdealSize.getHeight());
+                out.end(token);
+            }
+        } else if (hasSizedRemoteViews()) {
+            out.write(RemoteViewsProto.MODE, MODE_HAS_SIZED_REMOTEVIEWS);
+            for (RemoteViews view : mSizedRemoteViews) {
+                final long sizedViewToken = out.start(RemoteViewsProto.SIZED_REMOTEVIEWS);
+                view.writePreviewToProto(context, out);
+                out.end(sizedViewToken);
+            }
+        } else {
+            out.write(RemoteViewsProto.MODE, MODE_HAS_LANDSCAPE_AND_PORTRAIT);
+            final long landscapeViewToken = out.start(RemoteViewsProto.LANDSCAPE_REMOTEVIEWS);
+            mLandscape.writePreviewToProto(context, out);
+            out.end(landscapeViewToken);
+            final long portraitViewToken = out.start(RemoteViewsProto.PORTRAIT_REMOTEVIEWS);
+            mPortrait.writePreviewToProto(context, out);
+            out.end(portraitViewToken);
+        }
+    }
+
+    /**
+     * Create a RemoteViews from proto input.
+     * @hide
+     */
+    @FlaggedApi(FLAG_REMOTE_VIEWS_PROTO)
+    public static RemoteViews createPreviewFromProto(Context context, ProtoInputStream in)
+            throws Exception {
+        return createFromProto(in).create(context, context.getResources(), /* rootData= */ null,
+                /* depth= */ 0);
+    }
+
+    private static PendingResources<RemoteViews> createFromProto(ProtoInputStream in)
+            throws Exception {
+        // Grouping these variables into an anonymous object allows us to access them through `ref`
+        // (which is final) later in the lambda.
+        final var ref = new Object() {
+            final RemoteViews mRv = new RemoteViews();
+            int mMode = 0;
+            int mApplyFlags = 0;
+            long mProviderInstanceId = -1;
+            String mPackageName = null;
+            SizeF mIdealSize = null;
+            String mLayoutResName = null;
+            String mLightBackgroundResName = null;
+            String mViewResName = null;
+            final List<PendingResources<RemoteViews>> mSizedRemoteViews = new ArrayList<>();
+            PendingResources<RemoteViews> mLandscapeViews = null;
+            PendingResources<RemoteViews> mPortraitViews = null;
+            boolean mIsRoot = false;
+            boolean mHasDrawInstructions = false;
+        };
+
+        try {
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.MODE:
+                        ref.mMode = in.readInt(RemoteViewsProto.MODE);
+                        break;
+                    case (int) RemoteViewsProto.PACKAGE_NAME:
+                        ref.mPackageName = in.readString(RemoteViewsProto.PACKAGE_NAME);
+                        break;
+                    case (int) RemoteViewsProto.IDEAL_SIZE:
+                        final long idealSizeToken = in.start(RemoteViewsProto.IDEAL_SIZE);
+                        ref.mIdealSize = createSizeFFromProto(in);
+                        in.end(idealSizeToken);
+                        break;
+                    case (int) RemoteViewsProto.LAYOUT_ID:
+                        ref.mLayoutResName = in.readString(RemoteViewsProto.LAYOUT_ID);
+                        break;
+                    case (int) RemoteViewsProto.LIGHT_BACKGROUND_LAYOUT_ID:
+                        ref.mLightBackgroundResName = in.readString(
+                                RemoteViewsProto.LIGHT_BACKGROUND_LAYOUT_ID);
+                        break;
+                    case (int) RemoteViewsProto.VIEW_ID:
+                        ref.mViewResName = in.readString(RemoteViewsProto.VIEW_ID);
+                        break;
+                    case (int) RemoteViewsProto.APPLY_FLAGS:
+                        ref.mApplyFlags = in.readInt(RemoteViewsProto.APPLY_FLAGS);
+                        break;
+                    case (int) RemoteViewsProto.PROVIDER_INSTANCE_ID:
+                        ref.mProviderInstanceId = in.readInt(RemoteViewsProto.PROVIDER_INSTANCE_ID);
+                        break;
+                    case (int) RemoteViewsProto.SIZED_REMOTEVIEWS:
+                        final long sizedToken = in.start(RemoteViewsProto.SIZED_REMOTEVIEWS);
+                        ref.mSizedRemoteViews.add(createFromProto(in));
+                        in.end(sizedToken);
+                        break;
+                    case (int) RemoteViewsProto.LANDSCAPE_REMOTEVIEWS:
+                        final long landscapeToken = in.start(
+                                RemoteViewsProto.LANDSCAPE_REMOTEVIEWS);
+                        ref.mLandscapeViews = createFromProto(in);
+                        in.end(landscapeToken);
+                        break;
+                    case (int) RemoteViewsProto.PORTRAIT_REMOTEVIEWS:
+                        final long portraitToken = in.start(RemoteViewsProto.PORTRAIT_REMOTEVIEWS);
+                        ref.mPortraitViews = createFromProto(in);
+                        in.end(portraitToken);
+                        break;
+                    case (int) RemoteViewsProto.IS_ROOT:
+                        ref.mIsRoot = in.readBoolean(RemoteViewsProto.IS_ROOT);
+                        break;
+                    case (int) RemoteViewsProto.HAS_DRAW_INSTRUCTIONS:
+                        ref.mHasDrawInstructions = in.readBoolean(
+                                RemoteViewsProto.HAS_DRAW_INSTRUCTIONS);
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return (context, resources, rootData, depth) -> {
+            if (depth > MAX_NESTED_VIEWS && (UserHandle.getAppId(Binder.getCallingUid())
+                    != Process.SYSTEM_UID)) {
+                throw new IllegalArgumentException("Too many nested views.");
+            }
+            depth++;
+
+            RemoteViews rv = ref.mRv;
+            rv.mApplyFlags = ref.mApplyFlags;
+            rv.mIsRoot = ref.mIsRoot;
+            rv.mHasDrawInstructions = ref.mHasDrawInstructions;
+
+            // The root view will read its HierarchyRootData (bitmap cache, collection cache) from
+            // proto; all nested views will instead get it through the rootData parameter.
+            if (rootData == null) {
+                if (!rv.mIsRoot || depth != 1) {
+                    throw new IllegalStateException(
+                            "A nested view did not receive HierarchyRootData");
+                }
+                rootData = rv.getHierarchyRootData();
+            } else {
+                rv.configureAsChild(rootData);
+            }
+
+            Context appContext = null;
+            Resources appResources = null;
+            if (!ref.mHasDrawInstructions) {
+                checkProtoResultNotNull(ref.mPackageName, "No application info");
+                rv.mApplication = context.getPackageManager().getApplicationInfo(ref.mPackageName,
+                        /* flags= */ 0);
+                appContext = rv.getContextForResourcesEnsuringCorrectCachedApkPaths(context);
+                appResources = appContext.getResources();
+
+                checkProtoResultNotNull(ref.mLayoutResName, "No layout id");
+                rv.mLayoutId = appResources.getIdentifier(ref.mLayoutResName, /* defType= */ null,
+                        /* defPackage= */ null);
+                checkValidResource(rv.mLayoutId, "Invalid layout id", ref.mLayoutResName);
+
+                if (ref.mViewResName != null) {
+                    rv.mViewId = appResources.getIdentifier(ref.mViewResName, /* defType= */ null,
+                            /* defPackage= */ null);
+                    checkValidResource(rv.mViewId, "Invalid view id", ref.mViewResName);
+                }
+
+                if (ref.mLightBackgroundResName != null) {
+                    int lightBackgroundLayoutId = appResources.getIdentifier(
+                            ref.mLightBackgroundResName,
+                            /* defType= */ null, /* defPackage= */ null);
+                    checkValidResource(lightBackgroundLayoutId,
+                            "Invalid light background layout id", ref.mLightBackgroundResName);
+                    rv.setLightBackgroundLayoutId(lightBackgroundLayoutId);
+                }
+            }
+            if (ref.mProviderInstanceId != -1) {
+                rv.mProviderInstanceId = ref.mProviderInstanceId;
+            }
+            if (ref.mMode == MODE_NORMAL) {
+                rv.setIdealSize(ref.mIdealSize);
+                return rv;
+            } else if (ref.mMode == MODE_HAS_SIZED_REMOTEVIEWS) {
+                List<RemoteViews> sizedViews = new ArrayList<>();
+                for (RemoteViews.PendingResources<RemoteViews> pendingViews :
+                        ref.mSizedRemoteViews) {
+                    RemoteViews views = pendingViews.create(context, resources, rootData, depth);
+                    sizedViews.add(views);
+                }
+                rv.initializeSizedRemoteViews(sizedViews.iterator());
+                return rv;
+            } else if (ref.mMode == MODE_HAS_LANDSCAPE_AND_PORTRAIT) {
+                checkProtoResultNotNull(ref.mLandscapeViews, "Missing landscape views");
+                checkProtoResultNotNull(ref.mPortraitViews, "Missing portrait views");
+                RemoteViews parentRv = new RemoteViews(
+                        ref.mLandscapeViews.create(context, resources, rootData, depth),
+                        ref.mPortraitViews.create(context, resources, rootData, depth));
+                parentRv.initializeFrom(/* src= */ rv, /* hierarchyRoot= */ rv);
+                return parentRv;
+            } else {
+                throw new InvalidProtoException(ref.mMode + " is not a valid mode.");
+            }
+        };
+    }
+
+    private static class InvalidProtoException extends Exception {
+        InvalidProtoException(String message) {
+            super(message);
+        }
+    }
+
+    private interface PendingResources<T> {
+        T create(Context context, Resources appResources, HierarchyRootData rootData, int depth)
+                throws Exception;
+    }
+
+    private static void checkValidResource(int id, String message, String resName)
+            throws Exception {
+        if (id == 0) throw new Exception(message + ": " + resName);
+    }
+
+    private static void checkProtoResultNotNull(Object o, String message)
+            throws InvalidProtoException {
+        if (o == null) {
+            throw new InvalidProtoException(message);
+        }
+    }
+
+    private static SizeF createSizeFFromProto(ProtoInputStream in) throws Exception {
+        float width = 0;
+        float height = 0;
+        while (in.nextField() != NO_MORE_FIELDS) {
+            switch (in.getFieldNumber()) {
+                case (int) SizeFProto.WIDTH:
+                    width = in.readFloat(SizeFProto.WIDTH);
+                    break;
+                case (int) SizeFProto.HEIGHT:
+                    height = in.readFloat(SizeFProto.HEIGHT);
+                    break;
+                default:
+                    Log.w(LOG_TAG, "Unhandled field while reading SizeF proto!\n"
+                            + ProtoUtils.currentFieldToString(in));
+            }
+        }
+
+        return new SizeF(width, height);
     }
 }

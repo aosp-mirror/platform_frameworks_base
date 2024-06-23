@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.modifiers.background
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.PartitionedGridViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
@@ -63,9 +64,13 @@ import javax.inject.Inject
 
 @SysUISingleton
 class PartitionedGridLayout @Inject constructor(private val viewModel: PartitionedGridViewModel) :
-    GridLayout {
+    PaginatableGridLayout {
     @Composable
-    override fun TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
+    override fun TileGrid(
+        tiles: List<TileViewModel>,
+        modifier: Modifier,
+        editModeStart: () -> Unit,
+    ) {
         DisposableEffect(tiles) {
             val token = Any()
             tiles.forEach { it.startListening(token) }
@@ -167,6 +172,20 @@ class PartitionedGridLayout @Inject constructor(private val viewModel: Partition
                 columns = columns,
             )
         }
+    }
+
+    override fun splitIntoPages(
+        tiles: List<TileViewModel>,
+        rows: Int,
+        columns: Int,
+    ): List<List<TileViewModel>> {
+        val (smallTiles, largeTiles) = tiles.partition { viewModel.isIconTile(it.spec) }
+
+        val sizedLargeTiles = largeTiles.map { SizedTile(it, 2) }
+        val sizedSmallTiles = smallTiles.map { SizedTile(it, 1) }
+        val largeTilesRows = PaginatableGridLayout.splitInRows(sizedLargeTiles, columns)
+        val smallTilesRows = PaginatableGridLayout.splitInRows(sizedSmallTiles, columns)
+        return (largeTilesRows + smallTilesRows).chunked(rows).map { it.flatten().map { it.tile } }
     }
 
     @Composable

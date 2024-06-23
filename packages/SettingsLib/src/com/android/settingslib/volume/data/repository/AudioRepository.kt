@@ -20,6 +20,7 @@ import android.content.ContentResolver
 import android.database.ContentObserver
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import android.media.AudioManager.AudioDeviceCategory
 import android.media.AudioManager.OnCommunicationDeviceChangedListener
 import android.provider.Settings
 import androidx.concurrent.futures.DirectExecutor
@@ -85,6 +86,10 @@ interface AudioRepository {
     suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean
 
     suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode)
+
+    /** Gets audio device category. */
+    @AudioDeviceCategory
+    suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int
 }
 
 class AudioRepositoryImpl(
@@ -209,6 +214,13 @@ class AudioRepositoryImpl(
 
     override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
         withContext(backgroundCoroutineContext) { audioManager.ringerMode = mode.value }
+    }
+
+    @AudioDeviceCategory
+    override suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int {
+        return withContext(backgroundCoroutineContext) {
+            audioManager.getBluetoothAudioDeviceCategory(bluetoothAddress)
+        }
     }
 
     private fun getMinVolume(stream: AudioStream): Int =

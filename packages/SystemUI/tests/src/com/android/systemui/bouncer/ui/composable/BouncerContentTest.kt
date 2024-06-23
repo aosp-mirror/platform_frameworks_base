@@ -37,7 +37,7 @@ import com.android.systemui.bouncer.ui.viewmodel.bouncerViewModel
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.motion.createSysUiComposeMotionTestRule
-import com.android.systemui.scene.domain.interactor.sceneContainerStartable
+import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.testKosmos
 import org.junit.Before
 import org.junit.Rule

@@ -7,6 +7,7 @@ import android.view.Display
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.ScreenshotRequest
+import com.android.systemui.Flags.screenshotShelfUi2
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.display.data.repository.DisplayRepository
@@ -139,8 +140,8 @@ constructor(
 
     private suspend fun getDisplaysToScreenshot(requestType: Int): List<Display> {
         val allDisplays = displays.first()
-        return if (requestType == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-            // If this is a provided image, let's show the UI on the default display only.
+        return if (requestType == TAKE_SCREENSHOT_PROVIDED_IMAGE || screenshotShelfUi2()) {
+            // If this is a provided image or using the shelf UI, just screenshot th default display
             allDisplays.filter { it.displayId == Display.DEFAULT_DISPLAY }
         } else {
             allDisplays.filter { it.type in ALLOWED_DISPLAY_TYPES }

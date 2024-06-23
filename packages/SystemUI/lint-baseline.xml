@@ -27088,17 +27088,6 @@
 
     <issue
         id="UselessParent"
-        message="This `FrameLayout` layout or its `LinearLayout` parent is unnecessary"
-        errorLine1="    &lt;FrameLayout"
-        errorLine2="     ~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SystemUI/res/layout/media_output_list_item.xml"
-            line="24"
-            column="6"/>
-    </issue>
-
-    <issue
-        id="UselessParent"
         message="This `LinearLayout` layout or its `FrameLayout` parent is possibly unnecessary; transfer the `background` attribute to the other view"
         errorLine1="    &lt;LinearLayout"
         errorLine2="     ~~~~~~~~~~~~">
@@ -30581,17 +30570,6 @@
         <location
             file="frameworks/base/packages/SystemUI/res/layout/media_output_broadcast_area.xml"
             line="130"
-            column="14"/>
-    </issue>
-
-    <issue
-        id="ContentDescription"
-        message="Missing `contentDescription` attribute on image"
-        errorLine1="            &lt;ImageView"
-        errorLine2="             ~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SystemUI/res/layout/media_output_list_item.xml"
-            line="54"
             column="14"/>
     </issue>
 
