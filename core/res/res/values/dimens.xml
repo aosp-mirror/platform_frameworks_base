@@ -65,7 +65,7 @@
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">48dp</dimen>
     <!-- Height of the bottom taskbar not including decorations like rounded corners. -->
-    <dimen name="taskbar_frame_height">60dp</dimen>
+    <dimen name="taskbar_frame_height">56dp</dimen>
     <!-- How much we expand the touchable region of the status bar below the notch to catch touches
          that just start below the notch. -->
     <dimen name="display_cutout_touchable_region_size">12dp</dimen>
@@ -887,6 +887,8 @@
     <dimen name="autofill_save_scroll_view_top_margin">16dp</dimen>
     <dimen name="autofill_save_button_bar_padding">16dp</dimen>
     <dimen name="autofill_dialog_corner_radius">24dp</dimen>
+    <dimen name="autofill_button_bar_spacer_width">12dp</dimen>
+    <dimen name="autofill_button_bar_spacer_height">4dp</dimen>
 
     <!-- How much extra space should be left around the autofill dialog -->
     <dimen name="autofill_dialog_offset">72dp</dimen>

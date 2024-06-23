@@ -73,6 +73,17 @@ class ScreenshotSoundControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun playCameraSound_illegalStateException_doesNotThrow() = runTest {
+        whenever(mediaPlayer.start()).thenThrow(IllegalStateException())
+
+        val controller = createController()
+        controller.playCameraSound().await()
+
+        verify(mediaPlayer).start()
+        verify(mediaPlayer).release()
+    }
+
+    @Test
     fun playCameraSound_soundLoadingSuccessful_mediaPlayerReleases() = runTest {
         val controller = createController()
 

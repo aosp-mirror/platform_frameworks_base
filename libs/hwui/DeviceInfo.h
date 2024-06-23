@@ -23,6 +23,7 @@
 
 #include <mutex>
 
+#include "Properties.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -60,7 +61,13 @@ public:
     static void setWideColorDataspace(ADataSpace dataspace);
 
     static void setSupportFp16ForHdr(bool supportFp16ForHdr);
-    static bool isSupportFp16ForHdr() { return get()->mSupportFp16ForHdr; };
+    static bool isSupportFp16ForHdr() {
+        if (!Properties::hdr10bitPlus) {
+            return false;
+        }
+
+        return get()->mSupportFp16ForHdr;
+    };
 
     static void setSupportMixedColorSpaces(bool supportMixedColorSpaces);
     static bool isSupportMixedColorSpaces() { return get()->mSupportMixedColorSpaces; };

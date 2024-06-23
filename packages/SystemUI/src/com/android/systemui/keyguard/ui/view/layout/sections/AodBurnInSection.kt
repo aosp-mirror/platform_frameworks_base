@@ -19,15 +19,14 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
 import android.view.View
-import androidx.constraintlayout.helper.widget.Layer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
+import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import com.android.systemui.Flags.migrateClocksToBlueprint
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import javax.inject.Inject
 
@@ -36,68 +35,59 @@ class AodBurnInSection
 @Inject
 constructor(
     private val context: Context,
+    private val rootView: KeyguardRootView,
     private val clockViewModel: KeyguardClockViewModel,
-    private val smartspaceViewModel: KeyguardSmartspaceViewModel,
-    private val featureFlags: FeatureFlagsClassic,
 ) : KeyguardSection() {
-    lateinit var burnInLayer: Layer
-
+    private lateinit var burnInLayer: AodBurnInLayer
+    private lateinit var emptyView: View
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
 
-        val nic = constraintLayout.requireViewById<View>(R.id.aod_notification_icon_container)
+        // The burn-in layer requires at least 1 view at all times
+        emptyView =
+            View(context, null).apply {
+                id = R.id.burn_in_layer_empty_view
+                visibility = View.GONE
+            }
+        constraintLayout.addView(emptyView)
         burnInLayer =
-            Layer(context).apply {
+            AodBurnInLayer(context).apply {
                 id = R.id.burn_in_layer
-                addView(nic)
+                registerListener(rootView)
+                addView(emptyView)
                 if (!migrateClocksToBlueprint()) {
                     val statusView =
                         constraintLayout.requireViewById<View>(R.id.keyguard_status_view)
                     addView(statusView)
                 }
             }
-        if (migrateClocksToBlueprint()) {
-            addSmartspaceViews(constraintLayout)
-        }
         constraintLayout.addView(burnInLayer)
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
-        if (migrateClocksToBlueprint()) {
-            clockViewModel.burnInLayer = burnInLayer
-        }
+        clockViewModel.burnInLayer = burnInLayer
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
+        }
+
+        constraintSet.apply {
+            // The empty view should not occupy any space
+            constrainHeight(R.id.burn_in_layer_empty_view, 1)
+            constrainWidth(R.id.burn_in_layer_empty_view, 0)
+            connect(R.id.burn_in_layer_empty_view, BOTTOM, PARENT_ID, BOTTOM)
         }
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
+        burnInLayer.unregisterListener(rootView)
         constraintLayout.removeView(R.id.burn_in_layer)
-    }
-
-    private fun addSmartspaceViews(constraintLayout: ConstraintLayout) {
-        burnInLayer.apply {
-            if (smartspaceViewModel.isSmartspaceEnabled) {
-                val smartspaceView =
-                    constraintLayout.requireViewById<View>(smartspaceViewModel.smartspaceViewId)
-                addView(smartspaceView)
-                if (smartspaceViewModel.isDateWeatherDecoupled) {
-                    val dateView =
-                        constraintLayout.requireViewById<View>(smartspaceViewModel.dateId)
-                    val weatherView =
-                        constraintLayout.requireViewById<View>(smartspaceViewModel.weatherId)
-                    addView(weatherView)
-                    addView(dateView)
-                }
-            }
-        }
     }
 }

@@ -28,6 +28,7 @@ import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
 import android.os.IBinder;
@@ -140,9 +141,9 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     private static class TestableBiometricScheduler extends BiometricScheduler {
         @NonNull private Fingerprint21UdfpsMock mFingerprint21;
 
-        TestableBiometricScheduler(@NonNull String tag, @NonNull Handler handler,
+        TestableBiometricScheduler(
                 @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
-            super(tag, BiometricScheduler.SENSOR_TYPE_FP_OTHER, gestureAvailabilityDispatcher);
+            super(BiometricScheduler.SENSOR_TYPE_FP_OTHER, gestureAvailabilityDispatcher);
         }
 
         void init(@NonNull Fingerprint21UdfpsMock fingerprint21) {
@@ -258,7 +259,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
 
         final Handler handler = new Handler(Looper.getMainLooper());
         final TestableBiometricScheduler scheduler =
-                new TestableBiometricScheduler(TAG, handler, gestureAvailabilityDispatcher);
+                new TestableBiometricScheduler(gestureAvailabilityDispatcher);
         final MockHalResultController controller =
                 new MockHalResultController(sensorProps.sensorId, context, handler, scheduler);
         return new Fingerprint21UdfpsMock(context, biometricStateCallback,
@@ -367,7 +368,8 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             final IBinder token = client.getToken();
             final long operationId = authClient.getOperationId();
             final int cookie = client.getCookie();
-            final ClientMonitorCallbackConverter listener = client.getListener();
+            final ClientMonitorCallbackConverter listener = new ClientMonitorCallbackConverter(
+                    new IFingerprintServiceReceiver.Default());
             final boolean restricted = authClient.isRestricted();
             final int statsClient = client.getLogger().getStatsClient();
             final boolean isKeyguard = authClient.isKeyguard();

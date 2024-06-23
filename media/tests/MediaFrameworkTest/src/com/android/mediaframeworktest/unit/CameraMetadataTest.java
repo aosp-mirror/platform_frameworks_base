@@ -16,12 +16,10 @@
 
 package com.android.mediaframeworktest.unit;
 
-import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
-import android.util.Pair;
-import android.util.Range;
-import android.util.Rational;
-import android.util.SizeF;
+import static android.hardware.camera2.impl.CameraMetadataNative.*;
+
+import static com.android.mediaframeworktest.unit.ByteArrayHelpers.*;
+
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -31,7 +29,6 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
-import android.util.Size;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
 import android.hardware.camera2.params.ColorSpaceTransform;
@@ -45,9 +42,14 @@ import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.TonemapCurve;
 import android.hardware.camera2.utils.TypeReference;
+import android.util.Log;
+import android.util.Pair;
+import android.util.Range;
+import android.util.Rational;
+import android.util.Size;
+import android.util.SizeF;
 
-import static android.hardware.camera2.impl.CameraMetadataNative.*;
-import static com.android.mediaframeworktest.unit.ByteArrayHelpers.*;
+import androidx.test.filters.SmallTest;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;

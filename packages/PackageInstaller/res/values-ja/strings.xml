@@ -44,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"このユーザーは不明なアプリをインストールできません"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"このユーザーはアプリをインストールできません"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="archive" msgid="4447791830199354721">"アーカイブ"</string>
     <string name="update_anyway" msgid="8792432341346261969">"更新する"</string>
     <string name="manage_applications" msgid="5400164782453975580">"アプリの管理"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"容量不足"</string>
@@ -58,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"アップデートのアンインストール"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> は次のアプリの一部です。"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"このアプリをアンインストールしますか？"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"個人データが保存されます"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"すべてのユーザーに対しこのアプリをアーカイブしますか？個人データが保存されます"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"仕事用プロファイルでこのアプリをアーカイブしますか？個人データが保存されます"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"<xliff:g id="USERNAME">%1$s</xliff:g> に対しこのアプリをアーカイブしますか？個人データが保存されます"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"プライベート スペースからこのアプリをアーカイブしますか？個人データが保存されます"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"このアプリを"<b>"すべての"</b>"ユーザーからアンインストールしますか？このアプリとそのデータはデバイスの"<b>"すべての"</b>"ユーザーから削除されます。"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> さんのアプリをアンインストールしますか？"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"このアプリを仕事用プロファイルからアンインストールしますか？"</string>
@@ -86,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"ユーザーを管理"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> をアンインストールできませんでした。"</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"パッケージの解析中に問題が発生しました。"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear ではインストールやアンインストールはできません。"</string>
     <string name="message_staging" msgid="8032722385658438567">"アプリを準備しています…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"不明"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"セキュリティ上の理由から、お使いのタブレットでは現在、この提供元からの不明なアプリをインストールすることはできません。これは [設定] で変更できます。"</string>
@@ -98,17 +102,18 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"不明なアプリをインストールするとタブレットや個人データの侵害に対する安全性が低下します。このアプリをインストールすることで、アプリの使用により生じる可能性があるタブレットへの侵害やデータの損失について、ユーザーご自身が単独で責任を負うことに同意することになります。"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"不明なアプリをインストールするとテレビや個人データの侵害に対する安全性が低下します。このアプリをインストールすることで、アプリの使用により生じる可能性があるテレビへの侵害やデータの損失について、ユーザーご自身が単独で責任を負うことに同意することになります。"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> のクローン"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> をアーカイブしますか？"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"次へ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"設定"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wearアプリ インストール/アンインストール"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"アプリのインストールに関する通知"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"インストールしました"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"「<xliff:g id="APPNAME">%1$s</xliff:g>」をインストールしました"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> から <xliff:g id="APPNAME">%1$s</xliff:g> を復元しますか？"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%2$s</xliff:g> から <xliff:g id="APPNAME">%1$s</xliff:g> を復元しますか？"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"このアプリのダウンロードをバックグラウンドで開始します"</string>
     <string name="restore" msgid="8460854736328970444">"復元する"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"オフラインです"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"インターネットに接続すると、このアプリは自動的に復元されます"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"このアプリを復元するには、インターネット接続を確認してからもう一度お試しください"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"エラーが発生しました"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"このアプリを復元しようとしたときに問題が発生しました"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"空き容量が不足しています"</string>
@@ -116,8 +121,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"必要な対応"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"このアプリを復元するには、次の手順を行います"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> は無効です"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"このアプリを復元するには、設定で <xliff:g id="INSTALLERNAME">%1$s</xliff:g> を有効にしてください"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> はアンインストールされています"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"このアプリを復元するには、<xliff:g id="INSTALLERNAME">%1$s</xliff:g> をインストールする必要があります"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"続行"</string>

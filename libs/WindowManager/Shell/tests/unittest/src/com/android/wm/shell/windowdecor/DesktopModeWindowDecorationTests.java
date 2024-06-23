@@ -16,16 +16,30 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND;
+
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableContext;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.SurfaceControl;
@@ -34,14 +48,17 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -57,6 +74,13 @@ import java.util.function.Supplier;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DesktopModeWindowDecorationTests extends ShellTestCase {
+    private static final String USE_WINDOW_SHADOWS_SYSPROP_KEY =
+            "persist.wm.debug.desktop_use_window_shadows";
+    private static final String FOCUSED_USE_WINDOW_SHADOWS_SYSPROP_KEY =
+            "persist.wm.debug.desktop_use_window_shadows_focused_window";
+    private static final String USE_ROUNDED_CORNERS_SYSPROP_KEY =
+            "persist.wm.debug.desktop_use_rounded_corners";
+
     @Mock
     private DisplayController mMockDisplayController;
     @Mock
@@ -79,14 +103,29 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private SurfaceControlViewHost mMockSurfaceControlViewHost;
     @Mock
     private WindowDecoration.SurfaceControlViewHostFactory mMockSurfaceControlViewHostFactory;
+    @Mock
+    private TypedArray mMockRoundedCornersRadiusArray;
 
     private final Configuration mConfiguration = new Configuration();
+
+    private TestableContext mTestableContext;
+
+    /** Set up run before test class. */
+    @BeforeClass
+    public static void setUpClass() {
+        // Reset the sysprop settings before running the test.
+        SystemProperties.set(USE_WINDOW_SHADOWS_SYSPROP_KEY, "");
+        SystemProperties.set(FOCUSED_USE_WINDOW_SHADOWS_SYSPROP_KEY, "");
+        SystemProperties.set(USE_ROUNDED_CORNERS_SYSPROP_KEY, "");
+    }
 
     @Before
     public void setUp() {
         doReturn(mMockSurfaceControlViewHost).when(mMockSurfaceControlViewHostFactory).create(
                 any(), any(), any());
         doReturn(mMockTransaction).when(mMockTransactionSupplier).get();
+        mTestableContext = new TestableContext(mContext);
+        mTestableContext.ensureTestableResources();
     }
 
     @Test
@@ -104,6 +143,103 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         verify(spyWindowDecor).closeMaximizeMenu();
 
     }
+
+    @Test
+    public void updateRelayoutParams_noSysPropFlagsSet_windowShadowsAreEnabled() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams, mContext, taskInfo, /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mShadowRadiusId).isNotEqualTo(Resources.ID_NULL);
+    }
+
+    @Test
+    public void updateRelayoutParams_noSysPropFlagsSet_roundedCornersAreEnabled() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        fillRoundedCornersResources(/* fillValue= */ 30);
+        RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mCornerRadius).isGreaterThan(0);
+    }
+
+    @Test
+    public void updateRelayoutParams_freeformAndTransparent_allowsInputFallthrough() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        taskInfo.taskDescription.setStatusBarAppearance(
+                APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mAllowCaptionInputFallthrough).isTrue();
+    }
+
+    @Test
+    public void updateRelayoutParams_freeformButOpaque_disallowsInputFallthrough() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        taskInfo.taskDescription.setStatusBarAppearance(0);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mAllowCaptionInputFallthrough).isFalse();
+    }
+
+    @Test
+    public void updateRelayoutParams_fullscreen_disallowsInputFallthrough() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mAllowCaptionInputFallthrough).isFalse();
+    }
+
+    private void fillRoundedCornersResources(int fillValue) {
+        when(mMockRoundedCornersRadiusArray.getDimensionPixelSize(anyInt(), anyInt()))
+                .thenReturn(fillValue);
+        mTestableContext.getOrCreateTestableResources().addOverride(
+                R.array.config_roundedCornerRadiusArray, mMockRoundedCornersRadiusArray);
+        mTestableContext.getOrCreateTestableResources().addOverride(
+                R.dimen.rounded_corner_radius, fillValue);
+        mTestableContext.getOrCreateTestableResources().addOverride(
+                R.array.config_roundedCornerTopRadiusArray, mMockRoundedCornersRadiusArray);
+        mTestableContext.getOrCreateTestableResources().addOverride(
+                R.dimen.rounded_corner_radius_top, fillValue);
+        mTestableContext.getOrCreateTestableResources().addOverride(
+                R.array.config_roundedCornerBottomRadiusArray, mMockRoundedCornersRadiusArray);
+        mTestableContext.getOrCreateTestableResources().addOverride(
+                R.dimen.rounded_corner_radius_bottom, fillValue);
+    }
+
 
     private DesktopModeWindowDecoration createWindowDecoration(
             ActivityManager.RunningTaskInfo taskInfo) {
@@ -123,6 +259,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 .setTaskDescriptionBuilder(taskDescriptionBuilder)
                 .setVisible(visible)
                 .build();
+        taskInfo.topActivityInfo = new ActivityInfo();
+        taskInfo.topActivityInfo.applicationInfo = new ApplicationInfo();
         taskInfo.realActivity = new ComponentName("com.android.wm.shell.windowdecor",
                 "DesktopModeWindowDecorationTests");
         taskInfo.baseActivity = new ComponentName("com.android.wm.shell.windowdecor",

@@ -34,4 +34,11 @@
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="run-command" value="settings put secure immersive_mode_confirmations confirmed" />
     </target_preparer>
+
+    <!-- Collect the dumped files for debugging -->
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="directory-keys" value="/storage/emulated/0/ScreenshotTests" />
+        <option name="clean-up" value="true" />
+        <option name="collect-on-run-ended-only" value="true" />
+    </metrics_collector>
 </configuration>

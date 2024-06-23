@@ -18,16 +18,25 @@ package com.android.server.power.stats;
 
 import android.os.BatteryStats;
 import android.os.Parcel;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 /**
  * Provides test cases for android.os.BatteryStats.
  */
-public class BatteryStatsServTest extends TestCase {
+@SmallTest
+public class BatteryStatsServTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private static final String TAG = "BatteryStatsServTest";
 
     public static class TestServ extends BatteryStatsImpl.Uid.Pkg.Serv {
@@ -90,7 +99,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test that the constructor and detach methods touch the time bast observer list.
      */
-    @SmallTest
+    @Test
     public void testConstructAndDetach() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
 
@@ -104,7 +113,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test parceling and unparceling.
      */
-    @SmallTest
+    @Test
     public void testParceling() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ orig = new TestServ(bsi);
@@ -133,7 +142,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test getLaunchTimeToNow()
      */
-    @SmallTest
+    @Test
     public void testLaunchTimeToNow() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
@@ -151,7 +160,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test getStartTimeToNow()
      */
-    @SmallTest
+    @Test
     public void testStartTimeToNow() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
@@ -168,7 +177,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test startLaunchedLocked while not previously launched
      */
-    @SmallTest
+    @Test
     public void testStartLaunchedLockedWhileLaunched() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
@@ -197,7 +206,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test startLaunchedLocked while previously launched
      */
-    @SmallTest
+    @Test
     public void testStartLaunchedLockedWhileNotLaunched() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
@@ -224,7 +233,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test stopLaunchedLocked when not previously launched.
      */
-    @SmallTest
+    @Test
     public void testStopLaunchedLockedWhileNotLaunched() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
@@ -254,7 +263,7 @@ public class BatteryStatsServTest extends TestCase {
      * Test stopLaunchedLocked when previously launched, with measurable time between
      * start and stop.
      */
-    @SmallTest
+    @Test
     public void testStopLaunchedLockedWhileLaunchedNormal() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
@@ -283,7 +292,7 @@ public class BatteryStatsServTest extends TestCase {
      * Test stopLaunchedLocked when previously launched, with no measurable time between
      * start and stop.
      */
-    @SmallTest
+    @Test
     public void testStopLaunchedLockedWhileLaunchedTooQuick() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
@@ -306,7 +315,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test startRunningLocked while previously running
      */
-    @SmallTest
+    @Test
     public void testStartRunningLockedWhileRunning() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
@@ -335,7 +344,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test startRunningLocked while not previously launched
      */
-    @SmallTest
+    @Test
     public void testStartRunningLockedWhileNotRunning() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
@@ -364,7 +373,7 @@ public class BatteryStatsServTest extends TestCase {
      * Test stopRunningLocked when previously launched, with measurable time between
      * start and stop.
      */
-    @SmallTest
+    @Test
     public void testStopRunningLockedWhileRunningNormal() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
@@ -393,7 +402,7 @@ public class BatteryStatsServTest extends TestCase {
      * Test stopRunningLocked when previously launched, with measurable time between
      * start and stop.
      */
-    @SmallTest
+    @Test
     public void testStopRunningLockedWhileRunningTooQuick() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
@@ -416,7 +425,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test that getBatteryStats returns the BatteryStatsImpl passed in to the contstructor.
      */
-    @SmallTest
+    @Test
     public void testGetBatteryStats() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
@@ -427,7 +436,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test getLaunches
      */
-    @SmallTest
+    @Test
     public void testGetLaunches() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
@@ -449,7 +458,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test getStartTime while running
      */
-    @SmallTest
+    @Test
     public void testGetStartTimeRunning() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
@@ -475,7 +484,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test getStartTime while not running
      */
-    @SmallTest
+    @Test
     public void testGetStartTimeNotRunning() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
@@ -502,7 +511,7 @@ public class BatteryStatsServTest extends TestCase {
     /**
      * Test getStarts
      */
-    @SmallTest
+    @Test
     public void testGetStarts() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl();
         TestServ serv = new TestServ(bsi);
@@ -521,4 +530,3 @@ public class BatteryStatsServTest extends TestCase {
         Assert.assertEquals(8085, serv.getLaunches());
     }
 }
-

@@ -84,6 +84,7 @@
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
     <uses-permission android:name="android.permission.NETWORK_FACTORY" />
+    <uses-permission android:name="android.permission.SATELLITE_COMMUNICATION" />
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -238,6 +239,7 @@
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS" />
 
     <!-- role holder APIs -->
     <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
@@ -255,7 +257,13 @@
     <!-- launcher apps -->
     <uses-permission android:name="android.permission.ACCESS_SHORTCUTS" />
 
+    <!-- Permission to start Launcher's widget picker activity. -->
+    <uses-permission android:name="android.permission.START_WIDGET_PICKER_ACTIVITY" />
+
     <uses-permission android:name="android.permission.MODIFY_THEME_OVERLAY" />
+
+    <!-- Activity Manager -->
+    <uses-permission android:name="android.permission.SET_THEME_OVERLAY_CONTROLLER_READY" />
 
     <!-- accessibility -->
     <uses-permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA" />
@@ -349,6 +357,8 @@
     <uses-permission android:name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS" />
 
     <uses-permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT" />
+
+    <uses-permission android:name="android.permission.MONITOR_STICKY_MODIFIER_STATE" />
 
     <!-- Listen to (dis-)connection of external displays and enable / disable them. -->
     <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
@@ -466,6 +476,9 @@
             android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE" />
 
         <service android:name=".screenrecord.RecordingService"
+                 android:foregroundServiceType="systemExempted"/>
+
+        <service android:name=".recordissue.IssueRecordingService"
                  android:foregroundServiceType="systemExempted"/>
 
         <receiver android:name=".SysuiRestartReceiver"
@@ -892,6 +905,14 @@
                   android:exported="true"
                   />
 
+        <activity
+            android:name=".volume.panel.ui.activity.VolumePanelActivity"
+            android:label="@string/sound_settings"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.VolumePanelActivity" />
+
         <activity android:name=".wallet.ui.WalletActivity"
                   android:label="@string/wallet_title"
                   android:theme="@style/Wallet.Theme"
@@ -973,20 +994,10 @@
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
 
-        <activity android:name="com.android.systemui.communal.widgets.WidgetPickerActivity"
-            android:theme="@style/Theme.EditWidgetsActivity"
-            android:excludeFromRecents="true"
-            android:autoRemoveFromRecents="true"
-            android:showOnLockScreen="true"
-            android:launchMode="singleTop"
-            android:exported="false">
-        </activity>
-
         <activity android:name="com.android.systemui.communal.widgets.EditWidgetsActivity"
             android:theme="@style/Theme.EditWidgetsActivity"
             android:excludeFromRecents="true"
             android:autoRemoveFromRecents="true"
-            android:showOnLockScreen="true"
             android:launchMode="singleTop"
             android:exported="false">
         </activity>
@@ -1077,5 +1088,25 @@
         <!-- Allow SystemUI to listen for the capabilities defined in the linked xml -->
         <property android:name="android.net.PROPERTY_SELF_CERTIFIED_CAPABILITIES"
                   android:value="@xml/self_certified_network_capabilities_both" />
+
+
+        <service
+            android:name="com.android.systemui.dreams.homecontrols.HomeControlsDreamService"
+            android:exported="false"
+            android:enabled="false"
+            android:label="@string/home_controls_dream_label"
+            android:description="@string/home_controls_dream_description"
+            android:permission="android.permission.BIND_DREAM_SERVICE"
+            android:icon="@drawable/controls_icon"
+            >
+
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.dream"
+                android:resource="@xml/home_controls_dream_metadata" />
+        </service>
     </application>
 </manifest>

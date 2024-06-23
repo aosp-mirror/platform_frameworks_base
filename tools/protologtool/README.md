@@ -8,11 +8,13 @@ ProtoLogTool incorporates three different modes of operation:
 
 ### Code transformation
 
-Command: `protologtool transform-protolog-calls 
-    --protolog-class <protolog class name> 
-    --protolog-impl-class <protolog implementation class name>
+Command: `protologtool transform-protolog-calls
+    --protolog-class <protolog class name>
     --loggroups-class <protolog groups class name>
     --loggroups-jar <config jar path>
+    --viewer-config-file-path <protobuf viewer config file path>
+    --legacy-viewer-config-file-path <legacy json.gz viewer config file path>
+    --legacy-output-file-path <.winscope file path to write the legacy trace to>
     --output-srcjar <output.srcjar>
     [<input.java>]`
 
@@ -44,10 +46,11 @@ jar file (config.jar).
 ### Viewer config generation
 
 Command: `generate-viewer-config
-    --protolog-class <protolog class name> 
+    --protolog-class <protolog class name>
     --loggroups-class <protolog groups class name>
     --loggroups-jar <config jar path>
-    --viewer-conf <viewer.json>
+    --viewer-config-type <proto|json>
+    --viewer-config <viewer.json>
     [<input.java>]`
 
 This command is similar in it's syntax to the previous one, only instead of creating a processed source jar
@@ -74,7 +77,7 @@ it writes a viewer configuration file with following schema:
 
 ### Binary log viewing
 
-Command: `read-log --viewer-conf <viewer.json> <wm_log.pb>`
+Command: `read-log --viewer-config <viewer.json> <wm_log.pb>`
 
 Reads the binary ProtoLog log file and outputs a human-readable LogCat-like text log.
 

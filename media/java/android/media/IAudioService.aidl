@@ -28,6 +28,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.BluetoothProfileConnectionInfo;
+import android.media.FadeManagerConfiguration;
 import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
@@ -364,6 +365,8 @@ interface IAudioService {
 
     oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
 
+    List<AudioMix> getRegisteredPolicyMixes();
+
     void unregisterAudioPolicy(in IAudioPolicyCallback pcb);
 
     int addMixForPolicy(in AudioPolicyConfig policyConfig, in IAudioPolicyCallback pcb);
@@ -397,6 +400,14 @@ interface IAudioService {
 
     int dispatchFocusChange(in AudioFocusInfo afi, in int focusChange,
             in IAudioPolicyCallback pcb);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    int dispatchFocusChangeWithFade(in AudioFocusInfo afi,
+            in int focusChange,
+            in IAudioPolicyCallback pcb,
+            in List<AudioFocusInfo> otherActiveAfis,
+            in FadeManagerConfiguration transientFadeMgrConfig);
 
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
 
@@ -745,13 +756,30 @@ interface IAudioService {
 
     void unregisterLoudnessCodecUpdatesDispatcher(in ILoudnessCodecUpdatesDispatcher dispatcher);
 
-    oneway void startLoudnessCodecUpdates(int piid, in List<LoudnessCodecInfo> codecInfoSet);
+    oneway void startLoudnessCodecUpdates(int sessionId);
 
-    oneway void stopLoudnessCodecUpdates(int piid);
+    oneway void stopLoudnessCodecUpdates(int sessionId);
 
-    oneway void addLoudnessCodecInfo(int piid, int mediaCodecHash, in LoudnessCodecInfo codecInfo);
+    oneway void addLoudnessCodecInfo(int sessionId, int mediaCodecHash,
+            in LoudnessCodecInfo codecInfo);
 
-    oneway void removeLoudnessCodecInfo(int piid, in LoudnessCodecInfo codecInfo);
+    oneway void removeLoudnessCodecInfo(int sessionId, in LoudnessCodecInfo codecInfo);
 
-    PersistableBundle getLoudnessParams(int piid, in LoudnessCodecInfo codecInfo);
+    PersistableBundle getLoudnessParams(in LoudnessCodecInfo codecInfo);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    int setFadeManagerConfigurationForFocusLoss(in FadeManagerConfiguration fmcForFocusLoss);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    int clearFadeManagerConfigurationForFocusLoss();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    FadeManagerConfiguration getFadeManagerConfigurationForFocusLoss();
+
+    @EnforcePermission("QUERY_AUDIO_STATE")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.QUERY_AUDIO_STATE)")
+    boolean shouldNotificationSoundPlay(in AudioAttributes aa);
 }

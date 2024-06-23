@@ -338,6 +338,9 @@
     <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=5165842622743212268] -->
     <string name="bluetooth_talkback_input_peripheral">Input Peripheral</string>
 
+    <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=26580326066627664] -->
+    <string name="bluetooth_talkback_hearing_aids">Hearing Aids</string>
+
     <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=5615463912185280812] -->
     <string name="bluetooth_talkback_bluetooth">Bluetooth</string>
 
@@ -1079,6 +1082,10 @@
 
     <!-- [CHAR_LIMIT=NONE] Label for battery on main page of settings -->
     <string name="power_remaining_settings_home_page"><xliff:g id="percentage" example="10%">%1$s</xliff:g> - <xliff:g id="time_string" example="1 hour left based on your usage">%2$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=NONE] Label for charging on hold on main page of settings -->
+    <string name="power_charging_on_hold_settings_home_page"><xliff:g id="level">%1$s</xliff:g> - Charging on hold to protect battery</string>
+    <!-- [CHAR_LIMIT=NONE] Label for incompatible charging accessory on main page of settings -->
+    <string name="power_incompatible_charging_settings_home_page"><xliff:g id="level">%1$s</xliff:g> - Check charging accessory</string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery discharging -->
     <string name="power_remaining_duration_only">About <xliff:g id="time_remaining">%1$s</xliff:g> left</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
@@ -1122,7 +1129,7 @@
     <!-- [CHAR_LIMIT=80] Label for battery level chart when charge been limited -->
     <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging optimized</string>
     <!-- [CHAR_LIMIT=80] Label for battery charging future pause -->
-    <string name="power_charging_future_paused"><xliff:g id="level">%1$s</xliff:g> - Charging optimized</string>
+    <string name="power_charging_future_paused"><xliff:g id="level">%1$s</xliff:g> - Charging</string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
@@ -1139,11 +1146,13 @@
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item. A state which device is connected with any charger(e.g. USB, Adapter or Wireless) but not charging yet. Used for diagnostic info screens, precise translation isn't needed -->
-    <string name="battery_info_status_not_charging">Connected, not charging</string>
+    <string name="battery_info_status_not_charging">Connected, but not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_full">Charged</string>
     <!-- [CHAR_LIMIT=40] Battery Info screen. Value for a status item. A state which device is fully charged -->
     <string name="battery_info_status_full_charged">Fully Charged</string>
+    <!-- [CHAR_LIMIT=None] Battery Info screen. Value for a status item. A state which device charging on hold -->
+    <string name="battery_info_status_charging_on_hold">Charging on hold</string>
 
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
@@ -1331,11 +1340,11 @@
     <string name="notice_header" translatable="false"></string>
 
     <!-- Name of the phone device. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name" product="default">This phone</string>
+    <string name="media_transfer_this_device_name">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
+    <string name="media_transfer_this_device_name_tablet">This tablet</string>
     <!-- Name of the default media output of the TV. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name" product="tv">@string/tv_media_transfer_default</string>
+    <string name="media_transfer_this_device_name_tv">@string/tv_media_transfer_default</string>
     <!-- Name of the dock device. [CHAR LIMIT=30] -->
     <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
     <!-- Default name of the external device. [CHAR LIMIT=30] -->
@@ -1474,6 +1483,9 @@
 
     <!-- Title for the preference to enter the nickname of the user to display in the user switcher [CHAR LIMIT=25]-->
     <string name="user_nickname">Nickname</string>
+
+    <!-- Confirmation message on dialog for editing user name and profile picture. Inform user on who will be able to see the changes [CHAR LIMIT=NONE]-->
+    <string name="edit_user_info_message">Your name and picture will be visible to anyone that uses this device.</string>
 
     <!-- Label for adding a new user in the user switcher [CHAR LIMIT=35] -->
     <string name="user_add_user">Add user</string>
@@ -1633,6 +1645,8 @@
     <string name="accessibility_phone_two_bars">Phone two bars.</string>
     <!-- Content description of the phone signal when it is three bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_phone_three_bars">Phone three bars.</string>
+    <!-- Content description of the phone signal when it is four bars for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_phone_four_bars">Phone four bars.</string>
     <!-- Content description of the phone signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_phone_signal_full">Phone signal full.</string>
 

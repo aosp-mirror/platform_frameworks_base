@@ -16,10 +16,10 @@
 
 package com.android.settingslib.notification;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Flags;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -41,6 +41,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.PhoneWindow;
@@ -143,9 +145,16 @@ public class EnableZenModeDialog {
                                     Slog.d(TAG, "Invalid manual condition: " + tag.condition);
                                 }
                                 // always triggers priority-only dnd with chosen condition
-                                mNotificationManager.setZenMode(
-                                        Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
-                                        getRealConditionId(tag.condition), TAG);
+                                if (Flags.modesApi()) {
+                                    mNotificationManager.setZenMode(
+                                            Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                                            getRealConditionId(tag.condition), TAG,
+                                            /* fromUser= */ true);
+                                } else {
+                                    mNotificationManager.setZenMode(
+                                            Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                                            getRealConditionId(tag.condition), TAG);
+                                }
                             }
                         });
 

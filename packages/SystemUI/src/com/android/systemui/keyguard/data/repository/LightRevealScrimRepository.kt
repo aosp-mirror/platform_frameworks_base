@@ -140,8 +140,9 @@ constructor(
     override val revealAmount: Flow<Float> = callbackFlow {
         val updateListener =
             Animator.AnimatorUpdateListener {
-                val value = (it as ValueAnimator).animatedValue
-                trySend(value as Float)
+                val value = (it as ValueAnimator).animatedValue as Float
+                trySend(value)
+
                 if (value <= 0.0f || value >= 1.0f) {
                     scrimLogger.d(TAG, "revealAmount", value)
                 }
@@ -150,9 +151,13 @@ constructor(
         awaitClose { revealAmountAnimator.removeUpdateListener(updateListener) }
     }
 
+    private var willBeOrIsRevealed: Boolean? = null
+
     override fun startRevealAmountAnimator(reveal: Boolean) {
+        if (reveal == willBeOrIsRevealed) return
+        willBeOrIsRevealed = reveal
         if (reveal) revealAmountAnimator.start() else revealAmountAnimator.reverse()
-        scrimLogger.d(TAG, "startRevealAmountAnimator, reveal", reveal)
+        scrimLogger.d(TAG, "startRevealAmountAnimator, reveal: ", reveal)
     }
 
     override val revealEffect =

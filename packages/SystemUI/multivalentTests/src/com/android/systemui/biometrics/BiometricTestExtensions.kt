@@ -16,8 +16,10 @@
 
 package com.android.systemui.biometrics
 
+import android.graphics.Bitmap
 import android.hardware.biometrics.BiometricManager.Authenticators
 import android.hardware.biometrics.ComponentInfoInternal
+import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.SensorProperties
 import android.hardware.biometrics.SensorPropertiesInternal
@@ -116,18 +118,26 @@ internal fun Collection<SensorPropertiesInternal?>.extractAuthenticatorTypes(): 
 }
 
 internal fun promptInfo(
+    logoRes: Int = -1,
+    logoBitmap: Bitmap? = null,
+    logoDescription: String? = null,
     title: String = "title",
     subtitle: String = "sub",
     description: String = "desc",
+    contentView: PromptContentView? = null,
     credentialTitle: String? = "cred title",
     credentialSubtitle: String? = "cred sub",
     credentialDescription: String? = "cred desc",
     negativeButton: String = "neg",
 ): PromptInfo {
     val info = PromptInfo()
+    info.logoRes = logoRes
+    info.logoBitmap = logoBitmap
+    info.logoDescription = logoDescription
     info.title = title
     info.subtitle = subtitle
     info.description = description
+    info.contentView = contentView
     credentialTitle?.let { info.deviceCredentialTitle = it }
     credentialSubtitle?.let { info.deviceCredentialSubtitle = it }
     credentialDescription?.let { info.deviceCredentialDescription = it }

@@ -142,6 +142,11 @@ class PreviewLifecycleObserver(
             return true
         }
 
+        if (renderer == null || onDestroy == null) {
+            Log.wtf(TAG, "Renderer/onDestroy should not be null.")
+            return true
+        }
+
         when (message.what) {
             KeyguardPreviewConstants.MESSAGE_ID_SLOT_SELECTED -> {
                 message.data.getString(KeyguardPreviewConstants.KEY_SLOT_ID)?.let { slotId ->

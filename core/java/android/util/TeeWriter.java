@@ -29,6 +29,7 @@ import java.util.Objects;
  * @see https://man7.org/linux/man-pages/man1/tee.1.html
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class TeeWriter extends Writer {
     private final @NonNull Writer[] mWriters;
 

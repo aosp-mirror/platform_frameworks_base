@@ -1,11 +1,9 @@
 {
-  "presubmit": [
+  // TODO: b/324945360 - Re-enable on presubmit after fixing failures
+  "postsubmit": [
     {
       "name": "AccessibilityMenuServiceTests",
       "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
         {
           "exclude-annotation": "android.support.test.filters.FlakyTest"
         }

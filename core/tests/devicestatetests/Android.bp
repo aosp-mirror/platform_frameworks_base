@@ -29,6 +29,8 @@ android_test {
         "androidx.test.rules",
         "frameworks-base-testutils",
         "mockito-target-minus-junit4",
+        "platform-test-annotations",
+        "testng",
     ],
     libs: ["android.test.runner"],
     platform_apis: true,

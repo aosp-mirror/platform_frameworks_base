@@ -4,6 +4,7 @@ rule android.content.ComponentNameProto* com.android.nfc.x.@0
 rule android.content.IntentProto* com.android.nfc.x.@0
 rule android.content.IntentFilterProto* com.android.nfc.x.@0
 rule android.content.AuthorityEntryProto* com.android.nfc.x.@0
+rule android.content.UriRelativeFilter* com.android.nfc.x.@0
 rule android.nfc.cardemulation.AidGroupProto* com.android.nfc.x.@0
 rule android.nfc.cardemulation.ApduServiceInfoProto* com.android.nfc.x.@0
 rule android.nfc.cardemulation.NfcFServiceInfoProto* com.android.nfc.x.@0

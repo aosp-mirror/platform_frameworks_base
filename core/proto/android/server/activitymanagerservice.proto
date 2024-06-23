@@ -429,6 +429,7 @@ message ServiceRecordProto {
         optional string base_dir = 1;
         optional string res_dir = 2;
         optional string data_dir = 3;
+        optional int32 targetSdkVersion = 4;
     }
     optional AppInfo appinfo = 8;
     optional ProcessRecordProto app = 9;
@@ -1036,7 +1037,7 @@ message AppsExitInfoProto {
 
             optional int32 uid = 1;
             repeated .android.app.ApplicationExitInfoProto app_exit_info = 2;
-            repeated .android.app.ApplicationExitInfoProto app_recoverable_crash = 3;
+            repeated .android.app.ApplicationExitInfoProto app_recoverable_crash = 3 [deprecated=true];
         }
         repeated User users = 2;
     }

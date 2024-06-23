@@ -19,7 +19,10 @@ package com.android.systemui.statusbar.notification.interruption
 import android.app.ActivityManager
 import android.app.Notification
 import android.app.Notification.BubbleMetadata
+import android.app.Notification.EXTRA_COLORIZED
+import android.app.Notification.EXTRA_TEMPLATE
 import android.app.Notification.FLAG_BUBBLE
+import android.app.Notification.FLAG_CAN_COLORIZE
 import android.app.Notification.FLAG_FOREGROUND_SERVICE
 import android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED
 import android.app.Notification.FLAG_USER_INITIATED_JOB
@@ -50,6 +53,8 @@ import android.provider.Settings.Global.HEADS_UP_ON
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.log.core.LogLevel
@@ -122,6 +127,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected val systemClock = FakeSystemClock()
     protected val uiEventLogger = UiEventLoggerFake()
     protected val userTracker = FakeUserTracker()
+    protected val avalancheProvider: AvalancheProvider = mock()
 
     protected abstract val provider: VisualInterruptionDecisionProvider
 
@@ -1097,6 +1103,8 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var whenMs: Long? = null
         var isGrouped = false
         var isGroupSummary = false
+        var isCall = false
+        var category: String? = null
         var groupAlertBehavior: Int? = null
         var hasBubbleMetadata = false
         var hasFsi = false
@@ -1106,10 +1114,12 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var isUserInitiatedJob = false
         var isBubble = false
         var isStickyAndNotDemoted = false
+        var isColorized = false
 
         // Set on NotificationEntryBuilder:
         var importance = IMPORTANCE_DEFAULT
         var canBubble: Boolean? = null
+        var isImportantConversation = false
 
         // Set on NotificationEntry:
         var hasJustLaunchedFsi = false
@@ -1118,6 +1128,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var packageSuspended = false
         var visibilityOverride: Int? = null
         var suppressedVisualEffects: Int? = null
+        var isConversation = false
 
         private fun buildBubbleMetadata(): BubbleMetadata {
             val builder =
@@ -1158,6 +1169,13 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                         nb.setGroupSummary(true)
                     }
 
+                    if (isCall) {
+                        nb.extras.putString(EXTRA_TEMPLATE, Notification.CallStyle::class.java.name)
+                    }
+
+                    if (category != null) {
+                        nb.setCategory(category)
+                    }
                     groupAlertBehavior?.let { nb.setGroupAlertBehavior(it) }
 
                     if (hasBubbleMetadata) {
@@ -1185,6 +1203,10 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                     if (isStickyAndNotDemoted) {
                         n.flags = n.flags or FLAG_FSI_REQUESTED_BUT_DENIED
                     }
+                    if (isColorized) {
+                        n.extras.putBoolean(EXTRA_COLORIZED, true)
+                        n.flags = n.flags or FLAG_CAN_COLORIZE
+                    }
                 }
                 .let { NotificationEntryBuilder().setNotification(it) }
                 .also { neb ->
@@ -1193,9 +1215,10 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                     neb.setTag(TEST_TAG)
 
                     neb.setImportance(importance)
-                    neb.setChannel(
-                        NotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME, importance)
-                    )
+                    val channel =
+                            NotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME, importance)
+                    channel.isImportantConversation = isImportantConversation
+                    neb.setChannel(channel)
 
                     canBubble?.let { neb.setCanBubble(it) }
                 }
@@ -1216,6 +1239,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                             }
                             visibilityOverride?.let { mrb.setVisibilityOverride(it) }
                             suppressedVisualEffects?.let { mrb.setSuppressedVisualEffects(it) }
+                            mrb.setIsConversation(isConversation)
                         }
                         .build()
                 }
@@ -1287,7 +1311,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         }
     }
 
-    private fun whenAgo(whenAgeMs: Long) = systemClock.currentTimeMillis() - whenAgeMs
+    protected fun whenAgo(whenAgeMs: Long) = systemClock.currentTimeMillis() - whenAgeMs
 }
 
 private const val TEST_CONTENT_TITLE = "Test Content Title"

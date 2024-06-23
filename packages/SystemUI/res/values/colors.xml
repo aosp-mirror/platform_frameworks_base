@@ -29,6 +29,9 @@
     <color name="status_bar_icons_hover_color_light">#38FFFFFF</color> <!-- 22% white -->
     <color name="status_bar_icons_hover_color_dark">#38000000</color> <!-- 22% black -->
 
+    <!-- The dark background color behind the shade -->
+    <color name="shade_scrim_background_dark">@*android:color/black</color>
+
     <!-- The color of the background in the separated list of the Global Actions menu -->
     <color name="global_actions_separated_background">#F5F5F5</color>
 
@@ -56,6 +59,8 @@
     <color name="kg_user_switcher_restricted_avatar_icon_color">@color/GM2_grey_600</color>
     <!-- Color of background circle of user avatars in keyguard user switcher -->
     <color name="user_avatar_color_bg">?android:attr/colorBackgroundFloating</color>
+    <!-- Color of border for keyguard password input when focused -->
+    <color name="bouncer_password_focus_color">@*android:color/system_secondary_light</color>
 
     <!-- Icon color for user avatars in user switcher quick settings -->
     <color name="qs_user_switcher_avatar_icon_color">#3C4043</color>
@@ -135,6 +140,9 @@
     <color name="biometric_dialog_gray">#ff757575</color>
     <color name="biometric_dialog_accent">@color/material_dynamic_primary40</color>
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
+    <!-- Color for biometric prompt content view -->
+    <color name="biometric_prompt_content_background_color">#8AB4F8</color>
+    <color name="biometric_prompt_content_list_item_bullet_color">#1d873b</color>
 
     <!-- SFPS colors -->
     <color name="sfps_chevron_fill">@color/material_dynamic_primary90</color>

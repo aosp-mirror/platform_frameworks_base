@@ -41,6 +41,8 @@ namespace android {
 
 namespace {
 
+static const bool ENABLE_POINTER_CHOREOGRAPHER = input_flags::enable_pointer_choreographer();
+
 const ui::Transform kIdentityTransform;
 
 } // namespace
@@ -111,7 +113,11 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
       : PointerController(
                 policy, looper, spriteController, enabled,
                 [](const sp<android::gui::WindowInfosListener>& listener) {
-                    SurfaceComposerClient::getDefault()->addWindowInfosListener(listener);
+                    auto initialInfo = std::make_pair(std::vector<android::gui::WindowInfo>{},
+                                                      std::vector<android::gui::DisplayInfo>{});
+                    SurfaceComposerClient::getDefault()->addWindowInfosListener(listener,
+                                                                                &initialInfo);
+                    return initialInfo.second;
                 },
                 [](const sp<android::gui::WindowInfosListener>& listener) {
                     SurfaceComposerClient::getDefault()->removeWindowInfosListener(listener);
@@ -119,8 +125,9 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
 
 PointerController::PointerController(const sp<PointerControllerPolicyInterface>& policy,
                                      const sp<Looper>& looper, SpriteController& spriteController,
-                                     bool enabled, WindowListenerConsumer registerListener,
-                                     WindowListenerConsumer unregisterListener)
+                                     bool enabled,
+                                     const WindowListenerRegisterConsumer& registerListener,
+                                     WindowListenerUnregisterConsumer unregisterListener)
       : mEnabled(enabled),
         mContext(policy, looper, spriteController, *this),
         mCursorController(mContext),
@@ -128,7 +135,8 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
         mUnregisterWindowInfosListener(std::move(unregisterListener)) {
     std::scoped_lock lock(getLock());
     mLocked.presentation = Presentation::SPOT;
-    registerListener(mDisplayInfoListener);
+    const auto& initialDisplayInfos = registerListener(mDisplayInfoListener);
+    onDisplayInfosChangedLocked(initialDisplayInfos);
 }
 
 PointerController::~PointerController() {
@@ -218,7 +226,7 @@ void PointerController::setPresentation(Presentation presentation) {
 
     mLocked.presentation = presentation;
 
-    if (input_flags::enable_pointer_choreographer()) {
+    if (ENABLE_POINTER_CHOREOGRAPHER) {
         // When pointer choreographer is enabled, the presentation mode is only set once when the
         // PointerController is constructed, before the display viewport is provided.
         // TODO(b/293587049): Clean up the PointerController interface after pointer choreographer

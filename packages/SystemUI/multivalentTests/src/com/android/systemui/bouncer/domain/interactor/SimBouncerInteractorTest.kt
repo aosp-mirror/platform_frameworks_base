@@ -28,8 +28,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeSimBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor.Companion.INVALID_SUBSCRIPTION_ID
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -54,10 +57,10 @@ class SimBouncerInteractorTest : SysuiTestCase() {
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock lateinit var euiccManager: EuiccManager
 
-    private val utils = SceneTestUtils(this)
+    private val kosmos = testKosmos()
     private val bouncerSimRepository = FakeSimBouncerRepository()
     private val resources: Resources = context.resources
-    private val testScope = utils.testScope
+    private val testScope = kosmos.testScope
 
     private lateinit var underTest: SimBouncerInteractor
 
@@ -68,13 +71,13 @@ class SimBouncerInteractorTest : SysuiTestCase() {
             SimBouncerInteractor(
                 context,
                 testScope.backgroundScope,
-                utils.testDispatcher,
+                kosmos.testDispatcher,
                 bouncerSimRepository,
                 telephonyManager,
                 resources,
                 keyguardUpdateMonitor,
                 euiccManager,
-                utils.mobileConnectionsRepository,
+                kosmos.mobileConnectionsRepository,
             )
     }
 

@@ -2,25 +2,10 @@ package: "com.android.wm.shell"
 container: "system"
 
 flag {
-    name: "example_flag"
-    namespace: "multitasking"
-    description: "An Example Flag"
-    bug: "300136750"
-}
-
-flag {
     name: "enable_app_pairs"
     namespace: "multitasking"
     description: "Enables the ability to create and save app pairs to the Home screen"
     bug: "274835596"
-}
-
-flag {
-    name: "enable_desktop_windowing"
-    namespace: "multitasking"
-    description: "Enables desktop windowing"
-    bug: "304778354"
-    is_fixed_read_only: true
 }
 
 flag {
@@ -38,13 +23,6 @@ flag {
 }
 
 flag {
-    name: "enable_pip_ui_state_on_entering"
-    namespace: "multitasking"
-    description: "Enables PiP UI state callback on entering"
-    bug: "303718131"
-}
-
-flag {
     name: "enable_pip2_implementation"
     namespace: "multitasking"
     description: "Enables the new implementation of PiP (PiP2)"
@@ -57,4 +35,32 @@ flag {
     namespace: "multitasking"
     description: "Enables left/right split in portrait"
     bug: "291018646"
+}
+
+flag {
+    name: "enable_new_bubble_animations"
+    namespace: "multitasking"
+    description: "Enables new animations for expand and collapse for bubbles"
+    bug: "311450609"
+}
+
+flag {
+    name: "enable_pip_umo_experience"
+    namespace: "multitasking"
+    description: "Enables new UMO experience for PiP menu"
+    bug: "307998712"
+}
+
+flag {
+    name: "enable_bubble_bar"
+    namespace: "multitasking"
+    description: "Enables the new bubble bar UI for tablets"
+    bug: "286246694"
+}
+
+flag {
+    name: "enable_bubbles_long_press_nav_handle"
+    namespace: "multitasking"
+    description: "Enables long-press action for nav handle when a bubble is expanded"
+    bug: "324910035"
 }

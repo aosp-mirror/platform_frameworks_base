@@ -17,34 +17,37 @@
 package com.android.settingslib.spa.widget.card
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.WarningAmber
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.debug.UiModePreviews
 import com.android.settingslib.spa.framework.theme.SettingsDimension
@@ -72,11 +75,14 @@ fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
-fun SettingsCardContent(content: @Composable ColumnScope.() -> Unit) {
+fun SettingsCardContent(
+    containerColor: Color = Color.Unspecified,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     Card(
         shape = CornerExtraSmall,
         colors = CardDefaults.cardColors(
-            containerColor = SettingsTheme.colorScheme.surface,
+            containerColor = containerColor.takeOrElse { SettingsTheme.colorScheme.surface },
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -95,37 +101,44 @@ fun SettingsCard(model: CardModel) {
 @Composable
 internal fun SettingsCardImpl(model: CardModel) {
     AnimatedVisibility(visible = model.isVisible()) {
-        SettingsCardContent {
+        SettingsCardContent(containerColor = model.containerColor) {
             Column(
-                modifier = Modifier.padding(SettingsDimension.itemPaddingStart),
+                modifier = (model.onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier)
+                    .padding(
+                        horizontal = SettingsDimension.dialogItemPaddingHorizontal,
+                        vertical = SettingsDimension.itemPaddingAround,
+                    ),
                 verticalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround)
             ) {
-                CardHeader(model.imageVector, model.onDismiss)
+                CardHeader(model.imageVector, model.tintColor, model.onDismiss)
                 SettingsTitle(model.title)
                 SettingsBody(model.text)
-                Buttons(model.buttons)
+                Buttons(model.buttons, model.tintColor)
             }
         }
     }
 }
 
 @Composable
-fun CardHeader(imageVector: ImageVector?, onDismiss: (() -> Unit)? = null) {
+fun CardHeader(imageVector: ImageVector?, iconColor: Color, onDismiss: (() -> Unit)? = null) {
+    if (imageVector != null || onDismiss != null) {
+        Spacer(Modifier.height(SettingsDimension.buttonPaddingVertical))
+    }
     Row(Modifier.fillMaxWidth()) {
-        CardIcon(imageVector)
+        CardIcon(imageVector, iconColor)
         Spacer(modifier = Modifier.weight(1f))
         DismissButton(onDismiss)
     }
 }
 
 @Composable
-private fun CardIcon(imageVector: ImageVector?) {
+private fun CardIcon(imageVector: ImageVector?, color: Color) {
     if (imageVector != null) {
         Icon(
             imageVector = imageVector,
             contentDescription = null,
             modifier = Modifier.size(SettingsDimension.itemIconSize),
-            tint = MaterialTheme.colorScheme.primary,
+            tint = color.takeOrElse { MaterialTheme.colorScheme.primary },
         )
     }
 }
@@ -146,52 +159,39 @@ private fun DismissButton(onDismiss: (() -> Unit)?) {
                 contentDescription = stringResource(
                     androidx.compose.material3.R.string.m3c_snackbar_dismiss
                 ),
-                modifier = Modifier.size(SettingsDimension.iconSmall),
+                modifier = Modifier.padding(SettingsDimension.paddingSmall),
             )
         }
     }
 }
 
 @Composable
-private fun Buttons(buttons: List<CardButton>) {
+private fun Buttons(buttons: List<CardButton>, color: Color) {
     if (buttons.isNotEmpty()) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = SettingsDimension.itemPaddingAround),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(
                 space = SettingsDimension.itemPaddingEnd,
                 alignment = Alignment.End,
             ),
         ) {
             for (button in buttons) {
-                Button(button)
+                Button(button, color)
             }
         }
+    } else {
+        Spacer(Modifier.height(SettingsDimension.itemPaddingAround))
     }
 }
 
 @Composable
-private fun Button(button: CardButton) {
-    if (button.isMain) {
-        Button(
-            onClick = button.onClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = SettingsTheme.colorScheme.primaryContainer,
-            ),
-        ) {
-            Text(
-                text = button.text,
-                color = SettingsTheme.colorScheme.onPrimaryContainer,
-            )
-        }
-    } else {
-        OutlinedButton(onClick = button.onClick) {
-            Text(
-                text = button.text,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
+private fun Button(button: CardButton, color: Color) {
+    TextButton(
+        onClick = button.onClick,
+        modifier =
+            Modifier.semantics { button.contentDescription?.let { this.contentDescription = it } }
+    ) {
+        Text(text = button.text, color = color)
     }
 }
 
@@ -206,7 +206,6 @@ private fun SettingsCardPreview() {
                 imageVector = Icons.Outlined.WarningAmber,
                 buttons = listOf(
                     CardButton(text = "Action") {},
-                    CardButton(text = "Action", isMain = true) {},
                 )
             )
         )

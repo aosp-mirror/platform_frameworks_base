@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарежда се"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарежда се бързо"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарежда се бавно"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зареждането е оптимизирано с цел запазване на батерията"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Проблем със зарядното устройство"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зареждането е поставено на пауза с цел запазване на батерията"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Проверете аксесоара за зареждане"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Мрежата е заключена"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Няма SIM карта"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Неизползваема SIM карта."</string>

@@ -46,6 +46,17 @@ public class GetCandidateCredentialsException extends Exception {
             "android.credentials.GetCandidateCredentialsException.TYPE_NO_CREDENTIAL";
 
     @NonNull
+    public static final String TYPE_USER_CANCELED =
+            "android.credentials.GetCredentialException.TYPE_USER_CANCELED";
+    /**
+     * The error type value for when the given operation failed due to internal interruption.
+     * Retrying the same operation should fix the error.
+     */
+    @NonNull
+    public static final String TYPE_INTERRUPTED =
+            "android.credentials.GetCredentialException.TYPE_INTERRUPTED";
+
+    @NonNull
     private final String mType;
 
     /** Returns the specific exception type. */

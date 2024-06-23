@@ -22,10 +22,10 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
+import com.android.systemui.res.R;
 import com.android.systemui.util.InitializationChecker;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
@@ -124,9 +124,6 @@ public abstract class SystemUIInitializer {
                     .setDesktopMode(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
-        if (initializeComponents) {
-            mSysUIComponent.init();
-        }
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.

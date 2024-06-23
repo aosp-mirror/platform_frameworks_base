@@ -17,6 +17,7 @@ import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.StackScrollAlgorithmState
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
@@ -28,8 +29,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 /** Tests for {@link NotificationShelf}. */
 @SmallTest
@@ -53,7 +54,6 @@ open class NotificationShelfTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         mDependency.injectTestDependency(FeatureFlags::class.java, flags)
         flags.set(Flags.SENSITIVE_REVEAL_ANIM, useSensitiveReveal)
-        flags.setDefault(Flags.IMPROVED_HUN_ANIMATIONS)
         val root = FrameLayout(context)
         shelf =
             LayoutInflater.from(root.context)
@@ -72,6 +72,7 @@ open class NotificationShelfTest : SysuiTestCase() {
 
     @Test
     fun testShadeWidth_BasedOnFractionToShade() {
+        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         setFractionToShade(0f)
         setOnLockscreen(true)
 
@@ -87,6 +88,7 @@ open class NotificationShelfTest : SysuiTestCase() {
 
     @Test
     fun testShelfIsLong_WhenNotOnLockscreen() {
+        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         setFractionToShade(0f)
         setOnLockscreen(false)
 
@@ -224,7 +226,7 @@ open class NotificationShelfTest : SysuiTestCase() {
 
         whenever(expandableView.minHeight).thenReturn(25)
         whenever(expandableView.shelfTransformationTarget).thenReturn(null) // use translationY
-        whenever(expandableView.isInShelf).thenReturn(true)
+        whenever(expandableView.isInShelf).thenReturn(false)
 
         whenever(ambientState.isOnKeyguard).thenReturn(true)
         whenever(ambientState.isExpansionChanging).thenReturn(false)

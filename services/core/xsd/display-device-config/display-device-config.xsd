@@ -117,6 +117,9 @@
                 <xs:element type="sensorDetails" name="proxSensor">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="sensorDetails" name="tempSensor">
+                    <xs:annotation name="final"/>
+                </xs:element>
 
                 <!-- Length of the ambient light horizon used to calculate the long & short term
                 estimates of ambient light in milliseconds.-->
@@ -595,7 +598,7 @@
             <!-- Sets the brightness mapping of the desired screen brightness to the corresponding
             lux for the current display -->
             <xs:element name="luxToBrightnessMapping" type="luxToBrightnessMapping"
-                        minOccurs="0" maxOccurs="1">
+                        minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
@@ -619,12 +622,23 @@
 
     This is used in place of config_autoBrightnessLevels and config_autoBrightnessLcdBacklightValues
     defined in the config XML resource.
+
+    On devices that allow users to choose from a set of predefined options in display
+    auto-brightness settings, multiple mappings for different modes and settings can be defined.
+
+    If no mode is specified, the mapping will be used for the default mode.
+    If no setting is specified, the mapping will be used for the normal brightness setting.
+
+    If no mapping is defined for one of the settings, the mapping for the normal setting will be
+    used as a fallback.
     -->
     <xs:complexType name="luxToBrightnessMapping">
         <xs:element name="map" type="nonNegativeFloatToFloatMap">
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
+        <xs:element name="mode" type="AutoBrightnessModeName" minOccurs="0"/>
+        <xs:element name="setting" type="AutoBrightnessSettingName" minOccurs="0"/>
     </xs:complexType>
 
     <!-- Represents a point in the display brightness mapping, representing the lux level from the
@@ -757,4 +771,23 @@
             </xs:element>
         </xs:sequence>
     </xs:complexType>
+
+    <!-- Predefined type names as defined by
+    AutomaticBrightnessController.AutomaticBrightnessMode -->
+    <xs:simpleType  name="AutoBrightnessModeName">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="default"/>
+            <xs:enumeration value="idle"/>
+            <xs:enumeration value="doze"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Predefined auto-brighntess settings -->
+    <xs:simpleType  name="AutoBrightnessSettingName">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="dim"/>
+            <xs:enumeration value="normal"/>
+            <xs:enumeration value="bright"/>
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>

@@ -17,14 +17,14 @@
 package com.android.server.wm.flicker.activityembedding.pip
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.Rect
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.common.traces.component.ComponentNameMatcher.Companion.TRANSITION_SNAPSHOT
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.datatypes.Rect
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.flicker.subject.layers.LayersTraceSubject
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.component.ComponentNameMatcher.Companion.TRANSITION_SNAPSHOT
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
@@ -176,9 +176,7 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
                 val secondaryVisibleRegion =
                     it.visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
                 if (secondaryVisibleRegion.region.isNotEmpty) {
-                    check { "left" }
-                        .that(secondaryVisibleRegion.region.bounds.left)
-                        .isGreater(0)
+                    check { "left" }.that(secondaryVisibleRegion.region.bounds.left).isGreater(0)
                 }
             }
         }
@@ -217,7 +215,7 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
         flicker.assertLayers {
             visibleLayersShownMoreThanOneConsecutiveEntry(
                 LayersTraceSubject.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS +
-                        listOf(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                    listOf(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
             )
         }
     }

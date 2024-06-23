@@ -39,8 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Teksa shkojmë drejt një të ardhmeje pa fjalëkalime, këto të fundit do të ofrohen ende së bashku me çelësat e kalimit."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Zgjidh se ku t\'i ruash <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Zgjidh një menaxher fjalëkalimesh për të ruajtur informacionet e tua dhe për t\'u identifikuar më shpejt herën tjetër"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Të krijohet çelësi i kalimit për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Të ruhet fjalëkalimi për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Të krijohet një çelës kalimit për t\'u identifikuar në <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Të ruhet fjalëkalimi për t\'u identifikuar në <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Të ruhen informacionet e identifikimit për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"çelësin e kalimit"</string>
     <string name="password" msgid="6738570945182936667">"fjalëkalimi"</string>
@@ -88,8 +88,10 @@
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Trokit për të shkyçur"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Nuk ka informacione për identifikimin"</string>
     <string name="no_sign_in_info_in" msgid="2641118151920288356">"Nuk ka informacione regjistrimi në <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
-    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Identifikimet e menaxhimit"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Menaxho identifikimet"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Nga një pajisje tjetër"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Përdor një pajisje tjetër"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Kërkesa u anulua nga <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Opsionet e identifikimit"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Më shumë"</string>
 </resources>

@@ -16,14 +16,19 @@ package android.nfc {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean isTagIntentAppPreferenceSupported();
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void registerControllerAlwaysOnListener(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcAdapter.ControllerAlwaysOnListener);
     method @FlaggedApi("android.nfc.nfc_vendor_cmd") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void registerNfcVendorNciCallback(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcAdapter.NfcVendorNciCallback);
+    method @FlaggedApi("android.nfc.enable_nfc_charging") public void registerWlcStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcAdapter.WlcStateListener);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean removeNfcUnlockHandler(android.nfc.NfcAdapter.NfcUnlockHandler);
     method @FlaggedApi("android.nfc.nfc_vendor_cmd") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int sendVendorNciMessage(int, @IntRange(from=0, to=15) int, @IntRange(from=0) int, @NonNull byte[]);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean setControllerAlwaysOn(boolean);
-    method @FlaggedApi("android.nfc.enable_nfc_mainline") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setReaderMode(boolean);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setReaderModePollingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int setTagIntentAppPreferenceForUser(int, @NonNull String, boolean);
+    method @FlaggedApi("android.nfc.enable_nfc_charging") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setWlcEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void unregisterControllerAlwaysOnListener(@NonNull android.nfc.NfcAdapter.ControllerAlwaysOnListener);
-    method @FlaggedApi("android.nfc.enable_nfc_mainline") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void unregisterNfcVendorNciCallback(@NonNull android.nfc.NfcAdapter.NfcVendorNciCallback);
+    method @FlaggedApi("android.nfc.nfc_vendor_cmd") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void unregisterNfcVendorNciCallback(@NonNull android.nfc.NfcAdapter.NfcVendorNciCallback);
+    method @FlaggedApi("android.nfc.enable_nfc_charging") public void unregisterWlcStateListener(@NonNull android.nfc.NfcAdapter.WlcStateListener);
     field @FlaggedApi("android.nfc.enable_nfc_mainline") public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC = "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
+    field @FlaggedApi("android.nfc.enable_nfc_mainline") @RequiresPermission(android.Manifest.permission.SHOW_CUSTOMIZED_RESOLVER) public static final String ACTION_SHOW_NFC_RESOLVER = "android.nfc.action.SHOW_NFC_RESOLVER";
+    field @FlaggedApi("android.nfc.enable_nfc_mainline") public static final String EXTRA_RESOLVE_INFOS = "android.nfc.extra.RESOLVE_INFOS";
     field @FlaggedApi("android.nfc.nfc_vendor_cmd") public static final int MESSAGE_TYPE_COMMAND = 1; // 0x1
     field @FlaggedApi("android.nfc.nfc_vendor_cmd") public static final int SEND_VENDOR_NCI_STATUS_FAILED = 3; // 0x3
     field @FlaggedApi("android.nfc.nfc_vendor_cmd") public static final int SEND_VENDOR_NCI_STATUS_MESSAGE_CORRUPTED = 2; // 0x2
@@ -47,6 +52,10 @@ package android.nfc {
     method @FlaggedApi("android.nfc.nfc_vendor_cmd") public void onVendorNciResponse(@IntRange(from=0, to=15) int, int, @NonNull byte[]);
   }
 
+  @FlaggedApi("android.nfc.enable_nfc_charging") public static interface NfcAdapter.WlcStateListener {
+    method public void onWlcStateChanged(@NonNull android.nfc.WlcListenerDeviceInfo);
+  }
+
   @FlaggedApi("android.nfc.nfc_oem_extension") public final class NfcOemExtension {
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void clearPreference();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcOemExtension.Callback);
@@ -62,6 +71,7 @@ package android.nfc {
 package android.nfc.cardemulation {
 
   public final class CardEmulation {
+    method @FlaggedApi("android.permission.flags.wallet_role_enabled") @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static android.content.ComponentName getPreferredPaymentService(@NonNull android.content.Context);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.ApduServiceInfo> getServices(@NonNull String, int);
   }
 

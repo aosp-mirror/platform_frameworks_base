@@ -579,6 +579,17 @@ public class KeyCharacterMap implements Parcelable {
     }
 
     /**
+     * Get the combining character that corresponds with the provided accent.
+     *
+     * @param accent The accent character.  eg. '`'
+     * @return The combining character
+     * @hide
+     */
+    public static int getCombiningChar(int accent) {
+        return sAccentToCombining.get(accent);
+    }
+
+    /**
      * Describes the character mappings associated with a key.
      *
      * @deprecated instead use {@link KeyCharacterMap#getDisplayLabel(int)},

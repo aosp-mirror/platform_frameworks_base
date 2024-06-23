@@ -18,7 +18,8 @@ package com.android.mediaframeworktest.unit;
 
 import android.media.MediaPlayer;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 /**
  * Unit test class to test the set of valid and invalid states that

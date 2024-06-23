@@ -27,7 +27,8 @@ option java_multiple_files = true;
  * Represents a {@link android.view.InsetsSourceControl} object.
  */
 message InsetsSourceControlProto {
-    optional string type = 1;
+    optional string type = 1 [deprecated=true];
     optional .android.graphics.PointProto position = 2;
     optional SurfaceControlProto leash = 3;
+    optional int32 type_number = 4;
 }

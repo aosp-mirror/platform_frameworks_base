@@ -52,17 +52,7 @@ public class MediaManagerTest {
 
         when(mDevice.getId()).thenReturn(TEST_ID);
 
-        mMediaManager = new MediaManager(mContext, null) {
-            @Override
-            public void startScan() {
-
-            }
-
-            @Override
-            public void stopScan() {
-
-            }
-        };
+        mMediaManager = new MediaManager(mContext, null) {};
     }
 
     @Test

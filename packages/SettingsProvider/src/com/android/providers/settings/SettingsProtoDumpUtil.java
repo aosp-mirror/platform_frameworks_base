@@ -1113,6 +1113,10 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
                 GlobalSettingsProto.Notification.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS);
+        dumpSetting(s, p,
+                Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS,
+                GlobalSettingsProto.Notification
+                        .DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS);
         p.end(notificationToken);
 
         dumpSetting(s, p,
@@ -1857,6 +1861,14 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_PINCH_TO_ZOOM_ANYWHERE_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_PINCH_TO_ZOOM_ANYWHERE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_SINGLE_FINGER_PANNING_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_SINGLE_FINGER_PANNING_ENABLED);
+        dumpSetting(s, p,
                 Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
                 SecureSettingsProto.Accessibility.HEARING_AID_RINGTONE_ROUTING);
         dumpSetting(s, p,
@@ -1866,8 +1878,8 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.HEARING_AID_MEDIA_ROUTING,
                 SecureSettingsProto.Accessibility.HEARING_AID_MEDIA_ROUTING);
         dumpSetting(s, p,
-                Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
-                SecureSettingsProto.Accessibility.HEARING_AID_SYSTEM_SOUNDS_ROUTING);
+                Settings.Secure.HEARING_AID_NOTIFICATION_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_NOTIFICATION_ROUTING);
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED);
@@ -1943,6 +1955,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,
                 SecureSettingsProto.Assist.SEARCH_LONG_PRESS_HOME_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED,
+                SecureSettingsProto.Assist.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED);
         p.end(assistToken);
 
         final long assistHandlesToken = p.start(SecureSettingsProto.ASSIST_HANDLES);
@@ -2597,6 +2612,9 @@ class SettingsProtoDumpUtil {
         p.end(soundsToken);
 
         dumpSetting(s, p,
+                Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+                SecureSettingsProto.STYLUS_POINTER_ICON_ENABLED);
+        dumpSetting(s, p,
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
                 SecureSettingsProto.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED);
         dumpSetting(s, p,
@@ -3002,6 +3020,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.TOUCHPAD_TAP_TO_CLICK,
                 SystemSettingsProto.Touchpad.TAP_TO_CLICK);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_TAP_DRAGGING,
+                SystemSettingsProto.Touchpad.TAP_DRAGGING);
         p.end(touchpadToken);
 
         dumpSetting(s, p,

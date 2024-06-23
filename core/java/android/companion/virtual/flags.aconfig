@@ -101,3 +101,10 @@ flag {
   description: "Enable interactive screen mirroring using Virtual Devices"
   bug: "292212199"
 }
+
+flag {
+  name: "virtual_stylus"
+  namespace: "virtual_devices"
+  description: "Enable virtual stylus input"
+  bug: "304829446"
+}

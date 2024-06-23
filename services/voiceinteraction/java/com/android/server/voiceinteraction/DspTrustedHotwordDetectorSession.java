@@ -42,7 +42,6 @@ import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordDetector;
 import android.service.voice.HotwordRejectedResult;
-import android.service.voice.HotwordTrainingData;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.util.Slog;
 
@@ -88,10 +87,10 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging,
-            @NonNull DetectorRemoteExceptionListener listener) {
+            @NonNull DetectorRemoteExceptionListener listener, int userId) {
         super(remoteHotwordDetectionService, lock, context, token, callback,
                 voiceInteractionServiceUid, voiceInteractorIdentity, scheduledExecutorService,
-                logging, listener);
+                logging, listener, userId);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -186,7 +185,6 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                     if (mDebugHotwordLogging) {
                         Slog.i(TAG, "Egressed detected result: " + newResult);
                     }
-                    logEgressSizeStats(newResult);
                 }
             }
 
@@ -229,25 +227,7 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                     if (mDebugHotwordLogging && result != null) {
                         Slog.i(TAG, "Egressed rejected result: " + result);
                     }
-                    logEgressSizeStats(result);
                 }
-            }
-
-            @Override
-            public void onTrainingData(HotwordTrainingData data) throws RemoteException {
-                sendTrainingData(new TrainingDataEgressCallback() {
-                    @Override
-                    public void onHotwordDetectionServiceFailure(
-                            HotwordDetectionServiceFailure failure) throws RemoteException {
-                        externalCallback.onHotwordDetectionServiceFailure(failure);
-                    }
-
-                    @Override
-                    public void onTrainingData(HotwordTrainingData data)
-                            throws RemoteException {
-                        externalCallback.onTrainingData(data);
-                    }
-                }, data);
             }
         };
 

@@ -16,6 +16,8 @@
 
 package com.android.server.uri;
 
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.NULL_DEFAULT;
+
 import static com.android.server.uri.UriGrantsMockContext.FLAG_PERSISTABLE;
 import static com.android.server.uri.UriGrantsMockContext.FLAG_PREFIX;
 import static com.android.server.uri.UriGrantsMockContext.FLAG_READ;
@@ -57,21 +59,48 @@ import android.content.pm.ProviderInfo;
 import android.net.Uri;
 import android.os.Process;
 import android.os.UserHandle;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArraySet;
-
-import androidx.test.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
+@RunWith(Parameterized.class)
 public class UriGrantsManagerServiceTest {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    /**
+     * Why this class needs to test all combinations of
+     * {@link android.security.Flags#FLAG_CONTENT_URI_PERMISSION_APIS}:
+     *
+     * <p>Although tests in this class don't directly query the flag, its value
+     * is needed for {@link UriGrantsManagerInternal#checkGrantUriPermissionFromIntent}. This is
+     * particularly important for host side tests (Ravenwood), which cannot read flag values from
+     * the device and must have them set explicitly.
+     */
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getFlags() {
+        return FlagsParameterization.allCombinationsOf(
+                android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS);
+    }
+
+    public UriGrantsManagerServiceTest(FlagsParameterization flags) {
+        mSetFlagsRule = new SetFlagsRule(NULL_DEFAULT, flags);
+    }
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule;
 
     private UriGrantsMockContext mContext;
     private UriGrantsManagerInternal mService;
@@ -345,15 +374,18 @@ public class UriGrantsManagerServiceTest {
                 intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY), service);
 
         // Verify that everything is good with the world
-        assertTrue(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ));
+        assertTrue(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ,
+                /* isFullAccessForContentUri */ false));
 
         // Finish activity; service should hold permission
         activity.removeUriPermissions();
-        assertTrue(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ));
+        assertTrue(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ,
+                /* isFullAccessForContentUri */ false));
 
         // And finishing service should wrap things up
         service.removeUriPermissions();
-        assertFalse(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ));
+        assertFalse(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ,
+                /* isFullAccessForContentUri */ false));
     }
 
     @Test

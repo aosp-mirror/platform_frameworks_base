@@ -153,7 +153,8 @@ public class PowerStatsScheduler {
             mPowerStatsStore.dump(ipw);
             // Aggregate the remainder of power stats and dump the results without storing them yet.
             long powerStoreEndMonotonicTime = getLastSavedSpanEndMonotonicTime();
-            mPowerStatsAggregator.aggregatePowerStats(powerStoreEndMonotonicTime, 0,
+            mPowerStatsAggregator.aggregatePowerStats(powerStoreEndMonotonicTime,
+                    MonotonicClock.UNDEFINED,
                     stats -> {
                         // Create a PowerStatsSpan for consistency of the textual output
                         PowerStatsSpan span = PowerStatsStore.createPowerStatsSpan(stats);

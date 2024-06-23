@@ -264,15 +264,18 @@ public interface QSTile {
         }
     }
 
-    @ProvidesInterface(version = BooleanState.VERSION)
-    public static class BooleanState extends State {
+    /**
+     * Distinguished from [BooleanState] for use-case purposes such as allowing null secondary label
+     */
+    @ProvidesInterface(version = AdapterState.VERSION)
+    class AdapterState extends State {
         public static final int VERSION = 1;
         public boolean value;
         public boolean forceExpandIcon;
 
         @Override
         public boolean copyTo(State other) {
-            final BooleanState o = (BooleanState) other;
+            final AdapterState o = (AdapterState) other;
             final boolean changed = super.copyTo(other)
                     || o.value != value
                     || o.forceExpandIcon != forceExpandIcon;
@@ -288,6 +291,18 @@ public interface QSTile {
             rt.insert(rt.length() - 1, ",forceExpandIcon=" + forceExpandIcon);
             return rt;
         }
+
+        @Override
+        public State copy() {
+            AdapterState state = new AdapterState();
+            copyTo(state);
+            return state;
+        }
+    }
+
+    @ProvidesInterface(version = BooleanState.VERSION)
+    class BooleanState extends AdapterState {
+        public static final int VERSION = 1;
 
         @Override
         public State copy() {

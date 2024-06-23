@@ -32,15 +32,20 @@ import java.util.concurrent.TimeUnit;
     @ContextHubTransaction.Type
     private final int mTransactionType;
 
-    /* The ID of the nanoapp this transaction is targeted for, null if not applicable. */
+    /** The ID of the nanoapp this transaction is targeted for, null if not applicable. */
     private final Long mNanoAppId;
 
-    /*
+    /**
      * The host package associated with this transaction.
      */
     private final String mPackage;
 
-    /*
+    /**
+     * The message sequence number associated with this transaction, null if not applicable.
+     */
+    private final Integer mMessageSequenceNumber;
+
+    /**
      * true if the transaction has already completed, false otherwise
      */
     private boolean mIsComplete = false;
@@ -50,6 +55,7 @@ import java.util.concurrent.TimeUnit;
         mTransactionType = type;
         mNanoAppId = null;
         mPackage = packageName;
+        mMessageSequenceNumber = null;
     }
 
     /* package */ ContextHubServiceTransaction(int id, int type, long nanoAppId,
@@ -58,6 +64,16 @@ import java.util.concurrent.TimeUnit;
         mTransactionType = type;
         mNanoAppId = nanoAppId;
         mPackage = packageName;
+        mMessageSequenceNumber = null;
+    }
+
+    /* package */ ContextHubServiceTransaction(int id, int type, String packageName,
+            int messageSequenceNumber) {
+        mTransactionId = id;
+        mTransactionType = type;
+        mNanoAppId = null;
+        mPackage = packageName;
+        mMessageSequenceNumber = messageSequenceNumber;
     }
 
     /**
@@ -111,6 +127,13 @@ import java.util.concurrent.TimeUnit;
     }
 
     /**
+     * @return the message sequence number of this transaction
+     */
+    Integer getMessageSequenceNumber() {
+        return mMessageSequenceNumber;
+    }
+
+    /**
      * Gets the timeout period as defined in IContexthub.hal
      *
      * @return the timeout of this transaction in the specified time unit
@@ -119,6 +142,8 @@ import java.util.concurrent.TimeUnit;
         switch (mTransactionType) {
             case ContextHubTransaction.TYPE_LOAD_NANOAPP:
                 return unit.convert(30L, TimeUnit.SECONDS);
+            case ContextHubTransaction.TYPE_RELIABLE_MESSAGE:
+                return unit.convert(1000L, TimeUnit.MILLISECONDS);
             case ContextHubTransaction.TYPE_UNLOAD_NANOAPP:
             case ContextHubTransaction.TYPE_ENABLE_NANOAPP:
             case ContextHubTransaction.TYPE_DISABLE_NANOAPP:
@@ -152,7 +177,11 @@ import java.util.concurrent.TimeUnit;
         if (mNanoAppId != null) {
             out += "appId = 0x" + Long.toHexString(mNanoAppId) + ", ";
         }
-        out += "package = " + mPackage + ")";
+        out += "package = " + mPackage;
+        if (mMessageSequenceNumber != null) {
+            out += ", messageSequenceNumber = " + mMessageSequenceNumber;
+        }
+        out += ")";
 
         return out;
     }

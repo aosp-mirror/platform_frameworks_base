@@ -29,6 +29,15 @@ interface ShadeRepository {
      */
     val qsExpansion: StateFlow<Float>
 
+    /** Amount shade has expanded with regard to the UDFPS location */
+    val udfpsTransitionToFullShadeProgress: StateFlow<Float>
+
+    /**
+     * Information about the currently running fling animation, or null if no fling animation is
+     * running.
+     */
+    val currentFling: StateFlow<FlingInfo?>
+
     /**
      * The amount the lockscreen shade has dragged down by the user, [0-1]. 0 means fully collapsed,
      * 1 means fully expanded. Value resets to 0 when the user finishes dragging.
@@ -132,13 +141,16 @@ interface ShadeRepository {
     @Deprecated("Use ShadeInteractor instead")
     fun setLegacyLockscreenShadeTracking(tracking: Boolean)
 
-    /** Amount shade has expanded with regard to the UDFPS location */
-    val udfpsTransitionToFullShadeProgress: StateFlow<Float>
-
     /** The amount QS has expanded without notifications */
     fun setQsExpansion(qsExpansion: Float)
 
     fun setUdfpsTransitionToFullShadeProgress(progress: Float)
+
+    /**
+     * Sets the [FlingInfo] of the currently animating fling. If [info] is null, no fling is
+     * animating.
+     */
+    fun setCurrentFling(info: FlingInfo?)
 
     /**
      * Set the amount the shade has dragged down by the user, [0-1]. 0 means fully collapsed, 1
@@ -167,6 +179,9 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     private var _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
     override val udfpsTransitionToFullShadeProgress: StateFlow<Float> =
         _udfpsTransitionToFullShadeProgress.asStateFlow()
+
+    private val _currentFling: MutableStateFlow<FlingInfo?> = MutableStateFlow(null)
+    override val currentFling: StateFlow<FlingInfo?> = _currentFling.asStateFlow()
 
     private val _legacyShadeExpansion = MutableStateFlow(0f)
     @Deprecated("Use ShadeInteractor.shadeExpansion instead")
@@ -247,17 +262,21 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
         _qsExpansion.value = qsExpansion
     }
 
-    @Deprecated("Should only be called by NPVC and tests")
-    override fun setLegacyShadeExpansion(expandedFraction: Float) {
-        _legacyShadeExpansion.value = expandedFraction
-    }
-
     override fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float) {
         _lockscreenShadeExpansion.value = lockscreenShadeExpansion
     }
 
     override fun setUdfpsTransitionToFullShadeProgress(progress: Float) {
         _udfpsTransitionToFullShadeProgress.value = progress
+    }
+
+    override fun setCurrentFling(info: FlingInfo?) {
+        _currentFling.value = info
+    }
+
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyShadeExpansion(expandedFraction: Float) {
+        _legacyShadeExpansion.value = expandedFraction
     }
 
     companion object {

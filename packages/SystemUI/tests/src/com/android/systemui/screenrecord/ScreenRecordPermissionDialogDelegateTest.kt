@@ -25,7 +25,7 @@ import android.widget.Spinner
 import androidx.test.filters.SmallTest
 import com.android.systemui.Dependency
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -74,11 +74,10 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
         val systemUIDialogFactory =
             SystemUIDialog.Factory(
                 context,
-                Dependency.get(FeatureFlags::class.java),
                 Dependency.get(SystemUIDialogManager::class.java),
                 Dependency.get(SysUiState::class.java),
                 Dependency.get(BroadcastDispatcher::class.java),
-                Dependency.get(DialogLaunchAnimator::class.java),
+                Dependency.get(DialogTransitionAnimator::class.java),
             )
         val delegate =
             ScreenRecordPermissionDialogDelegate(

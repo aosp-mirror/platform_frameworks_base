@@ -16,11 +16,12 @@
 
 package com.android.settingslib.spa.widget.card
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class CardButton(
     val text: String,
-    val isMain: Boolean = false,
+    val contentDescription: String? = null,
     val onClick: () -> Unit,
 )
 
@@ -38,4 +39,12 @@ data class CardModel(
     val onDismiss: (() -> Unit)? = null,
 
     val buttons: List<CardButton> = emptyList(),
+
+    /** If specified, this color will be used to tint the icon and the buttons. */
+    val tintColor: Color = Color.Unspecified,
+
+    /** If specified, this color will be used to tint the icon and the buttons. */
+    val containerColor: Color = Color.Unspecified,
+
+    val onClick: (() -> Unit)? = null,
 )

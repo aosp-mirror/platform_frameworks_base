@@ -17,13 +17,13 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.Rotation
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import android.tools.device.traces.parsers.toFlickerComponent
+import android.tools.Rotation
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.parsers.toFlickerComponent
 import android.view.WindowInsets.Type.ime
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
@@ -55,10 +55,12 @@ class ShowImeWhileDismissingThemedPopupDialogTest(flicker: LegacyFlickerTest) : 
             testApp.launchViaIntent(wmHelper)
             testApp.waitIMEShown(wmHelper)
             broadcastActionTrigger.doAction(ACTION_START_DIALOG_THEMED_ACTIVITY)
-            wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(
-                        ActivityOptions.DialogThemedActivity.COMPONENT.toFlickerComponent())
-                    .waitForAndVerify()
+            wmHelper
+                .StateSyncBuilder()
+                .withFullScreenApp(
+                    ActivityOptions.DialogThemedActivity.COMPONENT.toFlickerComponent()
+                )
+                .waitForAndVerify()
             // Verify IME insets isn't visible on dialog since it's non-IME focusable window
             assertFalse(testApp.getInsetsVisibleFromDialog(ime()))
             assertTrue(testApp.getInsetsVisibleFromDialog(statusBars()))

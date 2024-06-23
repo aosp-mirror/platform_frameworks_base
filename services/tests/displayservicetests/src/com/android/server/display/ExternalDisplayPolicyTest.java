@@ -25,6 +25,7 @@ import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -97,6 +98,8 @@ public class ExternalDisplayPolicyTest {
     private LogicalDisplay mMockedLogicalDisplay;
     @Mock
     private DisplayNotificationManager mMockedDisplayNotificationManager;
+    @Mock
+    private ExternalDisplayStatsService mMockedExternalDisplayStatsService;
     @Captor
     private ArgumentCaptor<IThermalEventListener> mThermalEventListenerCaptor;
     @Captor
@@ -126,6 +129,8 @@ public class ExternalDisplayPolicyTest {
         when(mMockedInjector.getDisplayNotificationManager()).thenReturn(
                 mMockedDisplayNotificationManager);
         when(mMockedInjector.getHandler()).thenReturn(mHandler);
+        when(mMockedInjector.getExternalDisplayStatsService())
+                .thenReturn(mMockedExternalDisplayStatsService);
         mExternalDisplayPolicy = new ExternalDisplayPolicy(mMockedInjector);
 
         // Initialize mocked logical display
@@ -178,19 +183,69 @@ public class ExternalDisplayPolicyTest {
         assertDisplaySetEnabled(/*enabled=*/ false);
         // Expected only 1 invocation, upon critical temperature.
         verify(mMockedDisplayNotificationManager).onHighTemperatureExternalDisplayNotAllowed();
+        verify(mMockedExternalDisplayStatsService).onDisplayDisabled(eq(EXTERNAL_DISPLAY_ID));
     }
 
     @Test
-    public void testSetEnabledExternalDisplay(@TestParameter final boolean enable) {
-        mExternalDisplayPolicy.setExternalDisplayEnabledLocked(mMockedLogicalDisplay, enable);
-        assertDisplaySetEnabled(enable);
+    public void testSetEnabledExternalDisplay() {
+        mExternalDisplayPolicy.setExternalDisplayEnabledLocked(mMockedLogicalDisplay,
+                /*enabled=*/ true);
+        assertDisplaySetEnabled(/*enabled=*/ true);
+    }
+
+    @Test
+    public void testHandleDisplayAdded() {
+        mExternalDisplayPolicy.handleLogicalDisplayAddedLocked(mMockedLogicalDisplay);
+        verify(mMockedExternalDisplayStatsService).onDisplayAdded(eq(EXTERNAL_DISPLAY_ID));
+    }
+
+    @Test
+    public void testHandleDisplayDisconnected() {
+        mExternalDisplayPolicy.handleLogicalDisplayDisconnectedLocked(mMockedLogicalDisplay);
+        verify(mMockedExternalDisplayStatsService).onDisplayDisconnected(eq(EXTERNAL_DISPLAY_ID));
+    }
+
+    @Test
+    public void testOnPresentationStarted() {
+        mExternalDisplayPolicy.onPresentation(EXTERNAL_DISPLAY_ID, /*isShown=*/ true);
+        verify(mMockedExternalDisplayStatsService).onPresentationWindowAdded(
+                eq(EXTERNAL_DISPLAY_ID));
+    }
+
+    @Test
+    public void testOnPresentationEnded() {
+        mExternalDisplayPolicy.onPresentation(EXTERNAL_DISPLAY_ID, /*isShown=*/ false);
+        verify(mMockedExternalDisplayStatsService).onPresentationWindowRemoved(
+                eq(EXTERNAL_DISPLAY_ID));
+    }
+
+    @Test
+    public void testSetDisabledExternalDisplay() {
+        mExternalDisplayPolicy.setExternalDisplayEnabledLocked(mMockedLogicalDisplay,
+                /*enabled=*/ false);
+        assertDisplaySetEnabled(/*enabled=*/ false);
     }
 
     @Test
     public void testOnExternalDisplayAvailable() {
-        when(mMockedLogicalDisplay.isEnabledLocked()).thenReturn(false);
+
         mExternalDisplayPolicy.handleExternalDisplayConnectedLocked(mMockedLogicalDisplay);
+        assertNotAskedToEnableDisplay();
+        verify(mMockedExternalDisplayStatsService, never()).onDisplayConnected(any());
+
+        mExternalDisplayPolicy.onBootCompleted();
         assertAskedToEnableDisplay();
+        verify(mMockedExternalDisplayStatsService).onDisplayConnected(eq(mMockedLogicalDisplay));
+    }
+
+    @Test
+    public void testOnExternalDisplayUnpluggedBeforeBootCompletes() {
+        mExternalDisplayPolicy.handleExternalDisplayConnectedLocked(mMockedLogicalDisplay);
+        mExternalDisplayPolicy.handleLogicalDisplayDisconnectedLocked(mMockedLogicalDisplay);
+        mExternalDisplayPolicy.onBootCompleted();
+        assertNotAskedToEnableDisplay();
+        verify(mMockedExternalDisplayStatsService, never()).onDisplayConnected(any());
+        verify(mMockedExternalDisplayStatsService, never()).onDisplayDisconnected(anyInt());
     }
 
     @Test
@@ -262,8 +317,14 @@ public class ExternalDisplayPolicyTest {
                 mDisplayEventCaptor.capture());
         assertThat(mLogicalDisplayCaptor.getValue()).isEqualTo(mMockedLogicalDisplay);
         assertThat(mDisplayEventCaptor.getValue()).isEqualTo(EVENT_DISPLAY_CONNECTED);
+        verify(mMockedLogicalDisplay).setEnabledLocked(false);
         clearInvocations(mMockedLogicalDisplayMapper);
-        when(mMockedLogicalDisplay.isEnabledLocked()).thenReturn(true);
+        clearInvocations(mMockedLogicalDisplay);
+    }
+
+    private void assertNotAskedToEnableDisplay() {
+        verify(mMockedInjector, never()).sendExternalDisplayEventLocked(any(), anyInt());
+        verify(mMockedLogicalDisplay, never()).setEnabledLocked(anyBoolean());
     }
 
     private void assertIsExternalDisplayAllowed(final boolean enabled) {

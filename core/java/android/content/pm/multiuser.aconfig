@@ -45,6 +45,20 @@ flag {
 }
 
 flag {
+    name: "start_user_before_scheduled_alarms"
+    namespace: "multiuser"
+    description: "Persist list of users with alarms scheduled and wakeup stopped users before alarms are due"
+    bug: "314907186"
+}
+
+flag {
+    name: "add_ui_for_sounds_from_background_users"
+    namespace: "multiuser"
+    description: "Allow foreground user to dismiss sounds that are coming from background users"
+    bug: "314907186"
+}
+
+flag {
     name: "enable_biometrics_to_unlock_private_space"
     namespace: "profile_experiences"
     description: "Add support to unlock the private space using biometrics"
@@ -64,4 +78,110 @@ flag {
     description: "Implement new Avatar Picker outside of SetttingsLib with ability to select avatars from Google Account and synchronise to any changes."
     bug: "296829976"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "allow_resolver_sheet_for_private_space"
+    namespace: "profile_experiences"
+    description: "Add support for Private Space in resolver sheet"
+    bug: "307515485"
+}
+
+flag {
+    name: "move_quiet_mode_operations_to_separate_thread"
+    namespace: "profile_experiences"
+    description: "Move the quiet mode operations, happening on a background thread today, to a separate thread."
+    bug: "320483504"
+}
+
+flag {
+    name: "enable_private_space_autolock_on_restarts"
+    namespace: "profile_experiences"
+    description: "Enable auto-locking private space on device restarts"
+    bug: "296993385"
+}
+
+flag {
+    name: "enable_system_user_only_for_services_and_providers"
+    namespace: "multiuser"
+    description: "Enable systemUserOnly manifest attribute for services and providers."
+    bug: "302354856"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_private_space_features"
+    namespace: "profile_experiences"
+    description: "Enable the support for private space and all its sub-features"
+    bug: "286418785"
+}
+
+flag {
+    name: "enable_permission_to_access_hidden_profiles"
+    namespace: "profile_experiences"
+    description: "Add permission to access API hidden users data via system APIs"
+    bug: "321988638"
+}
+
+flag {
+    name: "handle_interleaved_settings_for_private_space"
+    namespace: "profile_experiences"
+    description: "Handle listing of private space apps in settings pages with interleaved content"
+    bug: "323212460"
+}
+
+flag {
+    name: "enable_hiding_profiles"
+    namespace: "profile_experiences"
+    description: "Allow the use of a profileApiAvailability user property to exclude HIDDEN profiles in API results"
+    bug: "316362775"
+}
+
+flag {
+    name: "enable_launcher_apps_hidden_profile_checks"
+    namespace: "profile_experiences"
+    description: "Enable extra check to limit access to hidden profiles data in Launcher apps APIs."
+    bug: "321988638"
+}
+
+flag {
+    name: "show_set_screen_lock_dialog"
+    namespace: "profile_experiences"
+    description: "Display the dialog to set up screen lock when private space unlock operation is requested"
+    bug: "316129700"
+}
+
+flag {
+    name: "reorder_wallpaper_during_user_switch"
+    namespace: "multiuser"
+    description: "Reorder loading home and lock screen wallpapers during a user switch."
+    bug: "324911115"
+}
+
+flag {
+    name: "set_power_mode_during_user_switch"
+    namespace: "multiuser"
+    description: "Set power mode during a user switch."
+    bug: "325249845"
+}
+
+flag {
+    name: "disable_private_space_items_on_home"
+    namespace: "profile_experiences"
+    description: "Disables adding items belonging to Private Space on Home Screen manually as well as automatically"
+    bug: "287975131"
+}
+
+flag {
+    name: "enable_ps_sensitive_notifications_toggle"
+    namespace: "profile_experiences"
+    description: "Enable the sensitive notifications toggle to be visible in the Private space settings page"
+    bug: "317067050"
+}
+
+flag {
+    name: "enable_private_space_intent_redirection"
+    namespace: "profile_experiences"
+    description: "Enable Private Space telephony and SMS intent redirection to the main user"
+    bug: "325576602"
 }

@@ -25,7 +25,9 @@ import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IKeyboardBacklightState;
+import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
+import android.hardware.input.KeyboardLayoutSelectionResult;
 import android.hardware.input.TouchCalibration;
 import android.os.CombinedVibration;
 import android.hardware.input.IInputSensorEventListener;
@@ -119,8 +121,9 @@ interface IInputManager {
             String keyboardLayoutDescriptor);
 
     // New Keyboard layout config APIs
-    String getKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier, int userId,
-            in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype);
+    KeyboardLayoutSelectionResult getKeyboardLayoutForInputDevice(
+            in InputDeviceIdentifier identifier, int userId, in InputMethodInfo imeInfo,
+            in InputMethodSubtype imeSubtype);
 
     @EnforcePermission("SET_KEYBOARD_LAYOUT")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
@@ -244,4 +247,14 @@ interface IInputManager {
     void unregisterKeyboardBacklightListener(IKeyboardBacklightListener listener);
 
     HostUsiVersion getHostUsiVersionFromDisplayConfig(int displayId);
+
+    @EnforcePermission("MONITOR_STICKY_MODIFIER_STATE")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)")
+    void registerStickyModifierStateListener(IStickyModifierStateListener listener);
+
+    @EnforcePermission("MONITOR_STICKY_MODIFIER_STATE")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)")
+    void unregisterStickyModifierStateListener(IStickyModifierStateListener listener);
 }

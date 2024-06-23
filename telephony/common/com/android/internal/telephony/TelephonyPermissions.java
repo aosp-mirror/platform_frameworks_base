@@ -196,7 +196,7 @@ public final class TelephonyPermissions {
         // We have READ_PHONE_STATE permission, so return true as long as the AppOps bit hasn't been
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        return appOps.noteOp(AppOpsManager.OPSTR_READ_PHONE_STATE, uid, callingPackage,
+        return appOps.noteOpNoThrow(AppOpsManager.OPSTR_READ_PHONE_STATE, uid, callingPackage,
                 callingFeatureId, null) == AppOpsManager.MODE_ALLOWED;
     }
 
@@ -249,7 +249,7 @@ public final class TelephonyPermissions {
         // We have READ_PHONE_STATE permission, so return true as long as the AppOps bit hasn't been
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        return appOps.noteOp(AppOpsManager.OPSTR_READ_PHONE_STATE, uid, callingPackage,
+        return appOps.noteOpNoThrow(AppOpsManager.OPSTR_READ_PHONE_STATE, uid, callingPackage,
                 callingFeatureId, null) == AppOpsManager.MODE_ALLOWED;
     }
 
@@ -521,7 +521,7 @@ public final class TelephonyPermissions {
         // We have READ_CALL_LOG permission, so return true as long as the AppOps bit hasn't been
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        return appOps.noteOp(AppOpsManager.OPSTR_READ_CALL_LOG, uid, callingPackage,
+        return appOps.noteOpNoThrow(AppOpsManager.OPSTR_READ_CALL_LOG, uid, callingPackage,
                 callingPackageName, null) == AppOpsManager.MODE_ALLOWED;
     }
 
@@ -601,8 +601,9 @@ public final class TelephonyPermissions {
      *
      * @return true if caller has ACCESS_LAST_KNOWN_CELL_ID permission else false.
      */
+    @RequiresPermission(Manifest.permission.ACCESS_LAST_KNOWN_CELL_ID)
     public static boolean checkLastKnownCellIdAccessPermission(Context context) {
-        return context.checkCallingOrSelfPermission("android.permission.ACCESS_LAST_KNOWN_CELL_ID")
+        return context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_LAST_KNOWN_CELL_ID)
                 == PackageManager.PERMISSION_GRANTED;
     }
 

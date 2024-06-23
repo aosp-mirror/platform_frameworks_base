@@ -395,7 +395,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         }
         if (displayId == mDisplayId) {
             mLightBarController.onNavigationBarAppearanceChanged(appearance, nbModeChanged,
-                    BarTransitions.MODE_TRANSPARENT, navbarColorManagedByIme);
+                    mTransitionMode, navbarColorManagedByIme);
         }
         if (mBehavior != behavior) {
             mBehavior = behavior;
@@ -495,12 +495,13 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         return mBehavior != BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
     }
 
-    private boolean isImmersiveMode() {
-        return mBehavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-    }
-
     public void onConfigurationChanged(Configuration configuration) {
         mEdgeBackGestureHandler.onConfigurationChanged(configuration);
+    }
+
+    @Override
+    public void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
+        mOverviewProxyService.onNavigationBarLumaSamplingEnabled(displayId, enable);
     }
 
     @Override

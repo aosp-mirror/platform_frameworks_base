@@ -32,7 +32,10 @@ android_test {
         enabled: false,
     },
     srcs: ["src/**/*.java"],
-    static_libs: ["junit"],
+    static_libs: [
+        "junit",
+        "androidx.test.rules",
+    ],
     libs: [
         "android.test.runner.stubs",
         "android.test.base.stubs",

@@ -55,7 +55,9 @@ import java.util.List;
  * A message of a {@link MessagingLayout}.
  */
 @RemoteViews.RemoteView
-public class MessagingGroup extends LinearLayout implements MessagingLinearLayout.MessagingChild {
+public class MessagingGroup extends NotificationOptimizedLinearLayout implements
+        MessagingLinearLayout.MessagingChild {
+
     private static final MessagingPool<MessagingGroup> sInstancePool =
             new MessagingPool<>(10);
 

@@ -25,14 +25,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.SeekBar
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.model.SysUiState
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK
@@ -78,9 +76,8 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
     @Mock private lateinit var dialogManager: SystemUIDialogManager
     @Mock private lateinit var dialogFactory: SystemUIDialog.Factory
     @Mock private lateinit var userTracker: UserTracker
-    private val featureFlags = FakeFeatureFlags()
     @Mock private lateinit var sysuiState: SysUiState
-    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
 
     @Before
     fun setUp() {
@@ -88,7 +85,6 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
         val mainHandler = Handler(testableLooper.looper)
         systemSettings = FakeSettings()
-        featureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM, true)
         // Guarantee that the systemSettings always starts with the default font scale.
         systemSettings.putFloatForUser(Settings.System.FONT_SCALE, 1.0f, userTracker.userId)
         secureSettings = FakeSettings()
@@ -96,31 +92,34 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
         backgroundDelayableExecutor = FakeExecutor(systemClock)
         whenever(sysuiState.setFlag(anyInt(), anyBoolean())).thenReturn(sysuiState)
 
-        fontScalingDialogDelegate = spy(FontScalingDialogDelegate(
+        fontScalingDialogDelegate =
+            spy(
+                FontScalingDialogDelegate(
+                    mContext,
+                    dialogFactory,
+                    LayoutInflater.from(mContext),
+                    systemSettings,
+                    secureSettings,
+                    systemClock,
+                    userTracker,
+                    mainHandler,
+                    backgroundDelayableExecutor
+                )
+            )
+
+        dialog =
+            SystemUIDialog(
                 mContext,
-                dialogFactory,
-                LayoutInflater.from(mContext),
-                systemSettings,
-                secureSettings,
-                systemClock,
-                userTracker,
-                mainHandler,
-                backgroundDelayableExecutor
-            ))
+                0,
+                DEFAULT_DISMISS_ON_DEVICE_LOCK,
+                dialogManager,
+                sysuiState,
+                fakeBroadcastDispatcher,
+                mDialogTransitionAnimator,
+                fontScalingDialogDelegate
+            )
 
-        dialog = SystemUIDialog(
-            mContext,
-            0,
-            DEFAULT_DISMISS_ON_DEVICE_LOCK,
-            featureFlags,
-            dialogManager,
-            sysuiState,
-            fakeBroadcastDispatcher,
-            dialogLaunchAnimator,
-            fontScalingDialogDelegate
-        )
-
-        whenever(dialogFactory.create(any())).thenReturn(dialog)
+        whenever(dialogFactory.create(any(), any())).thenReturn(dialog)
     }
 
     @Test
@@ -299,11 +298,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
         // Default seekbar progress for font size is 1, simulate dragging to 0 without
         // releasing the finger
         changeListener.onStartTrackingTouch(seekBar)
-        changeListener.onProgressChanged(
-            seekBar,
-            /* progress= */ 0,
-            /* fromUser= */ false
-        )
+        changeListener.onProgressChanged(seekBar, /* progress= */ 0, /* fromUser= */ false)
         backgroundDelayableExecutor.advanceClockToNext()
         backgroundDelayableExecutor.runAllReady()
 

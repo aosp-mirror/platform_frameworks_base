@@ -66,7 +66,7 @@ public class NotificationInlineImageResolver implements ImageResolver {
      * @param imageCache The implementation of internal cache.
      */
     public NotificationInlineImageResolver(Context context, ImageCache imageCache) {
-        mContext = context.getApplicationContext();
+        mContext = context;
         mImageCache = imageCache;
 
         if (mImageCache != null) {
@@ -74,6 +74,11 @@ public class NotificationInlineImageResolver implements ImageResolver {
         }
 
         updateMaxImageSizes();
+    }
+
+    @VisibleForTesting
+    public Context getContext() {
+        return mContext;
     }
 
     /**

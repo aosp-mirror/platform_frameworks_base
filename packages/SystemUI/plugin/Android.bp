@@ -47,8 +47,8 @@ java_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx-constraintlayout_constraintlayout",
+        "PlatformAnimationLib",
         "PluginCoreLib",
-        "SystemUIAnimationLib",
         "SystemUICommon",
         "SystemUILogLib",
         "androidx.annotation_annotation",

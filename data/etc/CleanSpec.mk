@@ -43,6 +43,8 @@
 #$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/core_intermediates)
 #$(call add-clean-step, find $(OUT_DIR) -type f -name "IGTalkSession*" -print0 | xargs -0 rm -f)
 #$(call add-clean-step, rm -rf $(PRODUCT_OUT)/data/*)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/etc/sysconfig/package-shareduid-allowlist.xml)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/product/etc/sysconfig/package-shareduid-allowlist.xml)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/etc/permissions/com.android.carrierconfig.xml)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/product/etc/permissions/com.android.carrierconfig.xml)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/etc/permissions/com.android.emergency.xml)

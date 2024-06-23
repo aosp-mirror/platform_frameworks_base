@@ -16,8 +16,8 @@
 
 package com.android.internal.telephony;
 
-import android.telephony.EmergencyRegResult;
+import android.telephony.EmergencyRegistrationResult;
 
 oneway interface IWwanSelectorResultCallback {
-    void onComplete(in EmergencyRegResult result);
+    void onComplete(in EmergencyRegistrationResult result);
 }

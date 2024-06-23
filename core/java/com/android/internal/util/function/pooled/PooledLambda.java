@@ -1009,7 +1009,7 @@ public interface PooledLambda {
             K arg11, L arg12) {
         synchronized (Message.sPoolSync) {
             PooledRunnable callback = acquire(PooledLambdaImpl.sMessageCallbacksPool,
-                    function, 11, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6, arg7,
+                    function, 12, 0, ReturnType.VOID, arg1, arg2, arg3, arg4, arg5, arg6, arg7,
                     arg8, arg9, arg10, arg11, arg12);
             return Message.obtain().setCallback(callback.recycleOnUse());
         }

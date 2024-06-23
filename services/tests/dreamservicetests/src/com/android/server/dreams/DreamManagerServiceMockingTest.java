@@ -36,13 +36,14 @@ import android.os.UserManager;
 import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 
-import com.android.server.LocalServices;
+import com.android.internal.util.test.LocalServiceKeeperRule;
 import com.android.server.SystemService;
+import com.android.server.testutils.TestHandler;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -65,23 +66,24 @@ public class DreamManagerServiceMockingTest {
     @Mock
     private UserManager mUserManagerMock;
 
-    private MockitoSession mMockitoSession;
+    @Rule
+    public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
 
-    private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
-        LocalServices.removeServiceForTest(clazz);
-        LocalServices.addService(clazz, mock);
-    }
+    private TestHandler mTestHandler;
+    private MockitoSession mMockitoSession;
 
     @Before
     public void setUp() throws Exception {
+        mTestHandler = new TestHandler(/* callback= */ null);
         MockitoAnnotations.initMocks(this);
-
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
         mResourcesSpy = spy(mContextSpy.getResources());
         when(mContextSpy.getResources()).thenReturn(mResourcesSpy);
 
-        addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternalMock);
-        addLocalServiceMock(PowerManagerInternal.class, mPowerManagerInternalMock);
+        mLocalServiceKeeperRule.overrideLocalService(
+                ActivityManagerInternal.class, mActivityManagerInternalMock);
+        mLocalServiceKeeperRule.overrideLocalService(
+                PowerManagerInternal.class, mPowerManagerInternalMock);
 
         when(mContextSpy.getSystemService(UserManager.class)).thenReturn(mUserManagerMock);
         mMockitoSession = mockitoSession()
@@ -94,26 +96,20 @@ public class DreamManagerServiceMockingTest {
     @After
     public void tearDown() throws Exception {
         mMockitoSession.finishMocking();
-        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
-        LocalServices.removeServiceForTest(PowerManagerInternal.class);
     }
 
     private DreamManagerService createService() {
-        return new DreamManagerService(mContextSpy);
+        return new DreamManagerService(mContextSpy, mTestHandler);
     }
 
     @Test
-    @FlakyTest(bugId = 293443309)
     public void testSettingsQueryUserChange() {
         final DreamManagerService service = createService();
-
         final SystemService.TargetUser from =
                 new SystemService.TargetUser(mock(UserInfo.class));
         final SystemService.TargetUser to =
                 new SystemService.TargetUser(mock(UserInfo.class));
-
         service.onUserSwitching(from, to);
-
         verify(() -> Settings.Secure.getIntForUser(any(),
                 eq(Settings.Secure.SCREENSAVER_ENABLED),
                 anyInt(),

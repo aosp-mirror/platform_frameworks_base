@@ -87,7 +87,7 @@ int64_t AKeyEvent_getDownTime(const AInputEvent* key_event) {
 
 const AInputEvent* AKeyEvent_fromJava(JNIEnv* env, jobject keyEvent) {
     std::unique_ptr<KeyEvent> event = std::make_unique<KeyEvent>();
-    *event = android::android_view_KeyEvent_toNative(env, keyEvent);
+    *event = android::android_view_KeyEvent_obtainAsCopy(env, keyEvent);
     return event.release();
 }
 
@@ -312,6 +312,25 @@ const AInputEvent* AMotionEvent_fromJava(JNIEnv* env, jobject motionEvent) {
     MotionEvent* event = new MotionEvent();
     event->copyFrom(eventSrc, true);
     return event;
+}
+
+jobject AInputEvent_toJava(JNIEnv* env, const AInputEvent* aInputEvent) {
+    LOG_ALWAYS_FATAL_IF(aInputEvent == nullptr, "Expected aInputEvent to be non-null");
+    const int32_t eventType = AInputEvent_getType(aInputEvent);
+    switch (eventType) {
+        case AINPUT_EVENT_TYPE_MOTION:
+            return android::android_view_MotionEvent_obtainAsCopy(env,
+                                                                  static_cast<const MotionEvent&>(
+                                                                          *aInputEvent))
+                    .release();
+        case AINPUT_EVENT_TYPE_KEY:
+            return android::android_view_KeyEvent_obtainAsCopy(env,
+                                                               static_cast<const KeyEvent&>(
+                                                                       *aInputEvent))
+                    .release();
+        default:
+            LOG_ALWAYS_FATAL("Unexpected event type %d in AInputEvent_toJava.", eventType);
+    }
 }
 
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,

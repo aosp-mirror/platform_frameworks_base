@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -29,6 +30,8 @@ import android.graphics.text.MeasuredText;
 import android.graphics.text.TextRunShaper;
 import android.os.Build;
 import android.text.TextShaper;
+
+import com.android.graphics.hwui.flags.Flags;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -147,6 +150,18 @@ public class Canvas extends BaseCanvas {
      */
     public boolean isHardwareAccelerated() {
         return false;
+    }
+
+    /**
+     * Indicates whether this Canvas is drawing high contrast text.
+     *
+     * @see android.view.accessibility.AccessibilityManager#isHighTextContrastEnabled()
+     * @return True if high contrast text is enabled, false otherwise.
+     *
+     * @hide
+     */
+    public boolean isHighContrastTextEnabled() {
+        return nIsHighContrastText(mNativeCanvasWrapper);
     }
 
     /**
@@ -766,6 +781,21 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * Preconcat the current matrix with the specified matrix. If the specified
+     * matrix is null, this method does nothing. If the canvas's matrix is changed in the z-axis
+     * through this function, the deprecated {@link #getMatrix()} method will return a 3x3 with
+     * z-axis info stripped away.
+     *
+     * @param m The 4x4 matrix to preconcatenate with the current matrix
+     */
+    @FlaggedApi(Flags.FLAG_MATRIX_44)
+    public void concat44(@Nullable Matrix44 m) {
+        if (m != null) {
+            nConcat(mNativeCanvasWrapper, m.mBackingArray);
+        }
+    }
+
+    /**
      * Completely replace the current matrix with the specified matrix. If the
      * matrix parameter is null, then the current matrix is reset to identity.
      *
@@ -1110,6 +1140,30 @@ public class Canvas extends BaseCanvas {
         return false;
     }
 
+    /**
+     * Intersect the current clip with the specified shader.
+     * The shader will be treated as an alpha mask, taking the intersection of the two.
+     *
+     * @param shader The shader to intersect with the current clip
+     */
+    @FlaggedApi(Flags.FLAG_CLIP_SHADER)
+    public void clipShader(@NonNull Shader shader) {
+        nClipShader(mNativeCanvasWrapper, shader.getNativeInstance(),
+                Region.Op.INTERSECT.nativeInt);
+    }
+
+    /**
+     * Set the clip to the difference of the current clip and the shader.
+     * The shader will be treated as an alpha mask, taking the difference of the two.
+     *
+     * @param shader The shader to intersect with the current clip
+     */
+    @FlaggedApi(Flags.FLAG_CLIP_SHADER)
+    public void clipOutShader(@NonNull Shader shader) {
+        nClipShader(mNativeCanvasWrapper, shader.getNativeInstance(),
+                Region.Op.DIFFERENCE.nativeInt);
+    }
+
     public @Nullable DrawFilter getDrawFilter() {
         return mDrawFilter;
     }
@@ -1410,6 +1464,8 @@ public class Canvas extends BaseCanvas {
     @CriticalNative
     private static native boolean nIsOpaque(long canvasHandle);
     @CriticalNative
+    private static native boolean nIsHighContrastText(long canvasHandle);
+    @CriticalNative
     private static native int nGetWidth(long canvasHandle);
     @CriticalNative
     private static native int nGetHeight(long canvasHandle);
@@ -1444,6 +1500,8 @@ public class Canvas extends BaseCanvas {
     private static native void nSkew(long canvasHandle, float sx, float sy);
     @CriticalNative
     private static native void nConcat(long nativeCanvas, long nativeMatrix);
+    @FastNative
+    private static native void nConcat(long nativeCanvas, float[] mat);
     @CriticalNative
     private static native void nSetMatrix(long nativeCanvas, long nativeMatrix);
     @CriticalNative
@@ -1451,6 +1509,8 @@ public class Canvas extends BaseCanvas {
             float left, float top, float right, float bottom, int regionOp);
     @CriticalNative
     private static native boolean nClipPath(long nativeCanvas, long nativePath, int regionOp);
+    @CriticalNative
+    private static native void nClipShader(long nativeCanvas, long nativeShader, int regionOp);
     @CriticalNative
     private static native void nSetDrawFilter(long nativeCanvas, long nativeFilter);
     @CriticalNative

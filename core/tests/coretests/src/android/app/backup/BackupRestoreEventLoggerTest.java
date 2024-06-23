@@ -26,10 +26,14 @@ import static junit.framework.Assert.fail;
 import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.backup.Flags;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,7 +47,9 @@ import java.util.Optional;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class BackupRestoreEventLoggerTest {
-    private static final int DATA_TYPES_ALLOWED = 15;
+    private static final int DATA_TYPES_ALLOWED_AFTER_FLAG = 150;
+
+    private static final int DATA_TYPES_ALLOWED_BEFORE_FLAG = 15;
 
     private static final String DATA_TYPE_1 = "data_type_1";
     private static final String DATA_TYPE_2 = "data_type_2";
@@ -54,6 +60,9 @@ public class BackupRestoreEventLoggerTest {
 
     private BackupRestoreEventLogger mLogger;
     private MessageDigest mHashDigest;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -83,10 +92,11 @@ public class BackupRestoreEventLoggerTest {
     }
 
     @Test
-    public void testBackupLogger_onlyAcceptsAllowedNumberOfDataTypes() {
+    public void testBackupLogger_datatypeLimitFlagOff_onlyAcceptsAllowedNumberOfDataTypes() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_INCREASE_DATATYPES_FOR_AGENT_LOGGING);
         mLogger = new BackupRestoreEventLogger(BACKUP);
 
-        for (int i = 0; i < DATA_TYPES_ALLOWED; i++) {
+        for (int i = 0; i < DATA_TYPES_ALLOWED_BEFORE_FLAG; i++) {
             String dataType = DATA_TYPE_1 + i;
             mLogger.logItemsBackedUp(dataType, /* count */ 5);
             mLogger.logItemsBackupFailed(dataType, /* count */ 5, /* error */ null);
@@ -103,10 +113,53 @@ public class BackupRestoreEventLoggerTest {
     }
 
     @Test
-    public void testRestoreLogger_onlyAcceptsAllowedNumberOfDataTypes() {
+    public void testRestoreLogger_datatypeLimitFlagOff_onlyAcceptsAllowedNumberOfDataTypes() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_INCREASE_DATATYPES_FOR_AGENT_LOGGING);
         mLogger = new BackupRestoreEventLogger(RESTORE);
 
-        for (int i = 0; i < DATA_TYPES_ALLOWED; i++) {
+        for (int i = 0; i < DATA_TYPES_ALLOWED_BEFORE_FLAG; i++) {
+            String dataType = DATA_TYPE_1 + i;
+            mLogger.logItemsRestored(dataType, /* count */ 5);
+            mLogger.logItemsRestoreFailed(dataType, /* count */ 5, /* error */ null);
+            mLogger.logRestoreMetadata(dataType, METADATA_1);
+
+            assertThat(getResultForDataTypeIfPresent(mLogger, dataType)).isNotEqualTo(
+                    Optional.empty());
+        }
+
+        mLogger.logItemsRestored(DATA_TYPE_2, /* count */ 5);
+        mLogger.logItemsRestoreFailed(DATA_TYPE_2, /* count */ 5, /* error */ null);
+        mLogger.logRestoreMetadata(DATA_TYPE_2, METADATA_1);
+        assertThat(getResultForDataTypeIfPresent(mLogger, DATA_TYPE_2)).isEqualTo(Optional.empty());
+    }
+
+    @Test
+    public void testBackupLogger_datatypeLimitFlagOn_onlyAcceptsAllowedNumberOfDataTypes() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_INCREASE_DATATYPES_FOR_AGENT_LOGGING);
+        mLogger = new BackupRestoreEventLogger(BACKUP);
+
+        for (int i = 0; i < DATA_TYPES_ALLOWED_AFTER_FLAG; i++) {
+            String dataType = DATA_TYPE_1 + i;
+            mLogger.logItemsBackedUp(dataType, /* count */ 5);
+            mLogger.logItemsBackupFailed(dataType, /* count */ 5, /* error */ null);
+            mLogger.logBackupMetadata(dataType, METADATA_1);
+
+            assertThat(getResultForDataTypeIfPresent(mLogger, dataType)).isNotEqualTo(
+                    Optional.empty());
+        }
+
+        mLogger.logItemsBackedUp(DATA_TYPE_2, /* count */ 5);
+        mLogger.logItemsBackupFailed(DATA_TYPE_2, /* count */ 5, /* error */ null);
+        mLogger.logRestoreMetadata(DATA_TYPE_2, METADATA_1);
+        assertThat(getResultForDataTypeIfPresent(mLogger, DATA_TYPE_2)).isEqualTo(Optional.empty());
+    }
+
+    @Test
+    public void testRestoreLogger_datatypeLimitFlagOn_onlyAcceptsAllowedNumberOfDataTypes() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_INCREASE_DATATYPES_FOR_AGENT_LOGGING);
+        mLogger = new BackupRestoreEventLogger(RESTORE);
+
+        for (int i = 0; i < DATA_TYPES_ALLOWED_AFTER_FLAG; i++) {
             String dataType = DATA_TYPE_1 + i;
             mLogger.logItemsRestored(dataType, /* count */ 5);
             mLogger.logItemsRestoreFailed(dataType, /* count */ 5, /* error */ null);

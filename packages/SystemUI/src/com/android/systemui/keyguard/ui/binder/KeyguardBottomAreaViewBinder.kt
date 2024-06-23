@@ -32,7 +32,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.settingslib.Utils
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.view.LaunchableLinearLayout
 import com.android.systemui.common.shared.model.Icon
@@ -241,7 +241,6 @@ object KeyguardBottomAreaViewBinder {
                                 vibratorHelper?.vibrate(KeyguardBottomAreaVibrations.Activated)
                                 settingsMenu.setOnTouchListener(
                                     KeyguardSettingsButtonOnTouchListener(
-                                        view = settingsMenu,
                                         viewModel = viewModel.settingsMenuViewModel,
                                     )
                                 )
@@ -535,7 +534,7 @@ object KeyguardBottomAreaViewBinder {
         activityStarter.postStartActivityDismissingKeyguard(
             WallpaperPickerIntentUtils.getIntent(view.context, LAUNCH_SOURCE_KEYGUARD),
             /* delay= */ 0,
-            /* animationController= */ ActivityLaunchAnimator.Controller.fromView(view),
+            /* animationController= */ ActivityTransitionAnimator.Controller.fromView(view),
             /* customMessage= */ view.context.getString(R.string.keyguard_unlock_to_customize_ls)
         )
     }

@@ -14,3 +14,10 @@ flag {
     description: "Add APIs to let apps attach debug information to jobs"
     bug: "293491637"
 }
+
+flag {
+    name: "backup_jobs_exemption"
+    namespace: "backstage_power"
+    description: "Introduce a new RUN_BACKUP_JOBS permission and exemption logic allowing for longer running jobs for apps whose primary purpose is to backup or sync content."
+    bug: "318731461"
+}

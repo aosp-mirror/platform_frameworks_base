@@ -24,8 +24,8 @@ import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -225,9 +225,9 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var activityStarter: ActivityStarter
-    @Mock private lateinit var animationController: ActivityLaunchAnimator.Controller
+    @Mock private lateinit var animationController: ActivityTransitionAnimator.Controller
     @Mock private lateinit var expandable: Expandable
-    @Mock private lateinit var launchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var launchAnimator: DialogTransitionAnimator
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 
@@ -249,7 +249,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(expandable.activityLaunchController()).thenReturn(animationController)
+        whenever(expandable.activityTransitionController()).thenReturn(animationController)
 
         userTracker = FakeUserTracker()
         homeControls =

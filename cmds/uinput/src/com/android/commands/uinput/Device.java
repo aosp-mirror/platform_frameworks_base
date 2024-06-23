@@ -55,7 +55,7 @@ public class Device {
     private final SparseArray<InputAbsInfo> mAbsInfo;
     private final OutputStream mOutputStream;
     private final Object mCond = new Object();
-    private long mTimeToSend;
+    private long mTimeToSendNanos;
 
     static {
         System.loadLibrary("uinputcommand_jni");
@@ -65,7 +65,8 @@ public class Device {
             int productId, int versionId, int bus, int ffEffectsMax, String port,
             DeviceCallback callback);
     private static native void nativeCloseUinputDevice(long ptr);
-    private static native void nativeInjectEvent(long ptr, int type, int code, int value);
+    private static native void nativeInjectEvent(long ptr, long timestampMicros, int type, int code,
+                                                 int value);
     private static native void nativeConfigure(int handle, int code, int[] configs);
     private static native void nativeSetAbsInfo(int handle, int axisCode, Parcel axisParcel);
     private static native int nativeGetEvdevEventTypeByLabel(String label);
@@ -101,27 +102,54 @@ public class Device {
         }
 
         mHandler.obtainMessage(MSG_OPEN_UINPUT_DEVICE, args).sendToTarget();
-        mTimeToSend = SystemClock.uptimeMillis();
+        mTimeToSendNanos = SystemClock.uptimeNanos();
+    }
+
+    private long getTimeToSendMillis() {
+        // Since we can only specify delays in milliseconds but evemu timestamps are in
+        // microseconds, we have to round up the delays to avoid setting event timestamps
+        // which are in the future (which the kernel would silently reject and replace with
+        // the current time).
+        //
+        // This should be the same as (long) Math.ceil(mTimeToSendNanos / 1_000_000.0), except
+        // without the precision loss that comes from converting from long to double and back.
+        return mTimeToSendNanos / 1_000_000 + ((mTimeToSendNanos % 1_000_000 > 0) ? 1 : 0);
     }
 
     /**
      * Inject uinput events to device
      *
      * @param events  Array of raw uinput events.
+     * @param offsetMicros The difference in microseconds between the timestamps of the previous
+     *                     batch of events injected and this batch. If set to -1, the current
+     *                     timestamp will be used.
      */
-    public void injectEvent(int[] events) {
+    public void injectEvent(int[] events, long offsetMicros) {
         // if two messages are sent at identical time, they will be processed in order received
-        Message msg = mHandler.obtainMessage(MSG_INJECT_EVENT, events);
-        mHandler.sendMessageAtTime(msg, mTimeToSend);
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = events;
+        args.argl1 = offsetMicros;
+        args.argl2 = SystemClock.uptimeNanos();
+        Message msg = mHandler.obtainMessage(MSG_INJECT_EVENT, args);
+        mHandler.sendMessageAtTime(msg, getTimeToSendMillis());
     }
 
     /**
-     * Impose a delay to the device for execution.
+     * Delay subsequent device activity by the specified amount of time.
      *
-     * @param delay  Time to delay in unit of milliseconds.
+     * <p>Note that although the delay is specified in nanoseconds, due to limitations of {@link
+     * Handler}'s API, scheduling only occurs with millisecond precision. When scheduling an
+     * injection or sync, the time at which it is scheduled will be rounded up to the nearest
+     * millisecond. While this means that a particular injection cannot be scheduled precisely,
+     * rounding errors will not accumulate over time. For example, if five injections are scheduled
+     * with a delay of 1,200,000ns before each one, the total delay will be 6ms, as opposed to the
+     * 10ms it would have been if each individual delay had been rounded up (as {@link EvemuParser}
+     * would otherwise have to do to avoid sending timestamps that are in the future).
+     *
+     * @param delayNanos  Time to delay in unit of nanoseconds.
      */
-    public void addDelay(int delay) {
-        mTimeToSend = Math.max(SystemClock.uptimeMillis(), mTimeToSend) + delay;
+    public void addDelayNanos(long delayNanos) {
+        mTimeToSendNanos += delayNanos;
     }
 
     /**
@@ -131,7 +159,8 @@ public class Device {
      * @param syncToken  The token for this sync command.
      */
     public void syncEvent(String syncToken) {
-        mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_SYNC_EVENT, syncToken), mTimeToSend);
+        mHandler.sendMessageAtTime(
+                mHandler.obtainMessage(MSG_SYNC_EVENT, syncToken), getTimeToSendMillis());
     }
 
     /**
@@ -140,7 +169,8 @@ public class Device {
      */
     public void close() {
         Message msg = mHandler.obtainMessage(MSG_CLOSE_UINPUT_DEVICE);
-        mHandler.sendMessageAtTime(msg, Math.max(SystemClock.uptimeMillis(), mTimeToSend) + 1);
+        mHandler.sendMessageAtTime(
+                msg, Math.max(SystemClock.uptimeMillis(), getTimeToSendMillis()) + 1);
         try {
             synchronized (mCond) {
                 mCond.wait();
@@ -151,6 +181,7 @@ public class Device {
 
     private class DeviceHandler extends Handler {
         private long mPtr;
+        private long mLastInjectTimestampMicros = -1;
         private int mBarrierToken;
 
         DeviceHandler(Looper looper) {
@@ -160,7 +191,7 @@ public class Device {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_OPEN_UINPUT_DEVICE:
+                case MSG_OPEN_UINPUT_DEVICE: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     String name = (String) args.arg1;
                     mPtr = nativeOpenUinputDevice(name, args.argi1 /* id */,
@@ -172,18 +203,48 @@ public class Device {
                         RuntimeException ex = new RuntimeException(
                                 "Could not create uinput device \"" + name + "\"");
                         Log.e(TAG, "Couldn't create uinput device, exiting.", ex);
+                        args.recycle();
                         throw ex;
                     }
+                    args.recycle();
                     break;
-                case MSG_INJECT_EVENT:
-                    if (mPtr != 0) {
-                        int[] events = (int[]) msg.obj;
-                        for (int pos = 0; pos + 2 < events.length; pos += 3) {
-                            nativeInjectEvent(mPtr, events[pos], events[pos + 1], events[pos + 2]);
-                        }
+                }
+                case MSG_INJECT_EVENT: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    if (mPtr == 0) {
+                        args.recycle();
+                        break;
                     }
+                    long offsetMicros = args.argl1;
+                    if (mLastInjectTimestampMicros == -1 || offsetMicros == -1) {
+                        // There's often a delay of a few milliseconds between the time specified to
+                        // Handler.sendMessageAtTime and the handler actually being called, due to
+                        // the way threads are scheduled. We don't take this into account when
+                        // calling addDelayNanos between the first batch of event injections (when
+                        // we set the "base timestamp" from which all others will be offset) and the
+                        // second batch, meaning that the actual time between the handler calls for
+                        // those batches may be less than the offset between their timestamps. When
+                        // that happens, we would pass a timestamp for the second batch that's
+                        // actually in the future. The kernel's uinput API rejects timestamps that
+                        // are in the future and uses the current time instead, making the reported
+                        // timestamps inconsistent with the recording we're replaying.
+                        //
+                        // To prevent this, we need to use the time at which we scheduled this first
+                        // batch, rather than the actual current time.
+                        mLastInjectTimestampMicros = args.argl2 / 1000;
+                    } else {
+                        mLastInjectTimestampMicros += offsetMicros;
+                    }
+
+                    int[] events = (int[]) args.arg1;
+                    for (int pos = 0; pos + 2 < events.length; pos += 3) {
+                        nativeInjectEvent(mPtr, mLastInjectTimestampMicros, events[pos],
+                                events[pos + 1], events[pos + 2]);
+                    }
+                    args.recycle();
                     break;
-                case MSG_CLOSE_UINPUT_DEVICE:
+                }
+                case MSG_CLOSE_UINPUT_DEVICE: {
                     if (mPtr != 0) {
                         nativeCloseUinputDevice(mPtr);
                         getLooper().quitSafely();
@@ -196,11 +257,14 @@ public class Device {
                         mCond.notify();
                     }
                     break;
-                case MSG_SYNC_EVENT:
+                }
+                case MSG_SYNC_EVENT: {
                     handleSyncEvent((String) msg.obj);
                     break;
-                default:
+                }
+                default: {
                     throw new IllegalArgumentException("Unknown device message");
+                }
             }
         }
 

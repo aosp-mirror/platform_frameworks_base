@@ -104,7 +104,8 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     }
 
     private void notifyManagedProfileRemoved() {
-        for (Callback callback : mCallbacks) {
+        ArrayList<Callback> copy = new ArrayList<>(mCallbacks);
+        for (Callback callback : copy) {
             callback.onManagedProfileRemoved();
         }
     }
@@ -148,7 +149,8 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
         @Override
         public void onUserChanged(int newUser, @NonNull Context userContext) {
             reloadManagedProfiles();
-            for (Callback callback : mCallbacks) {
+            ArrayList<Callback> copy = new ArrayList<>(mCallbacks);
+            for (Callback callback : copy) {
                 callback.onManagedProfileChanged();
             }
         }
@@ -156,7 +158,8 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
         @Override
         public void onProfilesChanged(@NonNull List<UserInfo> profiles) {
             reloadManagedProfiles();
-            for (Callback callback : mCallbacks) {
+            ArrayList<Callback> copy = new ArrayList<>(mCallbacks);
+            for (Callback callback : copy) {
                 callback.onManagedProfileChanged();
             }
         }

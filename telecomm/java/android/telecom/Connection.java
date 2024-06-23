@@ -21,6 +21,7 @@ import static android.Manifest.permission.MODIFY_PHONE_STATE;
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -56,6 +57,7 @@ import android.view.Surface;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
+import com.android.server.telecom.flags.Flags;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -961,28 +963,6 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.event.CALL_REMOTELY_UNHELD";
 
     /**
-     * Connection event used to inform an {@link InCallService} which initiated a call handover via
-     * {@link Call#EVENT_REQUEST_HANDOVER} that the handover from this {@link Connection} has
-     * successfully completed.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_HANDOVER_COMPLETE =
-            "android.telecom.event.HANDOVER_COMPLETE";
-
-    /**
-     * Connection event used to inform an {@link InCallService} which initiated a call handover via
-     * {@link Call#EVENT_REQUEST_HANDOVER} that the handover from this {@link Connection} has failed
-     * to complete.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_HANDOVER_FAILED =
-            "android.telecom.event.HANDOVER_FAILED";
-
-    /**
      * String Connection extra key used to store SIP invite fields for an incoming call for IMS call
      */
     public static final String EXTRA_SIP_INVITE = "android.telecom.extra.SIP_INVITE";
@@ -1037,9 +1017,11 @@ public abstract class Connection extends Conferenceable {
     /**
      * Connection event used to communicate a {@link android.telephony.CallQuality} report from
      * telephony to Telecom for relaying to
-     * {@link DiagnosticCall#onCallQualityReceived(CallQuality)}.
+     * {@link CallDiagnostics#onCallQualityReceived(CallQuality)}.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     public static final String EVENT_CALL_QUALITY_REPORT =
             "android.telecom.event.CALL_QUALITY_REPORT";
 
@@ -1048,6 +1030,8 @@ public abstract class Connection extends Conferenceable {
      * {@link android.telephony.CallQuality} data.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     public static final String EXTRA_CALL_QUALITY_REPORT =
             "android.telecom.extra.CALL_QUALITY_REPORT";
 
@@ -3362,15 +3346,6 @@ public abstract class Connection extends Conferenceable {
     public void onDisconnect() {}
 
     /**
-     * Notifies this Connection of a request to disconnect a participant of the conference managed
-     * by the connection.
-     *
-     * @param endpoint the {@link Uri} of the participant to disconnect.
-     * @hide
-     */
-    public void onDisconnectConferenceParticipant(Uri endpoint) {}
-
-    /**
      * Notifies this Connection of a request to separate from its parent conference.
      */
     public void onSeparate() {}
@@ -4050,9 +4025,12 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Retrieves the direction of this connection.
      * @return The direction of the call.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     public final @Call.Details.CallDirection int getCallDirection() {
         return mCallDirection;
     }

@@ -25,7 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.accessibility.fontscaling.FontScalingDialogDelegate
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -62,7 +62,7 @@ class FontScalingTileTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var qsLogger: QSLogger
-    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
     @Mock private lateinit var uiEventLogger: QsEventLogger
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var fontScalingDialogDelegate: FontScalingDialogDelegate
@@ -96,7 +96,7 @@ class FontScalingTileTest : SysuiTestCase() {
                 activityStarter,
                 qsLogger,
                 keyguardStateController,
-                dialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 { fontScalingDialogDelegate },
             )
         fontScalingTile.initialize()
@@ -132,7 +132,7 @@ class FontScalingTileTest : SysuiTestCase() {
                 eq(false)
             )
         argumentCaptor.value.run()
-        verify(dialogLaunchAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
+        verify(mDialogTransitionAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
     }
 
     @Test
@@ -151,7 +151,7 @@ class FontScalingTileTest : SysuiTestCase() {
                 eq(false)
             )
         argumentCaptor.value.run()
-        verify(dialogLaunchAnimator, never())
+        verify(mDialogTransitionAnimator, never())
             .showFromView(any(), eq(view), nullable(), anyBoolean())
     }
 

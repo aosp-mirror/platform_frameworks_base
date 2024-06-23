@@ -16,20 +16,19 @@
 
 package com.android.mediaframeworktest.functional;
 
-import java.io.File;
-
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
-import android.util.Log;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
+
 import com.android.mediaframeworktest.MediaFrameworkTest;
+
+import java.io.File;
 
 /*
  * System tests for the handling of mime type in the media framework.

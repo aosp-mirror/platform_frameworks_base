@@ -28,6 +28,7 @@ import android.annotation.StringRes;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
@@ -55,6 +56,7 @@ import java.util.Set;
  * <p>See the main {@link AutofillService} documentation for more details and examples.
  */
 public final class FillResponse implements Parcelable {
+    // common_typos_disable
 
     /**
      * Flag used to generate {@link FillEventHistory.Event events} of type
@@ -81,11 +83,17 @@ public final class FillResponse implements Parcelable {
      */
     public static final int FLAG_DELAY_FILL = 0x4;
 
+    /**
+     * @hide
+     */
+    public static final int FLAG_CREDENTIAL_MANAGER_RESPONSE = 0x8;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_TRACK_CONTEXT_COMMITED,
             FLAG_DISABLE_ACTIVITY_ONLY,
-            FLAG_DELAY_FILL
+            FLAG_DELAY_FILL,
+            FLAG_CREDENTIAL_MANAGER_RESPONSE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface FillResponseFlags {}
@@ -116,6 +124,7 @@ public final class FillResponse implements Parcelable {
     private final boolean mShowFillDialogIcon;
     private final boolean mShowSaveDialogIcon;
     private final @Nullable FieldClassification[] mDetectedFieldTypes;
+    private final @Nullable PendingIntent mDialogPendingIntent;
 
     /**
     * Creates a shollow copy of the provided FillResponse.
@@ -150,7 +159,8 @@ public final class FillResponse implements Parcelable {
                 r.mServiceDisplayNameResourceId,
                 r.mShowFillDialogIcon,
                 r.mShowSaveDialogIcon,
-                r.mDetectedFieldTypes);
+                r.mDetectedFieldTypes,
+                r.mDialogPendingIntent);
     }
 
     private FillResponse(ParceledListSlice<Dataset> datasets, SaveInfo saveInfo, Bundle clientState,
@@ -163,7 +173,7 @@ public final class FillResponse implements Parcelable {
             int[] cancelIds, boolean supportsInlineSuggestions, int iconResourceId,
             int serviceDisplayNameResourceId, boolean showFillDialogIcon,
             boolean showSaveDialogIcon,
-            FieldClassification[] detectedFieldTypes) {
+            FieldClassification[] detectedFieldTypes, PendingIntent dialogPendingIntent) {
         mDatasets = datasets;
         mSaveInfo = saveInfo;
         mClientState = clientState;
@@ -190,6 +200,7 @@ public final class FillResponse implements Parcelable {
         mShowFillDialogIcon = showFillDialogIcon;
         mShowSaveDialogIcon = showSaveDialogIcon;
         mDetectedFieldTypes = detectedFieldTypes;
+        mDialogPendingIntent = dialogPendingIntent;
     }
 
     private FillResponse(@NonNull Builder builder) {
@@ -219,6 +230,7 @@ public final class FillResponse implements Parcelable {
         mShowFillDialogIcon = builder.mShowFillDialogIcon;
         mShowSaveDialogIcon = builder.mShowSaveDialogIcon;
         mDetectedFieldTypes = builder.mDetectedFieldTypes;
+        mDialogPendingIntent = builder.mDialogPendingIntent;
     }
 
     /** @hide */
@@ -399,6 +411,7 @@ public final class FillResponse implements Parcelable {
         private boolean mShowFillDialogIcon = true;
         private boolean mShowSaveDialogIcon = true;
         private FieldClassification[] mDetectedFieldTypes;
+        private PendingIntent mDialogPendingIntent;
 
         /**
          * Adds a new {@link FieldClassification} to this response, to
@@ -828,7 +841,9 @@ public final class FillResponse implements Parcelable {
         public Builder setFlags(@FillResponseFlags int flags) {
             throwIfDestroyed();
             mFlags = Preconditions.checkFlagsArgument(flags,
-                    FLAG_TRACK_CONTEXT_COMMITED | FLAG_DISABLE_ACTIVITY_ONLY | FLAG_DELAY_FILL);
+                    FLAG_TRACK_CONTEXT_COMMITED
+                            | FLAG_DISABLE_ACTIVITY_ONLY | FLAG_DELAY_FILL
+                            | FLAG_CREDENTIAL_MANAGER_RESPONSE);
             return this;
         }
 
@@ -1079,6 +1094,24 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
+         * Sets credential dialog pending intent. Framework will use the intent to launch the
+         * selector UI. A replacement for previous fill bottom sheet.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called.
+         * @throws NullPointerException if {@code pendingIntent} is {@code null}.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setDialogPendingIntent(@NonNull PendingIntent pendingIntent) {
+            throwIfDestroyed();
+            Preconditions.checkNotNull(pendingIntent,
+                    "can't pass a null object to setDialogPendingIntent");
+            mDialogPendingIntent = pendingIntent;
+            return this;
+        }
+
+        /**
          * Builds a new {@link FillResponse} instance.
          *
          * @throws IllegalStateException if any of the following conditions occur:
@@ -1187,6 +1220,9 @@ public final class FillResponse implements Parcelable {
         if (mAuthentication != null) {
             builder.append(", hasAuthentication");
         }
+        if (mDialogPendingIntent != null) {
+            builder.append(", hasDialogPendingIntent");
+        }
         if (mAuthenticationIds != null) {
             builder.append(", authenticationIds=").append(Arrays.toString(mAuthenticationIds));
         }
@@ -1232,6 +1268,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelable(mInlineTooltipPresentation, flags);
         parcel.writeParcelable(mDialogPresentation, flags);
         parcel.writeParcelable(mDialogHeader, flags);
+        parcel.writeParcelable(mDialogPendingIntent, flags);
         parcel.writeParcelableArray(mFillDialogTriggerIds, flags);
         parcel.writeParcelable(mHeader, flags);
         parcel.writeParcelable(mFooter, flags);
@@ -1281,6 +1318,11 @@ public final class FillResponse implements Parcelable {
             final RemoteViews dialogHeader = parcel.readParcelable(null, android.widget.RemoteViews.class);
             if (dialogHeader != null) {
                 builder.setDialogHeader(dialogHeader);
+            }
+            final PendingIntent dialogPendingIntent = parcel.readParcelable(null,
+                    PendingIntent.class);
+            if (dialogPendingIntent != null) {
+                builder.setDialogPendingIntent(dialogPendingIntent);
             }
             final AutofillId[] triggerIds = parcel.readParcelableArray(null, AutofillId.class);
             if (triggerIds != null) {

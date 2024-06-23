@@ -28,8 +28,19 @@ filegroup {
     visibility: ["//visibility:private"],
 }
 
+java_defaults {
+    name: "FrameworksCoreTests-resources",
+    aaptflags: [
+        "-0 .dat",
+        "-0 .gld",
+        "-c fa",
+    ],
+    resource_dirs: ["res"],
+}
+
 android_test {
     name: "FrameworksCoreTests",
+    defaults: ["FrameworksCoreTests-resources"],
 
     srcs: [
         "src/**/*.java",
@@ -60,9 +71,11 @@ android_test {
         "frameworks-core-util-lib",
         "mockwebserver",
         "guava",
+        "android.app.usage.flags-aconfig-java",
         "android.view.accessibility.flags-aconfig-java",
         "androidx.core_core",
         "androidx.core_core-ktx",
+        "androidx.test.core",
         "androidx.test.espresso.core",
         "androidx.test.ext.junit",
         "androidx.test.runner",
@@ -83,6 +96,11 @@ android_test {
         "com.android.text.flags-aconfig-java",
         "flag-junit",
         "ravenwood-junit",
+        "perfetto_trace_java_protos",
+        "flickerlib-parsers",
+        "flickerlib-trace_processor_shell",
+        "mockito-target-extended-minus-junit4",
+        "TestParameterInjector",
     ],
 
     libs: [
@@ -109,7 +127,6 @@ android_test {
 
     certificate: "platform",
 
-    resource_dirs: ["res"],
     resource_zips: [":FrameworksCoreTests_apks_as_resources"],
     java_resources: [":FrameworksCoreTests_unit_test_cert_der"],
 
@@ -120,6 +137,30 @@ android_test {
         ":BinderProxyCountingTestApp",
         ":BinderProxyCountingTestService",
     ],
+}
+
+// FrameworksCoreTestsRavenwood pulls in the R.java class from this one.
+// Note, "FrameworksCoreTests" and "FrameworksCoreTests-resonly" _might_ not have indentical
+// R.java (not sure if there's a guarantee), but that doesn't matter as long as
+// FrameworksCoreTestsRavenwood consistently uses the R definition in this module.
+android_app {
+    name: "FrameworksCoreTests-resonly",
+    defaults: ["FrameworksCoreTests-resources"],
+
+    // FrameworksCoreTestsRavenwood references the .aapt.srcjar
+    use_resource_processor: false,
+    libs: [
+        "framework-res",
+        "android.test.runner",
+        "org.apache.http.legacy",
+    ],
+    uses_libs: [
+        "android.test.runner",
+    ],
+    optional_uses_libs: [
+        "org.apache.http.legacy",
+    ],
+    sdk_version: "core_platform",
 }
 
 // Rules to copy all the test apks to the intermediate raw resource directory
@@ -199,21 +240,31 @@ android_ravenwood_test {
         "androidx.test.uiautomator_uiautomator",
         "compatibility-device-util-axt",
         "flag-junit",
-        "mockito_ravenwood",
         "platform-test-annotations",
         "flag-junit",
         "testng",
     ],
     srcs: [
+        "src/android/app/ActivityManagerTest.java",
+        "src/android/content/ContextTest.java",
+        "src/android/content/pm/PackageManagerTest.java",
+        "src/android/content/pm/UserInfoTest.java",
+        "src/android/database/CursorWindowTest.java",
         "src/android/os/**/*.java",
-        "src/com/android/internal/os/**/*.java",
+        "src/android/telephony/PinResultTest.java",
         "src/android/util/**/*.java",
-        "src/com/android/internal/os/LongArrayMultiStateCounterTest.java",
+        "src/android/view/DisplayTest.java",
+        "src/android/view/DisplayInfoTest.java",
+        "src/com/android/internal/logging/**/*.java",
+        "src/com/android/internal/os/**/*.java",
         "src/com/android/internal/util/**/*.java",
         "src/com/android/internal/power/EnergyConsumerStatsTest.java",
-        ":FrameworksCoreTests{.aapt.srcjar}",
-        "src/com/android/internal/ravenwood/**/*.java",
 
+        // Pull in R.java from FrameworksCoreTests-resonly, not from FrameworksCoreTests,
+        // to avoid having a dependency to FrameworksCoreTests.
+        // This way, when updating source files and running this test, we don't need to
+        // rebuild the entire FrameworksCoreTests, which would be slow.
+        ":FrameworksCoreTests-resonly{.aapt.srcjar}",
         ":FrameworksCoreTests-aidl",
         ":FrameworksCoreTests-helpers",
         ":FrameworksCoreTestDoubles-sources",

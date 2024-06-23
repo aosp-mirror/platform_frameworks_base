@@ -19,13 +19,22 @@ package com.android.keyguard
 import android.app.Presentation
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.Display
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
+import android.widget.FrameLayout
+import android.widget.FrameLayout.LayoutParams
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
+import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.res.R
+import com.android.systemui.shared.clocks.ClockRegistry
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -37,6 +46,8 @@ constructor(
     @Assisted display: Display,
     context: Context,
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
+    private val clockRegistry: ClockRegistry,
+    private val clockEventController: ClockEventController,
 ) :
     Presentation(
         context,
@@ -45,18 +56,126 @@ constructor(
         WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
     ) {
 
+    private lateinit var rootView: FrameLayout
+    private var clock: View? = null
     private lateinit var keyguardStatusViewController: KeyguardStatusViewController
-    private lateinit var clock: KeyguardStatusView
+    private lateinit var faceController: ClockFaceController
+    private lateinit var clockFrame: FrameLayout
+
+    private val clockChangedListener =
+        object : ClockRegistry.ClockChangeListener {
+            override fun onCurrentClockChanged() {
+                setClock(clockRegistry.createCurrentClock())
+            }
+
+            override fun onAvailableClocksChanged() {}
+        }
+
+    private val layoutChangeListener =
+        object : View.OnLayoutChangeListener {
+            override fun onLayoutChange(
+                view: View,
+                left: Int,
+                top: Int,
+                right: Int,
+                bottom: Int,
+                oldLeft: Int,
+                oldTop: Int,
+                oldRight: Int,
+                oldBottom: Int
+            ) {
+                clock?.let {
+                    faceController.events.onTargetRegionChanged(
+                        Rect(it.left, it.top, it.width, it.height)
+                    )
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (migrateClocksToBlueprint()) {
+            onCreateV2()
+        } else {
+            onCreate()
+        }
+    }
+
+    fun onCreateV2() {
+        rootView = FrameLayout(getContext(), null)
+        rootView.setClipChildren(false)
+        setContentView(rootView)
+
+        setFullscreen()
+
+        setClock(clockRegistry.createCurrentClock())
+    }
+
+    fun onCreate() {
         setContentView(
             LayoutInflater.from(context)
                 .inflate(R.layout.keyguard_clock_presentation, /* root= */ null)
         )
-        val window = window ?: error("no window available.")
 
+        setFullscreen()
+
+        clock = requireViewById(R.id.clock)
+        keyguardStatusViewController =
+            keyguardStatusViewComponentFactory
+                .build(clock as KeyguardStatusView, display)
+                .keyguardStatusViewController
+                .apply {
+                    setDisplayedOnSecondaryDisplay()
+                    init()
+                }
+    }
+
+    override fun onAttachedToWindow() {
+        if (migrateClocksToBlueprint()) {
+            clockRegistry.registerClockChangeListener(clockChangedListener)
+            clockEventController.registerListeners(clock!!)
+
+            faceController.animations.enter()
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        if (migrateClocksToBlueprint()) {
+            clockEventController.unregisterListeners()
+            clockRegistry.unregisterClockChangeListener(clockChangedListener)
+        }
+
+        super.onDetachedFromWindow()
+    }
+
+    override fun onDisplayChanged() {
+        val window = window ?: error("no window available.")
+        window.getDecorView().requestLayout()
+    }
+
+    private fun setClock(clockController: ClockController) {
+        clock?.removeOnLayoutChangeListener(layoutChangeListener)
+        rootView.removeAllViews()
+
+        faceController = clockController.largeClock
+        clock = faceController.view.also { it.addOnLayoutChangeListener(layoutChangeListener) }
+        rootView.addView(
+            clock,
+            FrameLayout.LayoutParams(
+                context.resources.getDimensionPixelSize(R.dimen.keyguard_presentation_width),
+                WRAP_CONTENT,
+                Gravity.CENTER,
+            )
+        )
+
+        clockEventController.clock = clockController
+        clockEventController.setLargeClockOnSecondaryDisplay(true)
+        faceController.events.onSecondaryDisplayChanged(true)
+    }
+
+    private fun setFullscreen() {
+        val window = window ?: error("no window available.")
         // Logic to make the lock screen fullscreen
         window.decorView.systemUiVisibility =
             (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
@@ -65,16 +184,6 @@ constructor(
         window.attributes.fitInsetsTypes = 0
         window.isNavigationBarContrastEnforced = false
         window.navigationBarColor = Color.TRANSPARENT
-
-        clock = requireViewById(R.id.clock)
-        keyguardStatusViewController =
-            keyguardStatusViewComponentFactory
-                .build(clock, display)
-                .keyguardStatusViewController
-                .apply {
-                    setDisplayedOnSecondaryDisplay()
-                    init()
-                }
     }
 
     /** [ConnectedDisplayKeyguardPresentation] factory. */

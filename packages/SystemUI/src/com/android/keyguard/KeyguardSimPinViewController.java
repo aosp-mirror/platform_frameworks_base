@@ -42,6 +42,7 @@ import android.widget.ImageView;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.res.R;
@@ -93,10 +94,12 @@ public class KeyguardSimPinViewController
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
             TelephonyManager telephonyManager, FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController, FeatureFlags featureFlags,
-            SelectedUserInteractor selectedUserInteractor) {
+            SelectedUserInteractor selectedUserInteractor,
+            KeyguardKeyboardInteractor keyguardKeyboardInteractor) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
-                emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor);
+                emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor,
+                keyguardKeyboardInteractor);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mTelephonyManager = telephonyManager;
         mSimImageView = mView.findViewById(R.id.keyguard_sim);
@@ -105,6 +108,13 @@ public class KeyguardSimPinViewController
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
+        mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
+    }
+
+    @Override
+    protected void onViewDetached() {
+        super.onViewDetached();
+        mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
     }
 
     @Override
@@ -128,14 +138,12 @@ public class KeyguardSimPinViewController
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
-        mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mView.resetState();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
 
         // dismiss the dialog.
         if (mSimUnlockProgressDialog != null) {

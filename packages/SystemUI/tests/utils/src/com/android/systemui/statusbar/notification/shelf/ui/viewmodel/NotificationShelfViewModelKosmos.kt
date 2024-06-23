@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.shelf.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.notificationIconContainerShelfViewModel
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.activatableNotificationViewModel
 import com.android.systemui.statusbar.notification.shelf.domain.interactor.notificationShelfInteractor
 
@@ -26,6 +25,5 @@ val Kosmos.notificationShelfViewModel by Fixture {
     NotificationShelfViewModel(
         interactor = notificationShelfInteractor,
         activatableViewModel = activatableNotificationViewModel,
-        icons = notificationIconContainerShelfViewModel,
     )
 }

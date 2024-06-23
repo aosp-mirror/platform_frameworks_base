@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
+
 import static com.android.internal.display.RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE;
 
 import static org.junit.Assert.assertEquals;
@@ -50,6 +52,8 @@ public class RefreshRateSettingsUtilsTest {
     private DisplayManager mDisplayManagerMock;
     @Mock
     private Display mDisplayMock;
+    @Mock
+    private Display mDisplayMock2;
 
     @Before
     public void setUp() {
@@ -65,21 +69,54 @@ public class RefreshRateSettingsUtilsTest {
                 new Display.Mode(/* modeId= */ 0, /* width= */ 800, /* height= */ 600,
                         /* refreshRate= */ 90)
         };
-
         when(mDisplayManagerMock.getDisplay(Display.DEFAULT_DISPLAY)).thenReturn(mDisplayMock);
         when(mDisplayMock.getSupportedModes()).thenReturn(modes);
+
+        Display.Mode[] modes2 = new Display.Mode[]{
+                new Display.Mode(/* modeId= */ 0, /* width= */ 800, /* height= */ 600,
+                        /* refreshRate= */ 70),
+                new Display.Mode(/* modeId= */ 0, /* width= */ 800, /* height= */ 600,
+                        /* refreshRate= */ 130),
+                new Display.Mode(/* modeId= */ 0, /* width= */ 800, /* height= */ 600,
+                        /* refreshRate= */ 80)
+        };
+        when(mDisplayManagerMock.getDisplay(Display.DEFAULT_DISPLAY + 1)).thenReturn(mDisplayMock2);
+        when(mDisplayMock2.getSupportedModes()).thenReturn(modes2);
+
+        when(mDisplayManagerMock.getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED))
+                .thenReturn(new Display[]{ mDisplayMock, mDisplayMock2 });
     }
 
     @Test
     public void testFindHighestRefreshRateForDefaultDisplay() {
+        assertEquals(120,
+                RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(mContext),
+                /* delta= */ 0);
+    }
+
+    @Test
+    public void testFindHighestRefreshRateForDefaultDisplay_DisplayIsNull() {
         when(mDisplayManagerMock.getDisplay(Display.DEFAULT_DISPLAY)).thenReturn(null);
         assertEquals(DEFAULT_REFRESH_RATE,
                 RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(mContext),
                 /* delta= */ 0);
 
-        when(mDisplayManagerMock.getDisplay(Display.DEFAULT_DISPLAY)).thenReturn(mDisplayMock);
-        assertEquals(120,
-                RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(mContext),
+    }
+
+    @Test
+    public void testFindHighestRefreshRateAmongAllDisplays() {
+        assertEquals(130,
+                RefreshRateSettingsUtils.findHighestRefreshRateAmongAllDisplays(mContext),
                 /* delta= */ 0);
+    }
+
+    @Test
+    public void testFindHighestRefreshRateAmongAllDisplays_NoDisplays() {
+        when(mDisplayManagerMock.getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED))
+                .thenReturn(new Display[0]);
+        assertEquals(DEFAULT_REFRESH_RATE,
+                RefreshRateSettingsUtils.findHighestRefreshRateAmongAllDisplays(mContext),
+                /* delta= */ 0);
+
     }
 }

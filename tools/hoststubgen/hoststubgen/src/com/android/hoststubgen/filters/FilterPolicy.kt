@@ -111,6 +111,16 @@ enum class FilterPolicy {
             }
         }
 
+    /** Returns whether a policy is considered supported. */
+    val isSupported: Boolean
+        get() {
+            return when (this) {
+                // TODO: handle native method with no substitution as being unsupported
+                Stub, StubClass, Keep, KeepClass, SubstituteAndStub, SubstituteAndKeep -> true
+                else -> false
+            }
+        }
+
     fun getSubstitutionBasePolicy(): FilterPolicy {
         return when (this) {
             SubstituteAndKeep -> Keep

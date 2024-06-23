@@ -21,18 +21,22 @@ import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
@@ -40,12 +44,17 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableContext;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
@@ -72,7 +81,12 @@ import java.util.function.Consumer;
 @SmallTest
 public class FingerprintEnrollClientTest {
 
+    private static final int ENROLL_SOURCE = FingerprintEnrollOptions.ENROLL_REASON_SUW;
+
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final byte[] HAT = new byte[69];
     private static final int USER_ID = 8;
@@ -117,6 +131,8 @@ public class FingerprintEnrollClientTest {
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
+    @Captor
+    private ArgumentCaptor<Consumer<OperationContext>> mStartHalConsumerCaptor;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -140,6 +156,7 @@ public class FingerprintEnrollClientTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_DE_HIDL)
     public void enrollWithContext_v2() throws RemoteException {
         final FingerprintEnrollClient client = createClient(2);
 
@@ -236,6 +253,7 @@ public class FingerprintEnrollClientTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_DE_HIDL)
     public void notifyHalWhenContextChanges() throws RemoteException {
         final FingerprintEnrollClient client = createClient();
         client.start(mCallback);
@@ -248,6 +266,30 @@ public class FingerprintEnrollClientTest {
         // fake an update to the context
         verify(mBiometricContext).subscribe(
                 mOperationContextCaptor.capture(), mContextInjector.capture());
+        mContextInjector.getValue().accept(
+                mOperationContextCaptor.getValue().toAidlContext());
+        verify(mHal).onContextChanged(same(opContext));
+
+        client.stopHalOperation();
+        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void subscribeContextAndStartHal() throws RemoteException {
+        final FingerprintEnrollClient client = createClient();
+        client.start(mCallback);
+
+        verify(mBiometricContext).subscribe(mOperationContextCaptor.capture(),
+                mStartHalConsumerCaptor.capture(), mContextInjector.capture(), any());
+
+        mStartHalConsumerCaptor.getValue().accept(
+                mOperationContextCaptor.getValue().toAidlContext());
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).enrollWithContext(any(), captor.capture());
+        OperationContext opContext = captor.getValue();
+
         mContextInjector.getValue().accept(
                 mOperationContextCaptor.getValue().toAidlContext());
         verify(mHal).onContextChanged(same(opContext));
@@ -291,6 +333,7 @@ public class FingerprintEnrollClientTest {
 
         verify(mUdfpsOverlayController).hideUdfpsOverlay(anyInt());
         verify(mSideFpsController).hide(anyInt());
+        verify(mHal, times(2)).setIgnoreDisplayTouches(false);
     }
 
     @Test
@@ -313,6 +356,16 @@ public class FingerprintEnrollClientTest {
     public void showHideOverlay_result_sidefpsControllerRemovalRefactor() throws RemoteException {
         showHideOverlay_sidefpsControllerRemovalRefactor(
                 c -> c.onEnrollResult(new Fingerprint("", 1, 1), 0));
+    }
+
+    @Test
+    public void testEnrollWithReasonLogsMetric() throws RemoteException {
+        final FingerprintEnrollClient client = createClient(4);
+        client.start(mCallback);
+        client.onEnrollResult(new Fingerprint("fingerprint", 1 /* faceId */, 20 /* deviceId */), 0);
+
+        verify(mBiometricLogger).logOnEnrolled(anyInt(), anyLong(), anyBoolean(),
+                eq(BiometricsProtoEnums.ENROLLMENT_SOURCE_SUW));
     }
 
     private void showHideOverlay_sidefpsControllerRemovalRefactor(
@@ -344,6 +397,8 @@ public class FingerprintEnrollClientTest {
         HAT, "owner", mBiometricUtils, 8 /* sensorId */,
         mBiometricLogger, mBiometricContext, mSensorProps, mUdfpsOverlayController,
         mSideFpsController, mAuthenticationStateListeners, 6 /* maxTemplatesPerUser */,
-        FingerprintManager.ENROLL_ENROLL);
+        FingerprintManager.ENROLL_ENROLL, (new FingerprintEnrollOptions.Builder())
+                .setEnrollReason(ENROLL_SOURCE).build()
+        );
     }
 }

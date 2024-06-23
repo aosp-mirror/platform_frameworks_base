@@ -602,14 +602,15 @@ public final class UsageStatsManager {
 
     /**
      * Query for events with specific UsageEventsQuery object.
+     *
      * <em>Note: if the user's device is not in an unlocked state (as defined by
      * {@link UserManager#isUserUnlocked()}), then {@code null} will be returned.</em>
      *
      * @param query The query object used to specify the query parameters.
-     * @return A {@link UsageEvents}.
+     * @return A {@link UsageEvents} which contains the events matching the query parameters.
      */
     @FlaggedApi(Flags.FLAG_FILTER_BASED_EVENT_QUERY_API)
-    @NonNull
+    @Nullable
     @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
     public UsageEvents queryEvents(@NonNull UsageEventsQuery query) {
         try {

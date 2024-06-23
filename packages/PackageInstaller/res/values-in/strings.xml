@@ -44,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Aplikasi yang tidak dikenal tidak dapat diinstal oleh pengguna ini"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Pengguna ini tidak diizinkan menginstal aplikasi"</string>
     <string name="ok" msgid="7871959885003339302">"Oke"</string>
+    <string name="archive" msgid="4447791830199354721">"Mengarsipkan"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Tetap update"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Kelola aplikasi"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Kehabisan ruang penyimpanan"</string>
@@ -58,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Uninstal update"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> adalah bagian dari aplikasi berikut:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Apakah Anda ingin meng-uninstal aplikasi ini?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"Data pribadi Anda akan disimpan"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Arsipkan aplikasi ini untuk semua pengguna? Data pribadi Anda akan disimpan"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Arsipkan aplikasi ini di profil kerja? Data pribadi Anda akan disimpan"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Arsipkan aplikasi untuk <xliff:g id="USERNAME">%1$s</xliff:g>? Data pribadi Anda akan disimpan"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Ingin mengarsipkan aplikasi ini dari ruang pribadi? Data pribadi Anda akan disimpan"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Apakah Anda ingin meng-uninstal aplikasi ini untuk "<b>"semua"</b>" pengguna? Aplikasi dan datanya akan dihapus dari "<b>"semua"</b>" pengguna pada perangkat."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Apakah Anda ingin meng-uninstal aplikasi ini untuk pengguna <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Ingin meng-uninstal aplikasi ini dari profil kerja Anda?"</string>
@@ -86,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"Kelola pengguna"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak dapat di-uninstal."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Ada masalah saat mengurai paket."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Tindakan Instal/Uninstal tidak didukung di Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Menyiapkan aplikasi..."</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Tidak dikenal"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Demi keamanan, tablet Anda saat ini tidak diizinkan menginstal aplikasi yang tidak dikenal dari sumber ini. Anda dapat mengubahnya di Setelan."</string>
@@ -98,17 +102,18 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tablet dan data pribadi Anda lebih rentan terhadap serangan oleh aplikasi yang tidak dikenal. Dengan menginstal aplikasi ini, Anda setuju bahwa Anda bertanggung jawab atas kerusakan tablet atau kehilangan data yang mungkin diakibatkan oleh penggunaannya."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV dan data pribadi Anda lebih rentan terhadap serangan oleh aplikasi yang tidak dikenal. Dengan menginstal aplikasi ini, Anda setuju bahwa Anda bertanggung jawab atas kerusakan TV atau kehilangan data yang mungkin diakibatkan oleh penggunaannya."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Clone <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"Arsipkan <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Lanjutkan"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Setelan"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Melakukan instal/uninstal aplikasi Wear"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Notifikasi penginstalan aplikasi"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Berhasil diinstal"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"Berhasil menginstal “<xliff:g id="APPNAME">%1$s</xliff:g>”"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"Pulihkan <xliff:g id="APPNAME">%1$s</xliff:g> dari <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Pulihkan <xliff:g id="APPNAME">%1$s</xliff:g> dari <xliff:g id="INSTALLERNAME">%2$s</xliff:g>?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"Aplikasi ini akan mulai didownload di latar belakang"</string>
     <string name="restore" msgid="8460854736328970444">"Pulihkan"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Anda offline"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Aplikasi ini akan otomatis dipulihkan saat Anda terhubung ke internet"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"Untuk memulihkan aplikasi ini, periksa koneksi internet Anda, lalu coba lagi"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Terjadi error"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Terjadi error saat mencoba memulihkan aplikasi ini"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Penyimpanan tidak cukup"</string>
@@ -116,8 +121,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Tindakan diperlukan"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Ikuti langkah berikutnya untuk memulihkan aplikasi ini"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> dinonaktifkan"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Untuk memulihkan aplikasi ini, aktifkan <xliff:g id="INSTALLERNAME">%1$s</xliff:g> di Setelan"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> diuninstal"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Untuk memulihkan aplikasi ini, Anda harus menginstal <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Lanjutkan"</string>

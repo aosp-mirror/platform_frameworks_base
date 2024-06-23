@@ -26,6 +26,7 @@ import java.util.UUID;
  * immutable representation of a 128-bit universally unique
  * identifier.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ParcelUuid implements Parcelable {
 
     private final UUID mUuid;

@@ -53,6 +53,7 @@ import com.android.adservices.service.adselection.AdSelectionConfigArgumentUtil;
 import com.android.adservices.service.adselection.AdWithBidArgumentUtil;
 import com.android.adservices.service.adselection.CustomAudienceBiddingSignalsArgumentUtil;
 import com.android.adservices.service.adselection.CustomAudienceScoringSignalsArgumentUtil;
+import com.android.adservices.service.common.NoOpRetryStrategyImpl;
 import com.android.adservices.service.js.IsolateSettings;
 import com.android.adservices.service.js.JSScriptArgument;
 import com.android.adservices.service.js.JSScriptArrayArgument;
@@ -411,7 +412,8 @@ public class JSScriptEnginePerfTests {
                 jsScript,
                 args,
                 functionName,
-                IsolateSettings.forMaxHeapSizeEnforcementDisabled());
+                IsolateSettings.forMaxHeapSizeEnforcementDisabled(),
+                new NoOpRetryStrategyImpl());
         result.addListener(resultLatch::countDown, sExecutorService);
         return result;
     }
@@ -430,7 +432,8 @@ public class JSScriptEnginePerfTests {
                 wasmScript,
                 args,
                 functionName,
-                IsolateSettings.forMaxHeapSizeEnforcementDisabled());
+                IsolateSettings.forMaxHeapSizeEnforcementDisabled(),
+                new NoOpRetryStrategyImpl());
         result.addListener(resultLatch::countDown, sExecutorService);
         return result;
     }

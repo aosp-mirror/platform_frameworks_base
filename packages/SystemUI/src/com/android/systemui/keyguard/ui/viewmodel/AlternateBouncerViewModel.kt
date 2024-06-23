@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.graphics.Color
 import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor.Companion.TRANSITION_DURATION_MS
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
@@ -37,7 +36,6 @@ class AlternateBouncerViewModel
 @Inject
 constructor(
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
-    transitionInteractor: KeyguardTransitionInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     // When we're fully transitioned to the AlternateBouncer, the alpha of the scrim should be:
@@ -46,7 +44,8 @@ constructor(
         animationFlow
             .setup(
                 duration = TRANSITION_DURATION_MS,
-                stepFlow = transitionInteractor.anyStateToAlternateBouncerTransition,
+                from = null,
+                to = ALTERNATE_BOUNCER,
             )
             .sharedFlow(
                 duration = TRANSITION_DURATION_MS,
@@ -60,7 +59,8 @@ constructor(
         animationFlow
             .setup(
                 TRANSITION_DURATION_MS,
-                transitionInteractor.transitionStepsFromState(ALTERNATE_BOUNCER),
+                from = ALTERNATE_BOUNCER,
+                to = null,
             )
             .sharedFlow(
                 duration = TRANSITION_DURATION_MS,
@@ -88,5 +88,9 @@ constructor(
 
     fun showPrimaryBouncer() {
         statusBarKeyguardViewManager.showPrimaryBouncer(/* scrimmed */ true)
+    }
+
+    fun hideAlternateBouncer() {
+        statusBarKeyguardViewManager.hideAlternateBouncer(false)
     }
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility;
 
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS;
+
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 
 import android.accessibilityservice.AccessibilityService;
@@ -57,6 +58,7 @@ import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
 
@@ -71,7 +73,7 @@ import javax.inject.Inject;
  * Class to register system actions with accessibility framework.
  */
 @SysUISingleton
-public class SystemActions implements CoreStartable {
+public class SystemActions implements CoreStartable, ConfigurationController.ConfigurationListener {
     private static final String TAG = "SystemActions";
 
     /**
@@ -234,7 +236,7 @@ public class SystemActions implements CoreStartable {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         final Locale locale = mContext.getResources().getConfiguration().getLocales().get(0);
         if (!locale.equals(mLocale)) {
             mLocale = locale;

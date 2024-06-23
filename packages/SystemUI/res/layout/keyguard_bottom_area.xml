@@ -107,4 +107,13 @@
 
     <include layout="@layout/ambient_indication"
              android:id="@id/ambient_indication_container" />
+
+    <FrameLayout
+        android:id="@+id/smartspace_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="@dimen/ambient_indication_margin_bottom"
+        android:visibility="gone">
+    </FrameLayout>
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>

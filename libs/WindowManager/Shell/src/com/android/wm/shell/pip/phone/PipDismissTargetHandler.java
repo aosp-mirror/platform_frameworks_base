@@ -131,7 +131,8 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
                 });
         mMagnetizedPip.setMagnetListener(new MagnetizedObject.MagnetListener() {
             @Override
-            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject) {
                 // Show the dismiss target, in case the initial touch event occurred within
                 // the magnetic field radius.
                 if (mEnableDismissDragToEdge) {
@@ -141,6 +142,7 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
 
             @Override
             public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject,
                     float velX, float velY, boolean wasFlungOut) {
                 if (wasFlungOut) {
                     mMotionHelper.flingToSnapTarget(velX, velY, null /* endAction */);
@@ -151,7 +153,8 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
             }
 
             @Override
-            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject) {
                 if (mEnableDismissDragToEdge) {
                     mMainExecutor.executeDelayed(() -> {
                         mMotionHelper.notifyDismissalPending();

@@ -18,18 +18,34 @@ package com.android.server.notification;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
+
+import android.app.Flags;
 import android.os.Parcel;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.ZenDeviceEffects;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
 
+import com.google.common.collect.ImmutableSet;
+
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class ZenDeviceEffectsTest extends UiServiceTestCase {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Before
+    public final void setUp() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+    }
 
     @Test
     public void builder() {
@@ -40,6 +56,10 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
                 .setShouldMaximizeDoze(true)
                 .setShouldUseNightMode(false)
                 .setShouldSuppressAmbientDisplay(false).setShouldSuppressAmbientDisplay(true)
+                .addExtraEffect("WILL BE GONE")
+                .setExtraEffects(ImmutableSet.of("1", "2"))
+                .addExtraEffects(ImmutableSet.of("3", "4"))
+                .addExtraEffect("5")
                 .build();
 
         assertThat(deviceEffects.shouldDimWallpaper()).isTrue();
@@ -52,6 +72,7 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
         assertThat(deviceEffects.shouldMinimizeRadioUsage()).isFalse();
         assertThat(deviceEffects.shouldUseNightMode()).isFalse();
         assertThat(deviceEffects.shouldSuppressAmbientDisplay()).isTrue();
+        assertThat(deviceEffects.getExtraEffects()).containsExactly("1", "2", "3", "4", "5");
     }
 
     @Test
@@ -61,11 +82,13 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
                 .setShouldDisableTiltToWake(true)
                 .setShouldUseNightMode(true)
                 .setShouldSuppressAmbientDisplay(true)
+                .addExtraEffect("1")
                 .build();
 
         ZenDeviceEffects modified = new ZenDeviceEffects.Builder(original)
                 .setShouldDisplayGrayscale(true)
                 .setShouldUseNightMode(false)
+                .addExtraEffect("2")
                 .build();
 
         assertThat(modified.shouldDimWallpaper()).isTrue(); // from original
@@ -73,6 +96,32 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
         assertThat(modified.shouldDisplayGrayscale()).isTrue(); // updated
         assertThat(modified.shouldUseNightMode()).isFalse(); // updated
         assertThat(modified.shouldSuppressAmbientDisplay()).isTrue(); // from original
+        assertThat(modified.getExtraEffects()).containsExactly("1", "2"); // updated
+    }
+
+    @Test
+    public void builder_add_merges() {
+        ZenDeviceEffects zde1 = new ZenDeviceEffects.Builder()
+                .setShouldDimWallpaper(true)
+                .addExtraEffect("one")
+                .build();
+        ZenDeviceEffects zde2 = new ZenDeviceEffects.Builder()
+                .setShouldDisableTouch(true)
+                .addExtraEffect("two")
+                .build();
+        ZenDeviceEffects zde3 = new ZenDeviceEffects.Builder()
+                .setShouldMinimizeRadioUsage(true)
+                .addExtraEffect("three")
+                .build();
+
+        ZenDeviceEffects add = new ZenDeviceEffects.Builder().add(zde1).add(zde2).add(zde3).build();
+
+        assertThat(add).isEqualTo(new ZenDeviceEffects.Builder()
+                .setShouldDimWallpaper(true)
+                .setShouldDisableTouch(true)
+                .setShouldMinimizeRadioUsage(true)
+                .setExtraEffects(ImmutableSet.of("one", "two", "three"))
+                .build());
     }
 
     @Test
@@ -83,6 +132,7 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
                 .setShouldMinimizeRadioUsage(true)
                 .setShouldUseNightMode(true)
                 .setShouldSuppressAmbientDisplay(true)
+                .setExtraEffects(ImmutableSet.of("1", "2", "3"))
                 .build();
 
         Parcel parcel = Parcel.obtain();
@@ -101,6 +151,7 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
         assertThat(copy.shouldUseNightMode()).isTrue();
         assertThat(copy.shouldSuppressAmbientDisplay()).isTrue();
         assertThat(copy.shouldDisplayGrayscale()).isFalse();
+        assertThat(copy.getExtraEffects()).containsExactly("1", "2", "3");
     }
 
     @Test
@@ -115,5 +166,37 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
                 .setShouldDimWallpaper(true)
                 .build();
         assertThat(effects.hasEffects()).isTrue();
+    }
+
+    @Test
+    public void hasEffects_extras_returnsTrue() {
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder()
+                .addExtraEffect("extra")
+                .build();
+        assertThat(effects.hasEffects()).isTrue();
+    }
+
+    @Test
+    public void validate_extrasLength() {
+        ZenDeviceEffects okay = new ZenDeviceEffects.Builder()
+                .addExtraEffect("short")
+                .addExtraEffect("anotherShort")
+                .build();
+
+        ZenDeviceEffects pushingIt = new ZenDeviceEffects.Builder()
+                .addExtraEffect("0123456789".repeat(60))
+                .addExtraEffect("1234567890".repeat(60))
+                .build();
+
+        ZenDeviceEffects excessive = new ZenDeviceEffects.Builder()
+                .addExtraEffect("0123456789".repeat(60))
+                .addExtraEffect("1234567890".repeat(60))
+                .addExtraEffect("2345678901".repeat(60))
+                .addExtraEffect("3456789012".repeat(30))
+                .build();
+
+        okay.validate(); // No exception.
+        pushingIt.validate(); // No exception.
+        assertThrows(Exception.class, () -> excessive.validate());
     }
 }

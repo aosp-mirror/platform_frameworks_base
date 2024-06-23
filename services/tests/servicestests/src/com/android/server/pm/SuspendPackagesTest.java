@@ -273,7 +273,7 @@ public class SuspendPackagesTest {
         final CountDownLatch latch = new CountDownLatch(1);
         final IAppOpsCallback watcher = new IAppOpsCallback.Stub() {
             @Override
-            public void opChanged(int op, int uid, String packageName) {
+            public void opChanged(int op, int uid, String packageName, String persistentDeviceId) {
                 if (op == code && packageName.equals(TEST_APP_PACKAGE_NAME)) {
                     latch.countDown();
                 }

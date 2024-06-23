@@ -56,6 +56,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.spy
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder
 import com.android.internal.R
+import com.android.internal.pm.parsing.PackageParser2
 import com.android.internal.pm.parsing.pkg.PackageImpl
 import com.android.internal.pm.parsing.pkg.ParsedPackage
 import com.android.internal.pm.pkg.parsing.ParsingPackage
@@ -69,7 +70,6 @@ import com.android.server.compat.PlatformCompat
 import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.pm.dex.DexManager
 import com.android.server.pm.dex.DynamicCodeLogger
-import com.android.server.pm.parsing.PackageParser2
 import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.resolution.ComponentResolver

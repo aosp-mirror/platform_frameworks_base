@@ -154,6 +154,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> pēc <xliff:g id="TIME_DELAY">{2}</xliff:g> sekundes(-ēm)"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nav pāradresēts"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nav pāradresēts"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Mobilā tīkla drošība"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Pārskatīt iestatījumus"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Notikusi piekļuve ierīces identifikatoram"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Kāds tīkls savienojumā <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> reizi(-es) reģistrēja jūsu ierīces unikālo identifikatoru (IMSI) šajā laika periodā: <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g>–<xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Šifrēts savienojums ar tīklu <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Tagad ir izveidots savienojums ar drošāku mobilo tīklu."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Nešifrēts savienojums ar tīklu <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Ir izveidots savienojums ar nešifrētu mobilo tīklu. Jūsu zvani, ziņojumi un dati nav aizsargāti pret pārtveršanu."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mobilā tīkla drošības iestatījumi"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Uzzināt vairāk"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Funkcijas kods ir pabeigts."</string>
     <string name="fcError" msgid="5325116502080221346">"Savienojuma problēma vai nederīgs funkcijas kods."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Labi"</string>
@@ -371,6 +381,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Ļauj piesaistīt lietotni šūnu apraides modulim, lai pārsūtītu šūnu apraides ziņojumus, tiklīdz tie tiek saņemti. Šūnu apraides brīdinājumi tiek piegādāti noteiktās atrašanās vietās, lai brīdinātu jūs par ārkārtas situācijām. Ļaunprātīgas lietotnes var traucēt ierīces veiktspēju vai darbības, kad ir saņemts ārkārtas šūnas apraides ziņojums."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Aktīvo zvanu pārvaldība"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Ļauj lietotnei skatīt detalizētu informāciju par aktīvajiem zvaniem jūsu ierīcē, kā arī kontrolēt šos zvanus."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Piekļūt pēdējai zināmajai šūnas identitātei."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Ļauj lietotnei piekļūt pēdējai zināmajai šūnas identitātei, ko nodrošina telefonija."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"šūnu apraides ziņojumu lasīšana"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Ļauj lietotnei lasīt ierīcē saņemtos šūnu apraides ziņojumus. Šūnu apraides brīdinājumi tiek piegādāti dažās atrašanās vietās, lai brīdinātu jūs par ārkārtas situācijām. Ļaunprātīgas lietotnes var traucēt ierīces veiktspēju vai darbības, kad ir saņemts ārkārtas šūnas apraides ziņojums."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lasīt abonētās plūsmas"</string>
@@ -435,6 +447,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Ļauj lietotnei izmantot šāda veida priekšplāna pakalpojumus: systemExempted"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"izpildīt šāda veida priekšplāna pakalpojumu: fileManagement"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Ļauj lietotnei izmantot šāda veida priekšplāna pakalpojumus: fileManagement"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"izpildīt šāda veida priekšplāna pakalpojumu: mediaProcessing"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Ļauj lietotnei izmantot šāda veida priekšplāna pakalpojumus: mediaProcessing"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"izpildīt šāda veida priekšplāna pakalpojumu: specialUse"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Ļauj lietotnei izmantot šāda veida priekšplāna pakalpojumus: specialUse"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"noteikt vietas apjomu lietotnes atmiņā"</string>
@@ -540,6 +554,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Ļauj lietotnei izmantot tālruņa infrasarkano staru signāla raidītāju."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"iestatīt tapeti"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Ļauj lietotnei iestatīt sistēmas tapeti."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Piekļuve paslēptiem profiliem"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Atļauj lietotnei piekļūt paslēptiem profiliem."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"pielāgot fona tapetes lielumu"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Ļauj lietotnei iestatīt sistēmas tapetes izmēru norādes."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"iestatīt laika joslu"</string>
@@ -633,7 +649,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekrāna bloķēšanas metodes izmantošana"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Lai turpinātu, ievadiet ekrāna bloķēšanas informāciju"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Stingri spiediet pirkstu pie sensora"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Nevar atpazīt pirksta nospiedumu. Mēģiniet vēlreiz."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Pirksta nospiedums netika atpazīts. Mēģiniet vēlreiz."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Notīriet pirkstu nospiedumu sensoru un mēģiniet vēlreiz"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Notīriet sensoru un mēģiniet vēlreiz"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Stingri spiediet pirkstu pie sensora"</string>
@@ -651,18 +667,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Pirksta nospiedums tika autentificēts."</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Seja autentificēta"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Seja ir autentificēta. Nospiediet pogu Apstiprināt."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Nospieduma aparatūra nav pieejama."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Pirksta nospieduma aparatūra nav pieejama."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nevar iestatīt pirksta nospiedumu"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Iestatot pirksta nospiedumu, iestājās noildze. Mēģiniet vēlreiz."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Nospieduma darbība neizdevās."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Lietotājs atcēla pirksta nospieduma darbību."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Nospieduma darbība neizdevās."</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Lietotājs atcēla pirksta nospieduma darbību."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Pārāk daudz mēģinājumu. Izmantojiet ekrāna bloķēšanu."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Pārāk daudz mēģinājumu. Izmantojiet ekrāna bloķēšanu."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Nevar apstrādāt pirksta nospiedumu. Mēģiniet vēlreiz."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nav reģistrēts neviens pirksta nospiedums."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Šajā ierīcē nav pirksta nospieduma sensora."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensors ir īslaicīgi atspējots."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nevar izmantot pirksta nospieduma sensoru. Sazinieties ar remonta pakalpojumu sniedzēju."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Nav reģistrēts neviens pirksta nospiedums."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Šajā ierīcē nav pirksta nospieduma sensora."</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sensors ir īslaicīgi atspējots."</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Nevar izmantot pirksta nospieduma sensoru. Sazinieties ar remonta pakalpojumu sniedzēju."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Tika nospiesta barošanas poga"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. pirksts"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Pirksta nospieduma izmantošana"</string>
@@ -697,7 +713,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Seja nav redzama. Turiet tālruni acu līmenī."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Pārāk daudz kustību. Nekustīgi turiet tālruni."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Lūdzu, atkārtoti reģistrējiet savu seju."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Nevar atpazīt seju. Mēģiniet vēlreiz."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Seja netika atpazīta. Mēģiniet vēlreiz."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Nedaudz mainiet galvas pozīciju."</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Skatieties tieši uz tālruni"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Skatieties tieši uz tālruni"</string>
@@ -808,9 +824,11 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Ļauj lietotnei iztvert sensoru datus, izmantojot frekvenci, kas ir augstāka par 200 Hz."</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"atjaunināt lietotni bez lietotāja darbības"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Atļauj īpašniekam atjaunināt iepriekš instalēto lietotni bez lietotāja darbības"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"Verifikācijas statusu atjaunināšana E2EE sakaru atslēgām, kas pieder citām lietotnēm"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Atļauj lietotnei atjaunināt citām lietotnēm piederošu E2EE sakaru atslēgu verifikācijas statusus."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Paroles kārtulu iestatīšana"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolēt ekrāna bloķēšanas paroļu un PIN garumu un tajos atļautās rakstzīmes."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Pārraudzīt ekrāna atbloķēšanas mēģinājumus"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Pārrauga nepareizi ievadīto paroļu skaitu, atbloķējot ekrānu, un bloķē planšetdatoru vai dzēš visus planšetdatora datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt Android TV vai dzēst visus Android TV ierīces datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Ekrāna atbloķēšanas laikā pārraudzīt nepareizi ievadīto paroļu skaitu un bloķēt informatīvi izklaidējošo sistēmu vai dzēst visus informatīvi izklaidējošās sistēmas datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
@@ -1278,12 +1296,12 @@
     <string name="new_app_action" msgid="547772182913269801">"Atvērt <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"Lietotne <xliff:g id="OLD_APP">%1$s</xliff:g> tiks aizvērta, neko nesaglabājot"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"Process <xliff:g id="PROC">%1$s</xliff:g> pārsniedza atmiņas ierobežojumu."</string>
-    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> kaudzes izraksts ir gatavs"</string>
+    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> grēdas izraksts ir gatavs"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Apkopots kaudzes izraksts. Pieskarieties, lai kopīgotu."</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"Vai kopīgot kaudzes izrakstu?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"Process <xliff:g id="PROC">%1$s</xliff:g> pārsniedza atmiņas ierobežojumu (<xliff:g id="SIZE">%2$s</xliff:g>). Tika vākts kaudzes izraksts, ko varat kopīgot ar procesa izstrādātāju. Ņemiet vērā: kaudzes izrakstā var būt ietverta jūsu personas informācija, kurai var piekļūt lietojumprogramma."</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"Vai kopīgot grēdas izrakstu?"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"Process <xliff:g id="PROC">%1$s</xliff:g> pārsniedza atmiņas ierobežojumu (<xliff:g id="SIZE">%2$s</xliff:g>). Tika vākts grēdas izraksts, ko varat kopīgot ar procesa izstrādātāju. Ņemiet vērā: grēdas izrakstā var būt ietverta jūsu personas informācija, kurai var piekļūt lietojumprogramma."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"Process <xliff:g id="PROC">%1$s</xliff:g> pārsniedza atmiņas ierobežojumu (<xliff:g id="SIZE">%2$s</xliff:g>). Tika vākts kaudzes izraksts, ko varat kopīgot. Ievērojiet piesardzību, jo kaudzes izrakstā var būt ietverta visa sensitīvā personas informācija, kurai var piekļūt process, tostarp jūsu rakstīts teksts."</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"Ir pieejams procesa <xliff:g id="PROC">%1$s</xliff:g> kaudzes izraksts, ko varat kopīgot. Ievērojiet piesardzību, jo kaudzes izrakstā var būt ietverta visa sensitīvā personas informācija, kurai var piekļūt process, tostarp jūsu rakstīts teksts."</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"Ir pieejams procesa <xliff:g id="PROC">%1$s</xliff:g> grēdas izraksts, ko varat kopīgot. Ievērojiet piesardzību, jo grēdas izrakstā var būt ietverta visa sensitīvā personas informācija, kurai var piekļūt process, tostarp jūsu rakstīts teksts."</string>
     <string name="sendText" msgid="493003724401350724">"Izvēlieties darbību tekstam"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Zvanītāja skaļums"</string>
     <string name="volume_music" msgid="7727274216734955095">"Multivides skaļums"</string>
@@ -1907,6 +1925,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Nedēļas nogalē"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Pasākums"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Gulēšana"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Pārvalda <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Ieslēgta"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Izslēgta"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> izslēdz noteiktas skaņas"</string>
@@ -1926,6 +1945,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Verificēts"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Izvērst"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Sakļaut"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Sakļauts"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Izvērsts"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"izvērst/sakļaut"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB perifērijas ports"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1966,6 +1987,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Vai aktivizēt darba lietotnes?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Aktivizēt"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Ārkārtas zvans"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Iestatiet ekrāna bloķēšanu"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Iestatīt ekrāna bloķēšanu"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Lai izmantotu privāto telpu, iestatiet ekrāna bloķēšanu."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Lietotne nav pieejama"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pašlaik nav pieejama."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nav pieejams"</string>
@@ -2342,8 +2366,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nevar spoguļot displeju"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Izmantojiet citu vadu un mēģiniet vēlreiz."</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Jūsu ierīce ir pārāk silta, un to nevar spoguļot displejā, kamēr tā nav atdzisusi."</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Iespējams, vads neatbalsta displejus"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Iespējams, jūsu USB-C vads nevarēs nodrošināt pareizu savienojumu ar displejiem."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen režīms"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Ieslēgts Dual Screen režīms"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> satura rādīšanai izmanto abus displejus."</string>
@@ -2367,4 +2389,9 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Darbam (3.)"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Testēšanai"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Kopīgs"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Automātiski izveidots savienojums ar satelītu"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Varat sūtīt un saņemt ziņojumus bez mobilā vai Wi-Fi tīkla."</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Atvērt lietotni Ziņojumi"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Darbības principi"</string>
 </resources>

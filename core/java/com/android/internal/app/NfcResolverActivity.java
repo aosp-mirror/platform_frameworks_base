@@ -16,25 +16,25 @@
 
 package com.android.internal.app;
 
-import static android.service.chooser.CustomChoosers.EXTRA_RESOLVE_INFOS;
-import static android.service.chooser.Flags.supportNfcResolver;
+import static android.nfc.Flags.enableNfcMainline;
 
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
 
 import java.util.ArrayList;
 
 /**
  * Caller-customizable variant of {@link ResolverActivity} to support the
- * {@link CustomChoosers#showNfcResolver()} API.
+ * NFC resolver intent.
  */
 public class NfcResolverActivity extends ResolverActivity {
 
     @Override
     @SuppressWarnings("MissingSuperCall")  // Called indirectly via `super_onCreate()`.
     protected void onCreate(Bundle savedInstanceState) {
-        if (!supportNfcResolver()) {
+        if (!enableNfcMainline()) {
             super_onCreate(savedInstanceState);
             finish();
             return;
@@ -43,7 +43,8 @@ public class NfcResolverActivity extends ResolverActivity {
         Intent intent = getIntent();
         Intent target = intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent.class);
         ArrayList<ResolveInfo> rList =
-            intent.getParcelableArrayListExtra(EXTRA_RESOLVE_INFOS, ResolveInfo.class);
+                intent.getParcelableArrayListExtra(
+                NfcAdapter.EXTRA_RESOLVE_INFOS, ResolveInfo.class);
         CharSequence title = intent.getExtras().getCharSequence(
                 Intent.EXTRA_TITLE,
                 getResources().getText(com.android.internal.R.string.chooseActivity));

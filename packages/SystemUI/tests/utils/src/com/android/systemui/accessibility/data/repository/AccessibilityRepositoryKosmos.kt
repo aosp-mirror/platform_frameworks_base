@@ -16,10 +16,8 @@
 
 package com.android.systemui.accessibility.data.repository
 
-import android.view.accessibility.accessibilityManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 
-val Kosmos.accessibilityRepository by Fixture {
-    AccessibilityRepository.invoke(a11yManager = accessibilityManager)
-}
+val Kosmos.fakeAccessibilityRepository by Fixture { FakeAccessibilityRepository() }
+val Kosmos.accessibilityRepository by Fixture { fakeAccessibilityRepository }

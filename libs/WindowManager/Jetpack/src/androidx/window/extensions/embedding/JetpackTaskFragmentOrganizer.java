@@ -19,6 +19,7 @@ package androidx.window.extensions.embedding;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_DIM_ON_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ISOLATED_NAVIGATION;
 
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
@@ -356,6 +357,13 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         wct.addTaskFragmentOperation(fragmentToken, operation);
     }
 
+    void setTaskFragmentDimOnTask(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, boolean dimOnTask) {
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_DIM_ON_TASK).setDimOnTask(dimOnTask).build();
+        wct.addTaskFragmentOperation(fragmentToken, operation);
+    }
+
     void updateTaskFragmentInfo(@NonNull TaskFragmentInfo taskFragmentInfo) {
         mFragmentInfos.put(taskFragmentInfo.getFragmentToken(), taskFragmentInfo);
     }
@@ -374,9 +382,13 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         if (splitAttributes == null) {
             return TaskFragmentAnimationParams.DEFAULT;
         }
-        return new TaskFragmentAnimationParams.Builder()
-                // TODO(b/263047900): Update extensions API.
-                // .setAnimationBackgroundColor(splitAttributes.getAnimationBackgroundColor())
-                .build();
+        final AnimationBackground animationBackground = splitAttributes.getAnimationBackground();
+        if (animationBackground instanceof AnimationBackground.ColorBackground colorBackground) {
+            return new TaskFragmentAnimationParams.Builder()
+                    .setAnimationBackgroundColor(colorBackground.getColor())
+                    .build();
+        } else {
+            return TaskFragmentAnimationParams.DEFAULT;
+        }
     }
 }

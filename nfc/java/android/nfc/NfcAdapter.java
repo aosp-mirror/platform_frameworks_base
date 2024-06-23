@@ -16,6 +16,7 @@
 
 package android.nfc;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -27,6 +28,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -34,7 +36,9 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.nfc.cardemulation.PollingFrame;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
@@ -76,6 +80,7 @@ public final class NfcAdapter {
     static final String TAG = "NFC";
 
     private final NfcControllerAlwaysOnListener mControllerAlwaysOnListener;
+    private final NfcWlcStateListener mNfcWlcStateListener;
     private final NfcVendorNciCallbackListener mNfcVendorNciCallbackListener;
 
     /**
@@ -483,6 +488,25 @@ public final class NfcAdapter {
             "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
 
     /**
+     * Intent action to start a NFC resolver activity in a customized share session with list of
+     * {@link ResolveInfo}.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @RequiresPermission(Manifest.permission.SHOW_CUSTOMIZED_RESOLVER)
+    public static final String ACTION_SHOW_NFC_RESOLVER = "android.nfc.action.SHOW_NFC_RESOLVER";
+
+    /**
+     * "Extras" key for an ArrayList of {@link ResolveInfo} records which are to be shown as the
+     * targets in the customized share session.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public static final String EXTRA_RESOLVE_INFOS = "android.nfc.extra.RESOLVE_INFOS";
+
+    /**
      * The requested app is correctly added to the Tag intent app preference.
      *
      * @see #setTagIntentAppPreferenceForUser(int userId, String pkg, boolean allow)
@@ -525,6 +549,7 @@ public final class NfcAdapter {
     static boolean sIsInitialized = false;
     static boolean sHasNfcFeature;
     static boolean sHasCeFeature;
+    static boolean sHasNfcWlcFeature;
 
     static Object sLock = new Object();
 
@@ -738,8 +763,9 @@ public final class NfcAdapter {
                     || pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF)
                     || pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC)
                     || pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE);
+            sHasNfcWlcFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC_CHARGING);
             /* is this device meant to have NFC */
-            if (!sHasNfcFeature && !sHasCeFeature) {
+            if (!sHasNfcFeature && !sHasCeFeature && !sHasNfcWlcFeature) {
                 Log.v(TAG, "this device does not have NFC support");
                 throw new UnsupportedOperationException();
             }
@@ -864,6 +890,7 @@ public final class NfcAdapter {
         mTagRemovedListener = null;
         mLock = new Object();
         mControllerAlwaysOnListener = new NfcControllerAlwaysOnListener(getService());
+        mNfcWlcStateListener = new NfcWlcStateListener(getService());
         mNfcVendorNciCallbackListener = new NfcVendorNciCallbackListener(getService());
         mNfcOemExtension = new NfcOemExtension(mContext, this);
     }
@@ -1034,7 +1061,8 @@ public final class NfcAdapter {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
         }
-        return serviceState && (isTagReadingEnabled() || isCardEmulationEnabled());
+        return serviceState
+                && (isTagReadingEnabled() || isCardEmulationEnabled() || sHasNfcWlcFeature);
     }
 
     /**
@@ -1203,18 +1231,16 @@ public final class NfcAdapter {
         }
     }
 
-   /**
-    * Disables observe mode to allow the transaction to proceed. See
-    * {@link #isObserveModeSupported()} for a description of observe mode and
-    * use {@link #disallowTransaction()} to enable observe mode and block
-    * transactions again.
-    *
-    * @return boolean indicating success or failure.
-    */
+    /**
+     * Returns whether Observe Mode is currently enabled or not.
+     *
+     * @return true if observe mode is enabled, false otherwise.
+     */
+
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
-    public boolean allowTransaction() {
+    public boolean isObserveModeEnabled() {
         try {
-            return sService.setObserveMode(false);
+            return sService.isObserveModeEnabled();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
@@ -1222,18 +1248,20 @@ public final class NfcAdapter {
     }
 
     /**
-    * Signals that the transaction has completed and observe mode may be
-    * reenabled. See {@link #isObserveModeSupported()} for a description of
-    * observe mode and use {@link #allowTransaction()} to disable observe
-    * mode and allow transactions to proceed.
-    *
-    * @return boolean indicating success or failure.
-    */
+     * Controls whether the NFC adapter will allow transactions to proceed or be in observe mode
+     * and simply observe and notify the APDU service of polling loop frames. See
+     * {@link #isObserveModeSupported()} for a description of observe mode.
+     *
+     * @param enabled false disables observe mode to allow the transaction to proceed while true
+     *                enables observe mode and does not allow transactions to proceed.
+     *
+     * @return boolean indicating success or failure.
+     */
 
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
-    public boolean disallowTransaction() {
+    public boolean setObserveModeEnabled(boolean enabled) {
         try {
-            return sService.setObserveMode(true);
+            return sService.setObserveMode(enabled);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
@@ -1763,7 +1791,9 @@ public final class NfcAdapter {
     private static final int ENABLE_POLLING_FLAGS = 0x0000;
 
     /**
-     * Privileged API to enable disable reader polling.
+     * Privileged API to enable or disable reader polling.
+     * Unlike {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}, this API does not
+     * need a foreground activity to control reader mode parameters
      * Note: Use with caution! The app is responsible for ensuring that the polling state is
      * returned to normal.
      *
@@ -1777,14 +1807,14 @@ public final class NfcAdapter {
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     @SuppressLint("VisiblySynchronized")
-    public void setReaderMode(boolean enablePolling) {
+    public void setReaderModePollingEnabled(boolean enable) {
         synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
         }
         Binder token = new Binder();
-        int flags = enablePolling ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
+        int flags = enable ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
         try {
             NfcAdapter.sService.setReaderMode(token, null, flags, null);
         } catch (RemoteException e) {
@@ -2760,6 +2790,220 @@ public final class NfcAdapter {
         }
     }
 
+   /**
+     * Notifies the system of a new polling loop.
+     *
+     * @param frame is the new frame.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public void notifyPollingLoop(@NonNull PollingFrame pollingFrame) {
+        Bundle frame = pollingFrame.toBundle();
+        try {
+            if (sService == null) {
+                attemptDeadServiceRecovery(null);
+            }
+            sService.notifyPollingLoop(frame);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return;
+            }
+            try {
+                sService.notifyPollingLoop(frame);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+        }
+    }
+
+   /**
+     * Notifies the system of a an HCE session being deactivated.
+     *     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public void notifyHceDeactivated() {
+        try {
+            if (sService == null) {
+                attemptDeadServiceRecovery(null);
+            }
+            sService.notifyHceDeactivated();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return;
+            }
+            try {
+                sService.notifyHceDeactivated();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+        }
+    }
+
+    /**
+     * Sets NFC charging feature.
+     * <p>This API is for the Settings application.
+     * @return True if successful
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_CHARGING)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean setWlcEnabled(boolean enable) {
+        if (!sHasNfcWlcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.setWlcEnabled(enable);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.setWlcEnabled(enable);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Checks NFC charging feature is enabled.
+     *
+     * @return True if NFC charging is enabled, false otherwise
+     * @throws UnsupportedOperationException if FEATURE_NFC_CHARGING
+     * is unavailable
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_CHARGING)
+    public boolean isWlcEnabled() {
+        if (!sHasNfcWlcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.isWlcEnabled();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.isWlcEnabled();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
+    }
+
+    /**
+     * A listener to be invoked when NFC controller always on state changes.
+     * <p>Register your {@code ControllerAlwaysOnListener} implementation with {@link
+     * NfcAdapter#registerWlcStateListener} and disable it with {@link
+     * NfcAdapter#unregisterWlcStateListenerListener}.
+     * @see #registerWlcStateListener
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_CHARGING)
+    public interface WlcStateListener {
+        /**
+         * Called on NFC WLC state changes
+         */
+        void onWlcStateChanged(@NonNull WlcListenerDeviceInfo wlcListenerDeviceInfo);
+    }
+
+    /**
+     * Register a {@link WlcStateListener} to listen for NFC WLC state changes
+     * <p>The provided listener will be invoked by the given {@link Executor}.
+     *
+     * @param executor an {@link Executor} to execute given listener
+     * @param listener user implementation of the {@link WlcStateListener}
+     * @throws UnsupportedOperationException if FEATURE_NFC_CHARGING
+     * is unavailable
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_CHARGING)
+    public void registerWlcStateListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull WlcStateListener listener) {
+        if (!sHasNfcWlcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        mNfcWlcStateListener.register(executor, listener);
+    }
+
+    /**
+     * Unregister the specified {@link WlcStateListener}
+     * <p>The same {@link WlcStateListener} object used when calling
+     * {@link #registerWlcStateListener(Executor, WlcStateListener)}
+     * must be used.
+     *
+     * <p>Listeners are automatically unregistered when application process goes away
+     *
+     * @param listener user implementation of the {@link WlcStateListener}a
+     * @throws UnsupportedOperationException if FEATURE_NFC_CHARGING
+     * is unavailable
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_CHARGING)
+    public void unregisterWlcStateListener(
+            @NonNull WlcStateListener listener) {
+        if (!sHasNfcWlcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        mNfcWlcStateListener.unregister(listener);
+    }
+
+    /**
+     * Returns information on the NFC charging listener device
+     *
+     * @return Information on the NFC charging listener device
+     * @throws UnsupportedOperationException if FEATURE_NFC_CHARGING
+     * is unavailable
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_CHARGING)
+    @Nullable
+    public WlcListenerDeviceInfo getWlcListenerDeviceInfo() {
+        if (!sHasNfcWlcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.getWlcListenerDeviceInfo();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return null;
+            }
+            try {
+                return sService.getWlcListenerDeviceInfo();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return null;
+        }
+    }
+
     /**
      * Vendor NCI command success.
      * @hide
@@ -2881,7 +3125,7 @@ public final class NfcAdapter {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public void unregisterNfcVendorNciCallback(@NonNull NfcVendorNciCallback callback) {
         mNfcVendorNciCallbackListener.unregister(callback);

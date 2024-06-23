@@ -48,6 +48,15 @@
         app:layout_constraintBottom_toBottomOf="@+id/album_art" />
 
     <Constraint
+        android:id="@+id/loading_effect_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_media_session_height_expanded"
+        app:layout_constraintStart_toStartOf="@+id/album_art"
+        app:layout_constraintEnd_toEndOf="@+id/album_art"
+        app:layout_constraintTop_toTopOf="@+id/album_art"
+        app:layout_constraintBottom_toBottomOf="@+id/album_art" />
+
+    <Constraint
         android:id="@+id/header_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

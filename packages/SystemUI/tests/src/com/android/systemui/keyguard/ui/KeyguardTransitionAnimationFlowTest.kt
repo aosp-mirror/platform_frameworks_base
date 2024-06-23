@@ -20,14 +20,17 @@ import androidx.test.filters.SmallTest
 import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.coroutines.collectValues
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -37,23 +40,21 @@ import org.junit.runners.JUnit4
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardTransitionAnimationFlowTest : SysuiTestCase() {
-    private lateinit var underTest: KeyguardTransitionAnimationFlow.SharedFlowBuilder
-    private lateinit var repository: FakeKeyguardTransitionRepository
-    private lateinit var testScope: TestScope
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
+    val animationFlow = kosmos.keyguardTransitionAnimationFlow
+    val repository = kosmos.fakeKeyguardTransitionRepository
+
+    private lateinit var underTest: KeyguardTransitionAnimationFlow.FlowBuilder
 
     @Before
     fun setUp() {
-        testScope = TestScope()
-        repository = FakeKeyguardTransitionRepository()
         underTest =
-            KeyguardTransitionAnimationFlow(
-                    testScope.backgroundScope,
-                    mock(),
-                )
-                .setup(
-                    duration = 1000.milliseconds,
-                    stepFlow = repository.transitions,
-                )
+            animationFlow.setup(
+                duration = 1000.milliseconds,
+                from = GONE,
+                to = DREAMING,
+            )
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -83,6 +84,8 @@ class KeyguardTransitionAnimationFlowTest : SysuiTestCase() {
                     onFinish = { 10f },
                 )
             var animationValues = collectLastValue(flow)
+            runCurrent()
+
             repository.sendTransitionStep(step(1f, TransitionState.FINISHED), validateStep = false)
             assertThat(animationValues()).isEqualTo(10f)
         }
@@ -97,6 +100,8 @@ class KeyguardTransitionAnimationFlowTest : SysuiTestCase() {
                     onCancel = { 100f },
                 )
             var animationValues = collectLastValue(flow)
+            runCurrent()
+
             repository.sendTransitionStep(step(0.5f, TransitionState.CANCELED))
             assertThat(animationValues()).isEqualTo(100f)
         }
@@ -111,6 +116,8 @@ class KeyguardTransitionAnimationFlowTest : SysuiTestCase() {
                     onStep = { it },
                 )
             var animationValues = collectLastValue(flow)
+            runCurrent()
+
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
             assertThat(animationValues()).isEqualTo(0f)
 
@@ -137,6 +144,8 @@ class KeyguardTransitionAnimationFlowTest : SysuiTestCase() {
                     onStep = { it },
                 )
             var animationValues = collectLastValue(flow)
+            runCurrent()
+
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
             assertFloat(animationValues(), EMPHASIZED_ACCELERATE.getInterpolation(0f))
             repository.sendTransitionStep(step(0.5f, TransitionState.RUNNING))
@@ -157,17 +166,129 @@ class KeyguardTransitionAnimationFlowTest : SysuiTestCase() {
                     duration = 1000.milliseconds,
                     onStep = { it * 2 },
                 )
-            var animationValues = collectLastValue(flow)
+            val animationValues by collectLastValue(flow)
+            runCurrent()
+
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            assertFloat(animationValues(), 0f)
+            assertFloat(animationValues, 0f)
             repository.sendTransitionStep(step(0.3f, TransitionState.RUNNING))
-            assertFloat(animationValues(), 0.6f)
+            assertFloat(animationValues, 0.6f)
             repository.sendTransitionStep(step(0.6f, TransitionState.RUNNING))
-            assertFloat(animationValues(), 1.2f)
+            assertFloat(animationValues, 1.2f)
             repository.sendTransitionStep(step(0.8f, TransitionState.RUNNING))
-            assertFloat(animationValues(), 1.6f)
+            assertFloat(animationValues, 1.6f)
             repository.sendTransitionStep(step(1f, TransitionState.RUNNING))
-            assertFloat(animationValues(), 2f)
+            assertFloat(animationValues, 2f)
+        }
+
+    @Test
+    fun usesOnStepToDoubleValueWithState() =
+        testScope.runTest {
+            val flow =
+                underTest.sharedFlowWithState(
+                    duration = 1000.milliseconds,
+                    onStep = { it * 2 },
+                )
+            val animationValues by collectLastValue(flow)
+            runCurrent()
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(animationValues)
+                .isEqualTo(
+                    StateToValue(
+                        from = GONE,
+                        to = DREAMING,
+                        transitionState = TransitionState.STARTED,
+                        value = 0f
+                    )
+                )
+            repository.sendTransitionStep(step(0.3f, TransitionState.RUNNING))
+            assertThat(animationValues)
+                .isEqualTo(
+                    StateToValue(
+                        from = GONE,
+                        to = DREAMING,
+                        transitionState = TransitionState.RUNNING,
+                        value = 0.6f
+                    )
+                )
+            repository.sendTransitionStep(step(0.6f, TransitionState.RUNNING))
+            assertThat(animationValues)
+                .isEqualTo(
+                    StateToValue(
+                        from = GONE,
+                        to = DREAMING,
+                        transitionState = TransitionState.RUNNING,
+                        value = 1.2f
+                    )
+                )
+            repository.sendTransitionStep(step(0.8f, TransitionState.RUNNING))
+            assertThat(animationValues)
+                .isEqualTo(
+                    StateToValue(
+                        from = GONE,
+                        to = DREAMING,
+                        transitionState = TransitionState.RUNNING,
+                        value = 1.6f
+                    )
+                )
+            repository.sendTransitionStep(step(1f, TransitionState.RUNNING))
+            assertThat(animationValues)
+                .isEqualTo(
+                    StateToValue(
+                        from = GONE,
+                        to = DREAMING,
+                        transitionState = TransitionState.RUNNING,
+                        value = 2f
+                    )
+                )
+            repository.sendTransitionStep(step(1f, TransitionState.FINISHED))
+            assertThat(animationValues)
+                .isEqualTo(
+                    StateToValue(
+                        from = GONE,
+                        to = DREAMING,
+                        transitionState = TransitionState.FINISHED,
+                        value = null
+                    )
+                )
+        }
+
+    @Test
+    fun sameFloatValueWithTheSameTransitionStateDoesNotEmitTwice() =
+        testScope.runTest {
+            val flow =
+                underTest.sharedFlow(
+                    duration = 1000.milliseconds,
+                    onStep = { it },
+                )
+            val values by collectValues(flow)
+            runCurrent()
+
+            repository.sendTransitionStep(step(0.3f, TransitionState.RUNNING))
+            repository.sendTransitionStep(step(0.3f, TransitionState.RUNNING))
+
+            assertThat(values.size).isEqualTo(1)
+            assertThat(values[0]).isEqualTo(0.3f)
+        }
+
+    @Test
+    fun sameFloatValueWithADifferentTransitionStateDoesEmitTwice() =
+        testScope.runTest {
+            val flow =
+                underTest.sharedFlow(
+                    duration = 1000.milliseconds,
+                    onStep = { it },
+                )
+            val values by collectValues(flow)
+            runCurrent()
+
+            repository.sendTransitionStep(step(0.3f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.3f, TransitionState.RUNNING))
+
+            assertThat(values.size).isEqualTo(2)
+            assertThat(values[0]).isEqualTo(0.3f)
+            assertThat(values[0]).isEqualTo(0.3f)
         }
 
     private fun assertFloat(actual: Float?, expected: Float) {
@@ -179,8 +300,8 @@ class KeyguardTransitionAnimationFlowTest : SysuiTestCase() {
         state: TransitionState = TransitionState.RUNNING
     ): TransitionStep {
         return TransitionStep(
-            from = KeyguardState.GONE,
-            to = KeyguardState.DREAMING,
+            from = GONE,
+            to = DREAMING,
             value = value,
             transitionState = state,
             ownerName = "GoneToDreamingTransitionViewModelTest"

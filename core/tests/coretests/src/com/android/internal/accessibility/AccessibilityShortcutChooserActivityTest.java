@@ -42,8 +42,8 @@ import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.KeyguardManager;
-import android.app.UiAutomation;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -52,7 +52,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.platform.test.annotations.RequiresFlagsDisabled;
@@ -66,9 +65,9 @@ import android.support.test.uiautomator.Until;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.Flags;
 import android.view.accessibility.IAccessibilityManager;
+import android.widget.Button;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;
@@ -108,7 +107,6 @@ public class AccessibilityShortcutChooserActivityTest {
     private static final ComponentName TEST_COMPONENT_NAME = new ComponentName(TEST_PACKAGE,
             "class");
     private static final long UI_TIMEOUT_MS = 1000;
-    private UiAutomation mUiAutomation;
     private UiDevice mDevice;
     private ActivityScenario<TestAccessibilityShortcutChooserActivity> mScenario;
     private TestAccessibilityShortcutChooserActivity mActivity;
@@ -142,7 +140,6 @@ public class AccessibilityShortcutChooserActivityTest {
         assumeFalse("AccessibilityShortcutChooserActivity not supported on watch",
                 pm.hasSystemFeature(PackageManager.FEATURE_WATCH));
 
-        mUiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         mDevice.wakeUp();
         when(mAccessibilityServiceInfo.getResolveInfo()).thenReturn(mResolveInfo);
@@ -170,6 +167,12 @@ public class AccessibilityShortcutChooserActivityTest {
         if (mScenario != null) {
             mScenario.close();
         }
+        if (mActivity != null) {
+            Dialog permissionDialog = mActivity.getPermissionDialog();
+            if (permissionDialog != null && permissionDialog.isShowing()) {
+                permissionDialog.dismiss();
+            }
+        }
     }
 
     @Test
@@ -193,10 +196,8 @@ public class AccessibilityShortcutChooserActivityTest {
         openShortcutsList();
 
         mDevice.findObject(By.text(TEST_LABEL)).clickAndWait(Until.newWindow(), UI_TIMEOUT_MS);
-        clickSystemDialogButton(ALLOW_LABEL);
+        clickPermissionDialogButton(R.id.accessibility_permission_enable_allow_button);
 
-        assertThat(mDevice.wait(Until.hasObject(By.textStartsWith(LIST_TITLE_LABEL)),
-                UI_TIMEOUT_MS)).isTrue();
         assertThat(mDevice.wait(Until.hasObject(By.checked(true)), UI_TIMEOUT_MS)).isTrue();
     }
 
@@ -207,10 +208,8 @@ public class AccessibilityShortcutChooserActivityTest {
         openShortcutsList();
 
         mDevice.findObject(By.text(TEST_LABEL)).clickAndWait(Until.newWindow(), UI_TIMEOUT_MS);
-        clickSystemDialogButton(DENY_LABEL);
+        clickPermissionDialogButton(R.id.accessibility_permission_enable_deny_button);
 
-        assertThat(mDevice.wait(Until.hasObject(By.textStartsWith(LIST_TITLE_LABEL)),
-                UI_TIMEOUT_MS)).isTrue();
         assertThat(mDevice.wait(Until.hasObject(By.checked(true)), UI_TIMEOUT_MS)).isFalse();
     }
 
@@ -221,11 +220,9 @@ public class AccessibilityShortcutChooserActivityTest {
         openShortcutsList();
 
         mDevice.findObject(By.text(TEST_LABEL)).clickAndWait(Until.newWindow(), UI_TIMEOUT_MS);
-        clickSystemDialogButton(UNINSTALL_LABEL);
+        clickPermissionDialogButton(R.id.accessibility_permission_enable_uninstall_button);
 
         verify(mPackageInstaller).uninstall(eq(TEST_PACKAGE), any());
-        assertThat(mDevice.wait(Until.hasObject(By.textStartsWith(LIST_TITLE_LABEL)),
-                UI_TIMEOUT_MS)).isTrue();
         assertThat(mDevice.wait(Until.hasObject(By.textStartsWith(TEST_LABEL)),
                 UI_TIMEOUT_MS)).isFalse();
     }
@@ -353,16 +350,13 @@ public class AccessibilityShortcutChooserActivityTest {
         mDevice.wait(Until.hasObject(By.textStartsWith(LIST_TITLE_LABEL)), UI_TIMEOUT_MS);
     }
 
-    private void clickSystemDialogButton(String dialogButtonText) {
-        // Use UiAutomation to find the button because UiDevice struggles to find
-        // a UI element in a system dialog.
-        final AccessibilityNodeInfo button =
-                mUiAutomation.getRootInActiveWindow()
-                        .findAccessibilityNodeInfosByText(dialogButtonText).stream()
-                        .filter(AccessibilityNodeInfo::isClickable).findFirst().get();
-        final Rect bounds = new Rect();
-        button.getBoundsInScreen(bounds);
-        mDevice.click(bounds.centerX(), bounds.centerY());
+    private void clickPermissionDialogButton(int buttonId) {
+        Button button = mActivity.getPermissionDialog().findViewById(buttonId);
+        mActivity.runOnUiThread(button::performClick);
+        // Wait for the dialog to go away by waiting for the shortcut chooser
+        // to become visible again.
+        assertThat(mDevice.wait(Until.hasObject(By.textStartsWith(LIST_TITLE_LABEL)),
+                UI_TIMEOUT_MS)).isTrue();
     }
 
     /**
@@ -402,6 +396,10 @@ public class AccessibilityShortcutChooserActivityTest {
         public Object getSystemService(String name) {
             if (Context.ACCESSIBILITY_SERVICE.equals(name)
                     && sAccessibilityManagerService != null) {
+                // Warning: This new AccessibilityManager complicates UI inspection
+                // because it breaks the expected "singleton per process" quality of
+                // AccessibilityManager. Debug here if observing unexpected issues
+                // with UI inspection or interaction.
                 return new AccessibilityManager(this, new Handler(getMainLooper()),
                         sAccessibilityManagerService, /* userId= */ 0, /* serviceConnect= */ true);
             }

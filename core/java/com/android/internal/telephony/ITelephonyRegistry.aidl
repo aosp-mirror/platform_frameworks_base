@@ -104,6 +104,7 @@ interface ITelephonyRegistry {
     void notifyAllowedNetworkTypesChanged(in int phoneId, in int subId, in int reason, in long allowedNetworkType);
     void notifyLinkCapacityEstimateChanged(in int phoneId, in int subId,
             in List<LinkCapacityEstimate> linkCapacityEstimateList);
+    void notifySimultaneousCellularCallingSubscriptionsChanged(in int[] subIds);
 
     void addCarrierPrivilegesCallback(
             int phoneId, ICarrierPrivilegesCallback callback, String pkg, String featureId);

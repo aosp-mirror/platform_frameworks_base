@@ -28,16 +28,20 @@ import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_SHOWN;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityThread;
 import android.content.Context;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.view.InsetsController.AnimationType;
 import android.view.SurfaceControl;
+import android.view.View;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -107,34 +111,32 @@ public interface ImeTracker {
     /**
      * The origin of the IME request
      *
-     * The name follows the format {@code PHASE_x_...} where {@code x} denotes
-     * where the origin is (i.e. {@code PHASE_SERVER_...} occurs in the server).
+     * <p> The name follows the format {@code ORIGIN_x_...} where {@code x} denotes
+     * where the origin is (i.e. {@code ORIGIN_SERVER} occurs in the server).
      */
     @IntDef(prefix = { "ORIGIN_" }, value = {
-            ORIGIN_CLIENT_SHOW_SOFT_INPUT,
-            ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-            ORIGIN_SERVER_START_INPUT,
-            ORIGIN_SERVER_HIDE_INPUT
+            ORIGIN_CLIENT,
+            ORIGIN_SERVER,
+            ORIGIN_IME
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Origin {}
 
-    /** The IME show request originated in the client. */
-    int ORIGIN_CLIENT_SHOW_SOFT_INPUT = ImeProtoEnums.ORIGIN_CLIENT_SHOW_SOFT_INPUT;
+    /** The IME request originated in the client. */
+    int ORIGIN_CLIENT = ImeProtoEnums.ORIGIN_CLIENT;
 
-    /** The IME hide request originated in the client. */
-    int ORIGIN_CLIENT_HIDE_SOFT_INPUT = ImeProtoEnums.ORIGIN_CLIENT_HIDE_SOFT_INPUT;
+    /** The IME request originated in the server. */
+    int ORIGIN_SERVER = ImeProtoEnums.ORIGIN_SERVER;
 
-    /** The IME show request originated in the server. */
-    int ORIGIN_SERVER_START_INPUT = ImeProtoEnums.ORIGIN_SERVER_START_INPUT;
-
-    /** The IME hide request originated in the server. */
-    int ORIGIN_SERVER_HIDE_INPUT = ImeProtoEnums.ORIGIN_SERVER_HIDE_INPUT;
+    /** The IME request originated in the IME. */
+    int ORIGIN_IME = ImeProtoEnums.ORIGIN_IME;
+    /** The IME request originated in the WindowManager Shell. */
+    int ORIGIN_WM_SHELL = ImeProtoEnums.ORIGIN_WM_SHELL;
 
     /**
      * The current phase of the IME request.
      *
-     * The name follows the format {@code PHASE_x_...} where {@code x} denotes
+     * <p> The name follows the format {@code PHASE_x_...} where {@code x} denotes
      * where the phase is (i.e. {@code PHASE_SERVER_...} occurs in the server).
      */
     @IntDef(prefix = { "PHASE_" }, value = {
@@ -154,7 +156,6 @@ public interface ImeTracker {
             PHASE_IME_SHOW_SOFT_INPUT,
             PHASE_IME_HIDE_SOFT_INPUT,
             PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE,
-            PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER,
             PHASE_SERVER_APPLY_IME_VISIBILITY,
             PHASE_WM_SHOW_IME_RUNNER,
             PHASE_WM_SHOW_IME_READY,
@@ -179,7 +180,13 @@ public interface ImeTracker {
             PHASE_CLIENT_ANIMATION_RUNNING,
             PHASE_CLIENT_ANIMATION_CANCEL,
             PHASE_CLIENT_ANIMATION_FINISHED_SHOW,
-            PHASE_CLIENT_ANIMATION_FINISHED_HIDE
+            PHASE_CLIENT_ANIMATION_FINISHED_HIDE,
+            PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT,
+            PHASE_CLIENT_ANIMATION_FINISHED_HIDE,
+            PHASE_IME_SHOW_WINDOW,
+            PHASE_IME_HIDE_WINDOW,
+            PHASE_IME_PRIVILEGED_OPERATIONS,
+            PHASE_SERVER_CURRENT_ACTIVE_IME,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Phase {}
@@ -222,23 +229,19 @@ public interface ImeTracker {
     /** Dispatched from the IME wrapper to the IME. */
     int PHASE_IME_WRAPPER_DISPATCH = ImeProtoEnums.PHASE_IME_WRAPPER_DISPATCH;
 
-    /** Reached the IME' showSoftInput method. */
+    /** Reached the IME's showSoftInput method. */
     int PHASE_IME_SHOW_SOFT_INPUT = ImeProtoEnums.PHASE_IME_SHOW_SOFT_INPUT;
 
-    /** Reached the IME' hideSoftInput method. */
+    /** Reached the IME's hideSoftInput method. */
     int PHASE_IME_HIDE_SOFT_INPUT = ImeProtoEnums.PHASE_IME_HIDE_SOFT_INPUT;
 
     /** The server decided the IME should be shown. */
     int PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE = ImeProtoEnums.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE;
 
-    /** Requested applying the IME visibility in the insets source consumer. */
-    int PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER =
-            ImeProtoEnums.PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER;
-
     /** Applied the IME visibility. */
     int PHASE_SERVER_APPLY_IME_VISIBILITY = ImeProtoEnums.PHASE_SERVER_APPLY_IME_VISIBILITY;
 
-    /** Created the show IME runner. */
+    /** Started the show IME runner. */
     int PHASE_WM_SHOW_IME_RUNNER = ImeProtoEnums.PHASE_WM_SHOW_IME_RUNNER;
 
     /** Ready to show IME. */
@@ -317,35 +320,53 @@ public interface ImeTracker {
     /** Finished the IME window insets hide animation. */
     int PHASE_CLIENT_ANIMATION_FINISHED_HIDE = ImeProtoEnums.PHASE_CLIENT_ANIMATION_FINISHED_HIDE;
 
-    /**
-     * Creates an IME show request tracking token.
-     *
-     * @param component the name of the component that created the IME request, or {@code null}
-     *                  otherwise (defaulting to {@link ActivityThread#currentProcessName()}).
-     * @param uid the uid of the client that requested the IME.
-     * @param origin the origin of the IME show request.
-     * @param reason the reason why the IME show request was created.
-     *
-     * @return An IME tracking token.
-     */
-    @NonNull
-    Token onRequestShow(@Nullable String component, int uid, @Origin int origin,
-            @SoftInputShowHideReason int reason);
+    /** Aborted the request to show the IME post layout. */
+    int PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT =
+            ImeProtoEnums.PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT;
+
+    /** Reached the IME's showWindow method. */
+    int PHASE_IME_SHOW_WINDOW = ImeProtoEnums.PHASE_IME_SHOW_WINDOW;
+
+    /** Reached the IME's hideWindow method. */
+    int PHASE_IME_HIDE_WINDOW = ImeProtoEnums.PHASE_IME_HIDE_WINDOW;
+
+    /** Reached the InputMethodPrivilegedOperations handler. */
+    int PHASE_IME_PRIVILEGED_OPERATIONS = ImeProtoEnums.PHASE_IME_PRIVILEGED_OPERATIONS;
+
+    /** Checked that the calling IME is the currently active IME. */
+    int PHASE_SERVER_CURRENT_ACTIVE_IME = ImeProtoEnums.PHASE_SERVER_CURRENT_ACTIVE_IME;
 
     /**
-     * Creates an IME hide request tracking token.
+     * Called when an IME request is started.
      *
-     * @param component the name of the component that created the IME request, or {@code null}
-     *                  otherwise (defaulting to {@link ActivityThread#currentProcessName()}).
-     * @param uid the uid of the client that requested the IME.
-     * @param origin the origin of the IME hide request.
-     * @param reason the reason why the IME hide request was created.
+     * @param component the name of the component that started the request.
+     * @param uid the uid of the client that started the request.
+     * @param type the type of the request.
+     * @param origin the origin of the request.
+     * @param reason the reason for starting the request.
+     * @param fromUser whether this request was created directly from user interaction.
      *
-     * @return An IME tracking token.
+     * @return An IME request tracking token.
      */
     @NonNull
-    Token onRequestHide(@Nullable String component, int uid, @Origin int origin,
-            @SoftInputShowHideReason int reason);
+    Token onStart(@NonNull String component, int uid, @Type int type, @Origin int origin,
+            @SoftInputShowHideReason int reason, boolean fromUser);
+
+    /**
+     * Called when an IME request is started for the current process.
+     *
+     * @param type the type of the request.
+     * @param origin the origin of the request.
+     * @param reason the reason for starting the request.
+     * @param fromUser whether this request was created directly from user interaction.
+     *
+     * @return An IME request tracking token.
+     */
+    @NonNull
+    default Token onStart(@Type int type, @Origin int origin, @SoftInputShowHideReason int reason,
+            boolean fromUser) {
+        return onStart(Process.myProcessName(), Process.myUid(), type, origin, reason, fromUser);
+    }
 
     /**
      * Called when an IME request progresses to a further phase.
@@ -382,16 +403,38 @@ public interface ImeTracker {
     /**
      * Called when the IME show request is successful.
      *
-     * @param token the token tracking the current IME show request or {@code null} otherwise.
+     * @param token the token tracking the current IME request or {@code null} otherwise.
      */
     void onShown(@Nullable Token token);
 
     /**
      * Called when the IME hide request is successful.
      *
-     * @param token the token tracking the current IME hide request or {@code null} otherwise.
+     * @param token the token tracking the current IME request or {@code null} otherwise.
      */
     void onHidden(@Nullable Token token);
+
+    /**
+     * Returns whether the current IME request was created due to a user interaction. This can
+     * only be {@code true} when running on the view's UI thread.
+     *
+     * @param view the view for which the IME was requested.
+     * @return {@code true} if this request is coming from a user interaction,
+     * {@code false} otherwise.
+     */
+    static boolean isFromUser(@Nullable View view) {
+        if (view == null) {
+            return false;
+        }
+        final var handler = view.getHandler();
+        // Early return if not on the UI thread, to ensure safe access to getViewRootImpl() below.
+        if (handler == null || handler.getLooper() == null
+                || !handler.getLooper().isCurrentThread()) {
+            return false;
+        }
+        final var viewRootImpl = view.getViewRootImpl();
+        return viewRootImpl != null && viewRootImpl.isHandlingPointerEvent();
+    }
 
     /**
      * Get the singleton request tracker instance.
@@ -449,31 +492,17 @@ public interface ImeTracker {
 
         @NonNull
         @Override
-        public Token onRequestShow(@Nullable String component, int uid, @Origin int origin,
-                @SoftInputShowHideReason int reason) {
-            final var tag = getTag(component);
-            final var token = IInputMethodManagerGlobalInvoker.onRequestShow(tag, uid, origin,
-                    reason);
+        public Token onStart(@NonNull String component, int uid, @Type int type, @Origin int origin,
+                @SoftInputShowHideReason int reason, boolean fromUser) {
+            final var tag = Token.createTag(component);
+            final var token = IInputMethodManagerGlobalInvoker.onStart(tag, uid, type,
+                    origin, reason, fromUser);
 
-            Log.i(TAG, token.mTag + ": onRequestShow at " + Debug.originToString(origin)
-                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason),
+            Log.i(TAG, token.mTag + ": onRequest" + (type == TYPE_SHOW ? "Show" : "Hide")
+                    + " at " + Debug.originToString(origin)
+                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason)
+                    + " fromUser " + fromUser,
                     mLogStackTrace ? new Throwable() : null);
-
-            return token;
-        }
-
-        @NonNull
-        @Override
-        public Token onRequestHide(@Nullable String component, int uid, @Origin int origin,
-                @SoftInputShowHideReason int reason) {
-            final var tag = getTag(component);
-            final var token = IInputMethodManagerGlobalInvoker.onRequestHide(tag, uid, origin,
-                    reason);
-
-            Log.i(TAG, token.mTag + ": onRequestHide at " + Debug.originToString(origin)
-                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason),
-                    mLogStackTrace ? new Throwable() : null);
-
             return token;
         }
 
@@ -524,20 +553,6 @@ public interface ImeTracker {
 
             Log.i(TAG, token.mTag + ": onHidden");
         }
-
-        /**
-         * Returns a logging tag using the given component name.
-         *
-         * @param component the name of the component that created the IME request, or {@code null}
-         *                  otherwise (defaulting to {@link ActivityThread#currentProcessName()}).
-         */
-        @NonNull
-        private String getTag(@Nullable String component) {
-            if (component == null) {
-                component = ActivityThread.currentProcessName();
-            }
-            return component + ":" + Integer.toHexString(ThreadLocalRandom.current().nextInt());
-        }
     };
 
     /** The singleton IME tracker instance for instrumenting jank metrics. */
@@ -548,6 +563,10 @@ public interface ImeTracker {
 
     /** A token that tracks the progress of an IME request. */
     final class Token implements Parcelable {
+
+        /** Empty binder, lazily initialized, used for empty token instantiation. */
+        @Nullable
+        private static IBinder sEmptyBinder;
 
         /** The binder used to identify this token. */
         @NonNull
@@ -567,14 +586,54 @@ public interface ImeTracker {
             mTag = in.readString8();
         }
 
+        /** Returns the binder used to identify this token. */
         @NonNull
         public IBinder getBinder() {
             return mBinder;
         }
 
+        /** Returns the logging tag of this token. */
         @NonNull
         public String getTag() {
             return mTag;
+        }
+
+        /**
+         * Creates a logging tag.
+         *
+         * @param component the name of the component that created the IME request.
+         */
+        @NonNull
+        private static String createTag(@NonNull String component) {
+            return component + ":" + Integer.toHexString(ThreadLocalRandom.current().nextInt());
+        }
+
+        /** Returns a new token with an empty binder. */
+        @NonNull
+        @VisibleForTesting(visibility = Visibility.PACKAGE)
+        public static Token empty() {
+            final var tag = createTag(Process.myProcessName());
+            return empty(tag);
+        }
+
+        /** Returns a new token with an empty binder and the given logging tag. */
+        @NonNull
+        static Token empty(@NonNull String tag) {
+            return new Token(getEmptyBinder(), tag);
+        }
+
+        /** Returns the empty binder instance for empty token creation, lazily initializing it. */
+        @NonNull
+        private static IBinder getEmptyBinder() {
+            if (sEmptyBinder == null) {
+                sEmptyBinder = new Binder();
+            }
+            return sEmptyBinder;
+        }
+
+        @Override
+        public String toString() {
+            return super.toString() + "(tag: " + mTag + ")";
         }
 
         /** For Parcelable, no special marshalled objects. */

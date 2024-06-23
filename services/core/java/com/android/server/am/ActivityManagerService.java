@@ -135,6 +135,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
+import static com.android.sdksandbox.flags.Flags.sdkSandboxInstrumentationInfo;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
@@ -164,6 +165,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.ProcessList.ProcStartHandler;
+import static com.android.server.flags.Flags.disableSystemCompaction;
 import static com.android.server.net.NetworkPolicyManagerInternal.updateBlockedReasonsWithProcState;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.UserManagerInternal.USER_START_MODE_BACKGROUND;
@@ -185,6 +187,7 @@ import static com.android.server.wm.ActivityTaskManagerService.DUMP_TOP_RESUMED_
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_VISIBLE_ACTIVITIES;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToString;
+import static com.android.systemui.shared.Flags.enableHomeDelay;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -326,7 +329,6 @@ import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FactoryTest;
 import android.os.FileUtils;
-import android.os.Flags;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IDeviceIdentifiersPolicyService;
@@ -475,6 +477,8 @@ import com.android.server.pm.pkg.SELinuxUtil;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
+import com.android.server.stats.pull.StatsPullAtomService;
+import com.android.server.stats.pull.StatsPullAtomServiceInternal;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -521,6 +525,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -926,6 +931,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final ComponentAliasResolver mComponentAliasResolver;
 
+    private static final long HOME_LAUNCH_TIMEOUT_MS = 15000;
+    private final AtomicBoolean mHasHomeDelay = new AtomicBoolean(false);
+
+    /**
+     * Tracks all users with computed color resources by ThemeOverlaycvontroller
+     */
+    @GuardedBy("this")
+    private final Set<Integer> mThemeOverlayReadyUsers = new HashSet<>();
+
     /**
      * Tracks association information for a particular package along with debuggability.
      * <p> Associations for a package A are allowed to package B if B is part of the
@@ -1229,7 +1243,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * by the user ID the sticky is for, and can include UserHandle.USER_ALL
      * for stickies that are sent to all users.
      */
-    @GuardedBy("this")
+    @GuardedBy("mStickyBroadcasts")
     final SparseArray<ArrayMap<String, ArrayList<StickyBroadcast>>> mStickyBroadcasts =
             new SparseArray<>();
 
@@ -1315,6 +1329,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * any user id that can impact battery performance.
      */
     final BatteryStatsService mBatteryStatsService;
+
+    StatsPullAtomServiceInternal mStatsPullAtomServiceInternal;
 
     /**
      * Information about component usage
@@ -1694,6 +1710,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int REMOVE_UID_FROM_OBSERVER_MSG = 81;
     static final int BIND_APPLICATION_TIMEOUT_SOFT_MSG = 82;
     static final int BIND_APPLICATION_TIMEOUT_HARD_MSG = 83;
+    static final int SERVICE_FGS_TIMEOUT_MSG = 84;
+    static final int SERVICE_FGS_ANR_TIMEOUT_MSG = 85;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1755,7 +1773,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("mProcLock")
     private long mLastBinderHeavyHitterAutoSamplerStart = 0L;
 
-    final AppProfiler mAppProfiler;
+    AppProfiler mAppProfiler;
 
     private static final int INDEX_NATIVE_PSS = 0;
     private static final int INDEX_NATIVE_SWAP_PSS = 1;
@@ -2056,6 +2074,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case BIND_APPLICATION_TIMEOUT_HARD_MSG: {
                     handleBindApplicationTimeoutHard((ProcessRecord) msg.obj);
                 } break;
+                case SERVICE_FGS_TIMEOUT_MSG: {
+                    mServices.onFgsTimeout((ServiceRecord) msg.obj);
+                } break;
+                case SERVICE_FGS_ANR_TIMEOUT_MSG: {
+                    mServices.onFgsAnrTimeout((ServiceRecord) msg.obj);
+                } break;
             }
         }
     }
@@ -2093,7 +2117,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
                 app.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_SYSTEM);
                 addPidLocked(app);
-                mOomAdjuster.onProcessBeginLocked(app);
                 updateLruProcessLocked(app, false, null);
                 updateOomAdjLocked(OOM_ADJ_REASON_SYSTEM_INIT);
             }
@@ -2105,7 +2128,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Start watching app ops after we and the package manager are up and running.
         mAppOpsService.startWatchingMode(AppOpsManager.OP_RUN_IN_BACKGROUND, null,
                 new IAppOpsCallback.Stub() {
-                    @Override public void opChanged(int op, int uid, String packageName) {
+                    @Override public void opChanged(int op, int uid, String packageName,
+                            String persistentDeviceId) {
                         if (op == AppOpsManager.OP_RUN_IN_BACKGROUND && packageName != null) {
                             if (getAppOpsManager().checkOpNoThrow(op, uid, packageName)
                                     != AppOpsManager.MODE_ALLOWED) {
@@ -2119,7 +2143,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAppOpsService.startWatchingActive(cameraOp, new IAppOpsActiveCallback.Stub() {
             @Override
             public void opActiveChanged(int op, int uid, String packageName, String attributionTag,
-                    boolean active, @AttributionFlags int attributionFlags,
+                    int virtualDeviceId, boolean active, @AttributionFlags int attributionFlags,
                     int attributionChainId) {
                 cameraActiveChanged(uid, active);
             }
@@ -2335,6 +2359,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mService.startBroadcastObservers();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 mService.mPackageWatchdog.onPackagesReady();
+                mService.scheduleHomeTimeout();
             }
         }
 
@@ -2501,7 +2526,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mInjector = injector;
         mContext = mInjector.getContext();
         mUiContext = null;
-        mAppErrors = null;
+        mAppErrors = injector.getAppErrors();
         mPackageWatchdog = null;
         mAppOpsService = mInjector.getAppOpsService(null /* recentAccessesFile */,
             null /* storageFile */, null /* handler */);
@@ -2519,7 +2544,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ? new OomAdjusterModernImpl(this, mProcessList, activeUids, handlerThread)
                 : new OomAdjuster(this, mProcessList, activeUids, handlerThread);
 
-        mIntentFirewall = null;
+        mIntentFirewall = injector.getIntentFirewall();
         mProcessStats = new ProcessStatsService(this, mContext.getCacheDir());
         mCpHelper = new ContentProviderHelper(this, false);
         mServices = mInjector.getActiveServices(this);
@@ -4407,7 +4432,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (packageName == null) {
             // Remove all sticky broadcasts from this user.
-            mStickyBroadcasts.remove(userId);
+            synchronized (mStickyBroadcasts) {
+                mStickyBroadcasts.remove(userId);
+            }
         }
 
         ArrayList<ContentProviderRecord> providers = new ArrayList<>();
@@ -4632,7 +4659,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, pid, app.processName);
 
         synchronized (mProcLock) {
-            mOomAdjuster.onProcessBeginLocked(app);
             mOomAdjuster.setAttachingProcessStatesLSP(app);
             clearProcessForegroundLocked(app);
             app.setDebugging(false);
@@ -5095,13 +5121,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
                 | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
                 | Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        final BroadcastOptions bOptions = mUserController.getTemporaryAppAllowlistBroadcastOptions(
-                reason);
 
         broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null,
                 new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
                 null, null, AppOpsManager.OP_NONE,
-                bOptions.toBundle(), true,
+                null, true,
                 false, MY_PID, SYSTEM_UID,
                 SYSTEM_UID, MY_PID, app.userId);
     }
@@ -5308,6 +5332,61 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * Starts Home if there is no completion signal from ThemeOverlayController
+     */
+    private void scheduleHomeTimeout() {
+        if (enableHomeDelay() && mHasHomeDelay.compareAndSet(false, true)) {
+            int userId = mUserController.getCurrentUserId();
+            mHandler.postDelayed(() -> {
+                if (!isThemeOverlayReady(userId)) {
+                    Slog.d(TAG,
+                            "ThemeHomeDelay: ThemeOverlayController not responding, launching "
+                                    + "Home after "
+                                    + HOME_LAUNCH_TIMEOUT_MS + "ms");
+                    setThemeOverlayReady(userId);
+                }
+            }, HOME_LAUNCH_TIMEOUT_MS);
+        }
+    }
+
+    /**
+     * Used by ThemeOverlayController to notify when color
+     * palette is ready.
+     *
+     * @param userId The ID of the user where ThemeOverlayController is ready.
+     *
+     * @throws RemoteException
+     *
+     * @hide
+     */
+    @Override
+    public void setThemeOverlayReady(@UserIdInt int userId) {
+        enforceCallingPermission(Manifest.permission.SET_THEME_OVERLAY_CONTROLLER_READY,
+                "setThemeOverlayReady");
+
+        boolean updateUser;
+        synchronized (mThemeOverlayReadyUsers) {
+            updateUser = mThemeOverlayReadyUsers.add(userId);
+        }
+
+        if (updateUser && enableHomeDelay()) {
+            mAtmInternal.startHomeOnAllDisplays(userId, "setThemeOverlayReady");
+        }
+    }
+
+    /**
+     * Returns current state of ThemeOverlayController color
+     * palette readiness.
+     *
+     * @hide
+     */
+    public boolean isThemeOverlayReady(int userId) {
+        synchronized (mThemeOverlayReadyUsers) {
+            return mThemeOverlayReadyUsers.contains(userId);
+        }
+    }
+
     final void ensureBootCompleted() {
         boolean booting;
         boolean enableScreen;
@@ -5407,6 +5486,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                     intents[i] = new Intent(intent);
+                    intents[i].removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
                 }
             }
             if (resolvedTypes != null && resolvedTypes.length != intents.length) {
@@ -6533,7 +6613,24 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid,
             final int modeFlags, int userId, IBinder callerToken) {
-        enforceNotIsolatedCaller("checkUriPermission");
+        return checkUriPermission(uri, pid, uid, modeFlags, userId,
+                /* isFullAccessForContentUri */ false, "checkUriPermission");
+    }
+
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
+    @Override
+    public int checkContentUriPermissionFull(Uri uri, int pid, int uid,
+            final int modeFlags, int userId) {
+        return checkUriPermission(uri, pid, uid, modeFlags, userId,
+                /* isFullAccessForContentUri */ true, "checkContentUriPermissionFull");
+    }
+
+    private int checkUriPermission(Uri uri, int pid, int uid,
+            final int modeFlags, int userId, boolean isFullAccessForContentUri, String methodName) {
+        enforceNotIsolatedCaller(methodName);
 
         // Our own process gets to do everything.
         if (pid == MY_PID) {
@@ -6544,8 +6641,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return PackageManager.PERMISSION_DENIED;
             }
         }
-        return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
-                ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
+        boolean granted = mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid,
+                modeFlags, isFullAccessForContentUri);
+
+        return granted ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
     }
 
     @Override
@@ -7112,7 +7211,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     sdkSandboxClientAppPackage,
                     new HostingRecord(HostingRecord.HOSTING_TYPE_ADDED_APPLICATION,
                             customProcess != null ? customProcess : info.processName));
-            mOomAdjuster.onProcessBeginLocked(app);
             updateLruProcessLocked(app, false, null);
             updateOomAdjLocked(app, OOM_ADJ_REASON_PROCESS_BEGIN);
         }
@@ -7809,12 +7907,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void registerUidObserver(IUidObserver observer, int which, int cutpoint,
             String callingPackage) {
-        if (!hasUsageStatsPermission(callingPackage)) {
-            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
-                    "registerUidObserver");
-        }
-        mUidObserverController.register(observer, which, cutpoint, callingPackage,
-                Binder.getCallingUid(), /*uids*/null);
+        registerUidObserverForUids(observer, which, cutpoint, callingPackage, null /* uids */);
     }
 
     /**
@@ -8575,8 +8668,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long now = SystemClock.uptimeMillis();
             final long timeSinceLastIdle = now - mLastIdleTime;
 
-            // Compact all non-zygote processes to freshen up the page cache.
-            mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
+            if (!disableSystemCompaction()) {
+                // Compact all non-zygote processes to freshen up the page cache.
+                mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
+            }
 
             final long lowRamSinceLastIdle = mAppProfiler.getLowRamTimeSinceIdleLPr(now);
             mLastIdleTime = now;
@@ -8616,7 +8711,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         final long initialIdlePssOrRss, lastPssOrRss, lastSwapPss;
                         synchronized (mAppProfiler.mProfilerLock) {
                             initialIdlePssOrRss = pr.getInitialIdlePssOrRss();
-                            lastPssOrRss = !Flags.removeAppProfilerPssCollection()
+                            lastPssOrRss = mAppProfiler.isProfilingPss()
                                     ? pr.getLastPss() : pr.getLastRss();
                             lastSwapPss = pr.getLastSwapPss();
                         }
@@ -8626,14 +8721,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                             final StringBuilder sb2 = new StringBuilder(128);
                             sb2.append("Kill");
                             sb2.append(proc.processName);
-                            if (!Flags.removeAppProfilerPssCollection()) {
+                            if (mAppProfiler.isProfilingPss()) {
                                 sb2.append(" in idle maint: pss=");
                             } else {
                                 sb2.append(" in idle maint: rss=");
                             }
                             sb2.append(lastPssOrRss);
 
-                            if (!Flags.removeAppProfilerPssCollection()) {
+                            if (mAppProfiler.isProfilingPss()) {
                                 sb2.append(", swapPss=");
                                 sb2.append(lastSwapPss);
                                 sb2.append(", initialPss=");
@@ -8648,7 +8743,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             Slog.wtfQuiet(TAG, sb2.toString());
                             mHandler.post(() -> {
                                 synchronized (ActivityManagerService.this) {
-                                    proc.killLocked(!Flags.removeAppProfilerPssCollection()
+                                    proc.killLocked(mAppProfiler.isProfilingPss()
                                             ? "idle maint (pss " : "idle maint (rss " + lastPssOrRss
                                             + " from " + initialIdlePssOrRss + ")",
                                             ApplicationExitInfo.REASON_OTHER,
@@ -8937,7 +9032,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     BINDER_PROXY_LOW_WATERMARK, BINDER_PROXY_WARNING_WATERMARK);
             BinderInternal.nSetBinderProxyCountEnabled(true);
             BinderInternal.setBinderProxyCountCallback(new MyBinderProxyCountEventListener(),
-                    BackgroundThread.getHandler());
+                    mHandler);
             t.traceEnd(); // setBinderProxies
 
             t.traceEnd(); // ActivityManagerStartApps
@@ -8958,6 +9053,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.wtf(TAG, "Uid " + uid + " sent too many Binders to uid "
                     + Process.myUid());
             BinderProxy.dumpProxyDebugInfo();
+            CriticalEventLog.getInstance().logExcessiveBinderCalls(uid);
             if (uid == Process.SYSTEM_UID) {
                 Slog.i(TAG, "Skipping kill (uid is SYSTEM)");
             } else {
@@ -8981,7 +9077,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void onWarningThresholdReached(int uid) {
-            if (com.android.server.am.Flags.logExcessiveBinderProxies()) {
+            if (Flags.logExcessiveBinderProxies()) {
                 Slog.w(TAG, "Uid " + uid + " sent too many ("
                         + BINDER_PROXY_WARNING_WATERMARK + ") Binders to uid " + Process.myUid());
                 FrameworkStatsLog.write(
@@ -9888,7 +9984,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
 
     @Override
-    public void setApplicationStartInfoCompleteListener(
+    public void addApplicationStartInfoCompleteListener(
             IApplicationStartInfoCompleteListener listener, int userId) {
         enforceNotIsolatedCaller("setApplicationStartInfoCompleteListener");
 
@@ -9903,7 +9999,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
 
     @Override
-    public void clearApplicationStartInfoCompleteListener(int userId) {
+    public void removeApplicationStartInfoCompleteListener(
+            IApplicationStartInfoCompleteListener listener, int userId) {
         enforceNotIsolatedCaller("clearApplicationStartInfoCompleteListener");
 
         // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
@@ -9912,7 +10009,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final int callingUid = Binder.getCallingUid();
-        mProcessList.getAppStartInfoTracker().clearStartInfoCompleteListener(callingUid, true);
+        mProcessList.getAppStartInfoTracker().removeStartInfoCompleteListener(listener, callingUid,
+                true);
     }
 
     @Override
@@ -11367,20 +11465,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (BroadcastQueue q : mBroadcastQueues) {
             q.dumpDebug(proto, ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
         }
-        for (int user=0; user<mStickyBroadcasts.size(); user++) {
-            long token = proto.start(ActivityManagerServiceDumpBroadcastsProto.STICKY_BROADCASTS);
-            proto.write(StickyBroadcastProto.USER, mStickyBroadcasts.keyAt(user));
-            for (Map.Entry<String, ArrayList<StickyBroadcast>> ent
-                    : mStickyBroadcasts.valueAt(user).entrySet()) {
-                long actionToken = proto.start(StickyBroadcastProto.ACTIONS);
-                proto.write(StickyBroadcastProto.StickyAction.NAME, ent.getKey());
-                for (StickyBroadcast broadcast : ent.getValue()) {
-                    broadcast.intent.dumpDebug(proto, StickyBroadcastProto.StickyAction.INTENTS,
-                            false, true, true, false);
+        synchronized (mStickyBroadcasts) {
+            for (int user = 0; user < mStickyBroadcasts.size(); user++) {
+                long token = proto.start(
+                        ActivityManagerServiceDumpBroadcastsProto.STICKY_BROADCASTS);
+                proto.write(StickyBroadcastProto.USER, mStickyBroadcasts.keyAt(user));
+                for (Map.Entry<String, ArrayList<StickyBroadcast>> ent
+                        : mStickyBroadcasts.valueAt(user).entrySet()) {
+                    long actionToken = proto.start(StickyBroadcastProto.ACTIONS);
+                    proto.write(StickyBroadcastProto.StickyAction.NAME, ent.getKey());
+                    for (StickyBroadcast broadcast : ent.getValue()) {
+                        broadcast.intent.dumpDebug(proto, StickyBroadcastProto.StickyAction.INTENTS,
+                                false, true, true, false);
+                    }
+                    proto.end(actionToken);
                 }
-                proto.end(actionToken);
+                proto.end(token);
             }
-            proto.end(token);
         }
 
         long handlerToken = proto.start(ActivityManagerServiceDumpBroadcastsProto.HANDLER);
@@ -11520,45 +11621,50 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         needSep = true;
 
-        if (!onlyHistory && !onlyReceivers && mStickyBroadcasts != null && dumpPackage == null) {
-            for (int user=0; user<mStickyBroadcasts.size(); user++) {
-                if (needSep) {
-                    pw.println();
-                }
-                needSep = true;
-                printedAnything = true;
-                pw.print("  Sticky broadcasts for user ");
-                        pw.print(mStickyBroadcasts.keyAt(user)); pw.println(":");
-                StringBuilder sb = new StringBuilder(128);
-                for (Map.Entry<String, ArrayList<StickyBroadcast>> ent
-                        : mStickyBroadcasts.valueAt(user).entrySet()) {
-                    pw.print("  * Sticky action "); pw.print(ent.getKey());
-                    if (dumpAll) {
-                        pw.println(":");
-                        ArrayList<StickyBroadcast> broadcasts = ent.getValue();
-                        final int N = broadcasts.size();
-                        for (int i=0; i<N; i++) {
-                            final Intent intent = broadcasts.get(i).intent;
-                            final boolean deferUntilActive = broadcasts.get(i).deferUntilActive;
-                            sb.setLength(0);
-                            sb.append("    Intent: ");
-                            intent.toShortString(sb, false, true, false, false);
-                            pw.print(sb);
-                            if (deferUntilActive) {
-                                pw.print(" [D]");
+        synchronized (mStickyBroadcasts) {
+            if (!onlyHistory && !onlyReceivers && mStickyBroadcasts != null
+                    && dumpPackage == null) {
+                for (int user = 0; user < mStickyBroadcasts.size(); user++) {
+                    if (needSep) {
+                        pw.println();
+                    }
+                    needSep = true;
+                    printedAnything = true;
+                    pw.print("  Sticky broadcasts for user ");
+                    pw.print(mStickyBroadcasts.keyAt(user));
+                    pw.println(":");
+                    StringBuilder sb = new StringBuilder(128);
+                    for (Map.Entry<String, ArrayList<StickyBroadcast>> ent
+                            : mStickyBroadcasts.valueAt(user).entrySet()) {
+                        pw.print("  * Sticky action ");
+                        pw.print(ent.getKey());
+                        if (dumpAll) {
+                            pw.println(":");
+                            ArrayList<StickyBroadcast> broadcasts = ent.getValue();
+                            final int N = broadcasts.size();
+                            for (int i = 0; i < N; i++) {
+                                final Intent intent = broadcasts.get(i).intent;
+                                final boolean deferUntilActive = broadcasts.get(i).deferUntilActive;
+                                sb.setLength(0);
+                                sb.append("    Intent: ");
+                                intent.toShortString(sb, false, true, false, false);
+                                pw.print(sb);
+                                if (deferUntilActive) {
+                                    pw.print(" [D]");
+                                }
+                                pw.println();
+                                pw.print("      originalCallingUid: ");
+                                pw.println(broadcasts.get(i).originalCallingUid);
+                                pw.println();
+                                Bundle bundle = intent.getExtras();
+                                if (bundle != null) {
+                                    pw.print("      extras: ");
+                                    pw.println(bundle);
+                                }
                             }
-                            pw.println();
-                            pw.print("      originalCallingUid: ");
-                            pw.println(broadcasts.get(i).originalCallingUid);
-                            pw.println();
-                            Bundle bundle = intent.getExtras();
-                            if (bundle != null) {
-                                pw.print("      extras: ");
-                                pw.println(bundle);
-                            }
+                        } else {
+                            pw.println("");
                         }
-                    } else {
-                        pw.println("");
                     }
                 }
             }
@@ -13595,9 +13701,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
-        // Refuse possible leaked file descriptors
-        if (service != null && service.hasFileDescriptors() == true) {
-            throw new IllegalArgumentException("File descriptors passed in Intent");
+        if (service != null) {
+            // Refuse possible leaked file descriptors
+            if (service.hasFileDescriptors()) {
+                throw new IllegalArgumentException("File descriptors passed in Intent");
+            }
+            // Remove existing mismatch flag so it can be properly updated later
+            service.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
         }
 
         if (callingPackage == null) {
@@ -13733,6 +13843,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean hasServiceTimeLimitExceeded(ComponentName className, IBinder token) {
+        synchronized (this) {
+            return mServices.hasServiceTimedOutLocked(className, token);
+        }
+    }
+
+    @Override
     public int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
             boolean requireFull, String name, String callerPackage) {
         return mUserController.handleIncomingUser(callingPid, callingUid, userId, allowAll,
@@ -13769,6 +13886,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "isSingleton(" + componentProcessName + ", " + aInfo + ", " + className + ", 0x"
                 + Integer.toHexString(flags) + ") = " + result);
         return result;
+    }
+
+    boolean isSystemUserOnly(int flags) {
+        return android.multiuser.Flags.enableSystemUserOnlyForServicesAndProviders()
+                && (flags & ServiceInfo.FLAG_SYSTEM_USER_ONLY) != 0;
     }
 
     /**
@@ -13814,9 +13936,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceNotIsolatedCaller("bindService");
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
 
-        // Refuse possible leaked file descriptors
-        if (service != null && service.hasFileDescriptors() == true) {
-            throw new IllegalArgumentException("File descriptors passed in Intent");
+        if (service != null) {
+            // Refuse possible leaked file descriptors
+            if (service.hasFileDescriptors()) {
+                throw new IllegalArgumentException("File descriptors passed in Intent");
+            }
+            // Remove existing mismatch flag so it can be properly updated later
+            service.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
         }
 
         if (callingPackage == null) {
@@ -13890,13 +14016,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void serviceDoneExecuting(IBinder token, int type, int startId, int res) {
+    @Override
+    public void serviceDoneExecuting(IBinder token, int type, int startId, int res, Intent intent) {
         synchronized(this) {
             if (!(token instanceof ServiceRecord)) {
                 Slog.e(TAG, "serviceDoneExecuting: Invalid service token=" + token);
                 throw new IllegalArgumentException("Invalid service token");
             }
-            mServices.serviceDoneExecutingLocked((ServiceRecord) token, type, startId, res, false);
+            mServices.serviceDoneExecutingLocked((ServiceRecord) token, type, startId, res, false,
+                    intent);
         }
     }
 
@@ -14225,7 +14353,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int callingUid;
         int callingPid;
         boolean instantApp;
-        synchronized(this) {
+        synchronized (mProcLock) {
             callerApp = getRecordForAppLOSP(caller);
             if (callerApp == null) {
                 Slog.w(TAG, "registerReceiverWithFeature: no app for " + caller);
@@ -14241,57 +14369,59 @@ public class ActivityManagerService extends IActivityManager.Stub
             callingPid = callerApp.getPid();
 
             instantApp = isInstantApp(callerApp, callerPackage, callingUid);
-            userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, true,
-                    ALLOW_FULL_ONLY, "registerReceiver", callerPackage);
+        }
+        userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, true,
+                ALLOW_FULL_ONLY, "registerReceiver", callerPackage);
 
-            // Warn if system internals are registering for important broadcasts
-            // without also using a priority to ensure they process the event
-            // before normal apps hear about it
-            if (UserHandle.isCore(callingUid)) {
-                final int priority = filter.getPriority();
-                final boolean systemPriority = (priority >= IntentFilter.SYSTEM_HIGH_PRIORITY)
-                        || (priority <= IntentFilter.SYSTEM_LOW_PRIORITY);
-                if (!systemPriority) {
-                    final int N = filter.countActions();
-                    for (int i = 0; i < N; i++) {
-                        // TODO: expand to additional important broadcasts over time
-                        final String action = filter.getAction(i);
-                        if (action.startsWith("android.intent.action.USER_")
-                                || action.startsWith("android.intent.action.PACKAGE_")
-                                || action.startsWith("android.intent.action.UID_")
-                                || action.startsWith("android.intent.action.EXTERNAL_")
-                                || action.startsWith("android.bluetooth.")
-                                || action.equals(Intent.ACTION_SHUTDOWN)) {
-                            if (DEBUG_BROADCAST) {
-                                Slog.wtf(TAG,
-                                        "System internals registering for " + filter.toLongString()
-                                                + " with app priority; this will race with apps!",
-                                        new Throwable());
-                            }
-
-                            // When undefined, assume that system internals need
-                            // to hear about the event first; they can use
-                            // SYSTEM_LOW_PRIORITY if they need to hear last
-                            if (priority == 0) {
-                                filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-                            }
-                            break;
+        // Warn if system internals are registering for important broadcasts
+        // without also using a priority to ensure they process the event
+        // before normal apps hear about it
+        if (UserHandle.isCore(callingUid)) {
+            final int priority = filter.getPriority();
+            final boolean systemPriority = (priority >= IntentFilter.SYSTEM_HIGH_PRIORITY)
+                    || (priority <= IntentFilter.SYSTEM_LOW_PRIORITY);
+            if (!systemPriority) {
+                final int N = filter.countActions();
+                for (int i = 0; i < N; i++) {
+                    // TODO: expand to additional important broadcasts over time
+                    final String action = filter.getAction(i);
+                    if (action.startsWith("android.intent.action.USER_")
+                            || action.startsWith("android.intent.action.PACKAGE_")
+                            || action.startsWith("android.intent.action.UID_")
+                            || action.startsWith("android.intent.action.EXTERNAL_")
+                            || action.startsWith("android.bluetooth.")
+                            || action.equals(Intent.ACTION_SHUTDOWN)) {
+                        if (DEBUG_BROADCAST) {
+                            Slog.wtf(TAG,
+                                    "System internals registering for " + filter.toLongString()
+                                            + " with app priority; this will race with apps!",
+                                    new Throwable());
                         }
+
+                        // When undefined, assume that system internals need
+                        // to hear about the event first; they can use
+                        // SYSTEM_LOW_PRIORITY if they need to hear last
+                        if (priority == 0) {
+                            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+                        }
+                        break;
                     }
                 }
             }
+        }
 
-            Iterator<String> actions = filter.actionsIterator();
-            if (actions == null) {
-                ArrayList<String> noAction = new ArrayList<String>(1);
-                noAction.add(null);
-                actions = noAction.iterator();
-            }
-            boolean onlyProtectedBroadcasts = true;
+        Iterator<String> actions = filter.actionsIterator();
+        if (actions == null) {
+            ArrayList<String> noAction = new ArrayList<String>(1);
+            noAction.add(null);
+            actions = noAction.iterator();
+        }
+        boolean onlyProtectedBroadcasts = true;
 
-            // Collect stickies of users and check if broadcast is only registered for protected
-            // broadcasts
-            int[] userIds = { UserHandle.USER_ALL, UserHandle.getUserId(callingUid) };
+        // Collect stickies of users and check if broadcast is only registered for protected
+        // broadcasts
+        int[] userIds = { UserHandle.USER_ALL, UserHandle.getUserId(callingUid) };
+        synchronized (mStickyBroadcasts) {
             while (actions.hasNext()) {
                 String action = actions.next();
                 for (int id : userIds) {
@@ -14317,68 +14447,68 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
+        }
 
-            if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
-                SdkSandboxManagerLocal sdkSandboxManagerLocal =
-                        LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
-                if (sdkSandboxManagerLocal == null) {
-                    throw new IllegalStateException("SdkSandboxManagerLocal not found when checking"
-                            + " whether SDK sandbox uid can register to broadcast receivers.");
-                }
-                if (!sdkSandboxManagerLocal.canRegisterBroadcastReceiver(
-                        /*IntentFilter=*/ filter, flags, onlyProtectedBroadcasts)) {
-                    throw new SecurityException("SDK sandbox not allowed to register receiver"
-                            + " with the given IntentFilter: " + filter.toLongString());
-                }
+        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+            SdkSandboxManagerLocal sdkSandboxManagerLocal =
+                    LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
+            if (sdkSandboxManagerLocal == null) {
+                throw new IllegalStateException("SdkSandboxManagerLocal not found when checking"
+                        + " whether SDK sandbox uid can register to broadcast receivers.");
             }
-
-            // If the change is enabled, but neither exported or not exported is set, we need to log
-            // an error so the consumer can know to explicitly set the value for their flag.
-            // If the caller is registering for a sticky broadcast with a null receiver, we won't
-            // require a flag
-            final boolean explicitExportStateDefined =
-                    (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED)) != 0;
-            if (((flags & Context.RECEIVER_EXPORTED) != 0) && (
-                    (flags & Context.RECEIVER_NOT_EXPORTED) != 0)) {
-                throw new IllegalArgumentException(
-                        "Receiver can't specify both RECEIVER_EXPORTED and RECEIVER_NOT_EXPORTED"
-                                + "flag");
+            if (!sdkSandboxManagerLocal.canRegisterBroadcastReceiver(
+                    /*IntentFilter=*/ filter, flags, onlyProtectedBroadcasts)) {
+                throw new SecurityException("SDK sandbox not allowed to register receiver"
+                        + " with the given IntentFilter: " + filter.toLongString());
             }
+        }
 
-            // Don't enforce the flag check if we're EITHER registering for only protected
-            // broadcasts, or the receiver is null (a sticky broadcast). Sticky broadcasts should
-            // not be used generally, so we will be marking them as exported by default
-            boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
-                    DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid);
+        // If the change is enabled, but neither exported or not exported is set, we need to log
+        // an error so the consumer can know to explicitly set the value for their flag.
+        // If the caller is registering for a sticky broadcast with a null receiver, we won't
+        // require a flag
+        final boolean explicitExportStateDefined =
+                (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED)) != 0;
+        if (((flags & Context.RECEIVER_EXPORTED) != 0) && (
+                (flags & Context.RECEIVER_NOT_EXPORTED) != 0)) {
+            throw new IllegalArgumentException(
+                    "Receiver can't specify both RECEIVER_EXPORTED and RECEIVER_NOT_EXPORTED"
+                            + "flag");
+        }
 
-            // A receiver that is visible to instant apps must also be exported.
-            final boolean unexportedReceiverVisibleToInstantApps =
-                    ((flags & Context.RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0) && (
-                            (flags & Context.RECEIVER_NOT_EXPORTED) != 0);
-            if (unexportedReceiverVisibleToInstantApps && requireExplicitFlagForDynamicReceivers) {
-                throw new IllegalArgumentException(
-                        "Receiver can't specify both RECEIVER_VISIBLE_TO_INSTANT_APPS and "
-                                + "RECEIVER_NOT_EXPORTED flag");
-            }
+        // Don't enforce the flag check if we're EITHER registering for only protected
+        // broadcasts, or the receiver is null (a sticky broadcast). Sticky broadcasts should
+        // not be used generally, so we will be marking them as exported by default
+        boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
+                DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid);
 
-            if (!onlyProtectedBroadcasts) {
-                if (receiver == null && !explicitExportStateDefined) {
-                    // sticky broadcast, no flag specified (flag isn't required)
-                    flags |= Context.RECEIVER_EXPORTED;
-                } else if (requireExplicitFlagForDynamicReceivers && !explicitExportStateDefined) {
-                    throw new SecurityException(
-                            callerPackage + ": One of RECEIVER_EXPORTED or "
-                                    + "RECEIVER_NOT_EXPORTED should be specified when a receiver "
-                                    + "isn't being registered exclusively for system broadcasts");
-                    // Assume default behavior-- flag check is not enforced
-                } else if (!requireExplicitFlagForDynamicReceivers && (
-                        (flags & Context.RECEIVER_NOT_EXPORTED) == 0)) {
-                    // Change is not enabled, assume exported unless otherwise specified.
-                    flags |= Context.RECEIVER_EXPORTED;
-                }
-            } else if ((flags & Context.RECEIVER_NOT_EXPORTED) == 0) {
+        // A receiver that is visible to instant apps must also be exported.
+        final boolean unexportedReceiverVisibleToInstantApps =
+                ((flags & Context.RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0) && (
+                        (flags & Context.RECEIVER_NOT_EXPORTED) != 0);
+        if (unexportedReceiverVisibleToInstantApps && requireExplicitFlagForDynamicReceivers) {
+            throw new IllegalArgumentException(
+                    "Receiver can't specify both RECEIVER_VISIBLE_TO_INSTANT_APPS and "
+                            + "RECEIVER_NOT_EXPORTED flag");
+        }
+
+        if (!onlyProtectedBroadcasts) {
+            if (receiver == null && !explicitExportStateDefined) {
+                // sticky broadcast, no flag specified (flag isn't required)
+                flags |= Context.RECEIVER_EXPORTED;
+            } else if (requireExplicitFlagForDynamicReceivers && !explicitExportStateDefined) {
+                throw new SecurityException(
+                        callerPackage + ": One of RECEIVER_EXPORTED or "
+                                + "RECEIVER_NOT_EXPORTED should be specified when a receiver "
+                                + "isn't being registered exclusively for system broadcasts");
+                // Assume default behavior-- flag check is not enforced
+            } else if (!requireExplicitFlagForDynamicReceivers && (
+                    (flags & Context.RECEIVER_NOT_EXPORTED) == 0)) {
+                // Change is not enabled, assume exported unless otherwise specified.
                 flags |= Context.RECEIVER_EXPORTED;
             }
+        } else if ((flags & Context.RECEIVER_NOT_EXPORTED) == 0) {
+            flags |= Context.RECEIVER_EXPORTED;
         }
 
         // Dynamic receivers are exported by default for versions prior to T
@@ -15368,55 +15498,58 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new SecurityException(
                         "Sticky broadcasts can't target a specific component");
             }
-            // We use userId directly here, since the "all" target is maintained
-            // as a separate set of sticky broadcasts.
-            if (userId != UserHandle.USER_ALL) {
-                // But first, if this is not a broadcast to all users, then
-                // make sure it doesn't conflict with an existing broadcast to
-                // all users.
-                ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(
-                        UserHandle.USER_ALL);
-                if (stickies != null) {
-                    ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
-                    if (list != null) {
-                        int N = list.size();
-                        int i;
-                        for (i=0; i<N; i++) {
-                            if (intent.filterEquals(list.get(i).intent)) {
-                                throw new IllegalArgumentException(
-                                        "Sticky broadcast " + intent + " for user "
-                                        + userId + " conflicts with existing global broadcast");
+            synchronized (mStickyBroadcasts) {
+                // We use userId directly here, since the "all" target is maintained
+                // as a separate set of sticky broadcasts.
+                if (userId != UserHandle.USER_ALL) {
+                    // But first, if this is not a broadcast to all users, then
+                    // make sure it doesn't conflict with an existing broadcast to
+                    // all users.
+                    ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(
+                            UserHandle.USER_ALL);
+                    if (stickies != null) {
+                        ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
+                        if (list != null) {
+                            int N = list.size();
+                            int i;
+                            for (i = 0; i < N; i++) {
+                                if (intent.filterEquals(list.get(i).intent)) {
+                                    throw new IllegalArgumentException("Sticky broadcast " + intent
+                                            + " for user " + userId
+                                            + " conflicts with existing global broadcast");
+                                }
                             }
                         }
                     }
                 }
-            }
-            ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(userId);
-            if (stickies == null) {
-                stickies = new ArrayMap<>();
-                mStickyBroadcasts.put(userId, stickies);
-            }
-            ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
-            if (list == null) {
-                list = new ArrayList<>();
-                stickies.put(intent.getAction(), list);
-            }
-            final boolean deferUntilActive = BroadcastRecord.calculateDeferUntilActive(
-                    callingUid, brOptions, resultTo, ordered,
-                    BroadcastRecord.calculateUrgent(intent, brOptions));
-            final int stickiesCount = list.size();
-            int i;
-            for (i = 0; i < stickiesCount; i++) {
-                if (intent.filterEquals(list.get(i).intent)) {
-                    // This sticky already exists, replace it.
-                    list.set(i, StickyBroadcast.create(new Intent(intent), deferUntilActive,
-                            callingUid, callerAppProcessState));
-                    break;
+                ArrayMap<String, ArrayList<StickyBroadcast>> stickies =
+                        mStickyBroadcasts.get(userId);
+                if (stickies == null) {
+                    stickies = new ArrayMap<>();
+                    mStickyBroadcasts.put(userId, stickies);
                 }
-            }
-            if (i >= stickiesCount) {
-                list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive, callingUid,
-                        callerAppProcessState));
+                ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
+                if (list == null) {
+                    list = new ArrayList<>();
+                    stickies.put(intent.getAction(), list);
+                }
+                final boolean deferUntilActive = BroadcastRecord.calculateDeferUntilActive(
+                        callingUid, brOptions, resultTo, ordered,
+                        BroadcastRecord.calculateUrgent(intent, brOptions));
+                final int stickiesCount = list.size();
+                int i;
+                for (i = 0; i < stickiesCount; i++) {
+                    if (intent.filterEquals(list.get(i).intent)) {
+                        // This sticky already exists, replace it.
+                        list.set(i, StickyBroadcast.create(new Intent(intent), deferUntilActive,
+                                callingUid, callerAppProcessState));
+                        break;
+                    }
+                }
+                if (i >= stickiesCount) {
+                    list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive,
+                            callingUid, callerAppProcessState));
+                }
             }
         }
 
@@ -15653,13 +15786,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @VisibleForTesting
-    ArrayList<StickyBroadcast> getStickyBroadcasts(String action, int userId) {
-        final ArrayMap<String, ArrayList<StickyBroadcast>> stickyBroadcasts =
-                mStickyBroadcasts.get(userId);
-        if (stickyBroadcasts == null) {
-            return null;
+    ArrayList<StickyBroadcast> getStickyBroadcastsForTest(String action, int userId) {
+        synchronized (mStickyBroadcasts) {
+            final ArrayMap<String, ArrayList<StickyBroadcast>> stickyBroadcasts =
+                    mStickyBroadcasts.get(userId);
+            if (stickyBroadcasts == null) {
+                return null;
+            }
+            return stickyBroadcasts.get(action);
         }
-        return stickyBroadcasts.get(action);
     }
 
     /**
@@ -15708,9 +15843,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     final Intent verifyBroadcastLocked(Intent intent) {
-        // Refuse possible leaked file descriptors
-        if (intent != null && intent.hasFileDescriptors() == true) {
-            throw new IllegalArgumentException("File descriptors passed in Intent");
+        if (intent != null) {
+            // Refuse possible leaked file descriptors
+            if (intent.hasFileDescriptors()) {
+                throw new IllegalArgumentException("File descriptors passed in Intent");
+            }
+            // Remove existing mismatch flag so it can be properly updated later
+            intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
         }
 
         int flags = intent.getFlags();
@@ -15770,6 +15909,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             String[] excludedPackages, int appOp, Bundle bOptions,
             boolean serialized, boolean sticky, int userId) {
         enforceNotIsolatedCaller("broadcastIntent");
+
         synchronized(this) {
             intent = verifyBroadcastLocked(intent);
 
@@ -15783,6 +15923,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Permission regimes around sender-supplied broadcast options.
             enforceBroadcastOptionPermissionsInternal(bOptions, callingUid);
 
+            final ComponentName cn = intent.getComponent();
+
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "broadcastIntent:" + (cn != null ? cn.toString() : intent.getAction()));
+
             final long origId = Binder.clearCallingIdentity();
             try {
                 return broadcastIntentLocked(callerApp,
@@ -15793,6 +15939,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         callingPid, userId, BackgroundStartPrivileges.NONE, null, null);
             } finally {
                 Binder.restoreCallingIdentity(origId);
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
     }
@@ -15824,6 +15971,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
     public final void unbroadcastIntent(IApplicationThread caller, Intent intent, int userId) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors() == true) {
@@ -15833,23 +15981,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, true, ALLOW_NON_FULL, "removeStickyBroadcast", null);
 
-        synchronized(this) {
-            if (checkCallingPermission(android.Manifest.permission.BROADCAST_STICKY)
-                    != PackageManager.PERMISSION_GRANTED) {
-                String msg = "Permission Denial: unbroadcastIntent() from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " requires " + android.Manifest.permission.BROADCAST_STICKY;
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
-            }
+        if (checkCallingPermission(android.Manifest.permission.BROADCAST_STICKY)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: unbroadcastIntent() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.BROADCAST_STICKY;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        synchronized (mStickyBroadcasts) {
             ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(userId);
             if (stickies != null) {
                 ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
                 if (list != null) {
                     int N = list.size();
                     int i;
-                    for (i=0; i<N; i++) {
+                    for (i = 0; i < N; i++) {
                         if (intent.filterEquals(list.get(i).intent)) {
                             list.remove(i);
                             break;
@@ -16132,10 +16280,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final ApplicationInfo sdkSandboxInfo;
+        final String processName;
         try {
-            sdkSandboxInfo =
-                    sandboxManagerLocal.getSdkSandboxApplicationInfoForInstrumentation(
-                            sdkSandboxClientAppInfo, isSdkInSandbox);
+            if (sdkSandboxInstrumentationInfo()) {
+                sdkSandboxInfo =
+                        sandboxManagerLocal.getSdkSandboxApplicationInfoForInstrumentation(
+                                sdkSandboxClientAppInfo, isSdkInSandbox);
+                processName = sdkSandboxInfo.processName;
+            } else {
+                final PackageManager pm = mContext.getPackageManager();
+                sdkSandboxInfo =
+                        pm.getApplicationInfoAsUser(pm.getSdkSandboxPackageName(), 0, userId);
+                processName =
+                        sandboxManagerLocal.getSdkSandboxProcessNameForInstrumentation(
+                                sdkSandboxClientAppInfo);
+                sdkSandboxInfo.uid = Process.toSdkSandboxUid(sdkSandboxClientAppInfo.uid);
+            }
         } catch (NameNotFoundException e) {
             reportStartInstrumentationFailureLocked(
                     watcher, className, "Can't find SdkSandbox package");
@@ -16144,7 +16304,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
         activeInstr.mClass = className;
-        activeInstr.mTargetProcesses = new String[]{sdkSandboxInfo.processName};
+        activeInstr.mTargetProcesses = new String[]{processName};
         activeInstr.mTargetInfo = sdkSandboxInfo;
         activeInstr.mIsSdkInSandbox = isSdkInSandbox;
         activeInstr.mProfileFile = profileFile;
@@ -16187,7 +16347,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 ProcessRecord app = addAppLocked(
                         sdkSandboxInfo,
-                        sdkSandboxInfo.processName,
+                        processName,
                         /* isolated= */ false,
                         /* isSdkSandbox= */ true,
                         sdkSandboxInfo.uid,
@@ -16551,6 +16711,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final @ProcessCapability int capability) {
         mBatteryStatsService.noteUidProcessState(uid, state);
         mAppOpsService.updateUidProcState(uid, state, capability);
+        if (StatsPullAtomService.ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            try {
+                if (mStatsPullAtomServiceInternal == null) {
+                    mStatsPullAtomServiceInternal = LocalServices.getService(
+                            StatsPullAtomServiceInternal.class);
+                }
+                if (mStatsPullAtomServiceInternal != null) {
+                    mStatsPullAtomServiceInternal.noteUidProcessState(uid, state);
+                } else {
+                    Slog.d(TAG, "StatsPullAtomService not ready yet");
+                }
+            } catch (Exception e) {
+                Slog.e(TAG, "Exception during logging uid proc state change event", e);
+            }
+        }
         if (mTrackingAssociations) {
             for (int i1=0, N1=mAssociations.size(); i1<N1; i1++) {
                 ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>> targetComponents
@@ -17997,6 +18172,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.onUserStopped(userId);
             // Clean up various services by removing the user
             mBatteryStatsService.onUserRemoved(userId);
+
+            synchronized (mThemeOverlayReadyUsers) {
+                mThemeOverlayReadyUsers.remove(userId);
+            }
         }
 
         @Override
@@ -18327,7 +18506,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             (WindowProcessController) procsToKill.get(i);
                     final ProcessRecord pr = (ProcessRecord) wpc.mOwner;
                     if (ActivityManager.isProcStateBackground(pr.mState.getSetProcState())
-                            && pr.mReceivers.numberOfCurReceivers() == 0) {
+                            && pr.mReceivers.numberOfCurReceivers() == 0
+                            && !pr.mState.hasStartedServices()) {
                         pr.killLocked("remove task", ApplicationExitInfo.REASON_USER_REQUESTED,
                                 ApplicationExitInfo.SUBREASON_REMOVE_TASK, true);
                     } else {
@@ -19355,6 +19535,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             return ActivityManagerService.this.clearApplicationUserData(packageName, keepState,
                     isRestore, observer, userId);
         }
+
+        @Override
+        public boolean isThemeOverlayReady(int userId) {
+            return ActivityManagerService.this.isThemeOverlayReady(userId);
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {
@@ -20162,8 +20347,7 @@ public class ActivityManagerService extends IActivityManager.Stub
          * Returns the {@link BatteryStatsService} instance
          */
         public BatteryStatsService getBatteryStatsService() {
-            return new BatteryStatsService(mContext, SystemServiceManager.ensureSystemDir(),
-                BackgroundThread.get().getHandler());
+            return new BatteryStatsService(mContext, SystemServiceManager.ensureSystemDir());
         }
 
         /**
@@ -20216,6 +20400,36 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ProcessList.SCHED_GROUP_BACKGROUND);
             }
             return broadcastQueues;
+        }
+
+        /** @see Binder#getCallingUid */
+        public int getCallingUid() {
+            return Binder.getCallingUid();
+        }
+
+        /** @see Binder#getCallingPid */
+        public int getCallingPid() {
+            return Binder.getCallingUid();
+        }
+
+        /** @see Binder#clearCallingIdentity */
+        public long clearCallingIdentity() {
+            return Binder.clearCallingIdentity();
+        }
+
+        /** @see Binder#clearCallingIdentity */
+        public void restoreCallingIdentity(long ident) {
+            Binder.restoreCallingIdentity(ident);
+        }
+
+        /** @return the default instance of AppErrors */
+        public AppErrors getAppErrors() {
+            return null;
+        }
+
+        /** @return the default instance of intent firewall */
+        public IntentFirewall getIntentFirewall() {
+            return null;
         }
     }
 

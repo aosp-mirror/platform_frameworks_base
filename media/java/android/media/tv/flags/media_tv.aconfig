@@ -14,3 +14,10 @@ flag {
     description: "Enable the TV client-side AD framework."
     bug: "303506816"
 }
+
+flag {
+    name: "tiaf_v_apis"
+    namespace: "media_tv"
+    description: "TIAF V3.0 APIs for Android V"
+    bug: "303323657"
+}

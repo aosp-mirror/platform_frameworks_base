@@ -24,7 +24,7 @@
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"輸入 PIN 碼"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"畫出解鎖圖案"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"畫出解鎖圖案"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"輸入密碼"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"請輸入密碼"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"輸入密碼"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"卡片無效。"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"充電完成"</string>
@@ -33,8 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電中"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 快速充電中"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 慢速充電中"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 為保護電池，充電效能已最佳化"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電配件有問題"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 為保護電池，目前暫停充電"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 請檢查充電配件"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"網路已鎖定"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"沒有 SIM 卡"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM 卡無法使用。"</string>

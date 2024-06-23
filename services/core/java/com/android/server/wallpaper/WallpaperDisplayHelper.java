@@ -16,19 +16,31 @@
 
 package com.android.server.wallpaper;
 
+import static android.app.WallpaperManager.ORIENTATION_UNKNOWN;
+import static android.app.WallpaperManager.getRotatedOrientation;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.window.flags.Flags.multiCrop;
+
+import android.app.WallpaperManager;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Debug;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.WindowManager;
+import android.view.WindowMetrics;
 
 import com.android.server.wm.WindowManagerInternal;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -50,12 +62,56 @@ class WallpaperDisplayHelper {
     private final SparseArray<DisplayData> mDisplayDatas = new SparseArray<>();
     private final DisplayManager mDisplayManager;
     private final WindowManagerInternal mWindowManagerInternal;
+    private final SparseArray<Point> mDefaultDisplaySizes = new SparseArray<>();
+
+    // related orientations pairs for foldable (folded orientation, unfolded orientation)
+    private final List<Pair<Integer, Integer>> mFoldableOrientationPairs = new ArrayList<>();
+
+    private boolean mIsFoldable;
 
     WallpaperDisplayHelper(
             DisplayManager displayManager,
-            WindowManagerInternal windowManagerInternal) {
+            WindowManager windowManager,
+            WindowManagerInternal windowManagerInternal,
+            boolean isFoldable) {
         mDisplayManager = displayManager;
         mWindowManagerInternal = windowManagerInternal;
+        mIsFoldable = isFoldable;
+        if (!multiCrop()) return;
+        Set<WindowMetrics> metrics = windowManager.getPossibleMaximumWindowMetrics(DEFAULT_DISPLAY);
+        boolean populateOrientationPairs = isFoldable && metrics.size() == 2;
+        float surface = 0;
+        int firstOrientation = -1;
+        for (WindowMetrics metric: metrics) {
+            Rect bounds = metric.getBounds();
+            Point displaySize = new Point(bounds.width(), bounds.height());
+            Point reversedDisplaySize = new Point(displaySize.y, displaySize.x);
+            for (Point point : List.of(displaySize, reversedDisplaySize)) {
+                int orientation = WallpaperManager.getOrientation(point);
+                // don't add an entry if there is already a larger display of the same orientation
+                Point display = mDefaultDisplaySizes.get(orientation);
+                if (display == null || display.x * display.y < point.x * point.y) {
+                    mDefaultDisplaySizes.put(orientation, point);
+                }
+            }
+            if (populateOrientationPairs) {
+                int orientation = WallpaperManager.getOrientation(displaySize);
+                float newSurface = displaySize.x * displaySize.y
+                        / (metric.getDensity() * metric.getDensity());
+                if (surface <= 0) {
+                    surface = newSurface;
+                    firstOrientation = orientation;
+                } else {
+                    Pair<Integer, Integer> pair = (newSurface > surface)
+                            ? new Pair<>(firstOrientation, orientation)
+                            : new Pair<>(orientation, firstOrientation);
+                    Pair<Integer, Integer> rotatedPair = new Pair<>(
+                            getRotatedOrientation(pair.first), getRotatedOrientation(pair.second));
+                    mFoldableOrientationPairs.add(pair);
+                    mFoldableOrientationPairs.add(rotatedPair);
+                }
+            }
+        }
     }
 
     DisplayData getDisplayDataOrCreate(int displayId) {
@@ -66,6 +122,12 @@ class WallpaperDisplayHelper {
             mDisplayDatas.append(displayId, wpdData);
         }
         return wpdData;
+    }
+
+    int getDefaultDisplayCurrentOrientation() {
+        Point displaySize = new Point();
+        mDisplayManager.getDisplay(DEFAULT_DISPLAY).getSize(displaySize);
+        return WallpaperManager.getOrientation(displaySize);
     }
 
     void removeDisplayData(int displayId) {
@@ -132,5 +194,47 @@ class WallpaperDisplayHelper {
 
     boolean isValidDisplay(int displayId) {
         return mDisplayManager.getDisplay(displayId) != null;
+    }
+
+    SparseArray<Point> getDefaultDisplaySizes() {
+        return mDefaultDisplaySizes;
+    }
+
+    /** Return the number of pixel of the largest dimension of the default display */
+    int getDefaultDisplayLargestDimension() {
+        int result = -1;
+        for (int i = 0; i < mDefaultDisplaySizes.size(); i++) {
+            Point size = mDefaultDisplaySizes.valueAt(i);
+            result = Math.max(result, Math.max(size.x, size.y));
+        }
+        return result;
+    }
+
+    boolean isFoldable() {
+        return mIsFoldable;
+    }
+
+    /**
+     * If a given orientation corresponds to an unfolded orientation on foldable, return the
+     * corresponding folded orientation. Otherwise, return UNKNOWN. Always return UNKNOWN if the
+     * device is not a foldable.
+     */
+    int getFoldedOrientation(int orientation) {
+        for (Pair<Integer, Integer> pair : mFoldableOrientationPairs) {
+            if (pair.second.equals(orientation)) return pair.first;
+        }
+        return ORIENTATION_UNKNOWN;
+    }
+
+    /**
+     * If a given orientation corresponds to a folded orientation on foldable, return the
+     * corresponding unfolded orientation. Otherwise, return UNKNOWN. Always return UNKNOWN if the
+     * device is not a foldable.
+     */
+    int getUnfoldedOrientation(int orientation) {
+        for (Pair<Integer, Integer> pair : mFoldableOrientationPairs) {
+            if (pair.first.equals(orientation)) return pair.second;
+        }
+        return ORIENTATION_UNKNOWN;
     }
 }

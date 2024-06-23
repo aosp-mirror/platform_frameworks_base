@@ -2,6 +2,9 @@
   "presubmit": [
     {
       "name": "RavenwoodMockitoTest_device"
+    },
+    {
+      "name": "RavenwoodBivalentTest_device"
     }
   ],
   "ravenwood-presubmit": [
@@ -15,6 +18,14 @@
     },
     {
       "name": "CtsUtilTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "RavenwoodCoreTest",
+      "host": true
+    },
+    {
+      "name": "RavenwoodBivalentTest",
       "host": true
     }
   ]

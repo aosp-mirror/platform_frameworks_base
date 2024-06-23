@@ -378,6 +378,13 @@ public final class Choreographer {
     }
 
     /**
+     * @hide
+     */
+    public Looper getLooper() {
+        return mLooper;
+    }
+
+    /**
      * The amount of time, in milliseconds, between each frame of the animation.
      * <p>
      * This is a requested time that the animation will attempt to honor, but the actual delay

@@ -69,6 +69,7 @@ class AndroidColorScheme(context: Context) {
     val onTertiary = getColor(context, R.attr.materialColorOnTertiary)
     val surfaceDim = getColor(context, R.attr.materialColorSurfaceDim)
     val surfaceBright = getColor(context, R.attr.materialColorSurfaceBright)
+    val error = getColor(context, R.attr.materialColorError)
     val onError = getColor(context, R.attr.materialColorOnError)
     val surface = getColor(context, R.attr.materialColorSurface)
     val surfaceContainerHigh = getColor(context, R.attr.materialColorSurfaceContainerHigh)

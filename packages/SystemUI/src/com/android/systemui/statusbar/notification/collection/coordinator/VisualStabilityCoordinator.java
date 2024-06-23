@@ -25,6 +25,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -92,7 +93,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
 
     @Inject
     public VisualStabilityCoordinator(
-            DelayableExecutor delayableExecutor,
+            @Background DelayableExecutor delayableExecutor,
             DumpManager dumpManager,
             HeadsUpManager headsUpManager,
             ShadeAnimationInteractor shadeAnimationInteractor,
@@ -134,7 +135,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private final NotifStabilityManager mNotifStabilityManager =
             new NotifStabilityManager("VisualStabilityCoordinator") {
                 private boolean canMoveForHeadsUp(NotificationEntry entry) {
-                    return entry != null && mHeadsUpManager.isAlerting(entry.getKey())
+                    return entry != null && mHeadsUpManager.isHeadsUpEntry(entry.getKey())
                             && !mVisibilityLocationProvider.isInVisibleLocation(entry);
                 }
 

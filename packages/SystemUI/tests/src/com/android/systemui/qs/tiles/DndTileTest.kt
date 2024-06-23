@@ -31,7 +31,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
@@ -94,7 +94,7 @@ class DndTileTest : SysuiTestCase() {
     private lateinit var sharedPreferences: SharedPreferences
 
     @Mock
-    private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
 
     @Mock
     private lateinit var hostDialog: Dialog
@@ -133,7 +133,7 @@ class DndTileTest : SysuiTestCase() {
             zenModeController,
             sharedPreferences,
             secureSettings,
-            dialogLaunchAnimator
+            mDialogTransitionAnimator
         )
     }
 
@@ -191,7 +191,7 @@ class DndTileTest : SysuiTestCase() {
         tile.handleClick(view)
         testableLooper.processAllMessages()
 
-        verify(dialogLaunchAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
+        verify(mDialogTransitionAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
     }
 
     @Test
@@ -205,7 +205,8 @@ class DndTileTest : SysuiTestCase() {
         tile.handleClick(view)
         testableLooper.processAllMessages()
 
-        verify(dialogLaunchAnimator, never()).showFromView(any(), any(), nullable(), anyBoolean())
+        verify(mDialogTransitionAnimator, never())
+            .showFromView(any(), any(), nullable(), anyBoolean())
     }
 
     @Test

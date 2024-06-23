@@ -34,16 +34,21 @@ import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
 import static android.view.WindowInsets.Type.systemBars;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.util.Size;
 import android.view.View.OnApplyWindowInsetsListener;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.flags.Flags;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethod;
 
@@ -52,7 +57,10 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -76,6 +84,8 @@ public final class WindowInsets {
     private final Insets[] mTypeInsetsMap;
     private final Insets[] mTypeMaxInsetsMap;
     private final boolean[] mTypeVisibilityMap;
+    private final Rect[][] mTypeBoundingRectsMap;
+    private final Rect[][] mTypeMaxBoundingRectsMap;
 
     @Nullable private Rect mTempRect;
     private final boolean mIsRound;
@@ -83,6 +93,8 @@ public final class WindowInsets {
     @Nullable private final RoundedCorners mRoundedCorners;
     @Nullable private final PrivacyIndicatorBounds mPrivacyIndicatorBounds;
     @Nullable private final DisplayShape mDisplayShape;
+    private final int mFrameWidth;
+    private final int mFrameHeight;
 
     private final @InsetsType int mForceConsumingTypes;
     private final @InsetsType int mSuppressScrimTypes;
@@ -112,7 +124,7 @@ public final class WindowInsets {
     static {
         CONSUMED = new WindowInsets(createCompatTypeMap(null), createCompatTypeMap(null),
                 createCompatVisibilityMap(createCompatTypeMap(null)), false, 0, 0, null,
-                null, null, null, systemBars(), false);
+                null, null, null, systemBars(), false, null, null, 0, 0);
     }
 
     /**
@@ -137,7 +149,10 @@ public final class WindowInsets {
             RoundedCorners roundedCorners,
             PrivacyIndicatorBounds privacyIndicatorBounds,
             DisplayShape displayShape,
-            @InsetsType int compatInsetsTypes, boolean compatIgnoreVisibility) {
+            @InsetsType int compatInsetsTypes, boolean compatIgnoreVisibility,
+            Rect[][] typeBoundingRectsMap,
+            Rect[][] typeMaxBoundingRectsMap,
+            int frameWidth, int frameHeight) {
         mSystemWindowInsetsConsumed = typeInsetsMap == null;
         mTypeInsetsMap = mSystemWindowInsetsConsumed
                 ? new Insets[SIZE]
@@ -162,6 +177,14 @@ public final class WindowInsets {
         mRoundedCorners = roundedCorners;
         mPrivacyIndicatorBounds = privacyIndicatorBounds;
         mDisplayShape = displayShape;
+        mTypeBoundingRectsMap = (mSystemWindowInsetsConsumed || typeBoundingRectsMap == null)
+                ? new Rect[SIZE][]
+                : typeBoundingRectsMap.clone();
+        mTypeMaxBoundingRectsMap = (mStableInsetsConsumed || typeMaxBoundingRectsMap == null)
+                ? new Rect[SIZE][]
+                : typeMaxBoundingRectsMap.clone();
+        mFrameWidth = frameWidth;
+        mFrameHeight = frameHeight;
     }
 
     /**
@@ -179,7 +202,11 @@ public final class WindowInsets {
                 src.mPrivacyIndicatorBounds,
                 src.mDisplayShape,
                 src.mCompatInsetsTypes,
-                src.mCompatIgnoreVisibility);
+                src.mCompatIgnoreVisibility,
+                src.mSystemWindowInsetsConsumed ? null : src.mTypeBoundingRectsMap,
+                src.mStableInsetsConsumed ? null : src.mTypeMaxBoundingRectsMap,
+                src.mFrameWidth,
+                src.mFrameHeight);
     }
 
     private static DisplayCutout displayCutoutCopyConstructorArgument(WindowInsets w) {
@@ -231,7 +258,8 @@ public final class WindowInsets {
     @UnsupportedAppUsage
     public WindowInsets(Rect systemWindowInsets) {
         this(createCompatTypeMap(systemWindowInsets), null, new boolean[SIZE], false, 0, 0,
-                null, null, null, null, systemBars(), false /* compatIgnoreVisibility */);
+                null, null, null, null, systemBars(), false /* compatIgnoreVisibility */,
+                new Rect[SIZE][], null, 0, 0);
     }
 
     /**
@@ -473,6 +501,102 @@ public final class WindowInsets {
     }
 
     /**
+     * Returns a list of {@link Rect}s, each of which is the bounding rectangle for an area
+     * that is being partially or fully obscured inside the window.
+     *
+     * <p>
+     * May be used with or instead of {@link Insets} for finer avoidance of regions that may be
+     * partially obscuring the window but may be smaller than those provided by
+     * {@link #getInsets(int)}.
+     * </p>
+     *
+     * <p>
+     * The {@link Rect}s returned are always cropped to the bounds of the window frame and their
+     * coordinate values are relative to the {@link #getFrame()}, regardless of the window's
+     * position on screen.
+     * </p>
+     *
+     * <p>
+     * If inset by {@link #inset(Insets)}, bounding rects that intersect with the provided insets
+     * will be resized to only include the intersection with the remaining frame. Bounding rects
+     * may be completely removed if they no longer intersect with the new instance.
+     * </p>
+     *
+     * @param typeMask the insets type for which to obtain the bounding rectangles
+     * @return the bounding rectangles
+     */
+    @FlaggedApi(Flags.FLAG_CUSTOMIZABLE_WINDOW_HEADERS)
+    @NonNull
+    public List<Rect> getBoundingRects(@InsetsType int typeMask) {
+        return getBoundingRects(mTypeBoundingRectsMap, typeMask);
+    }
+
+    /**
+     * Returns a list of {@link Rect}s, each of which is the bounding rectangle for an area that
+     * can be partially or fully obscured inside the window, regardless of whether
+     * that type is currently visible or not.
+     *
+     * <p> The bounding rects represent areas of a window that <b>may</b> be partially or fully
+     * obscured by the {@code type}. This value does not change based on the visibility state of
+     * those elements. For example, if the status bar is normally shown, but temporarily hidden,
+     * the bounding rects returned here will provide the rects associated with the status bar being
+     * shown.</p>
+     *
+     * <p>
+     * May be used with or instead of {@link Insets} for finer avoidance of regions that may be
+     * partially obscuring the window but may be smaller than those provided by
+     * {@link #getInsetsIgnoringVisibility(int)}.
+     * </p>
+     *
+     * <p>
+     * The {@link Rect}s returned are always cropped to the bounds of the window frame and their
+     * coordinate values are relative to the {@link #getFrame()}, regardless of the window's
+     * position on screen.
+     * </p>
+     *
+     * @param typeMask the insets type for which to obtain the bounding rectangles
+     * @return the bounding rectangles
+     * @throws IllegalArgumentException If the caller tries to query {@link Type#ime()}. Bounding
+     *                                  rects are not available if the IME isn't visible as the
+     *                                  height of the IME is dynamic depending on the
+     *                                  {@link EditorInfo} of the currently focused view, as well
+     *                                  as the UI state of the IME.
+     */
+    @FlaggedApi(Flags.FLAG_CUSTOMIZABLE_WINDOW_HEADERS)
+    @NonNull
+    public List<Rect> getBoundingRectsIgnoringVisibility(@InsetsType int typeMask) {
+        if ((typeMask & IME) != 0) {
+            throw new IllegalArgumentException("Unable to query the bounding rects for IME");
+        }
+        return getBoundingRects(mTypeMaxBoundingRectsMap, typeMask);
+    }
+
+    private List<Rect> getBoundingRects(Rect[][] typeBoundingRectsMap, @InsetsType int typeMask) {
+        Rect[] allRects = null;
+        for (int i = FIRST; i <= LAST; i = i << 1) {
+            if ((typeMask & i) == 0) {
+                continue;
+            }
+            final Rect[] rects = typeBoundingRectsMap[indexOf(i)];
+            if (rects == null) {
+                continue;
+            }
+            if (allRects == null) {
+                allRects = rects;
+            } else {
+                final Rect[] concat = new Rect[allRects.length + rects.length];
+                System.arraycopy(allRects, 0, concat, 0, allRects.length);
+                System.arraycopy(rects, 0, concat, allRects.length, rects.length);
+                allRects = concat;
+            }
+        }
+        if (allRects == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(allRects);
+    }
+
+    /**
      * Returns the display cutout if there is one.
      *
      * <p>Note: the display cutout will already be {@link #consumeDisplayCutout consumed} during
@@ -553,7 +677,10 @@ public final class WindowInsets {
                 mTypeVisibilityMap,
                 mIsRound, mForceConsumingTypes, mSuppressScrimTypes,
                 null /* displayCutout */, mRoundedCorners, mPrivacyIndicatorBounds, mDisplayShape,
-                mCompatInsetsTypes, mCompatIgnoreVisibility);
+                mCompatInsetsTypes, mCompatIgnoreVisibility,
+                mSystemWindowInsetsConsumed ? null : mTypeBoundingRectsMap,
+                mStableInsetsConsumed ? null : mTypeMaxBoundingRectsMap,
+                mFrameWidth, mFrameHeight);
     }
 
 
@@ -608,7 +735,7 @@ public final class WindowInsets {
                 (mCompatInsetsTypes & displayCutout()) != 0
                         ? null : displayCutoutCopyConstructorArgument(this),
                 mRoundedCorners, mPrivacyIndicatorBounds, mDisplayShape, mCompatInsetsTypes,
-                mCompatIgnoreVisibility);
+                mCompatIgnoreVisibility, null, null, mFrameWidth, mFrameHeight);
     }
 
     // TODO(b/119190588): replace @code with @link below
@@ -912,6 +1039,10 @@ public final class WindowInsets {
                 result.append(Type.toString(1 << i)).append("=").append(insets)
                         .append(" max=").append(maxInsets)
                         .append(" vis=").append(visible)
+                        .append(" boundingRects=")
+                        .append(Arrays.toString(mTypeBoundingRectsMap[i]))
+                        .append(" maxBoundingRects=")
+                        .append(Arrays.toString(mTypeMaxBoundingRectsMap[i]))
                         .append("\n    ");
             }
         }
@@ -940,6 +1071,10 @@ public final class WindowInsets {
         result.append("displayCutoutConsumed=" + mDisplayCutoutConsumed);
         result.append("\n    ");
         result.append(isRound() ? "round" : "");
+        result.append("\n    ");
+        result.append("frameWidth=" + mFrameWidth);
+        result.append("\n    ");
+        result.append("frameHeight=" + mFrameHeight);
         result.append("}");
         return result.toString();
     }
@@ -1011,6 +1146,27 @@ public final class WindowInsets {
     }
 
     /**
+     * Returns the assumed size of the window, relative to which the {@link #getInsets} and
+     * {@link #getBoundingRects} have been calculated.
+     *
+     * <p> May be used with {@link #getBoundingRects} to better understand their position within
+     * the window, such as the area between the edge of a bounding rect and the edge of the window.
+     *
+     * <p>Note: the size may not match the actual size of the window, which is determined during
+     * the layout pass - as {@link WindowInsets} are dispatched before layout.
+     *
+     * <p>Caution: using this value in determining the actual window size may make the result of
+     * layout passes unstable and should be avoided.
+     *
+     * @return the assumed size of the window during the inset calculation
+     */
+    @FlaggedApi(Flags.FLAG_CUSTOMIZABLE_WINDOW_HEADERS)
+    @NonNull
+    public Size getFrame() {
+        return new Size(mFrameWidth, mFrameHeight);
+    }
+
+    /**
      * @see #inset(int, int, int, int)
      * @hide
      */
@@ -1037,7 +1193,17 @@ public final class WindowInsets {
                         ? null
                         : mPrivacyIndicatorBounds.inset(left, top, right, bottom),
                 mDisplayShape,
-                mCompatInsetsTypes, mCompatIgnoreVisibility);
+                mCompatInsetsTypes, mCompatIgnoreVisibility,
+                mSystemWindowInsetsConsumed
+                        ? null
+                        : insetBoundingRects(mTypeBoundingRectsMap, left, top, right, bottom,
+                                mFrameWidth, mFrameHeight),
+                mStableInsetsConsumed
+                        ? null
+                        : insetBoundingRects(mTypeMaxBoundingRectsMap, left, top, right, bottom,
+                                mFrameWidth, mFrameHeight),
+                Math.max(0, mFrameWidth - left - right),
+                Math.max(0, mFrameHeight - top - bottom));
     }
 
     @Override
@@ -1058,7 +1224,11 @@ public final class WindowInsets {
                 && Objects.equals(mDisplayCutout, that.mDisplayCutout)
                 && Objects.equals(mRoundedCorners, that.mRoundedCorners)
                 && Objects.equals(mPrivacyIndicatorBounds, that.mPrivacyIndicatorBounds)
-                && Objects.equals(mDisplayShape, that.mDisplayShape);
+                && Objects.equals(mDisplayShape, that.mDisplayShape)
+                && Arrays.deepEquals(mTypeBoundingRectsMap, that.mTypeBoundingRectsMap)
+                && Arrays.deepEquals(mTypeMaxBoundingRectsMap, that.mTypeMaxBoundingRectsMap)
+                && mFrameWidth == that.mFrameWidth
+                && mFrameHeight == that.mFrameHeight;
     }
 
     @Override
@@ -1067,7 +1237,8 @@ public final class WindowInsets {
                 Arrays.hashCode(mTypeVisibilityMap), mIsRound, mDisplayCutout, mRoundedCorners,
                 mForceConsumingTypes, mSuppressScrimTypes, mSystemWindowInsetsConsumed,
                 mStableInsetsConsumed, mDisplayCutoutConsumed, mPrivacyIndicatorBounds,
-                mDisplayShape);
+                mDisplayShape, Arrays.deepHashCode(mTypeBoundingRectsMap),
+                Arrays.deepHashCode(mTypeMaxBoundingRectsMap), mFrameWidth, mFrameHeight);
     }
 
 
@@ -1108,6 +1279,68 @@ public final class WindowInsets {
         return Insets.of(newLeft, newTop, newRight, newBottom);
     }
 
+    static Rect[][] insetBoundingRects(Rect[][] typeBoundingRectsMap,
+            int insetLeft, int insetTop, int insetRight, int insetBottom, int frameWidth,
+            int frameHeight) {
+        if (insetLeft == 0 && insetTop == 0 && insetRight == 0 && insetBottom == 0) {
+            return typeBoundingRectsMap;
+        }
+        boolean cloned = false;
+        for (int i = 0; i < SIZE; i++) {
+            final Rect[] boundingRects = typeBoundingRectsMap[i];
+            if (boundingRects == null) {
+                continue;
+            }
+            final Rect[] insetBoundingRects = insetBoundingRects(boundingRects,
+                    insetLeft, insetTop, insetRight, insetBottom, frameWidth, frameHeight);
+            if (!Arrays.equals(insetBoundingRects, boundingRects)) {
+                if (!cloned) {
+                    typeBoundingRectsMap = typeBoundingRectsMap.clone();
+                    cloned = true;
+                }
+                typeBoundingRectsMap[i] = insetBoundingRects;
+            }
+        }
+        return typeBoundingRectsMap;
+    }
+
+    static Rect[] insetBoundingRects(Rect[] boundingRects,
+            int left, int top, int right, int bottom, int frameWidth, int frameHeight) {
+        final List<Rect> insetBoundingRectsList = new ArrayList<>();
+        for (int i = 0; i < boundingRects.length; i++) {
+            final Rect insetRect = insetRect(boundingRects[i], left, top, right, bottom,
+                    frameWidth, frameHeight);
+            if (insetRect != null) {
+                insetBoundingRectsList.add(insetRect);
+            }
+        }
+        return insetBoundingRectsList.toArray(new Rect[0]);
+    }
+
+    private static Rect insetRect(Rect orig, int insetLeft, int insetTop, int insetRight,
+            int insetBottom, int frameWidth, int frameHeight) {
+        if (orig == null) {
+            return null;
+        }
+
+        // Calculate the inset frame, and leave it in that coordinate space for easier comparison
+        // against the |orig| rect.
+        final Rect insetFrame = new Rect(insetLeft, insetTop, frameWidth - insetRight,
+                frameHeight - insetBottom);
+        // Then the intersecting portion of |orig| with the inset |insetFrame|.
+        final Rect insetRect = new Rect();
+        if (insetRect.setIntersect(insetFrame, orig)) {
+            // The intersection is the inset rect, but its position must be shifted to be relative
+            // to the frame. Since the new frame will start at left=|insetLeft| and top=|insetTop|,
+            // just offset that much back in the direction of the origin of the frame.
+            insetRect.offset(-insetLeft, -insetTop);
+            return insetRect;
+        } else {
+            // The |orig| rect does not intersect with the new frame at all, so don't report it.
+            return null;
+        }
+    }
+
     /**
      * @return whether system window insets have been consumed.
      */
@@ -1123,6 +1356,8 @@ public final class WindowInsets {
         private final Insets[] mTypeInsetsMap;
         private final Insets[] mTypeMaxInsetsMap;
         private final boolean[] mTypeVisibilityMap;
+        private final Rect[][] mTypeBoundingRectsMap;
+        private final Rect[][] mTypeMaxBoundingRectsMap;
         private boolean mSystemInsetsConsumed = true;
         private boolean mStableInsetsConsumed = true;
 
@@ -1135,6 +1370,8 @@ public final class WindowInsets {
         private @InsetsType int mSuppressScrimTypes;
 
         private PrivacyIndicatorBounds mPrivacyIndicatorBounds = new PrivacyIndicatorBounds();
+        private int mFrameWidth;
+        private int mFrameHeight;
 
         /**
          * Creates a builder where all insets are initially consumed.
@@ -1143,6 +1380,8 @@ public final class WindowInsets {
             mTypeInsetsMap = new Insets[SIZE];
             mTypeMaxInsetsMap = new Insets[SIZE];
             mTypeVisibilityMap = new boolean[SIZE];
+            mTypeBoundingRectsMap = new Rect[SIZE][];
+            mTypeMaxBoundingRectsMap = new Rect[SIZE][];
         }
 
         /**
@@ -1163,6 +1402,10 @@ public final class WindowInsets {
             mSuppressScrimTypes = insets.mSuppressScrimTypes;
             mPrivacyIndicatorBounds = insets.mPrivacyIndicatorBounds;
             mDisplayShape = insets.mDisplayShape;
+            mTypeBoundingRectsMap = insets.mTypeBoundingRectsMap.clone();
+            mTypeMaxBoundingRectsMap = insets.mTypeMaxBoundingRectsMap.clone();
+            mFrameWidth = insets.mFrameWidth;
+            mFrameHeight = insets.mFrameHeight;
         }
 
         /**
@@ -1450,6 +1693,68 @@ public final class WindowInsets {
         }
 
         /**
+         * Sets the bounding rects.
+         *
+         * @param typeMask the inset types to which these rects apply.
+         * @param rects the bounding rects.
+         * @return itself.
+         */
+        @FlaggedApi(Flags.FLAG_CUSTOMIZABLE_WINDOW_HEADERS)
+        @NonNull
+        public Builder setBoundingRects(@InsetsType int typeMask, @NonNull List<Rect> rects) {
+            for (int i = FIRST; i <= LAST; i = i << 1) {
+                if ((typeMask & i) == 0) {
+                    continue;
+                }
+                mTypeBoundingRectsMap[indexOf(i)] = rects.toArray(new Rect[0]);
+            }
+            return this;
+        }
+
+        /**
+         * Sets the bounding rects while ignoring their visibility state.
+         *
+         * @param typeMask the inset types to which these rects apply.
+         * @param rects the bounding rects.
+         * @return itself.
+         *
+         * @throws IllegalArgumentException If {@code typeMask} contains {@link Type#ime()}.
+         * Maximum bounding rects are not available for this type as the height of the IME is
+         * dynamic depending on the {@link EditorInfo} of the currently focused view, as well as
+         * the UI state of the IME.
+         */
+        @FlaggedApi(Flags.FLAG_CUSTOMIZABLE_WINDOW_HEADERS)
+        @NonNull
+        public Builder setBoundingRectsIgnoringVisibility(@InsetsType int typeMask,
+                @NonNull List<Rect> rects) {
+            if (typeMask == IME) {
+                throw new IllegalArgumentException("Maximum bounding rects not available for IME");
+            }
+            for (int i = FIRST; i <= LAST; i = i << 1) {
+                if ((typeMask & i) == 0) {
+                    continue;
+                }
+                mTypeMaxBoundingRectsMap[indexOf(i)] = rects.toArray(new Rect[0]);
+            }
+            return this;
+        }
+
+        /**
+         * Set the frame size.
+         *
+         * @param width the width of the frame.
+         * @param height the height of the frame.
+         * @return itself.
+         */
+        @FlaggedApi(Flags.FLAG_CUSTOMIZABLE_WINDOW_HEADERS)
+        @NonNull
+        public Builder setFrame(int width, int height) {
+            mFrameWidth = width;
+            mFrameHeight = height;
+            return this;
+        }
+
+        /**
          * Builds a {@link WindowInsets} instance.
          *
          * @return the {@link WindowInsets} instance.
@@ -1460,7 +1765,10 @@ public final class WindowInsets {
                     mStableInsetsConsumed ? null : mTypeMaxInsetsMap, mTypeVisibilityMap,
                     mIsRound, mForceConsumingTypes, mSuppressScrimTypes, mDisplayCutout,
                     mRoundedCorners, mPrivacyIndicatorBounds, mDisplayShape, systemBars(),
-                    false /* compatIgnoreVisibility */);
+                    false /* compatIgnoreVisibility */,
+                    mSystemInsetsConsumed ? null : mTypeBoundingRectsMap,
+                    mStableInsetsConsumed ? null : mTypeMaxBoundingRectsMap,
+                    mFrameWidth, mFrameHeight);
         }
     }
 
@@ -1519,6 +1827,9 @@ public final class WindowInsets {
         }
 
         /** @hide */
+        @TestApi
+        @NonNull
+        @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
         public static String toString(@InsetsType int types) {
             StringBuilder result = new StringBuilder();
             if ((types & STATUS_BARS) != 0) {

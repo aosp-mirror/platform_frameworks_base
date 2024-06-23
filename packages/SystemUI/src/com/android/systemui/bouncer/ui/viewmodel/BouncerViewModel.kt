@@ -16,37 +16,47 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.app.admin.DevicePolicyManager
+import android.app.admin.DevicePolicyResources
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.core.graphics.drawable.toBitmap
+import com.android.internal.R
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.inputmethod.domain.interactor.InputMethodInteractor
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.android.systemui.user.ui.viewmodel.UserViewModel
+import com.android.systemui.util.time.SystemClock
 import dagger.Module
 import dagger.Provides
+import kotlin.math.ceil
+import kotlin.math.max
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.job
@@ -58,13 +68,17 @@ class BouncerViewModel(
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val bouncerInteractor: BouncerInteractor,
-    authenticationInteractor: AuthenticationInteractor,
-    flags: SceneContainerFlags,
+    private val inputMethodInteractor: InputMethodInteractor,
+    private val simBouncerInteractor: SimBouncerInteractor,
+    private val authenticationInteractor: AuthenticationInteractor,
+    private val selectedUserInteractor: SelectedUserInteractor,
+    flags: ComposeBouncerFlags,
     selectedUser: Flow<UserViewModel>,
     users: Flow<List<UserViewModel>>,
     userSwitcherMenu: Flow<List<UserActionViewModel>>,
-    actionButtonInteractor: BouncerActionButtonInteractor,
-    private val simBouncerInteractor: SimBouncerInteractor,
+    actionButton: Flow<BouncerActionButtonModel?>,
+    private val clock: SystemClock,
+    private val devicePolicyManager: DevicePolicyManager,
 ) {
     val selectedUserImage: StateFlow<Bitmap?> =
         selectedUser
@@ -104,18 +118,8 @@ class BouncerViewModel(
     val isUserSwitcherVisible: Boolean
         get() = bouncerInteractor.isUserSwitcherVisible
 
-    private val isInputEnabled: StateFlow<Boolean> =
-        bouncerInteractor.lockout
-            .map { it == null }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = bouncerInteractor.lockout.value == null,
-            )
-
     // Handle to the scope of the child ViewModel (stored in [authMethod]).
     private var childViewModelScope: CoroutineScope? = null
-    private val _dialogMessage = MutableStateFlow<String?>(null)
 
     /** View-model for the current UI, based on the current authentication method. */
     val authMethodViewModel: StateFlow<AuthMethodBouncerViewModel?> =
@@ -131,26 +135,49 @@ class BouncerViewModel(
      * A message for a dialog to show when the user has attempted the wrong credential too many
      * times and now must wait a while before attempting again.
      *
-     * If `null`, no dialog should be shown.
-     *
-     * Once the dialog is shown, the UI should call [onDialogDismissed] when the user dismisses this
-     * dialog.
+     * If `null`, the lockout dialog should not be shown.
      */
-    val dialogMessage: StateFlow<String?> = _dialogMessage.asStateFlow()
+    private val lockoutDialogMessage = MutableStateFlow<String?>(null)
 
-    /** The user-facing message to show in the bouncer. */
-    val message: StateFlow<MessageViewModel> =
-        combine(bouncerInteractor.message, bouncerInteractor.lockout) { message, lockout ->
-                toMessageViewModel(message, isLockedOut = lockout != null)
-            }
+    /**
+     * A message for a dialog to show when the user has attempted the wrong credential too many
+     * times and their user/profile/device data is at risk of being wiped due to a Device Manager
+     * policy.
+     *
+     * If `null`, the wipe dialog should not be shown.
+     */
+    private val wipeDialogMessage = MutableStateFlow<String?>(null)
+
+    /**
+     * Models the dialog to be shown to the user, or `null` if no dialog should be shown.
+     *
+     * Once the dialog is shown, the UI should call [DialogViewModel.onDismiss] when the user
+     * dismisses this dialog.
+     */
+    val dialogViewModel: StateFlow<DialogViewModel?> =
+        combine(wipeDialogMessage, lockoutDialogMessage) { _, _ -> createDialogViewModel() }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue =
-                    toMessageViewModel(
-                        message = bouncerInteractor.message.value,
-                        isLockedOut = bouncerInteractor.lockout.value != null,
-                    ),
+                initialValue = createDialogViewModel(),
+            )
+
+    /**
+     * A message shown when the user has attempted the wrong credential too many times and now must
+     * wait a while before attempting to authenticate again.
+     *
+     * This is updated every second (countdown) during the lockout duration. When lockout is not
+     * active, this is `null` and no lockout message should be shown.
+     */
+    private val lockoutMessage = MutableStateFlow<String?>(null)
+
+    /** The user-facing message to show in the bouncer. */
+    val message: StateFlow<MessageViewModel> =
+        combine(bouncerInteractor.message, lockoutMessage) { _, _ -> createMessageViewModel() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = createMessageViewModel(),
             )
 
     /**
@@ -158,7 +185,7 @@ class BouncerViewModel(
      * be shown.
      */
     val actionButton: StateFlow<BouncerActionButtonModel?> =
-        actionButtonInteractor.actionButton.stateIn(
+        actionButton.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
             initialValue = null
@@ -194,31 +221,81 @@ class BouncerViewModel(
                 initialValue = isFoldSplitRequired(authMethodViewModel.value),
             )
 
+    private val isInputEnabled: StateFlow<Boolean> =
+        lockoutMessage
+            .map { it == null }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = authenticationInteractor.lockoutEndTimestamp == null,
+            )
+
+    private var lockoutCountdownJob: Job? = null
+
     init {
-        if (flags.isEnabled()) {
+        if (flags.isComposeBouncerOrSceneContainerEnabled()) {
+            // Keeps the lockout dialog up-to-date.
             applicationScope.launch {
-                combine(bouncerInteractor.lockout, authMethodViewModel) {
-                        lockout,
-                        authMethodViewModel ->
-                        if (lockout != null && authMethodViewModel != null) {
-                            applicationContext.getString(
-                                authMethodViewModel.lockoutMessageId,
-                                lockout.failedAttemptCount,
-                                lockout.remainingSeconds,
-                            )
-                        } else {
-                            null
-                        }
-                    }
-                    .distinctUntilChanged()
-                    .collect { dialogMessage -> _dialogMessage.value = dialogMessage }
+                bouncerInteractor.onLockoutStarted.collect {
+                    showLockoutDialog()
+                    startLockoutCountdown()
+                }
+            }
+
+            applicationScope.launch {
+                // Update the lockout countdown whenever the selected user is switched.
+                selectedUser.collect { startLockoutCountdown() }
+            }
+
+            // Keeps the upcoming wipe dialog up-to-date.
+            applicationScope.launch {
+                authenticationInteractor.upcomingWipe.collect { wipeModel ->
+                    wipeDialogMessage.value = wipeModel?.message
+                }
             }
         }
     }
 
-    /** Notifies that the dialog has been dismissed by the user. */
-    fun onDialogDismissed() {
-        _dialogMessage.value = null
+    private fun showLockoutDialog() {
+        applicationScope.launch {
+            val failedAttempts = authenticationInteractor.failedAuthenticationAttempts.value
+            lockoutDialogMessage.value =
+                authMethodViewModel.value?.lockoutMessageId?.let { messageId ->
+                    applicationContext.getString(
+                        messageId,
+                        failedAttempts,
+                        remainingLockoutSeconds()
+                    )
+                }
+        }
+    }
+
+    /** Shows the countdown message and refreshes it every second. */
+    private fun startLockoutCountdown() {
+        lockoutCountdownJob?.cancel()
+        lockoutCountdownJob =
+            applicationScope.launch {
+                do {
+                    val remainingSeconds = remainingLockoutSeconds()
+                    lockoutMessage.value =
+                        if (remainingSeconds > 0) {
+                            applicationContext.getString(
+                                R.string.lockscreen_too_many_failed_attempts_countdown,
+                                remainingSeconds,
+                            )
+                        } else {
+                            null
+                        }
+                    delay(1.seconds)
+                } while (remainingSeconds > 0)
+                lockoutCountdownJob = null
+            }
+    }
+
+    private fun remainingLockoutSeconds(): Int {
+        val endTimestampMs = authenticationInteractor.lockoutEndTimestamp ?: 0
+        val remainingMs = max(0, endTimestampMs - clock.elapsedRealtime())
+        return ceil(remainingMs / 1000f).toInt()
     }
 
     private fun isSideBySideSupported(authMethod: AuthMethodBouncerViewModel?): Boolean {
@@ -229,12 +306,11 @@ class BouncerViewModel(
         return authMethod !is PasswordBouncerViewModel
     }
 
-    private fun toMessageViewModel(
-        message: String?,
-        isLockedOut: Boolean,
-    ): MessageViewModel {
+    private fun createMessageViewModel(): MessageViewModel {
+        val isLockedOut = lockoutMessage.value != null
         return MessageViewModel(
-            text = message ?: "",
+            // A lockout message takes precedence over the non-lockout message.
+            text = lockoutMessage.value ?: bouncerInteractor.message.value ?: "",
             isUpdateAnimated = !isLockedOut,
         )
     }
@@ -274,8 +350,10 @@ class BouncerViewModel(
             is AuthenticationMethodModel.Password ->
                 PasswordBouncerViewModel(
                     viewModelScope = newViewModelScope,
-                    interactor = bouncerInteractor,
                     isInputEnabled = isInputEnabled,
+                    interactor = bouncerInteractor,
+                    inputMethodInteractor = inputMethodInteractor,
+                    selectedUserInteractor = selectedUserInteractor,
                 )
             is AuthenticationMethodModel.Pattern ->
                 PatternBouncerViewModel(
@@ -294,6 +372,71 @@ class BouncerViewModel(
         )
     }
 
+    /**
+     * @return A message warning the user that the user/profile/device will be wiped upon a further
+     *   [AuthenticationWipeModel.remainingAttempts] unsuccessful authentication attempts.
+     */
+    private fun AuthenticationWipeModel.getAlmostAtWipeMessage(): String {
+        val message =
+            applicationContext.getString(
+                wipeTarget.messageIdForAlmostWipe,
+                failedAttempts,
+                remainingAttempts,
+            )
+        return if (wipeTarget == AuthenticationWipeModel.WipeTarget.ManagedProfile) {
+            devicePolicyManager.resources.getString(
+                DevicePolicyResources.Strings.SystemUi
+                    .KEYGUARD_DIALOG_FAILED_ATTEMPTS_ALMOST_ERASING_PROFILE,
+                { message },
+                failedAttempts,
+                remainingAttempts,
+            )
+                ?: message
+        } else {
+            message
+        }
+    }
+
+    /**
+     * @return A message informing the user that their user/profile/device will be wiped promptly.
+     */
+    private fun AuthenticationWipeModel.getWipeMessage(): String {
+        val message = applicationContext.getString(wipeTarget.messageIdForWipe, failedAttempts)
+        return if (wipeTarget == AuthenticationWipeModel.WipeTarget.ManagedProfile) {
+            devicePolicyManager.resources.getString(
+                DevicePolicyResources.Strings.SystemUi
+                    .KEYGUARD_DIALOG_FAILED_ATTEMPTS_ERASING_PROFILE,
+                { message },
+                failedAttempts,
+            )
+                ?: message
+        } else {
+            message
+        }
+    }
+
+    private val AuthenticationWipeModel.message: String
+        get() = if (remainingAttempts > 0) getAlmostAtWipeMessage() else getWipeMessage()
+
+    private fun createDialogViewModel(): DialogViewModel? {
+        val wipeText = wipeDialogMessage.value
+        val lockoutText = lockoutDialogMessage.value
+        return when {
+            // The wipe dialog takes priority over the lockout dialog.
+            wipeText != null ->
+                DialogViewModel(
+                    text = wipeText,
+                    onDismiss = { wipeDialogMessage.value = null },
+                )
+            lockoutText != null ->
+                DialogViewModel(
+                    text = lockoutText,
+                    onDismiss = { lockoutDialogMessage.value = null },
+                )
+            else -> null // No dialog to show.
+        }
+    }
+
     data class MessageViewModel(
         val text: String,
 
@@ -304,6 +447,13 @@ class BouncerViewModel(
          * instantly.
          */
         val isUpdateAnimated: Boolean,
+    )
+
+    data class DialogViewModel(
+        val text: String,
+
+        /** Callback to run after the dialog has been dismissed by the user. */
+        val onDismiss: () -> Unit,
     )
 
     data class UserSwitcherDropdownItemViewModel(
@@ -323,24 +473,32 @@ object BouncerViewModelModule {
         @Application applicationScope: CoroutineScope,
         @Main mainDispatcher: CoroutineDispatcher,
         bouncerInteractor: BouncerInteractor,
-        authenticationInteractor: AuthenticationInteractor,
-        flags: SceneContainerFlags,
-        userSwitcherViewModel: UserSwitcherViewModel,
-        actionButtonInteractor: BouncerActionButtonInteractor,
+        imeInteractor: InputMethodInteractor,
         simBouncerInteractor: SimBouncerInteractor,
+        actionButtonInteractor: BouncerActionButtonInteractor,
+        authenticationInteractor: AuthenticationInteractor,
+        selectedUserInteractor: SelectedUserInteractor,
+        flags: ComposeBouncerFlags,
+        userSwitcherViewModel: UserSwitcherViewModel,
+        clock: SystemClock,
+        devicePolicyManager: DevicePolicyManager,
     ): BouncerViewModel {
         return BouncerViewModel(
             applicationContext = applicationContext,
             applicationScope = applicationScope,
             mainDispatcher = mainDispatcher,
             bouncerInteractor = bouncerInteractor,
+            inputMethodInteractor = imeInteractor,
+            simBouncerInteractor = simBouncerInteractor,
             authenticationInteractor = authenticationInteractor,
+            selectedUserInteractor = selectedUserInteractor,
             flags = flags,
             selectedUser = userSwitcherViewModel.selectedUser,
             users = userSwitcherViewModel.users,
             userSwitcherMenu = userSwitcherViewModel.menu,
-            actionButtonInteractor = actionButtonInteractor,
-            simBouncerInteractor = simBouncerInteractor,
+            actionButton = actionButtonInteractor.actionButton,
+            clock = clock,
+            devicePolicyManager = devicePolicyManager,
         )
     }
 }

@@ -47,6 +47,7 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.LaunchAdjacentController;
+import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
@@ -64,6 +65,7 @@ import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
 import com.android.wm.shell.draganddrop.DragAndDropController;
+import com.android.wm.shell.draganddrop.GlobalDragListener;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
@@ -172,7 +174,7 @@ public abstract class WMShellModule {
             BubblePositioner positioner,
             DisplayController displayController,
             @DynamicOverride Optional<OneHandedController> oneHandedOptional,
-            Optional<DragAndDropController> dragAndDropController,
+            DragAndDropController dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
@@ -199,9 +201,11 @@ public abstract class WMShellModule {
     @Provides
     static WindowDecorViewModel provideWindowDecorViewModel(
             Context context,
+            @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellMainThread Choreographer mainChoreographer,
             ShellInit shellInit,
+            IWindowManager windowManager,
             ShellCommandHandler shellCommandHandler,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
@@ -210,15 +214,16 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopTasksController> desktopTasksController,
-            RecentsTransitionHandler recentsTransitionHandler,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         if (DesktopModeStatus.isEnabled()) {
             return new DesktopModeWindowDecorViewModel(
                     context,
+                    mainExecutor,
                     mainHandler,
                     mainChoreographer,
                     shellInit,
                     shellCommandHandler,
+                    windowManager,
                     taskOrganizer,
                     displayController,
                     shellController,
@@ -226,7 +231,6 @@ public abstract class WMShellModule {
                     syncQueue,
                     transitions,
                     desktopTasksController,
-                    recentsTransitionHandler,
                     rootTaskDisplayAreaOrganizer);
         }
         return new CaptionWindowDecorViewModel(
@@ -235,7 +239,8 @@ public abstract class WMShellModule {
                 mainChoreographer,
                 taskOrganizer,
                 displayController,
-                syncQueue);
+                syncQueue,
+                transitions);
     }
 
     //
@@ -339,7 +344,7 @@ public abstract class WMShellModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            Optional<DragAndDropController> dragAndDropController,
+            DragAndDropController dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,
@@ -347,12 +352,14 @@ public abstract class WMShellModule {
             LaunchAdjacentController launchAdjacentController,
             Optional<WindowDecorViewModel> windowDecorViewModel,
             Optional<DesktopTasksController> desktopTasksController,
+            MultiInstanceHelper multiInstanceHelper,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new SplitScreenController(context, shellInit, shellCommandHandler, shellController,
                 shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, displayController,
                 displayImeController, displayInsetsController, dragAndDropController, transitions,
                 transactionPool, iconProvider, recentTasks, launchAdjacentController,
-                windowDecorViewModel, desktopTasksController, mainExecutor);
+                windowDecorViewModel, desktopTasksController, null /* stageCoordinator */,
+                multiInstanceHelper, mainExecutor);
     }
 
     //
@@ -495,6 +502,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            DragAndDropController dragAndDropController,
             Transitions transitions,
             EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
             ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
@@ -503,14 +511,15 @@ public abstract class WMShellModule {
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             LaunchAdjacentController launchAdjacentController,
             RecentsTransitionHandler recentsTransitionHandler,
+            MultiInstanceHelper multiInstanceHelper,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
-                transitions, enterDesktopTransitionHandler, exitDesktopTransitionHandler,
-                toggleResizeDesktopTaskTransitionHandler, dragToDesktopTransitionHandler,
-                desktopModeTaskRepository, launchAdjacentController, recentsTransitionHandler,
-                mainExecutor);
+                dragAndDropController, transitions, enterDesktopTransitionHandler,
+                exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
+                dragToDesktopTransitionHandler, desktopModeTaskRepository, launchAdjacentController,
+                recentsTransitionHandler, multiInstanceHelper, mainExecutor);
     }
 
     @WMSingleton
@@ -554,6 +563,35 @@ public abstract class WMShellModule {
     }
 
     //
+    // Drag and drop
+    //
+
+    @WMSingleton
+    @Provides
+    static GlobalDragListener provideGlobalDragListener(
+            IWindowManager wmService,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new GlobalDragListener(wmService, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static DragAndDropController provideDragAndDropController(Context context,
+            ShellInit shellInit,
+            ShellController shellController,
+            ShellCommandHandler shellCommandHandler,
+            DisplayController displayController,
+            UiEventLogger uiEventLogger,
+            IconProvider iconProvider,
+            GlobalDragListener globalDragListener,
+            Transitions transitions,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new DragAndDropController(context, shellInit, shellController, shellCommandHandler,
+                displayController, uiEventLogger, iconProvider, globalDragListener, transitions,
+                mainExecutor);
+    }
+
+    //
     // Misc
     //
 
@@ -563,6 +601,7 @@ public abstract class WMShellModule {
     @ShellCreateTriggerOverride
     @Provides
     static Object provideIndependentShellComponentsToCreate(
+            DragAndDropController dragAndDropController,
             DefaultMixedHandler defaultMixedHandler) {
         return new Object();
     }

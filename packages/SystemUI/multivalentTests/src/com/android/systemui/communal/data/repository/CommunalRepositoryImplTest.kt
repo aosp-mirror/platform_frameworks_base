@@ -18,21 +18,16 @@ package com.android.systemui.communal.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.shared.model.CommunalSceneKey
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags
-import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.data.repository.SceneContainerRepository
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -43,91 +38,39 @@ import org.junit.runner.RunWith
 class CommunalRepositoryImplTest : SysuiTestCase() {
     private lateinit var underTest: CommunalRepositoryImpl
 
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
-
-    private lateinit var featureFlagsClassic: FakeFeatureFlagsClassic
-    private lateinit var sceneContainerRepository: SceneContainerRepository
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val sceneContainerRepository = kosmos.sceneContainerRepository
 
     @Before
     fun setUp() {
-        val sceneTestUtils = SceneTestUtils(this)
-        sceneContainerRepository = sceneTestUtils.fakeSceneContainerRepository()
-        featureFlagsClassic = FakeFeatureFlagsClassic()
-
-        featureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
-
         underTest = createRepositoryImpl(false)
     }
 
     private fun createRepositoryImpl(sceneContainerEnabled: Boolean): CommunalRepositoryImpl {
         return CommunalRepositoryImpl(
             testScope.backgroundScope,
-            featureFlagsClassic,
-            FakeSceneContainerFlags(enabled = sceneContainerEnabled),
+            kosmos.fakeSceneContainerFlags.apply { enabled = sceneContainerEnabled },
             sceneContainerRepository,
         )
     }
-
-    @Test
-    fun isCommunalShowing_sceneContainerDisabled_onCommunalScene_true() =
-        testScope.runTest {
-            underTest.setDesiredScene(CommunalSceneKey.Communal)
-
-            val isCommunalHubShowing by collectLastValue(underTest.isCommunalHubShowing)
-            assertThat(isCommunalHubShowing).isTrue()
-        }
-
-    @Test
-    fun isCommunalShowing_sceneContainerDisabled_onBlankScene_false() =
-        testScope.runTest {
-            underTest.setDesiredScene(CommunalSceneKey.Blank)
-
-            val isCommunalHubShowing by collectLastValue(underTest.isCommunalHubShowing)
-            assertThat(isCommunalHubShowing).isFalse()
-        }
-
-    @Test
-    fun isCommunalShowing_sceneContainerEnabled_onCommunalScene_true() =
-        testScope.runTest {
-            underTest = createRepositoryImpl(true)
-
-            sceneContainerRepository.setDesiredScene(SceneModel(key = SceneKey.Communal))
-
-            val isCommunalHubShowing by collectLastValue(underTest.isCommunalHubShowing)
-            assertThat(isCommunalHubShowing).isTrue()
-        }
-
-    @Test
-    fun isCommunalShowing_sceneContainerEnabled_onLockscreenScene_false() =
-        testScope.runTest {
-            underTest = createRepositoryImpl(true)
-
-            sceneContainerRepository.setDesiredScene(SceneModel(key = SceneKey.Lockscreen))
-
-            val isCommunalHubShowing by collectLastValue(underTest.isCommunalHubShowing)
-            assertThat(isCommunalHubShowing).isFalse()
-        }
 
     @Test
     fun transitionState_idleByDefault() =
         testScope.runTest {
             val transitionState by collectLastValue(underTest.transitionState)
             assertThat(transitionState)
-                .isEqualTo(ObservableCommunalTransitionState.Idle(CommunalSceneKey.DEFAULT))
+                .isEqualTo(ObservableTransitionState.Idle(CommunalScenes.Default))
         }
 
     @Test
     fun transitionState_setTransitionState_returnsNewValue() =
         testScope.runTest {
-            val expectedSceneKey = CommunalSceneKey.Communal
-            underTest.setTransitionState(
-                flowOf(ObservableCommunalTransitionState.Idle(expectedSceneKey))
-            )
+            val expectedSceneKey = CommunalScenes.Communal
+            underTest.setTransitionState(flowOf(ObservableTransitionState.Idle(expectedSceneKey)))
 
             val transitionState by collectLastValue(underTest.transitionState)
-            assertThat(transitionState)
-                .isEqualTo(ObservableCommunalTransitionState.Idle(expectedSceneKey))
+            assertThat(transitionState).isEqualTo(ObservableTransitionState.Idle(expectedSceneKey))
         }
 
     @Test
@@ -135,7 +78,7 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             // Set a value for the transition state flow.
             underTest.setTransitionState(
-                flowOf(ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal))
+                flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
             )
 
             // Set the transition state flow back to null.
@@ -144,6 +87,6 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
             // Flow returns default scene key.
             val transitionState by collectLastValue(underTest.transitionState)
             assertThat(transitionState)
-                .isEqualTo(ObservableCommunalTransitionState.Idle(CommunalSceneKey.DEFAULT))
+                .isEqualTo(ObservableTransitionState.Idle(CommunalScenes.Default))
         }
 }

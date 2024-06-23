@@ -115,7 +115,6 @@ import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.nano.RankingHelperProto;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -128,6 +127,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
@@ -391,6 +391,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(expected.getSound(), actual.getSound());
         assertEquals(expected.canBypassDnd(), actual.canBypassDnd());
         assertTrue(Arrays.equals(expected.getVibrationPattern(), actual.getVibrationPattern()));
+        assertEquals(expected.getVibrationEffect(), actual.getVibrationEffect());
         assertEquals(expected.getGroup(), actual.getGroup());
         assertEquals(expected.getAudioAttributes(), actual.getAudioAttributes());
         assertEquals(expected.getLightColor(), actual.getLightColor());
@@ -410,6 +411,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(parent.getSound(), actual.getSound());
         assertEquals(parent.canBypassDnd(), actual.canBypassDnd());
         assertTrue(Arrays.equals(parent.getVibrationPattern(), actual.getVibrationPattern()));
+        assertEquals(parent.getVibrationEffect(), actual.getVibrationEffect());
         assertEquals(parent.getGroup(), actual.getGroup());
         assertEquals(parent.getAudioAttributes(), actual.getAudioAttributes());
         assertEquals(parent.getLightColor(), actual.getLightColor());
