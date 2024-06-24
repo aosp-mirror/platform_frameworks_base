@@ -3046,7 +3046,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
                     if (mDeviceEntryFaceAuthInteractor.canFaceAuthRun()) {
                         mUpdateMonitor.requestActiveUnlock(
-                                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
+                                ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT_LEGACY,
                                 "lockScreenEmptySpaceTap");
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
