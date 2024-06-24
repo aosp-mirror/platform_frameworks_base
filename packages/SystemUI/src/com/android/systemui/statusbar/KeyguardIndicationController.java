@@ -1670,11 +1670,6 @@ public class KeyguardIndicationController {
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
         @Override
-        public void onStateChanged(int newState) {
-            setVisible(newState == StatusBarState.KEYGUARD);
-        }
-
-        @Override
         public void onDozingChanged(boolean dozing) {
             if (mDozing == dozing) {
                 return;
