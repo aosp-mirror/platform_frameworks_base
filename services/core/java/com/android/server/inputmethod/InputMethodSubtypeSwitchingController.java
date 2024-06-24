@@ -150,20 +150,25 @@ final class InputMethodSubtypeSwitchingController {
             if (result != 0) {
                 return result;
             }
-            // Subtype that has the same locale of the system's has higher priority.
-            result = (mIsSystemLocale ? -1 : 0) - (other.mIsSystemLocale ? -1 : 0);
-            if (result != 0) {
-                return result;
+            if (!Flags.imeSwitcherRevamp()) {
+                // Subtype that has the same locale of the system's has higher priority.
+                result = (mIsSystemLocale ? -1 : 0) - (other.mIsSystemLocale ? -1 : 0);
+                if (result != 0) {
+                    return result;
+                }
+                // Subtype that has the same language of the system's has higher priority.
+                result = (mIsSystemLanguage ? -1 : 0) - (other.mIsSystemLanguage ? -1 : 0);
+                if (result != 0) {
+                    return result;
+                }
+                result = compareNullableCharSequences(mSubtypeName, other.mSubtypeName);
+                if (result != 0) {
+                    return result;
+                }
             }
-            // Subtype that has the same language of the system's has higher priority.
-            result = (mIsSystemLanguage ? -1 : 0) - (other.mIsSystemLanguage ? -1 : 0);
-            if (result != 0) {
-                return result;
-            }
-            result = compareNullableCharSequences(mSubtypeName, other.mSubtypeName);
-            if (result != 0) {
-                return result;
-            }
+            // This will no longer compare by subtype name, however as {@link Collections.sort} is
+            // guaranteed to be a stable sorting, this allows sorting by the IME name (and ID),
+            // while maintaining the order of subtypes (given by each IME) at the IME level.
             return mImi.getId().compareTo(other.mImi.getId());
         }
 

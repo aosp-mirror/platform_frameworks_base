@@ -387,6 +387,7 @@ public final class InputMethodSubtypeSwitchingControllerTest {
         assertFalse(item_en_us_allcaps.mIsSystemLanguage);
     }
 
+    @RequiresFlagsDisabled(Flags.FLAG_IME_SWITCHER_REVAMP)
     @SuppressWarnings("SelfComparison")
     @Test
     public void testImeSubtypeListComparator() {
@@ -958,6 +959,103 @@ public final class InputMethodSubtypeSwitchingControllerTest {
 
         assertNoAction(controller, false /* forHardware */, unknownItems);
         assertNoAction(controller, true /* forHardware */, unknownHardwareItems);
+    }
+
+    /** Verifies that the IME name does influence the comparison order. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareImeName() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var imeX = createTestItem(component, "ImeX", "A", "en_US", 0);
+        final var imeY = createTestItem(component, "ImeY", "A", "en_US", 0);
+
+        assertTrue("Smaller IME name should be smaller.", imeX.compareTo(imeY) < 0);
+        assertTrue("Larger IME name should be larger.", imeY.compareTo(imeX) > 0);
+    }
+
+    /** Verifies that the IME ID does influence the comparison order. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareImeId() {
+        final var component1 = new ComponentName("com.example.ime1", "Ime");
+        final var component2 = new ComponentName("com.example.ime2", "Ime");
+        final var ime1 = createTestItem(component1, "Ime", "A", "en_US", 0);
+        final var ime2 = createTestItem(component2, "Ime", "A", "en_US", 0);
+
+        assertTrue("Smaller IME ID should be smaller.", ime1.compareTo(ime2) < 0);
+        assertTrue("Larger IME ID should be larger.", ime2.compareTo(ime1) > 0);
+    }
+
+    /** Verifies that comparison on self returns an equal order. */
+    @SuppressWarnings("SelfComparison")
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareSelf() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var item = createTestItem(component, "Ime", "A", "en_US", 0);
+
+        assertEquals("Item should have the same order to itself.", 0, item.compareTo(item));
+    }
+
+    /** Verifies that comparison on an equivalent item returns an equal order. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareEquivalent() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var item = createTestItem(component, "Ime", "A", "en_US", 0);
+        final var equivalent = createTestItem(component, "Ime", "A", "en_US", 0);
+
+        assertEquals("Equivalent items should have the same order.", 0, item.compareTo(equivalent));
+    }
+
+    /**
+     * Verifies that the system locale and system language do not the influence comparison order.
+     */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareSystemLocaleSystemLanguage() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var japanese = createTestItem(component, "Ime", "A", "ja_JP", 0);
+        final var systemLanguage = createTestItem(component, "Ime", "A", "en_GB", 0);
+        final var systemLocale = createTestItem(component, "Ime", "A", "en_US", 0);
+
+        assertFalse(japanese.mIsSystemLanguage);
+        assertFalse(japanese.mIsSystemLocale);
+        assertTrue(systemLanguage.mIsSystemLanguage);
+        assertFalse(systemLanguage.mIsSystemLocale);
+        assertTrue(systemLocale.mIsSystemLanguage);
+        assertTrue(systemLocale.mIsSystemLocale);
+
+        assertEquals("System language shouldn't influence comparison over non-system language.",
+                0, japanese.compareTo(systemLanguage));
+        assertEquals("System locale shouldn't influence comparison over non-system locale.",
+                0, japanese.compareTo(systemLocale));
+        assertEquals("System locale shouldn't influence comparison over system language.",
+                0, systemLanguage.compareTo(systemLocale));
+    }
+
+    /** Verifies that the subtype name does not influence the comparison order. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareSubtypeName() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var subtypeA = createTestItem(component, "Ime", "A", "en_US", 0);
+        final var subtypeB = createTestItem(component, "Ime", "B", "en_US", 0);
+
+        assertEquals("Subtype name shouldn't influence comparison.",
+                0, subtypeA.compareTo(subtypeB));
+    }
+
+    /** Verifies that the subtype index does not influence the comparison order. */
+    @RequiresFlagsEnabled(Flags.FLAG_IME_SWITCHER_REVAMP)
+    @Test
+    public void testCompareSubtypeIndex() {
+        final var component = new ComponentName("com.example.ime", "Ime");
+        final var subtype0 = createTestItem(component, "Ime1", "A", "en_US", 0);
+        final var subtype1 = createTestItem(component, "Ime1", "A", "en_US", 1);
+
+        assertEquals("Subtype index shouldn't influence comparison.",
+                0, subtype0.compareTo(subtype1));
     }
 
     /**
