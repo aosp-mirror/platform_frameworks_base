@@ -19,5 +19,11 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.keyguard.data.repository.trustRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.applicationCoroutineScope
 
-val Kosmos.trustInteractor by Fixture { TrustInteractor(repository = trustRepository) }
+val Kosmos.trustInteractor by Fixture {
+    TrustInteractor(
+        applicationScope = applicationCoroutineScope,
+        repository = trustRepository,
+    )
+}
