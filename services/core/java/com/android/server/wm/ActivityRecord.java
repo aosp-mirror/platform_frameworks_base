@@ -6975,14 +6975,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         updateReportedVisibilityLocked();
     }
 
-    /**
-     * Sets whether something has been visible in the task and returns {@code true} if the state
-     * is changed from invisible to visible.
-     */
-    private boolean setTaskHasBeenVisible() {
+    /** Sets whether something has been visible in the task. */
+    private void setTaskHasBeenVisible() {
         final boolean wasTaskVisible = task.getHasBeenVisible();
         if (wasTaskVisible) {
-            return false;
+            return;
         }
         if (inTransition()) {
             // The deferring will be canceled until transition is ready so it won't dispatch
@@ -6990,20 +6987,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             task.setDeferTaskAppear(true);
         }
         task.setHasBeenVisible(true);
-        return true;
     }
 
     void onStartingWindowDrawn() {
-        boolean wasTaskVisible = false;
         if (task != null) {
             mSplashScreenStyleSolidColor = true;
-            wasTaskVisible = !setTaskHasBeenVisible();
+            setTaskHasBeenVisible();
         }
+        if (mStartingData == null || mStartingData.mIsDisplayed) {
+            return;
+        }
+        mStartingData.mIsDisplayed = true;
 
         // The transition may not be executed if the starting process hasn't attached. But if the
         // starting window is drawn, the transition can start earlier. Exclude finishing and bubble
         // because it may be a trampoline.
-        if (!wasTaskVisible && mStartingData != null && !finishing && !mLaunchedFromBubble
+        if (app == null && !finishing && !mLaunchedFromBubble
                 && mVisibleRequested && !mDisplayContent.mAppTransition.isReady()
                 && !mDisplayContent.mAppTransition.isRunning()
                 && mDisplayContent.isNextTransitionForward()) {
@@ -7240,9 +7239,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         isInterestingAndDrawn = true;
                     }
                 }
-            } else if (mStartingData != null && w.isDrawn()) {
-                // The starting window for this container is drawn.
-                mStartingData.mIsDisplayed = true;
             }
         }
 
