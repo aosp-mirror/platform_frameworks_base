@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.row.shared
+package com.android.systemui.statusbar.notification.row.domain.interactor
 
-import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineViewModel
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.notification.row.data.repository.NotificationRowRepository
 
-data class NotificationContentModel(
-    val headsUpStatusBarModel: HeadsUpStatusBarModel,
-    val singleLineViewModel: SingleLineViewModel? = null,
-    val richOngoingContentModel: RichOngoingContentModel? = null,
-)
-
-sealed interface RichOngoingContentModel
+fun Kosmos.getNotificationRowInteractor(repository: NotificationRowRepository) =
+    NotificationRowInteractor(repository = repository)

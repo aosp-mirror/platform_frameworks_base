@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.row.shared
+package com.android.systemui.statusbar.notification.row.data.repository
 
-import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineViewModel
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.statusbar.notification.row.shared.RichOngoingContentModel
+import kotlinx.coroutines.flow.MutableStateFlow
 
-data class NotificationContentModel(
-    val headsUpStatusBarModel: HeadsUpStatusBarModel,
-    val singleLineViewModel: SingleLineViewModel? = null,
-    val richOngoingContentModel: RichOngoingContentModel? = null,
-)
+val Kosmos.fakeNotificationRowRepository by Fixture { FakeNotificationRowRepository() }
 
-sealed interface RichOngoingContentModel
+class FakeNotificationRowRepository : NotificationRowRepository {
+    override val richOngoingContentModel = MutableStateFlow<RichOngoingContentModel?>(null)
+}

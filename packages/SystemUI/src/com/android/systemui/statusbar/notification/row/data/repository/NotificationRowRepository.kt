@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.row.shared
+package com.android.systemui.statusbar.notification.row.data.repository
 
-import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineViewModel
+import com.android.systemui.statusbar.notification.row.shared.RichOngoingContentModel
+import kotlinx.coroutines.flow.StateFlow
 
-data class NotificationContentModel(
-    val headsUpStatusBarModel: HeadsUpStatusBarModel,
-    val singleLineViewModel: SingleLineViewModel? = null,
-    val richOngoingContentModel: RichOngoingContentModel? = null,
-)
-
-sealed interface RichOngoingContentModel
+/** A repository of states relating to a specific notification row. */
+interface NotificationRowRepository {
+    /**
+     * A flow of an immutable data class with the current state of the Rich Ongoing Notification
+     * content, if applicable.
+     */
+    val richOngoingContentModel: StateFlow<RichOngoingContentModel?>
+}

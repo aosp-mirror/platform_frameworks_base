@@ -16,12 +16,20 @@
 
 package com.android.systemui.statusbar.notification.row.shared
 
-import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineViewModel
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 
-data class NotificationContentModel(
-    val headsUpStatusBarModel: HeadsUpStatusBarModel,
-    val singleLineViewModel: SingleLineViewModel? = null,
-    val richOngoingContentModel: RichOngoingContentModel? = null,
-)
+// TODO: figure out how to support lazy resolution of the drawable, e.g. on unrelated text change
+class IconModel(val icon: Icon) {
+    var drawable: Drawable? = null
 
-sealed interface RichOngoingContentModel
+    override fun equals(other: Any?): Boolean =
+        when (other) {
+            null -> false
+            (other === this) -> true
+            !is IconModel -> false
+            else -> other.icon.sameAs(icon)
+        }
+
+    override fun toString(): String = "IconModel(icon=$icon, drawable=$drawable)"
+}
