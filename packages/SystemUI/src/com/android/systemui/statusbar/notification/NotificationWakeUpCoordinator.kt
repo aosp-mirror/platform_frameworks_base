@@ -469,10 +469,24 @@ constructor(
         get() = state
 
     override fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) {
-        val collapsedEnough = event.fraction <= 0.9f
-        if (collapsedEnough != this.collapsedEnoughToHide) {
-            val couldShowPulsingHuns = canShowPulsingHuns
-            this.collapsedEnoughToHide = collapsedEnough
+        val fraction = event.fraction
+
+        val wasCollapsedEnoughToHide = collapsedEnoughToHide
+        val isCollapsedEnoughToHide = fraction <= 0.9f
+
+        if (isCollapsedEnoughToHide != wasCollapsedEnoughToHide) {
+            val couldShowPulsingHuns = this.canShowPulsingHuns
+            this.collapsedEnoughToHide = isCollapsedEnoughToHide
+            val canShowPulsingHuns = this.canShowPulsingHuns
+
+            logger.logOnPanelExpansionChanged(
+                fraction,
+                wasCollapsedEnoughToHide,
+                isCollapsedEnoughToHide,
+                couldShowPulsingHuns,
+                canShowPulsingHuns
+            )
+
             if (couldShowPulsingHuns && !canShowPulsingHuns) {
                 updateNotificationVisibility(animate = true, increaseSpeed = true)
                 mHeadsUpManager.releaseAllImmediately()
