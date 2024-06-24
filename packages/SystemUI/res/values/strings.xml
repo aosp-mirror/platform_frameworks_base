@@ -269,8 +269,7 @@
     <string name="screenshot_detected_multiple_template"><xliff:g id="appName" example="Google Chrome">%1$s</xliff:g> and other open apps detected this screenshot.</string>
     <!-- Add to note button used in App Clips flow to return the saved screenshot image to notes app. [CHAR LIMIT=NONE] -->
     <string name="app_clips_save_add_to_note">Add to note</string>
-    <!-- TODO(b/300307759): Temporary string for text view that displays backlinks data. [CHAR LIMIT=NONE] -->
-    <string name="backlinks_string" translatable="false">Open <xliff:g id="appName" example="Google Chrome">%1$s</xliff:g></string>
+    <string name="backlinks_include_link">Include link</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_title">Screen Recorder</string>

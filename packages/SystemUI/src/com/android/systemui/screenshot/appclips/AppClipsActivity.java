@@ -29,7 +29,6 @@ import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivit
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,6 +45,7 @@ import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -100,7 +100,8 @@ public class AppClipsActivity extends ComponentActivity {
     private CropView mCropView;
     private Button mSave;
     private Button mCancel;
-    private TextView mBacklinksData;
+    private CheckBox mBacklinksIncludeDataCheckBox;
+    private TextView mBacklinksDataTextView;
     private AppClipsViewModel mViewModel;
 
     private ResultReceiver mResultReceiver;
@@ -161,12 +162,16 @@ public class AppClipsActivity extends ComponentActivity {
         mSave.setOnClickListener(this::onClick);
         mCancel.setOnClickListener(this::onClick);
         mCropView = mLayout.findViewById(R.id.crop_view);
-        mBacklinksData = mLayout.findViewById(R.id.backlinks_data);
         mPreview = mLayout.findViewById(R.id.preview);
-
         mPreview.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
                         updateImageDimensions());
+
+        mBacklinksDataTextView = mLayout.findViewById(R.id.backlinks_data);
+        mBacklinksIncludeDataCheckBox = mLayout.findViewById(R.id.backlinks_include_data);
+        mBacklinksIncludeDataCheckBox.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        mBacklinksDataTextView.setVisibility(isChecked ? View.VISIBLE : View.GONE));
 
         mViewModel = new ViewModelProvider(this, mViewModelFactory).get(AppClipsViewModel.class);
         mViewModel.getScreenshot().observe(this, this::setScreenshot);
@@ -297,13 +302,18 @@ public class AppClipsActivity extends ComponentActivity {
         finish();
     }
 
-    private void setBacklinksData(ClipData clipData) {
-        if (mBacklinksData.getVisibility() == View.GONE) {
-            mBacklinksData.setVisibility(View.VISIBLE);
-        }
+    private void setBacklinksData(InternalBacklinksData backlinksData) {
+        mBacklinksIncludeDataCheckBox.setVisibility(View.VISIBLE);
+        mBacklinksDataTextView.setVisibility(
+                mBacklinksIncludeDataCheckBox.isChecked() ? View.VISIBLE : View.GONE);
 
-        mBacklinksData.setText(String.format(getString(R.string.backlinks_string),
-                clipData.getDescription().getLabel()));
+        mBacklinksDataTextView.setText(backlinksData.getClipData().getDescription().getLabel());
+
+        Drawable appIcon = backlinksData.getAppIcon();
+        int size = getResources().getDimensionPixelSize(R.dimen.appclips_backlinks_icon_size);
+        appIcon.setBounds(/* left= */ 0, /* top= */ 0, /* right= */ size, /* bottom= */ size);
+        mBacklinksDataTextView.setCompoundDrawablesRelative(/* start= */ appIcon, /* top= */
+                null, /* end= */ null, /* bottom= */ null);
     }
 
     private void setError(int errorCode) {
