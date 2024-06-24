@@ -324,6 +324,7 @@ abstract class CrossActivityBackAnimation(
         enteringHasSameLetterbox = false
         lastPostCommitFlingScale = SPRING_SCALE
         gestureProgress = 0f
+        triggerBack = false
     }
 
     protected fun applyTransform(
@@ -499,10 +500,12 @@ abstract class CrossActivityBackAnimation(
         }
 
         override fun onBackCancelled() {
+            triggerBack = false
             progressAnimator.onBackCancelled { finishAnimation() }
         }
 
         override fun onBackInvoked() {
+            triggerBack = true
             progressAnimator.reset()
             onGestureCommitted(progressAnimator.velocity)
         }
