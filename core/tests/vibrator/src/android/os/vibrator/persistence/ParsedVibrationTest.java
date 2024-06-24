@@ -63,6 +63,34 @@ public class ParsedVibrationTest {
     }
 
     @Test
+    public void testEquals() {
+        assertThat(new ParsedVibration(List.of())).isEqualTo(new ParsedVibration(List.of()));
+        assertThat(new ParsedVibration(List.of())).isNotEqualTo(new ParsedVibration(mEffect1));
+        assertThat(new ParsedVibration(mEffect1)).isEqualTo(new ParsedVibration(mEffect1));
+        assertThat(new ParsedVibration(mEffect1)).isNotEqualTo(new ParsedVibration(mEffect2));
+        assertThat(new ParsedVibration(List.of(mEffect1, mEffect2, mEffect3)))
+                .isEqualTo(new ParsedVibration(List.of(mEffect1, mEffect2, mEffect3)));
+        assertThat(new ParsedVibration(List.of(mEffect1, mEffect2)))
+                .isNotEqualTo(new ParsedVibration(List.of(mEffect2, mEffect1)));
+    }
+
+    @Test
+    public void testHashCode() {
+        assertThat(new ParsedVibration(mEffect1).hashCode())
+                .isEqualTo(new ParsedVibration(mEffect1).hashCode());
+        assertThat(new ParsedVibration(mEffect1).hashCode())
+                .isNotEqualTo(new ParsedVibration(mEffect2).hashCode());
+        assertThat(new ParsedVibration(List.of()).hashCode())
+                .isEqualTo(new ParsedVibration(List.of()).hashCode());
+        assertThat(new ParsedVibration(List.of()).hashCode())
+                .isNotEqualTo(new ParsedVibration(mEffect1).hashCode());
+        assertThat(new ParsedVibration(List.of(mEffect1, mEffect2, mEffect3)).hashCode())
+                .isEqualTo(new ParsedVibration(List.of(mEffect1, mEffect2, mEffect3)).hashCode());
+        assertThat(new ParsedVibration(List.of(mEffect1, mEffect2)).hashCode())
+                .isNotEqualTo(new ParsedVibration(List.of(mEffect2, mEffect1)).hashCode());
+    }
+
+    @Test
     public void testResolve_allUnsupportedVibrations() {
         when(mVibratorInfoMock.areVibrationFeaturesSupported(any())).thenReturn(false);
 
@@ -89,21 +117,6 @@ public class ParsedVibrationTest {
                 .isEqualTo(mEffect1);
         assertThatResolution(mVibratorMock, List.of(mEffect1, mEffect2, mEffect3))
                 .isEqualTo(mEffect1);
-    }
-
-    @Test
-    public void testGetVibrationEffects() {
-        ParsedVibration parsedVibration =
-                new ParsedVibration(List.of(mEffect1, mEffect2, mEffect3));
-        assertThat(parsedVibration.getVibrationEffects())
-                .containsExactly(mEffect1, mEffect2, mEffect3)
-                .inOrder();
-
-        parsedVibration = new ParsedVibration(List.of(mEffect1));
-        assertThat(parsedVibration.getVibrationEffects()).containsExactly(mEffect1);
-
-        parsedVibration = new ParsedVibration(List.of());
-        assertThat(parsedVibration.getVibrationEffects()).isEmpty();
     }
 
     private Subject assertThatResolution(
