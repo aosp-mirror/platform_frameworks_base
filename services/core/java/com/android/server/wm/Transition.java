@@ -3230,6 +3230,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_WINDOW_MANAGER, TAG, cookie);
     }
 
+    boolean hasChanged(WindowContainer wc) {
+        final ChangeInfo chg = mChanges.get(wc);
+        if (chg == null) return false;
+        return chg.hasChanged();
+    }
+
     @VisibleForTesting
     static class ChangeInfo {
         private static final int FLAG_NONE = 0;
