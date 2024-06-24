@@ -11157,8 +11157,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             boolean cancel) {
         // This override is just for getting metrics. allFinished needs to be checked before
         // finish because finish resets all the states.
-        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
-        if (syncGroup != null && group != getSyncGroup()) return;
+        if (isDifferentSyncGroup(group)) return;
         mLastAllReadyAtSync = allSyncFinished();
         super.finishSync(outMergedTransaction, group, cancel);
     }
