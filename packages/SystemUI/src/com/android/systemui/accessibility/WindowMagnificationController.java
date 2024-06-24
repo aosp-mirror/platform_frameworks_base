@@ -1633,7 +1633,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         int maxHeightSize;
         int maxWidthSize;
-        if (Flags.redesignMagnifierWindowSize()) {
+        if (Flags.redesignMagnificationWindowSize()) {
             // mOuterBorderSize = transparent margin area
             // mMirrorSurfaceMargin = transparent margin area + orange border width
             // We would like to allow the width and height to be full size. Therefore, the max

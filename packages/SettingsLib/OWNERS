@@ -13,4 +13,4 @@ ykhung@google.com
 per-file *.xml=*
 
 # Notification-related utilities
-per-file */notification/* = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+per-file **/notification/** = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
