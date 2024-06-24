@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.ui.viewmodel
+package com.android.systemui.qs.ui.viewmodel
 
-import com.android.systemui.brightness.ui.viewmodel.brightnessSliderViewModel
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.tileGridViewModel
-import com.android.systemui.qs.ui.adapter.qsSceneAdapter
-import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneViewModel
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.ui.viewmodel.overlayShadeViewModel
 
 val Kosmos.quickSettingsShadeSceneViewModel: QuickSettingsShadeSceneViewModel by
     Kosmos.Fixture {
         QuickSettingsShadeSceneViewModel(
-            overlayShadeViewModel = overlayShadeViewModel,
-            brightnessSliderViewModel = brightnessSliderViewModel,
-            tileGridViewModel = tileGridViewModel,
-            editModeViewModel = editModeViewModel,
-            qsSceneAdapter = qsSceneAdapter,
             shadeInteractor = shadeInteractor,
+            overlayShadeViewModel = overlayShadeViewModel,
+            quickSettingsContainerViewModel = quickSettingsContainerViewModel,
+            applicationScope = applicationCoroutineScope,
         )
     }

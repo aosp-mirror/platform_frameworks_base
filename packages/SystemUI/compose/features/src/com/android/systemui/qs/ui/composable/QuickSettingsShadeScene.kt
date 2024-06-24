@@ -46,6 +46,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.TileGrid
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneViewModel
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
@@ -95,7 +96,7 @@ constructor(
                 )
 
                 ShadeBody(
-                    viewModel = viewModel,
+                    viewModel = viewModel.quickSettingsContainerViewModel,
                 )
             }
         }
@@ -104,7 +105,7 @@ constructor(
 
 @Composable
 private fun ShadeBody(
-    viewModel: QuickSettingsShadeSceneViewModel,
+    viewModel: QuickSettingsContainerViewModel,
 ) {
     val isEditing by viewModel.editModeViewModel.isEditing.collectAsStateWithLifecycle()
 
@@ -136,7 +137,7 @@ private fun ShadeBody(
 
 @Composable
 private fun QuickSettingsLayout(
-    viewModel: QuickSettingsShadeSceneViewModel,
+    viewModel: QuickSettingsContainerViewModel,
     modifier: Modifier = Modifier,
 ) {
     Column(
