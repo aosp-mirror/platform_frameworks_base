@@ -53,6 +53,7 @@ import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTarge
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
+import static com.android.server.inputmethod.InputMethodSubtypeSwitchingController.MODE_AUTO;
 import static com.android.server.inputmethod.InputMethodUtils.isSoftInputModeStateVisibleAllowed;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -4138,7 +4139,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final var currentImi = bindingController.getSelectedMethod();
         final ImeSubtypeListItem nextSubtype = getUserData(userId).mSwitchingController
                 .getNextInputMethodLocked(onlyCurrentIme, currentImi,
-                        bindingController.getCurrentSubtype());
+                        bindingController.getCurrentSubtype(),
+                        MODE_AUTO, true /* forward */);
         if (nextSubtype == null) {
             return false;
         }
@@ -4158,7 +4160,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var currentImi = bindingController.getSelectedMethod();
             final ImeSubtypeListItem nextSubtype = getUserData(userId).mSwitchingController
                     .getNextInputMethodLocked(false /* onlyCurrentIme */, currentImi,
-                            bindingController.getCurrentSubtype());
+                            bindingController.getCurrentSubtype(),
+                            MODE_AUTO, true /* forward */);
             return nextSubtype != null;
         }
     }
@@ -5459,6 +5462,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // Set InputMethod here
             settings.putSelectedInputMethod(imi != null ? imi.getId() : "");
         }
+
+        if (Flags.imeSwitcherRevamp()) {
+            getUserData(userId).mSwitchingController.onInputMethodSubtypeChanged();
+        }
     }
 
     @GuardedBy("ImfLock.class")
@@ -5579,11 +5586,29 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (currentImi == null) {
             return;
         }
-        final InputMethodSubtypeHandle currentSubtypeHandle =
-                InputMethodSubtypeHandle.of(currentImi, bindingController.getCurrentSubtype());
-        final InputMethodSubtypeHandle nextSubtypeHandle =
-                getUserData(userId).mHardwareKeyboardShortcutController.onSubtypeSwitch(
+        final var currentSubtype = bindingController.getCurrentSubtype();
+        final InputMethodSubtypeHandle nextSubtypeHandle;
+        if (Flags.imeSwitcherRevamp()) {
+            final var nextItem = getUserData(userId).mSwitchingController
+                    .getNextInputMethodForHardware(
+                            false /* onlyCurrentIme */, currentImi, currentSubtype, MODE_AUTO,
+                            direction > 0 /* forward */);
+            if (nextItem == null) {
+                Slog.i(TAG, "Hardware keyboard switching shortcut,"
+                        + " next input method and subtype not found");
+                return;
+            }
+
+            final var nextSubtype = nextItem.mSubtypeId > NOT_A_SUBTYPE_ID
+                    ? nextItem.mImi.getSubtypeAt(nextItem.mSubtypeId) : null;
+            nextSubtypeHandle = InputMethodSubtypeHandle.of(nextItem.mImi, nextSubtype);
+        } else {
+            final InputMethodSubtypeHandle currentSubtypeHandle =
+                    InputMethodSubtypeHandle.of(currentImi, currentSubtype);
+            nextSubtypeHandle =
+                    getUserData(userId).mHardwareKeyboardShortcutController.onSubtypeSwitch(
                         currentSubtypeHandle, direction > 0);
+        }
         if (nextSubtypeHandle == null) {
             return;
         }
