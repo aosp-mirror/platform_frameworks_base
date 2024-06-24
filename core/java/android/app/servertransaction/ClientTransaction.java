@@ -89,12 +89,10 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
      * @param item A single message that can contain a client activity/window request/callback.
      */
     public void addTransactionItem(@NonNull ClientTransactionItem item) {
-        if (Flags.bundleClientTransactionFlag()) {
-            if (mTransactionItems == null) {
-                mTransactionItems = new ArrayList<>();
-            }
-            mTransactionItems.add(item);
+        if (mTransactionItems == null) {
+            mTransactionItems = new ArrayList<>();
         }
+        mTransactionItems.add(item);
 
         // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
         // Populate even if mTransactionItems is set to support the UnsupportedAppUsage.
