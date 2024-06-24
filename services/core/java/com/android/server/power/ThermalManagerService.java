@@ -1806,7 +1806,7 @@ public class ThermalManagerService extends SystemService {
                         continue;
                     }
 
-                    float currentTemperature = samples.get(0).temperature;
+                    float currentTemperature = samples.get(samples.size() - 1).temperature;
 
                     if (samples.size() < MINIMUM_SAMPLE_COUNT) {
                         // Don't try to forecast, just use the latest one we have
