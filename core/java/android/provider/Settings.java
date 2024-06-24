@@ -11072,6 +11072,13 @@ public final class Settings {
                 "active_unlock_on_biometric_fail";
 
         /**
+         * Whether or not active unlock triggers on legacy unlock intents.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_UNLOCK_INTENT_LEGACY =
+                "active_unlock_on_unlock_intent_legacy";
+
+        /**
          * If active unlock triggers on biometric failures, include the following error codes
          * as a biometric failure. See {@link android.hardware.biometrics.BiometricFaceConstants}.
          * Error codes should be separated by a pipe. For example: "1|4|5". If active unlock
