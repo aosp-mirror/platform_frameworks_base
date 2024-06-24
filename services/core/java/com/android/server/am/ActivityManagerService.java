@@ -730,7 +730,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /** Whether some specified important processes are allowed to use FIFO priority. */
     boolean mAllowSpecifiedFifoScheduling = true;
 
-    @GuardedBy("this")
+    @GuardedBy("mStrictModeCallbacks")
     private final SparseArray<IUnsafeIntentStrictModeCallback>
             mStrictModeCallbacks = new SparseArray<>();
 
@@ -9538,18 +9538,20 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param callback The binder used to communicate the violations.
      */
     @Override
-    public synchronized void registerStrictModeCallback(IBinder callback) {
-        int callingPid = Binder.getCallingPid();
-        mStrictModeCallbacks.put(callingPid,
-                IUnsafeIntentStrictModeCallback.Stub.asInterface(callback));
-        try {
-            callback.linkToDeath(() -> {
-                synchronized (ActivityManagerService.this) {
-                    mStrictModeCallbacks.remove(callingPid);
-                }
-            }, 0);
-        } catch (RemoteException e) {
-            mStrictModeCallbacks.remove(callingPid);
+    public void registerStrictModeCallback(IBinder callback) {
+        final int callingPid = Binder.getCallingPid();
+        synchronized (mStrictModeCallbacks) {
+            mStrictModeCallbacks.put(callingPid,
+                    IUnsafeIntentStrictModeCallback.Stub.asInterface(callback));
+            try {
+                callback.linkToDeath(() -> {
+                    synchronized (mStrictModeCallbacks) {
+                        mStrictModeCallbacks.remove(callingPid);
+                    }
+                }, 0);
+            } catch (RemoteException e) {
+                mStrictModeCallbacks.remove(callingPid);
+            }
         }
     }
 
@@ -19930,7 +19932,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void triggerUnsafeIntentStrictMode(int callingPid, int type, Intent intent) {
             final IUnsafeIntentStrictModeCallback callback;
             final Intent i = intent.cloneFilter();
-            synchronized (ActivityManagerService.this) {
+            synchronized (mStrictModeCallbacks) {
                 callback = mStrictModeCallbacks.get(callingPid);
             }
             if (callback != null) {
@@ -19938,7 +19940,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     try {
                         callback.onUnsafeIntent(type, i);
                     } catch (RemoteException e) {
-                        synchronized (ActivityManagerService.this) {
+                        synchronized (mStrictModeCallbacks) {
                             mStrictModeCallbacks.remove(callingPid);
                         }
                     }
