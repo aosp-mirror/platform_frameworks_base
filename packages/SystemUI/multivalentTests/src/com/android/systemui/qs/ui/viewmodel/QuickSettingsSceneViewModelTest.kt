@@ -175,13 +175,13 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
 
-            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
-            assertThat(backScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(backScene).isNull()
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
-                        Back to UserActionResult(Scenes.Lockscreen),
-                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Lockscreen),
+                        Back to UserActionResult(Scenes.Shade),
+                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
                         Swipe(
                             fromSource = Edge.Bottom,
                             direction = SwipeDirection.Up,
